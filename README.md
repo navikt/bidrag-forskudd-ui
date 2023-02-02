@@ -1,4 +1,4 @@
-## Bidrag-template-ui
+## Bidrag-forskudd-ui
 Template applikasjon for Bidrag UI mikrofrontend app
 <br/>
 Dette er bare en mikrofrontend og har derfor ingen autentisering og innlogging av bruker. Det håndteres av [bidrag-ui](https://github.com/navikt/bidrag-ui) hvor token eksponeres av `/token` endepunktet.

@@ -23,7 +23,6 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
-                include: path.resolve(__dirname, "src"),
                 use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
             },
             {
@@ -59,21 +58,6 @@ module.exports = {
                 ],
             },
             {
-                test: /\.less$/i,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    "css-loader",
-                    {
-                        loader: "less-loader",
-                        options: {
-                            lessOptions: {
-                                paths: [path.resolve(__dirname, "node_modules")],
-                            },
-                        },
-                    },
-                ],
-            },
-            {
                 test: /\.svg$/,
                 loader: "svg-inline-loader",
             },
@@ -89,10 +73,10 @@ module.exports = {
             ignoreOrder: true,
         }),
         new ModuleFederationPlugin({
-            name: "bidrag_dokument_redigering_ui",
+            name: "bidrag_forskudd_ui",
             filename: "remoteEntry.js",
             exposes: {
-                "./DokumentRedigering": "./src/pages/App.tsx",
+                "./Forskudd": "./src/pages/forskudd/ForskuddPage.tsx",
             },
             shared: {
                 react: { singleton: true, requiredVersion: deps.react },

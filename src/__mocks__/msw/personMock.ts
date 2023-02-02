@@ -12,7 +12,7 @@ export default function personMock(): RestHandler[] {
                 ctx.body(
                     JSON.stringify({
                         personId: req.params.personId as string,
-                        navn: "Navn navnesen",
+                        navn: "Navn Test",
                         aktoerId: "123123213123",
                     })
                 )

@@ -7,7 +7,7 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 
 module.exports = merge(webpackCommon, {
     mode: "development",
-    devtool: "eval-source-map",
+    devtool: "source-map",
     devServer: {
         historyApiFallback: true,
         devMiddleware: {
@@ -17,7 +17,7 @@ module.exports = merge(webpackCommon, {
             webSocketTransport: "ws",
         },
         webSocketServer: "ws",
-        port: 5252,
+        port: 5253,
         hot: true,
         headers: {
             "Access-Control-Allow-Origin": "*",

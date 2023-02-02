@@ -1,4 +1,6 @@
 import "../index.css";
+import "@navikt/ds-css";
+import "@navikt/ds-css-internal";
 
 import React, { PropsWithChildren } from "react";
 
