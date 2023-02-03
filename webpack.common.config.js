@@ -73,7 +73,7 @@ module.exports = {
             ignoreOrder: true,
         }),
         new ModuleFederationPlugin({
-            name: "bidrag_forskudd_ui",
+            name: "bidrag_behandling_ui",
             filename: "remoteEntry.js",
             exposes: {
                 "./Forskudd": "./src/pages/forskudd/ForskuddPage.tsx",

@@ -4,7 +4,7 @@ on:
     branches:
       - '**'
 env:
-  app_name: bidrag_template_ui
+  app_name: bidrag_behandling_ui
   bucket_name_dev: bidrag-ui-static-files-dev
   bucket_name_prod: bidrag-ui-static-files-prod
   IS_FEATURE: ${{ github.ref != 'refs/heads/release' && github.ref != 'refs/heads/main'}}
