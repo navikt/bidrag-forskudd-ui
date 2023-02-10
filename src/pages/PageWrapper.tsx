@@ -1,12 +1,6 @@
 import "../index.css";
-import "@navikt/ds-css";
-import "@navikt/ds-css-internal";
 
 import React, { PropsWithChildren } from "react";
-
-import { initMock } from "../__mocks__/msw";
-
-initMock();
 
 interface PageWrapperProps {
     name: string;

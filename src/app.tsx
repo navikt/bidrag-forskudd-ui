@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <BrowserRouter>
             <Routes>
-                <Route path="/:personId" element={<ForskudWrapper />} />
+                <Route path="/:personId/:saksnummer" element={<ForskudWrapper />} />
                 <Route path="/" element={<div>Hello world</div>} />
             </Routes>
         </BrowserRouter>
@@ -22,6 +22,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 );
 
 function ForskudWrapper() {
-    const { personId } = useParams();
-    return <ForskuddPage personId={personId} />;
+    const { personId, saksnummer } = useParams<{ personId?: string; saksnummer?: string }>();
+    return <ForskuddPage personId={personId} saksnummer={saksnummer} />;
 }

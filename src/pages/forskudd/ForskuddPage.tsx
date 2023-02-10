@@ -1,23 +1,97 @@
-import { Button } from "@navikt/ds-react";
+import { Heading, Stepper, Tag } from "@navikt/ds-react";
+import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
+import FormWrapper from "../../components/forms/FormWrapper";
+import { ROLE_TAGS } from "../../constants/roleTags";
+import { STEPS } from "../../constants/steps";
+import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import PersonService from "../../service/PersonService";
+import SakService from "../../service/SakService";
+import { IBidragSak } from "../../types/bidrag-sak";
+import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 
 interface ForskuddPageProps {
     personId: string;
+    saksnummer: string;
 }
-export default function ForskuddPage({ personId }: ForskuddPageProps) {
+
+export interface CommonFormProps {
+    setActiveStep: (number) => void;
+}
+
+export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps) {
     const [personNavn, setPersonNavn] = useState<string>();
+    const [sak, setSak] = useState<IBidragSak>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeStep = searchParams.get("steg");
+    const personService = new PersonService();
+    const sakService = new SakService();
 
     useEffect(() => {
-        new PersonService().hentPerson(personId).then((res) => setPersonNavn(res.navn));
+        const personPromise = personService.hentPerson(personId);
+        const sakPromise = sakService.hentSak(saksnummer);
+
+        Promise.all([personPromise, sakPromise])
+            .then(([person, sak]) => {
+                setPersonNavn(person.navn);
+                setSak(sak);
+            })
+            .catch((error) => {
+                console.error(error.message);
+            });
     }, []);
 
+    const setActiveStep = (x: number) => {
+        searchParams.delete("steg");
+        setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
+    };
+
     return (
-        <PageWrapper name={"Forskudd"}>
-            Navnet på personen er {personNavn}
-            <Button>Knapp test</Button>
+        <PageWrapper name="tracking-wide">
+            <div className="bg-[var(--a-gray-50)]">
+                <Heading
+                    level="1"
+                    size="xlarge"
+                    className="px-6 py-2 leading-10 flex items-center gap-x-4 border-[var(--a-border-divider)] border-solid border-b"
+                >
+                    Søknad om forskudd{" "}
+                    <span className="text-base flex items-center font-normal">
+                        Saksnr. {saksnummer}{" "}
+                        <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
+                    </span>
+                </Heading>
+                {sak &&
+                    sak.roller.map((rolle) => (
+                        <div
+                            key={rolle.fodselsnummer}
+                            className="px-6 py-2 border-[var(--a-border-divider)] border-solid border-b flex"
+                        >
+                            <Tag variant={ROLE_TAGS[rolle.type]} size="small" className="w-8 mr-2 rounded">
+                                {rolle.type}
+                            </Tag>
+                            <span className="w-64">{rolle.fulltNavn}</span>
+                            <span className="mx-4">/</span> {rolle.fodselsnummer}
+                        </div>
+                    ))}
+            </div>
+            <div className="max-w-[1092px] mx-auto px-6 py-6">
+                <Stepper
+                    aria-labelledby="stepper-heading"
+                    activeStep={STEPS[activeStep]}
+                    onStepChange={(x) => setActiveStep(x)}
+                    orientation="horizontal"
+                    className="mb-8"
+                >
+                    <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
+                    <Stepper.Step>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
+                    <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
+                    <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
+                </Stepper>
+                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} />
+            </div>
         </PageWrapper>
     );
 }

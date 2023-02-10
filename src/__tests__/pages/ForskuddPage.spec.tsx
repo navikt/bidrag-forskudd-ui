@@ -8,7 +8,7 @@ import ForskuddPage from "../../pages/forskudd/ForskuddPage";
 
 describe("ForskuddPage", () => {
     it("should render", async () => {
-        render(<ForskuddPage personId={"JOARK-123213"} />);
+        render(<ForskuddPage personId={"JOARK-123213"} saksnummer={"12345"} />);
         await waitFor(() => expect(document.querySelector("button")).not.to.be.null);
     });
 });

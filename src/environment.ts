@@ -7,6 +7,7 @@ const system = {
 
 const url = {
     bidragPerson: process.env.BIDRAG_PERSON_URL,
+    bidragSak: process.env.BIDRAG_SAK_URL,
 };
 
 export default { url, system };
