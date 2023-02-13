@@ -9,75 +9,79 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
-                <Heading level="2" size="large">
+                <Heading level="2" size="xlarge">
                     Boforhold
                 </Heading>
-                <div>
-                    <Label>Barn som er med i saken</Label>
-                </div>
+                <Heading level="3" size="medium">
+                    Barn som er med i saken
+                </Heading>
                 <InlineGrid>
                     <div>
-                        <Label>Periode</Label>
+                        <Label size="small">Periode</Label>
                     </div>
                     <div>
-                        <Label>Bor ikke med foreldre</Label>
+                        <Label size="small">Bor ikke med foreldre</Label>
                     </div>
                     <div>
-                        <Label>Registrert på adresse</Label>
+                        <Label size="small">Registrert på adresse</Label>
                     </div>
                     <div>
-                        <Label>Kilde</Label>
+                        <Label size="small">Kilde</Label>
                     </div>
                 </InlineGrid>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Barn som er ikke med i saken</Label>
-                </div>
+                <Heading level="3" size="medium">
+                    Barn som er ikke med i saken
+                </Heading>
                 <InlineGrid>
                     <div>
-                        <Label>Navn</Label>
+                        <Label size="small">Navn</Label>
                     </div>
                     <div>
-                        <Label>Fødselsnummer</Label>
+                        <Label size="small">Fødselsnummer</Label>
                     </div>
                 </InlineGrid>
                 <InlineGrid>
                     <div>
-                        <Label>Periode</Label>
+                        <Label size="small">Periode</Label>
                     </div>
                     <div>
-                        <Label>Registrert på adresse</Label>
+                        <Label size="small">Registrert på adresse</Label>
                     </div>
                     <div>
-                        <Label>Kilde</Label>
-                    </div>
-                </InlineGrid>
-            </div>
-            <div className="grid gap-y-4">
-                <Label>Sivilstand</Label>
-                <InlineGrid>
-                    <div>
-                        <Label>Periode</Label>
-                    </div>
-                    <div>
-                        <Label>Sivilstand</Label>
+                        <Label size="small">Kilde</Label>
                     </div>
                 </InlineGrid>
             </div>
             <div className="grid gap-y-4">
-                <Label>Kommentar</Label>
-                <Textarea label="Begrunnelse (med i vedtaket og notat)" />
-                <TextField label="Begrunnelse (kun med i notat)" />
+                <Heading level="3" size="medium">
+                    Sivilstand
+                </Heading>
+                <InlineGrid>
+                    <div>
+                        <Label size="small">Periode</Label>
+                    </div>
+                    <div>
+                        <Label size="small">Sivilstand</Label>
+                    </div>
+                </InlineGrid>
+            </div>
+            <div className="grid gap-y-4">
+                <Heading level="3" size="medium">
+                    Kommentar
+                </Heading>
+                <Textarea label="Begrunnelse (med i vedtaket og notat)" size="small" />
+                <TextField label="Begrunnelse (kun med i notat)" size="small" />
             </div>
             <InlineGrid>
-                <Button loading={false} onClick={() => {}} className="w-max">
+                <Button loading={false} onClick={() => {}} className="w-max" size="small">
                     Gå videre
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
+                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max" size="small">
                     Oppfrisk
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
+                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max" size="small">
                     Lagre
                 </Button>
                 <Link href="#" onClick={() => {}} className="font-bold">
