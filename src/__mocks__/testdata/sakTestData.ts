@@ -3,7 +3,6 @@ import { Sakskategori } from "../../enum/Sakskategori";
 import { Saksstatus } from "../../enum/Saksstatus";
 import { IBidragSak } from "../../types/bidrag-sak";
 
-
 export const bidragsak: IBidragSak = {
     eierfogd: "2990",
     saksnummer: "2235166",

@@ -1,10 +1,10 @@
-import { Heading, Stepper, Tag } from "@navikt/ds-react";
+import { Heading, Stepper } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import FormWrapper from "../../components/forms/FormWrapper";
-import { ROLE_TAGS } from "../../constants/roleTags";
+import { RolleDetaljer } from "../../components/RolleDetaljer";
 import { STEPS } from "../../constants/steps";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import PersonService from "../../service/PersonService";
@@ -64,19 +64,7 @@ export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps
                         <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
                     </span>
                 </Heading>
-                {sak &&
-                    sak.roller.map((rolle) => (
-                        <div
-                            key={rolle.fodselsnummer}
-                            className="px-6 py-2 border-[var(--a-border-divider)] border-solid border-b flex"
-                        >
-                            <Tag variant={ROLE_TAGS[rolle.type]} size="small" className="w-8 mr-2 rounded">
-                                {rolle.type}
-                            </Tag>
-                            <span className="w-64">{rolle.fulltNavn}</span>
-                            <span className="mx-4">/</span> {rolle.fodselsnummer}
-                        </div>
-                    ))}
+                {sak && sak.roller.map((rolle, i) => <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />)}
             </div>
             <div className="max-w-[1092px] mx-auto px-6 py-6">
                 <Stepper
