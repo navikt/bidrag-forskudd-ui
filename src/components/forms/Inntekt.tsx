@@ -1,12 +1,36 @@
 import { Edit, ExternalLink } from "@navikt/ds-icons";
 import { Button, Checkbox, CheckboxGroup, Heading, Label, Link, Textarea, TextField } from "@navikt/ds-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
+import GrunnlagService from "../../service/GrunnlagService";
+import { SkattegrunnlagDto } from "../../types/grunnlagTypes";
+import { getFullYear } from "../../utils/date-utils";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { InlineGrid } from "../layout/grid/Grid";
 
-export default function Inntekt({ setActiveStep }: CommonFormProps) {
+export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
+    const [skattegrunnlag, setSkattegrunnlag] = useState<SkattegrunnlagDto[]>([]);
+    const grunnlagService = new GrunnlagService();
+
+    useEffect(() => {
+        const skattegrunnlagDtoPromises = [getFullYear(), getFullYear() - 1, getFullYear() - 2].map((year) =>
+            grunnlagService.hentSkatteGrunnlag({
+                inntektsAar: year.toString(),
+                inntektsFilter: "",
+                personId,
+            })
+        );
+
+        Promise.all(skattegrunnlagDtoPromises)
+            .then(([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]) => {
+                setSkattegrunnlag([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
+            })
+            .catch((error) => {
+                console.error(error.message);
+            });
+    }, []);
+
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
