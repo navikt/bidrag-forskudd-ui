@@ -20,6 +20,7 @@ interface ForskuddPageProps {
 
 export interface CommonFormProps {
     setActiveStep: (number) => void;
+    personId: string;
 }
 
 export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps) {
@@ -90,7 +91,7 @@ export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps
                     <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
-                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} />
+                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} personId={personId} />
             </div>
         </PageWrapper>
     );

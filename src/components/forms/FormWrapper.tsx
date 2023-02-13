@@ -9,6 +9,7 @@ import Virkningstidspunkt from "./Virkningstidspunkt";
 export interface FormWrapperProps {
     setActiveStep: (number) => void;
     activeStep: string;
+    personId: string;
 }
 
 export default function FormWrapper({ activeStep, ...props }: FormWrapperProps) {

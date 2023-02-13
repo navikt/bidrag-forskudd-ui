@@ -9,7 +9,9 @@
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "build": "webpack --config webpack.prod.config.js",
-    "types:person": "npx swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs  -o src/types -n personTypes.d.ts --no-client"
+    "types:person": "npx swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs  -o src/types -n personTypes.d.ts --no-client",
+    "types:bidragSak": "npx swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs  -o src/types -n bidragSakTypes.d.ts --no-client",
+    "types:bidragGrunnlag": "npx swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs  -o src/types -n bidragGrunnlag.d.ts --no-client"
   },
   "dependencies": {
     "@navikt/bidrag-ui-common": "1.4.0",
