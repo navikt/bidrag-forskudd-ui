@@ -1,13 +1,16 @@
 import { ExternalLink } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Link, Table, Tag } from "@navikt/ds-react";
 import React from "react";
+import { RolleType } from "../../enum/RolleType";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
+import { RolleDetaljer } from "../RolleDetaljer";
+import { RolleTag } from "../RolleTag";
 
 export default function Vedtak({ setActiveStep }: CommonFormProps) {
     const data = [
         {
-            rolle: "BA",
+            rolle: RolleType.BA,
             fnmr: "081020 34566",
             navn: "Amalia Svendsen",
             type: "Forskudd",
@@ -18,7 +21,7 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
             beløp: 0,
         },
         {
-            rolle: "BA",
+            rolle: RolleType.BA,
             fnmr: "081020 34566",
             navn: "Amalia Svendsen",
             type: "Forskudd",
@@ -62,9 +65,7 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                     return (
                         <Table.Row key={i + item.fnmr}>
                             <Table.DataCell>
-                                <Tag variant="info">
-                                    {item.rolle}
-                                </Tag>
+                                <RolleTag rolleType={item.rolle} />
                             </Table.DataCell>
                             <Table.DataCell>{item.fnmr}</Table.DataCell>
                             <Table.DataCell>{item.navn}</Table.DataCell>
@@ -84,7 +85,12 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                 Forsendelse gjelder:
             </Heading>
             <div>
-                Mia  Cathrine Svendsen 
+                <RolleDetaljer rolle={{
+                    navn: "Mia  Cathrine Svendsen",
+                    fulltNavn: "Mia  Cathrine Svendsen",
+                    fodselsnummer: "081020 34566",
+                    type: RolleType.BM
+                }} />
             </div>
             <Heading level="3" size="medium">
                 Sjekk notat
