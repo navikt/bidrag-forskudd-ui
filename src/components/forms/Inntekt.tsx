@@ -1,5 +1,16 @@
 import { Edit, ExternalLink } from "@navikt/ds-icons";
-import { Button, Checkbox, CheckboxGroup, Heading, Label, Link, Textarea, TextField } from "@navikt/ds-react";
+import {
+    BodyShort,
+    Button,
+    Checkbox,
+    CheckboxGroup,
+    Heading,
+    Label,
+    Link,
+    ReadMore,
+    Textarea,
+    TextField,
+} from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
@@ -7,14 +18,14 @@ import GrunnlagService from "../../service/GrunnlagService";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { getFullYear } from "../../utils/date-utils";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
-import { InlineGrid } from "../layout/grid/Grid";
+import { FlexRow } from "../layout/grid/FlexRow";
 
 export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
-    const [skattegrunnlag, setSkattegrunnlag] = useState<HentSkattegrunnlagResponse[]>([]);
+    const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
     const grunnlagService = new GrunnlagService();
 
     useEffect(() => {
-        const skattegrunnlagDtoPromises = [getFullYear(), getFullYear() - 1, getFullYear() - 2].map((year) =>
+        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
             grunnlagService.hentSkatteGrunnlag({
                 inntektsAar: year.toString(),
                 inntektsFilter: "",
@@ -24,12 +35,12 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
 
         Promise.all(skattegrunnlagDtoPromises)
             .then(([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]) => {
-                setSkattegrunnlag([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
+                setSkattegrunnlager([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
             })
             .catch((error) => {
                 console.error(error.message);
             });
-    }, []);
+    }, [personId]);
 
     return (
         <div className="grid gap-y-8">
@@ -60,9 +71,14 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     <div>
                         <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
                     </div>
-                    <div>
-                        <Label size="small">Skattegrunnlag (2020):</Label>
-                    </div>
+                    {skattegrunnlager.map((skattegrunnlag) => (
+                        <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
+                            <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
+                            {skattegrunnlag.grunnlag.map((grunnlag) => (
+                                <BodyShort size="small">{grunnlag.beloep}</BodyShort>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             </div>
             <div className="grid gap-y-4">
@@ -75,8 +91,18 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     </Link>
                 </div>
                 <div className="grid gap-y-2">
-                    <Label size="small">Kapitalinntekt (2020):</Label>
-                    <Label size="small">Næringsinntekt (2020):</Label>
+                    <div className="inline-flex items-center gap-x-2">
+                        <Label size="small">Kapitalinntekt (2020):</Label>
+                        <ReadMore size="small" header="Detaljer">
+                            Detaljer
+                        </ReadMore>
+                    </div>
+                    <div className="inline-flex items-center gap-x-2">
+                        <Label size="small">Næringsinntekt (2020):</Label>
+                        <ReadMore size="small" header="Detaljer">
+                            Detaljer
+                        </ReadMore>
+                    </div>
                 </div>
             </div>
             <div className="grid gap-y-4">
@@ -90,7 +116,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                             AA-register <ExternalLink aria-hidden />
                         </Link>
                     </div>
-                    <InlineGrid>
+                    <FlexRow>
                         <div>
                             <Label size="small">Periode</Label>
                         </div>
@@ -103,14 +129,14 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                         <div>
                             <Label size="small">Lønnsendring</Label>
                         </div>
-                    </InlineGrid>
+                    </FlexRow>
                 </div>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Perioder
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Fra og med</Label>
                     </div>
@@ -132,13 +158,13 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     <div>
                         <Label size="small">Beskrivelse</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Utvidet barnetrygd
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Periode</Label>
                     </div>
@@ -148,26 +174,26 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     <div>
                         <Label size="small">Beløp</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Kontantstøtte (for hele året/ per barn)
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Periode</Label>
                     </div>
                     <div>
                         <Label size="small">Barn</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Fra og med</Label>
                     </div>
@@ -186,7 +212,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     <div>
                         <Label size="small">Barnetillegg (netto)</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
@@ -209,7 +235,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     </CheckboxGroup>
                 </div>
             </div>
-            <InlineGrid>
+            <FlexRow>
                 <Button loading={false} onClick={() => {}} className="w-max" size="small">
                     Gå videre
                 </Button>
@@ -222,7 +248,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                 <Link href="#" onClick={() => {}} className="font-bold">
                     Vis notat <ExternalLink aria-hidden />
                 </Link>
-            </InlineGrid>
+            </FlexRow>
         </div>
     );
 }

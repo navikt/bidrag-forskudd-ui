@@ -3,7 +3,7 @@ import { Button, Heading, Label, Link, Textarea, TextField } from "@navikt/ds-re
 import React from "react";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
-import { InlineGrid } from "../layout/grid/Grid";
+import { FlexRow } from "../layout/grid/FlexRow";
 
 export default function Boforhold({ setActiveStep }: CommonFormProps) {
     return (
@@ -15,7 +15,7 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
                 <Heading level="3" size="medium">
                     Barn som er med i saken
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Periode</Label>
                     </div>
@@ -28,21 +28,21 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
                     <div>
                         <Label size="small">Kilde</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Barn som er ikke med i saken
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Navn</Label>
                     </div>
                     <div>
                         <Label size="small">Fødselsnummer</Label>
                     </div>
-                </InlineGrid>
-                <InlineGrid>
+                </FlexRow>
+                <FlexRow>
                     <div>
                         <Label size="small">Periode</Label>
                     </div>
@@ -52,20 +52,20 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
                     <div>
                         <Label size="small">Kilde</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Sivilstand
                 </Heading>
-                <InlineGrid>
+                <FlexRow>
                     <div>
                         <Label size="small">Periode</Label>
                     </div>
                     <div>
                         <Label size="small">Sivilstand</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
@@ -74,7 +74,7 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
                 <Textarea label="Begrunnelse (med i vedtaket og notat)" size="small" />
                 <TextField label="Begrunnelse (kun med i notat)" size="small" />
             </div>
-            <InlineGrid>
+            <FlexRow>
                 <Button loading={false} onClick={() => {}} className="w-max" size="small">
                     Gå videre
                 </Button>
@@ -87,7 +87,7 @@ export default function Boforhold({ setActiveStep }: CommonFormProps) {
                 <Link href="#" onClick={() => {}} className="font-bold">
                     Vis notat <ExternalLink aria-hidden />
                 </Link>
-            </InlineGrid>
+            </FlexRow>
         </div>
     );
 }
