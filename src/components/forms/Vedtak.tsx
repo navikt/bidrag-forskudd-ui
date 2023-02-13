@@ -8,6 +8,13 @@ import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
 export default function Vedtak({ setActiveStep }: CommonFormProps) {
+    const rolle = {
+        navn: "Mia  Cathrine Svendsen",
+        fulltNavn: "Mia  Cathrine Svendsen",
+        fodselsnummer: "081020 34566",
+        type: RolleType.BM,
+    };
+
     const data = [
         {
             rolle: RolleType.BA,
@@ -33,15 +40,19 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
         },
     ];
     return (
-        <div>
-            <Heading level="2" size="large">
-                Fatte vedtak
-            </Heading>
-            <div>Totrinnskontroll: inntekt</div>
-            <Heading level="3" size="medium">
-                Oppsummering
-            </Heading>
-            <div>Barn i egen husstand:</div>
+        <div className="grid gap-y-8">
+            <div className="grid gap-y-4">
+                <Heading level="2" size="large">
+                    Fatte vedtak
+                </Heading>
+                <div>Totrinnskontroll: inntekt</div>
+            </div>
+            <div className="grid gap-y-4">
+                <Heading level="3" size="medium">
+                    Oppsummering
+                </Heading>
+                <div>Barn i egen husstand:</div>
+            </div>
             <Table>
                 <Table.Header>
                     <Table.Row>
@@ -77,30 +88,24 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                 </Table.Body>
             </Table>
 
-            <Heading level="3" size="medium">
-                Forsendelse gjelder:
-            </Heading>
-            <div>
-                <RolleDetaljer
-                    rolle={{
-                        navn: "Mia  Cathrine Svendsen",
-                        fulltNavn: "Mia  Cathrine Svendsen",
-                        fodselsnummer: "081020 34566",
-                        type: RolleType.BM,
-                    }}
-                />
+            <div className="grid gap-y-4">
+                <Heading level="3" size="medium">
+                    Forsendelse gjelder:
+                </Heading>
+
+                <RolleDetaljer withBorder={false} rolle={rolle} />
             </div>
-            <Heading level="3" size="medium">
-                Sjekk notat
-            </Heading>
-            <div>
-                Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk basert
-                på opplysningene oppgitt.
-            </div>
-            <div>
-                <Link href="#" onClick={() => {}} className="font-bold">
-                    Sjekk notat <ExternalLink aria-hidden />
-                </Link>
+            <div className="grid gap-y-4">
+                <Heading level="3" size="medium">
+                    Sjekk notat
+                </Heading>
+                <div>
+                    Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
+                    basert på opplysningene oppgitt.
+                    <Link href="#" onClick={() => {}} className="font-bold">
+                        Sjekk notat <ExternalLink aria-hidden />
+                    </Link>
+                </div>
             </div>
             <div>
                 <ConfirmationPanel
