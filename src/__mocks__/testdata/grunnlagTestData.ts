@@ -1,13 +1,12 @@
-import { SkattegrunnlagDto } from "../../types/grunnlagTypes";
+import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 
-export const defaultSkattegrunnlag: SkattegrunnlagDto = {
+export const defaultSkattegrunnlag: HentSkattegrunnlagResponse = {
     grunnlag: [
         {
             beloep: "750000",
             tekniskNavn: "test",
         },
     ],
-    svalbardGrunnlag: [],
     skatteoppgjoersdato: "2022",
 };
 

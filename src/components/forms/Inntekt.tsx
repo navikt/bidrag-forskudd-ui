@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import GrunnlagService from "../../service/GrunnlagService";
-import { SkattegrunnlagDto } from "../../types/grunnlagTypes";
+import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { getFullYear } from "../../utils/date-utils";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { InlineGrid } from "../layout/grid/Grid";
 
 export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
-    const [skattegrunnlag, setSkattegrunnlag] = useState<SkattegrunnlagDto[]>([]);
+    const [skattegrunnlag, setSkattegrunnlag] = useState<HentSkattegrunnlagResponse[]>([]);
     const grunnlagService = new GrunnlagService();
 
     useEffect(() => {
