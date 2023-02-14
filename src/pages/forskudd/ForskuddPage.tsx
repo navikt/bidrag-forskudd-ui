@@ -1,5 +1,6 @@
 import { Heading, Stepper } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
+import { useApi } from "@navikt/bidrag-ui-common";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -11,6 +12,7 @@ import PersonService from "../../service/PersonService";
 import SakService from "../../service/SakService";
 import { IBidragSak } from "../../types/bidrag-sak";
 import { capitalize } from "../../utils/string-utils";
+import { Api as PersonApi } from "../../api/PersonApi";
 import PageWrapper from "../PageWrapper";
 
 interface ForskuddPageProps {
@@ -30,6 +32,17 @@ export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps
     const activeStep = searchParams.get("steg");
     const personService = new PersonService();
     const sakService = new SakService();
+
+    const personApi = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PERSON_URL }), "bidrag-person", "fss");
+
+    useEffect(() => {
+        personApi.informasjon.hentPerson(personId).then((res) => {
+            setPersonNavn(res.data.navn);
+        })
+        .catch(() => {
+            // todo
+        });
+    }, []);
 
     useEffect(() => {
         const personPromise = personService.hentPerson(personId);
