@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useMemo } from "react";
 
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import Boforhold from "./Boforhold";
@@ -9,11 +9,10 @@ import Virkningstidspunkt from "./Virkningstidspunkt";
 export interface FormWrapperProps {
     setActiveStep: (number) => void;
     activeStep: string;
-    personId: string;
 }
 
 export default function FormWrapper({ activeStep, ...props }: FormWrapperProps) {
-    const renderForm = useCallback(() => {
+    const renderForm = useMemo(() => {
         switch (activeStep) {
             case ForskuddStepper.VIRKNINGSTIDSPUNKT:
                 return <Virkningstidspunkt {...props} />;
@@ -28,5 +27,5 @@ export default function FormWrapper({ activeStep, ...props }: FormWrapperProps) 
         }
     }, [activeStep]);
 
-    return renderForm();
+    return renderForm;
 }

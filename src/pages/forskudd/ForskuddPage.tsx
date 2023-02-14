@@ -1,67 +1,21 @@
 import { Heading, Stepper } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
-import { useApi } from "@navikt/bidrag-ui-common";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React from "react";
 
 import FormWrapper from "../../components/forms/FormWrapper";
 import { RolleDetaljer } from "../../components/RolleDetaljer";
 import { STEPS } from "../../constants/steps";
+import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import PersonService from "../../service/PersonService";
-import SakService from "../../service/SakService";
-import { IBidragSak } from "../../types/bidrag-sak";
 import { capitalize } from "../../utils/string-utils";
-import { Api as PersonApi } from "../../api/PersonApi";
 import PageWrapper from "../PageWrapper";
-
-interface ForskuddPageProps {
-    personId: string;
-    saksnummer: string;
-}
 
 export interface CommonFormProps {
     setActiveStep: (number) => void;
-    personId: string;
 }
 
-export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps) {
-    const [personNavn, setPersonNavn] = useState<string>();
-    const [sak, setSak] = useState<IBidragSak>(null);
-    const [searchParams, setSearchParams] = useSearchParams();
-    const activeStep = searchParams.get("steg");
-    const personService = new PersonService();
-    const sakService = new SakService();
-
-    const personApi = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PERSON_URL }), "bidrag-person", "fss");
-
-    useEffect(() => {
-        personApi.informasjon.hentPerson(personId).then((res) => {
-            setPersonNavn(res.data.navn);
-        })
-        .catch(() => {
-            // todo
-        });
-    }, []);
-
-    useEffect(() => {
-        const personPromise = personService.hentPerson(personId);
-        const sakPromise = sakService.hentSak(saksnummer);
-
-        Promise.all([personPromise, sakPromise])
-            .then(([person, sak]) => {
-                setPersonNavn(person.navn);
-                setSak(sak);
-            })
-            .catch((error) => {
-                console.error(error.message);
-            });
-    }, []);
-
-    const setActiveStep = (x: number) => {
-        searchParams.delete("steg");
-        setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
-    };
+export default function ForskuddPage() {
+    const { sak, activeStep, setActiveStep } = useForskudd();
 
     return (
         <PageWrapper name="tracking-wide">
@@ -73,8 +27,8 @@ export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps
                 >
                     Søknad om forskudd{" "}
                     <span className="text-base flex items-center font-normal">
-                        Saksnr. {saksnummer}{" "}
-                        <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
+                        Saksnr. {sak?.saksnummer}{" "}
+                        <CopyToClipboard size="small" copyText={sak?.saksnummer} popoverText="Kopierte saksnummer" />
                     </span>
                 </Heading>
                 {sak && sak.roller.map((rolle, i) => <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />)}
@@ -92,7 +46,7 @@ export default function ForskuddPage({ personId, saksnummer }: ForskuddPageProps
                     <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
-                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} personId={personId} />
+                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} />
             </div>
         </PageWrapper>
     );

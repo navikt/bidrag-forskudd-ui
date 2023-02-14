@@ -11,37 +11,15 @@ import {
     Textarea,
     TextField,
 } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
+import { useForskudd } from "../../context/ForskuddContext";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
-import GrunnlagService from "../../service/GrunnlagService";
-import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
-import { getFullYear } from "../../utils/date-utils";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
-    const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
-    const grunnlagService = new GrunnlagService();
-
-    useEffect(() => {
-        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
-            grunnlagService.hentSkatteGrunnlag({
-                inntektsAar: year.toString(),
-                inntektsFilter: "",
-                personId,
-            })
-        );
-
-        Promise.all(skattegrunnlagDtoPromises)
-            .then(([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]) => {
-                setSkattegrunnlager([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
-            })
-            .catch((error) => {
-                console.error(error.message);
-            });
-    }, [personId]);
-
+export default function Inntekt({ setActiveStep }: CommonFormProps) {
+    const { skattegrunnlager } = useForskudd();
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
@@ -71,7 +49,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     <div>
                         <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
                     </div>
-                    {skattegrunnlager.map((skattegrunnlag) => (
+                    {skattegrunnlager?.map((skattegrunnlag) => (
                         <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
                             <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
                             {skattegrunnlag.grunnlag.map((grunnlag) => (
@@ -82,7 +60,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                 </div>
             </div>
             <div className="grid gap-y-4">
-                <div className="inline-flex">
+                <div className="inline-flex gap-x-4">
                     <Heading level="3" size="medium">
                         Andre typer inntekt
                     </Heading>
@@ -110,7 +88,7 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                     Arbeidsforhold
                 </Heading>
                 <div className="grid gap-y-2">
-                    <div>
+                    <div className="inline-flex items-center gap-x-4">
                         <Label size="small">Nåværende arbeidsforhold</Label>
                         <Link href="#" onClick={() => {}} className="font-bold">
                             AA-register <ExternalLink aria-hidden />
