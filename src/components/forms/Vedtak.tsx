@@ -1,19 +1,25 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { Button, ConfirmationPanel, Heading, Link, Table } from "@navikt/ds-react";
-import React from "react";
+import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
+import { SuccessStroke } from "@navikt/ds-icons";
+import React, { useState } from "react";
 
 import { RolleType } from "../../enum/RolleType";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
+import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
 export default function Vedtak({ setActiveStep }: CommonFormProps) {
+    const [erBekreftet, setBekreftet] = useState(false);
+
     const rolle = {
         navn: "Mia  Cathrine Svendsen",
         fulltNavn: "Mia  Cathrine Svendsen",
         fodselsnummer: "081020 34566",
         type: RolleType.BM,
     };
+
+    const antalBarn = 1;
 
     const data = [
         {
@@ -39,54 +45,64 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
             beløp: 0,
         },
     ];
+
+    const sendeVedtak = (): void => {
+        throw new Error("Function not implemented.");
+    }
+
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
                 <Heading level="2" size="large">
                     Fatte vedtak
                 </Heading>
-                <div>Totrinnskontroll: inntekt</div>
+                <div>
+                    <SuccessStroke width={"1.5rem"} height={"1.5rem"} scale={2} title="Suksess ikon" color="var(--a-icon-success)" style={{display: "inline"}} />
+                     Totrinnskontroll: inntekt</div>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
                     Oppsummering
                 </Heading>
-                <div>Barn i egen husstand:</div>
+                <div>
+                    <Label size="small">Barn i egen husstand: </Label> {antalBarn}
+                </div>
+            
+                <Table>
+                    <Table.Header>
+                        <Table.Row>
+                            <Table.HeaderCell scope="col">Rolle</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+                            <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
+                        </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                        {data.map((item, i) => {
+                            return (
+                                <Table.Row key={i + item.fnmr}>
+                                    <Table.DataCell>
+                                        <RolleTag rolleType={item.rolle} />
+                                    </Table.DataCell>
+                                    <Table.DataCell>{item.fnmr}</Table.DataCell>
+                                    <Table.DataCell>{item.navn}</Table.DataCell>
+                                    <Table.DataCell>{item.type}</Table.DataCell>
+                                    <Table.DataCell>{item.periode}</Table.DataCell>
+                                    <Table.DataCell>{item.inntekt}</Table.DataCell>
+                                    <Table.DataCell>{item.sivilsStandBm}</Table.DataCell>
+                                    <Table.DataCell>{item.resultat}</Table.DataCell>
+                                    <Table.DataCell>{item.beløp}</Table.DataCell>
+                                </Table.Row>
+                            );
+                        })}
+                    </Table.Body>
+                </Table>
             </div>
-            <Table>
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell scope="col">Rolle</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
-                        <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {data.map((item, i) => {
-                        return (
-                            <Table.Row key={i + item.fnmr}>
-                                <Table.DataCell>
-                                    <RolleTag rolleType={item.rolle} />
-                                </Table.DataCell>
-                                <Table.DataCell>{item.fnmr}</Table.DataCell>
-                                <Table.DataCell>{item.navn}</Table.DataCell>
-                                <Table.DataCell>{item.type}</Table.DataCell>
-                                <Table.DataCell>{item.periode}</Table.DataCell>
-                                <Table.DataCell>{item.inntekt}</Table.DataCell>
-                                <Table.DataCell>{item.sivilsStandBm}</Table.DataCell>
-                                <Table.DataCell>{item.resultat}</Table.DataCell>
-                                <Table.DataCell>{item.beløp}</Table.DataCell>
-                            </Table.Row>
-                        );
-                    })}
-                </Table.Body>
-            </Table>
 
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
@@ -109,22 +125,22 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
             </div>
             <div>
                 <ConfirmationPanel
-                    // checked={state}
+                    checked={erBekreftet}
                     label="Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer."
-                    onChange={() => {}}
+                    onChange={() => {setBekreftet(!erBekreftet)}}
                 >
                     bekreft tekst
                 </ConfirmationPanel>
             </div>
 
-            <div className="mt-4">
-                <Button loading={false} onClick={() => {}} className="w-max">
-                    Fatte veddtak
+            <FlexRow>
+                <Button disabled={!erBekreftet} loading={false} onClick={sendeVedtak} className="w-max">
+                    Fatte vedtak
                 </Button>
                 <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
                     Avbryt
                 </Button>
-            </div>
+            </FlexRow>
         </div>
     );
 }
