@@ -1,20 +1,31 @@
 import { Edit, ExternalLink } from "@navikt/ds-icons";
-import { Button, Checkbox, CheckboxGroup, Heading, Label, Link, Textarea, TextField } from "@navikt/ds-react";
+import {
+    BodyShort,
+    Button,
+    Checkbox,
+    CheckboxGroup,
+    Heading,
+    Label,
+    Link,
+    ReadMore,
+    Textarea,
+    TextField,
+} from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import GrunnlagService from "../../service/GrunnlagService";
-import { SkattegrunnlagDto } from "../../types/grunnlagTypes";
+import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { getFullYear } from "../../utils/date-utils";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
-import { InlineGrid } from "../layout/grid/Grid";
+import { FlexRow } from "../layout/grid/FlexRow";
 
 export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
-    const [skattegrunnlag, setSkattegrunnlag] = useState<SkattegrunnlagDto[]>([]);
+    const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
     const grunnlagService = new GrunnlagService();
 
     useEffect(() => {
-        const skattegrunnlagDtoPromises = [getFullYear(), getFullYear() - 1, getFullYear() - 2].map((year) =>
+        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
             grunnlagService.hentSkatteGrunnlag({
                 inntektsAar: year.toString(),
                 inntektsFilter: "",
@@ -24,22 +35,22 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
 
         Promise.all(skattegrunnlagDtoPromises)
             .then(([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]) => {
-                setSkattegrunnlag([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
+                setSkattegrunnlager([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
             })
             .catch((error) => {
                 console.error(error.message);
             });
-    }, []);
+    }, [personId]);
 
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
-                <Heading level="2" size="large">
+                <Heading level="2" size="xlarge">
                     Inntekt
                 </Heading>
                 <div className="grid gap-y-2">
                     <div className="flex">
-                        <Label>Periode: </Label>
+                        <Label size="small">Periode: </Label>
                         <span className="w-52"></span>
                         <DatePickerModal
                             button={(datePickerButtonProps) => (
@@ -55,171 +66,189 @@ export default function Inntekt({ setActiveStep, personId }: CommonFormProps) {
                         />
                     </div>
                     <div>
-                        <Label>Gjennomsnitt Inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
+                        <Label size="small">Gjennomsnitt Inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
                     </div>
                     <div>
-                        <Label>Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
+                        <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
                     </div>
-                    <div>
-                        <Label>Skattegrunnlag (2020):</Label>
-                    </div>
+                    {skattegrunnlager.map((skattegrunnlag) => (
+                        <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
+                            <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
+                            {skattegrunnlag.grunnlag.map((grunnlag) => (
+                                <BodyShort size="small">{grunnlag.beloep}</BodyShort>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Andre typer inntekt</Label>
+                <div className="inline-flex">
+                    <Heading level="3" size="medium">
+                        Andre typer inntekt
+                    </Heading>
                     <Link href="#" onClick={() => {}} className="font-bold">
                         A inntekt <ExternalLink aria-hidden />
                     </Link>
                 </div>
                 <div className="grid gap-y-2">
-                    <Label>Kapitalinntekt (2020):</Label>
-                    <Label>Næringsinntekt (2020):</Label>
+                    <div className="inline-flex items-center gap-x-2">
+                        <Label size="small">Kapitalinntekt (2020):</Label>
+                        <ReadMore size="small" header="Detaljer">
+                            Detaljer
+                        </ReadMore>
+                    </div>
+                    <div className="inline-flex items-center gap-x-2">
+                        <Label size="small">Næringsinntekt (2020):</Label>
+                        <ReadMore size="small" header="Detaljer">
+                            Detaljer
+                        </ReadMore>
+                    </div>
                 </div>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Arbeidsforhold</Label>
-                </div>
+                <Heading level="3" size="medium">
+                    Arbeidsforhold
+                </Heading>
                 <div className="grid gap-y-2">
                     <div>
-                        <Label>Nåværende arbeidsforhold</Label>
+                        <Label size="small">Nåværende arbeidsforhold</Label>
                         <Link href="#" onClick={() => {}} className="font-bold">
                             AA-register <ExternalLink aria-hidden />
                         </Link>
                     </div>
-                    <InlineGrid>
+                    <FlexRow>
                         <div>
-                            <Label>Periode</Label>
+                            <Label size="small">Periode</Label>
                         </div>
                         <div>
-                            <Label>Arbeidsgiver</Label>
+                            <Label size="small">Arbeidsgiver</Label>
                         </div>
                         <div>
-                            <Label>Stilling</Label>
+                            <Label size="small">Stilling</Label>
                         </div>
                         <div>
-                            <Label>Lønnsendring</Label>
+                            <Label size="small">Lønnsendring</Label>
                         </div>
-                    </InlineGrid>
+                    </FlexRow>
                 </div>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Perioder</Label>
-                </div>
-                <InlineGrid>
+                <Heading level="3" size="medium">
+                    Perioder
+                </Heading>
+                <FlexRow>
                     <div>
-                        <Label>Fra og med</Label>
+                        <Label size="small">Fra og med</Label>
                     </div>
                     <div>
-                        <Label>Til og med</Label>
+                        <Label size="small">Til og med</Label>
                     </div>
                     <div>
-                        <Label>Arbeidsgiver/Nav</Label>
+                        <Label size="small">Arbeidsgiver/Nav</Label>
                     </div>
                     <div>
-                        <Label>Inntekt</Label>
+                        <Label size="small">Inntekt</Label>
                     </div>
                     <div>
-                        <Label>Tillegg</Label>
+                        <Label size="small">Tillegg</Label>
                     </div>
                     <div>
-                        <Label>Totalt</Label>
+                        <Label size="small">Totalt</Label>
                     </div>
                     <div>
-                        <Label>Beskrivelse</Label>
+                        <Label size="small">Beskrivelse</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Utvidet barnetrygd</Label>
-                </div>
-                <InlineGrid>
+                <Heading level="3" size="medium">
+                    Utvidet barnetrygd
+                </Heading>
+                <FlexRow>
                     <div>
-                        <Label>Periode</Label>
+                        <Label size="small">Periode</Label>
                     </div>
                     <div>
-                        <Label>Delt bosted</Label>
+                        <Label size="small">Delt bosted</Label>
                     </div>
                     <div>
-                        <Label>Beløp</Label>
+                        <Label size="small">Beløp</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Kontantstøtte (for hele året/ per barn)</Label>
-                </div>
-                <InlineGrid>
+                <Heading level="3" size="medium">
+                    Kontantstøtte (for hele året/ per barn)
+                </Heading>
+                <FlexRow>
                     <div>
-                        <Label>Periode</Label>
+                        <Label size="small">Periode</Label>
                     </div>
                     <div>
-                        <Label>Barn</Label>
+                        <Label size="small">Barn</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
-                <div>
-                    <Label>Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)</Label>
-                </div>
-                <InlineGrid>
+                <Heading level="3" size="medium">
+                    Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
+                </Heading>
+                <FlexRow>
                     <div>
-                        <Label>Fra og med</Label>
+                        <Label size="small">Fra og med</Label>
                     </div>
                     <div>
-                        <Label>Til og med</Label>
+                        <Label size="small">Til og med</Label>
                     </div>
                     <div>
-                        <Label>Barn</Label>
+                        <Label size="small">Barn</Label>
                     </div>
                     <div>
-                        <Label>Barnetillegg (brutto)</Label>
+                        <Label size="small">Barnetillegg (brutto)</Label>
                     </div>
                     <div>
-                        <Label>Skattesats</Label>
+                        <Label size="small">Skattesats</Label>
                     </div>
                     <div>
-                        <Label>Barnetillegg (netto)</Label>
+                        <Label size="small">Barnetillegg (netto)</Label>
                     </div>
-                </InlineGrid>
+                </FlexRow>
             </div>
             <div className="grid gap-y-4">
+                <Heading level="3" size="medium">
+                    Kommentar
+                </Heading>
                 <div>
-                    <Label>Kommentar</Label>
+                    <Textarea label="Begrunnelse (med i vedtaket og notat)" size="small" />
                 </div>
                 <div>
-                    <Textarea label="Begrunnelse (med i vedtaket og notat)" />
-                </div>
-                <div>
-                    <TextField label="Begrunnelse (kun med i notat)" />
+                    <TextField label="Begrunnelse (kun med i notat)" size="small" />
                 </div>
                 <div>
                     <CheckboxGroup
                         legend="Skal til to-trinns kontroll."
                         hideLegend
                         onChange={(val: any[]) => console.log(val)}
+                        size="small"
                     >
                         <Checkbox value="true">Skal til to-trinns kontroll.</Checkbox>
                     </CheckboxGroup>
                 </div>
             </div>
-            <InlineGrid>
-                <Button loading={false} onClick={() => {}} className="w-max">
+            <FlexRow>
+                <Button loading={false} onClick={() => {}} className="w-max" size="small">
                     Gå videre
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
+                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max" size="small">
                     Oppfrisk
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
+                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max" size="small">
                     Lagre
                 </Button>
                 <Link href="#" onClick={() => {}} className="font-bold">
                     Vis notat <ExternalLink aria-hidden />
                 </Link>
-            </InlineGrid>
+            </FlexRow>
         </div>
     );
 }

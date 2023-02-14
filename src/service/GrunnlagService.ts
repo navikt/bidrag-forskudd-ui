@@ -2,15 +2,15 @@ import { DefaultRestService, SecureLoggerService } from "@navikt/bidrag-ui-commo
 
 import { HTTPStatus } from "../enum/HttpStatus";
 import environment from "../environment";
-import { SkattegrunnlagDto, SkattegrunnlagRequest } from "../types/grunnlagTypes";
+import { HentSkattegrunnlagRequest, HentSkattegrunnlagResponse } from "../types/bidragGrunnlagTypes";
 
 export default class GrunnlagService extends DefaultRestService {
     constructor() {
         super("bidrag-grunnlag", environment.url.bidragGrunnlag);
     }
 
-    async hentSkatteGrunnlag(skattegrunnlagRequest: SkattegrunnlagRequest): Promise<SkattegrunnlagDto> {
-        const response = await this.post<SkattegrunnlagDto>(
+    async hentSkatteGrunnlag(skattegrunnlagRequest: HentSkattegrunnlagRequest): Promise<HentSkattegrunnlagResponse> {
+        const response = await this.post<HentSkattegrunnlagResponse>(
             "/integrasjoner/skattegrunnlag",
             JSON.stringify(skattegrunnlagRequest)
         );
