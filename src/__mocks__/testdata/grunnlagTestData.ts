@@ -1,13 +1,19 @@
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 
-export const defaultSkattegrunnlag: HentSkattegrunnlagResponse = {
-    grunnlag: [
-        {
-            beloep: "750000",
-            tekniskNavn: "test",
-        },
-    ],
-    skatteoppgjoersdato: "2022",
+const randomSalary = () => {
+    const min = 2e5;
+    const max = 1.5e6;
+
+    return Math.round(min + Math.random() * (max - min));
 };
 
-export const createSkattegrunnlag = (year: string) => ({ ...defaultSkattegrunnlag, skatteoppgjoersdato: year });
+export const createSkattegrunnlag = (year: string) =>
+    ({
+        grunnlag: [
+            {
+                beloep: randomSalary().toString(),
+                tekniskNavn: "test",
+            },
+        ],
+        skatteoppgjoersdato: year,
+    } as HentSkattegrunnlagResponse);
