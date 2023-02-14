@@ -1,24 +1,15 @@
-import {
-    Button,
-    Heading,
-    Select,
-    Textarea,
-    TextField,
-    UNSAFE_DatePicker,
-    UNSAFE_useDatepicker,
-} from "@navikt/ds-react";
-import React from "react";
+import { Button, Heading, Select, Textarea, TextField } from "@navikt/ds-react";
+import React, { useState } from "react";
 
 import { STEPS } from "../../constants/steps";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
+import { DatePickerInput } from "../date-picker/DatePickerInput";
 
-export default function Virkningstidspunkt({ setActiveStep }: CommonFormProps) {
-    const { datepickerProps, inputProps, selectedDay } = UNSAFE_useDatepicker({
-        fromDate: new Date("Aug 23 2019"),
-        onDateChange: console.log,
-    });
-
+export const Virkningstidspunkt = ({ setActiveStep }: CommonFormProps) => {
+    const [mottatDato, setMottatDato] = useState<Date>(undefined);
+    const [soktFraDato, setSoktFraDato] = useState<Date>(undefined);
+    const [virkningstidspunktDato, setVirkningstidspunktDato] = useState<Date>(undefined);
     const onNext = () => {
         setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
@@ -41,17 +32,23 @@ export default function Virkningstidspunkt({ setActiveStep }: CommonFormProps) {
                             <option value="BM">BM</option>
                             <option value="BP">BP</option>
                         </Select>
-                        <UNSAFE_DatePicker {...datepickerProps}>
-                            <UNSAFE_DatePicker.Input {...inputProps} label="Mottat dato" size="small" />
-                        </UNSAFE_DatePicker>
-                        <UNSAFE_DatePicker {...datepickerProps}>
-                            <UNSAFE_DatePicker.Input {...inputProps} label="Søkt fra dato" size="small" />
-                        </UNSAFE_DatePicker>
+                        <DatePickerInput
+                            label="Mottat dato"
+                            defaultSelected={mottatDato}
+                            onChange={(selectedDay) => setMottatDato(selectedDay)}
+                        />
+                        <DatePickerInput
+                            label="Søkt fra dato"
+                            defaultSelected={soktFraDato}
+                            onChange={(selectedDay) => setSoktFraDato(selectedDay)}
+                        />
                     </div>
                     <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-                        <UNSAFE_DatePicker {...datepickerProps}>
-                            <UNSAFE_DatePicker.Input {...inputProps} label="Virkningstidspunkt" size="small" />
-                        </UNSAFE_DatePicker>
+                        <DatePickerInput
+                            label="Virkningstidspunkt"
+                            defaultSelected={virkningstidspunktDato}
+                            onChange={(selectedDay) => setVirkningstidspunktDato(selectedDay)}
+                        />
                         <Select label="Årsak" className="w-52" size="small">
                             <option value="aarsak_1">Årsak 1</option>
                             <option value="aarsak_2">Årsak 2</option>
@@ -70,4 +67,4 @@ export default function Virkningstidspunkt({ setActiveStep }: CommonFormProps) {
             </form>
         </div>
     );
-}
+};
