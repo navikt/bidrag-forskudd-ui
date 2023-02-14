@@ -2,11 +2,13 @@ import React, { createContext, PropsWithChildren, useCallback, useContext, useEf
 import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
-import GrunnlagService from "../service/GrunnlagService";
+import environment from "../environment";
 import SakService from "../service/SakService";
 import { IBidragSak } from "../types/bidrag-sak";
 import { HentSkattegrunnlagResponse } from "../types/bidragGrunnlagTypes";
 import { getFullYear } from "../utils/date-utils";
+import { useApi } from "@navikt/bidrag-ui-common";
+import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
 
 interface IForskuddContext {
     skattegrunnlager: HentSkattegrunnlagResponse[];
@@ -26,7 +28,8 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeStep = searchParams.get("steg");
-    const grunnlagService = new GrunnlagService();
+    const bidragGrunnlagApi = useApi(new BidragGrunnlagApi({ baseURL: environment.url.bidragGrunnlag }), "bidrag-grunnlag", "fss");
+
     const sakService = new SakService();
 
     const setActiveStep = useCallback((x: number) => {
@@ -37,7 +40,7 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     useEffect(() => {
         const sakPromise = sakService.hentSak(saksnummer);
         const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
-            grunnlagService.hentSkatteGrunnlag({
+            bidragGrunnlagApi.integrasjoner.hentSkattegrunnlag({
                 inntektsAar: year.toString(),
                 inntektsFilter: "",
                 personId: "123",
@@ -47,7 +50,7 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
         Promise.all([sakPromise, ...skattegrunnlagDtoPromises])
             .then(([sak, skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]) => {
                 setSak(sak);
-                setSkattegrunnlager([skattegrunnlag1, skattegrunnlag2, skattegrunnlag3]);
+                setSkattegrunnlager([skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data]);
             })
             .catch((error) => {
                 console.error(error.message);
