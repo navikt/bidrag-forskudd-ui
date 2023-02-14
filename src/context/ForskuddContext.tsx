@@ -1,14 +1,14 @@
+import { useApi } from "@navikt/bidrag-ui-common";
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
 import { STEPS } from "../constants/steps";
 import environment from "../environment";
 import SakService from "../service/SakService";
 import { IBidragSak } from "../types/bidrag-sak";
 import { HentSkattegrunnlagResponse } from "../types/bidragGrunnlagTypes";
 import { getFullYear } from "../utils/date-utils";
-import { useApi } from "@navikt/bidrag-ui-common";
-import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
 
 interface IForskuddContext {
     skattegrunnlager: HentSkattegrunnlagResponse[];
@@ -28,7 +28,11 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const activeStep = searchParams.get("steg");
-    const bidragGrunnlagApi = useApi(new BidragGrunnlagApi({ baseURL: environment.url.bidragGrunnlag }), "bidrag-grunnlag", "fss");
+    const bidragGrunnlagApi = useApi(
+        new BidragGrunnlagApi({ baseURL: environment.url.bidragGrunnlag }),
+        "bidrag-grunnlag",
+        "fss"
+    );
 
     const sakService = new SakService();
 

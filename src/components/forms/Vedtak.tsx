@@ -1,6 +1,6 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import { SuccessStroke } from "@navikt/ds-icons";
+import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
 
 import { RolleType } from "../../enum/RolleType";
@@ -48,7 +48,7 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
 
     const sendeVedtak = (): void => {
         throw new Error("Function not implemented.");
-    }
+    };
 
     return (
         <div className="grid gap-y-8">
@@ -57,8 +57,16 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                     Fatte vedtak
                 </Heading>
                 <div>
-                    <SuccessStroke width={"1.5rem"} height={"1.5rem"} scale={2} title="Suksess ikon" color="var(--a-icon-success)" style={{display: "inline"}} />
-                     Totrinnskontroll: inntekt</div>
+                    <SuccessStroke
+                        width={"1.5rem"}
+                        height={"1.5rem"}
+                        scale={2}
+                        title="Suksess ikon"
+                        color="var(--a-icon-success)"
+                        style={{ display: "inline" }}
+                    />
+                    Totrinnskontroll: inntekt
+                </div>
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
@@ -67,7 +75,7 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                 <div>
                     <Label size="small">Barn i egen husstand: </Label> {antalBarn}
                 </div>
-            
+
                 <Table>
                     <Table.Header>
                         <Table.Row>
@@ -127,7 +135,9 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
                 <ConfirmationPanel
                     checked={erBekreftet}
                     label="Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer."
-                    onChange={() => {setBekreftet(!erBekreftet)}}
+                    onChange={() => {
+                        setBekreftet(!erBekreftet);
+                    }}
                 >
                     bekreft tekst
                 </ConfirmationPanel>
