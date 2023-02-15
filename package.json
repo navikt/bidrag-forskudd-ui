@@ -14,7 +14,8 @@
     "types:bidragGrunnlag": "npx swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs  -o src/types -n bidragGrunnlagTypes.d.ts --no-client",
     "api:person": "npx swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "npx swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
-    "api:bidragBehandling": "npx swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragBehandlingApi.ts -o src/api"
+    "api:bidragBehandling": "npx swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragBehandlingApi.ts -o src/api",
+    "api:bidragSak": "npx swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs --axios -n BidragSakApi.ts -o src/api"
   },
   "dependencies": {
     "@navikt/bidrag-ui-common": "1.4.2",
