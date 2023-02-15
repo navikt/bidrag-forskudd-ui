@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import Boforhold from "./Boforhold";
-import Inntekt from "./Inntekt";
-import Vedtak from "./Vedtak";
-import Virkningstidspunkt from "./Virkningstidspunkt";
+import { Boforhold } from "./Boforhold";
+import { Inntekt } from "./Inntekt";
+import { Vedtak } from "./Vedtak";
+import { Virkningstidspunkt } from "./Virkningstidspunkt";
 
 export interface FormWrapperProps {
     setActiveStep: (number) => void;

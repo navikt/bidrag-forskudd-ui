@@ -9,7 +9,7 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
-export default function Vedtak({ setActiveStep }: CommonFormProps) {
+export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
     const [erBekreftet, setBekreftet] = useState(false);
 
     const rolle = {
@@ -153,4 +153,4 @@ export default function Vedtak({ setActiveStep }: CommonFormProps) {
             </FlexRow>
         </div>
     );
-}
+};

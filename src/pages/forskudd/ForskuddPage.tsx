@@ -14,7 +14,7 @@ export interface CommonFormProps {
     setActiveStep: (number) => void;
 }
 
-export default function ForskuddPage() {
+export const ForskuddPage = () => {
     const { sak, activeStep, setActiveStep } = useForskudd();
 
     return (
@@ -50,4 +50,4 @@ export default function ForskuddPage() {
             </div>
         </PageWrapper>
     );
-}
+};

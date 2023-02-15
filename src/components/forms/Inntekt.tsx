@@ -18,7 +18,7 @@ import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-export default function Inntekt({ setActiveStep }: CommonFormProps) {
+export const Inntekt = ({ setActiveStep }: CommonFormProps) => {
     const { skattegrunnlager } = useForskudd();
     return (
         <div className="grid gap-y-8">
@@ -229,4 +229,4 @@ export default function Inntekt({ setActiveStep }: CommonFormProps) {
             </FlexRow>
         </div>
     );
-}
+};

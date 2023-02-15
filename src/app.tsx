@@ -6,7 +6,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMock } from "./__mocks__/msw";
 import { ForskuddProvider } from "./context/ForskuddContext";
-import ForskuddPage from "./pages/forskudd/ForskuddPage";
+import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 
 // This file is only used for development. The entrypoint is under pages folder
 initMock();
