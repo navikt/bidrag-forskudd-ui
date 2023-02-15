@@ -53,7 +53,7 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
-                <Heading level="2" size="large">
+                <Heading level="2" size="xlarge">
                     Fatte vedtak
                 </Heading>
                 <div>
@@ -144,10 +144,10 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
             </div>
 
             <FlexRow>
-                <Button disabled={!erBekreftet} loading={false} onClick={sendeVedtak} className="w-max">
+                <Button disabled={!erBekreftet} loading={false} onClick={sendeVedtak} className="w-max" size="small">
                     Fatte vedtak
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max">
+                <Button loading={false} variant="secondary" onClick={() => {}} className="w-max" size="small">
                     Avbryt
                 </Button>
             </FlexRow>
