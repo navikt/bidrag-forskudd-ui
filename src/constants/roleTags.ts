@@ -5,4 +5,5 @@ export const ROLE_TAGS = {
     [RolleType.BP]: "alt1",
     [RolleType.BA]: "alt1",
     [RolleType.RM]: "alt3",
-};
+    [RolleType.FR]: "alt3",
+} as const;

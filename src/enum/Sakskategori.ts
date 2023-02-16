@@ -1,4 +1,4 @@
 export enum Sakskategori {
-    NASJONAL = "N",
-    UTLAND = "U",
+    NASJONAL = "Nasjonal",
+    UTLAND = "Utland",
 }
