@@ -2,8 +2,8 @@ import { ExternalLink } from "@navikt/ds-icons";
 import { SuccessStroke } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
-import { useForskudd } from "../../context/ForskuddContext";
 
+import { useForskudd } from "../../context/ForskuddContext";
 import { RolleType } from "../../enum/RolleType";
 import environment from "../../environment";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
@@ -14,7 +14,7 @@ import { RolleTag } from "../RolleTag";
 export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
-    
+
     const rolle = {
         navn: "Mia  Cathrine Svendsen",
         fulltNavn: "Mia  Cathrine Svendsen",
@@ -150,11 +150,17 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
                 <Button disabled={!erBekreftet} loading={false} onClick={sendeVedtak} className="w-max" size="small">
                     Fatte vedtak
                 </Button>
-                <Button loading={false} variant="secondary" onClick={() => {
-                    // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
-                    // og kanskje stateId?
-                    window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
-                }} className="w-max" size="small">
+                <Button
+                    loading={false}
+                    variant="secondary"
+                    onClick={() => {
+                        // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
+                        // og kanskje stateId?
+                        window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
+                    }}
+                    className="w-max"
+                    size="small"
+                >
                     Avbryt
                 </Button>
             </FlexRow>
