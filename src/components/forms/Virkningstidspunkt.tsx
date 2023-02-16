@@ -2,6 +2,7 @@ import { Button, Heading, Select, Textarea, TextField } from "@navikt/ds-react";
 import React, { useState } from "react";
 
 import { STEPS } from "../../constants/steps";
+import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
@@ -50,8 +51,10 @@ export const Virkningstidspunkt = ({ setActiveStep }: CommonFormProps) => {
                             onChange={(selectedDay) => setVirkningstidspunktDato(selectedDay)}
                         />
                         <Select label="Årsak" className="w-52" size="small">
-                            <option value="aarsak_1">Årsak 1</option>
-                            <option value="aarsak_2">Årsak 2</option>
+                            <option value="">Velg årsak</option>
+                            {Object.entries(ForskuddBeregningKodeAarsak).map((entry) => (
+                                <option value={entry[0]}>{entry[1]}</option>
+                            ))}
                         </Select>
                         <Select label="Avslag/opphør" className="w-52" size="small">
                             <option value="avslag_1">Avslag 1</option>
