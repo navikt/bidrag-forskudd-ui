@@ -28,6 +28,7 @@ interface IForskuddContextProps {
 }
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
+let didInit = false;
 
 function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<IForskuddContextProps>) {
     const [sak, setSak] = useState<BidragSakDto>(null);
@@ -50,32 +51,36 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     }, []);
 
     const fetchData = useCallback(async () => {
-        const sakPromise = bidragSakApi.bidragSak.findMetadataForSak(saksnummer);
-        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
-            bidragGrunnlagApi.integrasjoner.hentSkattegrunnlag({
-                inntektsAar: year.toString(),
-                inntektsFilter: "",
-                personId: "123",
-            })
-        );
+        if (!didInit) {
+            didInit = true;
 
-        const [fetchedSak, skattegrunnlag1, skattegrunnlag2, skattegrunnlag3] = await Promise.all([
-            sakPromise,
-            ...skattegrunnlagDtoPromises,
-        ]);
-        setSak(fetchedSak.data);
-        setSkattegrunnlager([skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data]);
+            const sakPromise = bidragSakApi.bidragSak.findMetadataForSak(saksnummer);
+            const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
+                bidragGrunnlagApi.integrasjoner.hentSkattegrunnlag({
+                    inntektsAar: year.toString(),
+                    inntektsFilter: "",
+                    personId: "123",
+                })
+            );
 
-        const personPromises = fetchedSak.data.roller.map((rolle) =>
-            personApi.informasjon.hentPersonPost({ ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer })
-        );
-        const [...personer] = await Promise.all([...personPromises]);
-        const roller = personer.map((person) => {
-            const rolle = fetchedSak.data.roller.find((rolle) => rolle.fodselsnummer === person.data.ident);
-            if (!rolle) throw new Error(removePlaceholder(PERSON_IKKE_FINNES, person.data.ident));
-            return { ...rolle, ...person.data };
-        });
-        setRoller(roller);
+            const [fetchedSak, skattegrunnlag1, skattegrunnlag2, skattegrunnlag3] = await Promise.all([
+                sakPromise,
+                ...skattegrunnlagDtoPromises,
+            ]);
+            setSak(fetchedSak.data);
+            setSkattegrunnlager([skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data]);
+
+            const personPromises = fetchedSak.data.roller.map((rolle) =>
+                personApi.informasjon.hentPersonPost({ ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer })
+            );
+            const [...personer] = await Promise.all([...personPromises]);
+            const roller = personer.map((person) => {
+                const rolle = fetchedSak.data.roller.find((rolle) => rolle.fodselsnummer === person.data.ident);
+                if (!rolle) throw new Error(removePlaceholder(PERSON_IKKE_FINNES, person.data.ident));
+                return { ...rolle, ...person.data };
+            });
+            setRoller(roller);
+        }
     }, []);
 
     useEffect(() => {
