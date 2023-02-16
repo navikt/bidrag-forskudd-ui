@@ -53,7 +53,9 @@ export const Inntekt = ({ setActiveStep }: CommonFormProps) => {
                         <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
                             <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
                             {skattegrunnlag.grunnlag.map((grunnlag) => (
-                                <BodyShort size="small">{grunnlag.beloep}</BodyShort>
+                                <BodyShort key={skattegrunnlag.skatteoppgjoersdato + grunnlag.beloep} size="small">
+                                    {grunnlag.beloep}
+                                </BodyShort>
                             ))}
                         </div>
                     ))}
