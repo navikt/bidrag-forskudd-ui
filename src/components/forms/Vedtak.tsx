@@ -59,7 +59,11 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
                 <Heading level="2" size="xlarge">
                     Fatte vedtak
                 </Heading>
-                <div>
+                {/* TODO: "Totrinnskontroll: inntekt"
+                    det har vi ikke (foreløpig)
+                    men viktig at vi husker om det og tar på plass, eventuelt
+                 */}
+                {/* <div>
                     <SuccessStroke
                         width={"1.5rem"}
                         height={"1.5rem"}
@@ -69,7 +73,7 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
                         style={{ display: "inline" }}
                     />
                     Totrinnskontroll: inntekt
-                </div>
+                </div> */}
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
