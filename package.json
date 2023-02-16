@@ -9,11 +9,10 @@
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "build": "webpack --config webpack.prod.config.js",
-    "types:person": "npx swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs  -o src/types -n personTypes.d.ts --no-client",
-    "types:bidragSak": "npx swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs  -o src/types -n bidragSakTypes.d.ts --no-client",
-    "types:bidragGrunnlag": "npx swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs  -o src/types -n bidragGrunnlagTypes.d.ts --no-client",
+    "build:api": "npm-run-all -p -r api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling api:bidragSak",
     "api:person": "npx swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "npx swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
+    "api:bidragVedtak": "npx swagger-typescript-api -p https://bidrag-vedtak-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
     "api:bidragBehandling": "npx swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragBehandlingApi.ts -o src/api",
     "api:bidragSak": "npx swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs --axios -n BidragSakApi.ts -o src/api"
   },
