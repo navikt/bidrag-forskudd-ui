@@ -1,4 +1,4 @@
-import { Heading, Stepper } from "@navikt/ds-react";
+import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React from "react";
 
@@ -15,7 +15,7 @@ export interface CommonFormProps {
 }
 
 export const ForskuddPage = () => {
-    const { sak, activeStep, setActiveStep } = useForskudd();
+    const { sak, roller, activeStep, error, setActiveStep } = useForskudd();
 
     return (
         <PageWrapper name="tracking-wide">
@@ -31,9 +31,16 @@ export const ForskuddPage = () => {
                         <CopyToClipboard size="small" copyText={sak?.saksnummer} popoverText="Kopierte saksnummer" />
                     </span>
                 </Heading>
-                {sak && sak.roller.map((rolle, i) => <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />)}
+                {roller.map((rolle, i) => (
+                    <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />
+                ))}
             </div>
             <div className="max-w-[1092px] mx-auto px-6 py-6">
+                {error && (
+                    <Alert variant="error" className="mb-12">
+                        {error}
+                    </Alert>
+                )}
                 <Stepper
                     aria-labelledby="stepper-heading"
                     activeStep={STEPS[activeStep]}

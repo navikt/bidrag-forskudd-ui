@@ -3,5 +3,5 @@ export enum RolleType {
     BP = "BP",
     BA = "BA",
     RM = "RM",
-    UKJENT = "UKJENT",
+    FR = "FR",
 }
