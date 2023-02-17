@@ -10,10 +10,13 @@ import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
+import {Api as BidragVedtakApi} from "../../api/BidragVedtakApi";
+import { useApi } from "@navikt/bidrag-ui-common";
 
 export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
+    const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
     const rolle = {
         navn: "Mia  Cathrine Svendsen",
@@ -50,6 +53,18 @@ export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
     ];
 
     const sendeVedtak = (): void => {
+        vedtakApi.vedtak.opprettVedtak({
+            kilde: "MANUELT",
+            type: "INDEKSREGULERING",
+            opprettetAv: "",
+            vedtakTidspunkt: "",
+            enhetId: "",
+            grunnlagListe: []
+        }).then((r) => {
+            
+        }).catch((e) => {
+            
+        })
         throw new Error("Function not implemented.");
     };
 
