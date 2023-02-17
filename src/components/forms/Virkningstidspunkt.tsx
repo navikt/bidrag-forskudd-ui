@@ -53,7 +53,9 @@ export const Virkningstidspunkt = ({ setActiveStep }: CommonFormProps) => {
                         <Select label="Årsak" className="w-52" size="small">
                             <option value="">Velg årsak</option>
                             {Object.entries(ForskuddBeregningKodeAarsak).map((entry) => (
-                                <option value={entry[0]}>{entry[1]}</option>
+                                <option key={entry[0]} value={entry[0]}>
+                                    {entry[1]}
+                                </option>
                             ))}
                         </Select>
                         <Select label="Avslag/opphør" className="w-52" size="small">

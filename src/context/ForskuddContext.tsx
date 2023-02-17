@@ -7,6 +7,7 @@ import { Api as BidragSakApi } from "../api/BidragSakApi";
 import { Api as PersonApi } from "../api/PersonApi";
 import { PERSON_IKKE_FINNES } from "../constants/error";
 import { STEPS } from "../constants/steps";
+import { ForskuddStepper } from "../enum/ForskuddStepper";
 import environment from "../environment";
 import { HentSkattegrunnlagResponse } from "../types/bidragGrunnlagTypes";
 import { BidragSakDto } from "../types/bidragSakTypes";
@@ -29,7 +30,7 @@ interface IForskuddContextProps {
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 let didInit = false;
-
+let fetchedSkattegrunnlag = false;
 function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<IForskuddContextProps>) {
     const [sak, setSak] = useState<BidragSakDto>(null);
     const [skattegrunnlager, setSkattegrunnlager] = useState<HentSkattegrunnlagResponse[]>([]);
@@ -51,40 +52,51 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     }, []);
 
     const fetchData = useCallback(async () => {
-        if (!didInit) {
-            didInit = true;
+        const sak = await bidragSakApi.bidragSak.findMetadataForSak(saksnummer);
+        setSak(sak.data);
+    }, []);
 
-            const sakPromise = bidragSakApi.bidragSak.findMetadataForSak(saksnummer);
-            const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
-                bidragGrunnlagApi.integrasjoner.hentSkattegrunnlag({
-                    inntektsAar: year.toString(),
-                    inntektsFilter: "",
-                    personId: "123",
-                })
-            );
+    const fetchPersons = useCallback(async () => {
+        const personPromises = sak.roller.map((rolle) =>
+            personApi.informasjon.hentPersonPost({ ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer })
+        );
+        const [...personer] = await Promise.all([...personPromises]);
+        const roller = personer.map((person) => {
+            const rolle = sak.roller.find((rolle) => rolle.fodselsnummer === person.data.ident);
+            if (!rolle) throw new Error(removePlaceholder(PERSON_IKKE_FINNES, person.data.ident));
+            return { ...rolle, ...person.data };
+        });
+        setRoller(roller);
+    }, [sak]);
 
-            const [fetchedSak, skattegrunnlag1, skattegrunnlag2, skattegrunnlag3] = await Promise.all([
-                sakPromise,
-                ...skattegrunnlagDtoPromises,
-            ]);
-            setSak(fetchedSak.data);
-            setSkattegrunnlager([skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data]);
-
-            const personPromises = fetchedSak.data.roller.map((rolle) =>
-                personApi.informasjon.hentPersonPost({ ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer })
-            );
-            const [...personer] = await Promise.all([...personPromises]);
-            const roller = personer.map((person) => {
-                const rolle = fetchedSak.data.roller.find((rolle) => rolle.fodselsnummer === person.data.ident);
-                if (!rolle) throw new Error(removePlaceholder(PERSON_IKKE_FINNES, person.data.ident));
-                return { ...rolle, ...person.data };
-            });
-            setRoller(roller);
-        }
+    const fetchSkattegrunnlag = useCallback(async () => {
+        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
+            bidragGrunnlagApi.integrasjoner.hentSkattegrunnlag({
+                inntektsAar: year.toString(),
+                inntektsFilter: "",
+                personId: "123",
+            })
+        );
+        const [skattegrunnlag1, skattegrunnlag2, skattegrunnlag3] = await Promise.all([...skattegrunnlagDtoPromises]);
+        setSkattegrunnlager([skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data]);
     }, []);
 
     useEffect(() => {
-        fetchData().catch((error) => setError(error.message));
+        if (sak) fetchPersons().catch((error) => setError(error.message));
+    }, [sak]);
+
+    useEffect(() => {
+        if (activeStep === ForskuddStepper.INNTEKT && !fetchedSkattegrunnlag) {
+            fetchedSkattegrunnlag = true;
+            fetchSkattegrunnlag().catch((error) => setError(error.message));
+        }
+    }, [activeStep]);
+
+    useEffect(() => {
+        if (!didInit) {
+            didInit = true;
+            fetchData().catch((error) => setError(error.message));
+        }
     }, [fetchData]);
 
     return (
