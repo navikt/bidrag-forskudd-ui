@@ -13,13 +13,15 @@ import {
 } from "@navikt/ds-react";
 import React from "react";
 
-import { useForskudd } from "../../context/ForskuddContext";
+import { useApiData } from "../../hooks/useApiData";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-export const Inntekt = ({ setActiveStep }: CommonFormProps) => {
-    const { skattegrunnlager } = useForskudd();
+export default ({ setActiveStep }: CommonFormProps) => {
+    const { api } = useApiData();
+    const { data } = api.getSkattegrunnlager();
+
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
@@ -49,16 +51,18 @@ export const Inntekt = ({ setActiveStep }: CommonFormProps) => {
                     <div>
                         <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
                     </div>
-                    {skattegrunnlager?.map((skattegrunnlag) => (
-                        <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
-                            <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
-                            {skattegrunnlag.grunnlag.map((grunnlag) => (
-                                <BodyShort key={skattegrunnlag.skatteoppgjoersdato + grunnlag.beloep} size="small">
-                                    {grunnlag.beloep}
-                                </BodyShort>
-                            ))}
-                        </div>
-                    ))}
+                    {data?.pages.map((skattegrunnlager) =>
+                        skattegrunnlager.map((skattegrunnlag) => (
+                            <div key={skattegrunnlag.skatteoppgjoersdato} className="flex gap-x-2">
+                                <Label size="small">Skattegrunnlag ({skattegrunnlag.skatteoppgjoersdato}):</Label>
+                                {skattegrunnlag?.grunnlag?.map((grunnlag) => (
+                                    <BodyShort key={skattegrunnlag.skatteoppgjoersdato + grunnlag.beloep} size="small">
+                                        {grunnlag.beloep}
+                                    </BodyShort>
+                                ))}
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
             <div className="grid gap-y-4">

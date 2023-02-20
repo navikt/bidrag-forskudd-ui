@@ -11,7 +11,7 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
-export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
+export default ({ setActiveStep }: CommonFormProps) => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
 

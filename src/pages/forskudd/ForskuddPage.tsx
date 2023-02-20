@@ -7,6 +7,7 @@ import { RolleDetaljer } from "../../components/RolleDetaljer";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { useApiData } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 
@@ -14,8 +15,14 @@ export interface CommonFormProps {
     setActiveStep: (number) => void;
 }
 
-export const ForskuddPage = () => {
-    const { sak, roller, activeStep, error, setActiveStep } = useForskudd();
+interface IForskuddPageProps {
+    saksnummer: string;
+}
+
+export const ForskuddPage = ({ saksnummer }: IForskuddPageProps) => {
+    const { activeStep, setActiveStep } = useForskudd();
+    const { api, networkError } = useApiData();
+    const { sak, roller } = api.getSakAndRoller(saksnummer);
 
     return (
         <PageWrapper name="tracking-wide">
@@ -31,14 +38,14 @@ export const ForskuddPage = () => {
                         <CopyToClipboard size="small" copyText={sak?.saksnummer} popoverText="Kopierte saksnummer" />
                     </span>
                 </Heading>
-                {roller.map((rolle, i) => (
+                {roller?.map((rolle, i) => (
                     <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />
                 ))}
             </div>
             <div className="max-w-[1092px] mx-auto px-6 py-6">
-                {error && (
+                {networkError && (
                     <Alert variant="error" className="mb-12">
-                        {error}
+                        {networkError}
                     </Alert>
                 )}
                 <Stepper

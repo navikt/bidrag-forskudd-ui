@@ -2,6 +2,7 @@ import "./index.css";
 
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMock } from "./__mocks__/msw";
@@ -10,6 +11,8 @@ import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 
 // This file is only used for development. The entrypoint is under pages folder
 initMock();
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
@@ -25,8 +28,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 function ForskudWrapper() {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     return (
-        <ForskuddProvider saksnummer={saksnummer}>
-            <ForskuddPage />
-        </ForskuddProvider>
+        <QueryClientProvider client={queryClient}>
+            <ForskuddProvider saksnummer={saksnummer}>
+                <ForskuddPage saksnummer={saksnummer} />
+            </ForskuddProvider>
+        </QueryClientProvider>
     );
 }

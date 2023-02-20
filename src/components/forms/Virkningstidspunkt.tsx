@@ -7,7 +7,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 
-export const Virkningstidspunkt = ({ setActiveStep }: CommonFormProps) => {
+export default ({ setActiveStep }: CommonFormProps) => {
     const [mottatDato, setMottatDato] = useState<Date>(undefined);
     const [soktFraDato, setSoktFraDato] = useState<Date>(undefined);
     const [virkningstidspunktDato, setVirkningstidspunktDato] = useState<Date>(undefined);

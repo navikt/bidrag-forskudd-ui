@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import { Loader } from "@navikt/ds-react";
+import React, { lazy, Suspense, useMemo } from "react";
 
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { Boforhold } from "./Boforhold";
-import { Inntekt } from "./Inntekt";
-import { Vedtak } from "./Vedtak";
-import { Virkningstidspunkt } from "./Virkningstidspunkt";
+const Boforhold = lazy(() => import("./Boforhold"));
+const Inntekt = lazy(() => import("./Inntekt"));
+const Vedtak = lazy(() => import("./Vedtak"));
+const Virkningstidspunkt = lazy(() => import("./Virkningstidspunkt"));
 
 export interface FormWrapperProps {
     setActiveStep: (number) => void;
@@ -27,5 +28,5 @@ export default function FormWrapper({ activeStep, ...props }: FormWrapperProps) 
         }
     }, [activeStep]);
 
-    return renderForm;
+    return <Suspense fallback={<Loader size="3xlarge" title="venter..." />}>{renderForm}</Suspense>;
 }

@@ -5,7 +5,7 @@ import React from "react";
 import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-export const Boforhold = ({ setActiveStep }: CommonFormProps) => {
+export default ({ setActiveStep }: CommonFormProps) => {
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">

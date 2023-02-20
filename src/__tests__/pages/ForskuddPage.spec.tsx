@@ -4,11 +4,11 @@ import { expect } from "chai";
 import { describe } from "mocha";
 import React from "react";
 
-import ForskuddPage from "../../pages/forskudd/ForskuddPage";
+import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
 
 describe("ForskuddPage", () => {
     it("should render", async () => {
-        render(<ForskuddPage personId={"JOARK-123213"} saksnummer={"12345"} />);
+        render(<ForskuddPage />);
         await waitFor(() => expect(document.querySelector("button")).not.to.be.null);
     });
 });
