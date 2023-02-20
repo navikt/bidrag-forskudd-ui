@@ -13,7 +13,7 @@ import { RolleTag } from "../RolleTag";
 import {Api as BidragVedtakApi} from "../../api/BidragVedtakApi";
 import { useApi } from "@navikt/bidrag-ui-common";
 
-export const Vedtak = ({ setActiveStep }: CommonFormProps) => {
+export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
