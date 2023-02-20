@@ -1,17 +1,15 @@
+import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
-import { SuccessStroke } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
 
+import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import { RolleType } from "../../enum/RolleType";
 import environment from "../../environment";
-import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
-import {Api as BidragVedtakApi} from "../../api/BidragVedtakApi";
-import { useApi } from "@navikt/bidrag-ui-common";
 
 export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
@@ -53,18 +51,17 @@ export default () => {
     ];
 
     const sendeVedtak = (): void => {
-        vedtakApi.vedtak.opprettVedtak({
-            kilde: "MANUELT",
-            type: "INDEKSREGULERING",
-            opprettetAv: "",
-            vedtakTidspunkt: "",
-            enhetId: "",
-            grunnlagListe: []
-        }).then((r) => {
-            
-        }).catch((e) => {
-            
-        })
+        vedtakApi.vedtak
+            .opprettVedtak({
+                kilde: "MANUELT",
+                type: "INDEKSREGULERING",
+                opprettetAv: "",
+                vedtakTidspunkt: "",
+                enhetId: "",
+                grunnlagListe: [],
+            })
+            .then((r) => {})
+            .catch((e) => {});
         throw new Error("Function not implemented.");
     };
 
@@ -74,10 +71,6 @@ export default () => {
                 <Heading level="2" size="xlarge">
                     Fatte vedtak
                 </Heading>
-                {/* TODO: "Totrinnskontroll: inntekt"
-                    det har vi ikke (foreløpig)
-                    men viktig at vi husker om det og tar på plass, eventuelt
-                 */}
                 {/* <div>
                     <SuccessStroke
                         width={"1.5rem"}
