@@ -6,12 +6,11 @@ import React, { useState } from "react";
 import { useForskudd } from "../../context/ForskuddContext";
 import { RolleType } from "../../enum/RolleType";
 import environment from "../../environment";
-import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
-export default ({ setActiveStep }: CommonFormProps) => {
+export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
 

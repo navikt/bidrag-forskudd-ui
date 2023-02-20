@@ -30,7 +30,7 @@ function ForskudWrapper() {
     return (
         <QueryClientProvider client={queryClient}>
             <ForskuddProvider saksnummer={saksnummer}>
-                <ForskuddPage saksnummer={saksnummer} />
+                <ForskuddPage />
             </ForskuddProvider>
         </QueryClientProvider>
     );

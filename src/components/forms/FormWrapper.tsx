@@ -1,30 +1,27 @@
 import { Loader } from "@navikt/ds-react";
 import React, { lazy, Suspense, useMemo } from "react";
 
+import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 const Boforhold = lazy(() => import("./Boforhold"));
 const Inntekt = lazy(() => import("./Inntekt"));
 const Vedtak = lazy(() => import("./Vedtak"));
 const Virkningstidspunkt = lazy(() => import("./Virkningstidspunkt"));
 
-export interface FormWrapperProps {
-    setActiveStep: (number) => void;
-    activeStep: string;
-}
-
-export default function FormWrapper({ activeStep, ...props }: FormWrapperProps) {
+export default function FormWrapper() {
+    const { activeStep } = useForskudd();
     const renderForm = useMemo(() => {
         switch (activeStep) {
             case ForskuddStepper.VIRKNINGSTIDSPUNKT:
-                return <Virkningstidspunkt {...props} />;
+                return <Virkningstidspunkt />;
             case ForskuddStepper.INNTEKT:
-                return <Inntekt {...props} />;
+                return <Inntekt />;
             case ForskuddStepper.BOFORHOLD:
-                return <Boforhold {...props} />;
+                return <Boforhold />;
             case ForskuddStepper.VEDTAK:
-                return <Vedtak {...props} />;
+                return <Vedtak />;
             default:
-                return <Virkningstidspunkt {...props} />;
+                return <Virkningstidspunkt />;
         }
     }, [activeStep]);
 

@@ -14,11 +14,10 @@ import {
 import React from "react";
 
 import { useApiData } from "../../hooks/useApiData";
-import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-export default ({ setActiveStep }: CommonFormProps) => {
+export default () => {
     const { api } = useApiData();
     const { data } = api.getSkattegrunnlager();
 

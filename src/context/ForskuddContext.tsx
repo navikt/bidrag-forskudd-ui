@@ -6,6 +6,7 @@ import { STEPS } from "../constants/steps";
 interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
+    saksnummer: string;
 }
 
 interface IForskuddContextProps {
@@ -24,7 +25,9 @@ function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<
     }, []);
 
     return (
-        <ForskuddContext.Provider value={{ activeStep, setActiveStep, ...props }}>{children}</ForskuddContext.Provider>
+        <ForskuddContext.Provider value={{ saksnummer, activeStep, setActiveStep, ...props }}>
+            {children}
+        </ForskuddContext.Provider>
     );
 }
 function useForskudd() {

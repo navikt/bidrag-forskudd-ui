@@ -10,7 +10,7 @@ import { removePlaceholder } from "../utils/string-utils";
 export const useApiData = () => {
     const [networkError, setNetworkError] = useState<string>(null);
 
-    const getSak = async (saksnummer: string) => {
+    const fetchSak = async (saksnummer: string) => {
         const sak = await BIDRAG_SAK_API.bidragSak.findMetadataForSak(saksnummer);
         return sak.data;
     };
@@ -33,21 +33,6 @@ export const useApiData = () => {
         return roller;
     };
 
-    const getSakAndRoller = (saksnummer: string) => {
-        const { data: sak } = useQuery({
-            queryKey: `sak-${saksnummer}`,
-            queryFn: () => getSak(saksnummer),
-            staleTime: Infinity,
-        });
-
-        const { data: roller } = useQuery("roller", () => fetchAndMapPersonsToRoles(sak), {
-            staleTime: Infinity,
-            enabled: !!sak,
-        });
-
-        return { sak: sak, roller: roller };
-    };
-
     const fetchSkattegrunnlager = async (signal?: AbortSignal) => {
         const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
             BIDRAG_GRUNNLAG_API.integrasjoner.hentSkattegrunnlag(
@@ -64,6 +49,21 @@ export const useApiData = () => {
         return [skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data];
     };
 
+    const getSakAndRoller = (saksnummer: string) => {
+        const { data: sak } = useQuery({
+            queryKey: `sak-${saksnummer}`,
+            queryFn: () => fetchSak(saksnummer),
+            staleTime: Infinity,
+        });
+
+        const { data: roller } = useQuery("roller", () => fetchAndMapPersonsToRoles(sak), {
+            staleTime: Infinity,
+            enabled: !!sak,
+        });
+
+        return { sak: sak, roller: roller };
+    };
+
     const getSkattegrunnlager = () => {
         const { data } = useInfiniteQuery({
             queryKey: "skattegrunlager",
@@ -75,7 +75,6 @@ export const useApiData = () => {
     };
 
     const api = {
-        getSak,
         getSkattegrunnlager,
         getSakAndRoller,
     };

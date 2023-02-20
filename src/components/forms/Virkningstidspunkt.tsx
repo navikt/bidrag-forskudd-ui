@@ -2,16 +2,18 @@ import { Button, Heading, Select, Textarea, TextField } from "@navikt/ds-react";
 import React, { useState } from "react";
 
 import { STEPS } from "../../constants/steps";
+import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { CommonFormProps } from "../../pages/forskudd/ForskuddPage";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 
-export default ({ setActiveStep }: CommonFormProps) => {
+export default () => {
+    const { setActiveStep } = useForskudd();
     const [mottatDato, setMottatDato] = useState<Date>(undefined);
     const [soktFraDato, setSoktFraDato] = useState<Date>(undefined);
     const [virkningstidspunktDato, setVirkningstidspunktDato] = useState<Date>(undefined);
-    const onNext = () => {
+    const onNext = (e) => {
+        e.preventDefault();
         setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
 

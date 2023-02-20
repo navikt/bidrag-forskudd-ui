@@ -11,16 +11,8 @@ import { useApiData } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 
-export interface CommonFormProps {
-    setActiveStep: (number) => void;
-}
-
-interface IForskuddPageProps {
-    saksnummer: string;
-}
-
-export const ForskuddPage = ({ saksnummer }: IForskuddPageProps) => {
-    const { activeStep, setActiveStep } = useForskudd();
+export const ForskuddPage = () => {
+    const { activeStep, setActiveStep, saksnummer } = useForskudd();
     const { api, networkError } = useApiData();
     const { sak, roller } = api.getSakAndRoller(saksnummer);
 
@@ -60,7 +52,7 @@ export const ForskuddPage = ({ saksnummer }: IForskuddPageProps) => {
                     <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
-                <FormWrapper setActiveStep={setActiveStep} activeStep={activeStep} />
+                <FormWrapper />
             </div>
         </PageWrapper>
     );
