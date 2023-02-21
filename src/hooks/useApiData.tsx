@@ -1,11 +1,11 @@
+import { AxiosResponse } from "axios";
 import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "react-query";
 
 import { BidragSakDto } from "../api/BidragSakApi";
 import { BIDRAG_GRUNNLAG_API, BIDRAG_SAK_API, PERSON_API } from "../constants/api";
-import { PERSON_IKKE_FINNES } from "../constants/error";
 import { getFullYear } from "../utils/date-utils";
-import { removePlaceholder } from "../utils/string-utils";
+import { mapPersonsToRoles } from "../utils/roles-utils";
 
 export const useApiData = () => {
     const [networkError, setNetworkError] = useState<string>(null);
@@ -15,26 +15,22 @@ export const useApiData = () => {
         return sak.data;
     };
 
-    const fetchPersons = async (sak: BidragSakDto) => {
-        const personPromises = sak.roller.map((rolle) =>
-            PERSON_API.informasjon.hentPersonPost({ ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer })
+    const fetchPersons = async (sak: BidragSakDto, signal: AbortSignal) =>
+        getDataFromPromises(createPersonPromises(sak, signal));
+
+    const getDataFromPromises = async (promises: Promise<AxiosResponse<any, any>>[]) =>
+        await Promise.all([...promises]).then((results) => results.map((result) => result.data));
+
+    const createPersonPromises = (sak: BidragSakDto, signal: AbortSignal) =>
+        sak.roller.map((rolle) =>
+            PERSON_API.informasjon.hentPersonPost(
+                { ident: rolle.fodselsnummer, verdi: rolle.fodselsnummer },
+                { signal }
+            )
         );
-        const [...personer] = await Promise.all([...personPromises]);
-        return personer;
-    };
 
-    const fetchAndMapPersonsToRoles = async (sak: BidragSakDto) => {
-        const personer = await fetchPersons(sak);
-        const roller = personer.map((person) => {
-            const rolle = sak.roller.find((rolle) => rolle.fodselsnummer === person.data.ident);
-            if (!rolle) throw new Error(removePlaceholder(PERSON_IKKE_FINNES, person.data.ident));
-            return { ...rolle, ...person.data };
-        });
-        return roller;
-    };
-
-    const fetchSkattegrunnlager = async (signal?: AbortSignal) => {
-        const skattegrunnlagDtoPromises = [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
+    const createSkattegrunnlagePromises = (signal: AbortSignal) =>
+        [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
             BIDRAG_GRUNNLAG_API.integrasjoner.hentSkattegrunnlag(
                 {
                     inntektsAar: year.toString(),
@@ -44,10 +40,9 @@ export const useApiData = () => {
                 { signal }
             )
         );
-        const [skattegrunnlag1, skattegrunnlag2, skattegrunnlag3] = await Promise.all([...skattegrunnlagDtoPromises]);
 
-        return [skattegrunnlag1.data, skattegrunnlag2.data, skattegrunnlag3.data];
-    };
+    const fetchSkattegrunnlager = async (signal: AbortSignal) =>
+        getDataFromPromises(createSkattegrunnlagePromises(signal));
 
     const getSakAndRoller = (saksnummer: string) => {
         const { data: sak } = useQuery({
@@ -56,18 +51,21 @@ export const useApiData = () => {
             staleTime: Infinity,
         });
 
-        const { data: roller } = useQuery("roller", () => fetchAndMapPersonsToRoles(sak), {
-            staleTime: Infinity,
-            enabled: !!sak,
-        });
+        const { data: roller } = useQuery(
+            "roller",
+            ({ signal }) => fetchPersons(sak, signal).then((personer) => mapPersonsToRoles(sak, personer)),
+            {
+                staleTime: Infinity,
+                enabled: !!sak,
+            }
+        );
 
         return { sak: sak, roller: roller };
     };
-
     const getSkattegrunnlager = () => {
         const { data } = useInfiniteQuery({
             queryKey: "skattegrunlager",
-            queryFn: () => fetchSkattegrunnlager(),
+            queryFn: ({ signal }) => fetchSkattegrunnlager(signal),
             staleTime: Infinity,
         });
 
