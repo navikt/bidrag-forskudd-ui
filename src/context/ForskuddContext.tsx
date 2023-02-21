@@ -2,6 +2,7 @@ import React, { createContext, PropsWithChildren, useCallback, useContext } from
 import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
+import { ForskuddStepper } from "../enum/ForskuddStepper";
 
 interface IForskuddContext {
     activeStep: string;
@@ -17,7 +18,7 @@ export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
 function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
-    const activeStep = searchParams.get("steg");
+    const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
 
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
