@@ -7,13 +7,17 @@ import {
     Heading,
     Label,
     Link,
+    Radio,
+    RadioGroup,
     ReadMore,
+    Select,
     Textarea,
     TextField,
 } from "@navikt/ds-react";
 import React from "react";
 
 import { useApiData } from "../../hooks/useApiData";
+import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { DatePickerModal } from "../date-picker/DatePickerModal";
 import { FlexRow } from "../layout/grid/FlexRow";
 
@@ -121,25 +125,35 @@ export default () => {
                 </Heading>
                 <FlexRow>
                     <div>
-                        <Label size="small">Fra og med</Label>
+                        <DatePickerInput
+                            label="Fra og med"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Til og med</Label>
+                        <DatePickerInput
+                            label="Til og med"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Arbeidsgiver/Nav</Label>
+                        <TextField label="Arbeidsgiver/Nav" size="small" />
                     </div>
                     <div>
-                        <Label size="small">Inntekt</Label>
+                        <TextField label="Inntekt" size="small" />
                     </div>
                     <div>
-                        <Label size="small">Tillegg</Label>
+                        <TextField label="Tillegg" size="small" />
                     </div>
                     <div>
-                        <Label size="small">Totalt</Label>
+                        <TextField label="Totalt" size="small" />
                     </div>
                     <div>
-                        <Label size="small">Beskrivelse</Label>
+                        <TextField label="Beskrivelse" size="small" />
                     </div>
                 </FlexRow>
             </div>
@@ -149,26 +163,68 @@ export default () => {
                 </Heading>
                 <FlexRow>
                     <div>
-                        <Label size="small">Periode</Label>
+                        <DatePickerInput
+                            label="Periode"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Delt bosted</Label>
+                        <DatePickerInput
+                            label=""
+                            className="mt-5"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Beløp</Label>
+                        <TextField label="Delt bosted" size="small" />
+                    </div>
+                    <div>
+                        <TextField label="Beløp" size="small" />
                     </div>
                 </FlexRow>
             </div>
             <div className="grid gap-y-4">
-                <Heading level="3" size="medium">
-                    Kontantstøtte (for hele året/ per barn)
-                </Heading>
+                <RadioGroup
+                    legend={
+                        <Heading level="3" size="medium">
+                            Kontantstøtte (for hele året/ per barn)
+                        </Heading>
+                    }
+                    onChange={(val: any) => console.log(val)}
+                    size="small"
+                >
+                    <div className="flex gap-x-4">
+                        <Radio value="true">Ja</Radio>
+                        <Radio value="false">Nei</Radio>
+                    </div>
+                </RadioGroup>
                 <FlexRow>
                     <div>
-                        <Label size="small">Periode</Label>
+                        <DatePickerInput
+                            label="Periode"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Barn</Label>
+                        <DatePickerInput
+                            label=""
+                            className="mt-5"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
+                    </div>
+                    <div>
+                        <Select label="Barn" className="w-52" size="small">
+                            <option value="barn_1">Barn 1</option>
+                            <option value="barn_2">Barn 2</option>
+                        </Select>
                     </div>
                 </FlexRow>
             </div>
@@ -178,22 +234,38 @@ export default () => {
                 </Heading>
                 <FlexRow>
                     <div>
-                        <Label size="small">Fra og med</Label>
+                        <DatePickerInput
+                            label="Fra og med"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Til og med</Label>
+                        <DatePickerInput
+                            label="Til og med"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Barn</Label>
+                        <Select label="Barn" className="w-52" size="small">
+                            <option value="barn_1">Barn 1</option>
+                            <option value="barn_2">Barn 2</option>
+                        </Select>
                     </div>
                     <div>
-                        <Label size="small">Barnetillegg (brutto)</Label>
+                        <Select label="Barnetillegg (brutto)" className="w-52" size="small">
+                            <option value="barnetillegg_1">Barnetillegg 1</option>
+                            <option value="barnetillegg_2">Barnetillegg 2</option>
+                        </Select>
                     </div>
                     <div>
-                        <Label size="small">Skattesats</Label>
+                        <TextField label="Skattesats" size="small" />
                     </div>
                     <div>
-                        <Label size="small">Barnetillegg (netto)</Label>
+                        <TextField label="Barnetillegg (netto)" size="small" />
                     </div>
                 </FlexRow>
             </div>
