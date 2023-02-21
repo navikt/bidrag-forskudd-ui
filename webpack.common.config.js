@@ -76,7 +76,7 @@ module.exports = {
             name: "bidrag_behandling_ui",
             filename: "remoteEntry.js",
             exposes: {
-                "./Forskudd": "./src/pages/forskudd/ForskuddPage.tsx",
+                "./Forskudd": "./src/Forskudd.tsx",
             },
             shared: {
                 react: { singleton: true, requiredVersion: deps.react },
