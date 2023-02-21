@@ -1,8 +1,9 @@
+import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
-import { SuccessStroke } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
 
+import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import { RolleType } from "../../enum/RolleType";
 import environment from "../../environment";
@@ -13,6 +14,7 @@ import { RolleTag } from "../RolleTag";
 export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
     const { sak } = useForskudd();
+    const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
     const rolle = {
         navn: "Mia  Cathrine Svendsen",
@@ -49,6 +51,17 @@ export default () => {
     ];
 
     const sendeVedtak = (): void => {
+        vedtakApi.vedtak
+            .opprettVedtak({
+                kilde: "MANUELT",
+                type: "INDEKSREGULERING",
+                opprettetAv: "",
+                vedtakTidspunkt: "",
+                enhetId: "",
+                grunnlagListe: [],
+            })
+            .then((r) => {})
+            .catch((e) => {});
         throw new Error("Function not implemented.");
     };
 
@@ -58,7 +71,7 @@ export default () => {
                 <Heading level="2" size="xlarge">
                     Fatte vedtak
                 </Heading>
-                <div>
+                {/* <div>
                     <SuccessStroke
                         width={"1.5rem"}
                         height={"1.5rem"}
@@ -68,7 +81,7 @@ export default () => {
                         style={{ display: "inline" }}
                     />
                     Totrinnskontroll: inntekt
-                </div>
+                </div> */}
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
