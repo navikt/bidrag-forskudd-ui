@@ -48,10 +48,10 @@ export default () => {
                             )}
                         />
                     </div>
-                    <div>
+                    <div className="flex gap-x-2">
                         <Label size="small">Gjennomsnitt Inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
                     </div>
-                    <div>
+                    <div className="flex gap-x-2">
                         <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
                     </div>
                     {data?.pages.map((skattegrunnlager) =>
