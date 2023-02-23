@@ -144,12 +144,6 @@ export default () => {
                         <TextField label="Arbeidsgiver/Nav" size="small" />
                     </div>
                     <div>
-                        <TextField label="Inntekt" size="small" />
-                    </div>
-                    <div>
-                        <TextField label="Tillegg" size="small" />
-                    </div>
-                    <div>
                         <TextField label="Totalt" size="small" />
                     </div>
                     <div>

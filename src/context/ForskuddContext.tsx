@@ -16,20 +16,24 @@ interface IForskuddContextProps {
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
-function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<IForskuddContextProps>) {
+function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
-
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
-    return (
-        <ForskuddContext.Provider value={{ saksnummer, activeStep, setActiveStep, ...props }}>
-            {children}
-        </ForskuddContext.Provider>
+    const value = React.useMemo(
+        () => ({
+            activeStep,
+            setActiveStep,
+            saksnummer,
+        }),
+        [activeStep, saksnummer]
     );
+
+    return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);
