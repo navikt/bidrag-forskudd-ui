@@ -3,13 +3,14 @@ import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
 
 interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     saksnummer: string;
-    virkningstidspunktFormValues: any;
-    setVirkningstidspunktFormValues: (values: any) => void;
+    virkningstidspunktFormValues: VirkningstidspunktFormValues;
+    setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
 }
 
 interface IForskuddContextProps {
