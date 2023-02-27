@@ -1,4 +1,4 @@
-import React, { createContext, PropsWithChildren, useCallback, useContext } from "react";
+import React, { createContext, PropsWithChildren, useCallback, useContext, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
@@ -8,6 +8,8 @@ interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     saksnummer: string;
+    virkningstidspunktFormValues: any;
+    setVirkningstidspunktFormValues: (values: any) => void;
 }
 
 interface IForskuddContextProps {
@@ -16,20 +18,27 @@ interface IForskuddContextProps {
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
-function ForskuddProvider({ saksnummer, children, ...props }: PropsWithChildren<IForskuddContextProps>) {
+function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
-
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
-    return (
-        <ForskuddContext.Provider value={{ saksnummer, activeStep, setActiveStep, ...props }}>
-            {children}
-        </ForskuddContext.Provider>
+    const value = React.useMemo(
+        () => ({
+            activeStep,
+            setActiveStep,
+            saksnummer,
+            virkningstidspunktFormValues,
+            setVirkningstidspunktFormValues,
+        }),
+        [activeStep, saksnummer, virkningstidspunktFormValues]
     );
+
+    return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);

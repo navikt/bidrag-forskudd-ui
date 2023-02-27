@@ -1,7 +1,8 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { Button, Heading, Label, Link, Textarea, TextField } from "@navikt/ds-react";
+import { Button, Checkbox, CheckboxGroup, Heading, Label, Link, Select, Textarea, TextField } from "@navikt/ds-react";
 import React from "react";
 
+import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FlexRow } from "../layout/grid/FlexRow";
 
 export default () => {
@@ -16,16 +17,47 @@ export default () => {
                 </Heading>
                 <FlexRow>
                     <div>
-                        <Label size="small">Periode</Label>
+                        <DatePickerInput
+                            label="Periode"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Bor ikke med foreldre</Label>
+                        <DatePickerInput
+                            label=""
+                            className="mt-5"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Registrert på adresse</Label>
+                        <CheckboxGroup
+                            legend="Bor ikke med foreldre"
+                            onChange={(val: any[]) => console.log(val)}
+                            size="small"
+                            className="flex justify-center"
+                        >
+                            <Checkbox value="true">{""}</Checkbox>
+                        </CheckboxGroup>
                     </div>
                     <div>
-                        <Label size="small">Kilde</Label>
+                        <CheckboxGroup
+                            legend="Registrert på adresse"
+                            onChange={(val: any[]) => console.log(val)}
+                            size="small"
+                            className="flex justify-center"
+                        >
+                            <Checkbox value="true">{""}</Checkbox>
+                        </CheckboxGroup>
+                    </div>
+                    <div>
+                        <Select label="Kilde" className="w-52" size="small">
+                            <option value="offentlig">Offentlig</option>
+                            <option value="manuelt">Manuelt</option>
+                        </Select>
                     </div>
                 </FlexRow>
             </div>
@@ -43,13 +75,37 @@ export default () => {
                 </FlexRow>
                 <FlexRow>
                     <div>
-                        <Label size="small">Periode</Label>
+                        <DatePickerInput
+                            label="Periode"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Registrert på adresse</Label>
+                        <DatePickerInput
+                            label=""
+                            className="mt-5"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Kilde</Label>
+                        <CheckboxGroup
+                            legend="Registrert på adresse"
+                            onChange={(val: any[]) => console.log(val)}
+                            size="small"
+                            className="flex justify-center"
+                        >
+                            <Checkbox value="true">{""}</Checkbox>
+                        </CheckboxGroup>
+                    </div>
+                    <div>
+                        <Select label="Kilde" className="w-52" size="small">
+                            <option value="offentlig">Offentlig</option>
+                            <option value="manuelt">Manuelt</option>
+                        </Select>
                     </div>
                 </FlexRow>
             </div>
@@ -59,10 +115,27 @@ export default () => {
                 </Heading>
                 <FlexRow>
                     <div>
-                        <Label size="small">Periode</Label>
+                        <DatePickerInput
+                            label="Periode"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
                     </div>
                     <div>
-                        <Label size="small">Sivilstand</Label>
+                        <DatePickerInput
+                            label=""
+                            className="mt-5"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            defaultSelected={undefined}
+                            onChange={(selectedDay) => console.log(selectedDay)}
+                        />
+                    </div>
+                    <div>
+                        <Select label="Sivilstand" className="w-52" size="small">
+                            <option value="ugift">Ugift</option>
+                            <option value="gift">Gift</option>
+                        </Select>
                     </div>
                 </FlexRow>
             </div>

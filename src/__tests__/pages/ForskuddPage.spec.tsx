@@ -12,7 +12,13 @@ import { ForskuddProvider } from "../../context/ForskuddContext";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
 import { sinonSandbox } from "../resources/mocha.init";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            suspense: true,
+        },
+    },
+});
 const renderWithRouter = (ui, { route = "/" } = {}) => {
     window.history.pushState({}, "Test page", route);
 
@@ -33,6 +39,9 @@ describe("ForskuddPage", () => {
             </QueryClientProvider>,
             { route: "/1234?steg=virkningstidspunkt" }
         );
-        await waitFor(() => expect(document.querySelector("button")).not.to.be.null);
+        await waitFor(() => {
+            const activeStepButton = document.querySelector(".navds-stepper__step--active");
+            expect(activeStepButton.innerHTML).includes("Virkningstidspunkt");
+        });
     });
 });
