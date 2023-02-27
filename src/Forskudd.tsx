@@ -7,7 +7,13 @@ import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            suspense: true,
+        },
+    },
+});
 
 // TODO: move initMock() to app.tsx once backend is ready
 initMock();

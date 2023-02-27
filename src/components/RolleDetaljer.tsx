@@ -12,7 +12,7 @@ export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: IRolleUi; w
             } flex items-center`}
         >
             <RolleTag rolleType={rolle.type} />
-            <span className="w-64">{rolle.navn}</span>
+            <span>{rolle.navn}</span>
             <span className="mx-4">/</span> {rolle.fodselsnummer}
             <CopyToClipboard size="small" copyText={rolle.fodselsnummer} popoverText="Kopierte fødselsnummeret" />
         </div>

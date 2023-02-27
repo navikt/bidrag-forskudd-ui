@@ -10,7 +10,7 @@ export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
     const { sak, roller } = api.getSakAndRoller(saksnummer);
 
     return (
-        <div className="bg-[var(--a-gray-50)]">
+        <div className="bg-[var(--a-gray-50)] border-[var(--a-border-divider)] border-solid border-b">
             <Heading
                 level="1"
                 size="xlarge"
@@ -22,9 +22,11 @@ export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
                     <CopyToClipboard size="small" copyText={sak?.saksnummer} popoverText="Kopierte saksnummer" />
                 </span>
             </Heading>
-            {roller?.map((rolle, i) => (
-                <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} />
-            ))}
+            <div className="grid grid-cols-[max-content_auto]">
+                {roller?.map((rolle, i) => (
+                    <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} withBorder={false} />
+                ))}
+            </div>
         </div>
     );
 });
