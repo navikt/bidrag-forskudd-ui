@@ -10,10 +10,8 @@
  */
 
 export interface PersonRequest {
-    /** Identen til personen @Deprecated */
-    ident?: string;
     /** Identen til personen */
-    verdi: string;
+    ident: string;
 }
 
 /** Liste over alle hentede forekomster av sivilstand */
@@ -131,25 +129,11 @@ export interface HusstandsmedlemmerDto {
     husstandListe?: Husstand[];
 }
 
-export interface PersonIdent {
-    verdi: string;
-    erDNummer: boolean;
-    erNAVSyntetisk: boolean;
-    erSkattSyntetisk: boolean;
-    /** @format date */
-    fødselsdato: string;
-}
-
 export interface Graderingsinfo {
     /** Map med ident til gradering. */
     identerTilGradering: Record<string, "STRENGT_FORTROLIG" | "FORTROLIG" | "STRENGT_FORTROLIG_UTLAND" | "UGRADERT">;
     /** Hvor vidt hovedident fra GraderingQuery er skjerment. */
     identerTilSkjerming: Record<string, boolean>;
-}
-
-export interface Fodselsdatoer {
-    /** Map med ident til fødselsdato-elementer. */
-    identerTilDatoer: Record<string, string>;
 }
 
 export interface GeografiskTilknytningDto {
@@ -175,6 +159,11 @@ export interface ForelderBarnRelasjon {
 export interface ForelderBarnRelasjonDto {
     /** Liste over alle hentede forekomster av foreldre-barnrelasjoner */
     forelderBarnRelasjon?: ForelderBarnRelasjon[];
+}
+
+export interface Fodselsdatoer {
+    /** Map med ident til fødselsdato-elementer. */
+    identerTilDatoer: Record<string, string>;
 }
 
 export interface PersonAdresseDto {
@@ -536,44 +525,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 ...params,
             }),
     };
-    hentGraderingsinfo = {
-        /**
-         * @description Hent graderingsinfo for en liste med personer
-         *
-         * @tags person-controller-kt
-         * @name HentGraderingsinfo
-         * @request POST:/hentGraderingsinfo
-         * @secure
-         */
-        hentGraderingsinfo: (data: PersonIdent[], params: RequestParams = {}) =>
-            this.request<Graderingsinfo, any>({
-                path: `/hentGraderingsinfo`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                ...params,
-            }),
-    };
-    hentFodselsdatoer = {
-        /**
-         * @description Hent fødselsdatoer for en liste med personer
-         *
-         * @tags person-controller-kt
-         * @name HentFodselsdatoerV2
-         * @request POST:/hentFodselsdatoer
-         * @secure
-         */
-        hentFodselsdatoerV2: (data: PersonIdent[], params: RequestParams = {}) =>
-            this.request<Fodselsdatoer, any>({
-                path: `/hentFodselsdatoer`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                ...params,
-            }),
-    };
     graderingsinfo = {
         /**
          * @description Hent graderingsinfo for en liste med personer
@@ -581,7 +532,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags person-controller-kt
          * @name HentGraderinger
          * @request POST:/graderingsinfo
-         * @deprecated
          * @secure
          */
         hentGraderinger: (data: string[], params: RequestParams = {}) =>
@@ -673,7 +623,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags person-controller-kt
          * @name HentFodselsdatoer
          * @request POST:/fodselsdatoer
-         * @deprecated
          * @secure
          */
         hentFodselsdatoer: (data: string[], params: RequestParams = {}) =>

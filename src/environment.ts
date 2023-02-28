@@ -8,7 +8,9 @@ const system = {
 const url = {
     bidragPerson: process.env.BIDRAG_PERSON_URL,
     bidragSak: process.env.BIDRAG_SAK_URL,
+    bidragBehandling: process.env.BIDRAG_BEHANDLING_URL,
     bidragGrunnlag: process.env.BIDRAG_GRUNNLAG_URL,
+    bidragVedtak: process.env.BIDRAG_VEDTAK_URL,
     bisys: process.env.BISYS_URL,
 };
 
