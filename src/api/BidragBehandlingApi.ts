@@ -9,75 +9,60 @@
  * ---------------------------------------------------------------
  */
 
-export interface AbstractJsonSchemaPropertyObject {
-    title?: string;
-    readOnly?: boolean;
+export interface CreateBehandlingRequest {
+    behandlingType: "FORSKUDD";
+    soknadType:
+        | "ENDRING"
+        | "EGET_TILTAK"
+        | "SOKNAD"
+        | "INNKREVET_GRUNNLAG"
+        | "INDEKSREGULERING"
+        | "KLAGE_BEGR_SATS"
+        | "KLAGE"
+        | "FOLGER_KLAGE"
+        | "KORRIGERING"
+        | "KONVERTERING"
+        | "OPPHOR"
+        | "PRIVAT_AVTALE"
+        | "BEGR_REVURD"
+        | "REVURDERING"
+        | "KONVERTERT"
+        | "MANEDLIG_PALOP";
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    saksnummer: string;
+    behandlerEnhet: string;
 }
 
-export interface Item {
-    type?: string;
-    properties?: Record<string, AbstractJsonSchemaPropertyObject>;
-    requiredProperties?: string[];
-}
-
-export interface JsonSchema {
-    title?: string;
-    description?: string;
-    properties?: Record<string, AbstractJsonSchemaPropertyObject>;
-    requiredProperties?: string[];
-    definitions?: Record<string, Item>;
-    type?: string;
-    $schema?: string;
-}
-
-export type Links = Record<string, Link>;
-
-export interface RepresentationModelObject {
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelBehandlingData {
-    _embedded?: {
-        behandlingDatas?: EntityModelBehandlingData[];
-    };
-    _links?: Links;
-}
-
-export interface EntityModelBehandlingData {
-    fri_text?: string;
-    _links?: Links;
-}
-
-export interface BehandlingDataRequestBody {
+export interface Behandling {
     /** @format int64 */
     id?: number;
-    fri_text?: string;
-}
-
-export interface PersonIdent {
-    verdi: string;
-    erDNummer: boolean;
-    erNAVSyntetisk: boolean;
-    erSkattSyntetisk: boolean;
-    /** @format date */
-    fødselsdato: string;
-}
-
-export interface HentPersonResponse {
-    ident: string;
-    navn: string;
-    aktoerId: string;
-}
-
-export interface Link {
-    href?: string;
-    hreflang?: string;
-    title?: string;
-    type?: string;
-    deprecation?: string;
-    profile?: string;
-    name?: string;
-    templated?: boolean;
+    behandlingType: "FORSKUDD";
+    soknadType:
+        | "ENDRING"
+        | "EGET_TILTAK"
+        | "SOKNAD"
+        | "INNKREVET_GRUNNLAG"
+        | "INDEKSREGULERING"
+        | "KLAGE_BEGR_SATS"
+        | "KLAGE"
+        | "FOLGER_KLAGE"
+        | "KORRIGERING"
+        | "KONVERTERING"
+        | "OPPHOR"
+        | "PRIVAT_AVTALE"
+        | "BEGR_REVURD"
+        | "REVURDERING"
+        | "KONVERTERT"
+        | "MANEDLIG_PALOP";
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    saksnummer: string;
+    behandlerEnhet: string;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -219,194 +204,54 @@ export class HttpClient<SecurityDataType = unknown> {
  * @baseUrl https://bidrag-behandling-feature.dev.intern.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-    behandlingDatas = {
+    behandling = {
         /**
-         * @description get-behandlingdata
+         * @description Henter en behandlinger
          *
-         * @tags behandling-data-entity-controller
-         * @name GetCollectionResourceBehandlingdataGet1
-         * @request GET:/behandlingDatas
+         * @tags behandlig-controller
+         * @name HentBehandlinger
+         * @request GET:/behandling
          * @secure
          */
-        getCollectionResourceBehandlingdataGet1: (params: RequestParams = {}) =>
-            this.request<CollectionModelEntityModelBehandlingData, any>({
-                path: `/behandlingDatas`,
+        hentBehandlinger: (params: RequestParams = {}) =>
+            this.request<Behandling[], Behandling[]>({
+                path: `/behandling`,
                 method: "GET",
                 secure: true,
-                format: "json",
                 ...params,
             }),
 
         /**
-         * @description create-behandlingdata
+         * @description Legger til en ny behandling
          *
-         * @tags behandling-data-entity-controller
-         * @name PostCollectionResourceBehandlingdataPost
-         * @request POST:/behandlingDatas
+         * @tags behandlig-controller
+         * @name CreateBehandling
+         * @request POST:/behandling
          * @secure
          */
-        postCollectionResourceBehandlingdataPost: (data: BehandlingDataRequestBody, params: RequestParams = {}) =>
-            this.request<EntityModelBehandlingData, any>({
-                path: `/behandlingDatas`,
+        createBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
+            this.request<Behandling, Behandling>({
+                path: `/behandling`,
                 method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
-                format: "json",
                 ...params,
             }),
 
         /**
-         * No description
+         * @description Henter en behandling
          *
-         * @tags behandling-data-search-controller
-         * @name ExecuteSearchBehandlingdataGet
-         * @request GET:/behandlingDatas/search/hentBidrgaDataById
+         * @tags behandlig-controller
+         * @name HentBehandling
+         * @request GET:/behandling/{behandlingId}
          * @secure
          */
-        executeSearchBehandlingdataGet: (
-            query?: {
-                /** @format int64 */
-                id?: number;
-            },
-            params: RequestParams = {}
-        ) =>
-            this.request<CollectionModelEntityModelBehandlingData, void>({
-                path: `/behandlingDatas/search/hentBidrgaDataById`,
-                method: "GET",
-                query: query,
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description get-behandlingdata
-         *
-         * @tags behandling-data-entity-controller
-         * @name GetItemResourceBehandlingdataGet
-         * @request GET:/behandlingDatas/{id}
-         * @secure
-         */
-        getItemResourceBehandlingdataGet: (id: string, params: RequestParams = {}) =>
-            this.request<EntityModelBehandlingData, void>({
-                path: `/behandlingDatas/${id}`,
+        hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<Behandling, Behandling>({
+                path: `/behandling/${behandlingId}`,
                 method: "GET",
                 secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description update-behandlingdata
-         *
-         * @tags behandling-data-entity-controller
-         * @name PutItemResourceBehandlingdataPut
-         * @request PUT:/behandlingDatas/{id}
-         * @secure
-         */
-        putItemResourceBehandlingdataPut: (id: string, data: BehandlingDataRequestBody, params: RequestParams = {}) =>
-            this.request<EntityModelBehandlingData, any>({
-                path: `/behandlingDatas/${id}`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description delete-behandlingdata
-         *
-         * @tags behandling-data-entity-controller
-         * @name DeleteItemResourceBehandlingdataDelete
-         * @request DELETE:/behandlingDatas/{id}
-         * @secure
-         */
-        deleteItemResourceBehandlingdataDelete: (id: string, params: RequestParams = {}) =>
-            this.request<void, void>({
-                path: `/behandlingDatas/${id}`,
-                method: "DELETE",
-                secure: true,
-                ...params,
-            }),
-
-        /**
-         * @description patch-behandlingdata
-         *
-         * @tags behandling-data-entity-controller
-         * @name PatchItemResourceBehandlingdataPatch
-         * @request PATCH:/behandlingDatas/{id}
-         * @secure
-         */
-        patchItemResourceBehandlingdataPatch: (
-            id: string,
-            data: BehandlingDataRequestBody,
-            params: RequestParams = {}
-        ) =>
-            this.request<EntityModelBehandlingData, any>({
-                path: `/behandlingDatas/${id}`,
-                method: "PATCH",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-    };
-    profile = {
-        /**
-         * No description
-         *
-         * @tags profile-controller
-         * @name ListAllFormsOfMetadata1
-         * @request GET:/profile
-         * @secure
-         */
-        listAllFormsOfMetadata1: (params: RequestParams = {}) =>
-            this.request<RepresentationModelObject, any>({
-                path: `/profile`,
-                method: "GET",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags profile-controller
-         * @name Descriptor111
-         * @request GET:/profile/behandlingDatas
-         * @secure
-         */
-        descriptor111: (params: RequestParams = {}) =>
-            this.request<string, any>({
-                path: `/profile/behandlingDatas`,
-                method: "GET",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-    };
-    person = {
-        /**
-         * @description Henter person data
-         *
-         * @tags example-controller
-         * @name HentDialog
-         * @request POST:/person
-         * @secure
-         */
-        hentDialog: (data: PersonIdent, params: RequestParams = {}) =>
-            this.request<HentPersonResponse, HentPersonResponse>({
-                path: `/person`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
                 ...params,
             }),
     };
