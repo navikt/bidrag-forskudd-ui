@@ -1,7 +1,9 @@
 import { behandlingData } from "../testdata/behandlingTestData";
+import { inntektData } from "../testdata/inntektTestData";
 
 export const initMockData = () => {
     sessionStorage.setItem(`behandling-1234`, JSON.stringify(behandlingData()));
+    sessionStorage.setItem(`inntekt-1234`, JSON.stringify(inntektData()));
 
     // setInterval(
     //     () =>

@@ -1,9 +1,10 @@
+import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { RolleType } from "../../enum/RolleType";
-import { SoknadsType } from "./kodeverk";
+import { SoknadsType } from "../../enum/SoknadsTypes";
 
 export interface BehandlingData {
     soknadType: SoknadsType;
-    soknadFra: string;
+    soknadFra: RolleType;
     soktFraDato: string;
     mottatDato: string;
     enhet: {
@@ -11,10 +12,10 @@ export interface BehandlingData {
         navn: string;
     };
     virkningstidspunkt: string;
-    aarsak: string;
+    aarsak: ForskuddBeregningKodeAarsak;
     avslag: string;
-    vedtakNotat: string;
-    notat: string;
+    begrunnelseMedIVedtakNotat: string;
+    begrunnelseKunINotat: string;
 }
 export const behandlingData = (data = {}) => {
     const initialData = {
@@ -27,10 +28,10 @@ export const behandlingData = (data = {}) => {
             navn: "",
         },
         virkningstidspunkt: mockDates[0],
-        aarsak: "NF",
+        aarsak: Object.keys(ForskuddBeregningKodeAarsak)[2],
         avslag: "avslag_2",
-        vedtakNotat: "Some vedtak notat ",
-        notat: "Some not vedtak notat",
+        begrunnelseMedIVedtakNotat: "Some vedtak notat ",
+        begrunnelseKunINotat: "Some not vedtak notat",
     };
     return {
         ...initialData,

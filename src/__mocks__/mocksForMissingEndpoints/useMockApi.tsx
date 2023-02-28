@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { BehandlingData } from "../testdata/behandlingTestData";
+import { InntektData } from "../testdata/inntektTestData";
 
 export const useMockApi = () => {
     const queryClient = useQueryClient();
@@ -31,9 +32,17 @@ export const useMockApi = () => {
             },
         });
 
+    const getInntektData = (saksnummer: string) =>
+        useQuery({
+            queryKey: `inntekt-${saksnummer}`,
+            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(sessionStorage.getItem(`inntekt-${saksnummer}`))),
+            staleTime: Infinity,
+        });
+
     const api = {
         getBehandlingData,
         postBehandlingData,
+        getInntektData,
     };
 
     return { api, networkError };

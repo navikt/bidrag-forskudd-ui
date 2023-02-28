@@ -1,7 +1,9 @@
+import { ForskuddBeregningKodeAarsak } from "../enum/ForskuddBeregningKodeAarsak";
+
 export interface VirkningstidspunktFormValues {
     virkningstidspunkt?: Date;
-    aarsak: string;
+    aarsak: ForskuddBeregningKodeAarsak;
     avslag: string;
-    vedtakNotat: string;
-    notat: string;
+    begrunnelseMedIVedtakNotat: string;
+    begrunnelseKunINotat: string;
 }

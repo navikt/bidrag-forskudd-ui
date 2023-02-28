@@ -21,8 +21,8 @@ const createInitialValues = (behandling) =>
         virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : undefined,
         aarsak: behandling.aarsak ?? "",
         avslag: behandling.avslag ?? "",
-        vedtakNotat: behandling.vedtakNotat ?? "",
-        notat: behandling.notat ?? "",
+        begrunnelseMedIVedtakNotat: behandling.begrunnelseMedIVedtakNotat ?? "",
+        begrunnelseKunINotat: behandling.begrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
 
 export default () => {
@@ -177,7 +177,7 @@ const VirkningstidspunktForm = ({
                     </FlexRow>
                     <Controller
                         control={control}
-                        name="vedtakNotat"
+                        name="begrunnelseMedIVedtakNotat"
                         render={({ field }) => (
                             <Textarea
                                 label="Begrunnelse (med i vedtaket og notat)"
@@ -189,7 +189,7 @@ const VirkningstidspunktForm = ({
                     />
                     <Controller
                         control={control}
-                        name="notat"
+                        name="begrunnelseKunINotat"
                         render={({ field }) => (
                             <TextField
                                 label="Begrunnelse (kun med i notat)"
