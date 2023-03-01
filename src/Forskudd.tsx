@@ -2,6 +2,7 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
+import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { initMock } from "./__mocks__/msw";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ForskuddProvider } from "./context/ForskuddContext";
@@ -17,6 +18,7 @@ const queryClient = new QueryClient({
 
 // TODO: move initMock() to app.tsx once backend is ready
 initMock();
+initMockData();
 export default function Forskudd() {
     return (
         <BrowserRouter>
@@ -30,6 +32,7 @@ export default function Forskudd() {
 
 function ForskudWrapper() {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
+
     return (
         <QueryClientProvider client={queryClient}>
             <ForskuddHeader saksnummer={saksnummer} />

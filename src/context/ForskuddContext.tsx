@@ -3,13 +3,16 @@ import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
 
 interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     saksnummer: string;
-    virkningstidspunktFormValues: any;
-    setVirkningstidspunktFormValues: (values: any) => void;
+    virkningstidspunktFormValues: VirkningstidspunktFormValues;
+    setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
+    inntektFormValues: any;
+    setInntektFormValues: (values: any) => void;
 }
 
 interface IForskuddContextProps {
@@ -21,6 +24,7 @@ export const ForskuddContext = createContext<IForskuddContext | null>(null);
 function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
+    const [inntektFormValues, setInntektFormValues] = useState(undefined);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
@@ -34,8 +38,10 @@ function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddC
             saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,
+            inntektFormValues,
+            setInntektFormValues,
         }),
-        [activeStep, saksnummer, virkningstidspunktFormValues]
+        [activeStep, saksnummer, virkningstidspunktFormValues, inntektFormValues]
     );
 
     return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;

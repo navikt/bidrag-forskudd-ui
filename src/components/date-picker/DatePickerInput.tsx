@@ -8,7 +8,7 @@ interface DatePickerModalProps {
     placeholder?: string;
     hideLabel?: boolean;
     className?: string;
-    defaultValue?: string;
+    defaultValue?: Date;
 }
 
 export const DatePickerInput = ({
@@ -25,11 +25,11 @@ export const DatePickerInput = ({
             onChange(date);
         },
         fromDate,
-        defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
+        defaultSelected: defaultValue,
     });
 
     useEffect(() => {
-        if (defaultValue) setSelected(new Date(defaultValue));
+        if (defaultValue) setSelected(defaultValue);
     }, [defaultValue]);
 
     return (

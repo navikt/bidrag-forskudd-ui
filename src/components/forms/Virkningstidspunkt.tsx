@@ -1,39 +1,62 @@
 import { ExternalLink } from "@navikt/ds-icons";
 import { BodyShort, Button, Heading, Label, Link, Loader, Select, Textarea, TextField } from "@navikt/ds-react";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { UseMutationResult } from "react-query";
+import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { BehandlingData } from "../../__mocks__/testdata/behandlingTestData";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { ActionStatus } from "../../types/actionStatus";
+import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FlexRow } from "../layout/grid/FlexRow";
 
-const createInitialValues = (behandling) => ({
-    virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : undefined,
-    aarsak: behandling.aarsak ?? "",
-    avslag: behandling.avslag ?? "",
-    vedtakNotat: behandling.vedtakNotat ?? "",
-    notat: behandling.notat ?? "",
-});
+const createInitialValues = (behandling) =>
+    ({
+        virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : undefined,
+        aarsak: behandling.aarsak ?? "",
+        avslag: behandling.avslag ?? "",
+        begrunnelseMedIVedtakNotat: behandling.begrunnelseMedIVedtakNotat ?? "",
+        begrunnelseKunINotat: behandling.begrunnelseKunINotat ?? "",
+    } as VirkningstidspunktFormValues);
 
 export default () => {
     const { saksnummer } = useForskudd();
     const { api } = useMockApi();
     const { data: behandling, refetch, isRefetching } = api.getBehandlingData(saksnummer);
+    const mutation = api.postBehandlingData(saksnummer);
 
     return (
         <Suspense fallback={<Loader size="3xlarge" title="venter..." />}>
-            <VirkningstidspunktForm behandling={behandling} refetch={refetch} isRefetching={isRefetching} />
+            <VirkningstidspunktForm
+                behandling={behandling}
+                refetch={refetch}
+                isRefetching={isRefetching}
+                mutation={mutation}
+            />
         </Suspense>
     );
 };
 
-const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
+const VirkningstidspunktForm = ({
+    behandling,
+    refetch,
+    isRefetching,
+    mutation,
+}: {
+    behandling: BehandlingData;
+    refetch: () => Promise<QueryObserverResult>;
+    isRefetching: boolean;
+    mutation: UseMutationResult;
+}) => {
     const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep } = useForskudd();
     const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
+    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
 
     const {
         handleSubmit,
@@ -60,8 +83,20 @@ const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
         setVirkningstidspunktFormValues(values);
     };
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSave = async () => {
+        setAction(ActionStatus.SAVING);
+        await save();
+    };
+
+    const save = async () => {
+        await mutation.mutateAsync({ ...behandling, ...getValues() });
+        setVirkningstidspunktFormValues(getValues());
+        setAction(ActionStatus.IDLE);
+    };
+
+    const onSubmit = async () => {
+        setAction(ActionStatus.SUBMITTING);
+        await save();
         setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
 
@@ -142,7 +177,7 @@ const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
                     </FlexRow>
                     <Controller
                         control={control}
-                        name="vedtakNotat"
+                        name="begrunnelseMedIVedtakNotat"
                         render={({ field }) => (
                             <Textarea
                                 label="Begrunnelse (med i vedtaket og notat)"
@@ -154,7 +189,7 @@ const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
                     />
                     <Controller
                         control={control}
-                        name="notat"
+                        name="begrunnelseKunINotat"
                         render={({ field }) => (
                             <TextField
                                 label="Begrunnelse (kun med i notat)"
@@ -165,7 +200,7 @@ const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
                         )}
                     />
                     <FlexRow>
-                        <Button loading={false} className="w-max" size="small">
+                        <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
                             Gå videre
                         </Button>
                         <Button
@@ -180,9 +215,9 @@ const VirkningstidspunktForm = ({ behandling, refetch, isRefetching }) => {
                         </Button>
                         <Button
                             type="button"
-                            loading={false}
+                            loading={action === ActionStatus.SAVING}
                             variant="secondary"
-                            onClick={() => {}}
+                            onClick={onSave}
                             className="w-max"
                             size="small"
                         >
