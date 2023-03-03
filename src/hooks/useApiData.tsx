@@ -1,10 +1,9 @@
 import { AxiosResponse } from "axios";
 import { useState } from "react";
-import { useInfiniteQuery, useQuery } from "react-query";
+import { useQuery } from "react-query";
 
 import { BidragSakDto } from "../api/BidragSakApi";
-import { BIDRAG_GRUNNLAG_API, BIDRAG_SAK_API, PERSON_API } from "../constants/api";
-import { getFullYear } from "../utils/date-utils";
+import { BIDRAG_SAK_API, PERSON_API } from "../constants/api";
 import { mapPersonsToRoles } from "../utils/roles-utils";
 
 export const useApiData = () => {
@@ -29,21 +28,6 @@ export const useApiData = () => {
             )
         );
 
-    const createSkattegrunnlagePromises = (signal: AbortSignal) =>
-        [getFullYear() - 1, getFullYear() - 2, getFullYear() - 3].map((year) =>
-            BIDRAG_GRUNNLAG_API.integrasjoner.hentSkattegrunnlag(
-                {
-                    inntektsAar: year.toString(),
-                    inntektsFilter: "",
-                    personId: "123",
-                },
-                { signal }
-            )
-        );
-
-    const fetchSkattegrunnlager = async (signal: AbortSignal) =>
-        getDataFromPromises(createSkattegrunnlagePromises(signal));
-
     const getSakAndRoller = (saksnummer: string) => {
         const { data: sak } = useQuery({
             queryKey: `sak-${saksnummer}`,
@@ -62,18 +46,8 @@ export const useApiData = () => {
 
         return { sak: sak, roller: roller };
     };
-    const getSkattegrunnlager = () => {
-        const { data } = useInfiniteQuery({
-            queryKey: "skattegrunlager",
-            queryFn: ({ signal }) => fetchSkattegrunnlager(signal),
-            staleTime: Infinity,
-        });
-
-        return { data };
-    };
 
     const api = {
-        getSkattegrunnlager,
         getSakAndRoller,
     };
 

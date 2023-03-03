@@ -4,7 +4,7 @@ import React, { lazy, memo, Suspense } from "react";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 const Boforhold = lazy(() => import("./Boforhold"));
-const Inntekt = lazy(() => import("./Inntekt"));
+const Inntekt = lazy(() => import("./inntekt/Inntekt"));
 const Vedtak = lazy(() => import("./Vedtak"));
 const Virkningstidspunkt = lazy(() => import("./Virkningstidspunkt"));
 
@@ -27,7 +27,13 @@ export default function FormWrapper() {
     const { activeStep } = useForskudd();
 
     return (
-        <Suspense fallback={<Loader size="3xlarge" title="venter..." />}>
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." />
+                </div>
+            }
+        >
             <ForskuddForm activeStep={activeStep} />
         </Suspense>
     );

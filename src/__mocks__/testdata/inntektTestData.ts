@@ -1,5 +1,5 @@
-type Nullable<T> = T | null;
-type MaybeList<T> = T[] | [];
+export type Nullable<T> = T | null;
+export type MaybeList<T> = T[] | [];
 export interface Periode {
     fraDato: string;
     tilDato: string;
@@ -11,12 +11,12 @@ export interface AndreInntekter {
     tekniskNavn: string;
     selected: boolean;
 }
-interface GjennomsnittInntekt {
+export interface GjennomsnittInntekt {
     aarsInntekt: number;
     maanedInntekt: number;
 }
 
-interface InntektSomLeggesTilGrunn {
+export interface InntektSomLeggesTilGrunn {
     fraDato: string;
     tilDato: string;
     arbeidsgiver: string;
@@ -29,16 +29,18 @@ interface Barn {
     navn: string;
 }
 
-interface BarneTilleg {
-    periode: Nullable<Periode>;
+export interface BarneTilleg {
+    fraDato: string;
+    tilDato: string;
     barn: Barn;
     brutto: number;
     skattesats: number;
     netto: number;
 }
 
-interface UtvidetBarnetrygd {
-    periode: Nullable<Partial<Periode>>;
+export interface UtvidetBarnetrygd {
+    fraDato: string;
+    tilDato: string;
     deltBosted: boolean;
     beloep: number;
 }
@@ -52,6 +54,7 @@ export interface InntektData {
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
     begrunnelseIVedtaket: string;
     begrunnelseINotat: string;
+    toTrinnsKontroll: boolean;
 }
 export const inntektData = (data = {}) => {
     const initialData = {
@@ -94,6 +97,7 @@ export const inntektData = (data = {}) => {
         utvidetBarnetrygd: [],
         begrunnelseIVedtaket: "",
         begrunnelseINotat: "",
+        toTrinnsKontroll: false,
     } as InntektData;
 
     return {

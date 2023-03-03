@@ -1,5 +1,5 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { BodyShort, Button, Heading, Label, Link, Loader, Select, Textarea, TextField } from "@navikt/ds-react";
+import { BodyShort, Button, Heading, Label, Link, Loader, Select, Textarea } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { UseMutationResult } from "react-query";
@@ -32,7 +32,13 @@ export default () => {
     const mutation = api.postBehandlingData(saksnummer);
 
     return (
-        <Suspense fallback={<Loader size="3xlarge" title="venter..." />}>
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." />
+                </div>
+            }
+        >
             <VirkningstidspunktForm
                 behandling={behandling}
                 refetch={refetch}
@@ -79,8 +85,8 @@ const VirkningstidspunktForm = ({
     const onRefetch = async () => {
         const { data } = await refetch();
         const values = createInitialValues(data);
-        reset(values);
         setVirkningstidspunktFormValues(values);
+        reset(values);
     };
 
     const onSave = async () => {
@@ -89,8 +95,9 @@ const VirkningstidspunktForm = ({
     };
 
     const save = async () => {
-        await mutation.mutateAsync({ ...behandling, ...getValues() });
-        setVirkningstidspunktFormValues(getValues());
+        const values = getValues();
+        setVirkningstidspunktFormValues(values);
+        await mutation.mutateAsync({ ...behandling, ...values });
         setAction(ActionStatus.IDLE);
     };
 
@@ -191,7 +198,7 @@ const VirkningstidspunktForm = ({
                         control={control}
                         name="begrunnelseKunINotat"
                         render={({ field }) => (
-                            <TextField
+                            <Textarea
                                 label="Begrunnelse (kun med i notat)"
                                 size="small"
                                 value={field.value}

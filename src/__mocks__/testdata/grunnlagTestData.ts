@@ -7,13 +7,45 @@ const randomSalary = () => {
     return Math.round(min + Math.random() * (max - min));
 };
 
-export const createSkattegrunnlag = (year: string) =>
-    ({
-        grunnlag: [
-            {
-                beloep: randomSalary().toString(),
-                tekniskNavn: "test",
-            },
-        ],
-        skatteoppgjoersdato: year,
-    } as HentSkattegrunnlagResponse);
+export const createSkattegrunnlag = () =>
+    [
+        {
+            grunnlag: [
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Skattegrunnlag",
+                },
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Lønns og trekkoppgave",
+                },
+            ],
+            skatteoppgjoersdato: "2022",
+        },
+        {
+            grunnlag: [
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Skattegrunnlag",
+                },
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Lønns og trekkoppgave",
+                },
+            ],
+            skatteoppgjoersdato: "2021",
+        },
+        {
+            grunnlag: [
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Skattegrunnlag",
+                },
+                {
+                    beloep: randomSalary().toString(),
+                    tekniskNavn: "Lønns og trekkoppgave",
+                },
+            ],
+            skatteoppgjoersdato: "2020",
+        },
+    ] as HentSkattegrunnlagResponse[];

@@ -1,9 +1,13 @@
+import { arbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { behandlingData } from "../testdata/behandlingTestData";
+import { createSkattegrunnlag } from "../testdata/grunnlagTestData";
 import { inntektData } from "../testdata/inntektTestData";
 
 export const initMockData = () => {
     sessionStorage.setItem(`behandling-1234`, JSON.stringify(behandlingData()));
     sessionStorage.setItem(`inntekt-1234`, JSON.stringify(inntektData()));
+    sessionStorage.setItem(`arbeidsforhold-1234`, JSON.stringify(arbeidsforholdData()));
+    sessionStorage.setItem(`skattegrunlag-1234`, JSON.stringify(createSkattegrunnlag()));
 
     // setInterval(
     //     () =>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
+import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
+import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { BehandlingData } from "../testdata/behandlingTestData";
 import { InntektData } from "../testdata/inntektTestData";
 
@@ -39,10 +41,40 @@ export const useMockApi = () => {
             staleTime: Infinity,
         });
 
+    const postInntektData = (saksnummer: string) =>
+        useMutation({
+            mutationFn: (payload: InntektData): Promise<InntektData> => {
+                sessionStorage.setItem(`inntekt-${saksnummer}`, JSON.stringify(payload));
+                return fakeFetch(payload);
+            },
+            onSuccess: (data) => {
+                queryClient.setQueryData(`inntekt-${saksnummer}`, data);
+            },
+        });
+
+    const getArbeidsforholdData = (saksnummer: string) =>
+        useQuery({
+            queryKey: `arbeidsforhold-${saksnummer}`,
+            queryFn: (): Promise<ArbeidsforholdData[]> =>
+                fakeFetch(JSON.parse(sessionStorage.getItem(`arbeidsforhold-${saksnummer}`))),
+            staleTime: Infinity,
+        });
+
+    const getSkattegrunlag = (saksnummer: string) =>
+        useQuery({
+            queryKey: `skattegrunlag-${saksnummer}`,
+            queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
+                fakeFetch(JSON.parse(sessionStorage.getItem(`skattegrunlag-${saksnummer}`))),
+            staleTime: Infinity,
+        });
+
     const api = {
         getBehandlingData,
         postBehandlingData,
         getInntektData,
+        postInntektData,
+        getArbeidsforholdData,
+        getSkattegrunlag,
     };
 
     return { api, networkError };
