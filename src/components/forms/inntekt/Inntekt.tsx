@@ -157,22 +157,19 @@ const InntektForm = ({
                         <Heading level="3" size="medium">
                             Inntektene som legges til grunn
                         </Heading>
-                        <InntekteneSomLeggesTilGrunnTabel
-                            initialValues={initialValues.inntekteneSomLeggesTilGrunn}
-                            fieldArray={inntekteneSomLeggesTilGrunnField}
-                        />
+                        <InntekteneSomLeggesTilGrunnTabel fieldArray={inntekteneSomLeggesTilGrunnField} />
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">
                             Utvidet barnetrygd
                         </Heading>
-                        <UtvidetBarnetrygdTabel initialValues={initialValues.utvidetBarnetrygd} />
+                        <UtvidetBarnetrygdTabel />
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">
                             Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
                         </Heading>
-                        <BarnetilleggTabel initialValues={initialValues.barnetillegg} />
+                        <BarnetilleggTabel />
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">

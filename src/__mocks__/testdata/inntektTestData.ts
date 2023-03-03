@@ -39,8 +39,8 @@ export interface BarneTilleg {
 }
 
 export interface UtvidetBarnetrygd {
-    fraDato: string;
-    tilDato: string;
+    fraDato: Date | string;
+    tilDato: Date | string;
     deltBosted: boolean;
     beloep: number;
 }
