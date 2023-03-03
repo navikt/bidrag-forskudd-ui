@@ -70,8 +70,8 @@ const GrunnlagInntektOptions = ({ skattegrunnlager, fieldArray }) => {
         const ident = createSkattegrunlagIdent(grunnlagValues.skatteoppgjoersdato, grunnlagValues.tekniskNavn);
         if (checked) {
             fieldArray.append({
-                fraDato: null,
-                tilDato: null,
+                fraDato: new Date(grunnlagValues.skatteoppgjoersdato),
+                tilDato: new Date(grunnlagValues.skatteoppgjoersdato, 12, 0),
                 arbeidsgiver: "",
                 totalt: Number(grunnlagValues.beloep),
                 beskrivelse: grunnlagValues.tekniskNavn,

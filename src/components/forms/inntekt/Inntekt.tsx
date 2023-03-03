@@ -172,7 +172,7 @@ const InntektForm = ({
                         <Heading level="3" size="medium">
                             Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
                         </Heading>
-                        <BarnetilleggTabel initialValues={initialValues} />
+                        <BarnetilleggTabel initialValues={initialValues.barnetillegg} />
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">

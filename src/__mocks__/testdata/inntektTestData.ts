@@ -30,8 +30,8 @@ interface Barn {
 }
 
 export interface BarneTilleg {
-    fraDato: string;
-    tilDato: string;
+    fraDato: Date | string;
+    tilDato: Date | string;
     barn: Barn;
     brutto: number;
     skattesats: number;
