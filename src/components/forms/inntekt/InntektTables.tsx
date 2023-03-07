@@ -13,83 +13,99 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
     fieldArray,
 }: {
     fieldArray: UseFieldArrayReturn<FieldValues, "inntekteneSomLeggesTilGrunn", string>;
-}) => (
-    <>
-        <TableWrapper heading={["Periode", "Arbeidsgiver/NAV", "Totalt", "Beskrivelse", ""]}>
-            {fieldArray.fields.map((item, index) => {
-                return (
-                    <TableRowWrapper
-                        key={item.id}
-                        cells={[
-                            <div className="flex gap-x-4">
-                                <FormControlledDatePicker
-                                    key={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
-                                    name={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
-                                    label="Fra og med"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item?.fraDato ?? null}
+}) => {
+    const handleOnDelete = (index) => {
+        fieldArray.remove(index);
+
+        if (!index) {
+            fieldArray.append({
+                fraDato: null,
+                tilDato: null,
+                arbeidsgiver: "",
+                totalt: "",
+                beskrivelse: "",
+            });
+        }
+    };
+
+    return (
+        <>
+            <TableWrapper heading={["Periode", "Arbeidsgiver/NAV", "Totalt", "Beskrivelse", ""]}>
+                {fieldArray.fields.map((item, index) => {
+                    return (
+                        <TableRowWrapper
+                            key={item.id}
+                            cells={[
+                                <div className="flex gap-x-4">
+                                    <FormControlledDatePicker
+                                        key={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
+                                        name={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
+                                        label="Fra og med"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item?.fraDato ?? null}
+                                        hideLabel
+                                    />
+                                    <FormControlledDatePicker
+                                        key={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
+                                        name={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
+                                        label="Til og med"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item?.tilDato ?? null}
+                                        hideLabel
+                                    />
+                                </div>,
+                                <FormControlledTextField
+                                    key={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
+                                    name={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
+                                    label="Arbeidsgiver/Nav"
                                     hideLabel
-                                />
-                                <FormControlledDatePicker
-                                    key={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
-                                    name={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
-                                    label="Til og med"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item?.tilDato ?? null}
+                                />,
+                                <FormControlledTextField
+                                    key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
+                                    name={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
+                                    label="Totalt"
+                                    type="number"
                                     hideLabel
-                                />
-                            </div>,
-                            <FormControlledTextField
-                                key={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
-                                name={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
-                                label="Arbeidsgiver/Nav"
-                                hideLabel
-                            />,
-                            <FormControlledTextField
-                                key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
-                                name={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
-                                label="Totalt"
-                                type="number"
-                                hideLabel
-                            />,
-                            <FormControlledTextField
-                                key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
-                                name={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
-                                label="Beskrivelse"
-                                hideLabel
-                            />,
-                            <Button
-                                key={`delete-button-${index}`}
-                                type="button"
-                                onClick={() => fieldArray.remove(index)}
-                                icon={<Delete aria-hidden />}
-                                variant="tertiary"
-                                size="xsmall"
-                            />,
-                        ]}
-                    />
-                );
-            })}
-        </TableWrapper>
-        <Button
-            variant="tertiary"
-            type="button"
-            size="small"
-            className="w-fit"
-            onClick={() =>
-                fieldArray.append({
-                    fraDato: null,
-                    tilDato: null,
-                    arbeidsgiver: "",
-                    totalt: "",
-                    beskrivelse: "",
-                })
-            }
-        >
-            + legg til periode
-        </Button>
-    </>
-);
+                                />,
+                                <FormControlledTextField
+                                    key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
+                                    name={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
+                                    label="Beskrivelse"
+                                    hideLabel
+                                />,
+                                <Button
+                                    key={`delete-button-${index}`}
+                                    type="button"
+                                    onClick={() => handleOnDelete(index)}
+                                    icon={<Delete aria-hidden />}
+                                    variant="tertiary"
+                                    size="xsmall"
+                                />,
+                            ]}
+                        />
+                    );
+                })}
+            </TableWrapper>
+            <Button
+                variant="tertiary"
+                type="button"
+                size="small"
+                className="w-fit"
+                onClick={() =>
+                    fieldArray.append({
+                        fraDato: null,
+                        tilDato: null,
+                        arbeidsgiver: "",
+                        totalt: "",
+                        beskrivelse: "",
+                    })
+                }
+            >
+                + legg til periode
+            </Button>
+        </>
+    );
+};
 
 export const UtvidetBarnetrygdTabel = () => {
     const { control } = useFormContext();

@@ -1,12 +1,12 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { BodyShort, Heading, Label, Link, ReadMore } from "@navikt/ds-react";
-import React from "react";
-import { FieldValues, UseFieldArrayReturn } from "react-hook-form";
+import { Alert, BodyShort, Button, Heading, Label, Link, ReadMore } from "@navikt/ds-react";
+import React, { Fragment, useEffect, useState } from "react";
+import { FieldValues, UseFieldArrayReturn, useFormContext } from "react-hook-form";
 
 import { GjennomsnittInntekt } from "../../../__mocks__/testdata/inntektTestData";
+import { GRUNNLAG_BRUKT } from "../../../constants/error";
 import { HentSkattegrunnlagResponse } from "../../../types/bidragGrunnlagTypes";
-import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
-import { createSkattegrunlagIdent } from "./inntektFormHelpers";
+import { removePlaceholder } from "../../../utils/string-utils";
 
 export const InntektInfo = ({
     gjennomsnittInntektSisteTreMaaneder,
@@ -21,21 +21,18 @@ export const InntektInfo = ({
 }) => (
     <>
         <div className="flex gap-x-2">
-            <Label size="small">Gjennomsnitt Inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
+            <Label size="small">Gjennomsnitt inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
             <BodyShort size="small">
                 {gjennomsnittInntektSisteTreMaaneder.aarsInntekt}/{gjennomsnittInntektSisteTreMaaneder.maanedInntekt}
             </BodyShort>
         </div>
         <div className="flex gap-x-2">
-            <Label size="small">Gjennomsnitt Inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
+            <Label size="small">Gjennomsnitt inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
             <BodyShort size="small">
                 {gjennomsnittInntektSisteTolvMaaneder.aarsInntekt}/{gjennomsnittInntektSisteTolvMaaneder.maanedInntekt}
             </BodyShort>
         </div>
-        <GrunnlagInntektOptions
-            skattegrunnlager={skattegrunnlager}
-            fieldArray={inntekteneSomLeggesTilGrunnFieldArray}
-        />
+        <GrunnlagInntekt skattegrunnlager={skattegrunnlager} fieldArray={inntekteneSomLeggesTilGrunnFieldArray} />
     </>
 );
 
@@ -65,35 +62,76 @@ export const AndreTyperInntekter = ({ andreTyperInntekter }) => (
     </>
 );
 
-const GrunnlagInntektOptions = ({ skattegrunnlager, fieldArray }) => {
-    const handleOnChange = (checked, grunnlagValues) => {
-        const ident = createSkattegrunlagIdent(grunnlagValues.skatteoppgjoersdato, grunnlagValues.tekniskNavn);
-        if (checked) {
+const GrunnlagInntekt = ({ skattegrunnlager, fieldArray }) => {
+    const { getValues } = useFormContext();
+    const [error, setError] = useState(undefined);
+    const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
+
+    useEffect(() => {
+        setError(undefined);
+    }, [inntekteneSomLeggesTilGrunn]);
+
+    return (
+        <div className="grid grid-cols-[max-content,max-content] gap-x-4">
+            <div className="grid grid-cols-[max-content,max-content] gap-x-4 items-center">
+                <GrunnlagInntektOptions
+                    skattegrunnlager={skattegrunnlager}
+                    fieldArray={fieldArray}
+                    setError={setError}
+                />
+            </div>
+            {error && (
+                <Alert variant="error" size="small" className="h-max">
+                    {error}
+                </Alert>
+            )}
+        </div>
+    );
+};
+
+const GrunnlagInntektOptions = ({ skattegrunnlager, fieldArray, setError }) => {
+    const { getValues } = useFormContext();
+
+    const handleOnClicked = (grunnlag) => {
+        const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
+        const fraDato = new Date(grunnlag.skatteoppgjoersdato);
+        const tilDato = new Date(grunnlag.skatteoppgjoersdato, 12, 0);
+
+        const periodeMedSammeInntekt = inntekteneSomLeggesTilGrunn.some(
+            (inntekt) =>
+                inntekt.beskrivelse === grunnlag.tekniskNavn && inntekt.fraDato <= fraDato && inntekt.tilDato >= tilDato
+        );
+
+        if (!periodeMedSammeInntekt) {
             fieldArray.append({
-                fraDato: new Date(grunnlagValues.skatteoppgjoersdato),
-                tilDato: new Date(grunnlagValues.skatteoppgjoersdato, 12, 0),
+                fraDato,
+                tilDato,
                 arbeidsgiver: "",
-                totalt: Number(grunnlagValues.beloep),
-                beskrivelse: grunnlagValues.tekniskNavn,
-                ident,
+                totalt: Number(grunnlag.beloep),
+                beskrivelse: grunnlag.tekniskNavn,
             });
         } else {
-            const index = fieldArray.fields.findIndex((field) => field.ident === ident);
-            if (index !== -1) fieldArray.remove(index);
+            setError(removePlaceholder(GRUNNLAG_BRUKT, grunnlag.tekniskNavn, grunnlag.skatteoppgjoersdato));
         }
     };
 
     return skattegrunnlager
         .map((year) =>
             year.grunnlag.map((grunnlag) => (
-                <FormControlledCheckbox
-                    onChange={(e) =>
-                        handleOnChange(e.target.checked, { ...grunnlag, skatteoppgjoersdato: year.skatteoppgjoersdato })
-                    }
-                    key={`${year.skatteoppgjoersdato}-${grunnlag.tekniskNavn}`}
-                    name={createSkattegrunlagIdent(year.skatteoppgjoersdato, grunnlag.tekniskNavn)}
-                    legend={`${grunnlag.tekniskNavn} ${year.skatteoppgjoersdato}: ${grunnlag.beloep}`}
-                />
+                <Fragment key={`${grunnlag.tekniskNavn}-${year.skatteoppgjoersdato}-${grunnlag.beloep}`}>
+                    <BodyShort size="small">
+                        {grunnlag.tekniskNavn} {year.skatteoppgjoersdato}: {grunnlag.beloep}
+                    </BodyShort>
+                    <Button
+                        type="button"
+                        size="small"
+                        variant="tertiary"
+                        onClick={() => handleOnClicked({ ...grunnlag, skatteoppgjoersdato: year.skatteoppgjoersdato })}
+                        className="w-max"
+                    >
+                        + legg til periode
+                    </Button>
+                </Fragment>
             ))
         )
         .flat();

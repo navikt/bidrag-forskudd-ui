@@ -95,7 +95,11 @@ export const inntektData = (data = {}) => {
         ],
         barnetillegg: [],
         utvidetBarnetrygd: [],
-        begrunnelseIVedtaket: "",
+        begrunnelseIVedtaket:
+            "Du har en månedslønn på 41 250,- kroner, inkludert skattepliktig fordel. I tillegg har du mottatt bonus med 27 500,- kroner, og ferietillegg med 26 643,- kroner.\n" +
+            "Omregnet til årsinntekt utgjør dette (41250kr x 12mnd + 27500kr + 26643kr) 549 143,- kroner, som NAV legger til grunn.\n" +
+            "Du mottar utvidet barnetrygd med 12 648,- kroner per år.\n" +
+            "Fra 1. september 2022 mottar du kontantstøtte med 90 000,- kroner per år.\n",
         begrunnelseINotat: "",
         toTrinnsKontroll: false,
     } as InntektData;

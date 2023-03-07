@@ -7,11 +7,13 @@ export const FormControlledTextField = ({
     label,
     hideLabel,
     type,
+    disabled,
 }: {
     name: string;
     label: string;
     hideLabel?: boolean;
     type?: "number" | "email" | "password" | "tel" | "text" | "url";
+    disabled?: boolean;
 }) => {
     const {
         control,
@@ -28,6 +30,7 @@ export const FormControlledTextField = ({
             value={field.value}
             onChange={field.onChange}
             hideLabel={hideLabel}
+            disabled={disabled}
         />
     );
 };

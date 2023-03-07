@@ -7,6 +7,7 @@ import { QueryObserverResult } from "react-query/types/core/types";
 import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { ArbeidsforholdData } from "../../../__mocks__/testdata/arbeidsforholdTestData";
 import { InntektData } from "../../../__mocks__/testdata/inntektTestData";
+import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -17,12 +18,7 @@ import { FormControlledTextarea } from "../../formFields/FormControlledTextArea"
 import { FormControlledDatePickerRange } from "../../formFields/FormControllerDatePickerRange";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
-import {
-    createInitialValues,
-    createInntektPayload,
-    createSkattegrunlagFields,
-    syncSkattegrunlagFields,
-} from "./inntektFormHelpers";
+import { createInitialValues, createInntektPayload } from "./inntektFormHelpers";
 import { AndreTyperInntekter, InntektInfo } from "./Inntektinfo";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
@@ -69,9 +65,9 @@ const InntektForm = ({
     isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
+    const channel = new BroadcastChannel("inntekter");
     const { inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
-    const skattegrunlagFields = createSkattegrunlagFields(inntekt, skattegrunnlager);
-    const initialValues = inntektFormValues ?? { ...createInitialValues(inntekt), ...skattegrunlagFields };
+    const initialValues = inntektFormValues ?? createInitialValues(inntekt);
     const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
 
     const useFormMethods = useForm({
@@ -83,18 +79,20 @@ const InntektForm = ({
         name: "inntekteneSomLeggesTilGrunn",
     });
 
-    const watchInntekteneSomLeggesTilGrunn = useFormMethods.watch("inntekteneSomLeggesTilGrunn");
-
     useEffect(() => {
-        syncSkattegrunlagFields(skattegrunlagFields, watchInntekteneSomLeggesTilGrunn, useFormMethods);
-    }, [watchInntekteneSomLeggesTilGrunn]);
+        const { unsubscribe } = useFormMethods.watch((value, { name }) => {
+            const field = name?.split("[")[0];
+            if (NOTAT_FIELDS.includes(field)) {
+                channel.postMessage(JSON.stringify({ field, value: value[field] }));
+            }
+        });
+        return () => unsubscribe();
+    }, [useFormMethods.watch]);
 
     useEffect(() => {
         if (!inntektFormValues) setInntektFormValues(initialValues);
 
-        return () => {
-            setInntektFormValues(useFormMethods.getValues());
-        };
+        return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
     const onRefetch = async () => {

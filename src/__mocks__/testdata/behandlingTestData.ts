@@ -30,8 +30,9 @@ export const behandlingData = (data = {}) => {
         virkningstidspunkt: mockDates[0],
         aarsak: Object.keys(ForskuddBeregningKodeAarsak)[2],
         avslag: "avslag_2",
-        begrunnelseMedIVedtakNotat: "Some vedtak notat ",
-        begrunnelseKunINotat: "Some not vedtak notat",
+        begrunnelseMedIVedtakNotat:
+            "Du har søkt om bidragsforskudd fra 01.05.2022 med den begrunnelse at du ikke har har blitt informert muligheten for å søke tidligere. I brev av 05.10.2022 er du blitt bedt om å dokumentere påstanden, men NAV har ikke mottatt etterspurt dokumentasjon innen fristen.  Bidragsforskuddet er fastsatt med virkning fra 01.07.2022, som er tre måneder før NAV fikk søknaden din.",
+        begrunnelseKunINotat: "",
     };
     return {
         ...initialData,

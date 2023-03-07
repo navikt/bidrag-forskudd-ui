@@ -75,40 +75,5 @@ export const createInitialValues = (inntekt) => ({
     toTrinnsKontroll: inntekt.toTrinnsKontroll,
 });
 
-export const createSkattegrunlagFields = (inntekt, skattegrunlager) => {
-    return skattegrunlager
-        .map((year) =>
-            year.grunnlag.map((grunnlag) => {
-                const ident = createSkattegrunlagIdent(year.skatteoppgjoersdato, grunnlag.tekniskNavn);
-                return {
-                    [ident]: hasSkattegrunlagMatch(ident, inntekt.inntekteneSomLeggesTilGrunn),
-                };
-            })
-        )
-        .flat()
-        .reduce((acc, field) => ({ ...acc, ...field }), {});
-};
-
-const hasSkattegrunlagMatch = (ident, inntekteneSomLeggesTilGrunn) =>
-    inntekteneSomLeggesTilGrunn.some((inntekt) => {
-        if (!inntekt.fraDato || !inntekt.beskrivelse) return false;
-        const inntektIdent = createSkattegrunlagIdent(inntekt.fraDato.split("-")[0], inntekt.beskrivelse);
-        return inntektIdent === ident;
-    });
-
-export const createSkattegrunlagIdent = (year, name) => `${year}-${name.replaceAll(" ", "_")}`;
-
-export const syncSkattegrunlagFields = (skattegrunlagFields, watchInntekteneSomLeggesTilGrunn, useFormMethods) =>
-    Object.keys(skattegrunlagFields).some((field) => {
-        const value = useFormMethods.getValues(field);
-        const inInntekteneSomLeggesTilGrunn = watchInntekteneSomLeggesTilGrunn.some(
-            (inntekt) => inntekt.ident === field
-        );
-        if (value && !inInntekteneSomLeggesTilGrunn) {
-            useFormMethods.setValue(field, false);
-            return true;
-        }
-    });
-
 const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
 const toISOStringOrNull = (date?: Date): string | null => date?.toISOString() ?? null;

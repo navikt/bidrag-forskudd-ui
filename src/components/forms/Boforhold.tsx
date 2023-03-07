@@ -20,7 +20,7 @@ export default () => {
                         <DatePickerInput
                             label="Periode"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>
@@ -29,7 +29,7 @@ export default () => {
                             label=""
                             className="mt-5"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>
@@ -78,7 +78,7 @@ export default () => {
                         <DatePickerInput
                             label="Periode"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>
@@ -87,7 +87,7 @@ export default () => {
                             label=""
                             className="mt-5"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>
@@ -118,7 +118,7 @@ export default () => {
                         <DatePickerInput
                             label="Periode"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>
@@ -127,7 +127,7 @@ export default () => {
                             label=""
                             className="mt-5"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            defaultSelected={undefined}
+                            defaultValue={undefined}
                             onChange={(selectedDay) => console.log(selectedDay)}
                         />
                     </div>

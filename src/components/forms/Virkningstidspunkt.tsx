@@ -1,7 +1,7 @@
 import { ExternalLink } from "@navikt/ds-icons";
 import { BodyShort, Button, Heading, Label, Link, Loader, Select, Textarea } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
@@ -60,9 +60,10 @@ const VirkningstidspunktForm = ({
     isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
-    const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep } = useForskudd();
+    const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep, saksnummer } = useForskudd();
     const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
     const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
+    const channel = new BroadcastChannel("virkningstidspunkt");
 
     const {
         handleSubmit,
@@ -73,6 +74,15 @@ const VirkningstidspunktForm = ({
     } = useForm({
         defaultValues: initialValues,
     });
+
+    const fieldsForNotat = useWatch({
+        control,
+        name: ["virkningstidspunkt", "aarsak", "begrunnelseMedIVedtakNotat"],
+    });
+
+    useEffect(() => {
+        channel.postMessage(JSON.stringify(fieldsForNotat));
+    }, [fieldsForNotat]);
 
     useEffect(() => {
         if (!virkningstidspunktFormValues) setVirkningstidspunktFormValues(initialValues);
@@ -230,7 +240,7 @@ const VirkningstidspunktForm = ({
                         >
                             Lagre
                         </Button>
-                        <Link href="#" onClick={() => {}} className="font-bold">
+                        <Link href={`/forskudd/${saksnummer}/notat`} target="_blank" className="font-bold">
                             Vis notat <ExternalLink aria-hidden />
                         </Link>
                     </FlexRow>

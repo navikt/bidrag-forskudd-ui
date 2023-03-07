@@ -21,6 +21,7 @@ export const useMockApi = () => {
             queryFn: (): Promise<BehandlingData> =>
                 fakeFetch(JSON.parse(sessionStorage.getItem(`behandling-${saksnummer}`))),
             staleTime: Infinity,
+            suspense: true,
         });
 
     const postBehandlingData = (saksnummer: string) =>
@@ -39,6 +40,7 @@ export const useMockApi = () => {
             queryKey: `inntekt-${saksnummer}`,
             queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(sessionStorage.getItem(`inntekt-${saksnummer}`))),
             staleTime: Infinity,
+            suspense: true,
         });
 
     const postInntektData = (saksnummer: string) =>
@@ -58,6 +60,7 @@ export const useMockApi = () => {
             queryFn: (): Promise<ArbeidsforholdData[]> =>
                 fakeFetch(JSON.parse(sessionStorage.getItem(`arbeidsforhold-${saksnummer}`))),
             staleTime: Infinity,
+            suspense: true,
         });
 
     const getSkattegrunlag = (saksnummer: string) =>
@@ -66,6 +69,7 @@ export const useMockApi = () => {
             queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
                 fakeFetch(JSON.parse(sessionStorage.getItem(`skattegrunlag-${saksnummer}`))),
             staleTime: Infinity,
+            suspense: true,
         });
 
     const api = {
