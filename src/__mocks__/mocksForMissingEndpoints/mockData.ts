@@ -4,10 +4,18 @@ import { createSkattegrunnlag } from "../testdata/grunnlagTestData";
 import { inntektData } from "../testdata/inntektTestData";
 
 export const initMockData = () => {
-    sessionStorage.setItem(`behandling-1234`, JSON.stringify(behandlingData()));
-    sessionStorage.setItem(`inntekt-1234`, JSON.stringify(inntektData()));
-    sessionStorage.setItem(`arbeidsforhold-1234`, JSON.stringify(arbeidsforholdData()));
-    sessionStorage.setItem(`skattegrunlag-1234`, JSON.stringify(createSkattegrunnlag()));
+    if (!localStorage.getItem("behandling-1234")) {
+        localStorage.setItem(`behandling-1234`, JSON.stringify(behandlingData()));
+    }
+    if (!localStorage.getItem("inntekt-1234")) {
+        localStorage.setItem(`inntekt-1234`, JSON.stringify(inntektData()));
+    }
+    if (!localStorage.getItem("arbeidsforhold-1234")) {
+        localStorage.setItem(`arbeidsforhold-1234`, JSON.stringify(arbeidsforholdData()));
+    }
+    if (!localStorage.getItem("skattegrunlag-1234")) {
+        localStorage.setItem(`skattegrunlag-1234`, JSON.stringify(createSkattegrunnlag()));
+    }
 
     // setInterval(
     //     () =>

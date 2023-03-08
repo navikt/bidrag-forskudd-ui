@@ -19,7 +19,7 @@ export const useMockApi = () => {
         useQuery({
             queryKey: `behandling-${saksnummer}`,
             queryFn: (): Promise<BehandlingData> =>
-                fakeFetch(JSON.parse(sessionStorage.getItem(`behandling-${saksnummer}`))),
+                fakeFetch(JSON.parse(localStorage.getItem(`behandling-${saksnummer}`))),
             staleTime: Infinity,
             suspense: true,
         });
@@ -27,7 +27,7 @@ export const useMockApi = () => {
     const postBehandlingData = (saksnummer: string) =>
         useMutation({
             mutationFn: (payload: BehandlingData): Promise<BehandlingData> => {
-                sessionStorage.setItem(`behandling-${saksnummer}`, JSON.stringify(payload));
+                localStorage.setItem(`behandling-${saksnummer}`, JSON.stringify(payload));
                 return fakeFetch(payload);
             },
             onSuccess: (data) => {
@@ -38,7 +38,7 @@ export const useMockApi = () => {
     const getInntektData = (saksnummer: string) =>
         useQuery({
             queryKey: `inntekt-${saksnummer}`,
-            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(sessionStorage.getItem(`inntekt-${saksnummer}`))),
+            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt-${saksnummer}`))),
             staleTime: Infinity,
             suspense: true,
         });
@@ -46,7 +46,7 @@ export const useMockApi = () => {
     const postInntektData = (saksnummer: string) =>
         useMutation({
             mutationFn: (payload: InntektData): Promise<InntektData> => {
-                sessionStorage.setItem(`inntekt-${saksnummer}`, JSON.stringify(payload));
+                localStorage.setItem(`inntekt-${saksnummer}`, JSON.stringify(payload));
                 return fakeFetch(payload);
             },
             onSuccess: (data) => {
@@ -58,7 +58,7 @@ export const useMockApi = () => {
         useQuery({
             queryKey: `arbeidsforhold-${saksnummer}`,
             queryFn: (): Promise<ArbeidsforholdData[]> =>
-                fakeFetch(JSON.parse(sessionStorage.getItem(`arbeidsforhold-${saksnummer}`))),
+                fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold-${saksnummer}`))),
             staleTime: Infinity,
             suspense: true,
         });
@@ -67,7 +67,7 @@ export const useMockApi = () => {
         useQuery({
             queryKey: `skattegrunlag-${saksnummer}`,
             queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
-                fakeFetch(JSON.parse(sessionStorage.getItem(`skattegrunlag-${saksnummer}`))),
+                fakeFetch(JSON.parse(localStorage.getItem(`skattegrunlag-${saksnummer}`))),
             staleTime: Infinity,
             suspense: true,
         });
