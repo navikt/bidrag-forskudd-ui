@@ -109,6 +109,7 @@ const GrunnlagInntektOptions = ({ skattegrunnlager, fieldArray, setError }) => {
                 arbeidsgiver: "",
                 totalt: Number(grunnlag.beloep),
                 beskrivelse: grunnlag.tekniskNavn,
+                fraPostene: true,
             });
         } else {
             setError(removePlaceholder(GRUNNLAG_BRUKT, grunnlag.tekniskNavn, grunnlag.skatteoppgjoersdato));

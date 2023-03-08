@@ -19,9 +19,9 @@ export interface GjennomsnittInntekt {
 export interface InntektSomLeggesTilGrunn {
     fraDato: string;
     tilDato: string;
-    arbeidsgiver: string;
     totalt: number;
     beskrivelse: string;
+    fraPostene: boolean;
 }
 
 interface Barn {
@@ -88,9 +88,9 @@ export const inntektData = (data = {}) => {
             {
                 fraDato: "2021-01-01",
                 tilDato: "2021-11-05",
-                arbeidsgiver: "alle",
                 totalt: 208052,
                 beskrivelse: "Lønns og trekkopgave",
+                fraPostene: true,
             },
         ],
         barnetillegg: [],

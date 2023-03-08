@@ -1,5 +1,5 @@
 import { Delete } from "@navikt/ds-icons";
-import { Button } from "@navikt/ds-react";
+import { BodyShort, Button } from "@navikt/ds-react";
 import React from "react";
 import { FieldValues, useFieldArray, UseFieldArrayReturn, useFormContext } from "react-hook-form";
 
@@ -9,6 +9,29 @@ import { FormControlledSelectField } from "../../formFields/FormControlledSelect
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 
+const getBeskrivelse = (item, index) =>
+    item.fraPostene ? (
+        <BodyShort>{item.beskrivelse}</BodyShort>
+    ) : (
+        <FormControlledTextField
+            key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
+            name={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
+            label="Beskrivelse"
+            hideLabel
+        />
+    );
+const getTotalt = (item, index) =>
+    item.fraPostene ? (
+        <BodyShort>{item.totalt}</BodyShort>
+    ) : (
+        <FormControlledTextField
+            key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
+            name={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
+            label="Totalt"
+            type="number"
+            hideLabel
+        />
+    );
 export const InntekteneSomLeggesTilGrunnTabel = ({
     fieldArray,
 }: {
@@ -24,13 +47,14 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                 arbeidsgiver: "",
                 totalt: "",
                 beskrivelse: "",
+                fraPostene: false,
             });
         }
     };
 
     return (
         <>
-            <TableWrapper heading={["Periode", "Arbeidsgiver/NAV", "Totalt", "Beskrivelse", ""]}>
+            <TableWrapper heading={["Periode", "Totalt", "Beskrivelse", ""]}>
                 {fieldArray.fields.map((item, index) => {
                     return (
                         <TableRowWrapper
@@ -54,25 +78,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                                         hideLabel
                                     />
                                 </div>,
-                                <FormControlledTextField
-                                    key={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
-                                    name={`inntekteneSomLeggesTilGrunn[${index}].arbeidsgiver`}
-                                    label="Arbeidsgiver/Nav"
-                                    hideLabel
-                                />,
-                                <FormControlledTextField
-                                    key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
-                                    name={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
-                                    label="Totalt"
-                                    type="number"
-                                    hideLabel
-                                />,
-                                <FormControlledTextField
-                                    key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
-                                    name={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
-                                    label="Beskrivelse"
-                                    hideLabel
-                                />,
+                                getTotalt(item, index),
+                                getBeskrivelse(item, index),
                                 <Button
                                     key={`delete-button-${index}`}
                                     type="button"
@@ -98,6 +105,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                         arbeidsgiver: "",
                         totalt: "",
                         beskrivelse: "",
+                        fraPostene: false,
                     })
                 }
             >

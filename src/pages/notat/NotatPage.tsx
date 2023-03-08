@@ -227,10 +227,6 @@ const InntekterView = ({ inntekt, arbeidsforholder }) => {
                             </BodyShort>
                         </div>
                         <div>
-                            <Label size="small">Arbeidsgiver/Nav</Label>
-                            <BodyShort size="small">{inntekt.arbeidsgiver}</BodyShort>
-                        </div>
-                        <div>
                             <Label size="small">Inntekt</Label>
                             <BodyShort size="small">{inntekt.totalt}</BodyShort>
                         </div>
