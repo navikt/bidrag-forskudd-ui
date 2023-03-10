@@ -34,11 +34,23 @@ export interface CreateBehandlingRequest {
     datoTom: string;
     saksnummer: string;
     behandlerEnhet: string;
+    /** @uniqueItems true */
+    roller: CreateRolleDto[];
+}
+
+export interface CreateRolleDto {
+    rolleType: "BIDRAGS_PLIKTIG" | "BIDRAGS_MOTTAKER" | "BARN" | "REELL_MOTTAKER";
+    ident: string;
+    /** @format date-time */
+    opprettetDato: string;
+}
+
+export interface CreateBehandlingResponse {
+    /** @format int64 */
+    id: number;
 }
 
 export interface Behandling {
-    /** @format int64 */
-    id?: number;
     behandlingType: "FORSKUDD";
     soknadType:
         | "ENDRING"
@@ -63,6 +75,42 @@ export interface Behandling {
     datoTom: string;
     saksnummer: string;
     behandlerEnhet: string;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?:
+        | "SF"
+        | "NF"
+        | "OF"
+        | "AF"
+        | "CF"
+        | "DF"
+        | "LF"
+        | "GF"
+        | "HF"
+        | "BF"
+        | "KF"
+        | "QF"
+        | "MF"
+        | "PF"
+        | "EF"
+        | "FF";
+    avslag?: string;
+    begrunnelseMedIVedtakNotat?: string;
+    begrunnelseKunINotat?: string;
+    /** @format int64 */
+    id?: number;
+    /** @uniqueItems true */
+    roller: Rolle[];
+}
+
+export interface Rolle {
+    behandling: Behandling;
+    rolleType: "BIDRAGS_PLIKTIG" | "BIDRAGS_MOTTAKER" | "BARN" | "REELL_MOTTAKER";
+    ident: string;
+    /** @format date-time */
+    opprettetDato: string;
+    /** @format int64 */
+    id?: number;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -204,18 +252,18 @@ export class HttpClient<SecurityDataType = unknown> {
  * @baseUrl https://bidrag-behandling-feature.dev.intern.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-    behandling = {
+    api = {
         /**
          * @description Henter en behandlinger
          *
-         * @tags behandlig-controller
+         * @tags behandling-controller
          * @name HentBehandlinger
-         * @request GET:/behandling
+         * @request GET:/api/behandling
          * @secure
          */
         hentBehandlinger: (params: RequestParams = {}) =>
             this.request<Behandling[], Behandling[]>({
-                path: `/behandling`,
+                path: `/api/behandling`,
                 method: "GET",
                 secure: true,
                 ...params,
@@ -224,14 +272,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Legger til en ny behandling
          *
-         * @tags behandlig-controller
+         * @tags behandling-controller
          * @name CreateBehandling
-         * @request POST:/behandling
+         * @request POST:/api/behandling
          * @secure
          */
         createBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
-            this.request<Behandling, Behandling>({
-                path: `/behandling`,
+            this.request<CreateBehandlingResponse, CreateBehandlingResponse>({
+                path: `/api/behandling`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -242,14 +290,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Henter en behandling
          *
-         * @tags behandlig-controller
+         * @tags behandling-controller
          * @name HentBehandling
-         * @request GET:/behandling/{behandlingId}
+         * @request GET:/api/behandling/{behandlingId}
          * @secure
          */
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
             this.request<Behandling, Behandling>({
-                path: `/behandling/${behandlingId}`,
+                path: `/api/behandling/${behandlingId}`,
                 method: "GET",
                 secure: true,
                 ...params,
