@@ -6,7 +6,7 @@ import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { BehandlingData, behandlingData } from "../../__mocks__/testdata/behandlingTestData";
+import { BehandlingData } from "../../__mocks__/testdata/behandlingTestData";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
@@ -40,7 +40,7 @@ export default () => {
             }
         >
             <VirkningstidspunktForm
-                behandling={behandlingData()}
+                behandling={behandling}
                 refetch={refetch}
                 isRefetching={isRefetching}
                 mutation={mutation}
