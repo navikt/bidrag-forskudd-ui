@@ -8,18 +8,20 @@ import { RolleDetaljer } from "../RolleDetaljer";
 
 export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
     const { api } = useApiData();
+    const { sak, roller } = api.getSakAndRoller(saksnummer);
 
     useEffect(() => {
         try {
-            BEHANDLING_API.behandling.hentBehandling(1).then((r) => {
-                console.log(r);
+            BEHANDLING_API.api.hentBehandling(Number(saksnummer)).then(({data}) => {
+                const { roller } = data;
+                console.log(data);
             });
         } catch (e) {
             console.log(e);
         }
     }, []);
 
-    const { sak, roller } = api.getSakAndRoller(saksnummer);
+    
 
     return (
         <div className="bg-[var(--a-gray-50)] border-[var(--a-border-divider)] border-solid border-b">
