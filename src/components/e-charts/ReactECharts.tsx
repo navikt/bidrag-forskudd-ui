@@ -1,6 +1,6 @@
 import type { LineSeriesOption } from "echarts/charts";
 import { LineChart } from "echarts/charts";
-import type { GridComponentOption, TitleComponentOption } from "echarts/components";
+import type { GridComponentOption, TitleComponentOption, TooltipComponentOption } from "echarts/components";
 import {
     DataZoomComponent,
     GridComponent,
@@ -25,7 +25,9 @@ use([
     CanvasRenderer,
 ]);
 
-export type EChartsOption = ComposeOption<LineSeriesOption | TitleComponentOption | GridComponentOption>;
+export type EChartsOption = ComposeOption<
+    LineSeriesOption | TitleComponentOption | GridComponentOption | TooltipComponentOption
+>;
 
 export interface ReactEChartsProps {
     option: EChartsOption;
@@ -33,6 +35,7 @@ export interface ReactEChartsProps {
     settings?: SetOptionOpts;
 }
 
+let currentIndex = -1;
 export function ReactECharts({ option, style, settings }: ReactEChartsProps): JSX.Element {
     const chartRef = useRef<HTMLDivElement>(null);
     const [chartInitialized, setChartInitialized] = useState(false);
@@ -59,20 +62,45 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
         const canvas = chartRef.current.querySelector("canvas");
 
         if (canvas) {
-            const chart = getInstanceByDom(chartRef.current);
             canvas.setAttribute("tabindex", "0");
+            const chart = getInstanceByDom(chartRef.current);
+            const dataLen = option.series[0].data.length;
             const handleKeydown = (e) => {
-                chart.dispatchAction({
-                    type: "showTip",
-                    seriesIndex: 1,
-                });
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                    chart.dispatchAction({
+                        type: "downplay",
+                        seriesIndex: 0,
+                        dataIndex: currentIndex,
+                    });
+                    currentIndex =
+                        e.key === "ArrowRight"
+                            ? (currentIndex + 1) % dataLen
+                            : currentIndex <= 0
+                            ? dataLen - 1
+                            : currentIndex - 1;
+                    chart.dispatchAction({
+                        type: "highlight",
+                        seriesIndex: 0,
+                        dataIndex: currentIndex,
+                    });
+                    chart.dispatchAction({
+                        type: "showTip",
+                        seriesIndex: 0,
+                        dataIndex: currentIndex,
+                    });
+                }
             };
-            canvas.addEventListener("focusin", () => {
-                window.addEventListener("keydown", handleKeydown);
-            });
-            canvas.addEventListener("focusout", () => {
+
+            const addKeydownListener = () => window.addEventListener("keydown", handleKeydown);
+            const removeKeydownListener = () => window.removeEventListener("keydown", handleKeydown);
+            canvas.addEventListener("focusin", addKeydownListener);
+            canvas.addEventListener("focusout", removeKeydownListener);
+
+            return () => {
+                canvas.removeEventListener("focusin", addKeydownListener);
+                canvas.removeEventListener("focusout", removeKeydownListener);
                 window.removeEventListener("keydown", handleKeydown);
-            });
+            };
         }
     }, [chartInitialized]);
 

@@ -28,12 +28,19 @@ const chartOptions: EChartsOption = {
     tooltip: {
         trigger: "axis",
         showContent: true,
+        formatter: (params) => `<strong>Lønn</strong>: ${params[0].data.toLocaleString()}`,
+        backgroundColor: "rgb(230,240,255)",
+        borderColor: "rgb(230,240,255)",
     },
-    xAxis: { type: "category", data: ["Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Okt", "Nov", "Des"] },
+    xAxis: {
+        type: "category",
+        data: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
+    },
+    grid: { bottom: "0px", top: "16px", left: "0px", right: "0px", containLabel: true },
     yAxis: { type: "value" },
     series: [
         {
-            data: [47000, 48000, 43200, 45500, 45700, 72000, 50000, 48100, 42300, 44000, 58000, 45700],
+            data: [47352, 48121, 43271, 45522, 45731, 72321, 50112, 48103, 42335, 44753, 58121, 45733],
             type: "line",
             smooth: true,
         },
