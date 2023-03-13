@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { InntektFormValues } from "../types/inntektFormValues";
 import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
 
 interface IForskuddContext {
@@ -11,8 +12,10 @@ interface IForskuddContext {
     saksnummer: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
-    inntektFormValues: any;
-    setInntektFormValues: (values: any) => void;
+    inntektFormValues: InntektFormValues;
+    setInntektFormValues: (values: InntektFormValues) => void;
+    boforholdFormValues: any;
+    setBoforholdFormValues: (values: any) => void;
 }
 
 interface IForskuddContextProps {
@@ -25,6 +28,7 @@ function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddC
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
+    const [boforholdFormValues, setBoforholdFormValues] = useState(undefined);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
@@ -40,8 +44,10 @@ function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddC
             setVirkningstidspunktFormValues,
             inntektFormValues,
             setInntektFormValues,
+            boforholdFormValues,
+            setBoforholdFormValues,
         }),
-        [activeStep, saksnummer, virkningstidspunktFormValues, inntektFormValues]
+        [activeStep, saksnummer, virkningstidspunktFormValues, inntektFormValues, boforholdFormValues]
     );
 
     return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;

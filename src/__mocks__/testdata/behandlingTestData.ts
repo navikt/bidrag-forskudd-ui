@@ -27,7 +27,7 @@ export const behandlingData = (data = {}) => {
             id: "",
             navn: "",
         },
-        virkningstidspunkt: mockDates[0],
+        virkningstidspunkt: "",
         aarsak: Object.keys(ForskuddBeregningKodeAarsak)[2],
         avslag: "avslag_2",
         begrunnelseMedIVedtakNotat:

@@ -1,17 +1,21 @@
 import { Delete } from "@navikt/ds-icons";
-import { BodyShort, Button } from "@navikt/ds-react";
-import React from "react";
-import { FieldValues, useFieldArray, UseFieldArrayReturn, useFormContext } from "react-hook-form";
+import { BodyShort, Button, Loader } from "@navikt/ds-react";
+import React, { Suspense } from "react";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { useForskudd } from "../../../context/ForskuddContext";
+import { RolleType } from "../../../enum/RolleType";
+import { useApiData } from "../../../hooks/useApiData";
+import { InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledDatePicker } from "../../formFields/FormControlledDatePicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 
-const getBeskrivelse = (item, index) =>
+const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
-        <BodyShort>{item.beskrivelse}</BodyShort>
+        <BodyShort className="min-w-[215px]">{item.beskrivelse}</BodyShort>
     ) : (
         <FormControlledTextField
             key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
@@ -20,9 +24,9 @@ const getBeskrivelse = (item, index) =>
             hideLabel
         />
     );
-const getTotalt = (item, index) =>
+const Totalt = ({ item, index }) =>
     item.fraPostene ? (
-        <BodyShort>{item.totalt}</BodyShort>
+        <BodyShort className="min-w-[215px]">{item.totalt}</BodyShort>
     ) : (
         <FormControlledTextField
             key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
@@ -32,21 +36,47 @@ const getTotalt = (item, index) =>
             hideLabel
         />
     );
-export const InntekteneSomLeggesTilGrunnTabel = ({
-    fieldArray,
-}: {
-    fieldArray: UseFieldArrayReturn<FieldValues, "inntekteneSomLeggesTilGrunn", string>;
-}) => {
-    const handleOnDelete = (index) => {
-        fieldArray.remove(index);
 
+const DeleteButton = ({ item, index, handleOnDelete }) =>
+    item.fraPostene ? (
+        <div className="min-w-[40px]"></div>
+    ) : (
+        <Button
+            key={`delete-button-${index}`}
+            type="button"
+            onClick={() => handleOnDelete(index)}
+            icon={<Delete aria-hidden />}
+            variant="tertiary"
+            size="xsmall"
+        />
+    );
+
+const Periode = ({ item, index, datepicker }) => {
+    const { control } = useFormContext<InntektFormValues>();
+    const value = useWatch({
+        control,
+        name: "inntekteneSomLeggesTilGrunn",
+    });
+
+    return value[index].selected || !item.fraPostene ? datepicker : <div className="min-w-[160px]"></div>;
+};
+
+export const InntekteneSomLeggesTilGrunnTabel = () => {
+    const { control } = useFormContext<InntektFormValues>();
+    const inntekteneSomLeggesTilGrunnField = useFieldArray({
+        control,
+        name: "inntekteneSomLeggesTilGrunn",
+    });
+
+    const handleOnDelete = (index) => {
+        inntekteneSomLeggesTilGrunnField.remove(index);
         if (!index) {
-            fieldArray.append({
+            inntekteneSomLeggesTilGrunnField.append({
                 fraDato: null,
                 tilDato: null,
-                arbeidsgiver: "",
                 totalt: "",
                 beskrivelse: "",
+                selected: false,
                 fraPostene: false,
             });
         }
@@ -54,13 +84,22 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
 
     return (
         <>
-            <TableWrapper heading={["Periode", "Totalt", "Beskrivelse", ""]}>
-                {fieldArray.fields.map((item, index) => {
-                    return (
-                        <TableRowWrapper
-                            key={item.id}
-                            cells={[
-                                <div className="flex gap-x-4">
+            <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
+                {inntekteneSomLeggesTilGrunnField.fields.map((item, index) => (
+                    <TableRowWrapper
+                        key={item.id}
+                        cells={[
+                            <FormControlledCheckbox
+                                key={`inntekteneSomLeggesTilGrunn[${index}].selected`}
+                                name={`inntekteneSomLeggesTilGrunn[${index}].selected`}
+                                legend=""
+                            />,
+                            <Beskrivelse item={item} index={index} />,
+                            <Totalt item={item} index={index} />,
+                            <Periode
+                                item={item}
+                                index={index}
+                                datepicker={
                                     <FormControlledDatePicker
                                         key={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
                                         name={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
@@ -69,6 +108,12 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                                         defaultValue={item?.fraDato ?? null}
                                         hideLabel
                                     />
+                                }
+                            />,
+                            <Periode
+                                item={item}
+                                index={index}
+                                datepicker={
                                     <FormControlledDatePicker
                                         key={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
                                         name={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
@@ -77,21 +122,12 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                                         defaultValue={item?.tilDato ?? null}
                                         hideLabel
                                     />
-                                </div>,
-                                getTotalt(item, index),
-                                getBeskrivelse(item, index),
-                                <Button
-                                    key={`delete-button-${index}`}
-                                    type="button"
-                                    onClick={() => handleOnDelete(index)}
-                                    icon={<Delete aria-hidden />}
-                                    variant="tertiary"
-                                    size="xsmall"
-                                />,
-                            ]}
-                        />
-                    );
-                })}
+                                }
+                            />,
+                            <DeleteButton item={item} index={index} handleOnDelete={handleOnDelete} />,
+                        ]}
+                    />
+                ))}
             </TableWrapper>
             <Button
                 variant="tertiary"
@@ -99,12 +135,12 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
                 size="small"
                 className="w-fit"
                 onClick={() =>
-                    fieldArray.append({
+                    inntekteneSomLeggesTilGrunnField.append({
                         fraDato: null,
                         tilDato: null,
-                        arbeidsgiver: "",
                         totalt: "",
                         beskrivelse: "",
+                        selected: false,
                         fraPostene: false,
                     })
                 }
@@ -116,8 +152,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({
 };
 
 export const UtvidetBarnetrygdTabel = () => {
-    const { control } = useFormContext();
-    const fieldArray: UseFieldArrayReturn<FieldValues, "utvidetBarnetrygd", string> = useFieldArray({
+    const { control } = useFormContext<InntektFormValues>();
+    const fieldArray = useFieldArray({
         control: control,
         name: "utvidetBarnetrygd",
     });
@@ -192,14 +228,24 @@ export const UtvidetBarnetrygdTabel = () => {
 };
 
 export const BarnetilleggTabel = () => {
-    const { control } = useFormContext();
-    const fieldArray: UseFieldArrayReturn<FieldValues, "barnetillegg", string> = useFieldArray({
+    const { saksnummer } = useForskudd();
+    const { api } = useApiData();
+    const { roller } = api.getSakAndRoller(saksnummer);
+    const barnene = roller.filter((rolle) => rolle.rolleType === RolleType.BA);
+    const { control } = useFormContext<InntektFormValues>();
+    const fieldArray = useFieldArray({
         control: control,
         name: "barnetillegg",
     });
 
     return (
-        <>
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." />
+                </div>
+            }
+        >
             <TableWrapper
                 heading={[
                     "Fra og med",
@@ -235,11 +281,9 @@ export const BarnetilleggTabel = () => {
                                 key={`barnetillegg[${index}].barn`}
                                 name={`barnetillegg[${index}].barn`}
                                 label="Barn"
-                                options={[
-                                    { value: "", text: "" },
-                                    { value: "barn_1", text: "Barn 1" },
-                                    { value: "barn_2", text: "Barn 2" },
-                                ]}
+                                options={[{ value: "", text: "Velg barn" }].concat(
+                                    barnene.map((barn) => ({ value: barn.ident, text: barn.navn }))
+                                )}
                                 hideLabel
                             />,
                             <FormControlledSelectField
@@ -288,7 +332,7 @@ export const BarnetilleggTabel = () => {
                     fieldArray.append({
                         fraDato: null,
                         tilDato: null,
-                        barn: "",
+                        barn: { navn: "", foedselnummer: "" },
                         brutto: "",
                         skattesats: "",
                         netto: "",
@@ -297,6 +341,6 @@ export const BarnetilleggTabel = () => {
             >
                 + legg til periode
             </Button>
-        </>
+        </Suspense>
     );
 };

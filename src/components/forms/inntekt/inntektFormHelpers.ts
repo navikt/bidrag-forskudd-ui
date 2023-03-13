@@ -1,13 +1,18 @@
-export const createInntektPayload = (values) => ({
+import { InntektFormValues } from "../../../types/inntektFormValues";
+import { dateOrNull, toISOStringOrNull } from "../../../utils/date-utils";
+
+export const createInntektPayload = (values: InntektFormValues) => ({
     periode: {
         fraDato: toISOStringOrNull(values.periodeFra),
         tilDato: toISOStringOrNull(values.periodeTil),
     },
-    inntekteneSomLeggesTilGrunn: values.inntekteneSomLeggesTilGrunn.map((inntekt) => ({
-        ...inntekt,
-        fraDato: toISOStringOrNull(inntekt.fraDato),
-        tilDato: toISOStringOrNull(inntekt.tilDato),
-    })),
+    inntekteneSomLeggesTilGrunn: values.inntekteneSomLeggesTilGrunn
+        .map((inntekt) => ({
+            ...inntekt,
+            fraDato: toISOStringOrNull(inntekt.fraDato),
+            tilDato: toISOStringOrNull(inntekt.tilDato),
+        }))
+        .filter((inntekt) => inntekt.selected),
     utvidetBarnetrygd: values.utvidetBarnetrygd.length
         ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               fraDato: toISOStringOrNull(utvidetBarnetrygd.fraDato),
@@ -31,14 +36,14 @@ export const createInntektPayload = (values) => ({
     toTrinnsKontroll: values.toTrinnsKontroll,
 });
 
-export const createInitialValues = (inntekt) => ({
+export const createInitialValues = (inntekt, skattegrunnlager): InntektFormValues => ({
     periodeFra: dateOrNull(inntekt.periode.fraDato),
     periodeTil: dateOrNull(inntekt.periode.tilDato),
-    inntekteneSomLeggesTilGrunn: inntekt.inntekteneSomLeggesTilGrunn.map((inntekt) => ({
-        ...inntekt,
-        fraDato: dateOrNull(inntekt.fraDato),
-        tilDato: dateOrNull(inntekt.tilDato),
-    })),
+    inntekteneSomLeggesTilGrunn: inntekt.inntekteneSomLeggesTilGrunn.length
+        ? gjennomsnittInntektene(inntekt).concat(
+              mergeSkattegrunlagAndInntektlist(skattegrunnlager, inntekt.inntekteneSomLeggesTilGrunn)
+          )
+        : gjennomsnittInntektene(inntekt).concat(mappedSkattegrunnlager(skattegrunnlager)),
     utvidetBarnetrygd: inntekt.utvidetBarnetrygd.length
         ? inntekt.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
@@ -75,5 +80,52 @@ export const createInitialValues = (inntekt) => ({
     toTrinnsKontroll: inntekt.toTrinnsKontroll,
 });
 
-const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
-const toISOStringOrNull = (date?: Date): string | null => date?.toISOString() ?? null;
+const transformSkattegrunnlager = (year) =>
+    year.grunnlag.map((grunnlag) => ({
+        fraDato: new Date(year.skatteoppgjoersdato),
+        tilDato: new Date(year.skatteoppgjoersdato, 12, 0),
+        beskrivelse: `${grunnlag.tekniskNavn} ${year.skatteoppgjoersdato}`,
+        totalt: grunnlag.beloep,
+        selected: false,
+        fraPostene: true,
+    }));
+
+const transformInntekt = (inntekt) => ({
+    ...inntekt,
+    fraDato: dateOrNull(inntekt.fraDato),
+    tilDato: dateOrNull(inntekt.tilDato),
+    selected: true,
+});
+
+const gjennomsnittInntektene = (inntekt) =>
+    [
+        {
+            fraDato: new Date(),
+            tilDato: new Date(new Date().getFullYear(), 12, 0),
+            beskrivelse: "3 måneder beregnet",
+            totalt: inntekt.gjennomsnittInntektSisteTreMaaneder.aarsInntekt,
+            selected: false,
+            fraPostene: true,
+        },
+        {
+            fraDato: new Date(),
+            tilDato: new Date(new Date().getFullYear(), 12, 0),
+            beskrivelse: "12 måneder beregnet",
+            totalt: inntekt.gjennomsnittInntektSisteTolvMaaneder.aarsInntekt,
+            selected: false,
+            fraPostene: true,
+        },
+    ].filter((gjennomsnittInntekt) =>
+        filterOutSelectedIncomes(gjennomsnittInntekt, inntekt.inntekteneSomLeggesTilGrunn)
+    );
+
+const filterOutSelectedIncomes = (inntektFraPostene, inntekteneSomLeggesTilGrunn) => {
+    const exists = inntekteneSomLeggesTilGrunn.find((inntekt) => inntekt.beskrivelse === inntektFraPostene.beskrivelse);
+    return !exists;
+};
+const mappedSkattegrunnlager = (skattegrunnlager) => skattegrunnlager.map(transformSkattegrunnlager).flat();
+const mergeSkattegrunlagAndInntektlist = (skattegrunnlager, inntektene) =>
+    mappedSkattegrunnlager(skattegrunnlager)
+        .filter((skattegrunnlag) => filterOutSelectedIncomes(skattegrunnlag, inntektene))
+        .concat(inntektene.map(transformInntekt))
+        .sort((a, b) => a.fraDato - b.fraDato);

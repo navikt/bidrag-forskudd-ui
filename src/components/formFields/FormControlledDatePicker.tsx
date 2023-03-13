@@ -3,7 +3,25 @@ import { useController, useFormContext } from "react-hook-form";
 
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 
-export const FormControlledDatePicker = ({ name, label, defaultValue, placeholder, hideLabel }) => {
+interface FormControlledDatePickerProps {
+    name: string;
+    label: string;
+    defaultValue: Date | null;
+    placeholder: string;
+    hideLabel?: boolean;
+    className?: string;
+    resetDefaultValue?: boolean;
+}
+
+export const FormControlledDatePicker = ({
+    name,
+    label,
+    defaultValue,
+    placeholder,
+    hideLabel,
+    className,
+    resetDefaultValue,
+}: FormControlledDatePickerProps) => {
     const {
         control,
         formState: { errors },
@@ -18,6 +36,8 @@ export const FormControlledDatePicker = ({ name, label, defaultValue, placeholde
             onChange={field.onChange}
             defaultValue={defaultValue}
             hideLabel={hideLabel}
+            className={className}
+            resetDefaultValue={resetDefaultValue}
         />
     );
 };

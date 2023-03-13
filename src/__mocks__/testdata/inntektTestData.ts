@@ -24,7 +24,7 @@ export interface InntektSomLeggesTilGrunn {
     fraPostene: boolean;
 }
 
-interface Barn {
+export interface Barn {
     foedselnummer: string;
     navn: string;
 }

@@ -1,15 +1,15 @@
 import { UNSAFE_DatePicker, UNSAFE_useRangeDatepicker } from "@navikt/ds-react";
 import { useEffect } from "react";
 
-export const DatePickerRange = ({ onChange, defaultValues }) => {
+export const DatePickerRange = ({ onChange, defaultValues, resetDefaultValues }) => {
     const { datepickerProps, toInputProps, fromInputProps, setSelected } = UNSAFE_useRangeDatepicker({
         defaultSelected: defaultValues,
         onRangeChange: onChange,
     });
 
     useEffect(() => {
-        if (defaultValues) setSelected(defaultValues);
-    }, [defaultValues]);
+        setSelected(defaultValues);
+    }, [defaultValues, resetDefaultValues]);
 
     return (
         <div className="min-h-96">

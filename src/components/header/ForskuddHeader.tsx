@@ -1,25 +1,17 @@
-import { useApi } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { memo, useEffect } from "react";
 
-import { Api as BidragBehandlingApi } from "../../api/BidragBehandlingApi";
-import environment from "../../environment";
+import { BEHANDLING_API } from "../../constants/api";
 import { useApiData } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
 
 export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
     const { api } = useApiData();
 
-    const behandlingApi = useApi(
-        new BidragBehandlingApi({ baseURL: environment.url.bidragBehandling }),
-        "bidrag-behandling",
-        "fss-gcp"
-    );
-
     useEffect(() => {
         try {
-            behandlingApi.behandling.hentBehandling(1).then((r) => {
+            BEHANDLING_API.behandling.hentBehandling(1).then((r) => {
                 console.log(r);
             });
         } catch (e) {

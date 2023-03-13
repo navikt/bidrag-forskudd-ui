@@ -1,5 +1,6 @@
 import { arbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { behandlingData } from "../testdata/behandlingTestData";
+import { createBoforholdData } from "../testdata/boforholdTestData";
 import { createSkattegrunnlag } from "../testdata/grunnlagTestData";
 import { inntektData } from "../testdata/inntektTestData";
 
@@ -15,6 +16,9 @@ export const initMockData = () => {
     }
     if (!localStorage.getItem("skattegrunlag-1234")) {
         localStorage.setItem(`skattegrunlag-1234`, JSON.stringify(createSkattegrunnlag()));
+    }
+    if (!localStorage.getItem("boforhold-1234")) {
+        localStorage.setItem(`boforhold-1234`, JSON.stringify(createBoforholdData()));
     }
 
     // setInterval(

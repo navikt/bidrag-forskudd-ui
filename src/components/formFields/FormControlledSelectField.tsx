@@ -2,7 +2,26 @@ import { Select } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
-export const FormControlledSelectField = ({ name, label, options, hideLabel }) => {
+interface Option {
+    value: string;
+    text: string;
+}
+
+interface FormControlledSelectFieldProps {
+    name: string;
+    label: string;
+    options: Option[];
+    hideLabel?: boolean;
+    className?: string;
+}
+
+export const FormControlledSelectField = ({
+    name,
+    label,
+    options,
+    hideLabel,
+    className,
+}: FormControlledSelectFieldProps) => {
     const {
         control,
         formState: { errors },
@@ -13,7 +32,7 @@ export const FormControlledSelectField = ({ name, label, options, hideLabel }) =
     return (
         <Select
             label={label}
-            className="w-52"
+            className={`w-52 ${className}`}
             size="small"
             value={field.value}
             onChange={field.onChange}

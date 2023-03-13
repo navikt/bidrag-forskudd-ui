@@ -27,7 +27,7 @@ export default () => {
 const Virkningstidspunkt = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { api } = useMockApi();
-    const { data: behandling } = api.getBehandlingData(saksnummer);
+    const { data: behandling } = api.getBehandling(saksnummer);
 
     return (
         <Suspense
@@ -118,8 +118,8 @@ const VirkningstidspunktView = ({ behandling }) => {
 const Inntekter = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { api: mockApi } = useMockApi();
-    const { data: inntekt } = mockApi.getInntektData(saksnummer);
-    const { data: arbeidsforholder } = mockApi.getArbeidsforholdData(saksnummer);
+    const { data: inntekt } = mockApi.getInntekt(saksnummer);
+    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(saksnummer);
 
     return (
         <Suspense>

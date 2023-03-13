@@ -1,7 +1,6 @@
-import { ExternalLink } from "@navikt/ds-icons";
-import { BodyShort, Button, Heading, Label, Link, Loader, Select, Textarea } from "@navikt/ds-react";
+import { BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
@@ -13,12 +12,15 @@ import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAar
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { ActionStatus } from "../../types/actionStatus";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { DatePickerInput } from "../date-picker/DatePickerInput";
+import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
+import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
+import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
+import { ActionButtons } from "./inntekt/ActionButtons";
 
 const createInitialValues = (behandling) =>
     ({
-        virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : undefined,
+        virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : null,
         aarsak: behandling.aarsak ?? "",
         avslag: behandling.avslag ?? "",
         begrunnelseMedIVedtakNotat: behandling.begrunnelseMedIVedtakNotat ?? "",
@@ -28,8 +30,8 @@ const createInitialValues = (behandling) =>
 export default () => {
     const { saksnummer } = useForskudd();
     const { api } = useMockApi();
-    const { data: behandling, refetch, isRefetching } = api.getBehandlingData(saksnummer);
-    const mutation = api.postBehandlingData(saksnummer);
+    const { data: behandling, refetch, isRefetching } = api.getBehandling(saksnummer);
+    const mutation = api.postBehandling(saksnummer);
 
     return (
         <Suspense
@@ -60,43 +62,42 @@ const VirkningstidspunktForm = ({
     isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
-    const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep, saksnummer } = useForskudd();
+    const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep } = useForskudd();
     const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
     const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
     const channel = new BroadcastChannel("virkningstidspunkt");
 
-    const {
-        handleSubmit,
-        control,
-        reset,
-        getValues,
-        formState: { errors },
-    } = useForm({
+    const useFormMethods = useForm({
         defaultValues: initialValues,
     });
 
     const fieldsForNotat = useWatch({
-        control,
+        control: useFormMethods.control,
         name: ["virkningstidspunkt", "aarsak", "begrunnelseMedIVedtakNotat"],
     });
+
+    useEffect(() => {
+        if (!virkningstidspunktFormValues) setVirkningstidspunktFormValues(initialValues);
+
+        return () => {
+            setVirkningstidspunktFormValues(useFormMethods.getValues());
+        };
+    }, []);
 
     useEffect(() => {
         channel.postMessage(JSON.stringify(fieldsForNotat));
     }, [fieldsForNotat]);
 
     useEffect(() => {
-        if (!virkningstidspunktFormValues) setVirkningstidspunktFormValues(initialValues);
-
-        return () => {
-            setVirkningstidspunktFormValues(getValues());
-        };
-    }, []);
+        if (action === ActionStatus.REFETCHED) setAction(ActionStatus.IDLE);
+    }, [action]);
 
     const onRefetch = async () => {
         const { data } = await refetch();
         const values = createInitialValues(data);
         setVirkningstidspunktFormValues(values);
-        reset(values);
+        useFormMethods.reset(values);
+        setAction(ActionStatus.REFETCHED);
     };
 
     const onSave = async () => {
@@ -105,7 +106,7 @@ const VirkningstidspunktForm = ({
     };
 
     const save = async () => {
-        const values = getValues();
+        const values = useFormMethods.getValues();
         setVirkningstidspunktFormValues(values);
         await mutation.mutateAsync({ ...behandling, ...values });
         setAction(ActionStatus.IDLE);
@@ -122,130 +123,79 @@ const VirkningstidspunktForm = ({
             <Heading level="2" size="xlarge">
                 Virkningstidspunkt
             </Heading>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="grid gap-y-4 mt-4">
-                    <FlexRow className="gap-x-12">
-                        <div className="flex gap-x-2">
-                            <Label size="small">Søknadstype</Label>
-                            <BodyShort size="small">{behandling.soknadType}</BodyShort>
-                        </div>
-                        <div className="flex gap-x-2">
-                            <Label size="small">Søknad fra</Label>
-                            <BodyShort size="small">{behandling.soknadFra}</BodyShort>
-                        </div>
-                        <div className="flex gap-x-2">
-                            <Label size="small">Mottat dato</Label>
-                            <BodyShort size="small">{behandling.soktFraDato}</BodyShort>
-                        </div>
-                        <div className="flex gap-x-2">
-                            <Label size="small">Søkt fra dato</Label>
-                            <BodyShort size="small">{behandling.mottatDato}</BodyShort>
-                        </div>
-                    </FlexRow>
-                    <FlexRow className="gap-x-8">
-                        <Controller
-                            control={control}
-                            name="virkningstidspunkt"
-                            render={({ field }) => (
-                                <DatePickerInput
-                                    label="Virkningstidspunkt"
-                                    onChange={field.onChange}
-                                    defaultValue={initialValues.virkningstidspunkt}
-                                />
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name="aarsak"
-                            render={({ field }) => (
-                                <Select
-                                    label="Årsak"
-                                    className="w-52"
-                                    size="small"
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                >
-                                    <option value="">Velg årsak</option>
-                                    {Object.entries(ForskuddBeregningKodeAarsak).map((entry) => (
-                                        <option key={entry[0]} value={entry[0]}>
-                                            {entry[1]}
-                                        </option>
-                                    ))}
-                                </Select>
-                            )}
-                        />
-                        <Controller
-                            control={control}
-                            name="avslag"
-                            render={({ field }) => (
-                                <Select
-                                    label="Avslag/opphør"
-                                    className="w-52"
-                                    size="small"
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                >
-                                    <option value=""></option>
-                                    <option value="avslag_1">Avslag 1</option>
-                                    <option value="avslag_2">Avslag 2</option>
-                                </Select>
-                            )}
-                        />
-                    </FlexRow>
-                    <Controller
-                        control={control}
-                        name="begrunnelseMedIVedtakNotat"
-                        render={({ field }) => (
-                            <Textarea
-                                label="Begrunnelse (med i vedtaket og notat)"
-                                size="small"
-                                value={field.value}
-                                onChange={field.onChange}
+            <FormProvider {...useFormMethods}>
+                <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
+                    <div className="grid gap-y-4 mt-4">
+                        <FlexRow className="gap-x-12">
+                            <div className="flex gap-x-2">
+                                <Label size="small">Søknadstype</Label>
+                                <BodyShort size="small">{behandling.soknadType}</BodyShort>
+                            </div>
+                            <div className="flex gap-x-2">
+                                <Label size="small">Søknad fra</Label>
+                                <BodyShort size="small">{behandling.soknadFra}</BodyShort>
+                            </div>
+                            <div className="flex gap-x-2">
+                                <Label size="small">Mottat dato</Label>
+                                <BodyShort size="small">{behandling.soktFraDato}</BodyShort>
+                            </div>
+                            <div className="flex gap-x-2">
+                                <Label size="small">Søkt fra dato</Label>
+                                <BodyShort size="small">{behandling.mottatDato}</BodyShort>
+                            </div>
+                        </FlexRow>
+                        <FlexRow className="gap-x-8">
+                            <FormControlledDatePicker
+                                name="virkningstidspunkt"
+                                label="Virkningstidspunkt"
+                                placeholder="DD.MM.ÅÅÅÅ"
+                                defaultValue={initialValues.virkningstidspunkt}
+                                resetDefaultValue={action === ActionStatus.REFETCHED}
+                                hideLabel
                             />
-                        )}
-                    />
-                    <Controller
-                        control={control}
-                        name="begrunnelseKunINotat"
-                        render={({ field }) => (
-                            <Textarea
-                                label="Begrunnelse (kun med i notat)"
-                                size="small"
-                                value={field.value}
-                                onChange={field.onChange}
+                            <FormControlledSelectField
+                                name="aarsak"
+                                label="Årsak"
+                                options={Object.entries(ForskuddBeregningKodeAarsak).map((entry) => ({
+                                    value: entry[0],
+                                    text: entry[1],
+                                }))}
+                                hideLabel
                             />
-                        )}
-                    />
-                    <FlexRow>
-                        <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
-                            Gå videre
-                        </Button>
-                        <Button
-                            type="button"
-                            loading={isRefetching}
-                            variant="secondary"
-                            onClick={onRefetch}
-                            className="w-max"
-                            size="small"
-                        >
-                            Oppfrisk
-                        </Button>
-                        <Button
-                            type="button"
-                            loading={action === ActionStatus.SAVING}
-                            variant="secondary"
-                            onClick={onSave}
-                            className="w-max"
-                            size="small"
-                        >
-                            Lagre
-                        </Button>
-                        <Link href={`/forskudd/${saksnummer}/notat`} target="_blank" className="font-bold">
-                            Vis notat <ExternalLink aria-hidden />
-                        </Link>
-                    </FlexRow>
-                </div>
-            </form>
+                            <FormControlledSelectField
+                                name="avslag"
+                                label="Avslag/opphør"
+                                options={[
+                                    {
+                                        value: "",
+                                        text: "",
+                                    },
+                                    {
+                                        value: "avslag_1",
+                                        text: "Avslag 1",
+                                    },
+                                    {
+                                        value: "avslag_2",
+                                        text: "Avslag 2",
+                                    },
+                                ]}
+                                hideLabel
+                            />
+                        </FlexRow>
+                        <FormControlledTextarea
+                            name="begrunnelseMedIVedtakNotat"
+                            label="Begrunnelse (med i vedtaket og notat)"
+                        />
+                        <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+                        <ActionButtons
+                            action={action}
+                            onSave={onSave}
+                            onRefetch={onRefetch}
+                            isRefetching={isRefetching}
+                        />
+                    </div>
+                </form>
+            </FormProvider>
         </div>
     );
 };

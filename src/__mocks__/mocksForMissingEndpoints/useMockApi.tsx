@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { BehandlingData } from "../testdata/behandlingTestData";
+import { BoforholdData } from "../testdata/boforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
 
 export const useMockApi = () => {
@@ -15,7 +16,7 @@ export const useMockApi = () => {
             setTimeout(() => resolve(result), 1000);
         });
 
-    const getBehandlingData = (saksnummer: string) =>
+    const getBehandling = (saksnummer: string) =>
         useQuery({
             queryKey: `behandling-${saksnummer}`,
             queryFn: (): Promise<BehandlingData> =>
@@ -24,7 +25,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const postBehandlingData = (saksnummer: string) =>
+    const postBehandling = (saksnummer: string) =>
         useMutation({
             mutationFn: (payload: BehandlingData): Promise<BehandlingData> => {
                 localStorage.setItem(`behandling-${saksnummer}`, JSON.stringify(payload));
@@ -35,7 +36,7 @@ export const useMockApi = () => {
             },
         });
 
-    const getInntektData = (saksnummer: string) =>
+    const getInntekt = (saksnummer: string) =>
         useQuery({
             queryKey: `inntekt-${saksnummer}`,
             queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt-${saksnummer}`))),
@@ -43,7 +44,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const postInntektData = (saksnummer: string) =>
+    const postInntekt = (saksnummer: string) =>
         useMutation({
             mutationFn: (payload: InntektData): Promise<InntektData> => {
                 localStorage.setItem(`inntekt-${saksnummer}`, JSON.stringify(payload));
@@ -54,7 +55,7 @@ export const useMockApi = () => {
             },
         });
 
-    const getArbeidsforholdData = (saksnummer: string) =>
+    const getArbeidsforhold = (saksnummer: string) =>
         useQuery({
             queryKey: `arbeidsforhold-${saksnummer}`,
             queryFn: (): Promise<ArbeidsforholdData[]> =>
@@ -72,13 +73,35 @@ export const useMockApi = () => {
             suspense: true,
         });
 
+    const getBoforhold = (saksnummer: string) =>
+        useQuery({
+            queryKey: `boforhold-${saksnummer}`,
+            queryFn: (): Promise<BoforholdData> =>
+                fakeFetch(JSON.parse(localStorage.getItem(`boforhold-${saksnummer}`))),
+            staleTime: Infinity,
+            suspense: true,
+        });
+
+    const postBoforhold = (saksnummer: string) =>
+        useMutation({
+            mutationFn: (payload: BoforholdData): Promise<BehandlingData> => {
+                localStorage.setItem(`boforhold-${saksnummer}`, JSON.stringify(payload));
+                return fakeFetch(payload);
+            },
+            onSuccess: (data) => {
+                queryClient.setQueryData(`boforhold-${saksnummer}`, data);
+            },
+        });
+
     const api = {
-        getBehandlingData,
-        postBehandlingData,
-        getInntektData,
-        postInntektData,
-        getArbeidsforholdData,
+        getBehandling,
+        postBehandling,
+        getInntekt,
+        postInntekt,
+        getArbeidsforhold,
         getSkattegrunlag,
+        getBoforhold,
+        postBoforhold,
     };
 
     return { api, networkError };

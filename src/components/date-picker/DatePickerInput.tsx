@@ -9,6 +9,7 @@ interface DatePickerModalProps {
     hideLabel?: boolean;
     className?: string;
     defaultValue?: Date;
+    resetDefaultValue?: boolean;
 }
 
 export const DatePickerInput = ({
@@ -19,6 +20,7 @@ export const DatePickerInput = ({
     hideLabel,
     className,
     defaultValue,
+    resetDefaultValue,
 }: DatePickerModalProps) => {
     const { datepickerProps, inputProps, setSelected } = UNSAFE_useDatepicker({
         onDateChange: (date) => {
@@ -29,8 +31,8 @@ export const DatePickerInput = ({
     });
 
     useEffect(() => {
-        if (defaultValue) setSelected(defaultValue);
-    }, [defaultValue]);
+        setSelected(defaultValue);
+    }, [defaultValue, resetDefaultValue]);
 
     return (
         <UNSAFE_DatePicker {...datepickerProps}>
