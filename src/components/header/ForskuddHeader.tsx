@@ -12,7 +12,7 @@ export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
 
     useEffect(() => {
         try {
-            BEHANDLING_API.api.hentBehandling(Number(saksnummer)).then(({data}) => {
+            BEHANDLING_API.api.hentBehandling(Number(saksnummer)).then(({ data }) => {
                 const { roller } = data;
                 console.log(data);
             });
@@ -20,8 +20,6 @@ export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
             console.log(e);
         }
     }, []);
-
-    
 
     return (
         <div className="bg-[var(--a-gray-50)] border-[var(--a-border-divider)] border-solid border-b">
