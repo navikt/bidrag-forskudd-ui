@@ -16,5 +16,5 @@ export const BIDRAG_GRUNNLAG_API = useApi(
 export const BEHANDLING_API = useApi(
     new BidragBehandlingApi({ baseURL: environment.url.bidragBehandling }),
     "bidrag-behandling",
-    "fss-gcp"
+    "gcp"
 );

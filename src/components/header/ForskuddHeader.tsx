@@ -1,24 +1,21 @@
 import { Heading } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
-import React, { memo, useEffect } from "react";
+import React, { memo, useEffect, useState } from "react";
 
 import { BEHANDLING_API } from "../../constants/api";
-import { useApiData } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
 
-export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
-    const { api } = useApiData();
-    const { sak, roller } = api.getSakAndRoller(saksnummer);
+export const ForskuddHeader = memo(({ behandlingId }: { behandlingId: number }) => {
+    const [saksnummer, setSaksnummer] = useState(null);
+    const [roller, setRoller] = useState([]);
 
     useEffect(() => {
-        try {
-            BEHANDLING_API.api.hentBehandling(Number(saksnummer)).then(({ data }) => {
-                const { roller } = data;
-                console.log(data);
-            });
-        } catch (e) {
-            console.log(e);
-        }
+        // todo remove hardcoded 1
+        BEHANDLING_API.api.hentBehandling(1).then(({ data }) => {
+            setRoller(data.roller);
+            setSaksnummer(data.saksnummer);
+        });
+
     }, []);
 
     return (
@@ -30,8 +27,8 @@ export const ForskuddHeader = memo(({ saksnummer }: { saksnummer: string }) => {
             >
                 Søknad om forskudd{" "}
                 <span className="text-base flex items-center font-normal">
-                    Saksnr. {sak?.saksnummer}{" "}
-                    <CopyToClipboard size="small" copyText={sak?.saksnummer} popoverText="Kopierte saksnummer" />
+                    Saksnr. {saksnummer}{" "}
+                    <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
                 </span>
             </Heading>
             <div className="grid grid-cols-[max-content_auto]">

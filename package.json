@@ -13,7 +13,9 @@
     "api:person": "swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "swagger-typescript-api -p https://bidrag-grunnlag-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
     "api:bidragVedtak": "swagger-typescript-api -p https://bidrag-vedtak-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
-    "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragBehandlingApi.ts -o src/api",
+    "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
+    "local:api:bidragBehandling": "swagger-typescript-api -p http://localhost:8999/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
+    "types:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs -o src/types",
     "api:bidragSak": "swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs --axios -n BidragSakApi.ts -o src/api"
   },
   "dependencies": {
