@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
-import { initMock } from "./__mocks__/msw";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";

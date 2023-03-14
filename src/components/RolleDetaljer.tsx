@@ -1,7 +1,7 @@
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React from "react";
-import { RolleDto } from "../api/BidragBehandlingApi";
 
+import { RolleDto } from "../api/BidragBehandlingApi";
 import { RolleTag } from "./RolleTag";
 
 export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: RolleDto; withBorder?: boolean }) => {

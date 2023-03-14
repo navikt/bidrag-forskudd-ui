@@ -15,7 +15,6 @@ export const ForskuddHeader = memo(({ behandlingId }: { behandlingId: number }) 
             setRoller(data.roller);
             setSaksnummer(data.saksnummer);
         });
-
     }, []);
 
     return (
