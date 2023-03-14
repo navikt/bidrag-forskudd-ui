@@ -11,7 +11,7 @@ export const ForskuddHeader = memo(({ behandlingId }: { behandlingId: number }) 
 
     useEffect(() => {
         // todo remove hardcoded 1
-        BEHANDLING_API.api.hentBehandling(1).then(({ data }) => {
+        BEHANDLING_API.api.hentBehandling(behandlingId).then(({ data }) => {
             setRoller(data.roller);
             setSaksnummer(data.saksnummer);
         });
