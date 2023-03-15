@@ -26,8 +26,10 @@ export const FormControlledDatePickerRange = ({
     } = useFormContext();
 
     const onChange = useCallback((range: { from: Date | null; to?: Date | null }) => {
-        setValue(fromFieldName, range.from);
-        setValue(toFieldName, range.to);
+        if (range.from && range.to) {
+            setValue(fromFieldName, range.from);
+            setValue(toFieldName, range.to);
+        }
     }, []);
 
     return (
