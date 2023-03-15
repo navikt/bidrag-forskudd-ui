@@ -21,8 +21,8 @@ export const initMockData = () => {
     if (!localStorage.getItem("boforhold")) {
         localStorage.setItem(`boforhold`, JSON.stringify(createBoforholdData()));
     }
-    if (!localStorage.getItem("ainntekt-1234")) {
-        localStorage.setItem(`ainntekt-1234`, JSON.stringify(createAInntektData()));
+    if (!localStorage.getItem("ainntekt")) {
+        localStorage.setItem(`ainntekt`, JSON.stringify(createAInntektData()));
     }
 
     // setInterval(

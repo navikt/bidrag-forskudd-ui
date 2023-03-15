@@ -74,9 +74,8 @@ export const useMockApi = () => {
 
     const getAndreTyperInntekt = (saksnummer: string) =>
         useQuery({
-            queryKey: `ainntekt-${saksnummer}`,
-            queryFn: (): Promise<AndreInntekter[]> =>
-                fakeFetch(JSON.parse(localStorage.getItem(`ainntekt-${saksnummer}`))),
+            queryKey: `ainntekt`,
+            queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
             staleTime: Infinity,
             suspense: true,
         });
