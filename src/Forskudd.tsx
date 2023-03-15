@@ -17,8 +17,6 @@ const queryClient = new QueryClient({
     },
 });
 
-// TODO: move initMock() to app.tsx once backend is ready
-// initMock();
 initMockData();
 export default function Forskudd() {
     return (
