@@ -1,3 +1,4 @@
+import { createAInntektData } from "../testdata/aInntektTestData";
 import { arbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { behandlingData } from "../testdata/behandlingTestData";
 import { createBoforholdData } from "../testdata/boforholdTestData";
@@ -19,6 +20,9 @@ export const initMockData = () => {
     }
     if (!localStorage.getItem("boforhold")) {
         localStorage.setItem(`boforhold`, JSON.stringify(createBoforholdData()));
+    }
+    if (!localStorage.getItem("ainntekt-1234")) {
+        localStorage.setItem(`ainntekt-1234`, JSON.stringify(createAInntektData()));
     }
 
     // setInterval(

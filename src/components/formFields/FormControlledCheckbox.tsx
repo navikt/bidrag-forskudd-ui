@@ -26,7 +26,7 @@ export const FormControlledCheckbox = ({
     };
 
     return (
-        <Checkbox checked={field.value} value={field.value} onChange={handleOnChange} size="small">
+        <Checkbox {...field} checked={field.value} onChange={handleOnChange} size="small">
             {legend}
         </Checkbox>
     );

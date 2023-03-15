@@ -36,14 +36,16 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     toTrinnsKontroll: values.toTrinnsKontroll,
 });
 
-export const createInitialValues = (inntekt, skattegrunnlager): InntektFormValues => ({
+export const createInitialValues = (inntekt, skattegrunnlager, aInntektene): InntektFormValues => ({
     periodeFra: dateOrNull(inntekt.periode.fraDato),
     periodeTil: dateOrNull(inntekt.periode.tilDato),
     inntekteneSomLeggesTilGrunn: inntekt.inntekteneSomLeggesTilGrunn.length
         ? gjennomsnittInntektene(inntekt).concat(
-              mergeSkattegrunlagAndInntektlist(skattegrunnlager, inntekt.inntekteneSomLeggesTilGrunn)
+              mergeSkattegrunlagAndInntektlist(skattegrunnlager, inntekt.inntekteneSomLeggesTilGrunn, aInntektene)
           )
-        : gjennomsnittInntektene(inntekt).concat(mappedSkattegrunnlager(skattegrunnlager)),
+        : gjennomsnittInntektene(inntekt)
+              .concat(mappedSkattegrunnlager(skattegrunnlager))
+              .concat(mappedAInntektene(aInntektene)),
     utvidetBarnetrygd: inntekt.utvidetBarnetrygd.length
         ? inntekt.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
@@ -82,8 +84,8 @@ export const createInitialValues = (inntekt, skattegrunnlager): InntektFormValue
 
 const transformSkattegrunnlager = (year) =>
     year.grunnlag.map((grunnlag) => ({
-        fraDato: new Date(year.skatteoppgjoersdato),
-        tilDato: new Date(year.skatteoppgjoersdato, 12, 0),
+        fraDato: null,
+        tilDato: null,
         beskrivelse: `${grunnlag.tekniskNavn} ${year.skatteoppgjoersdato}`,
         totalt: grunnlag.beloep,
         selected: false,
@@ -97,19 +99,28 @@ const transformInntekt = (inntekt) => ({
     selected: true,
 });
 
+const transformAInntekt = (inntekt) => ({
+    fraDato: null,
+    tilDato: null,
+    beskrivelse: `${inntekt.tekniskNavn} ${inntekt.aar}`,
+    totalt: inntekt.beloep,
+    fraPostene: true,
+    selected: false,
+});
+
 const gjennomsnittInntektene = (inntekt) =>
     [
         {
-            fraDato: new Date(),
-            tilDato: new Date(new Date().getFullYear(), 12, 0),
+            fraDato: null,
+            tilDato: null,
             beskrivelse: "3 måneder beregnet",
             totalt: inntekt.gjennomsnittInntektSisteTreMaaneder.aarsInntekt,
             selected: false,
             fraPostene: true,
         },
         {
-            fraDato: new Date(),
-            tilDato: new Date(new Date().getFullYear(), 12, 0),
+            fraDato: null,
+            tilDato: null,
             beskrivelse: "12 måneder beregnet",
             totalt: inntekt.gjennomsnittInntektSisteTolvMaaneder.aarsInntekt,
             selected: false,
@@ -120,12 +131,22 @@ const gjennomsnittInntektene = (inntekt) =>
     );
 
 const filterOutSelectedIncomes = (inntektFraPostene, inntekteneSomLeggesTilGrunn) => {
-    const exists = inntekteneSomLeggesTilGrunn.find((inntekt) => inntekt.beskrivelse === inntektFraPostene.beskrivelse);
+    const exists = inntekteneSomLeggesTilGrunn.find(
+        (inntekt) => inntekt.beskrivelse.toLowerCase() === inntektFraPostene.beskrivelse.toLowerCase()
+    );
     return !exists;
 };
 const mappedSkattegrunnlager = (skattegrunnlager) => skattegrunnlager.map(transformSkattegrunnlager).flat();
-const mergeSkattegrunlagAndInntektlist = (skattegrunnlager, inntektene) =>
+const mappedAInntektene = (aInntektene) => aInntektene.map(transformAInntekt);
+const mergeSkattegrunlagAndInntektlist = (skattegrunnlager, inntektene, aInntektene) =>
     mappedSkattegrunnlager(skattegrunnlager)
         .filter((skattegrunnlag) => filterOutSelectedIncomes(skattegrunnlag, inntektene))
         .concat(inntektene.map(transformInntekt))
+        .concat(mappedAInntektene(aInntektene).filter((aInntekt) => filterOutSelectedIncomes(aInntekt, inntektene)))
         .sort((a, b) => a.fraDato - b.fraDato);
+
+// saksbehandlers registrerte inntekter og enkeltinntekter bør ikke overlape med innhentedeTotalsummerteInntekter
+// enkeltinntekter av samme type bør ikke overlape
+// saksbehandlers registrerte inntekter av samme type bør ikke overlape
+// innhentedeTotalsummerteInntekter - de bør ikke overlapper med andre perioder i samme kategori og av samme gruppe
+// innhentedeTotalsummerteInntekter - kapitalinntekt og næringsinntekter kan løpe i parallell med Lønn og trekk eller Skattegrunnlag

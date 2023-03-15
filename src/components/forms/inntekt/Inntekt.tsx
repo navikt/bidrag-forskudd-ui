@@ -6,6 +6,7 @@ import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { AndreInntekter } from "../../../__mocks__/testdata/aInntektTestData";
 import { ArbeidsforholdData } from "../../../__mocks__/testdata/arbeidsforholdTestData";
 import { InntektData } from "../../../__mocks__/testdata/inntektTestData";
 import { NOTAT_FIELDS } from "../../../constants/notatFields";
@@ -51,6 +52,7 @@ export default () => {
     const { saksnummer } = useForskudd();
     const { api: mockApi } = useMockApi();
     const { data: skattegrunnlager } = mockApi.getSkattegrunlag(saksnummer);
+    const { data: aInntekt } = mockApi.getAndreTyperInntekt(saksnummer);
     const { data: inntekt, refetch, isRefetching } = mockApi.getInntekt(saksnummer);
     const { data: arbeidsforholder } = mockApi.getArbeidsforhold(saksnummer);
     const mutation = mockApi.postInntekt(saksnummer);
@@ -70,6 +72,7 @@ export default () => {
                 isRefetching={isRefetching}
                 mutation={mutation}
                 skattegrunnlager={skattegrunnlager}
+                aInntekt={aInntekt}
             />
         </Suspense>
     );
@@ -77,6 +80,7 @@ export default () => {
 
 const InntektForm = ({
     inntekt,
+    aInntekt,
     arbeidsforholder,
     skattegrunnlager,
     refetch,
@@ -84,6 +88,7 @@ const InntektForm = ({
     mutation,
 }: {
     inntekt: InntektData;
+    aInntekt: AndreInntekter[];
     arbeidsforholder: ArbeidsforholdData[];
     skattegrunnlager: HentSkattegrunnlagResponse[];
     refetch: () => Promise<QueryObserverResult>;
@@ -92,7 +97,7 @@ const InntektForm = ({
 }) => {
     const channel = new BroadcastChannel("inntekter");
     const { inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
-    const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager);
+    const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
     const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
     const [openPeriodDatePicker, setOpenPeriodDatePicker] = useState(false);
 
@@ -122,7 +127,7 @@ const InntektForm = ({
 
     const onRefetch = async () => {
         const { data } = await refetch();
-        const values = createInitialValues(data, skattegrunnlager);
+        const values = createInitialValues(data, skattegrunnlager, aInntekt);
         useFormMethods.reset(values);
         setInntektFormValues(values);
         setAction(ActionStatus.REFETCHED);
@@ -195,7 +200,7 @@ const InntektForm = ({
                             </Accordion.Content>
                         </Accordion.Item>
                     </Accordion>
-                    <div className="grid gap-y-4">
+                    <div className="grid gap-y-4 w-max">
                         <Heading level="3" size="medium">
                             Inntektene som legges til grunn
                         </Heading>

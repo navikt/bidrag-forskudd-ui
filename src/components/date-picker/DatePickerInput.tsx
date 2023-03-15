@@ -31,7 +31,9 @@ export const DatePickerInput = ({
     });
 
     useEffect(() => {
-        setSelected(defaultValue);
+        if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString() || resetDefaultValue) {
+            setSelected(defaultValue);
+        }
     }, [defaultValue, resetDefaultValue]);
 
     return (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
+import { AndreInntekter } from "../testdata/aInntektTestData";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { BehandlingData } from "../testdata/behandlingTestData";
 import { BoforholdData } from "../testdata/boforholdTestData";
@@ -71,6 +72,15 @@ export const useMockApi = () => {
             suspense: true,
         });
 
+    const getAndreTyperInntekt = (saksnummer: string) =>
+        useQuery({
+            queryKey: `ainntekt-${saksnummer}`,
+            queryFn: (): Promise<AndreInntekter[]> =>
+                fakeFetch(JSON.parse(localStorage.getItem(`ainntekt-${saksnummer}`))),
+            staleTime: Infinity,
+            suspense: true,
+        });
+
     const getBoforhold = (saksnummer: string) =>
         useQuery({
             queryKey: `boforhold`,
@@ -95,6 +105,7 @@ export const useMockApi = () => {
         postBehandling,
         getInntekt,
         postInntekt,
+        getAndreTyperInntekt,
         getArbeidsforhold,
         getSkattegrunlag,
         getBoforhold,

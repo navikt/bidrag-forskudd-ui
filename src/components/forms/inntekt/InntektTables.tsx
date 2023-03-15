@@ -1,11 +1,11 @@
 import { Delete } from "@navikt/ds-icons";
 import { BodyShort, Button, Loader } from "@navikt/ds-react";
-import React, { Suspense } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { RolleType } from "../../../api/BidragBehandlingApi";
+import { BEHANDLING_API } from "../../../constants/api";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { RolleType } from "../../../enum/RolleType";
-import { useApiData } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledDatePicker } from "../../formFields/FormControlledDatePicker";
@@ -15,22 +15,22 @@ import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 
 const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
-        <BodyShort className="min-w-[215px]">{item.beskrivelse}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{item.beskrivelse}</BodyShort>
     ) : (
         <FormControlledTextField
-            key={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
-            name={`inntekteneSomLeggesTilGrunn[${index}].beskrivelse`}
+            key={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
+            name={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
             label="Beskrivelse"
             hideLabel
         />
     );
 const Totalt = ({ item, index }) =>
     item.fraPostene ? (
-        <BodyShort className="min-w-[215px]">{item.totalt}</BodyShort>
+        <BodyShort className="min-w-[160px]">{item.totalt}</BodyShort>
     ) : (
         <FormControlledTextField
-            key={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
-            name={`inntekteneSomLeggesTilGrunn[${index}].totalt`}
+            key={`inntekteneSomLeggesTilGrunn.${index}.totalt`}
+            name={`inntekteneSomLeggesTilGrunn.${index}.totalt`}
             label="Totalt"
             type="number"
             hideLabel
@@ -55,18 +55,32 @@ const Periode = ({ item, index, datepicker }) => {
     const { control } = useFormContext<InntektFormValues>();
     const value = useWatch({
         control,
-        name: "inntekteneSomLeggesTilGrunn",
+        name: `inntekteneSomLeggesTilGrunn.${index}.selected`,
     });
 
-    return value[index].selected || !item.fraPostene ? datepicker : <div className="min-w-[160px]"></div>;
+    return <div className={`${value || !item.fraPostene ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = () => {
-    const { control } = useFormContext<InntektFormValues>();
+    const { control, watch } = useFormContext<InntektFormValues>();
     const inntekteneSomLeggesTilGrunnField = useFieldArray({
         control,
         name: "inntekteneSomLeggesTilGrunn",
     });
+
+    useEffect(() => {
+        const subscription = watch((value, { name, type }) => {
+            if (
+                name?.includes("inntekteneSomLeggesTilGrunn") &&
+                ["selected", "fraDato", "tilDato"].some((field) => name?.includes(field))
+            ) {
+                const [index, field] = name.split(/[[\].]+/).slice(1);
+                const fieldValue = value["inntekteneSomLeggesTilGrunn"][index];
+                console.log("fieldValue", fieldValue);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [watch]);
 
     const handleOnDelete = (index) => {
         inntekteneSomLeggesTilGrunnField.remove(index);
@@ -90,8 +104,8 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                         key={item.id}
                         cells={[
                             <FormControlledCheckbox
-                                key={`inntekteneSomLeggesTilGrunn[${index}].selected`}
-                                name={`inntekteneSomLeggesTilGrunn[${index}].selected`}
+                                key={`inntekteneSomLeggesTilGrunn.${index}.selected`}
+                                name={`inntekteneSomLeggesTilGrunn.${index}.selected`}
                                 legend=""
                             />,
                             <Beskrivelse item={item} index={index} />,
@@ -101,8 +115,8 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                                 index={index}
                                 datepicker={
                                     <FormControlledDatePicker
-                                        key={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
-                                        name={`inntekteneSomLeggesTilGrunn[${index}].fraDato`}
+                                        key={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
+                                        name={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
                                         label="Fra og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item?.fraDato ?? null}
@@ -115,8 +129,8 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                                 index={index}
                                 datepicker={
                                     <FormControlledDatePicker
-                                        key={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
-                                        name={`inntekteneSomLeggesTilGrunn[${index}].tilDato`}
+                                        key={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
+                                        name={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
                                         label="Til og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item?.tilDato ?? null}
@@ -134,16 +148,18 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                 type="button"
                 size="small"
                 className="w-fit"
-                onClick={() =>
-                    inntekteneSomLeggesTilGrunnField.append({
-                        fraDato: null,
-                        tilDato: null,
-                        totalt: "",
-                        beskrivelse: "",
-                        selected: false,
-                        fraPostene: false,
-                    })
-                }
+                onClick={useCallback(
+                    () =>
+                        inntekteneSomLeggesTilGrunnField.append({
+                            fraDato: null,
+                            tilDato: null,
+                            totalt: "",
+                            beskrivelse: "",
+                            selected: false,
+                            fraPostene: false,
+                        }),
+                    []
+                )}
             >
                 + legg til periode
             </Button>
@@ -228,10 +244,16 @@ export const UtvidetBarnetrygdTabel = () => {
 };
 
 export const BarnetilleggTabel = () => {
-    const { saksnummer } = useForskudd();
-    const { api } = useApiData();
-    const { roller } = api.getSakAndRoller(saksnummer);
-    const barnene = roller.filter((rolle) => rolle.rolleType === RolleType.BA);
+    const { saksnummer: behandlingId } = useForskudd();
+    const [roller, setRoller] = useState(undefined);
+
+    useEffect(() => {
+        BEHANDLING_API.api.hentBehandling(Number(behandlingId)).then(({ data }) => {
+            setRoller(data.roller);
+        });
+    }, []);
+
+    const barnene = roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const { control } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,

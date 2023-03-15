@@ -4,13 +4,6 @@ export interface Periode {
     fraDato: string;
     tilDato: string;
 }
-
-export interface AndreInntekter {
-    aar: string;
-    beloep: number;
-    tekniskNavn: string;
-    selected: boolean;
-}
 export interface GjennomsnittInntekt {
     aarsInntekt: number;
     maanedInntekt: number;
@@ -48,7 +41,6 @@ export interface InntektData {
     periode: Nullable<Partial<Periode>>;
     gjennomsnittInntektSisteTreMaaneder: Nullable<GjennomsnittInntekt>;
     gjennomsnittInntektSisteTolvMaaneder: Nullable<GjennomsnittInntekt>;
-    andreTyperInntekter: MaybeList<AndreInntekter>;
     inntekteneSomLeggesTilGrunn: MaybeList<InntektSomLeggesTilGrunn>;
     barnetillegg: MaybeList<BarneTilleg>;
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
@@ -70,26 +62,19 @@ export const inntektData = (data = {}) => {
             aarsInntekt: 520000,
             maanedInntekt: 50500,
         },
-        andreTyperInntekter: [
-            {
-                aar: "2019",
-                beloep: 103,
-                tekniskNavn: "kapitalinntekt",
-                selected: false,
-            },
-            {
-                aar: "2021",
-                beloep: 6060,
-                tekniskNavn: "kapitalinntekt",
-                selected: false,
-            },
-        ],
         inntekteneSomLeggesTilGrunn: [
             {
                 fraDato: "2021-01-01",
                 tilDato: "2021-11-05",
                 totalt: 208052,
-                beskrivelse: "Lønns og trekkopgave",
+                beskrivelse: "Lønns og trekkoppgave 2020",
+                fraPostene: true,
+            },
+            {
+                fraDato: "2021-01-01",
+                tilDato: "2021-11-05",
+                totalt: 108052,
+                beskrivelse: "Kapitalinntekt 2019",
                 fraPostene: true,
             },
         ],
