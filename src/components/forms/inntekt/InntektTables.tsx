@@ -245,15 +245,16 @@ export const UtvidetBarnetrygdTabel = () => {
 
 export const BarnetilleggTabel = () => {
     const { saksnummer: behandlingId } = useForskudd();
-    const [roller, setRoller] = useState(undefined);
+    const [roller, setRoller] = useState([]);
+    const [barnene, setBarnene] = useState([]);
 
     useEffect(() => {
         BEHANDLING_API.api.hentBehandling(Number(behandlingId)).then(({ data }) => {
             setRoller(data.roller);
+            setBarnene(data.roller.filter((rolle) => rolle.rolleType === RolleType.BARN));
         });
     }, []);
 
-    const barnene = roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const { control } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
