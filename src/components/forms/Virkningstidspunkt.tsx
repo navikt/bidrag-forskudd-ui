@@ -137,11 +137,11 @@ const VirkningstidspunktForm = ({
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Mottat dato</Label>
-                                <BodyShort size="small">{behandling.soktFraDato}</BodyShort>
+                                <BodyShort size="small">{behandling.mottatDato}</BodyShort>
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Søkt fra dato</Label>
-                                <BodyShort size="small">{behandling.mottatDato}</BodyShort>
+                                <BodyShort size="small">{behandling.soktFraDato}</BodyShort>
                             </div>
                         </FlexRow>
                         <FlexRow className="gap-x-8">

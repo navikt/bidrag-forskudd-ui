@@ -32,7 +32,7 @@ export const ForskuddHeader = memo(({ behandlingId }: { behandlingId: number }) 
             </Heading>
             <div className="grid grid-cols-[max-content_auto]">
                 {roller?.map((rolle, i) => (
-                    <RolleDetaljer key={rolle.fodselsnummer + i} rolle={rolle} withBorder={false} />
+                    <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
                 ))}
             </div>
         </div>
