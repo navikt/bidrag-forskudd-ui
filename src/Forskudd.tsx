@@ -23,7 +23,7 @@ export default function Forskudd() {
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/forskudd/:saksnummer" element={<ForskudWrapper />} />
+                    <Route path="/forskudd/:behandlingId" element={<ForskudWrapper />} />
                     <Route path="/forskudd/:saksnummer/notat" element={<NotatPageWrapper />} />
                     <Route path="/" element={<div>Hello world</div>} />
                 </Routes>
@@ -33,12 +33,12 @@ export default function Forskudd() {
 }
 
 function ForskudWrapper() {
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
 
     return (
         <>
-            <ForskuddHeader behandlingId={Number(saksnummer)} />
-            <ForskuddProvider saksnummer={saksnummer}>
+            <ForskuddProvider behandlingId={Number(behandlingId)}>
+                <ForskuddHeader />
                 <ForskuddPage />
             </ForskuddProvider>
         </>

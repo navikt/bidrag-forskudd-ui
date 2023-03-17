@@ -9,81 +9,32 @@
  * ---------------------------------------------------------------
  */
 
-export enum BehandlingType {
-    FORSKUDD = "FORSKUDD",
-}
-
-export interface CreateBehandlingRequest {
+export interface BehandlingDto {
+    /** @format int64 */
+    id: number;
     behandlingType: BehandlingType;
     soknadType: SoknadType;
     /** @format date-time */
     datoFom: string;
     /** @format date-time */
     datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    soknadFraType: SoknadFraType;
     saksnummer: string;
     behandlerEnhet: string;
     /** @uniqueItems true */
-    roller: CreateRolleDto[];
-}
-
-export interface CreateRolleDto {
-    rolleType: RolleType;
-    ident: string;
-    /** @format date-time */
-    opprettetDato: string;
-}
-
-export enum RolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
-    BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
-}
-
-export enum SoknadType {
-    ENDRING = "ENDRING",
-    EGET_TILTAK = "EGET_TILTAK",
-    SOKNAD = "SOKNAD",
-    INNKREVET_GRUNNLAG = "INNKREVET_GRUNNLAG",
-    INDEKSREGULERING = "INDEKSREGULERING",
-    KLAGE_BEGR_SATS = "KLAGE_BEGR_SATS",
-    KLAGE = "KLAGE",
-    FOLGER_KLAGE = "FOLGER_KLAGE",
-    KORRIGERING = "KORRIGERING",
-    KONVERTERING = "KONVERTERING",
-    OPPHOR = "OPPHOR",
-    PRIVAT_AVTALE = "PRIVAT_AVTALE",
-    BEGR_REVURD = "BEGR_REVURD",
-    REVURDERING = "REVURDERING",
-    KONVERTERT = "KONVERTERT",
-    MANEDLIG_PALOP = "MANEDLIG_PALOP",
-}
-
-export interface CreateBehandlingResponse {
-    /** @format int64 */
-    id: number;
-}
-
-export interface Behandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    saksnummer: string;
-    behandlerEnhet: string;
+    roller: RolleDto[];
     /** @format date-time */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
     avslag?: string;
     begrunnelseMedIVedtakNotat?: string;
     begrunnelseKunINotat?: string;
-    /** @format int64 */
-    id?: number;
-    /** @uniqueItems true */
-    roller: Rolle[];
+}
+
+export enum BehandlingType {
+    FORSKUDD = "FORSKUDD",
 }
 
 export enum ForskuddBeregningKodeAarsakType {
@@ -105,37 +56,6 @@ export enum ForskuddBeregningKodeAarsakType {
     FF = "FF",
 }
 
-export interface Rolle {
-    behandling: Behandling;
-    rolleType: RolleType;
-    ident: string;
-    /** @format date-time */
-    opprettetDato: string;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface BehandlingDto {
-    /** @format int64 */
-    id: number;
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    /** @uniqueItems true */
-    roller: RolleDto[];
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: string;
-    begrunnelseMedIVedtakNotat?: string;
-    begrunnelseKunINotat?: string;
-}
-
 export interface RolleDto {
     /** @format int64 */
     id: number;
@@ -144,6 +64,111 @@ export interface RolleDto {
     /** @format date-time */
     opprettetDato: string;
     navn: string;
+}
+
+export enum RolleType {
+    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
+    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BARN = "BARN",
+    REELL_MOTTAKER = "REELL_MOTTAKER",
+    FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+export enum SoknadFraType {
+    BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
+    BARN18 = "BARN_18",
+    TK = "TK",
+    FTK = "FTK",
+    FYLKESNEMDA = "FYLKESNEMDA",
+    KONVERTERING = "KONVERTERING",
+    BM = "BM",
+    NORSKE_MYNDIGH = "NORSKE_MYNDIGH",
+    BP = "BP",
+    TI = "TI",
+    UTENLANDSKE_MYNDIGH = "UTENLANDSKE_MYNDIGH",
+    VERGE = "VERGE",
+    KOMMUNE = "KOMMUNE",
+}
+
+export enum SoknadType {
+    ENDRING = "ENDRING",
+    EGET_TILTAK = "EGET_TILTAK",
+    SOKNAD = "SOKNAD",
+    INNKREVET_GRUNNLAG = "INNKREVET_GRUNNLAG",
+    INDEKSREGULERING = "INDEKSREGULERING",
+    KLAGE_BEGR_SATS = "KLAGE_BEGR_SATS",
+    KLAGE = "KLAGE",
+    FOLGER_KLAGE = "FOLGER_KLAGE",
+    KORRIGERING = "KORRIGERING",
+    KONVERTERING = "KONVERTERING",
+    OPPHOR = "OPPHOR",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    BEGR_REVURD = "BEGR_REVURD",
+    REVURDERING = "REVURDERING",
+    KONVERTERT = "KONVERTERT",
+    MANEDLIG_PALOP = "MANEDLIG_PALOP",
+}
+
+export interface CreateBehandlingRequest {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    soknadFra: SoknadFraType;
+    saksnummer: string;
+    behandlerEnhet: string;
+    /** @uniqueItems true */
+    roller: CreateRolleDto[];
+}
+
+export interface CreateRolleDto {
+    rolleType: RolleType;
+    ident: string;
+    /** @format date-time */
+    opprettetDato: string;
+}
+
+export interface CreateBehandlingResponse {
+    /** @format int64 */
+    id: number;
+}
+
+export interface Behandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddBeregningKodeAarsakType;
+    avslag?: string;
+    begrunnelseMedIVedtakNotat?: string;
+    begrunnelseKunINotat?: string;
+    /** @format int64 */
+    id?: number;
+    /** @uniqueItems true */
+    roller: Rolle[];
+}
+
+export interface Rolle {
+    behandling: Behandling;
+    rolleType: RolleType;
+    ident: string;
+    /** @format date-time */
+    opprettetDato: string;
+    /** @format int64 */
+    id?: number;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -287,6 +312,38 @@ export class HttpClient<SecurityDataType = unknown> {
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
         /**
+         * @description Henter en behandling
+         *
+         * @tags behandling-controller
+         * @name HentBehandling
+         * @request GET:/api/behandling/{behandlingId}
+         * @secure
+         */
+        hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer en behandling
+         *
+         * @tags behandling-controller
+         * @name OppdaterBehandling
+         * @request PUT:/api/behandling/{behandlingId}
+         * @secure
+         */
+        oppdaterBehandling: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/behandling/${behandlingId}`,
+                method: "PUT",
+                secure: true,
+                ...params,
+            }),
+
+        /**
          * @description Henter en behandlinger
          *
          * @tags behandling-controller
@@ -317,22 +374,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * @description Henter en behandling
-         *
-         * @tags behandling-controller
-         * @name HentBehandling
-         * @request GET:/api/behandling/{behandlingId}
-         * @secure
-         */
-        hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<BehandlingDto, BehandlingDto>({
-                path: `/api/behandling/${behandlingId}`,
-                method: "GET",
-                secure: true,
                 ...params,
             }),
     };

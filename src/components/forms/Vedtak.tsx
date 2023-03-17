@@ -2,10 +2,10 @@ import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
+import { RolleType } from "../../api/BidragBehandlingApi";
 
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
-import { RolleType } from "../../enum/RolleType";
 import environment from "../../environment";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
@@ -13,21 +13,24 @@ import { RolleTag } from "../RolleTag";
 
 export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
-    const { sak } = useForskudd();
+    const { behandling } = useForskudd();
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
-    const rolle = {
-        navn: "Mia  Cathrine Svendsen",
-        fulltNavn: "Mia  Cathrine Svendsen",
-        fodselsnummer: "081020 34566",
-        type: RolleType.BM,
+    const bmIndex = behandling.roller.findIndex(r => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
+    const bm = bmIndex > 0 ? behandling.roller[bmIndex] : {
+        id: -1,
+        rolleType: RolleType.BIDRAGS_MOTTAKER,
+        ident: "UKJENT",
+        opprettetDato: "",
+        navn: "UKJENT",
+        //eksistererer ikke, feil
     };
 
-    const antalBarn = 1;
+    const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
 
     const data = [
         {
-            rolle: RolleType.BA,
+            rolle: RolleType.BARN,
             fnmr: "081020 34566",
             navn: "Amalia Svendsen",
             type: "Forskudd",
@@ -38,7 +41,7 @@ export default () => {
             beløp: 0,
         },
         {
-            rolle: RolleType.BA,
+            rolle: RolleType.BARN,
             fnmr: "081020 34566",
             navn: "Amalia Svendsen",
             type: "Forskudd",
@@ -65,7 +68,7 @@ export default () => {
         throw new Error("Function not implemented.");
     };
 
-    return (
+    return behandling && (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
                 <Heading level="2" size="xlarge">
@@ -88,7 +91,7 @@ export default () => {
                     Oppsummering
                 </Heading>
                 <div>
-                    <Label size="small">Barn i egen husstand: </Label> {antalBarn}
+                    <Label size="small">Barn i egen husstand: </Label> {barn.length}
                 </div>
 
                 <Table>
@@ -132,7 +135,7 @@ export default () => {
                     Forsendelse gjelder:
                 </Heading>
 
-                <RolleDetaljer withBorder={false} rolle={rolle} />
+                <RolleDetaljer withBorder={false} rolle={bm} />
             </div>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">

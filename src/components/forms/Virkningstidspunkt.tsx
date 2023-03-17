@@ -17,6 +17,7 @@ import { FormControlledSelectField } from "../formFields/FormControlledSelectFie
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { ActionButtons } from "./inntekt/ActionButtons";
+import { BehandlingDto } from "../../api/BidragBehandlingApi";
 
 const createInitialValues = (behandling) =>
     ({
@@ -28,9 +29,9 @@ const createInitialValues = (behandling) =>
     } as VirkningstidspunktFormValues);
 
 export default () => {
-    const { saksnummer } = useForskudd();
+    const { saksnummer, behandling } = useForskudd();
     const { api } = useMockApi();
-    const { data: behandling, refetch, isRefetching } = api.getBehandling(saksnummer);
+    const { refetch, isRefetching } = api.getBehandling(saksnummer);
     const mutation = api.postBehandling(saksnummer);
 
     return (
@@ -57,7 +58,7 @@ const VirkningstidspunktForm = ({
     isRefetching,
     mutation,
 }: {
-    behandling: BehandlingData;
+    behandling: BehandlingDto;
     refetch: () => Promise<QueryObserverResult>;
     isRefetching: boolean;
     mutation: UseMutationResult;
@@ -133,7 +134,7 @@ const VirkningstidspunktForm = ({
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Søknad fra</Label>
-                                <BodyShort size="small">{behandling.soknadFra}</BodyShort>
+                                <BodyShort size="small">{behandling.soknadFraType}</BodyShort>
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Mottat dato</Label>
@@ -141,7 +142,7 @@ const VirkningstidspunktForm = ({
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Søkt fra dato</Label>
-                                <BodyShort size="small">{behandling.soktFraDato}</BodyShort>
+                                <BodyShort size="small">{behandling.datoFom}</BodyShort>
                             </div>
                         </FlexRow>
                         <FlexRow className="gap-x-8">

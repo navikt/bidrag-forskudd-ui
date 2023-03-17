@@ -49,13 +49,13 @@ const chartOptions: EChartsOption = {
 };
 
 export default () => {
-    const { saksnummer } = useForskudd();
+    const { behandling } = useForskudd();
     const { api: mockApi } = useMockApi();
-    const { data: skattegrunnlager } = mockApi.getSkattegrunlag(saksnummer);
-    const { data: aInntekt } = mockApi.getAndreTyperInntekt(saksnummer);
-    const { data: inntekt, refetch, isRefetching } = mockApi.getInntekt(saksnummer);
-    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(saksnummer);
-    const mutation = mockApi.postInntekt(saksnummer);
+    const { data: skattegrunnlager } = mockApi.getSkattegrunlag(behandling.saksnummer);
+    const { data: aInntekt } = mockApi.getAndreTyperInntekt(behandling.saksnummer);
+    const { data: inntekt, refetch, isRefetching } = mockApi.getInntekt(behandling.saksnummer);
+    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(behandling.saksnummer);
+    const mutation = mockApi.postInntekt(behandling.saksnummer);
 
     return (
         <Suspense

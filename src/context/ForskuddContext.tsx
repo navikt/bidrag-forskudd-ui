@@ -1,5 +1,7 @@
-import React, { createContext, PropsWithChildren, useCallback, useContext, useState } from "react";
+import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { BehandlingDto } from "../api/BidragBehandlingApi";
+import { BEHANDLING_API } from "../constants/api";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
@@ -9,6 +11,7 @@ import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormVal
 interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
+    behandling: BehandlingDto;
     saksnummer: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
@@ -19,12 +22,12 @@ interface IForskuddContext {
 }
 
 interface IForskuddContextProps {
-    saksnummer: string;
+    behandlingId: number;
 }
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
-function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddContextProps>) {
+function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
@@ -35,10 +38,22 @@ function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddC
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
+    const [behandling, setBehandling] = useState<BehandlingDto>(null);
+
+    // TODO
+    const saksnummer = behandlingId+"";
+
+    useEffect(() => {
+        BEHANDLING_API.api.hentBehandling(behandlingId).then(({ data }) => {
+            setBehandling(data);
+        });
+    }, []);
+
     const value = React.useMemo(
         () => ({
             activeStep,
             setActiveStep,
+            behandling,
             saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,
@@ -47,10 +62,10 @@ function ForskuddProvider({ saksnummer, children }: PropsWithChildren<IForskuddC
             boforholdFormValues,
             setBoforholdFormValues,
         }),
-        [activeStep, saksnummer, virkningstidspunktFormValues, inntektFormValues, boforholdFormValues]
+        [activeStep, behandling, virkningstidspunktFormValues, inntektFormValues, boforholdFormValues]
     );
 
-    return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
+    return <ForskuddContext.Provider value={value}>{behandling && children}</ForskuddContext.Provider>;
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);
