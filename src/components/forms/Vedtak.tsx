@@ -2,8 +2,8 @@ import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
 import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
-import { RolleType } from "../../api/BidragBehandlingApi";
 
+import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
@@ -16,15 +16,18 @@ export default () => {
     const { behandling } = useForskudd();
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
-    const bmIndex = behandling.roller.findIndex(r => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
-    const bm = bmIndex > 0 ? behandling.roller[bmIndex] : {
-        id: -1,
-        rolleType: RolleType.BIDRAGS_MOTTAKER,
-        ident: "UKJENT",
-        opprettetDato: "",
-        navn: "UKJENT",
-        //eksistererer ikke, feil
-    };
+    const bmIndex = behandling.roller.findIndex((r) => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
+    const bm =
+        bmIndex > 0
+            ? behandling.roller[bmIndex]
+            : {
+                  id: -1,
+                  rolleType: RolleType.BIDRAGS_MOTTAKER,
+                  ident: "UKJENT",
+                  opprettetDato: "",
+                  navn: "UKJENT",
+                  //eksistererer ikke, feil
+              };
 
     const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
 
@@ -68,13 +71,14 @@ export default () => {
         throw new Error("Function not implemented.");
     };
 
-    return behandling && (
-        <div className="grid gap-y-8">
-            <div className="grid gap-y-4">
-                <Heading level="2" size="xlarge">
-                    Fatte vedtak
-                </Heading>
-                {/* <div>
+    return (
+        behandling && (
+            <div className="grid gap-y-8">
+                <div className="grid gap-y-4">
+                    <Heading level="2" size="xlarge">
+                        Fatte vedtak
+                    </Heading>
+                    {/* <div>
                     <SuccessStroke
                         width={"1.5rem"}
                         height={"1.5rem"}
@@ -85,100 +89,107 @@ export default () => {
                     />
                     Totrinnskontroll: inntekt
                 </div> */}
-            </div>
-            <div className="grid gap-y-4">
-                <Heading level="3" size="medium">
-                    Oppsummering
-                </Heading>
-                <div>
-                    <Label size="small">Barn i egen husstand: </Label> {barn.length}
+                </div>
+                <div className="grid gap-y-4">
+                    <Heading level="3" size="medium">
+                        Oppsummering
+                    </Heading>
+                    <div>
+                        <Label size="small">Barn i egen husstand: </Label> {barn.length}
+                    </div>
+
+                    <Table>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell scope="col">Rolle</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {data.map((item, i) => {
+                                return (
+                                    <Table.Row key={i + item.fnmr}>
+                                        <Table.DataCell>
+                                            <RolleTag rolleType={item.rolle} />
+                                        </Table.DataCell>
+                                        <Table.DataCell>{item.fnmr}</Table.DataCell>
+                                        <Table.DataCell>{item.navn}</Table.DataCell>
+                                        <Table.DataCell>{item.type}</Table.DataCell>
+                                        <Table.DataCell>{item.periode}</Table.DataCell>
+                                        <Table.DataCell>{item.inntekt}</Table.DataCell>
+                                        <Table.DataCell>{item.sivilsStandBm}</Table.DataCell>
+                                        <Table.DataCell>{item.resultat}</Table.DataCell>
+                                        <Table.DataCell>{item.beløp}</Table.DataCell>
+                                    </Table.Row>
+                                );
+                            })}
+                        </Table.Body>
+                    </Table>
                 </div>
 
-                <Table>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell scope="col">Rolle</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
-                            <Table.HeaderCell scope="col">Beløp</Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {data.map((item, i) => {
-                            return (
-                                <Table.Row key={i + item.fnmr}>
-                                    <Table.DataCell>
-                                        <RolleTag rolleType={item.rolle} />
-                                    </Table.DataCell>
-                                    <Table.DataCell>{item.fnmr}</Table.DataCell>
-                                    <Table.DataCell>{item.navn}</Table.DataCell>
-                                    <Table.DataCell>{item.type}</Table.DataCell>
-                                    <Table.DataCell>{item.periode}</Table.DataCell>
-                                    <Table.DataCell>{item.inntekt}</Table.DataCell>
-                                    <Table.DataCell>{item.sivilsStandBm}</Table.DataCell>
-                                    <Table.DataCell>{item.resultat}</Table.DataCell>
-                                    <Table.DataCell>{item.beløp}</Table.DataCell>
-                                </Table.Row>
-                            );
-                        })}
-                    </Table.Body>
-                </Table>
-            </div>
+                <div className="grid gap-y-4">
+                    <Heading level="3" size="medium">
+                        Forsendelse gjelder:
+                    </Heading>
 
-            <div className="grid gap-y-4">
-                <Heading level="3" size="medium">
-                    Forsendelse gjelder:
-                </Heading>
-
-                <RolleDetaljer withBorder={false} rolle={bm} />
-            </div>
-            <div className="grid gap-y-4">
-                <Heading level="3" size="medium">
-                    Sjekk notat
-                </Heading>
-                <div>
-                    Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
-                    basert på opplysningene oppgitt.
-                    <Link href="#" onClick={() => {}} className="font-bold">
-                        Sjekk notat <ExternalLink aria-hidden />
-                    </Link>
+                    <RolleDetaljer withBorder={false} rolle={bm} />
                 </div>
-            </div>
-            <div>
-                <ConfirmationPanel
-                    checked={erBekreftet}
-                    label="Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer."
-                    onChange={() => {
-                        setBekreftet(!erBekreftet);
-                    }}
-                >
-                    bekreft tekst
-                </ConfirmationPanel>
-            </div>
+                <div className="grid gap-y-4">
+                    <Heading level="3" size="medium">
+                        Sjekk notat
+                    </Heading>
+                    <div>
+                        Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
+                        basert på opplysningene oppgitt.
+                        <Link href="#" onClick={() => {}} className="font-bold">
+                            Sjekk notat <ExternalLink aria-hidden />
+                        </Link>
+                    </div>
+                </div>
+                <div>
+                    <ConfirmationPanel
+                        checked={erBekreftet}
+                        label="Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer."
+                        onChange={() => {
+                            setBekreftet(!erBekreftet);
+                        }}
+                    >
+                        bekreft tekst
+                    </ConfirmationPanel>
+                </div>
 
-            <FlexRow>
-                <Button disabled={!erBekreftet} loading={false} onClick={sendeVedtak} className="w-max" size="small">
-                    Fatte vedtak
-                </Button>
-                <Button
-                    loading={false}
-                    variant="secondary"
-                    onClick={() => {
-                        // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
-                        // og kanskje stateId?
-                        window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
-                    }}
-                    className="w-max"
-                    size="small"
-                >
-                    Avbryt
-                </Button>
-            </FlexRow>
-        </div>
+                <FlexRow>
+                    <Button
+                        disabled={!erBekreftet}
+                        loading={false}
+                        onClick={sendeVedtak}
+                        className="w-max"
+                        size="small"
+                    >
+                        Fatte vedtak
+                    </Button>
+                    <Button
+                        loading={false}
+                        variant="secondary"
+                        onClick={() => {
+                            // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
+                            // og kanskje stateId?
+                            window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
+                        }}
+                        className="w-max"
+                        size="small"
+                    >
+                        Avbryt
+                    </Button>
+                </FlexRow>
+            </div>
+        )
     );
 };

@@ -1,8 +1,8 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+
 import { BehandlingDto } from "../api/BidragBehandlingApi";
 import { BEHANDLING_API } from "../constants/api";
-
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { InntektFormValues } from "../types/inntektFormValues";
@@ -41,7 +41,7 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
     const [behandling, setBehandling] = useState<BehandlingDto>(null);
 
     // TODO
-    const saksnummer = behandlingId+"";
+    const saksnummer = behandlingId + "";
 
     useEffect(() => {
         BEHANDLING_API.api.hentBehandling(behandlingId).then(({ data }) => {

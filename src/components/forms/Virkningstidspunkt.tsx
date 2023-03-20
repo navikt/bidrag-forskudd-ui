@@ -5,7 +5,7 @@ import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { BehandlingData } from "../../__mocks__/testdata/behandlingTestData";
+import { BehandlingDto } from "../../api/BidragBehandlingApi";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
@@ -17,7 +17,6 @@ import { FormControlledSelectField } from "../formFields/FormControlledSelectFie
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { ActionButtons } from "./inntekt/ActionButtons";
-import { BehandlingDto } from "../../api/BidragBehandlingApi";
 
 const createInitialValues = (behandling) =>
     ({
