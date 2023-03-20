@@ -1,8 +1,7 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { BehandlingDto } from "../api/BidragBehandlingApi";
-import { BEHANDLING_API } from "../constants/api";
+import { Api as BidragBehandlingApi, BehandlingDto } from "../api/BidragBehandlingApi";
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { InntektFormValues } from "../types/inntektFormValues";
@@ -23,11 +22,12 @@ interface IForskuddContext {
 
 interface IForskuddContextProps {
     behandlingId: number;
+    behandlingApi: BidragBehandlingApi<BehandlingDto>;
 }
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
-function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskuddContextProps>) {
+function ForskuddProvider({ behandlingId, behandlingApi, children }: PropsWithChildren<IForskuddContextProps>) {
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
@@ -44,9 +44,12 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
     const saksnummer = behandlingId + "";
 
     useEffect(() => {
-        BEHANDLING_API.api.hentBehandling(behandlingId).then(({ data }) => {
-            setBehandling(data);
-        });
+        behandlingApi.api
+            .hentBehandling(behandlingId)
+            .then(({ data }) => {
+                setBehandling(data);
+            })
+            .catch((e) => console.log(e));
     }, []);
 
     const value = React.useMemo(

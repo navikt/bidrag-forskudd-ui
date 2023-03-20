@@ -7,10 +7,10 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter } from "react-router-dom";
 
-import { mockSak } from "../../__mocks__/sinon/MockDokumentService";
+import { BehandlingType, SoknadFraType, SoknadType } from "../../api/BidragBehandlingApi";
+import { ForskuddHeader } from "../../components/header/ForskuddHeader";
 import { ForskuddProvider } from "../../context/ForskuddContext";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
-import { sinonSandbox } from "../resources/mocha.init";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -30,15 +30,38 @@ const renderWithRouter = (ui, { route = "/" } = {}) => {
 
 describe("ForskuddPage", () => {
     it("should render", async () => {
-        mockSak(sinonSandbox);
+        const behandlingApi = {
+            api: {
+                hentBehandling: () =>
+                    new Promise((res) => {
+                        res({
+                            data: {
+                                id: 1234,
+                                behandlingType: BehandlingType.FORSKUDD,
+                                soknadType: SoknadType.SOKNAD,
+                                datoFom: "2021-02-02",
+                                datoTom: "2021-02-02",
+                                mottatDato: "2021-02-02",
+                                soknadFraType: SoknadFraType.BM,
+                                saksnummer: "1234",
+                                behandlerEnhet: "1234",
+                                roller: [],
+                            },
+                        });
+                    }),
+            },
+        };
+
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider saksnummer="1234">
+                <ForskuddProvider behandlingId={Number(1)} behandlingApi={behandlingApi}>
+                    <ForskuddHeader />
                     <ForskuddPage />
                 </ForskuddProvider>
             </QueryClientProvider>,
-            { route: "/1234?steg=virkningstidspunkt" }
+            { route: "/forskudd/1234?steg=virkningstidspunkt" }
         );
+
         await waitFor(() => {
             const activeStepButton = document.querySelector(".navds-stepper__step--active");
             expect(activeStepButton.innerHTML).includes("Virkningstidspunkt");
