@@ -1,12 +1,14 @@
-import { Barn, MaybeList } from "../__mocks__/testdata/inntektTestData";
+import { Barn } from "../__mocks__/testdata/inntektTestData";
 
 export interface InntektSomLeggesTilGrunnFormValues {
+    aar?: string;
+    beskrivelse: string;
     fraDato: Date | null;
+    fraPostene: boolean;
+    selected: boolean;
+    tekniskNavn: string;
     tilDato: Date | null;
     totalt: string;
-    beskrivelse: string;
-    selected: boolean;
-    fraPostene: boolean;
 }
 
 export interface BarneTillegFormValues {
@@ -27,9 +29,9 @@ export interface UtvidetBarnetrygdFormValues {
 export interface InntektFormValues {
     periodeFra: Date | null;
     periodeTil: Date | null;
-    inntekteneSomLeggesTilGrunn: MaybeList<InntektSomLeggesTilGrunnFormValues>;
-    barnetillegg: MaybeList<BarneTillegFormValues>;
-    utvidetBarnetrygd: MaybeList<UtvidetBarnetrygdFormValues>;
+    inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunnFormValues[];
+    barnetillegg: BarneTillegFormValues[];
+    utvidetBarnetrygd: UtvidetBarnetrygdFormValues[];
     begrunnelseIVedtaket: string;
     begrunnelseINotat: string;
     toTrinnsKontroll: boolean;

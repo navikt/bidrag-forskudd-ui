@@ -1,4 +1,4 @@
-import { UNSAFE_DatePicker, UNSAFE_useDatepicker } from "@navikt/ds-react";
+import { DateValidationT, UNSAFE_DatePicker, UNSAFE_useDatepicker } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
 interface DatePickerModalProps {
@@ -10,6 +10,8 @@ interface DatePickerModalProps {
     className?: string;
     defaultValue?: Date;
     resetDefaultValue?: boolean;
+    error?: string;
+    onValidate?: (dateValidation: DateValidationT) => void;
 }
 
 export const DatePickerInput = ({
@@ -21,10 +23,15 @@ export const DatePickerInput = ({
     className,
     defaultValue,
     resetDefaultValue,
+    onValidate,
+    error,
 }: DatePickerModalProps) => {
     const { datepickerProps, inputProps, setSelected } = UNSAFE_useDatepicker({
         onDateChange: (date) => {
             onChange(date);
+        },
+        onValidate: (val) => {
+            if (onValidate) onValidate(val);
         },
         fromDate,
         defaultSelected: defaultValue,
@@ -44,6 +51,7 @@ export const DatePickerInput = ({
                 hideLabel={hideLabel}
                 placeholder={placeholder}
                 label={label}
+                error={error}
                 size="small"
             />
         </UNSAFE_DatePicker>

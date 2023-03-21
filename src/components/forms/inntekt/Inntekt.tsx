@@ -1,7 +1,7 @@
-import { Close, Edit } from "@navikt/ds-icons";
-import { Accordion, BodyShort, Button, Heading, Label, Loader } from "@navikt/ds-react";
-import React, { Suspense, useCallback, useEffect, useState } from "react";
-import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
+import { ExternalLink } from "@navikt/ds-icons";
+import { Accordion, Heading, Link, Loader } from "@navikt/ds-react";
+import React, { Suspense, useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
@@ -15,10 +15,10 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { ActionStatus } from "../../../types/actionStatus";
 import { HentSkattegrunnlagResponse } from "../../../types/bidragGrunnlagTypes";
+import { roundDown, roundUp } from "../../../utils/number-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
-import { FormControlledDatePickerRange } from "../../formFields/FormControllerDatePickerRange";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { createInitialValues, createInntektPayload } from "./inntektFormHelpers";
@@ -37,8 +37,12 @@ const chartOptions: EChartsOption = {
         type: "category",
         data: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
     },
-    grid: { bottom: "0px", top: "16px", left: "0px", right: "0px", containLabel: true },
-    yAxis: { type: "value" },
+    grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
+    yAxis: {
+        type: "value",
+        min: (value) => roundDown(value.min),
+        max: (value) => roundUp(value.max),
+    },
     series: [
         {
             data: [47352, 48121, 43271, 45522, 45731, 72321, 50112, 48103, 42335, 44753, 58121, 45733],
@@ -103,6 +107,8 @@ const InntektForm = ({
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
+        mode: "onBlur",
+        criteriaMode: "all",
     });
 
     useEffect(() => {
@@ -151,11 +157,6 @@ const InntektForm = ({
         setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
     };
 
-    const toggleOpenDatepickerRange = useCallback(
-        () => setOpenPeriodDatePicker(!openPeriodDatePicker),
-        [openPeriodDatePicker]
-    );
-
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
@@ -163,36 +164,10 @@ const InntektForm = ({
                     <Heading level="2" size="xlarge">
                         Inntekt
                     </Heading>
-                    <Periode toggleOpenDatepickerRange={toggleOpenDatepickerRange} />
-                    {openPeriodDatePicker && (
-                        <div className="flex gap-x-4">
-                            <div>
-                                <FormControlledDatePickerRange
-                                    fromFieldName="periodeFra"
-                                    toFieldName="periodeTil"
-                                    defaultValues={{ from: initialValues.periodeFra, to: initialValues.periodeTil }}
-                                    resetDefaultValues={action === ActionStatus.REFETCHED}
-                                />
-                            </div>
-                            <Button
-                                type="button"
-                                variant="tertiary"
-                                icon={<Close aria-hidden />}
-                                size="small"
-                                className="flex self-end"
-                                onClick={toggleOpenDatepickerRange}
-                            >
-                                Lukk
-                            </Button>
-                        </div>
-                    )}
+                    <div style={{ width: "100%", maxWidth: "65ch" }}>
+                        <ReactECharts option={chartOptions} />
+                    </div>
                     <Accordion style={{ width: "100%", maxWidth: "65ch" }}>
-                        <Accordion.Item>
-                            <Accordion.Header>{"<Graf>"}</Accordion.Header>
-                            <Accordion.Content>
-                                <ReactECharts option={chartOptions} />
-                            </Accordion.Content>
-                        </Accordion.Item>
                         <Accordion.Item>
                             <Accordion.Header>Arbeidsforhold</Accordion.Header>
                             <Accordion.Content>
@@ -201,16 +176,15 @@ const InntektForm = ({
                         </Accordion.Item>
                     </Accordion>
                     <div className="grid gap-y-4 w-max">
-                        <Heading level="3" size="medium">
-                            Inntektene som legges til grunn
-                        </Heading>
+                        <div className="flex gap-x-4">
+                            <Heading level="3" size="medium">
+                                Inntektene som legges til grunn
+                            </Heading>
+                            <Link href="" target="_blank" className="font-bold">
+                                A-inntekt <ExternalLink aria-hidden />
+                            </Link>
+                        </div>
                         <InntekteneSomLeggesTilGrunnTabel />
-                    </div>
-                    <div className="grid gap-y-4">
-                        <Heading level="3" size="medium">
-                            Utvidet barnetrygd
-                        </Heading>
-                        <UtvidetBarnetrygdTabel />
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">
@@ -220,7 +194,13 @@ const InntektForm = ({
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">
-                            Kommentar
+                            Utvidet barnetrygd
+                        </Heading>
+                        <UtvidetBarnetrygdTabel />
+                    </div>
+                    <div className="grid gap-y-4">
+                        <Heading level="3" size="medium">
+                            Begrunnelse
                         </Heading>
                         <div>
                             <FormControlledTextarea
@@ -239,28 +219,5 @@ const InntektForm = ({
                 </div>
             </form>
         </FormProvider>
-    );
-};
-
-const Periode = ({ toggleOpenDatepickerRange }) => {
-    const { control } = useFormContext();
-    const [fra, til] = useWatch({ control, name: ["periodeFra", "periodeTil"] });
-
-    return (
-        <div className="flex gap-x-2 items-center">
-            <Label size="small">Periode: </Label>
-            <BodyShort size="small">
-                {fra.toLocaleDateString()} - {til.toLocaleDateString()}
-            </BodyShort>
-            <Button
-                type="button"
-                variant="tertiary"
-                icon={<Edit aria-hidden />}
-                size="xsmall"
-                onClick={toggleOpenDatepickerRange}
-            >
-                Endre periode
-            </Button>
-        </div>
     );
 };

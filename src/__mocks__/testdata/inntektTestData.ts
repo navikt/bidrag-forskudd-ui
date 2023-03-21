@@ -14,6 +14,8 @@ export interface InntektSomLeggesTilGrunn {
     tilDato: string;
     totalt: number;
     beskrivelse: string;
+    aar: string;
+    tekniskNavn: string;
     fraPostene: boolean;
 }
 
@@ -62,22 +64,7 @@ export const inntektData = (data = {}) => {
             aarsInntekt: 520000,
             maanedInntekt: 50500,
         },
-        inntekteneSomLeggesTilGrunn: [
-            {
-                fraDato: "2021-01-01",
-                tilDato: "2021-11-05",
-                totalt: 208052,
-                beskrivelse: "Lønns og trekkoppgave 2020",
-                fraPostene: true,
-            },
-            {
-                fraDato: "2021-01-01",
-                tilDato: "2021-11-05",
-                totalt: 108052,
-                beskrivelse: "Kapitalinntekt 2019",
-                fraPostene: true,
-            },
-        ],
+        inntekteneSomLeggesTilGrunn: [],
         barnetillegg: [],
         utvidetBarnetrygd: [],
         begrunnelseIVedtaket:

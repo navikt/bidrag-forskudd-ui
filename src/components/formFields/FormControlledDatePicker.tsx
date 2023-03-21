@@ -1,3 +1,4 @@
+import { DateValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
@@ -11,6 +12,8 @@ interface FormControlledDatePickerProps {
     hideLabel?: boolean;
     className?: string;
     resetDefaultValue?: boolean;
+    required?: boolean;
+    onChange?: (date: Date | undefined) => void;
 }
 
 export const FormControlledDatePicker = ({
@@ -21,23 +24,41 @@ export const FormControlledDatePicker = ({
     hideLabel,
     className,
     resetDefaultValue,
+    required,
+    onChange,
 }: FormControlledDatePickerProps) => {
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
+    const { control, setError, clearErrors } = useFormContext();
+    const { field, fieldState } = useController({ name, control, rules: { required: required } });
 
-    const { field } = useController({ name, control });
+    const handleChange = (date: Date) => {
+        if (date) {
+            field.onChange(date);
+            clearErrors(name);
+        }
+        if (onChange) {
+            onChange(date);
+        }
+    };
+
+    const onValidate = (dateValidation: DateValidationT) => {
+        if (required && dateValidation.isEmpty) {
+            setError(name, { type: "required", message: "Dato må fylles ut" });
+        } else if (!dateValidation.isValidDate) {
+            setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+        }
+    };
 
     return (
         <DatePickerInput
             label={label}
             placeholder={placeholder}
-            onChange={field.onChange}
+            onChange={(value) => handleChange(value)}
             defaultValue={defaultValue}
             hideLabel={hideLabel}
             className={className}
             resetDefaultValue={resetDefaultValue}
+            error={fieldState?.error?.message}
+            onValidate={onValidate}
         />
     );
 };

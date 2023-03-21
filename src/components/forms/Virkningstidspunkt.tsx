@@ -151,7 +151,6 @@ const VirkningstidspunktForm = ({
                                 placeholder="DD.MM.ÅÅÅÅ"
                                 defaultValue={initialValues.virkningstidspunkt}
                                 resetDefaultValue={action === ActionStatus.REFETCHED}
-                                hideLabel
                             />
                             <FormControlledSelectField
                                 name="aarsak"
@@ -160,7 +159,6 @@ const VirkningstidspunktForm = ({
                                     value: entry[0],
                                     text: entry[1],
                                 }))}
-                                hideLabel
                             />
                             <FormControlledSelectField
                                 name="avslag"
@@ -179,7 +177,6 @@ const VirkningstidspunktForm = ({
                                         text: "Avslag 2",
                                     },
                                 ]}
-                                hideLabel
                             />
                         </FlexRow>
                         <FormControlledTextarea

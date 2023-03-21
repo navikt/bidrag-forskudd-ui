@@ -111,5 +111,5 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
         }
     }, [option, settings]);
 
-    return <div ref={chartRef} style={{ width: "100%", height: "300px", ...style }} />;
+    return <div ref={chartRef} style={{ width: "100%", height: "250px", ...style }} />;
 }

@@ -13,11 +13,16 @@ export const createSkattegrunnlag = () =>
             grunnlag: [
                 {
                     beloep: randomSalary().toString(),
-                    tekniskNavn: "Skattegrunnlag",
+                    tekniskNavn: "skattegrunnlag",
                 },
+            ],
+            skatteoppgjoersdato: "2023",
+        },
+        {
+            grunnlag: [
                 {
                     beloep: randomSalary().toString(),
-                    tekniskNavn: "Lønns og trekkoppgave",
+                    tekniskNavn: "skattegrunnlag",
                 },
             ],
             skatteoppgjoersdato: "2022",
@@ -26,11 +31,7 @@ export const createSkattegrunnlag = () =>
             grunnlag: [
                 {
                     beloep: randomSalary().toString(),
-                    tekniskNavn: "Skattegrunnlag",
-                },
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "Lønns og trekkoppgave",
+                    tekniskNavn: "loenn_og_trekk",
                 },
             ],
             skatteoppgjoersdato: "2021",
@@ -39,11 +40,7 @@ export const createSkattegrunnlag = () =>
             grunnlag: [
                 {
                     beloep: randomSalary().toString(),
-                    tekniskNavn: "Skattegrunnlag",
-                },
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "Lønns og trekkoppgave",
+                    tekniskNavn: "skattegrunnlag",
                 },
             ],
             skatteoppgjoersdato: "2020",

@@ -207,7 +207,7 @@ const BoforholdsForm = ({
                     </div>
                     <div className="grid gap-y-4">
                         <Heading level="3" size="medium">
-                            Kommentar
+                            Begrunnelse
                         </Heading>
                         <FormControlledTextarea
                             name="begrunnelseIVedtaket"
