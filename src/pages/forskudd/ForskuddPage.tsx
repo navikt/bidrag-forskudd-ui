@@ -29,8 +29,8 @@ export const ForskuddPage = () => {
                     className="mb-8"
                 >
                     <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
-                    <Stepper.Step>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
+                    <Stepper.Step>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
                 <FormWrapper />
