@@ -12,4 +12,4 @@ export const deductDays = (date: Date, days) => {
     return newDate;
 };
 
-export const isValidDate = (date: Date) => date instanceof Date && isFinite(date.getTime());
+export const isValidDate = (date: any) => date instanceof Date && isFinite(date.getTime());

@@ -28,9 +28,7 @@ export interface BarneTilleg {
     fraDato: Date | string;
     tilDato: Date | string;
     barn: Barn;
-    brutto: number;
-    skattesats: number;
-    netto: number;
+    beloep: number;
 }
 
 export interface UtvidetBarnetrygd {

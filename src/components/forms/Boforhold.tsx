@@ -110,7 +110,7 @@ const BoforholdsForm = ({
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+        setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
 
     return (

@@ -15,10 +15,6 @@ const tekniksNavnToBeskrivelse = {
 };
 
 export const createInntektPayload = (values: InntektFormValues) => ({
-    periode: {
-        fraDato: toISOStringOrNull(values.periodeFra),
-        tilDato: toISOStringOrNull(values.periodeTil),
-    },
     inntekteneSomLeggesTilGrunn: values.inntekteneSomLeggesTilGrunn
         .map((inntekt) => ({
             ...inntekt,
@@ -28,20 +24,16 @@ export const createInntektPayload = (values: InntektFormValues) => ({
         .filter((inntekt) => inntekt.selected),
     utvidetBarnetrygd: values.utvidetBarnetrygd.length
         ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
+              ...utvidetBarnetrygd,
               fraDato: toISOStringOrNull(utvidetBarnetrygd.fraDato),
               tilDato: toISOStringOrNull(utvidetBarnetrygd.tilDato),
-              deltBosted: utvidetBarnetrygd.deltBosted,
-              beloep: utvidetBarnetrygd.beloep,
           }))
         : [],
     barnetillegg: values.barnetillegg.length
         ? values.barnetillegg.map((barnetillegg) => ({
+              ...barnetillegg,
               fraDato: toISOStringOrNull(barnetillegg.fraDato),
               tilDato: toISOStringOrNull(barnetillegg.tilDato),
-              barn: barnetillegg.barn ?? null,
-              brutto: barnetillegg.brutto ?? null,
-              skattesats: barnetillegg.skattesats ?? null,
-              netto: barnetillegg.netto ?? null,
           }))
         : [],
     begrunnelseIVedtaket: values.begrunnelseIVedtaket,
@@ -50,8 +42,6 @@ export const createInntektPayload = (values: InntektFormValues) => ({
 });
 
 export const createInitialValues = (inntekt, skattegrunnlager, aInntektene): InntektFormValues => ({
-    periodeFra: dateOrNull(inntekt.periode.fraDato),
-    periodeTil: dateOrNull(inntekt.periode.tilDato),
     inntekteneSomLeggesTilGrunn: inntekt.inntekteneSomLeggesTilGrunn.length
         ? gjennomsnittInntektene(inntekt).concat(
               mergeSkattegrunlagAndInntektlist(skattegrunnlager, inntekt.inntekteneSomLeggesTilGrunn, aInntektene)
@@ -62,7 +52,6 @@ export const createInitialValues = (inntekt, skattegrunnlager, aInntektene): Inn
     utvidetBarnetrygd: inntekt.utvidetBarnetrygd.length
         ? inntekt.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
-              deltBosted: utvidetBarnetrygd.deltBosted,
               fraDato: dateOrNull(utvidetBarnetrygd.fraDato),
               tilDato: dateOrNull(utvidetBarnetrygd.tilDato),
           }))
@@ -308,38 +297,35 @@ export const findDateGaps = (perioder, virkningstidspunkt) => {
     return gaps;
 };
 
-export const getOverlappingPeriods = (perioder) => {
+export const checkOverlappingPeriods = (perioder) => {
+    const overlappingPeriods = [];
+
+    for (let i = 0; i < perioder.length; i++) {
+        for (let j = i + 1; j < perioder.length; j++) {
+            if (
+                (perioder[i].tilDato === null || perioder[i].tilDato >= perioder[j].fraDato) &&
+                (perioder[j].tilDato === null || perioder[j].tilDato >= perioder[i].fraDato)
+            ) {
+                overlappingPeriods.push([`${perioder[i].beskrivelse}`, `${perioder[j].beskrivelse}`]);
+            }
+        }
+    }
+
+    return overlappingPeriods;
+};
+
+export const getOverlappingInntektPerioder = (perioder) => {
     const ytelsePerioder = perioder
         .filter((periode) => periode.fraDato !== null && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
         .sort((a, b) => a.fraDato - b.fraDato);
-    const overlappingPeriods = [];
-
-    const pushOverlappingPeriods = (filteredAndSortedPerioder) => {
-        for (let i = 0; i < filteredAndSortedPerioder.length; i++) {
-            for (let j = i + 1; j < filteredAndSortedPerioder.length; j++) {
-                if (
-                    (filteredAndSortedPerioder[i].tilDato === null ||
-                        filteredAndSortedPerioder[i].tilDato >= filteredAndSortedPerioder[j].fraDato) &&
-                    (filteredAndSortedPerioder[j].tilDato === null ||
-                        filteredAndSortedPerioder[j].tilDato >= filteredAndSortedPerioder[i].fraDato)
-                ) {
-                    overlappingPeriods.push([
-                        `${filteredAndSortedPerioder[i].beskrivelse}`,
-                        `${filteredAndSortedPerioder[j].beskrivelse}`,
-                    ]);
-                }
-            }
-        }
-    };
-
-    pushOverlappingPeriods(ytelsePerioder);
+    const overlappingPeriods = checkOverlappingPeriods(ytelsePerioder);
 
     perioderSomKanIkkeOverlapeKunMedHverandre.forEach((tekniskNavn) => {
         const filteredAndSortedPerioder = perioder
             .filter((periode) => periode.fraDato !== null && periode.tekniskNavn === tekniskNavn)
             .sort((a, b) => a.fraDato - b.fraDato);
 
-        pushOverlappingPeriods(filteredAndSortedPerioder);
+        overlappingPeriods.concat(checkOverlappingPeriods(filteredAndSortedPerioder));
     });
 
     return overlappingPeriods;

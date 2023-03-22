@@ -116,7 +116,7 @@ const VirkningstidspunktForm = ({
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
+        setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
     };
 
     return (

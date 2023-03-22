@@ -152,7 +152,7 @@ const InntektForm = ({
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
+        setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
     };
 
     return (
@@ -184,13 +184,13 @@ const InntektForm = ({
                         </div>
                         <InntekteneSomLeggesTilGrunnTabel />
                     </div>
-                    <div className="grid gap-y-4">
+                    <div className="grid gap-y-4 w-max">
                         <Heading level="3" size="medium">
                             Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
                         </Heading>
                         <BarnetilleggTabel />
                     </div>
-                    <div className="grid gap-y-4">
+                    <div className="grid gap-y-4 w-max">
                         <Heading level="3" size="medium">
                             Utvidet barnetrygd
                         </Heading>
