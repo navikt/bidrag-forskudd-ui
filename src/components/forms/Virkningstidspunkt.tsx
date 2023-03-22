@@ -4,12 +4,12 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
-import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { BehandlingDto } from "../../api/BidragBehandlingApi";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { useApiData } from "../../hooks/useApiData";
 import { ActionStatus } from "../../types/actionStatus";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
 import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
@@ -28,10 +28,10 @@ const createInitialValues = (behandling) =>
     } as VirkningstidspunktFormValues);
 
 export default () => {
-    const { saksnummer, behandling } = useForskudd();
-    const { api } = useMockApi();
-    const { refetch, isRefetching } = api.getBehandling(saksnummer);
-    const mutation = api.postBehandling(saksnummer);
+    const { behandlingId } = useForskudd();
+    const { api } = useApiData();
+    const { refetch, isRefetching, data: data } = api.getBehandling(behandlingId);
+    const mutation = api.updateBehandling(behandlingId);
 
     return (
         <Suspense
@@ -42,7 +42,7 @@ export default () => {
             }
         >
             <VirkningstidspunktForm
-                behandling={behandling}
+                behandling={data.data}
                 refetch={refetch}
                 isRefetching={isRefetching}
                 mutation={mutation}
@@ -108,6 +108,7 @@ const VirkningstidspunktForm = ({
     const save = async () => {
         const values = useFormMethods.getValues();
         setVirkningstidspunktFormValues(values);
+
         await mutation.mutateAsync({ ...behandling, ...values });
         setAction(ActionStatus.IDLE);
     };

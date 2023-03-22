@@ -5,7 +5,6 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
-import { BEHANDLING_API } from "./constants/api";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
@@ -38,7 +37,7 @@ function ForskudWrapper() {
 
     return (
         <>
-            <ForskuddProvider behandlingId={Number(behandlingId)} behandlingApi={BEHANDLING_API}>
+            <ForskuddProvider behandlingId={Number(behandlingId)}>
                 <ForskuddHeader />
                 <ForskuddPage />
             </ForskuddProvider>

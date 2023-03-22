@@ -1,9 +1,12 @@
+import { useApi } from "@navikt/bidrag-ui-common";
 import { AxiosResponse } from "axios";
 import { useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
+import { Api as BidragBehandlingApi, BehandlingDto, UpdateBehandlingRequest } from "../api/BidragBehandlingApi";
 import { BidragSakDto } from "../api/BidragSakApi";
 import { BIDRAG_SAK_API, PERSON_API } from "../constants/api";
+import environment from "../environment";
 import { mapPersonsToRoles } from "../utils/roles-utils";
 
 export const useApiData = () => {
@@ -28,6 +31,31 @@ export const useApiData = () => {
             )
         );
 
+    const behandlingApi: BidragBehandlingApi<BehandlingDto> = useApi(
+        new BidragBehandlingApi({ baseURL: environment.url.bidragBehandling }),
+        "bidrag-behandling",
+        "gcp"
+    );
+
+    const queryClient = useQueryClient();
+
+    const getBehandling = (behandlingId: number) =>
+        useQuery({
+            queryKey: `behandling-${behandlingId}`,
+            queryFn: (): Promise<AxiosResponse<BehandlingDto>> => behandlingApi.api.hentBehandling(behandlingId),
+            staleTime: Infinity,
+            suspense: true,
+        });
+
+    const updateBehandling = (behandlingId: number) =>
+        useMutation({
+            mutationFn: (payload: UpdateBehandlingRequest): Promise<AxiosResponse<BehandlingDto>> =>
+                behandlingApi.api.oppdaterBehandling(behandlingId, payload),
+            onSuccess: (data) => {
+                queryClient.setQueryData(`behandling-${behandlingId}`, data);
+            },
+        });
+
     const getSakAndRoller = (saksnummer: string) => {
         const { data: sak } = useQuery({
             queryKey: `sak-${saksnummer}`,
@@ -49,6 +77,8 @@ export const useApiData = () => {
 
     const api = {
         getSakAndRoller,
+        getBehandling,
+        updateBehandling,
     };
 
     return { api, networkError };

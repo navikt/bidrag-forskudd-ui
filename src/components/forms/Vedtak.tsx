@@ -1,25 +1,29 @@
 import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
-import { Button, ConfirmationPanel, Heading, Label, Link, Table } from "@navikt/ds-react";
-import React, { useState } from "react";
+import { Button, ConfirmationPanel, Heading, Label, Link, Loader, Table } from "@navikt/ds-react";
+import React, { Suspense, useState } from "react";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
+import { useApiData } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
 export default () => {
     const [erBekreftet, setBekreftet] = useState(false);
-    const { behandling } = useForskudd();
+    const { behandlingId } = useForskudd();
+    const { api } = useApiData();
+    const { data: behandling } = api.getBehandling(behandlingId);
+
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
-    const bmIndex = behandling.roller.findIndex((r) => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
-    const bm =
-        bmIndex > 0
-            ? behandling.roller[bmIndex]
+    const getBmIndex = () => behandling.data.roller.findIndex((r) => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
+    const getBm = () =>
+        getBmIndex() > 0
+            ? behandling.data.roller[getBmIndex()]
             : {
                   id: -1,
                   rolleType: RolleType.BIDRAGS_MOTTAKER,
@@ -29,7 +33,7 @@ export default () => {
                   //eksistererer ikke, feil
               };
 
-    const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
+    const getBarn = () => behandling.data.roller.filter((r) => r.rolleType == RolleType.BARN);
 
     const data = [
         {
@@ -72,7 +76,13 @@ export default () => {
     };
 
     return (
-        behandling && (
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." />
+                </div>
+            }
+        >
             <div className="grid gap-y-8">
                 <div className="grid gap-y-4">
                     <Heading level="2" size="xlarge">
@@ -95,7 +105,7 @@ export default () => {
                         Oppsummering
                     </Heading>
                     <div>
-                        <Label size="small">Barn i egen husstand: </Label> {barn.length}
+                        <Label size="small">Barn i egen husstand: </Label> {getBarn().length}
                     </div>
 
                     <Table>
@@ -139,7 +149,7 @@ export default () => {
                         Forsendelse gjelder:
                     </Heading>
 
-                    <RolleDetaljer withBorder={false} rolle={bm} />
+                    <RolleDetaljer withBorder={false} rolle={getBm()} />
                 </div>
                 <div className="grid gap-y-4">
                     <Heading level="3" size="medium">
@@ -190,6 +200,6 @@ export default () => {
                     </Button>
                 </FlexRow>
             </div>
-        )
+        </Suspense>
     );
 };

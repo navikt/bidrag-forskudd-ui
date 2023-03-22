@@ -4,10 +4,10 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from "react
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { RolleType } from "../../../api/BidragBehandlingApi";
-import { BEHANDLING_API } from "../../../constants/api";
+import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
+import { useApiData } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -383,20 +383,18 @@ export const UtvidetBarnetrygdTabel = () => {
 };
 
 export const BarnetilleggTabel = () => {
-    const { saksnummer: behandlingId } = useForskudd();
-    const [barnene, setBarnene] = useState([]);
+    const { behandlingId } = useForskudd();
 
-    useEffect(() => {
-        BEHANDLING_API.api.hentBehandling(Number(behandlingId)).then(({ data }) => {
-            setBarnene(data.roller.filter((rolle) => rolle.rolleType === RolleType.BARN));
-        });
-    }, []);
+    const { api } = useApiData();
+    const { data: data } = api.getBehandling(behandlingId);
 
     const { control } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
         name: "barnetillegg",
     });
+
+    const getBarn = (roller: RolleDto[]) => roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
 
     return (
         <Suspense
@@ -433,7 +431,10 @@ export const BarnetilleggTabel = () => {
                                     name={`barnetillegg[${index}].barn`}
                                     label="Barn"
                                     options={[{ value: "", text: "Velg barn" }].concat(
-                                        barnene.map((barn) => ({ value: barn.ident, text: barn.navn }))
+                                        getBarn(data.data.roller).map((barn) => ({
+                                            value: barn.ident,
+                                            text: barn.navn,
+                                        }))
                                     )}
                                     hideLabel
                                 />,
