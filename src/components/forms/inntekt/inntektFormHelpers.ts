@@ -185,18 +185,30 @@ export const syncDates = (
     const periodeErFoerVirkningsTidspunkt = new Date(fieldValue.aar).getFullYear() < virkningstidspunkt.getFullYear();
 
     if (!selected) {
-        if (!preSelectedPerioder.length && postSelectedPerioder.length) {
+        if (!preSelectedPerioder.length && postSelectedPerioder.length === 1) {
             const forstePostPeriode = postSelectedPerioder[0];
             const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
             setValue(`inntekteneSomLeggesTilGrunn.${Number(forstePostPeriodeIndex)}.fraDato`, virkningstidspunkt);
         }
 
-        if (preSelectedPerioder.length) {
+        if (!preSelectedPerioder.length && postSelectedPerioder.length > 1) {
+            const forstePostPeriode = postSelectedPerioder[0];
+            const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
+            if (!(new Date(forstePostPeriode.aar).getFullYear() < virkningstidspunkt.getFullYear())) {
+                setValue(`inntekteneSomLeggesTilGrunn.${Number(forstePostPeriodeIndex)}.fraDato`, virkningstidspunkt);
+            }
+        }
+
+        if (preSelectedPerioder.length === 1 && !postSelectedPerioder.length) {
+            const sistePrePeriode = preSelectedPerioder[0];
+            const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
+            setValue(`inntekteneSomLeggesTilGrunn.${Number(sistePrePeriodeIndex)}.tilDato`, null);
+            setValue(`inntekteneSomLeggesTilGrunn.${Number(sistePrePeriodeIndex)}.fraDato`, virkningstidspunkt);
+        } else if (preSelectedPerioder.length) {
             const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
             const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
             if (postSelectedPerioder.length) {
                 setValue(`inntekteneSomLeggesTilGrunn.${Number(sistePrePeriodeIndex)}.tilDato`, fieldValue.tilDato);
-
                 if (!inntekteneSomLeggesTilGrunn[sistePrePeriodeIndex].fraDato) {
                     setValue(`inntekteneSomLeggesTilGrunn.${Number(sistePrePeriodeIndex)}.fraDato`, fieldValue.fraDato);
                 }
@@ -254,10 +266,7 @@ export const syncDates = (
                 setValue(`inntekteneSomLeggesTilGrunn.${Number(index)}.fraDato`, null);
                 setValue(`inntekteneSomLeggesTilGrunn.${Number(index)}.tilDato`, null);
             });
-            return;
-        }
-
-        if (preSelectedPerioder.length) {
+        } else if (preSelectedPerioder.length) {
             const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
             const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
             setValue(`inntekteneSomLeggesTilGrunn.${Number(sistePrePeriodeIndex)}.tilDato`, deductDays(fraDato, 1));

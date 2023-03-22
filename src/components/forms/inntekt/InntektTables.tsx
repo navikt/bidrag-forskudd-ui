@@ -126,13 +126,28 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
     const handleOnSelect = (value: boolean, index: number) => {
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
-            syncDates(value, inntekteneSomLeggesTilGrunn, index, setValue, virkningstidspunkt, setError, clearErrors);
+            if (inntekteneSomLeggesTilGrunn.length) {
+                syncDates(
+                    value,
+                    inntekteneSomLeggesTilGrunn,
+                    index,
+                    setValue,
+                    virkningstidspunkt,
+                    setError,
+                    clearErrors
+                );
+            }
         }
     };
 
     const validatePeriods = () => {
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
+
+            if (!inntekteneSomLeggesTilGrunn.length) {
+                clearErrors("inntekteneSomLeggesTilGrunn");
+                return;
+            }
             const dateGaps = findDateGaps(inntekteneSomLeggesTilGrunn, virkningstidspunkt);
             const overlappingPerioder = getOverlappingPeriods(inntekteneSomLeggesTilGrunn);
             let types = {};
