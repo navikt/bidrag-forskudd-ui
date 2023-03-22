@@ -103,7 +103,6 @@ const InntektForm = ({
     const { inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
     const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
     const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
-    const [openPeriodDatePicker, setOpenPeriodDatePicker] = useState(false);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,

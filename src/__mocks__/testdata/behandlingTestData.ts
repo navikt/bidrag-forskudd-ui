@@ -52,10 +52,12 @@ export const behandlingMockApiData = {
     id: 1,
     behandlingType: "FORSKUDD",
     soknadType: "SOKNAD",
-    datoFom: 1672527600000,
-    datoTom: 4834076400000,
+    datoFom: "01-01-2023",
+    datoTom: "10-03-2123",
+    mottatDato: "17-03-2023",
     saksnummer: "2300138",
     behandlerEnhet: "4806",
+    soknadFraType: "BM",
     roller: [
         {
             id: 1,

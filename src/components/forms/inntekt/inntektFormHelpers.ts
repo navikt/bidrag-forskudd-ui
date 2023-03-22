@@ -1,11 +1,18 @@
 import {
-    gjennomsnitPerioder,
+    gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
     perioderSomIkkeKanOverlape,
     perioderSomKanOverlape,
+    ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { addDays, dateOrNull, deductDays, toISOStringOrNull } from "../../../utils/date-utils";
+
+const tekniksNavnToBeskrivelse = {
+    kapitalinntekt: "Kapitalinntekt",
+    skattegrunnlag: "Skattegrunnlag",
+    loenn_og_trekk: "Lønn og trekk",
+};
 
 export const createInntektPayload = (values: InntektFormValues) => ({
     periode: {
@@ -76,7 +83,7 @@ const transformSkattegrunnlager = (year) =>
     year.grunnlag.map((grunnlag) => ({
         fraDato: null,
         tilDato: null,
-        beskrivelse: `${grunnlag.tekniskNavn} ${year.skatteoppgjoersdato}`,
+        beskrivelse: `${tekniksNavnToBeskrivelse[grunnlag.tekniskNavn]} ${year.skatteoppgjoersdato}`,
         tekniskNavn: grunnlag.tekniskNavn.toLowerCase(),
         totalt: grunnlag.beloep,
         aar: year.skatteoppgjoersdato,
@@ -94,7 +101,7 @@ const transformInntekt = (inntekt) => ({
 const transformAInntekt = (inntekt) => ({
     fraDato: null,
     tilDato: null,
-    beskrivelse: `${inntekt.tekniskNavn} ${inntekt.aar}`,
+    beskrivelse: `${tekniksNavnToBeskrivelse[inntekt.tekniskNavn]} ${inntekt.aar}`,
     tekniskNavn: inntekt.tekniskNavn.toLowerCase(),
     totalt: inntekt.beloep,
     aar: inntekt.aar,
@@ -163,7 +170,7 @@ export const syncDates = (
             (inntekt) =>
                 !(inntekt.tekniskNavn === fieldValue.tekniskNavn && inntekt.aar === fieldValue.aar) &&
                 inntekt.selected &&
-                perioderSomIkkeKanOverlape.includes(inntekt.tekniskNavn) &&
+                ytelsePerioder.includes(inntekt.tekniskNavn) &&
                 inntekt.aar
         )
         .sort((a, b) => new Date(a.aar).getFullYear() - new Date(b.aar).getFullYear());
@@ -212,7 +219,7 @@ export const syncDates = (
 
     if (
         perioderSomKanOverlape.includes(fieldValue.tekniskNavn) ||
-        gjennomsnitPerioder.includes(fieldValue.tekniskNavn)
+        gjennomsnittPerioder.includes(fieldValue.tekniskNavn)
     ) {
         setValue(`inntekteneSomLeggesTilGrunn.${Number(index)}.fraDato`, virkningstidspunkt);
     } else {
@@ -290,4 +297,29 @@ export const findDateGaps = (perioder, virkningstidspunkt) => {
         gaps.push({ fra: gapFrom.toLocaleDateString(), til: today.toLocaleDateString() });
     }
     return gaps;
+};
+
+export const getOverlappingPeriods = (perioder) => {
+    const filteredAndSortedPerioder = perioder
+        .filter((periode) => periode.fraDato !== null && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
+        .sort((a, b) => a.fraDato - b.fraDato);
+    const overlappingPeriods = [];
+
+    for (let i = 0; i < filteredAndSortedPerioder.length; i++) {
+        for (let j = i + 1; j < filteredAndSortedPerioder.length; j++) {
+            if (
+                (filteredAndSortedPerioder[i].tilDato === null ||
+                    filteredAndSortedPerioder[i].tilDato >= filteredAndSortedPerioder[j].fraDato) &&
+                (filteredAndSortedPerioder[j].tilDato === null ||
+                    filteredAndSortedPerioder[j].tilDato >= filteredAndSortedPerioder[i].fraDato)
+            ) {
+                overlappingPeriods.push([
+                    `${filteredAndSortedPerioder[i].beskrivelse}`,
+                    `${filteredAndSortedPerioder[j].beskrivelse}`,
+                ]);
+            }
+        }
+    }
+
+    return overlappingPeriods;
 };

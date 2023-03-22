@@ -14,7 +14,7 @@ import { FormControlledDatePicker } from "../../formFields/FormControlledDatePic
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { findDateGaps, syncDates } from "./inntektFormHelpers";
+import { findDateGaps, getOverlappingPeriods, syncDates } from "./inntektFormHelpers";
 
 const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
@@ -134,15 +134,29 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
             const dateGaps = findDateGaps(inntekteneSomLeggesTilGrunn, virkningstidspunkt);
+            const overlappingPerioder = getOverlappingPeriods(inntekteneSomLeggesTilGrunn);
+            let types = {};
+
             if (dateGaps?.length) {
                 const message = `Mangler inntekter for ${dateGaps.length > 1 ? "perioder" : "periode"}: ${dateGaps.map(
                     (gap) => ` ${gap.fra} - ${gap.til}`
                 )}`;
-                setError("inntekteneSomLeggesTilGrunn", { type: "periodGaps", message });
+                types = { ...types, periodGaps: message };
             }
 
+            if (overlappingPerioder?.length) {
+                types = { ...types, overlappingPerioder: JSON.stringify(overlappingPerioder) };
+            }
+            if (Object.keys(types).length) {
+                setError("inntekteneSomLeggesTilGrunn", { types });
+            }
             if (!dateGaps?.length) {
-                clearErrors("inntekteneSomLeggesTilGrunn");
+                // @ts-ignore
+                clearErrors("inntekteneSomLeggesTilGrunn.types.periodGaps");
+            }
+            if (!overlappingPerioder?.length) {
+                // @ts-ignore
+                clearErrors("inntekteneSomLeggesTilGrunn.types.overlappingPerioder");
             }
         }
     };
@@ -172,8 +186,25 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
 
     return (
         <>
-            {errors?.inntekteneSomLeggesTilGrunn?.type === "periodGaps" && (
-                <Alert variant="warning">{errors.inntekteneSomLeggesTilGrunn.message}</Alert>
+            {errors?.inntekteneSomLeggesTilGrunn?.types && (
+                <Alert variant="warning">
+                    {errors.inntekteneSomLeggesTilGrunn.types?.periodGaps && (
+                        <BodyShort>{errors.inntekteneSomLeggesTilGrunn.types.periodGaps}</BodyShort>
+                    )}
+                    {errors.inntekteneSomLeggesTilGrunn.types?.overlappingPerioder && (
+                        <>
+                            <BodyShort>Du har overlappende perioder:</BodyShort>
+                            {JSON.parse(errors.inntekteneSomLeggesTilGrunn.types.overlappingPerioder as string).map(
+                                (perioder) => (
+                                    <BodyShort key={perioder}>
+                                        <span className="capitalize">{perioder[0]}</span> og{" "}
+                                        <span className="capitalize">{perioder[1]}</span>
+                                    </BodyShort>
+                                )
+                            )}
+                        </>
+                    )}
+                </Alert>
             )}
             {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
             <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
