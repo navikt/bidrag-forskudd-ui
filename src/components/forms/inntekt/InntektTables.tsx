@@ -7,6 +7,7 @@ import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockA
 import { RolleType } from "../../../api/BidragBehandlingApi";
 import { BEHANDLING_API } from "../../../constants/api";
 import { useForskudd } from "../../../context/ForskuddContext";
+import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -20,10 +21,16 @@ const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
         <BodyShort className="min-w-[215px] capitalize">{item.beskrivelse}</BodyShort>
     ) : (
-        <FormControlledTextField
+        <FormControlledSelectField
             key={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
             name={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
             label="Beskrivelse"
+            options={[{ value: "", text: "Velg type inntekt" }].concat(
+                Object.entries(InntektBeskrivelse).map((entry) => ({
+                    value: entry[0],
+                    text: entry[1],
+                }))
+            )}
             hideLabel
         />
     );
@@ -69,6 +76,7 @@ const Totalt = ({ item, index }) =>
                 name={`inntekteneSomLeggesTilGrunn.${index}.totalt`}
                 label="Totalt"
                 type="number"
+                min="1"
                 hideLabel
             />
         </div>

@@ -17,7 +17,6 @@ import { ActionStatus } from "../../../types/actionStatus";
 import { HentSkattegrunnlagResponse } from "../../../types/bidragGrunnlagTypes";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
-import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
@@ -209,9 +208,6 @@ const InntektForm = ({
                         </div>
                         <div>
                             <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
-                        </div>
-                        <div>
-                            <FormControlledCheckbox name="toTrinnsKontroll" legend="Skal til to-trinns kontroll." />
                         </div>
                     </div>
                     <ActionButtons action={action} onSave={onSave} onRefetch={onRefetch} isRefetching={isRefetching} />
