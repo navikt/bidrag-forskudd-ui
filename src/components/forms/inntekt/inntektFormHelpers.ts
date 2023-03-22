@@ -2,7 +2,7 @@ import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
     perioderSomIkkeKanOverlape,
-    perioderSomKanOverlape,
+    perioderSomKanIkkeOverlapeKunMedHverandre,
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
@@ -230,7 +230,7 @@ export const syncDates = (
     }
 
     if (
-        perioderSomKanOverlape.includes(fieldValue.tekniskNavn) ||
+        perioderSomKanIkkeOverlapeKunMedHverandre.includes(fieldValue.tekniskNavn) ||
         gjennomsnittPerioder.includes(fieldValue.tekniskNavn)
     ) {
         setValue(`inntekteneSomLeggesTilGrunn.${Number(index)}.fraDato`, virkningstidspunkt);
@@ -309,26 +309,38 @@ export const findDateGaps = (perioder, virkningstidspunkt) => {
 };
 
 export const getOverlappingPeriods = (perioder) => {
-    const filteredAndSortedPerioder = perioder
+    const ytelsePerioder = perioder
         .filter((periode) => periode.fraDato !== null && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
         .sort((a, b) => a.fraDato - b.fraDato);
     const overlappingPeriods = [];
 
-    for (let i = 0; i < filteredAndSortedPerioder.length; i++) {
-        for (let j = i + 1; j < filteredAndSortedPerioder.length; j++) {
-            if (
-                (filteredAndSortedPerioder[i].tilDato === null ||
-                    filteredAndSortedPerioder[i].tilDato >= filteredAndSortedPerioder[j].fraDato) &&
-                (filteredAndSortedPerioder[j].tilDato === null ||
-                    filteredAndSortedPerioder[j].tilDato >= filteredAndSortedPerioder[i].fraDato)
-            ) {
-                overlappingPeriods.push([
-                    `${filteredAndSortedPerioder[i].beskrivelse}`,
-                    `${filteredAndSortedPerioder[j].beskrivelse}`,
-                ]);
+    const pushOverlappingPeriods = (filteredAndSortedPerioder) => {
+        for (let i = 0; i < filteredAndSortedPerioder.length; i++) {
+            for (let j = i + 1; j < filteredAndSortedPerioder.length; j++) {
+                if (
+                    (filteredAndSortedPerioder[i].tilDato === null ||
+                        filteredAndSortedPerioder[i].tilDato >= filteredAndSortedPerioder[j].fraDato) &&
+                    (filteredAndSortedPerioder[j].tilDato === null ||
+                        filteredAndSortedPerioder[j].tilDato >= filteredAndSortedPerioder[i].fraDato)
+                ) {
+                    overlappingPeriods.push([
+                        `${filteredAndSortedPerioder[i].beskrivelse}`,
+                        `${filteredAndSortedPerioder[j].beskrivelse}`,
+                    ]);
+                }
             }
         }
-    }
+    };
+
+    pushOverlappingPeriods(ytelsePerioder);
+
+    perioderSomKanIkkeOverlapeKunMedHverandre.forEach((tekniskNavn) => {
+        const filteredAndSortedPerioder = perioder
+            .filter((periode) => periode.fraDato !== null && periode.tekniskNavn === tekniskNavn)
+            .sort((a, b) => a.fraDato - b.fraDato);
+
+        pushOverlappingPeriods(filteredAndSortedPerioder);
+    });
 
     return overlappingPeriods;
 };
