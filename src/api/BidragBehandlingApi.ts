@@ -9,23 +9,40 @@
  * ---------------------------------------------------------------
  */
 
+export interface UpdateBehandlingRequest {
+    begrunnelseMedIVedtakNotat?: string;
+    begrunnelseKunINotat?: string;
+}
+
 export interface BehandlingDto {
     /** @format int64 */
     id: number;
     behandlingType: BehandlingType;
     soknadType: SoknadType;
-    /** @format date-time */
+    /**
+     * @format date
+     * @example "0007-06-17"
+     */
     datoFom: string;
-    /** @format date-time */
+    /**
+     * @format date
+     * @example "0007-06-17"
+     */
     datoTom: string;
-    /** @format date-time */
+    /**
+     * @format date
+     * @example "0007-06-17"
+     */
     mottatDato: string;
     soknadFraType: SoknadFraType;
     saksnummer: string;
     behandlerEnhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
-    /** @format date-time */
+    /**
+     * @format date
+     * @example "0007-06-17"
+     */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
     avslag?: string;
@@ -335,11 +352,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request PUT:/api/behandling/{behandlingId}
          * @secure
          */
-        oppdaterBehandling: (behandlingId: number, params: RequestParams = {}) =>
+        oppdaterBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
             this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
                 method: "PUT",
+                body: data,
                 secure: true,
+                type: ContentType.Json,
                 ...params,
             }),
 
