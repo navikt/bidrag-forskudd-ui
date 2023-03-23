@@ -39,6 +39,14 @@ export const useApiData = () => {
 
     const queryClient = useQueryClient();
 
+    const listBehandlings = () =>
+        useQuery({
+            queryKey: `behandlings`,
+            queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => behandlingApi.api.hentBehandlinger(),
+            staleTime: 0,
+            suspense: true,
+        });
+
     const getBehandling = (behandlingId: number) =>
         useQuery({
             queryKey: `behandling-${behandlingId}`,
@@ -78,6 +86,7 @@ export const useApiData = () => {
     const api = {
         getSakAndRoller,
         getBehandling,
+        listBehandlings,
         updateBehandling,
     };
 

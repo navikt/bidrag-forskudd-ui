@@ -7,6 +7,7 @@ import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
+import { Index } from "./pages/forskudd/Index";
 const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
 
 const queryClient = new QueryClient({
@@ -25,7 +26,7 @@ export default function Forskudd() {
                 <Routes>
                     <Route path="/forskudd/:behandlingId" element={<ForskudWrapper />} />
                     <Route path="/forskudd/:behandlingId/notat" element={<NotatPageWrapper />} />
-                    <Route path="/" element={<div>Hello world</div>} />
+                    <Route path="/forskudd/" element={<Index />} />
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>
