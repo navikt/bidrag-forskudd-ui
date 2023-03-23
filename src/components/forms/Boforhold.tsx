@@ -40,10 +40,10 @@ const createInitialValues = (boforhold) => ({
 });
 
 export default () => {
-    const { saksnummer } = useForskudd();
+    const { behandlingId } = useForskudd();
     const { api } = useMockApi();
-    const { data: boforhold, refetch, isRefetching } = api.getBoforhold(saksnummer);
-    const mutation = api.postBoforhold(saksnummer);
+    const { data: boforhold, refetch, isRefetching } = api.getBoforhold(behandlingId.toString());
+    const mutation = api.postBoforhold(behandlingId.toString());
 
     return (
         <Suspense

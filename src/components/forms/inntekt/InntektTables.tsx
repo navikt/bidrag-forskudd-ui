@@ -107,9 +107,9 @@ const Periode = ({ item, index, datepicker }) => {
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = () => {
-    const { saksnummer, virkningstidspunktFormValues } = useForskudd();
+    const { behandlingId, virkningstidspunktFormValues } = useForskudd();
     const { api } = useMockApi();
-    const { data: behandling } = api.getBehandling(saksnummer);
+    const { data: behandling } = api.getBehandling(behandlingId.toString());
     const {
         control,
         getValues,

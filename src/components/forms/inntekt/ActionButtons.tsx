@@ -7,7 +7,7 @@ import { ActionStatus } from "../../../types/actionStatus";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const ActionButtons = ({ action, onSave, onRefetch, isRefetching }) => {
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
     return (
         <FlexRow>
             <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
@@ -33,7 +33,7 @@ export const ActionButtons = ({ action, onSave, onRefetch, isRefetching }) => {
             >
                 Lagre
             </Button>
-            <Link href={`/forskudd/${saksnummer}/notat`} target="_blank" className="font-bold">
+            <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold">
                 Vis notat <ExternalLink aria-hidden />
             </Link>
         </FlexRow>

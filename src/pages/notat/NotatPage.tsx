@@ -25,9 +25,9 @@ export default () => {
 };
 
 const Virkningstidspunkt = () => {
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { api } = useMockApi();
-    const { data: behandling } = api.getBehandling(saksnummer);
+    const { data: behandling } = api.getBehandling(behandlingId);
 
     return (
         <Suspense
@@ -43,7 +43,6 @@ const Virkningstidspunkt = () => {
 };
 
 const VirkningstidspunktView = ({ behandling }) => {
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
     const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandling.virkningstidspunkt);
     const [aarsak, setAarsak] = useState(behandling.aarsak);
     const [begrunnelse, setBegrunnelse] = useState(behandling.begrunnelseMedIVedtakNotat);
@@ -84,7 +83,7 @@ const VirkningstidspunktView = ({ behandling }) => {
                 </Heading>
                 <div className="flex gap-x-2">
                     <Label size="small">Saksnummer:</Label>
-                    <BodyShort size="small">{saksnummer}</BodyShort>
+                    <BodyShort size="small">{behandling.saksnummer}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Mottatt dato:</Label>
@@ -116,10 +115,10 @@ const VirkningstidspunktView = ({ behandling }) => {
 };
 
 const Inntekter = () => {
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { api: mockApi } = useMockApi();
-    const { data: inntekt } = mockApi.getInntekt(saksnummer);
-    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(saksnummer);
+    const { data: inntekt } = mockApi.getInntekt(behandlingId);
+    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(behandlingId);
 
     return (
         <Suspense>

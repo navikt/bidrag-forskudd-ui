@@ -10,7 +10,6 @@ interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     behandlingId: number;
-    saksnummer: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
@@ -36,15 +35,11 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
-    // TODO
-    const saksnummer = behandlingId + "";
-
     const value = React.useMemo(
         () => ({
             activeStep,
             setActiveStep,
             behandlingId,
-            saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,
             inntektFormValues,

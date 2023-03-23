@@ -24,7 +24,7 @@ export default function Forskudd() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/forskudd/:behandlingId" element={<ForskudWrapper />} />
-                    <Route path="/forskudd/:saksnummer/notat" element={<NotatPageWrapper />} />
+                    <Route path="/forskudd/:behandlingId/notat" element={<NotatPageWrapper />} />
                     <Route path="/" element={<div>Hello world</div>} />
                 </Routes>
             </BrowserRouter>
