@@ -38,7 +38,6 @@ export const createInntektPayload = (values: InntektFormValues) => ({
         : [],
     begrunnelseIVedtaket: values.begrunnelseIVedtaket,
     begrunnelseINotat: values.begrunnelseINotat,
-    toTrinnsKontroll: values.toTrinnsKontroll,
 });
 
 export const createInitialValues = (inntekt, skattegrunnlager, aInntektene): InntektFormValues => ({
@@ -65,7 +64,6 @@ export const createInitialValues = (inntekt, skattegrunnlager, aInntektene): Inn
         : [],
     begrunnelseIVedtaket: inntekt.begrunnelseIVedtaket,
     begrunnelseINotat: inntekt.begrunnelseINotat,
-    toTrinnsKontroll: inntekt.toTrinnsKontroll,
 });
 
 const transformSkattegrunnlager = (year) =>

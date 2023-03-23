@@ -67,6 +67,13 @@ export const behandlingMockApiData = {
             navn: "Forsikring, Kognitiv",
         },
         {
+            id: 4,
+            rolleType: "BARN",
+            ident: "07512150855",
+            opprettetDato: 1678402800000,
+            navn: "Forsikring, Inkognitiv",
+        },
+        {
             id: 2,
             rolleType: "BIDRAGS_PLIKTIG",
             ident: "31459900198",

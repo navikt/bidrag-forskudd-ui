@@ -11,7 +11,7 @@ export default function grunnlagMock(): RestHandler[] {
             return res(
                 ctx.set("Content-Type", "application/json"),
                 ctx.status(200),
-                ctx.body(JSON.stringify(createSkattegrunnlag(requestBody.inntektsAar)))
+                ctx.body(JSON.stringify(createSkattegrunnlag()))
             );
         }),
     ];

@@ -7,7 +7,7 @@ import { isResponseData } from "./types";
 export function mapToMockedResponse<T>(
     res: ResponseFunction,
     ctx: RestContext,
-    responseData?: ResponseData<T> | T,
+    responseData?: object | ResponseData<object>,
     delay?: number
 ): MockedResponse<T> | Promise<MockedResponse<T>> {
     const delayResponse = ctx.delay(delay ?? 500);

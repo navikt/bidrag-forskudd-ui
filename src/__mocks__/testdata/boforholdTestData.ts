@@ -12,42 +12,42 @@ interface Sivilstand {
     stand: string;
 }
 interface Barn {
-    navn: string;
     ident: string;
     perioder: Periode[];
 }
 export interface BoforholdData {
     barn: Barn[];
-    sivilstand: Sivilstand;
+    sivilstand: Sivilstand[];
     begrunnelseMedIVedtakNotat: string;
     begrunnelseKunINotat: string;
 }
 
-export const createBoforholdData = () => {
+export const createBoforholdData = (identer: string[] = []) => {
     const initialData = {
-        barn: [
-            {
-                navn: "Amalia Svendsen",
-                ident: "08102034566",
-                perioder: [
-                    {
-                        fraDato: "",
-                        tilDato: "",
-                        registrertPaaAdresse: true,
-                        kilde: "offentlig",
-                        borMedForeldre: true,
-                    },
-                ],
-            },
-        ],
-        sivilstand: {
-            fraDato: "",
-            tilDato: "",
-            stand: "",
-        },
+        barn: barnBoforholdData(identer),
+        sivilstand: [],
         begrunnelseMedIVedtakNotat: "",
         begrunnelseKunINotat: "",
     } as BoforholdData;
 
     return initialData;
+};
+
+export const barnBoforholdData = (identer: string[]) => {
+    if (!identer.length) {
+        return [];
+    }
+
+    return identer.map((ident) => ({
+        ident,
+        perioder: [],
+    }));
+};
+
+export const getBoforholdMockData = (behandlingId, identer: string[]) => {
+    if (!localStorage.getItem(`boforhold-${behandlingId}`)) {
+        localStorage.setItem(`boforhold-${behandlingId}`, JSON.stringify(createBoforholdData(identer)));
+    }
+
+    return localStorage.getItem(`boforhold-${behandlingId}`);
 };

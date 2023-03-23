@@ -357,7 +357,7 @@ export const UtvidetBarnetrygdTabel = () => {
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <div className="flex gap-x-4">
+                                <div key={`utvidetBarnetrygd[${index}].fraDato`} className="flex gap-x-4">
                                     <FormControlledDatePicker
                                         key={`utvidetBarnetrygd[${index}].fraDato`}
                                         name={`utvidetBarnetrygd[${index}].fraDato`}

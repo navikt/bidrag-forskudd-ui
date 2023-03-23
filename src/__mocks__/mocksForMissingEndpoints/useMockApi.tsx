@@ -5,7 +5,7 @@ import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { AndreInntekter } from "../testdata/aInntektTestData";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { BehandlingData } from "../testdata/behandlingTestData";
-import { BoforholdData } from "../testdata/boforholdTestData";
+import { BoforholdData, getBoforholdMockData } from "../testdata/boforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
 
 export const useMockApi = () => {
@@ -17,7 +17,7 @@ export const useMockApi = () => {
             setTimeout(() => resolve(result), 1000);
         });
 
-    const getBehandling = (saksnummer: string) =>
+    const getBehandling = (behandlingId: string) =>
         useQuery({
             queryKey: `behandling`,
             queryFn: (): Promise<BehandlingData> => fakeFetch(JSON.parse(localStorage.getItem(`behandling`))),
@@ -25,7 +25,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const postBehandling = (saksnummer: string) =>
+    const postBehandling = (behandlingId: string) =>
         useMutation({
             mutationFn: (payload: BehandlingData): Promise<BehandlingData> => {
                 localStorage.setItem(`behandling`, JSON.stringify(payload));
@@ -36,7 +36,7 @@ export const useMockApi = () => {
             },
         });
 
-    const getInntekt = (saksnummer: string) =>
+    const getInntekt = (behandlingId: string) =>
         useQuery({
             queryKey: `inntekt`,
             queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`))),
@@ -44,7 +44,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const postInntekt = (saksnummer: string) =>
+    const postInntekt = (behandlingId: string) =>
         useMutation({
             mutationFn: (payload: InntektData): Promise<InntektData> => {
                 localStorage.setItem(`inntekt`, JSON.stringify(payload));
@@ -55,7 +55,7 @@ export const useMockApi = () => {
             },
         });
 
-    const getArbeidsforhold = (saksnummer: string) =>
+    const getArbeidsforhold = (behandlingId: string) =>
         useQuery({
             queryKey: `arbeidsforhold`,
             queryFn: (): Promise<ArbeidsforholdData[]> => fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`))),
@@ -63,7 +63,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const getSkattegrunlag = (saksnummer: string) =>
+    const getSkattegrunlag = (behandlingId: string) =>
         useQuery({
             queryKey: `skattegrunlag`,
             queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
@@ -72,7 +72,7 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const getAndreTyperInntekt = (saksnummer: string) =>
+    const getAndreTyperInntekt = (behandlingId: string) =>
         useQuery({
             queryKey: `ainntekt`,
             queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
@@ -80,22 +80,23 @@ export const useMockApi = () => {
             suspense: true,
         });
 
-    const getBoforhold = (saksnummer: string) =>
+    const getBoforhold = (behandlingId: string, identer: string[], enabled = false) =>
         useQuery({
-            queryKey: `boforhold`,
-            queryFn: (): Promise<BoforholdData> => fakeFetch(JSON.parse(localStorage.getItem(`boforhold`))),
+            queryKey: `boforhold-${behandlingId}`,
+            queryFn: (): Promise<BoforholdData> => fakeFetch(JSON.parse(getBoforholdMockData(behandlingId, identer))),
             staleTime: Infinity,
             suspense: true,
+            enabled,
         });
 
-    const postBoforhold = (saksnummer: string) =>
+    const postBoforhold = (behandlingId: string) =>
         useMutation({
             mutationFn: (payload: BoforholdData): Promise<BehandlingData> => {
-                localStorage.setItem(`boforhold`, JSON.stringify(payload));
+                localStorage.setItem(`boforhold-${behandlingId}`, JSON.stringify(payload));
                 return fakeFetch(payload);
             },
             onSuccess: (data) => {
-                queryClient.setQueryData(`boforhold`, data);
+                queryClient.setQueryData(`boforhold-${behandlingId}`, data);
             },
         });
 

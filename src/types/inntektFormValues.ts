@@ -30,5 +30,4 @@ export interface InntektFormValues {
     utvidetBarnetrygd: UtvidetBarnetrygdFormValues[];
     begrunnelseIVedtaket: string;
     begrunnelseINotat: string;
-    toTrinnsKontroll: boolean;
 }
