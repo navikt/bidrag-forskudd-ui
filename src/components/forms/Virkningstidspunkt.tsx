@@ -5,6 +5,7 @@ import { UseMutationResult } from "react-query";
 import { QueryObserverResult } from "react-query/types/core/types";
 
 import { BehandlingDto } from "../../api/BidragBehandlingApi";
+import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
@@ -134,7 +135,7 @@ const VirkningstidspunktForm = ({
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Søknad fra</Label>
-                                <BodyShort size="small">{behandling.soknadFraType}</BodyShort>
+                                <BodyShort size="small">{SOKNAD_LABELS[behandling.soknadFraType]}</BodyShort>
                             </div>
                             <div className="flex gap-x-2">
                                 <Label size="small">Mottat dato</Label>

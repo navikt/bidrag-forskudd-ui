@@ -12,6 +12,8 @@
 export interface UpdateBehandlingRequest {
     begrunnelseMedIVedtakNotat?: string;
     begrunnelseKunINotat?: string;
+    /** @format date */
+    virkningsDato?: string;
 }
 
 export interface BehandlingDto {
@@ -19,30 +21,18 @@ export interface BehandlingDto {
     id: number;
     behandlingType: BehandlingType;
     soknadType: SoknadType;
-    /**
-     * @format date
-     * @example "0007-06-17"
-     */
+    /** @format date */
     datoFom: string;
-    /**
-     * @format date
-     * @example "0007-06-17"
-     */
+    /** @format date */
     datoTom: string;
-    /**
-     * @format date
-     * @example "0007-06-17"
-     */
+    /** @format date */
     mottatDato: string;
     soknadFraType: SoknadFraType;
     saksnummer: string;
     behandlerEnhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
-    /**
-     * @format date
-     * @example "0007-06-17"
-     */
+    /** @format date */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
     avslag?: string;
@@ -152,40 +142,6 @@ export interface CreateRolleDto {
 export interface CreateBehandlingResponse {
     /** @format int64 */
     id: number;
-}
-
-export interface Behandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: string;
-    begrunnelseMedIVedtakNotat?: string;
-    begrunnelseKunINotat?: string;
-    /** @format int64 */
-    id?: number;
-    /** @uniqueItems true */
-    roller: Rolle[];
-}
-
-export interface Rolle {
-    behandling: Behandling;
-    rolleType: RolleType;
-    ident: string;
-    /** @format date-time */
-    opprettetDato: string;
-    /** @format int64 */
-    id?: number;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -371,7 +327,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBehandlinger: (params: RequestParams = {}) =>
-            this.request<Behandling[], Behandling[]>({
+            this.request<BehandlingDto[], BehandlingDto[]>({
                 path: `/api/behandling`,
                 method: "GET",
                 secure: true,
