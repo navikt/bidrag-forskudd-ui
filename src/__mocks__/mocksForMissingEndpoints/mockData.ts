@@ -1,13 +1,9 @@
 import { createAInntektData } from "../testdata/aInntektTestData";
 import { arbeidsforholdData } from "../testdata/arbeidsforholdTestData";
-import { behandlingData } from "../testdata/behandlingTestData";
 import { createSkattegrunnlag } from "../testdata/grunnlagTestData";
 import { inntektData } from "../testdata/inntektTestData";
 
 export const initMockData = () => {
-    if (!localStorage.getItem("behandling")) {
-        localStorage.setItem(`behandling`, JSON.stringify(behandlingData()));
-    }
     if (!localStorage.getItem("inntekt")) {
         localStorage.setItem(`inntekt`, JSON.stringify(inntektData()));
     }

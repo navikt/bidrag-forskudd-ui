@@ -60,48 +60,44 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
 
     useEffect(() => {
         const canvas = chartRef.current.querySelector("canvas");
+        const chart = getInstanceByDom(chartRef.current);
+        const dataLen = option.series[0].data.length;
+        const handleKeydown = (e) => {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                chart.dispatchAction({
+                    type: "downplay",
+                    seriesIndex: 0,
+                    dataIndex: currentIndex,
+                });
+                currentIndex =
+                    e.key === "ArrowRight"
+                        ? (currentIndex + 1) % dataLen
+                        : currentIndex <= 0
+                        ? dataLen - 1
+                        : currentIndex - 1;
+                chart.dispatchAction({
+                    type: "highlight",
+                    seriesIndex: 0,
+                    dataIndex: currentIndex,
+                });
+                chart.dispatchAction({
+                    type: "showTip",
+                    seriesIndex: 0,
+                    dataIndex: currentIndex,
+                });
+            }
+        };
+        const addKeydownListener = () => window.addEventListener("keydown", handleKeydown);
+        const removeKeydownListener = () => window.removeEventListener("keydown", handleKeydown);
+        canvas?.setAttribute("tabindex", "0");
+        canvas?.addEventListener("focusin", addKeydownListener);
+        canvas?.addEventListener("focusout", removeKeydownListener);
 
-        if (canvas) {
-            canvas.setAttribute("tabindex", "0");
-            const chart = getInstanceByDom(chartRef.current);
-            const dataLen = option.series[0].data.length;
-            const handleKeydown = (e) => {
-                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                    chart.dispatchAction({
-                        type: "downplay",
-                        seriesIndex: 0,
-                        dataIndex: currentIndex,
-                    });
-                    currentIndex =
-                        e.key === "ArrowRight"
-                            ? (currentIndex + 1) % dataLen
-                            : currentIndex <= 0
-                            ? dataLen - 1
-                            : currentIndex - 1;
-                    chart.dispatchAction({
-                        type: "highlight",
-                        seriesIndex: 0,
-                        dataIndex: currentIndex,
-                    });
-                    chart.dispatchAction({
-                        type: "showTip",
-                        seriesIndex: 0,
-                        dataIndex: currentIndex,
-                    });
-                }
-            };
-
-            const addKeydownListener = () => window.addEventListener("keydown", handleKeydown);
-            const removeKeydownListener = () => window.removeEventListener("keydown", handleKeydown);
-            canvas.addEventListener("focusin", addKeydownListener);
-            canvas.addEventListener("focusout", removeKeydownListener);
-
-            return () => {
-                canvas.removeEventListener("focusin", addKeydownListener);
-                canvas.removeEventListener("focusout", removeKeydownListener);
-                window.removeEventListener("keydown", handleKeydown);
-            };
-        }
+        return () => {
+            window.removeEventListener("keydown", handleKeydown);
+            canvas?.removeEventListener("focusin", addKeydownListener);
+            canvas?.removeEventListener("focusout", removeKeydownListener);
+        };
     }, [chartInitialized]);
 
     useEffect(() => {
