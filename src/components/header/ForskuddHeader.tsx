@@ -17,7 +17,7 @@ export const ForskuddHeader = memo(() => {
         <Suspense
             fallback={
                 <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." />
+                    <Loader size="3xlarge" title="venter..." variant="interaction" />
                 </div>
             }
         >

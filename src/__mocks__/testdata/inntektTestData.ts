@@ -10,9 +10,9 @@ export interface GjennomsnittInntekt {
 }
 
 export interface InntektSomLeggesTilGrunn {
-    fraDato: string;
-    tilDato: string;
-    totalt: number;
+    fraDato: string | null;
+    tilDato: string | null;
+    totalt: number | string;
     beskrivelse: string;
     aar: string;
     tekniskNavn: string;

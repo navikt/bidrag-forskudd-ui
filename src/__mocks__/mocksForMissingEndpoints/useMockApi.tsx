@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "react-query";
 
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { AndreInntekter } from "../testdata/aInntektTestData";
@@ -10,11 +9,14 @@ import { InntektData } from "../testdata/inntektTestData";
 
 export const useMockApi = () => {
     const queryClient = useQueryClient();
-    const [networkError, setNetworkError] = useState<string>(null);
 
-    const fakeFetch = (result): Promise<any> =>
-        new Promise((resolve) => {
-            setTimeout(() => resolve(result), 1000);
+    const fakeFetch = (result, success = true): Promise<any> =>
+        new Promise((resolve, reject) => {
+            if (success) {
+                setTimeout(() => resolve(result), 1000);
+            } else {
+                setTimeout(() => reject(new Error("Fetch failed")), 1000);
+            }
         });
 
     const getBehandling = (behandlingId: string) =>
@@ -36,10 +38,10 @@ export const useMockApi = () => {
             },
         });
 
-    const getInntekt = (behandlingId: string) =>
+    const getInntekt = (behandlingId: string, success = true) =>
         useQuery({
             queryKey: `inntekt`,
-            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`))),
+            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`)), success),
             staleTime: Infinity,
             suspense: true,
         });
@@ -55,10 +57,11 @@ export const useMockApi = () => {
             },
         });
 
-    const getArbeidsforhold = (behandlingId: string) =>
+    const getArbeidsforhold = (behandlingId: string, success = true) =>
         useQuery({
             queryKey: `arbeidsforhold`,
-            queryFn: (): Promise<ArbeidsforholdData[]> => fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`))),
+            queryFn: (): Promise<ArbeidsforholdData[]> =>
+                fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`)), success),
             staleTime: Infinity,
             suspense: true,
         });
@@ -100,6 +103,29 @@ export const useMockApi = () => {
             },
         });
 
+    const getInntektAInntektAndGrunnlag = (behandlingId: string) =>
+        useQueries([
+            {
+                queryKey: "skattegrunlag",
+                queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
+                    fakeFetch(JSON.parse(localStorage.getItem(`skattegrunlag`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+            {
+                queryKey: "ainntekt",
+                queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+            {
+                queryKey: "inntekt",
+                queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+        ]);
+
     const api = {
         getBehandling,
         postBehandling,
@@ -110,7 +136,8 @@ export const useMockApi = () => {
         getSkattegrunlag,
         getBoforhold,
         postBoforhold,
+        getInntektAInntektAndGrunnlag,
     };
 
-    return { api, networkError };
+    return { api };
 };

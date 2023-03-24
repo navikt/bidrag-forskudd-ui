@@ -125,7 +125,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
     });
     const virkningstidspunkt = virkningstidspunktFormValues?.virkningstidspunkt
         ? virkningstidspunktFormValues.virkningstidspunkt
-        : behandling.virkningstidspunkt
+        : behandling?.virkningstidspunkt
         ? behandling.virkningstidspunkt
         : null;
 
@@ -190,6 +190,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
         inntekteneSomLeggesTilGrunnField.remove(index);
         if (!index) {
             inntekteneSomLeggesTilGrunnField.append({
+                aar: "",
                 fraDato: null,
                 tilDato: null,
                 totalt: "",
@@ -289,6 +290,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                 onClick={useCallback(
                     () =>
                         inntekteneSomLeggesTilGrunnField.append({
+                            aar: "",
                             fraDato: null,
                             tilDato: null,
                             totalt: "",
@@ -474,7 +476,7 @@ export const BarnetilleggTabel = () => {
         <Suspense
             fallback={
                 <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." />
+                    <Loader size="3xlarge" title="venter..." variant="interaction" />
                 </div>
             }
         >

@@ -1,7 +1,7 @@
 import { Barn } from "../__mocks__/testdata/inntektTestData";
 
 export interface InntektSomLeggesTilGrunnFormValues {
-    aar?: string;
+    aar: string;
     beskrivelse: string;
     fraDato: Date | null;
     fraPostene: boolean;

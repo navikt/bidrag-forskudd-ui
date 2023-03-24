@@ -1,21 +1,16 @@
 import { ExternalLink } from "@navikt/ds-icons";
-import { Accordion, Heading, Link, Loader } from "@navikt/ds-react";
-import React, { Suspense, useEffect, useState } from "react";
+import { Accordion, Heading, Link } from "@navikt/ds-react";
+import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { UseMutationResult } from "react-query";
-import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { AndreInntekter } from "../../../__mocks__/testdata/aInntektTestData";
-import { ArbeidsforholdData } from "../../../__mocks__/testdata/arbeidsforholdTestData";
-import { InntektData } from "../../../__mocks__/testdata/inntektTestData";
 import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { ActionStatus } from "../../../types/actionStatus";
-import { HentSkattegrunnlagResponse } from "../../../types/bidragGrunnlagTypes";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
@@ -23,56 +18,27 @@ import { createInitialValues, createInntektPayload } from "./inntektFormHelpers"
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
 export default () => {
-    const { behandlingId } = useForskudd();
+    return (
+        <div className="grid gap-y-8">
+            <InntektHeader />
+            <QueryErrorWrapper>
+                <InntektForm />
+            </QueryErrorWrapper>
+        </div>
+    );
+};
+
+const InntektForm = () => {
+    const channel = new BroadcastChannel("inntekter");
+    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
+    const { behandlingId, inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
     const { api: mockApi } = useMockApi();
     const { data: skattegrunnlager } = mockApi.getSkattegrunlag(behandlingId.toString());
     const { data: aInntekt } = mockApi.getAndreTyperInntekt(behandlingId.toString());
     const { data: inntekt, refetch, isRefetching } = mockApi.getInntekt(behandlingId.toString());
-    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(behandlingId.toString());
     const mutation = mockApi.postInntekt(behandlingId.toString());
 
-    return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." />
-                </div>
-            }
-        >
-            <InntektForm
-                inntekt={inntekt}
-                arbeidsforholder={arbeidsforholder}
-                refetch={refetch}
-                isRefetching={isRefetching}
-                mutation={mutation}
-                skattegrunnlager={skattegrunnlager}
-                aInntekt={aInntekt}
-            />
-        </Suspense>
-    );
-};
-
-const InntektForm = ({
-    inntekt,
-    aInntekt,
-    arbeidsforholder,
-    skattegrunnlager,
-    refetch,
-    isRefetching,
-    mutation,
-}: {
-    inntekt: InntektData;
-    aInntekt: AndreInntekter[];
-    arbeidsforholder: ArbeidsforholdData[];
-    skattegrunnlager: HentSkattegrunnlagResponse[];
-    refetch: () => Promise<QueryObserverResult>;
-    isRefetching: boolean;
-    mutation: UseMutationResult;
-}) => {
-    const channel = new BroadcastChannel("inntekter");
-    const { inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
     const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
-    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -130,20 +96,6 @@ const InntektForm = ({
         <FormProvider {...useFormMethods}>
             <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
                 <div className="grid gap-y-8">
-                    <Heading level="2" size="xlarge">
-                        Inntekt
-                    </Heading>
-                    <div className="grid w-full max-w-[65ch] gap-y-8">
-                        <InntektChart />
-                        <Accordion>
-                            <Accordion.Item>
-                                <Accordion.Header>Arbeidsforhold</Accordion.Header>
-                                <Accordion.Content>
-                                    <Arbeidsforhold arbeidsforholder={arbeidsforholder} />
-                                </Accordion.Content>
-                            </Accordion.Item>
-                        </Accordion>
-                    </div>
                     <div className="grid gap-y-4 w-max">
                         <div className="flex gap-x-4">
                             <Heading level="3" size="medium">
@@ -187,3 +139,24 @@ const InntektForm = ({
         </FormProvider>
     );
 };
+
+const InntektHeader = () => (
+    <>
+        <Heading level="2" size="xlarge">
+            Inntekt
+        </Heading>
+        <div className="grid w-full max-w-[65ch] gap-y-8">
+            <InntektChart />
+            <Accordion>
+                <Accordion.Item>
+                    <Accordion.Header>Arbeidsforhold</Accordion.Header>
+                    <Accordion.Content>
+                        <QueryErrorWrapper>
+                            <Arbeidsforhold />
+                        </QueryErrorWrapper>
+                    </Accordion.Content>
+                </Accordion.Item>
+            </Accordion>
+        </div>
+    </>
+);
