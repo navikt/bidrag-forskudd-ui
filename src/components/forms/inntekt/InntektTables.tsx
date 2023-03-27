@@ -3,7 +3,6 @@ import { Alert, BodyShort, Button, Heading, Loader, Popover } from "@navikt/ds-r
 import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
@@ -15,7 +14,13 @@ import { FormControlledDatePicker } from "../../formFields/FormControlledDatePic
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { checkOverlappingPeriods, findDateGaps, getOverlappingInntektPerioder, syncDates } from "./inntektFormHelpers";
+import { getVirkningstidspunkt } from "../helpers/helpers";
+import {
+    checkOverlappingPeriods,
+    findDateGaps,
+    getOverlappingInntektPerioder,
+    syncDates,
+} from "../helpers/inntektFormHelpers";
 
 const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
@@ -108,8 +113,8 @@ const Periode = ({ item, index, datepicker }) => {
 
 export const InntekteneSomLeggesTilGrunnTabel = () => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
-    const { api } = useMockApi();
-    const { data: behandling } = api.getBehandling(behandlingId.toString());
+    const { api } = useApiData();
+    const { data: behandling } = api.getBehandling(behandlingId);
     const {
         control,
         getValues,
@@ -123,11 +128,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
         control,
         name: "inntekteneSomLeggesTilGrunn",
     });
-    const virkningstidspunkt = virkningstidspunktFormValues?.virkningstidspunkt
-        ? virkningstidspunktFormValues.virkningstidspunkt
-        : behandling?.virkningstidspunkt
-        ? behandling.virkningstidspunkt
-        : null;
+    const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
 
     useEffect(() => {
         trigger();

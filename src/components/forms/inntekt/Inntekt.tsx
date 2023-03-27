@@ -11,10 +11,10 @@ import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { ActionStatus } from "../../../types/actionStatus";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
-import { createInitialValues, createInntektPayload } from "./inntektFormHelpers";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
 export default () => {

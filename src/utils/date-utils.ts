@@ -12,4 +12,12 @@ export const deductDays = (date: Date, days) => {
     return newDate;
 };
 
+export const addMonths = (date: Date, months: number) => {
+    const newDate = new Date(date);
+    newDate.setMonth(newDate.getMonth() + months);
+    return newDate;
+};
+
+export const lastDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
 export const isValidDate = (date: any) => date && date instanceof Date && isFinite(date.getTime());

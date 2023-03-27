@@ -1,7 +1,7 @@
 import { DateValidationT, UNSAFE_DatePicker, UNSAFE_useDatepicker } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
-interface DatePickerModalProps {
+interface DatePickerInputProps {
     onChange: (selectedDay: Date | undefined) => void;
     label: string;
     fromDate?: Date;
@@ -25,7 +25,7 @@ export const DatePickerInput = ({
     resetDefaultValue,
     onValidate,
     error,
-}: DatePickerModalProps) => {
+}: DatePickerInputProps) => {
     const { datepickerProps, inputProps, setSelected } = UNSAFE_useDatepicker({
         onDateChange: (date) => {
             onChange(date);

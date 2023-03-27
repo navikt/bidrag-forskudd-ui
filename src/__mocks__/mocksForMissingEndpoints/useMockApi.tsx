@@ -3,7 +3,6 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "react-query";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { AndreInntekter } from "../testdata/aInntektTestData";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
-import { BehandlingData } from "../testdata/behandlingTestData";
 import { BoforholdData, getBoforholdMockData } from "../testdata/boforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
 
@@ -17,25 +16,6 @@ export const useMockApi = () => {
             } else {
                 setTimeout(() => reject(new Error("Fetch failed")), 1000);
             }
-        });
-
-    const getBehandling = (behandlingId: string) =>
-        useQuery({
-            queryKey: `behandling`,
-            queryFn: (): Promise<BehandlingData> => fakeFetch(JSON.parse(localStorage.getItem(`behandling`))),
-            staleTime: Infinity,
-            suspense: true,
-        });
-
-    const postBehandling = (behandlingId: string) =>
-        useMutation({
-            mutationFn: (payload: BehandlingData): Promise<BehandlingData> => {
-                localStorage.setItem(`behandling`, JSON.stringify(payload));
-                return fakeFetch(payload);
-            },
-            onSuccess: (data) => {
-                queryClient.setQueryData(`behandling`, data);
-            },
         });
 
     const getInntekt = (behandlingId: string, success = true) =>
@@ -94,7 +74,7 @@ export const useMockApi = () => {
 
     const postBoforhold = (behandlingId: string) =>
         useMutation({
-            mutationFn: (payload: BoforholdData): Promise<BehandlingData> => {
+            mutationFn: (payload: BoforholdData): Promise<BoforholdData> => {
                 localStorage.setItem(`boforhold-${behandlingId}`, JSON.stringify(payload));
                 return fakeFetch(payload);
             },
@@ -127,8 +107,6 @@ export const useMockApi = () => {
         ]);
 
     const api = {
-        getBehandling,
-        postBehandling,
         getInntekt,
         postInntekt,
         getAndreTyperInntekt,

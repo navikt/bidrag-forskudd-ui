@@ -1,4 +1,4 @@
-import { hentBehandlingMock } from "./behandlingMock";
+import { behandlingMock } from "./behandlingMock";
 import grunnlagMock from "./grunnlagMock";
 import logMock from "./logMock";
 import personMock from "./personMock";
@@ -10,5 +10,5 @@ export const handlers = [
     ...personMock(),
     ...hentSakMock(),
     ...grunnlagMock(),
-    ...hentBehandlingMock(),
+    ...behandlingMock(),
 ];

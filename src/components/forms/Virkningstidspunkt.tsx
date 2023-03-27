@@ -1,4 +1,5 @@
 import { BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
+import { AxiosResponse } from "axios";
 import React, { Suspense, useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
@@ -13,15 +14,16 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useApiData } from "../../hooks/useApiData";
 import { ActionStatus } from "../../types/actionStatus";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
+import { dateOrNull } from "../../utils/date-utils";
+import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
-const createInitialValues = (behandling) =>
+const createInitialValues = (behandling: BehandlingDto) =>
     ({
-        virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt) : null,
+        virkningsDato: dateOrNull(behandling.virkningsDato),
         aarsak: behandling.aarsak ?? "",
         avslag: behandling.avslag ?? "",
         begrunnelseMedIVedtakNotat: behandling.begrunnelseMedIVedtakNotat ?? "",
@@ -59,7 +61,7 @@ const VirkningstidspunktForm = ({
     mutation,
 }: {
     behandling: BehandlingDto;
-    refetch: () => Promise<QueryObserverResult>;
+    refetch: () => Promise<QueryObserverResult<AxiosResponse<BehandlingDto, unknown>>>;
     isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
@@ -74,7 +76,7 @@ const VirkningstidspunktForm = ({
 
     const fieldsForNotat = useWatch({
         control: useFormMethods.control,
-        name: ["virkningstidspunkt", "aarsak", "begrunnelseMedIVedtakNotat"],
+        name: ["virkningsDato", "aarsak", "begrunnelseMedIVedtakNotat"],
     });
 
     useEffect(() => {
@@ -95,7 +97,7 @@ const VirkningstidspunktForm = ({
 
     const onRefetch = async () => {
         const { data } = await refetch();
-        const values = createInitialValues(data);
+        const values = createInitialValues(data.data);
         setVirkningstidspunktFormValues(values);
         useFormMethods.reset(values);
         setAction(ActionStatus.REFETCHED);
@@ -147,13 +149,6 @@ const VirkningstidspunktForm = ({
                             </div>
                         </FlexRow>
                         <FlexRow className="gap-x-8">
-                            <FormControlledDatePicker
-                                name="virkningstidspunkt"
-                                label="Virkningstidspunkt"
-                                placeholder="DD.MM.ÅÅÅÅ"
-                                defaultValue={initialValues.virkningstidspunkt}
-                                resetDefaultValue={action === ActionStatus.REFETCHED}
-                            />
                             <FormControlledSelectField
                                 name="aarsak"
                                 label="Årsak"
@@ -161,6 +156,14 @@ const VirkningstidspunktForm = ({
                                     value: entry[0],
                                     text: entry[1],
                                 }))}
+                            />
+                            <FormControlledMonthPicker
+                                name="virkningsDato"
+                                label="Virkningstidspunkt"
+                                placeholder="MM.ÅÅÅÅ"
+                                defaultValue={initialValues.virkningsDato}
+                                resetDefaultValue={action === ActionStatus.REFETCHED}
+                                toDate={new Date()}
                             />
                             <FormControlledSelectField
                                 name="avslag"

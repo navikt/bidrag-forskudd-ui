@@ -9,7 +9,6 @@ import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useApiData } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
-import { RolleDetaljer } from "../RolleDetaljer";
 import { RolleTag } from "../RolleTag";
 
 export default () => {
@@ -142,14 +141,6 @@ export default () => {
                             })}
                         </Table.Body>
                     </Table>
-                </div>
-
-                <div className="grid gap-y-4">
-                    <Heading level="3" size="medium">
-                        Forsendelse gjelder:
-                    </Heading>
-
-                    <RolleDetaljer withBorder={false} rolle={getBm()} />
                 </div>
                 <div className="grid gap-y-4">
                     <Heading level="3" size="medium">

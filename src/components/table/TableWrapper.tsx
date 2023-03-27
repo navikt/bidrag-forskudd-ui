@@ -4,7 +4,7 @@ import React, { ReactElement, ReactNode } from "react";
 export const TableWrapper = ({ heading, children }: { heading: string[]; children: ReactNode }) => (
     <Table size="small" className="w-fit" zebraStripes>
         <Table.Header>
-            <Table.Row>
+            <Table.Row className="align-baseline">
                 {heading.map((header) => (
                     <Table.HeaderCell scope="col" key={header}>
                         {header}
@@ -17,7 +17,7 @@ export const TableWrapper = ({ heading, children }: { heading: string[]; childre
 );
 
 export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
-    <Table.Row>
+    <Table.Row className="align-baseline">
         {cells.map((cell, index) => {
             if (!index)
                 return (

@@ -2,6 +2,7 @@ import { Heading, Loader } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { memo, Suspense } from "react";
 
+import { RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import { useApiData } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
@@ -38,9 +39,15 @@ export const ForskuddHeader = memo(() => {
                     </span>
                 </Heading>
                 <div className="grid grid-cols-[max-content_auto]">
-                    {behandling.roller?.map((rolle, i) => (
-                        <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
-                    ))}
+                    {behandling.roller
+                        ?.sort((a, b) => {
+                            if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
+                            if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
+                            return 0;
+                        })
+                        .map((rolle, i) => (
+                            <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
+                        ))}
                 </div>
             </div>
         </Suspense>
