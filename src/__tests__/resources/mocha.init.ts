@@ -16,17 +16,10 @@ export async function mochaGlobalSetup() {
     global.window.logErrorMessage = (message, error) => {
         console.log("logErrorMessage was called with message=", message);
     };
-    // @ts-ignore
-    global.window.openPersonsok = () => {
-        return null;
-    };
     global.window.open = () => null;
     global.window.focus = () => null;
     global.window.close = () => null;
-    // @ts-ignore
-    global.window.waitForPersonSokResult = () => {
-        return Promise.resolve({ ok: true, status: 200, payload: null });
-    };
+
     // @ts-ignore
     global.window.logToServer = {
         info: (message: string) => null,
