@@ -9,9 +9,58 @@
  * ---------------------------------------------------------------
  */
 
+export interface CustomFieldError {
+    objectName: string;
+    field: string;
+    message: string;
+}
+
+export interface Error {
+    /** @format int32 */
+    status: number;
+    message: string;
+    fieldErrors: CustomFieldError[];
+}
+
+export enum AvslagType {
+    ANNET_AVSLAG = "ANNET_AVSLAG",
+    PGA_BARNEPENSJ = "PGA_BARNEPENSJ",
+    BARNS_EKTESKAP = "BARNS_EKTESKAP",
+    BARNS_INNTEKT = "BARNS_INNTEKT",
+    PGA_YTELSE_FTRL = "PGA_YTELSE_FTRL",
+    FULLT_UNDERH_OFF = "FULLT_UNDERH_OFF",
+    IKKE_OMSORG = "IKKE_OMSORG",
+    IKKE_OPPH_I_RIKET = "IKKE_OPPH_I_RIKET",
+    MANGL_DOK = "MANGL_DOK",
+    PGA_SAMMENFL = "PGA_SAMMENFL",
+    OPPH_UTLAND = "OPPH_UTLAND",
+    UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum ForskuddBeregningKodeAarsakType {
+    SF = "SF",
+    NF = "NF",
+    OF = "OF",
+    AF = "AF",
+    CF = "CF",
+    DF = "DF",
+    LF = "LF",
+    GF = "GF",
+    HF = "HF",
+    BF = "BF",
+    KF = "KF",
+    QF = "QF",
+    MF = "MF",
+    PF = "PF",
+    EF = "EF",
+    FF = "FF",
+}
+
 export interface UpdateBehandlingRequest {
     begrunnelseMedIVedtakNotat?: string;
     begrunnelseKunINotat?: string;
+    avslag?: AvslagType;
+    aarsak?: ForskuddBeregningKodeAarsakType;
     /** @format date */
     virkningsDato?: string;
 }
@@ -35,32 +84,13 @@ export interface BehandlingDto {
     /** @format date */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: string;
+    avslag?: AvslagType;
     begrunnelseMedIVedtakNotat?: string;
     begrunnelseKunINotat?: string;
 }
 
 export enum BehandlingType {
     FORSKUDD = "FORSKUDD",
-}
-
-export enum ForskuddBeregningKodeAarsakType {
-    SF = "SF",
-    NF = "NF",
-    OF = "OF",
-    AF = "AF",
-    CF = "CF",
-    DF = "DF",
-    LF = "LF",
-    GF = "GF",
-    HF = "HF",
-    BF = "BF",
-    KF = "KF",
-    QF = "QF",
-    MF = "MF",
-    PF = "PF",
-    EF = "EF",
-    FF = "FF",
 }
 
 export interface RolleDto {
@@ -126,14 +156,28 @@ export interface CreateBehandlingRequest {
     /** @format date-time */
     mottatDato: string;
     soknadFra: SoknadFraType;
+    /**
+     * @minLength 0
+     * @maxLength 7
+     */
     saksnummer: string;
+    /**
+     * @minLength 4
+     * @maxLength 4
+     */
     behandlerEnhet: string;
-    /** @uniqueItems true */
+    /**
+     * @maxItems 2147483647
+     * @minItems 2
+     * @uniqueItems true
+     */
     roller: CreateRolleDto[];
 }
 
+/** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
     rolleType: RolleType;
+    /** Fødselsdato */
     ident: string;
     /** @format date-time */
     opprettetDato: string;
@@ -293,7 +337,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<BehandlingDto, BehandlingDto>({
+            this.request<BehandlingDto, Error | BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
                 method: "GET",
                 secure: true,
@@ -309,7 +353,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdaterBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
-            this.request<BehandlingDto, BehandlingDto>({
+            this.request<BehandlingDto, Error | BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
                 method: "PUT",
                 body: data,
@@ -327,7 +371,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBehandlinger: (params: RequestParams = {}) =>
-            this.request<BehandlingDto[], BehandlingDto[]>({
+            this.request<BehandlingDto[], Error | BehandlingDto[]>({
                 path: `/api/behandling`,
                 method: "GET",
                 secure: true,
@@ -343,7 +387,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         createBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
-            this.request<CreateBehandlingResponse, CreateBehandlingResponse>({
+            this.request<CreateBehandlingResponse, Error | CreateBehandlingResponse>({
                 path: `/api/behandling`,
                 method: "POST",
                 body: data,
