@@ -9,6 +9,7 @@ import { BehandlingDto } from "../../api/BidragBehandlingApi";
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
+import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useApiData } from "../../hooks/useApiData";
@@ -116,7 +117,9 @@ const VirkningstidspunktForm = ({
             .mutateAsync({
                 begrunnelseMedIVedtakNotat: values.begrunnelseMedIVedtakNotat,
                 begrunnelseKunINotat: values.begrunnelseKunINotat,
-                virkningsDato: values.virkningsDato,
+                aarsak: values.aarsak,
+                avslag: values.avslag,    
+                //virkningsDato: values.virkningsDato.toLocaleDateString("no-NO"),
             })
             .finally(() => setAction(ActionStatus.IDLE));
     };
@@ -173,20 +176,10 @@ const VirkningstidspunktForm = ({
                             <FormControlledSelectField
                                 name="avslag"
                                 label="Avslag/opphør"
-                                options={[
-                                    {
-                                        value: "",
-                                        text: "",
-                                    },
-                                    {
-                                        value: "avslag_1",
-                                        text: "Avslag 1",
-                                    },
-                                    {
-                                        value: "avslag_2",
-                                        text: "Avslag 2",
-                                    },
-                                ]}
+                                options={Object.entries(Avslag).map((entry) => ({
+                                    value: entry[0],
+                                    text: entry[1],
+                                }))}
                             />
                         </FlexRow>
                         <FormControlledTextarea
