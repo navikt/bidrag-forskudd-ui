@@ -112,8 +112,13 @@ const VirkningstidspunktForm = ({
         const values = useFormMethods.getValues();
         setVirkningstidspunktFormValues(values);
 
-        await mutation.mutateAsync({ ...behandling, ...values });
-        setAction(ActionStatus.IDLE);
+        await mutation
+            .mutateAsync({
+                begrunnelseMedIVedtakNotat: values.begrunnelseMedIVedtakNotat,
+                begrunnelseKunINotat: values.begrunnelseKunINotat,
+                virkningsDato: values.virkningsDato,
+            })
+            .finally(() => setAction(ActionStatus.IDLE));
     };
 
     const onSubmit = async () => {

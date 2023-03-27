@@ -16,8 +16,14 @@ export function behandlingMock(): RestHandler[] {
         }),
         rest.put(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, async (req, res, ctx) => {
             const body = await req.json();
-            localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(body));
-            return res(ctx.set("Content-Type", "application/json"), ctx.status(200), ctx.body(JSON.stringify(body)));
+            const behandling = JSON.parse(localStorage.getItem(`behandling-${req.params.behandlingId}`));
+            const updatedBehandling = { ...behandling, ...body };
+            localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(updatedBehandling));
+            return res(
+                ctx.set("Content-Type", "application/json"),
+                ctx.status(200),
+                ctx.body(JSON.stringify(updatedBehandling))
+            );
         }),
     ];
 }
