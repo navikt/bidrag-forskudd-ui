@@ -1,7 +1,7 @@
 import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
 import { Alert, Button, Heading, Label, Link, Loader, Table } from "@navikt/ds-react";
-import React, { Suspense, useState } from "react";
+import React, { Suspense } from "react";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
@@ -12,52 +12,12 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleTag } from "../RolleTag";
 
 export default () => {
-    const [erBekreftet, setBekreftet] = useState(false);
     const { behandlingId } = useForskudd();
     const { api } = useApiData();
     const { data: behandling } = api.getBehandling(behandlingId);
 
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
-
-    const getBmIndex = () => behandling.data.roller.findIndex((r) => r.rolleType == RolleType.BIDRAGS_MOTTAKER);
-    const getBm = () =>
-        getBmIndex() > 0
-            ? behandling.data.roller[getBmIndex()]
-            : {
-                  id: -1,
-                  rolleType: RolleType.BIDRAGS_MOTTAKER,
-                  ident: "UKJENT",
-                  opprettetDato: "",
-                  navn: "UKJENT",
-                  //eksistererer ikke, feil
-              };
-
-    const getBarn = () => behandling.data.roller.filter((r) => r.rolleType == RolleType.BARN);
-
-    const data = [
-        {
-            rolle: RolleType.BARN,
-            fnmr: "081020 34566",
-            navn: "Amalia Svendsen",
-            type: "Forskudd",
-            periode: "01.07.2022 - 3108.2022",
-            inntekt: "651 791",
-            sivilsStandBm: "Ugift",
-            resultat: "Opph pga høy inntekt",
-            beløp: 0,
-        },
-        {
-            rolle: RolleType.BARN,
-            fnmr: "081020 34566",
-            navn: "Amalia Svendsen",
-            type: "Forskudd",
-            periode: "01.07.2022 - 3108.2022",
-            inntekt: "651 791",
-            sivilsStandBm: "Ugift",
-            resultat: "Opph pga høy inntekt",
-            beløp: 0,
-        },
-    ];
+    const barn = behandling.data.roller.filter((r) => r.rolleType == RolleType.BARN);
 
     const sendeVedtak = (): void => {
         vedtakApi.vedtak
@@ -87,24 +47,13 @@ export default () => {
                     <Heading level="2" size="xlarge">
                         Fatte vedtak
                     </Heading>
-                    {/* <div>
-                    <SuccessStroke
-                        width={"1.5rem"}
-                        height={"1.5rem"}
-                        scale={2}
-                        title="Suksess ikon"
-                        color="var(--a-icon-success)"
-                        style={{ display: "inline" }}
-                    />
-                    Totrinnskontroll: inntekt
-                </div> */}
                 </div>
                 <div className="grid gap-y-4">
                     <Heading level="3" size="medium">
                         Oppsummering
                     </Heading>
                     <div>
-                        <Label size="small">Barn i egen husstand: </Label> {getBarn().length}
+                        <Label size="small">Barn i egen husstand: </Label> {barn.length}
                     </div>
 
                     <Table>
@@ -122,20 +71,20 @@ export default () => {
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
-                            {data.map((item, i) => {
+                            {barn.map((item, i) => {
                                 return (
-                                    <Table.Row key={i + item.fnmr}>
+                                    <Table.Row key={i + item.ident}>
                                         <Table.DataCell>
-                                            <RolleTag rolleType={item.rolle} />
+                                            <RolleTag rolleType={item.rolleType} />
                                         </Table.DataCell>
-                                        <Table.DataCell>{item.fnmr}</Table.DataCell>
+                                        <Table.DataCell>{item.ident}</Table.DataCell>
                                         <Table.DataCell>{item.navn}</Table.DataCell>
-                                        <Table.DataCell>{item.type}</Table.DataCell>
-                                        <Table.DataCell>{item.periode}</Table.DataCell>
-                                        <Table.DataCell>{item.inntekt}</Table.DataCell>
-                                        <Table.DataCell>{item.sivilsStandBm}</Table.DataCell>
-                                        <Table.DataCell>{item.resultat}</Table.DataCell>
-                                        <Table.DataCell>{item.beløp}</Table.DataCell>
+                                        <Table.DataCell>Forskudd</Table.DataCell>
+                                        <Table.DataCell>01.07.2022 - 31.08.2022</Table.DataCell>
+                                        <Table.DataCell>651 555</Table.DataCell>
+                                        <Table.DataCell>Ugift</Table.DataCell>
+                                        <Table.DataCell>Opph pga høy inntekt</Table.DataCell>
+                                        <Table.DataCell>0</Table.DataCell>
                                     </Table.Row>
                                 );
                             })}
@@ -150,23 +99,18 @@ export default () => {
                         <div>
                             Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert
                             automatisk basert på opplysningene oppgitt.
-                            <Link href="#" onClick={() => {}} className="font-bold ml-2">
+                            <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold ml-2">
                                 Sjekk notat <ExternalLink aria-hidden />
                             </Link>
                         </div>
                     </div>
                 </Alert>
                 <FlexRow>
-                    <Button
-                        disabled={!erBekreftet}
-                        loading={false}
-                        onClick={sendeVedtak}
-                        className="w-max"
-                        size="small"
-                    >
+                    <Button loading={false} onClick={sendeVedtak} className="w-max" size="small">
                         Fatte vedtak
                     </Button>
                     <Button
+                        type="button"
                         loading={false}
                         variant="secondary"
                         onClick={() => {
