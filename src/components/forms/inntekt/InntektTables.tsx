@@ -47,6 +47,7 @@ const Detaljer = ({ totalt }) => {
     return (
         <>
             <Button
+                type="button"
                 size="small"
                 variant="tertiary"
                 ref={buttonRef}
@@ -60,7 +61,13 @@ const Detaljer = ({ totalt }) => {
                     </Heading>
                     <BodyShort size="small">Lønnsinntekt med trygdeavgiftsplikt og med trekkplikt: {totalt}</BodyShort>
                     <BodyShort size="small">Sum: {totalt}</BodyShort>
-                    <Button type="button" size="small" className="w-max" onClick={() => setOpenState(false)}>
+                    <Button
+                        type="button"
+                        size="small"
+                        variant="secondary"
+                        className="w-max"
+                        onClick={() => setOpenState(false)}
+                    >
                         Lukk
                     </Button>
                 </Popover.Content>
