@@ -13,6 +13,7 @@ interface FormControlledSelectFieldProps {
     options: Option[];
     hideLabel?: boolean;
     className?: string;
+    onSelect?: (value) => void;
 }
 
 export const FormControlledSelectField = ({
@@ -21,6 +22,7 @@ export const FormControlledSelectField = ({
     options,
     hideLabel,
     className,
+    onSelect,
 }: FormControlledSelectFieldProps) => {
     const {
         control,
@@ -29,13 +31,20 @@ export const FormControlledSelectField = ({
 
     const { field } = useController({ name, control });
 
+    const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        if (onSelect) {
+            onSelect(e.target.value);
+        }
+        field.onChange(e.target.value);
+    };
+
     return (
         <Select
             label={label}
             className={`w-52 ${className}`}
             size="small"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
         >
             {options.map((option) => (

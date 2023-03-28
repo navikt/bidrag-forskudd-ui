@@ -15,11 +15,12 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useApiData } from "../../hooks/useApiData";
 import { ActionStatus } from "../../types/actionStatus";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { dateOrNull } from "../../utils/date-utils";
+import { dateOrNull, isValidDate } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
+import { aarsakToVirkningstidspunktMapper } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
 const createInitialValues = (behandling: BehandlingDto) =>
@@ -96,6 +97,13 @@ const VirkningstidspunktForm = ({
         if (action === ActionStatus.REFETCHED) setAction(ActionStatus.IDLE);
     }, [action]);
 
+    const onAarsakSelect = (value: string) => {
+        const date = aarsakToVirkningstidspunktMapper(value, behandling);
+        if (isValidDate(date)) {
+            useFormMethods.setValue("virkningsDato", date);
+        }
+    };
+
     const onRefetch = async () => {
         const { data } = await refetch();
         const values = createInitialValues(data.data);
@@ -160,6 +168,7 @@ const VirkningstidspunktForm = ({
                             <FormControlledSelectField
                                 name="aarsak"
                                 label="Årsak"
+                                onSelect={onAarsakSelect}
                                 options={[{ value: "", text: "Velg årsak" }].concat(
                                     Object.entries(ForskuddBeregningKodeAarsak).map((entry) => ({
                                         value: entry[0],

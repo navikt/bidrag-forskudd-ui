@@ -3,12 +3,15 @@ import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { RolleType } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
+import { useApiData } from "../../hooks/useApiData";
+import { ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
 
 export enum NotatVirkningsTidspunktFields {
-    "virkningstidspunkt",
+    "virkningsDato",
     "aarsak",
     "begrunnelse",
 }
@@ -26,8 +29,8 @@ export default () => {
 
 const Virkningstidspunkt = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { api } = useMockApi();
-    const { data: behandling } = api.getBehandling(behandlingId);
+    const { api } = useApiData();
+    const { data: behandling } = api.getBehandling(Number(behandlingId));
 
     return (
         <Suspense
@@ -37,13 +40,15 @@ const Virkningstidspunkt = () => {
                 </div>
             }
         >
-            <VirkningstidspunktView behandling={behandling} />
+            <VirkningstidspunktView behandling={behandling.data} />
         </Suspense>
     );
 };
 
 const VirkningstidspunktView = ({ behandling }) => {
-    const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandling.virkningstidspunkt);
+    const [virkningstidspunkt, setVirkningstidspunkt] = useState(
+        ISODateTimeStringToDDMMYYYYString(behandling.virkningsDato)
+    );
     const [aarsak, setAarsak] = useState(behandling.aarsak);
     const [begrunnelse, setBegrunnelse] = useState(behandling.begrunnelseMedIVedtakNotat);
     const channel = new BroadcastChannel("virkningstidspunkt");
@@ -52,8 +57,11 @@ const VirkningstidspunktView = ({ behandling }) => {
         channel.onmessage = (ev) => {
             const data = JSON.parse(ev.data);
 
-            if (virkningstidspunkt !== data[NotatVirkningsTidspunktFields.virkningstidspunkt])
-                setVirkningstidspunkt(data[NotatVirkningsTidspunktFields.virkningstidspunkt]);
+            if (virkningstidspunkt !== data[NotatVirkningsTidspunktFields.virkningsDato]) {
+                setVirkningstidspunkt(
+                    ISODateTimeStringToDDMMYYYYString(data[NotatVirkningsTidspunktFields.virkningsDato])
+                );
+            }
             if (aarsak !== data[NotatVirkningsTidspunktFields.aarsak])
                 setAarsak(data[NotatVirkningsTidspunktFields.aarsak]);
             if (begrunnelse !== data[NotatVirkningsTidspunktFields.begrunnelse])
@@ -74,7 +82,9 @@ const VirkningstidspunktView = ({ behandling }) => {
                 </Heading>
                 <div className="flex gap-x-2">
                     <Label size="small">BM:</Label>
-                    <BodyShort size="small">Some Name</BodyShort>
+                    <BodyShort size="small">
+                        {behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).navn}
+                    </BodyShort>
                 </div>
             </div>
             <div className="grid gap-y-2">
@@ -91,7 +101,7 @@ const VirkningstidspunktView = ({ behandling }) => {
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Søkt fra dato:</Label>
-                    <BodyShort size="small">{behandling.soknadFra}</BodyShort>
+                    <BodyShort size="small">{behandling.datoFom}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Virkningstidspunkt:</Label>
@@ -173,7 +183,7 @@ const InntekterView = ({ inntekt, arbeidsforholder }) => {
                     Andre typer inntekt
                 </Heading>
                 <div className="grid gap-y-2">
-                    {inntekt.andreTyperInntekter.map((inntekt, i) => (
+                    {inntekt.andreTyperInntekter?.map((inntekt, i) => (
                         <div key={`${inntekt.beloep}-${i}`} className="inline-flex items-center gap-x-2">
                             <Label size="small">
                                 <span className="capitalize">{inntekt.tekniskNavn}</span> ({inntekt.aar}):

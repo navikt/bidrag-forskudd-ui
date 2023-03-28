@@ -1,6 +1,6 @@
 import { useApi } from "@navikt/bidrag-ui-common";
 import { ExternalLink } from "@navikt/ds-icons";
-import { Button, ConfirmationPanel, Heading, Label, Link, Loader, Table } from "@navikt/ds-react";
+import { Alert, Button, Heading, Label, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense, useState } from "react";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
@@ -142,30 +142,20 @@ export default () => {
                         </Table.Body>
                     </Table>
                 </div>
-                <div className="grid gap-y-4">
-                    <Heading level="3" size="medium">
-                        Sjekk notat
-                    </Heading>
-                    <div>
-                        Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
-                        basert på opplysningene oppgitt.
-                        <Link href="#" onClick={() => {}} className="font-bold">
-                            Sjekk notat <ExternalLink aria-hidden />
-                        </Link>
+                <Alert variant="info">
+                    <div className="grid gap-y-4">
+                        <Heading level="3" size="medium">
+                            Sjekk notat
+                        </Heading>
+                        <div>
+                            Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert
+                            automatisk basert på opplysningene oppgitt.
+                            <Link href="#" onClick={() => {}} className="font-bold ml-2">
+                                Sjekk notat <ExternalLink aria-hidden />
+                            </Link>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <ConfirmationPanel
-                        checked={erBekreftet}
-                        label="Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer."
-                        onChange={() => {
-                            setBekreftet(!erBekreftet);
-                        }}
-                    >
-                        bekreft tekst
-                    </ConfirmationPanel>
-                </div>
-
+                </Alert>
                 <FlexRow>
                     <Button
                         disabled={!erBekreftet}
