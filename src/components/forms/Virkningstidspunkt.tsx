@@ -118,7 +118,7 @@ const VirkningstidspunktForm = ({
                 begrunnelseMedIVedtakNotat: values.begrunnelseMedIVedtakNotat,
                 begrunnelseKunINotat: values.begrunnelseKunINotat,
                 aarsak: values.aarsak,
-                avslag: values.avslag,    
+                avslag: values.avslag,
                 //virkningsDato: values.virkningsDato.toLocaleDateString("no-NO"),
             })
             .finally(() => setAction(ActionStatus.IDLE));
