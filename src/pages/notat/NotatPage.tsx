@@ -178,21 +178,6 @@ const InntekterView = ({ inntekt, arbeidsforholder }) => {
             </div>
             <div className="grid gap-y-2">
                 <Heading level="4" size="small">
-                    Andre typer inntekt
-                </Heading>
-                <div className="grid gap-y-2">
-                    {inntekt.andreTyperInntekter?.map((inntekt, i) => (
-                        <div key={`${inntekt.beloep}-${i}`} className="inline-flex items-center gap-x-2">
-                            <Label size="small">
-                                <span className="capitalize">{inntekt.tekniskNavn}</span> ({inntekt.aar}):
-                            </Label>
-                            <BodyShort size="small">{inntekt.beloep}</BodyShort>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className="grid gap-y-2">
-                <Heading level="4" size="small">
                     Arbeidsforhold
                 </Heading>
                 {arbeidsforholder.map((arbeidsforhold) => (

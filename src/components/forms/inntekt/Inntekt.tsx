@@ -48,9 +48,11 @@ const InntektForm = () => {
 
     useEffect(() => {
         const { unsubscribe } = useFormMethods.watch((value, { name }) => {
-            const field = name?.split("[")[0];
+            const field = name?.split(".")[0];
             if (NOTAT_FIELDS.includes(field)) {
-                channel.postMessage(JSON.stringify({ field, value: value[field] }));
+                channel.postMessage(
+                    JSON.stringify({ field, value: value[field].filter((inntekt) => inntekt.selected) })
+                );
             }
         });
         return () => unsubscribe();
