@@ -117,8 +117,8 @@ const VirkningstidspunktForm = ({
             .mutateAsync({
                 begrunnelseMedIVedtakNotat: values.begrunnelseMedIVedtakNotat,
                 begrunnelseKunINotat: values.begrunnelseKunINotat,
-                aarsak: values.aarsak,
-                avslag: values.avslag,
+                aarsak: values.aarsak ? values.aarsak : null,
+                avslag: values.avslag ? values.avslag : null,
                 //virkningsDato: values.virkningsDato.toLocaleDateString("no-NO"),
             })
             .finally(() => setAction(ActionStatus.IDLE));
@@ -160,10 +160,12 @@ const VirkningstidspunktForm = ({
                             <FormControlledSelectField
                                 name="aarsak"
                                 label="Årsak"
-                                options={Object.entries(ForskuddBeregningKodeAarsak).map((entry) => ({
-                                    value: entry[0],
-                                    text: entry[1],
-                                }))}
+                                options={[{ value: "", text: "Velg årsak" }].concat(
+                                    Object.entries(ForskuddBeregningKodeAarsak).map((entry) => ({
+                                        value: entry[0],
+                                        text: entry[1],
+                                    }))
+                                )}
                             />
                             <FormControlledMonthPicker
                                 name="virkningsDato"
@@ -176,10 +178,12 @@ const VirkningstidspunktForm = ({
                             <FormControlledSelectField
                                 name="avslag"
                                 label="Avslag/opphør"
-                                options={Object.entries(Avslag).map((entry) => ({
-                                    value: entry[0],
-                                    text: entry[1],
-                                }))}
+                                options={[{ value: "", text: "Velg avslag/opphør" }].concat(
+                                    Object.entries(Avslag).map((entry) => ({
+                                        value: entry[0],
+                                        text: entry[1],
+                                    }))
+                                )}
                             />
                         </FlexRow>
                         <FormControlledTextarea
