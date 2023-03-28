@@ -9,7 +9,6 @@ interface DatePickerInputProps {
     hideLabel?: boolean;
     className?: string;
     defaultValue?: Date;
-    resetDefaultValue?: boolean;
     error?: string;
     onValidate?: (dateValidation: DateValidationT) => void;
 }
@@ -22,7 +21,6 @@ export const DatePickerInput = ({
     hideLabel,
     className,
     defaultValue,
-    resetDefaultValue,
     onValidate,
     error,
 }: DatePickerInputProps) => {
@@ -38,10 +36,10 @@ export const DatePickerInput = ({
     });
 
     useEffect(() => {
-        if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString() || resetDefaultValue) {
+        if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString()) {
             setSelected(defaultValue);
         }
-    }, [defaultValue, resetDefaultValue]);
+    }, [defaultValue]);
 
     return (
         <UNSAFE_DatePicker {...datepickerProps}>

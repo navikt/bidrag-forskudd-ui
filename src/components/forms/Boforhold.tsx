@@ -3,7 +3,6 @@ import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
-import { QueryObserverResult } from "react-query/types/core/types";
 
 import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { BoforholdData } from "../../__mocks__/testdata/boforholdTestData";
@@ -56,11 +55,7 @@ export default () => {
     const { data: behandling } = api.getBehandling(behandlingId);
     const barn = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const { api: mockApi } = useMockApi();
-    const {
-        data: boforhold,
-        refetch,
-        isRefetching,
-    } = mockApi.getBoforhold(
+    const { data: boforhold } = mockApi.getBoforhold(
         behandlingId.toString(),
         barn.map((rolle) => rolle.ident),
         !!barn
@@ -80,8 +75,6 @@ export default () => {
                 boforhold={boforhold}
                 virkningstidspunkt={virkningstidspunkt}
                 barnFraBehandling={barn}
-                refetch={refetch}
-                isRefetching={isRefetching}
                 mutation={mutation}
             />
         </Suspense>
@@ -92,15 +85,11 @@ const BoforholdsForm = ({
     boforhold,
     virkningstidspunkt,
     barnFraBehandling,
-    refetch,
-    isRefetching,
     mutation,
 }: {
     boforhold: BoforholdData;
     virkningstidspunkt: Date;
     barnFraBehandling: RolleDto[];
-    refetch: () => Promise<QueryObserverResult>;
-    isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setActiveStep } = useForskudd();
@@ -117,16 +106,9 @@ const BoforholdsForm = ({
         return () => setBoforholdFormValues(useFormMethods.getValues());
     }, []);
 
-    useEffect(() => {
-        if (action === ActionStatus.REFETCHED) setAction(ActionStatus.IDLE);
-    }, [action]);
-
-    const onRefetch = async () => {
-        const { data } = await refetch();
-        const values = createInitialValues(data);
-        useFormMethods.reset(values);
-        setBoforholdFormValues(values);
-        setAction(ActionStatus.REFETCHED);
+    const onReset = async () => {
+        useFormMethods.reset(initialValues);
+        setBoforholdFormValues(initialValues);
     };
 
     const onSave = async () => {
@@ -176,7 +158,7 @@ const BoforholdsForm = ({
                         />
                         <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
                     </div>
-                    <ActionButtons action={action} onSave={onSave} onRefetch={onRefetch} isRefetching={isRefetching} />
+                    <ActionButtons action={action} onSave={onSave} onReset={onReset} />
                 </div>
             </form>
         </FormProvider>

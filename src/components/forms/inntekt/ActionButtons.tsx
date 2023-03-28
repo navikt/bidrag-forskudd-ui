@@ -6,21 +6,14 @@ import { useParams } from "react-router-dom";
 import { ActionStatus } from "../../../types/actionStatus";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
-export const ActionButtons = ({ action, onSave, onRefetch, isRefetching }) => {
+export const ActionButtons = ({ action, onSave, onReset }) => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     return (
         <FlexRow>
             <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
                 Gå videre
             </Button>
-            <Button
-                type="button"
-                loading={isRefetching}
-                variant="secondary"
-                onClick={onRefetch}
-                className="w-max"
-                size="small"
-            >
+            <Button type="button" variant="secondary" onClick={onReset} className="w-max" size="small">
                 Oppfrisk
             </Button>
             <Button

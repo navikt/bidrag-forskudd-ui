@@ -1,9 +1,7 @@
 import { BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
-import { AxiosResponse } from "axios";
 import React, { Suspense, useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
-import { QueryObserverResult } from "react-query/types/core/types";
 
 import { BehandlingDto } from "../../api/BidragBehandlingApi";
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
@@ -35,7 +33,7 @@ const createInitialValues = (behandling: BehandlingDto) =>
 export default () => {
     const { behandlingId } = useForskudd();
     const { api } = useApiData();
-    const { refetch, isRefetching, data: data } = api.getBehandling(behandlingId);
+    const { data: behandling } = api.getBehandling(behandlingId);
     const mutation = api.updateBehandling(behandlingId);
 
     return (
@@ -46,25 +44,16 @@ export default () => {
                 </div>
             }
         >
-            <VirkningstidspunktForm
-                behandling={data.data}
-                refetch={refetch}
-                isRefetching={isRefetching}
-                mutation={mutation}
-            />
+            <VirkningstidspunktForm behandling={behandling.data} mutation={mutation} />
         </Suspense>
     );
 };
 
 const VirkningstidspunktForm = ({
     behandling,
-    refetch,
-    isRefetching,
     mutation,
 }: {
     behandling: BehandlingDto;
-    refetch: () => Promise<QueryObserverResult<AxiosResponse<BehandlingDto, unknown>>>;
-    isRefetching: boolean;
     mutation: UseMutationResult;
 }) => {
     const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep } = useForskudd();
@@ -93,10 +82,6 @@ const VirkningstidspunktForm = ({
         channel.postMessage(JSON.stringify(fieldsForNotat));
     }, [fieldsForNotat]);
 
-    useEffect(() => {
-        if (action === ActionStatus.REFETCHED) setAction(ActionStatus.IDLE);
-    }, [action]);
-
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
         if (isValidDate(date)) {
@@ -104,11 +89,9 @@ const VirkningstidspunktForm = ({
         }
     };
 
-    const onRefetch = async () => {
-        const { data } = await refetch();
-        const values = createInitialValues(data.data);
-        setVirkningstidspunktFormValues(values);
-        useFormMethods.reset(values);
+    const onReset = async () => {
+        setVirkningstidspunktFormValues(initialValues);
+        useFormMethods.reset(initialValues);
         setAction(ActionStatus.REFETCHED);
     };
 
@@ -181,8 +164,6 @@ const VirkningstidspunktForm = ({
                                 label="Virkningstidspunkt"
                                 placeholder="MM.ÅÅÅÅ"
                                 defaultValue={initialValues.virkningsDato}
-                                resetDefaultValue={action === ActionStatus.REFETCHED}
-                                toDate={new Date()}
                             />
                             <FormControlledSelectField
                                 name="avslag"
@@ -200,12 +181,7 @@ const VirkningstidspunktForm = ({
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
                         <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
-                        <ActionButtons
-                            action={action}
-                            onSave={onSave}
-                            onRefetch={onRefetch}
-                            isRefetching={isRefetching}
-                        />
+                        <ActionButtons action={action} onSave={onSave} onReset={onReset} />
                     </div>
                 </form>
             </FormProvider>

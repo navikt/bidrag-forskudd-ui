@@ -35,7 +35,7 @@ const InntektForm = () => {
     const { api: mockApi } = useMockApi();
     const { data: skattegrunnlager } = mockApi.getSkattegrunlag(behandlingId.toString());
     const { data: aInntekt } = mockApi.getAndreTyperInntekt(behandlingId.toString());
-    const { data: inntekt, refetch, isRefetching } = mockApi.getInntekt(behandlingId.toString());
+    const { data: inntekt } = mockApi.getInntekt(behandlingId.toString());
     const mutation = mockApi.postInntekt(behandlingId.toString());
 
     const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
@@ -64,16 +64,9 @@ const InntektForm = () => {
         return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
-    useEffect(() => {
-        if (action === ActionStatus.REFETCHED) setAction(ActionStatus.IDLE);
-    }, [action]);
-
-    const onRefetch = async () => {
-        const { data } = await refetch();
-        const values = createInitialValues(data, skattegrunnlager, aInntekt);
-        useFormMethods.reset(values);
-        setInntektFormValues(values);
-        setAction(ActionStatus.REFETCHED);
+    const onReset = async () => {
+        useFormMethods.reset(initialValues);
+        setInntektFormValues(initialValues);
     };
 
     const onSave = async () => {
@@ -135,7 +128,7 @@ const InntektForm = () => {
                             <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
                         </div>
                     </div>
-                    <ActionButtons action={action} onSave={onSave} onRefetch={onRefetch} isRefetching={isRefetching} />
+                    <ActionButtons action={action} onSave={onSave} onReset={onReset} />
                 </div>
             </form>
         </FormProvider>

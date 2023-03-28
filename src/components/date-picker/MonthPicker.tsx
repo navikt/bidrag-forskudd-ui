@@ -9,10 +9,10 @@ interface MonthPickerInputProps {
     hideLabel?: boolean;
     className?: string;
     defaultValue?: Date;
-    resetDefaultValue?: boolean;
     error?: string;
     onValidate?: (monthValidation: MonthValidationT) => void;
     toDate?: Date;
+    fieldValue?: Date;
 }
 
 export const MonthPicker = ({
@@ -24,7 +24,7 @@ export const MonthPicker = ({
     hideLabel,
     className,
     defaultValue,
-    resetDefaultValue,
+    fieldValue,
     onValidate,
     error,
 }: MonthPickerInputProps) => {
@@ -42,10 +42,10 @@ export const MonthPicker = ({
     });
 
     useEffect(() => {
-        if (selectedMonth?.toLocaleString() !== defaultValue?.toLocaleString() || resetDefaultValue) {
-            setSelected(defaultValue);
+        if (selectedMonth?.toLocaleString() !== fieldValue?.toLocaleString()) {
+            setSelected(fieldValue);
         }
-    }, [defaultValue, resetDefaultValue]);
+    }, [fieldValue]);
 
     return (
         <div className="min-h-96">

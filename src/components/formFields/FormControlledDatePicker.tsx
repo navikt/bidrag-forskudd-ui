@@ -11,7 +11,6 @@ interface FormControlledDatePickerProps {
     placeholder: string;
     hideLabel?: boolean;
     className?: string;
-    resetDefaultValue?: boolean;
     required?: boolean;
     onChange?: (date: Date | undefined) => void;
 }
@@ -23,7 +22,6 @@ export const FormControlledDatePicker = ({
     placeholder,
     hideLabel,
     className,
-    resetDefaultValue,
     required,
     onChange,
 }: FormControlledDatePickerProps) => {
@@ -56,7 +54,6 @@ export const FormControlledDatePicker = ({
             defaultValue={defaultValue}
             hideLabel={hideLabel}
             className={className}
-            resetDefaultValue={resetDefaultValue}
             error={fieldState?.error?.message}
             onValidate={onValidate}
         />

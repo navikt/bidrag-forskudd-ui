@@ -12,7 +12,6 @@ interface FormControlledDatePickerProps {
     placeholder: string;
     hideLabel?: boolean;
     className?: string;
-    resetDefaultValue?: boolean;
     required?: boolean;
     onChange?: (date: Date | undefined) => void;
     toDate?: Date;
@@ -26,7 +25,6 @@ export const FormControlledMonthPicker = ({
     placeholder,
     hideLabel,
     className,
-    resetDefaultValue,
     required,
     onChange,
     toDate,
@@ -60,10 +58,10 @@ export const FormControlledMonthPicker = ({
             label={label}
             placeholder={placeholder}
             onChange={(value) => handleChange(value)}
+            fieldValue={field.value}
             defaultValue={defaultValue}
             hideLabel={hideLabel}
             className={className}
-            resetDefaultValue={resetDefaultValue}
             error={fieldState?.error?.message}
             onValidate={onValidate}
             toDate={toDate}
