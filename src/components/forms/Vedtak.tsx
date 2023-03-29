@@ -1,5 +1,5 @@
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { useApi } from "@navikt/bidrag-ui-common";
-import { ExternalLink } from "@navikt/ds-icons";
 import { Alert, Button, Heading, Label, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense } from "react";
 
@@ -100,7 +100,7 @@ export default () => {
                             Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert
                             automatisk basert på opplysningene oppgitt.
                             <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold ml-2">
-                                Sjekk notat <ExternalLink aria-hidden />
+                                Sjekk notat <ExternalLinkIcon aria-hidden />
                             </Link>
                         </div>
                     </div>

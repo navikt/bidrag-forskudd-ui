@@ -1,4 +1,4 @@
-import { ExternalLink } from "@navikt/ds-icons";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Button, Link } from "@navikt/ds-react";
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -9,7 +9,7 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 export const ActionButtons = ({ action, onSave }) => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     return (
-        <FlexRow>
+        <FlexRow className="items-center">
             <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
                 Gå videre
             </Button>
@@ -24,7 +24,7 @@ export const ActionButtons = ({ action, onSave }) => {
                 Lagre
             </Button>
             <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold">
-                Vis notat <ExternalLink aria-hidden />
+                Vis notat <ExternalLinkIcon aria-hidden />
             </Link>
         </FlexRow>
     );

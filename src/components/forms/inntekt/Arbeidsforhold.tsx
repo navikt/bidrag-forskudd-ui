@@ -1,4 +1,4 @@
-import { ExternalLink } from "@navikt/ds-icons";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { BodyShort, Label, Link } from "@navikt/ds-react";
 import React from "react";
 
@@ -16,7 +16,7 @@ export const Arbeidsforhold = () => {
             <div className="inline-flex items-center gap-x-4">
                 <Label size="small">Nåværende arbeidsforhold</Label>
                 <Link href="src/components/forms#" onClick={() => {}} className="font-bold">
-                    AA-register <ExternalLink aria-hidden />
+                    AA-register <ExternalLinkIcon aria-hidden />
                 </Link>
             </div>
             {arbeidsforholder.map((arbeidsforhold) => (

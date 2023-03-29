@@ -1,4 +1,4 @@
-import { Delete, ExternalLink } from "@navikt/ds-icons";
+import { InformationSquareIcon, TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Loader, Popover } from "@navikt/ds-react";
 import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -51,7 +51,7 @@ const Detaljer = ({ totalt }) => {
                 size="small"
                 variant="tertiary"
                 ref={buttonRef}
-                icon={<ExternalLink aria-hidden />}
+                icon={<InformationSquareIcon aria-hidden />}
                 onClick={() => setOpenState(true)}
             />
             <Popover open={openState} onClose={() => setOpenState(false)} anchorEl={buttonRef.current}>
@@ -102,7 +102,7 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
             key={`delete-button-${index}`}
             type="button"
             onClick={() => handleOnDelete(index)}
-            icon={<Delete aria-hidden />}
+            icon={<TrashIcon aria-hidden />}
             variant="tertiary"
             size="xsmall"
         />
@@ -407,7 +407,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                         fieldArray.remove(index);
                                         validatePeriods();
                                     }}
-                                    icon={<Delete aria-hidden />}
+                                    icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
                                     size="xsmall"
                                 />,
@@ -544,7 +544,7 @@ export const BarnetilleggTabel = () => {
                                         fieldArray.remove(index);
                                         validatePeriods();
                                     }}
-                                    icon={<Delete aria-hidden />}
+                                    icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
                                     size="xsmall"
                                 />,

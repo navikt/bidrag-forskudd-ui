@@ -1,4 +1,4 @@
-import { ExternalLink } from "@navikt/ds-icons";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Accordion, Heading, Link } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -92,7 +92,7 @@ const InntektForm = () => {
                                 Inntektene som legges til grunn
                             </Heading>
                             <Link href="" target="_blank" className="font-bold">
-                                A-inntekt <ExternalLink aria-hidden />
+                                A-inntekt <ExternalLinkIcon aria-hidden />
                             </Link>
                         </div>
                         <InntekteneSomLeggesTilGrunnTabel />

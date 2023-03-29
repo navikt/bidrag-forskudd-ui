@@ -19,10 +19,10 @@
     "api:bidragSak": "swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs --axios -n BidragSakApi.ts -o src/api"
   },
   "dependencies": {
+    "@navikt/aksel-icons": "^2.8.5",
     "@navikt/bidrag-ui-common": "1.4.2",
     "@navikt/ds-css": "^2.1.0",
     "@navikt/ds-css-internal": "^2.1.0",
-    "@navikt/ds-icons": "^2.1.0",
     "@navikt/ds-react": "^2.1.0",
     "@navikt/ds-react-internal": "^2.1.0",
     "@navikt/ds-tailwind": "^2.1.0",

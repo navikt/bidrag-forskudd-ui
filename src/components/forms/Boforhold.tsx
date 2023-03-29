@@ -1,4 +1,4 @@
-import { Delete } from "@navikt/ds-icons";
+import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
@@ -341,7 +341,7 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                                         barnPerioder.remove(index);
                                         validatePeriods();
                                     }}
-                                    icon={<Delete aria-hidden />}
+                                    icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
                                     size="xsmall"
                                 />,
@@ -498,7 +498,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         sivilstandPerioder.remove(index);
                                         validatePeriods();
                                     }}
-                                    icon={<Delete aria-hidden />}
+                                    icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
                                     size="xsmall"
                                 />,
