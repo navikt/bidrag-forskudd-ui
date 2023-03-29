@@ -89,12 +89,6 @@ const VirkningstidspunktForm = ({
         }
     };
 
-    const onReset = async () => {
-        setVirkningstidspunktFormValues(initialValues);
-        useFormMethods.reset(initialValues);
-        setAction(ActionStatus.REFETCHED);
-    };
-
     const onSave = async () => {
         setAction(ActionStatus.SAVING);
         await save();
@@ -181,7 +175,7 @@ const VirkningstidspunktForm = ({
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
                         <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
-                        <ActionButtons action={action} onSave={onSave} onReset={onReset} />
+                        <ActionButtons action={action} onSave={onSave} />
                     </div>
                 </form>
             </FormProvider>

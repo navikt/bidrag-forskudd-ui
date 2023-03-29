@@ -64,11 +64,6 @@ const InntektForm = () => {
         return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
-    const onReset = async () => {
-        useFormMethods.reset(initialValues);
-        setInntektFormValues(initialValues);
-    };
-
     const onSave = async () => {
         setAction(ActionStatus.SAVING);
         await save();
@@ -128,7 +123,7 @@ const InntektForm = () => {
                             <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
                         </div>
                     </div>
-                    <ActionButtons action={action} onSave={onSave} onReset={onReset} />
+                    <ActionButtons action={action} onSave={onSave} />
                 </div>
             </form>
         </FormProvider>

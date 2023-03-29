@@ -106,11 +106,6 @@ const BoforholdsForm = ({
         return () => setBoforholdFormValues(useFormMethods.getValues());
     }, []);
 
-    const onReset = async () => {
-        useFormMethods.reset(initialValues);
-        setBoforholdFormValues(initialValues);
-    };
-
     const onSave = async () => {
         setAction(ActionStatus.SAVING);
         await save();
@@ -153,12 +148,12 @@ const BoforholdsForm = ({
                             Begrunnelse
                         </Heading>
                         <FormControlledTextarea
-                            name="begrunnelseIVedtaket"
+                            name="begrunnelseMedIVedtakNotat"
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
-                        <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
+                        <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                     </div>
-                    <ActionButtons action={action} onSave={onSave} onReset={onReset} />
+                    <ActionButtons action={action} onSave={onSave} />
                 </div>
             </form>
         </FormProvider>
