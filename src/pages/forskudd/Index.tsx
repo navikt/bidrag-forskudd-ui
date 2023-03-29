@@ -1,4 +1,4 @@
-import { Alert, Link, Loader, Table } from "@navikt/ds-react";
+import { Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense } from "react";
 
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
@@ -6,7 +6,7 @@ import { useApiData } from "../../hooks/useApiData";
 import PageWrapper from "../PageWrapper";
 
 export const Index = () => {
-    const { api, networkError } = useApiData();
+    const { api } = useApiData();
     const behandlings = api.listBehandlings();
 
     return (
@@ -19,11 +19,6 @@ export const Index = () => {
         >
             <PageWrapper name="tracking-wide">
                 <div className="max-w-[1092px] mx-auto px-6 py-6">
-                    {networkError && (
-                        <Alert variant="error" className="mb-12">
-                            {networkError}
-                        </Alert>
-                    )}
                     <Table>
                         <Table.Header>
                             <Table.Row>
