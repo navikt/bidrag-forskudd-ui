@@ -89,9 +89,10 @@ const VirkningstidspunktForm = ({
         }
     };
 
-    const onSave = async () => {
-        setAction(ActionStatus.SAVING);
-        await save();
+    const onNext = async () => {
+        const values = useFormMethods.getValues();
+        setVirkningstidspunktFormValues(values);
+        setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
     };
 
     const save = async () => {
@@ -112,7 +113,6 @@ const VirkningstidspunktForm = ({
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
     };
 
     return (
@@ -175,7 +175,7 @@ const VirkningstidspunktForm = ({
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
                         <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
-                        <ActionButtons action={action} onSave={onSave} />
+                        <ActionButtons action={action} onNext={onNext} />
                     </div>
                 </form>
             </FormProvider>

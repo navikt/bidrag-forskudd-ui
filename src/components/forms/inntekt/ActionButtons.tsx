@@ -6,21 +6,14 @@ import { useParams } from "react-router-dom";
 import { ActionStatus } from "../../../types/actionStatus";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
-export const ActionButtons = ({ action, onSave }) => {
+export const ActionButtons = ({ action, onNext }) => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     return (
         <FlexRow className="items-center">
-            <Button loading={action === ActionStatus.SUBMITTING} className="w-max" size="small">
+            <Button type="button" variant="secondary" onClick={onNext} className="w-max" size="small">
                 Gå videre
             </Button>
-            <Button
-                type="button"
-                loading={action === ActionStatus.SAVING}
-                variant="secondary"
-                onClick={onSave}
-                className="w-max"
-                size="small"
-            >
+            <Button loading={action === ActionStatus.SUBMITTING} variant="primary" className="w-max" size="small">
                 Lagre
             </Button>
             <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold">

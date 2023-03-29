@@ -106,9 +106,10 @@ const BoforholdsForm = ({
         return () => setBoforholdFormValues(useFormMethods.getValues());
     }, []);
 
-    const onSave = async () => {
-        setAction(ActionStatus.SAVING);
-        await save();
+    const onNext = async () => {
+        const values = useFormMethods.getValues();
+        setBoforholdFormValues(values);
+        setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
 
     const save = async () => {
@@ -121,7 +122,6 @@ const BoforholdsForm = ({
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
     };
 
     return (
@@ -153,7 +153,7 @@ const BoforholdsForm = ({
                         />
                         <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                     </div>
-                    <ActionButtons action={action} onSave={onSave} />
+                    <ActionButtons action={action} onNext={onNext} />
                 </div>
             </form>
         </FormProvider>

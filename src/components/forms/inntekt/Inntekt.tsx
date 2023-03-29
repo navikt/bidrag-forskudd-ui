@@ -64,14 +64,14 @@ const InntektForm = () => {
         return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
-    const onSave = async () => {
-        setAction(ActionStatus.SAVING);
-        await save();
+    const onNext = async () => {
+        const values = useFormMethods.getValues();
+        setInntektFormValues(values);
+        setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
     };
 
     const save = async () => {
         const values = useFormMethods.getValues();
-        setInntektFormValues(values);
         await mutation.mutateAsync({ ...inntekt, ...createInntektPayload(values) });
         setAction(ActionStatus.IDLE);
     };
@@ -79,7 +79,6 @@ const InntektForm = () => {
     const onSubmit = async () => {
         setAction(ActionStatus.SUBMITTING);
         await save();
-        setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
     };
 
     return (
@@ -123,7 +122,7 @@ const InntektForm = () => {
                             <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
                         </div>
                     </div>
-                    <ActionButtons action={action} onSave={onSave} />
+                    <ActionButtons action={action} onNext={onNext} />
                 </div>
             </form>
         </FormProvider>
