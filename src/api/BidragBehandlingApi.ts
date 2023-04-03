@@ -57,8 +57,12 @@ export enum ForskuddBeregningKodeAarsakType {
 }
 
 export interface UpdateBehandlingRequest {
-    begrunnelseMedIVedtakNotat?: string;
-    begrunnelseKunINotat?: string;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
     avslag?: AvslagType;
     aarsak?: ForskuddBeregningKodeAarsakType;
     /** @format date */
@@ -85,8 +89,12 @@ export interface BehandlingDto {
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
     avslag?: AvslagType;
-    begrunnelseMedIVedtakNotat?: string;
-    begrunnelseKunINotat?: string;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
 }
 
 export enum BehandlingType {
@@ -144,6 +152,15 @@ export enum SoknadType {
     REVURDERING = "REVURDERING",
     KONVERTERT = "KONVERTERT",
     MANEDLIG_PALOP = "MANEDLIG_PALOP",
+}
+
+export interface UpdateBehandlingRequestExtended {
+    soknadType: SoknadType;
+    soknadFraType: SoknadFraType;
+    /** @format date */
+    datoFom: string;
+    /** @format date */
+    mottatDato: string;
 }
 
 export interface CreateBehandlingRequest {
@@ -355,6 +372,28 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
             this.request<BehandlingDto, Error | BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer en behandling
+         *
+         * @tags behandling-controller
+         * @name OppdaterBehandlingExtended
+         * @request PUT:/api/behandling/ext/{behandlingId}
+         * @secure
+         */
+        oppdaterBehandlingExtended: (
+            behandlingId: number,
+            data: UpdateBehandlingRequestExtended,
+            params: RequestParams = {}
+        ) =>
+            this.request<BehandlingDto, Error | BehandlingDto>({
+                path: `/api/behandling/ext/${behandlingId}`,
                 method: "PUT",
                 body: data,
                 secure: true,

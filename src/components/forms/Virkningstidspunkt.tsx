@@ -26,8 +26,8 @@ const createInitialValues = (behandling: BehandlingDto) =>
         virkningsDato: dateOrNull(behandling.virkningsDato),
         aarsak: behandling.aarsak ?? "",
         avslag: behandling.avslag ?? "",
-        begrunnelseMedIVedtakNotat: behandling.begrunnelseMedIVedtakNotat ?? "",
-        begrunnelseKunINotat: behandling.begrunnelseKunINotat ?? "",
+        virkningsTidspunktBegrunnelseMedIVedtakNotat: behandling.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
+        virkningsTidspunktBegrunnelseKunINotat: behandling.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
 
 export default () => {
@@ -101,8 +101,8 @@ const VirkningstidspunktForm = ({
 
         await mutation
             .mutateAsync({
-                begrunnelseMedIVedtakNotat: values.begrunnelseMedIVedtakNotat,
-                begrunnelseKunINotat: values.begrunnelseKunINotat,
+                virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
+                virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
                 aarsak: values.aarsak ? values.aarsak : null,
                 avslag: values.avslag ? values.avslag : null,
                 virkningsDato: values.virkningsDato.toLocaleDateString("no-NO", { dateStyle: "short" }),
@@ -171,10 +171,10 @@ const VirkningstidspunktForm = ({
                             />
                         </FlexRow>
                         <FormControlledTextarea
-                            name="begrunnelseMedIVedtakNotat"
+                            name="virkningsTidspunktBegrunnelseMedIVedtakNotat"
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
-                        <FormControlledTextarea name="begrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+                        <FormControlledTextarea name="virkningsTidspunktBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                         <ActionButtons action={action} onNext={onNext} />
                     </div>
                 </form>

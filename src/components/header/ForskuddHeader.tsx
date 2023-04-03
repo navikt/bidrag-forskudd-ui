@@ -1,11 +1,12 @@
-import { Heading, Loader } from "@navikt/ds-react";
+import { Heading, Loader, Modal } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
-import React, { memo, Suspense } from "react";
+import React, { memo, Suspense, useState } from "react";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import { useApiData } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
+import { UpdateForskudd } from "../UpdateForskudd";
 
 export const ForskuddHeader = memo(() => {
     const { behandlingId } = useForskudd();
@@ -13,6 +14,11 @@ export const ForskuddHeader = memo(() => {
     const {
         data: { data: behandling },
     } = api.getBehandling(behandlingId);
+    
+    console.log(behandling)
+    const mutation = api._updateBehandlingExtended(behandlingId);
+
+    const [modalOpen, setModalOpen] = useState(false);
 
     return (
         <Suspense
@@ -27,6 +33,7 @@ export const ForskuddHeader = memo(() => {
                     level="1"
                     size="xlarge"
                     className="px-6 py-2 leading-10 flex items-center gap-x-4 border-[var(--a-border-divider)] border-solid border-b"
+                    onDoubleClick={() => {setModalOpen(true)}}
                 >
                     Søknad om forskudd{" "}
                     <span className="text-base flex items-center font-normal">
@@ -50,6 +57,21 @@ export const ForskuddHeader = memo(() => {
                         ))}
                 </div>
             </div>
+
+            <Modal
+                ariaHideApp={false}
+                open={modalOpen}
+                aria-label="Oppdatter søknad"
+                onClose={() => setModalOpen(!modalOpen)}
+                aria-labelledby="modal-heading"
+            >
+                <Modal.Content>
+                    <Heading spacing level="1" size="large" id="modal-heading">
+                        Laborum proident id ullamco
+                    </Heading>
+                    <UpdateForskudd behandling={behandling} mutation={mutation} close={() => {setModalOpen(!modalOpen)}}/>
+                </Modal.Content>
+            </Modal>
         </Suspense>
     );
 });

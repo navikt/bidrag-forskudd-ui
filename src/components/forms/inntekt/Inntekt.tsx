@@ -114,12 +114,12 @@ const InntektForm = () => {
                         </Heading>
                         <div>
                             <FormControlledTextarea
-                                name="begrunnelseIVedtaket"
+                                name="inntektBegrunnelseMedIVedtakNotat"
                                 label="Begrunnelse (med i vedtaket og notat)"
                             />
                         </div>
                         <div>
-                            <FormControlledTextarea name="begrunnelseINotat" label="Begrunnelse (kun med i notat)" />
+                            <FormControlledTextarea name="inntektBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                         </div>
                     </div>
                     <ActionButtons action={action} onNext={onNext} />

@@ -29,6 +29,8 @@ export const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date
 
 export const isValidDate = (date: any) => date && date instanceof Date && isFinite(date.getTime());
 
+export const toDateString = (date: Date) => date.toLocaleDateString("no-NO", { dateStyle: "short" });
+
 export const DDMMYYYYStringToDate = (dateString: string) => {
     const [day, month, year] = dateString.split(".").map((d, i) => {
         if (i === 1) return Number(d) - 1;

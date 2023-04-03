@@ -10,6 +10,7 @@ interface DatePickerInputProps {
     className?: string;
     defaultValue?: Date;
     error?: string;
+    strategy?: "absolute" | "fixed";
     onValidate?: (dateValidation: DateValidationT) => void;
 }
 
@@ -23,6 +24,7 @@ export const DatePickerInput = ({
     defaultValue,
     onValidate,
     error,
+    strategy = "absolute",
 }: DatePickerInputProps) => {
     const { datepickerProps, inputProps, setSelected } = UNSAFE_useDatepicker({
         onDateChange: (date) => {
@@ -34,6 +36,7 @@ export const DatePickerInput = ({
         fromDate,
         defaultSelected: defaultValue,
     });
+    datepickerProps.strategy = strategy
 
     useEffect(() => {
         if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString()) {

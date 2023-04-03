@@ -4,6 +4,7 @@ export const SOKNAD_LABELS = {
     [SoknadFraType.BM_I_ANNEN_SAK]: "BM i annen sak",
     [SoknadFraType.TK]: "TK",
     [SoknadFraType.FTK]: "FTK",
+    [SoknadFraType.BARN18]: "BARN18",
     [SoknadFraType.FYLKESNEMDA]: "Fylkesnemda",
     [SoknadFraType.KONVERTERING]: "Konvertering",
     [SoknadFraType.BM]: "BM",

@@ -44,8 +44,8 @@ export interface InntektData {
     inntekteneSomLeggesTilGrunn: MaybeList<InntektSomLeggesTilGrunn>;
     barnetillegg: MaybeList<BarneTilleg>;
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
-    begrunnelseIVedtaket: string;
-    begrunnelseINotat: string;
+    inntektBegrunnelseMedIVedtakNotat: string;
+    inntektBegrunnelseKunINotat: string;
     toTrinnsKontroll: boolean;
 }
 export const inntektData = (data = {}) => {
@@ -61,8 +61,8 @@ export const inntektData = (data = {}) => {
         inntekteneSomLeggesTilGrunn: [],
         barnetillegg: [],
         utvidetBarnetrygd: [],
-        begrunnelseIVedtaket: "",
-        begrunnelseINotat: "",
+        inntektBegrunnelseMedIVedtakNotat: "",
+        inntektBegrunnelseKunINotat: "",
         toTrinnsKontroll: false,
     } as InntektData;
 

@@ -18,16 +18,16 @@ interface Barn {
 export interface BoforholdData {
     barn: Barn[];
     sivilstand: Sivilstand[];
-    begrunnelseMedIVedtakNotat: string;
-    begrunnelseKunINotat: string;
+    boforholdBegrunnelseMedIVedtakNotat: string;
+    boforholdBegrunnelseKunINotat: string;
 }
 
 export const createBoforholdData = (identer: string[] = []) => {
     const initialData = {
         barn: barnBoforholdData(identer),
         sivilstand: [],
-        begrunnelseMedIVedtakNotat: "",
-        begrunnelseKunINotat: "",
+        boforholdBegrunnelseMedIVedtakNotat: "",
+        boforholdBegrunnelseKunINotat: "",
     } as BoforholdData;
 
     return initialData;

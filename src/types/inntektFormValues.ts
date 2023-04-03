@@ -28,6 +28,6 @@ export interface InntektFormValues {
     inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunnFormValues[];
     barnetillegg: BarneTillegFormValues[];
     utvidetBarnetrygd: UtvidetBarnetrygdFormValues[];
-    begrunnelseIVedtaket: string;
-    begrunnelseINotat: string;
+    inntektBegrunnelseMedIVedtakNotat: string;
+    inntektBegrunnelseKunINotat: string;
 }

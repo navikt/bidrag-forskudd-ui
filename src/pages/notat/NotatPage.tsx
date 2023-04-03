@@ -48,7 +48,7 @@ const Virkningstidspunkt = () => {
 const VirkningstidspunktView = ({ behandling }) => {
     const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandling.virkningsDato);
     const [aarsak, setAarsak] = useState(behandling.aarsak);
-    const [begrunnelse, setBegrunnelse] = useState(behandling.begrunnelseMedIVedtakNotat);
+    const [begrunnelse, setBegrunnelse] = useState(behandling.virkningsTidspunktBegrunnelseMedIVedtakNotat);
     const channel = new BroadcastChannel("virkningstidspunkt");
 
     useEffect(() => {

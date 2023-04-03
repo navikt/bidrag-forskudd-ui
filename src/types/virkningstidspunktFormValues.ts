@@ -4,6 +4,6 @@ export interface VirkningstidspunktFormValues {
     virkningsDato?: Date;
     aarsak: ForskuddBeregningKodeAarsakType;
     avslag: AvslagType;
-    begrunnelseMedIVedtakNotat: string;
-    begrunnelseKunINotat: string;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat: string;
+    virkningsTidspunktBegrunnelseKunINotat: string;
 }

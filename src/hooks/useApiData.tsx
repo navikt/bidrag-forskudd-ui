@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { BehandlingDto, UpdateBehandlingRequest } from "../api/BidragBehandlingApi";
+import { BehandlingDto, UpdateBehandlingRequest, UpdateBehandlingRequestExtended } from "../api/BidragBehandlingApi";
 import { BidragSakDto } from "../api/BidragSakApi";
 import { BEHANDLING_API, BIDRAG_SAK_API, PERSON_API } from "../constants/api";
 import { mapPersonsToRoles } from "../utils/roles-utils";
@@ -34,6 +34,15 @@ export const useApiData = () => {
             queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
             staleTime: 0,
             suspense: true,
+        });
+
+    const _updateBehandlingExtended = (behandlingId: number) =>
+        useMutation({
+            mutationFn: (payload: UpdateBehandlingRequestExtended): Promise<AxiosResponse<BehandlingDto>> =>
+                BEHANDLING_API.api.oppdaterBehandlingExtended(behandlingId, payload),
+            onSuccess: (data) => {
+                queryClient.setQueryData(`behandling-${behandlingId}`, data);
+            },
         });
 
     const getBehandling = (behandlingId: number) =>
@@ -77,6 +86,7 @@ export const useApiData = () => {
         getBehandling,
         listBehandlings,
         updateBehandling,
+        _updateBehandlingExtended,
     };
 
     return { api };
