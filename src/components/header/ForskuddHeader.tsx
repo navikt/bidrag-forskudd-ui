@@ -2,22 +2,19 @@ import { Heading, Loader, Modal } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { memo, Suspense, useState } from "react";
 
-import { RolleType } from "../../api/BidragBehandlingApi";
+import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
-import { useApiData } from "../../hooks/useApiData";
+import { _updateBehandlingExtended, useGetBehandling } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { UpdateForskudd } from "../UpdateForskudd";
 
 export const ForskuddHeader = memo(() => {
     const { behandlingId } = useForskudd();
-    const { api } = useApiData();
     const {
         data: { data: behandling },
-    } = api.getBehandling(behandlingId);
-    
-    console.log(behandling)
-    const mutation = api._updateBehandlingExtended(behandlingId);
+    } = useGetBehandling(behandlingId);
 
+    const mutation = _updateBehandlingExtended(behandlingId);
     const [modalOpen, setModalOpen] = useState(false);
 
     return (
@@ -33,33 +30,18 @@ export const ForskuddHeader = memo(() => {
                     level="1"
                     size="xlarge"
                     className="px-6 py-2 leading-10 flex items-center gap-x-4 border-[var(--a-border-divider)] border-solid border-b"
-                    onDoubleClick={() => {setModalOpen(true)}}
+                    onDoubleClick={() => {
+                        setModalOpen(true);
+                    }}
                 >
-                    Søknad om forskudd{" "}
-                    <span className="text-base flex items-center font-normal">
-                        Saksnr. {behandling.saksnummer}{" "}
-                        <CopyToClipboard
-                            size="small"
-                            copyText={behandling.saksnummer}
-                            popoverText="Kopierte saksnummer"
-                        />
-                    </span>
+                    Søknad om forskudd <Saksnummer saksnummer={behandling.saksnummer} />
                 </Heading>
                 <div className="grid grid-cols-[max-content_auto]">
-                    {behandling.roller
-                        ?.sort((a, b) => {
-                            if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
-                            if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
-                            return 0;
-                        })
-                        .map((rolle, i) => (
-                            <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
-                        ))}
+                    <Roller roller={behandling.roller} />
                 </div>
             </div>
 
             <Modal
-                ariaHideApp={false}
                 open={modalOpen}
                 aria-label="Oppdatter søknad"
                 onClose={() => setModalOpen(!modalOpen)}
@@ -69,9 +51,35 @@ export const ForskuddHeader = memo(() => {
                     <Heading spacing level="1" size="large" id="modal-heading">
                         Laborum proident id ullamco
                     </Heading>
-                    <UpdateForskudd behandling={behandling} mutation={mutation} close={() => {setModalOpen(!modalOpen)}}/>
+                    <UpdateForskudd
+                        behandling={behandling}
+                        mutation={mutation}
+                        close={() => {
+                            setModalOpen(!modalOpen);
+                        }}
+                    />
                 </Modal.Content>
             </Modal>
         </Suspense>
     );
 });
+
+const Roller = memo(({ roller }: { roller: RolleDto[] }) => (
+    <>
+        {roller
+            .sort((a, b) => {
+                if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
+                if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
+                return 0;
+            })
+            .map((rolle, i) => (
+                <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
+            ))}
+    </>
+));
+
+const Saksnummer = memo(({ saksnummer }: { saksnummer: string }) => (
+    <span className="text-base flex items-center font-normal">
+        Saksnr. {saksnummer} <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
+    </span>
+));

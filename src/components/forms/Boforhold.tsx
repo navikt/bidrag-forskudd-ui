@@ -1,17 +1,17 @@
 import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
-import React, { Fragment, Suspense, useEffect, useState } from "react";
+import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
 
-import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetBoforhold, usePostBoforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { BoforholdData } from "../../__mocks__/testdata/boforholdTestData";
 import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useApiData } from "../../hooks/useApiData";
-import { ActionStatus } from "../../types/actionStatus";
+import { useGetBehandling } from "../../hooks/useApiData";
+import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 import { dateOrNull, isValidDate } from "../../utils/date-utils";
 import { FormControlledCheckbox } from "../formFields/FormControlledCheckbox";
@@ -51,16 +51,14 @@ const createInitialValues = (boforhold) => ({
 
 export default () => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
-    const { api } = useApiData();
-    const { data: behandling } = api.getBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
     const barn = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    const { api: mockApi } = useMockApi();
-    const { data: boforhold } = mockApi.getBoforhold(
+    const { data: boforhold } = useGetBoforhold(
         behandlingId.toString(),
         barn.map((rolle) => rolle.ident),
         !!barn
     );
-    const mutation = mockApi.postBoforhold(behandlingId.toString());
+    const mutation = usePostBoforhold(behandlingId.toString());
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
 
     return (
@@ -94,11 +92,12 @@ const BoforholdsForm = ({
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setActiveStep } = useForskudd();
     const initialValues = boforholdFormValues ?? createInitialValues(boforhold);
-    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    const watchAllFields = useWatch({ control: useFormMethods.control });
 
     useEffect(() => {
         if (!boforholdFormValues) setBoforholdFormValues(initialValues);
@@ -106,27 +105,26 @@ const BoforholdsForm = ({
         return () => setBoforholdFormValues(useFormMethods.getValues());
     }, []);
 
-    const onNext = async () => {
+    const onSave = () => {
         const values = useFormMethods.getValues();
         setBoforholdFormValues(values);
-        setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
+        mutation.mutate(values, {
+            onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }),
+        });
     };
 
-    const save = async () => {
-        const values = useFormMethods.getValues();
-        setBoforholdFormValues(values);
-        await mutation.mutateAsync(values);
-        setAction(ActionStatus.IDLE);
-    };
+    const debouncedOnSave = useDebounce(onSave);
 
-    const onSubmit = async () => {
-        setAction(ActionStatus.SUBMITTING);
-        await save();
-    };
+    useEffect(() => {
+        if (useFormMethods.formState.isDirty) {
+            debouncedOnSave();
+        }
+    }, [watchAllFields, useFormMethods.formState.isDirty]);
+    const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     return (
         <FormProvider {...useFormMethods}>
-            <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
+            <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                 <div className="grid gap-y-8">
                     <div className="grid gap-y-4 w-max">
                         <Heading level="2" size="xlarge">
@@ -153,7 +151,7 @@ const BoforholdsForm = ({
                         />
                         <FormControlledTextarea name="boforholdBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                     </div>
-                    <ActionButtons action={action} onNext={onNext} />
+                    <ActionButtons onNext={onNext} />
                 </div>
             </form>
         </FormProvider>

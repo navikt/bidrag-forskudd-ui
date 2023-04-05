@@ -1,7 +1,6 @@
-import { BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
-import React, { Suspense, useEffect, useState } from "react";
+import { Alert, BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
+import React, { Suspense, useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { UseMutationResult } from "react-query";
 
 import { BehandlingDto } from "../../api/BidragBehandlingApi";
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
@@ -10,8 +9,8 @@ import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useApiData } from "../../hooks/useApiData";
-import { ActionStatus } from "../../types/actionStatus";
+import { Mutation, useGetBehandling, useUpdateBehandling } from "../../hooks/useApiData";
+import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
 import { dateOrNull, isValidDate } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
@@ -32,9 +31,8 @@ const createInitialValues = (behandling: BehandlingDto) =>
 
 export default () => {
     const { behandlingId } = useForskudd();
-    const { api } = useApiData();
-    const { data: behandling } = api.getBehandling(behandlingId);
-    const mutation = api.updateBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const updateBehandling = useUpdateBehandling(behandlingId);
 
     return (
         <Suspense
@@ -44,21 +42,20 @@ export default () => {
                 </div>
             }
         >
-            <VirkningstidspunktForm behandling={behandling.data} mutation={mutation} />
+            <VirkningstidspunktForm behandling={behandling.data} updateBehandling={updateBehandling} />
         </Suspense>
     );
 };
 
 const VirkningstidspunktForm = ({
     behandling,
-    mutation,
+    updateBehandling,
 }: {
     behandling: BehandlingDto;
-    mutation: UseMutationResult;
+    updateBehandling: Mutation;
 }) => {
     const { virkningstidspunktFormValues, setVirkningstidspunktFormValues, setActiveStep } = useForskudd();
     const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
-    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
     const channel = new BroadcastChannel("virkningstidspunkt");
 
     const useFormMethods = useForm({
@@ -67,15 +64,15 @@ const VirkningstidspunktForm = ({
 
     const fieldsForNotat = useWatch({
         control: useFormMethods.control,
-        name: ["virkningsDato", "aarsak", "begrunnelseMedIVedtakNotat"],
+        name: ["virkningsDato", "aarsak", "virkningsTidspunktBegrunnelseMedIVedtakNotat"],
     });
+
+    const watchAllFields = useWatch({ control: useFormMethods.control });
 
     useEffect(() => {
         if (!virkningstidspunktFormValues) setVirkningstidspunktFormValues(initialValues);
 
-        return () => {
-            setVirkningstidspunktFormValues(useFormMethods.getValues());
-        };
+        return () => setVirkningstidspunktFormValues(useFormMethods.getValues());
     }, []);
 
     useEffect(() => {
@@ -89,39 +86,38 @@ const VirkningstidspunktForm = ({
         }
     };
 
-    const onNext = async () => {
+    const onSave = () => {
         const values = useFormMethods.getValues();
         setVirkningstidspunktFormValues(values);
-        setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
-    };
-
-    const save = async () => {
-        const values = useFormMethods.getValues();
-        setVirkningstidspunktFormValues(values);
-
-        await mutation
-            .mutateAsync({
+        updateBehandling.mutation.mutate(
+            {
                 virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
                 virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
                 aarsak: values.aarsak ? values.aarsak : null,
                 avslag: values.avslag ? values.avslag : null,
-                virkningsDato: values.virkningsDato.toLocaleDateString("no-NO", { dateStyle: "short" }),
-            })
-            .finally(() => setAction(ActionStatus.IDLE));
+                virkningsDato: values.virkningsDato?.toLocaleDateString("no-NO", { dateStyle: "short" }) ?? null,
+            },
+            { onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }) }
+        );
     };
 
-    const onSubmit = async () => {
-        setAction(ActionStatus.SUBMITTING);
-        await save();
-    };
+    const debouncedOnSave = useDebounce(onSave);
+
+    useEffect(() => {
+        if (useFormMethods.formState.isDirty) {
+            debouncedOnSave();
+        }
+    }, [watchAllFields, useFormMethods.formState.isDirty]);
+    const onNext = () => setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
 
     return (
         <div>
             <Heading level="2" size="xlarge">
                 Virkningstidspunkt
             </Heading>
+            {updateBehandling.error && <Alert variant="error">{updateBehandling.error.message}</Alert>}
             <FormProvider {...useFormMethods}>
-                <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
+                <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <div className="grid gap-y-4 mt-4">
                         <FlexRow className="gap-x-12">
                             <div className="flex gap-x-2">
@@ -174,8 +170,11 @@ const VirkningstidspunktForm = ({
                             name="virkningsTidspunktBegrunnelseMedIVedtakNotat"
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
-                        <FormControlledTextarea name="virkningsTidspunktBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
-                        <ActionButtons action={action} onNext={onNext} />
+                        <FormControlledTextarea
+                            name="virkningsTidspunktBegrunnelseKunINotat"
+                            label="Begrunnelse (kun med i notat)"
+                        />
+                        <ActionButtons onNext={onNext} />
                     </div>
                 </form>
             </FormProvider>

@@ -2,14 +2,13 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { BodyShort, Label, Link } from "@navikt/ds-react";
 import React from "react";
 
-import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetArbeidsforhold } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const Arbeidsforhold = () => {
     const { behandlingId } = useForskudd();
-    const { api: mockApi } = useMockApi();
-    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(behandlingId.toString());
+    const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId.toString());
 
     return (
         <div className="grid gap-y-2">

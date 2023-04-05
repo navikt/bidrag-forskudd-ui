@@ -6,11 +6,11 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
-import { useApiData } from "../../../hooks/useApiData";
+import { useGetBehandling } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
-import { FormControlledDatePicker } from "../../formFields/FormControlledDatePicker";
+import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
@@ -120,15 +120,13 @@ const Periode = ({ item, index, datepicker }) => {
 
 export const InntekteneSomLeggesTilGrunnTabel = () => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
-    const { api } = useApiData();
-    const { data: behandling } = api.getBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
     const {
         control,
         getValues,
         setValue,
         setError,
         clearErrors,
-        trigger,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const inntekteneSomLeggesTilGrunnField = useFieldArray({
@@ -136,10 +134,11 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
         name: "inntekteneSomLeggesTilGrunn",
     });
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
+    const watchFieldArray = useWatch({ control, name: "inntekteneSomLeggesTilGrunn" });
 
     useEffect(() => {
-        trigger();
-    }, [trigger]);
+        validatePeriods();
+    }, [watchFieldArray]);
 
     const handleOnSelect = (value: boolean, index: number) => {
         if (isValidDate(virkningstidspunkt)) {
@@ -160,7 +159,9 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
 
     const validatePeriods = () => {
         if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
+            const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn").filter(
+                (inntekt) => inntekt.selected
+            );
 
             if (!inntekteneSomLeggesTilGrunn.length) {
                 clearErrors("inntekteneSomLeggesTilGrunn");
@@ -181,7 +182,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                 types = { ...types, overlappingPerioder: JSON.stringify(overlappingPerioder) };
             }
             if (Object.keys(types).length) {
-                setError("inntekteneSomLeggesTilGrunn", { types });
+                setError("inntekteneSomLeggesTilGrunn", { ...errors.inntekteneSomLeggesTilGrunn, types });
             }
             if (!dateGaps?.length) {
                 // @ts-ignore
@@ -195,22 +196,10 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
     };
 
     const handleOnDelete = (index) => {
+        clearErrors(`inntekteneSomLeggesTilGrunn.${index}`);
         inntekteneSomLeggesTilGrunnField.remove(index);
-        if (!index) {
-            inntekteneSomLeggesTilGrunnField.append({
-                aar: "",
-                fraDato: null,
-                tilDato: null,
-                totalt: "",
-                beskrivelse: "",
-                tekniskNavn: "",
-                selected: false,
-                fraPostene: false,
-            });
-        }
     };
 
-    const watchFieldArray = useWatch({ control, name: "inntekteneSomLeggesTilGrunn" });
     const controlledFields = inntekteneSomLeggesTilGrunnField.fields.map((field, index) => {
         return {
             ...field,
@@ -258,13 +247,12 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                                 item={item}
                                 index={index}
                                 datepicker={
-                                    <FormControlledDatePicker
+                                    <FormControlledMonthPicker
                                         key={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
                                         name={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
                                         label="Fra og med"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item?.fraDato ?? null}
-                                        onChange={validatePeriods}
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.fraDato}
                                         required={item.selected}
                                         hideLabel
                                     />
@@ -274,13 +262,12 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                                 item={item}
                                 index={index}
                                 datepicker={
-                                    <FormControlledDatePicker
+                                    <FormControlledMonthPicker
                                         key={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
                                         name={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
                                         label="Til og med"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item?.tilDato ?? null}
-                                        onChange={validatePeriods}
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.tilDato}
                                         hideLabel
                                     />
                                 }
@@ -329,6 +316,12 @@ export const UtvidetBarnetrygdTabel = () => {
         name: "utvidetBarnetrygd",
     });
 
+    const watchFieldArray = useWatch({ control, name: "utvidetBarnetrygd" });
+
+    useEffect(() => {
+        validatePeriods();
+    }, [watchFieldArray]);
+
     const validatePeriods = () => {
         const utvidetBarnetrygdList = getValues("utvidetBarnetrygd");
 
@@ -337,28 +330,31 @@ export const UtvidetBarnetrygdTabel = () => {
             return;
         }
         const filtrertOgSorterListe = utvidetBarnetrygdList
-            .filter((periode) => periode.fraDato !== null)
+            .filter((periode) => isValidDate(periode.fraDato))
             .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
             setError("utvidetBarnetrygd", {
-                type: "overlappingPerioder",
-                message: "Du har overlappende perioder",
+                ...errors.utvidetBarnetrygd,
+                types: {
+                    overlappingPerioder: "Du har overlappende perioder",
+                },
             });
         }
 
         if (!overlappingPerioder?.length) {
-            clearErrors("utvidetBarnetrygd");
+            // @ts-ignore
+            clearErrors("utvidetBarnetrygd.types.overlappingPerioder");
         }
     };
 
     return (
         <>
-            {errors?.utvidetBarnetrygd?.type === "overlappingPerioder" && (
+            {errors?.utvidetBarnetrygd?.types?.overlappingPerioder && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.utvidetBarnetrygd.message}</BodyShort>
+                    <BodyShort>{errors.utvidetBarnetrygd.types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
@@ -367,34 +363,33 @@ export const UtvidetBarnetrygdTabel = () => {
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <div key={`utvidetBarnetrygd[${index}].fraDato`} className="flex gap-x-4">
-                                    <FormControlledDatePicker
-                                        key={`utvidetBarnetrygd[${index}].fraDato`}
-                                        name={`utvidetBarnetrygd[${index}].fraDato`}
+                                <div key={`utvidetBarnetrygd.${index}.fraDato`} className="flex gap-x-4">
+                                    <FormControlledMonthPicker
+                                        key={`utvidetBarnetrygd.${index}.fraDato`}
+                                        name={`utvidetBarnetrygd.${index}.fraDato`}
                                         label="Fra og med"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item?.fraDato ?? null}
-                                        onChange={validatePeriods}
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.fraDato}
+                                        required
                                         hideLabel
                                     />
-                                    <FormControlledDatePicker
-                                        key={`utvidetBarnetrygd[${index}].tilDato`}
-                                        name={`utvidetBarnetrygd[${index}].tilDato`}
+                                    <FormControlledMonthPicker
+                                        key={`utvidetBarnetrygd.${index}.tilDato`}
+                                        name={`utvidetBarnetrygd.${index}.tilDato`}
                                         label="Til og med"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item?.tilDato ?? null}
-                                        onChange={validatePeriods}
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.fraDato}
                                         hideLabel
                                     />
                                 </div>,
                                 <FormControlledCheckbox
-                                    key={`utvidetBarnetrygd[${index}].deltBosted`}
-                                    name={`utvidetBarnetrygd[${index}].deltBosted`}
+                                    key={`utvidetBarnetrygd.${index}.deltBosted`}
+                                    name={`utvidetBarnetrygd.${index}.deltBosted`}
                                     legend=""
                                 />,
                                 <FormControlledTextField
-                                    key={`utvidetBarnetrygd[${index}].beloep`}
-                                    name={`utvidetBarnetrygd[${index}].beloep`}
+                                    key={`utvidetBarnetrygd.${index}.beloep`}
+                                    name={`utvidetBarnetrygd.${index}.beloep`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -404,8 +399,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                     key={`delete-button-${index}`}
                                     type="button"
                                     onClick={() => {
+                                        clearErrors(`utvidetBarnetrygd.${index}`);
                                         fieldArray.remove(index);
-                                        validatePeriods();
                                     }}
                                     icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
@@ -438,8 +433,7 @@ export const UtvidetBarnetrygdTabel = () => {
 
 export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
-    const { api } = useApiData();
-    const { data: data } = api.getBehandling(behandlingId);
+    const { data: data } = useGetBehandling(behandlingId);
 
     const {
         control,
@@ -453,6 +447,12 @@ export const BarnetilleggTabel = () => {
         name: "barnetillegg",
     });
 
+    const watchFieldArray = useWatch({ control, name: "barnetillegg" });
+
+    useEffect(() => {
+        validatePeriods();
+    }, [watchFieldArray]);
+
     const getBarn = (roller: RolleDto[]) => roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
 
     const validatePeriods = () => {
@@ -463,20 +463,23 @@ export const BarnetilleggTabel = () => {
             return;
         }
         const filtrertOgSorterListe = barnetilleggList
-            .filter((periode) => periode.fraDato !== null)
+            .filter((periode) => isValidDate(periode.fraDato))
             .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
             setError("barnetillegg", {
-                type: "overlappingPerioder",
-                message: "Du har overlappende perioder",
+                ...errors.barnetillegg,
+                types: {
+                    overlappingPerioder: "Du har overlappende perioder",
+                },
             });
         }
 
         if (!overlappingPerioder?.length) {
-            clearErrors("barnetillegg");
+            // @ts-ignore
+            clearErrors("barnetillegg.types.overlappingPerioder");
         }
     };
 
@@ -488,9 +491,9 @@ export const BarnetilleggTabel = () => {
                 </div>
             }
         >
-            {errors?.barnetillegg?.type === "overlappingPerioder" && (
+            {errors?.barnetillegg?.types?.overlappingPerioder && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.barnetillegg.message}</BodyShort>
+                    <BodyShort>{errors.barnetillegg.types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
@@ -499,27 +502,26 @@ export const BarnetilleggTabel = () => {
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <FormControlledDatePicker
-                                    key={`barnetillegg[${index}].fraDato`}
-                                    name={`barnetillegg[${index}].fraDato`}
+                                <FormControlledMonthPicker
+                                    key={`barnetillegg.${index}.fraDato`}
+                                    name={`barnetillegg.${index}.fraDato`}
                                     label="Fra og med"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item?.fraDato ?? null}
-                                    onChange={validatePeriods}
+                                    placeholder="MM.ÅÅÅÅ"
+                                    defaultValue={item.fraDato}
+                                    required
                                     hideLabel
                                 />,
-                                <FormControlledDatePicker
-                                    key={`barnetillegg[${index}].tilDato`}
-                                    name={`barnetillegg[${index}].tilDato`}
+                                <FormControlledMonthPicker
+                                    key={`barnetillegg.${index}.tilDato`}
+                                    name={`barnetillegg.${index}.tilDato`}
                                     label="Til og med"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item?.tilDato ?? null}
-                                    onChange={validatePeriods}
+                                    placeholder="MM.ÅÅÅÅ"
+                                    defaultValue={item.tilDato}
                                     hideLabel
                                 />,
                                 <FormControlledSelectField
-                                    key={`barnetillegg[${index}].barn`}
-                                    name={`barnetillegg[${index}].barn`}
+                                    key={`barnetillegg.${index}.barn`}
+                                    name={`barnetillegg.${index}.barn`}
                                     label="Barn"
                                     options={[{ value: "", text: "Velg barn" }].concat(
                                         getBarn(data.data.roller).map((barn) => ({
@@ -530,8 +532,8 @@ export const BarnetilleggTabel = () => {
                                     hideLabel
                                 />,
                                 <FormControlledTextField
-                                    key={`barnetillegg[${index}].beloep`}
-                                    name={`barnetillegg[${index}].beloep`}
+                                    key={`barnetillegg.${index}.beloep`}
+                                    name={`barnetillegg.${index}.beloep`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -541,8 +543,8 @@ export const BarnetilleggTabel = () => {
                                     key={`delete-button-${index}`}
                                     type="button"
                                     onClick={() => {
+                                        clearErrors(`barnetillegg.${index}`);
                                         fieldArray.remove(index);
-                                        validatePeriods();
                                     }}
                                     icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"

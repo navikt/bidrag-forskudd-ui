@@ -26,24 +26,30 @@ export const FormControlledDatePicker = ({
     onChange,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors } = useFormContext();
-    const { field, fieldState } = useController({ name, control, rules: { required: required } });
+    const { field, fieldState } = useController({
+        name,
+        control,
+        rules: {
+            required: required ? "Dato må fylles ut" : false,
+        },
+    });
 
     const handleChange = (date: Date) => {
         if (date) {
-            field.onChange(date);
             clearErrors(name);
         }
+        field.onChange(date);
         if (onChange) {
             onChange(date);
         }
     };
 
     const onValidate = (dateValidation: DateValidationT) => {
-        if (required && dateValidation.isEmpty) {
-            setError(name, { type: "required", message: "Dato må fylles ut" });
-        } else if (!dateValidation.isValidDate) {
+        if (!dateValidation.isValidDate && !dateValidation.isEmpty) {
             setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+            return;
         }
+        clearErrors(name);
     };
 
     return (

@@ -1,14 +1,19 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Accordion, Heading, Link } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import React, { useEffect } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { useMockApi } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { NOTAT_FIELDS } from "../../../constants/notatFields";
+import {
+    useGetAndreTyperInntekt,
+    useGetInntekt,
+    useGetSkattegrunlag,
+    usePostInntekt,
+} from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { INNTEKT_PERIODE_NOTAT_FIELDS, NOTAT_FIELDS } from "../../../constants/notatFields";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { ActionStatus } from "../../../types/actionStatus";
+import { useDebounce } from "../../../hooks/useDebounce";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
@@ -30,13 +35,11 @@ export default () => {
 
 const InntektForm = () => {
     const channel = new BroadcastChannel("inntekter");
-    const [action, setAction] = useState<ActionStatus>(ActionStatus.IDLE);
     const { behandlingId, inntektFormValues, setInntektFormValues, setActiveStep } = useForskudd();
-    const { api: mockApi } = useMockApi();
-    const { data: skattegrunnlager } = mockApi.getSkattegrunlag(behandlingId.toString());
-    const { data: aInntekt } = mockApi.getAndreTyperInntekt(behandlingId.toString());
-    const { data: inntekt } = mockApi.getInntekt(behandlingId.toString());
-    const mutation = mockApi.postInntekt(behandlingId.toString());
+    const { data: skattegrunnlager } = useGetSkattegrunlag(behandlingId.toString());
+    const { data: aInntekt } = useGetAndreTyperInntekt(behandlingId.toString());
+    const { data: inntekt } = useGetInntekt(behandlingId.toString());
+    const mutation = usePostInntekt(behandlingId.toString());
 
     const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
 
@@ -46,12 +49,18 @@ const InntektForm = () => {
         criteriaMode: "all",
     });
 
+    const watchAllFields = useWatch({ control: useFormMethods.control });
+
     useEffect(() => {
         const { unsubscribe } = useFormMethods.watch((value, { name }) => {
             const field = name?.split(".")[0];
             if (NOTAT_FIELDS.includes(field)) {
+                const isPeriodeField = INNTEKT_PERIODE_NOTAT_FIELDS.includes(field);
                 channel.postMessage(
-                    JSON.stringify({ field, value: value[field].filter((inntekt) => inntekt.selected) })
+                    JSON.stringify({
+                        field,
+                        value: isPeriodeField ? value[field].filter((inntekt) => inntekt.selected) : value[field],
+                    })
                 );
             }
         });
@@ -60,30 +69,33 @@ const InntektForm = () => {
 
     useEffect(() => {
         if (!inntektFormValues) setInntektFormValues(initialValues);
+        useFormMethods.trigger();
 
         return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
-    const onNext = async () => {
+    const onSave = () => {
         const values = useFormMethods.getValues();
-        setInntektFormValues(values);
-        setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+        mutation.mutate(
+            { ...inntekt, ...createInntektPayload(values) },
+            {
+                onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }),
+            }
+        );
     };
 
-    const save = async () => {
-        const values = useFormMethods.getValues();
-        await mutation.mutateAsync({ ...inntekt, ...createInntektPayload(values) });
-        setAction(ActionStatus.IDLE);
-    };
+    const debouncedOnSave = useDebounce(onSave);
 
-    const onSubmit = async () => {
-        setAction(ActionStatus.SUBMITTING);
-        await save();
-    };
+    useEffect(() => {
+        if (useFormMethods.formState.isDirty) {
+            debouncedOnSave();
+        }
+    }, [watchAllFields, useFormMethods.formState.isDirty]);
+    const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
 
     return (
         <FormProvider {...useFormMethods}>
-            <form onSubmit={useFormMethods.handleSubmit(onSubmit)}>
+            <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                 <div className="grid gap-y-8">
                     <div className="grid gap-y-4 w-max">
                         <div className="flex gap-x-4">
@@ -122,7 +134,7 @@ const InntektForm = () => {
                             <FormControlledTextarea name="inntektBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
                         </div>
                     </div>
-                    <ActionButtons action={action} onNext={onNext} />
+                    <ActionButtons onNext={onNext} />
                 </div>
             </form>
         </FormProvider>

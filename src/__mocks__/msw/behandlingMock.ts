@@ -18,12 +18,27 @@ export function behandlingMock(): RestHandler[] {
             const body = await req.json();
             const behandling = JSON.parse(localStorage.getItem(`behandling-${req.params.behandlingId}`));
             const updatedBehandling = { ...behandling, ...body };
-            localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(updatedBehandling));
-            return res(
+
+            const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),
                 ctx.status(200),
-                ctx.body(JSON.stringify(updatedBehandling))
-            );
+                ctx.body(JSON.stringify(updatedBehandling)),
+            ];
+            const errorHeaders = [
+                ctx.status(503),
+                ctx.json({
+                    errorMessage: "Service Unavailable",
+                }),
+            ];
+
+            const index = Math.random() < 0.9 ? 0 : 1;
+            const response = [sucessHeaders, errorHeaders];
+
+            if (index === 0) {
+                localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(updatedBehandling));
+            }
+
+            return res(...response[index]);
         }),
     ];
 }

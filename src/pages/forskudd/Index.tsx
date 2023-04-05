@@ -2,12 +2,11 @@ import { Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense } from "react";
 
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
-import { useApiData } from "../../hooks/useApiData";
+import { useGetBehandlings } from "../../hooks/useApiData";
 import PageWrapper from "../PageWrapper";
 
 export const Index = () => {
-    const { api } = useApiData();
-    const behandlings = api.listBehandlings();
+    const behandlings = useGetBehandlings();
 
     return (
         <Suspense

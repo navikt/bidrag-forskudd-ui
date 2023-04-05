@@ -2,12 +2,12 @@ import { BodyLong, BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useMockApi } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetArbeidsforhold, useGetInntekt } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
-import { useApiData } from "../../hooks/useApiData";
+import { useGetBehandling } from "../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
 
 export enum NotatVirkningsTidspunktFields {
@@ -29,8 +29,7 @@ export default () => {
 
 const Virkningstidspunkt = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { api } = useApiData();
-    const { data: behandling } = api.getBehandling(Number(behandlingId));
+    const { data: behandling } = useGetBehandling(Number(behandlingId));
 
     return (
         <Suspense
@@ -124,9 +123,8 @@ const VirkningstidspunktView = ({ behandling }) => {
 
 const Inntekter = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { api: mockApi } = useMockApi();
-    const { data: inntekt } = mockApi.getInntekt(behandlingId);
-    const { data: arbeidsforholder } = mockApi.getArbeidsforhold(behandlingId);
+    const { data: inntekt } = useGetInntekt(behandlingId);
+    const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId);
 
     return (
         <Suspense>

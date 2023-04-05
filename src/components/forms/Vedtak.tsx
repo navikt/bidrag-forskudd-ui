@@ -7,14 +7,13 @@ import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
-import { useApiData } from "../../hooks/useApiData";
+import { useGetBehandling } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleTag } from "../RolleTag";
 
 export default () => {
     const { behandlingId } = useForskudd();
-    const { api } = useApiData();
-    const { data: behandling } = api.getBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
 
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
     const barn = behandling.data.roller.filter((r) => r.rolleType == RolleType.BARN);

@@ -2,7 +2,7 @@ import { MonthValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
-import { lastDayOfMonth } from "../../utils/date-utils";
+import { isValidDate, lastDayOfMonth } from "../../utils/date-utils";
 import { MonthPicker } from "../date-picker/MonthPicker";
 
 interface FormControlledDatePickerProps {
@@ -31,10 +31,16 @@ export const FormControlledMonthPicker = ({
     lastDayOfMonthPicker,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors } = useFormContext();
-    const { field, fieldState } = useController({ name, control, rules: { required: required } });
+    const { field, fieldState } = useController({
+        name,
+        control,
+        rules: {
+            required: required ? "Dato må fylles ut" : false,
+        },
+    });
 
     const handleChange = (date: Date) => {
-        if (date) {
+        if (isValidDate(date)) {
             let dateToSave = date;
             if (lastDayOfMonthPicker) dateToSave = lastDayOfMonth(dateToSave);
             field.onChange(dateToSave);
@@ -46,11 +52,11 @@ export const FormControlledMonthPicker = ({
     };
 
     const onValidate = (monthValidation: MonthValidationT) => {
-        if (required && monthValidation.isEmpty) {
-            setError(name, { type: "required", message: "Dato må fylles ut" });
-        } else if (!monthValidation.isValidMonth) {
+        if (!monthValidation.isValidMonth && !monthValidation.isEmpty) {
             setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+            return;
         }
+        clearErrors(name);
     };
 
     return (

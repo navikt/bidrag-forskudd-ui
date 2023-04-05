@@ -6,7 +6,7 @@ import {
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { addDays, dateOrNull, deductDays, toISOStringOrNull } from "../../../utils/date-utils";
+import { addDays, dateOrNull, deductDays, isValidDate, toISOStringOrNull } from "../../../utils/date-utils";
 
 const tekniksNavnToBeskrivelse = {
     kapitalinntekt: "Kapitalinntekt",
@@ -269,7 +269,7 @@ export const syncDates = (
 
 export const findDateGaps = (perioder, virkningstidspunkt) => {
     const filteredAndSortedPerioder = perioder
-        .filter((periode) => periode.fraDato !== null)
+        .filter((periode) => isValidDate(periode.fraDato))
         .sort((a, b) => a.fraDato - b.fraDato);
 
     if (!filteredAndSortedPerioder.length) return;
@@ -314,13 +314,13 @@ export const checkOverlappingPeriods = (perioder) => {
 
 export const getOverlappingInntektPerioder = (perioder) => {
     const ytelsePerioder = perioder
-        .filter((periode) => periode.fraDato !== null && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
+        .filter((periode) => isValidDate(periode.fraDato) && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
         .sort((a, b) => a.fraDato - b.fraDato);
     const overlappingPeriods = checkOverlappingPeriods(ytelsePerioder);
 
     perioderSomKanIkkeOverlapeKunMedHverandre.forEach((tekniskNavn) => {
         const filteredAndSortedPerioder = perioder
-            .filter((periode) => periode.fraDato !== null && periode.tekniskNavn === tekniskNavn)
+            .filter((periode) => isValidDate(periode.fraDato) && periode.tekniskNavn === tekniskNavn)
             .sort((a, b) => a.fraDato - b.fraDato);
 
         overlappingPeriods.concat(checkOverlappingPeriods(filteredAndSortedPerioder));

@@ -7,7 +7,6 @@ import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
-
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
 

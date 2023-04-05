@@ -1,14 +1,24 @@
+import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React from "react";
 
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 
 const chartOptions: EChartsOption = {
-    legend: {},
+    legend: {
+        show: false,
+    },
     tooltip: {
         trigger: "axis",
         showContent: true,
-        formatter: (params) => `<strong>Lønn</strong>: ${params[0].data.toLocaleString()}`,
+        formatter: (params: TopLevelFormatterParams) => {
+            if (Array.isArray(params)) {
+                return params
+                    .map((param) => `<p><strong>${param.seriesName}</strong>: ${param.data.toLocaleString()}</p>`)
+                    .join("");
+            }
+            return `<p><strong>Lønn</strong>: ${params.data.toLocaleString()}</p>`;
+        },
         backgroundColor: "rgb(230,240,255)",
         borderColor: "rgb(230,240,255)",
     },
@@ -24,6 +34,7 @@ const chartOptions: EChartsOption = {
     },
     series: [
         {
+            name: "Lønn",
             data: [47352, 48121, 43271, 45522, 45731, 72321, 50112, 48103, 42335, 44753, 58121, 45733],
             type: "line",
             smooth: true,
