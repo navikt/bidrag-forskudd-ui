@@ -131,7 +131,10 @@ const InntektForm = () => {
                             />
                         </div>
                         <div>
-                            <FormControlledTextarea name="inntektBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+                            <FormControlledTextarea
+                                name="inntektBegrunnelseKunINotat"
+                                label="Begrunnelse (kun med i notat)"
+                            />
                         </div>
                     </div>
                     <ActionButtons onNext={onNext} />

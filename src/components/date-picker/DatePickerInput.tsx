@@ -36,7 +36,7 @@ export const DatePickerInput = ({
         fromDate,
         defaultSelected: defaultValue,
     });
-    datepickerProps.strategy = strategy
+    datepickerProps.strategy = strategy;
 
     useEffect(() => {
         if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString()) {

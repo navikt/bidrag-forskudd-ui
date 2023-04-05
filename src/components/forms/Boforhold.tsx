@@ -149,7 +149,10 @@ const BoforholdsForm = ({
                             name="boforholdBegrunnelseMedIVedtakNotat"
                             label="Begrunnelse (med i vedtaket og notat)"
                         />
-                        <FormControlledTextarea name="boforholdBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+                        <FormControlledTextarea
+                            name="boforholdBegrunnelseKunINotat"
+                            label="Begrunnelse (kun med i notat)"
+                        />
                     </div>
                     <ActionButtons onNext={onNext} />
                 </div>
