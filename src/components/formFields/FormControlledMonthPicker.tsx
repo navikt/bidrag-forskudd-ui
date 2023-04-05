@@ -45,9 +45,10 @@ export const FormControlledMonthPicker = ({
             if (lastDayOfMonthPicker) dateToSave = lastDayOfMonth(dateToSave);
             field.onChange(dateToSave);
             clearErrors(name);
-        }
-        if (onChange) {
-            onChange(date);
+
+            if (onChange) {
+                onChange(dateToSave);
+            }
         }
     };
 
