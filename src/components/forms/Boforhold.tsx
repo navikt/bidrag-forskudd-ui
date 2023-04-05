@@ -224,19 +224,9 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
-            return;
+        } else {
+            clearErrors(`barn.${barnIndex}.perioder.${index}.fraDato`);
         }
-
-        if (field === "tilDato") {
-            if (perioderValues[index].fraDato && date < perioderValues[index].fraDato) {
-                setError(`barn.${barnIndex}.perioder.${index}.fraDato`, {
-                    type: "datesNotValid",
-                    message: "Fom dato kan ikke være før tom dato",
-                });
-            }
-            return;
-        }
-        clearErrors(`barn.${barnIndex}.perioder.${index}.fraDato`);
     };
 
     const validatePeriods = () => {
@@ -296,7 +286,7 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                                         defaultValue={item.fraDato}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "tilDato");
+                                            validateFomOgTom(date, index, "fraDato");
                                         }}
                                         toDate={new Date()}
                                         hideLabel
@@ -391,19 +381,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
-            return;
+        } else {
+            clearErrors(`sivilstand.${index}.fraDato`);
         }
-
-        if (field === "tilDato") {
-            if (sivilstandPerioder[index].fraDato && date < sivilstandPerioder[index].fraDato) {
-                setError(`sivilstand.${index}.fraDato`, {
-                    type: "datesNotValid",
-                    message: "Fom dato kan ikke være før tom dato",
-                });
-            }
-            return;
-        }
-        clearErrors(`sivilstand.${index}.fraDato`);
     };
 
     const validatePeriods = () => {
