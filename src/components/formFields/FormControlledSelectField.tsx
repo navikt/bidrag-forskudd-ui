@@ -48,11 +48,12 @@ export const FormControlledSelectField = ({
             onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
         >
-            {children || options.map((option) => (
-                <option key={option.text} value={option.value}>
-                    {option.text}
-                </option>
-            ))}
+            {children ||
+                options.map((option) => (
+                    <option key={option.text} value={option.value}>
+                        {option.text}
+                    </option>
+                ))}
         </Select>
     );
 };

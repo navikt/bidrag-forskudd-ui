@@ -13,6 +13,7 @@ import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox"
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import { PersonNavn } from "../../PersonNavn";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { getVirkningstidspunkt } from "../helpers/helpers";
 import {
@@ -21,7 +22,6 @@ import {
     getOverlappingInntektPerioder,
     syncDates,
 } from "../helpers/inntektFormHelpers";
-import { PersonNavn } from "../../PersonNavn";
 
 const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
@@ -436,9 +436,7 @@ export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
     const { data: data } = useGetBehandling(behandlingId);
 
-    useEffect(() => {
-
-    }, []);
+    useEffect(() => {}, []);
 
     const {
         control,
@@ -537,8 +535,7 @@ export const BarnetilleggTabel = () => {
                                         <option key={barn.navn} value={barn.ident}>
                                             <PersonNavn ident={barn.ident}></PersonNavn>
                                         </option>
-                                    ))
-                                    }
+                                    ))}
                                 </FormControlledSelectField>,
                                 <FormControlledTextField
                                     key={`barnetillegg.${index}.beloep`}

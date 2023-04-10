@@ -60,9 +60,24 @@ const server = setupServer(
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/json",
             }),
-            ctx.body(JSON.stringify({"ident":"03522150877","navn":"Forsikring, Kognitiv","fornavn":"Kognitiv","etternavn":"Forsikring","kjønn":"KVINNE","kjoenn":"KVINNE","fødselsdato":"2021-12-03","foedselsdato":"2021-12-03","aktørId":"2601080498043","aktoerId":"2601080498043","kortnavn":"Kognitiv Forsikring","kortNavn":"Kognitiv Forsikring"}))
+            ctx.body(
+                JSON.stringify({
+                    ident: "03522150877",
+                    navn: "Forsikring, Kognitiv",
+                    fornavn: "Kognitiv",
+                    etternavn: "Forsikring",
+                    kjønn: "KVINNE",
+                    kjoenn: "KVINNE",
+                    fødselsdato: "2021-12-03",
+                    foedselsdato: "2021-12-03",
+                    aktørId: "2601080498043",
+                    aktoerId: "2601080498043",
+                    kortnavn: "Kognitiv Forsikring",
+                    kortNavn: "Kognitiv Forsikring",
+                })
+            )
         );
-    }),
+    })
 );
 
 before(() => {

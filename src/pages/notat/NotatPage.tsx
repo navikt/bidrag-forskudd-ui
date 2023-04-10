@@ -6,10 +6,10 @@ import { useGetArbeidsforhold, useGetInntekt } from "../../__mocks__/mocksForMis
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
+import { PersonNavn } from "../../components/PersonNavn";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { useGetBehandling } from "../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
-import { PersonNavn } from "../../components/PersonNavn";
 
 export enum NotatVirkningsTidspunktFields {
     "virkningsDato",
@@ -81,7 +81,11 @@ const VirkningstidspunktView = ({ behandling }) => {
                 <div className="flex gap-x-2">
                     <Label size="small">BM:</Label>
                     <BodyShort size="small">
-                        <PersonNavn ident={behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident}></PersonNavn>
+                        <PersonNavn
+                            ident={
+                                behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident
+                            }
+                        ></PersonNavn>
                     </BodyShort>
                 </div>
             </div>

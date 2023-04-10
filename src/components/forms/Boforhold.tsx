@@ -19,13 +19,13 @@ import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPick
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
+import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import { calculateFraDato } from "./helpers/boforholdFormHelpers";
 import { getVirkningstidspunkt } from "./helpers/helpers";
 import { checkOverlappingPeriods } from "./helpers/inntektFormHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
-import { PersonNavn } from "../PersonNavn";
 
 const createInitialValues = (boforhold) => ({
     ...boforhold,
@@ -182,7 +182,11 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
                 <Fragment key={item.id}>
                     <FlexRow className="items-center">
                         <RolleTag rolleType={RolleType.BARN} />
-                        <BodyShort size="small"><PersonNavn ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}></PersonNavn></BodyShort>
+                        <BodyShort size="small">
+                            <PersonNavn
+                                ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
+                            ></PersonNavn>
+                        </BodyShort>
                         <BodyShort size="small">{item.ident}</BodyShort>
                     </FlexRow>
                     <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
