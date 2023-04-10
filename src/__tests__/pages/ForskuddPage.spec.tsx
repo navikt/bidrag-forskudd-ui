@@ -49,7 +49,20 @@ const server = setupServer(
             }),
             ctx.body(JSON.stringify(behandlingMockApiData))
         );
-    })
+    }),
+    rest.options(`${environment.url.bidragPerson}/informasjon`, (req, res, ctx) => {
+        return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
+    }),
+    rest.post(`${environment.url.bidragPerson}/informasjon`, (req, res, ctx) => {
+        return res(
+            ctx.set({
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            }),
+            ctx.body(JSON.stringify({"ident":"03522150877","navn":"Forsikring, Kognitiv","fornavn":"Kognitiv","etternavn":"Forsikring","kjønn":"KVINNE","kjoenn":"KVINNE","fødselsdato":"2021-12-03","foedselsdato":"2021-12-03","aktørId":"2601080498043","aktoerId":"2601080498043","kortnavn":"Kognitiv Forsikring","kortNavn":"Kognitiv Forsikring"}))
+        );
+    }),
 );
 
 before(() => {
@@ -83,7 +96,7 @@ describe("ForskuddPage", () => {
     it("should render Boforhold", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={Number(1)}>
+                <ForskuddProvider behandlingId={1}>
                     <ForskuddPage />
                 </ForskuddProvider>
             </QueryClientProvider>,
@@ -99,7 +112,7 @@ describe("ForskuddPage", () => {
     it("should render Vedtak", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={Number(1)}>
+                <ForskuddProvider behandlingId={1}>
                     <ForskuddPage />
                 </ForskuddProvider>
             </QueryClientProvider>,
@@ -115,7 +128,7 @@ describe("ForskuddPage", () => {
     it("should render header with roles", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={Number(1)}>
+                <ForskuddProvider behandlingId={1}>
                     <ForskuddHeader />
                 </ForskuddProvider>
             </QueryClientProvider>,
