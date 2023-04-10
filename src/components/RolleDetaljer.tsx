@@ -2,6 +2,7 @@ import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React from "react";
 
 import { RolleDto } from "../api/BidragBehandlingApi";
+import { PersonNavn } from "./PersonNavn";
 import { RolleTag } from "./RolleTag";
 
 export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: RolleDto; withBorder?: boolean }) => {
@@ -12,7 +13,9 @@ export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: RolleDto; w
             } flex items-center`}
         >
             <RolleTag rolleType={rolle.rolleType} />
-            <span>{rolle.navn}</span>
+            <span>
+                <PersonNavn ident={rolle.ident}></PersonNavn>
+            </span>
             <span className="mx-4">/</span> {rolle.ident}
             <CopyToClipboard size="small" copyText={rolle.ident} popoverText="Kopierte fødselsnummeret" />
         </div>

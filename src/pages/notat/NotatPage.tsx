@@ -9,6 +9,7 @@ import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { useGetBehandling } from "../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
+import { PersonNavn } from "../../components/PersonNavn";
 
 export enum NotatVirkningsTidspunktFields {
     "virkningsDato",
@@ -80,7 +81,7 @@ const VirkningstidspunktView = ({ behandling }) => {
                 <div className="flex gap-x-2">
                     <Label size="small">BM:</Label>
                     <BodyShort size="small">
-                        {behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).navn}
+                        <PersonNavn ident={behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident}></PersonNavn>
                     </BodyShort>
                 </div>
             </div>

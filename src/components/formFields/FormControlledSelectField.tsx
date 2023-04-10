@@ -1,5 +1,5 @@
 import { Select } from "@navikt/ds-react";
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 interface Option {
@@ -10,7 +10,7 @@ interface Option {
 interface FormControlledSelectFieldProps {
     name: string;
     label: string;
-    options: Option[];
+    options?: Option[];
     hideLabel?: boolean;
     className?: string;
     onSelect?: (value) => void;
@@ -23,7 +23,8 @@ export const FormControlledSelectField = ({
     hideLabel,
     className,
     onSelect,
-}: FormControlledSelectFieldProps) => {
+    children,
+}: PropsWithChildren<FormControlledSelectFieldProps>) => {
     const {
         control,
         formState: { errors },
@@ -47,7 +48,7 @@ export const FormControlledSelectField = ({
             onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
         >
-            {options.map((option) => (
+            {children || options.map((option) => (
                 <option key={option.text} value={option.value}>
                     {option.text}
                 </option>

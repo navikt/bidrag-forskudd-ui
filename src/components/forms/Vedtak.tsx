@@ -10,6 +10,7 @@ import environment from "../../environment";
 import { useGetBehandling } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { RolleTag } from "../RolleTag";
+import { PersonNavn } from "../PersonNavn";
 
 export default () => {
     const { behandlingId } = useForskudd();
@@ -77,7 +78,7 @@ export default () => {
                                             <RolleTag rolleType={item.rolleType} />
                                         </Table.DataCell>
                                         <Table.DataCell>{item.ident}</Table.DataCell>
-                                        <Table.DataCell>{item.navn}</Table.DataCell>
+                                        <Table.DataCell><PersonNavn ident={item.ident}></PersonNavn></Table.DataCell>
                                         <Table.DataCell>Forskudd</Table.DataCell>
                                         <Table.DataCell>01.07.2022 - 31.08.2022</Table.DataCell>
                                         <Table.DataCell>651 555</Table.DataCell>

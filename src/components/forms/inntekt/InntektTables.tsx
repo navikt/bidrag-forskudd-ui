@@ -21,6 +21,7 @@ import {
     getOverlappingInntektPerioder,
     syncDates,
 } from "../helpers/inntektFormHelpers";
+import { PersonNavn } from "../../PersonNavn";
 
 const Beskrivelse = ({ item, index }) =>
     item.fraPostene ? (
@@ -435,6 +436,10 @@ export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
     const { data: data } = useGetBehandling(behandlingId);
 
+    useEffect(() => {
+
+    }, []);
+
     const {
         control,
         getValues,
@@ -523,14 +528,18 @@ export const BarnetilleggTabel = () => {
                                     key={`barnetillegg.${index}.barn`}
                                     name={`barnetillegg.${index}.barn`}
                                     label="Barn"
-                                    options={[{ value: "", text: "Velg barn" }].concat(
-                                        getBarn(data.data.roller).map((barn) => ({
-                                            value: barn.ident,
-                                            text: barn.navn,
-                                        }))
-                                    )}
                                     hideLabel
-                                />,
+                                >
+                                    <option key={"Velg barn"} value={""}>
+                                        Velg barn
+                                    </option>
+                                    {getBarn(data.data.roller).map((barn) => (
+                                        <option key={barn.navn} value={barn.ident}>
+                                            <PersonNavn ident={barn.ident}></PersonNavn>
+                                        </option>
+                                    ))
+                                    }
+                                </FormControlledSelectField>,
                                 <FormControlledTextField
                                     key={`barnetillegg.${index}.beloep`}
                                     name={`barnetillegg.${index}.beloep`}
