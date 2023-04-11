@@ -1,10 +1,11 @@
 import { Heading, Loader, Modal } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
-import React, { memo, Suspense, useState } from "react";
+import React, { memo, Suspense, useMemo, useState } from "react";
 
-import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
+import { RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
-import { _updateBehandlingExtended, useGetBehandling } from "../../hooks/useApiData";
+import { _updateBehandlingExtended, useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
+import { IRolleUI } from "../../types/rolle";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { UpdateForskudd } from "../UpdateForskudd";
 
@@ -13,6 +14,21 @@ export const ForskuddHeader = memo(() => {
     const {
         data: { data: behandling },
     } = useGetBehandling(behandlingId);
+
+    const personsQueries = usePersonsQueries(behandling.roller);
+    const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
+    const rollerMedPersonNavn = useMemo(
+        () =>
+            personQueriesSuccess
+                ? behandling.roller.map((rolle) => ({
+                      ...rolle,
+                      navn:
+                          personsQueries.find((query) => rolle.ident === query.data.data.ident)?.data.data.navn ||
+                          "UKJENT",
+                  }))
+                : [],
+        [behandling.roller, personQueriesSuccess]
+    );
 
     const mutation = _updateBehandlingExtended(behandlingId);
     const [modalOpen, setModalOpen] = useState(false);
@@ -37,7 +53,7 @@ export const ForskuddHeader = memo(() => {
                     Søknad om forskudd <Saksnummer saksnummer={behandling.saksnummer} />
                 </Heading>
                 <div className="grid grid-cols-[max-content_auto]">
-                    <Roller roller={behandling.roller} />
+                    <Roller roller={rollerMedPersonNavn} />
                 </div>
             </div>
 
@@ -64,7 +80,7 @@ export const ForskuddHeader = memo(() => {
     );
 });
 
-const Roller = memo(({ roller }: { roller: RolleDto[] }) => (
+const Roller = memo(({ roller }: { roller: IRolleUI[] }) => (
     <>
         {roller
             .sort((a, b) => {

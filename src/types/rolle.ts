@@ -1,4 +1,5 @@
-import { RolleDto } from "./bidragSakTypes";
-import { PersonDto } from "./personTypes";
+import { RolleDto } from "../api/BidragBehandlingApi";
 
-export type IRolleUi = RolleDto & PersonDto;
+export interface IRolleUI extends RolleDto {
+    navn: string;
+}

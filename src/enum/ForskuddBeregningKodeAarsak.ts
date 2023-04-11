@@ -1,5 +1,4 @@
 export enum ForskuddBeregningKodeAarsak {
-    SF = "Annet",
     NF = "Endring 3 måneder tilbake",
     OF = "Endring 3 års regelen",
     AF = "Fra barnets fødsel",

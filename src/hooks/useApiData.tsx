@@ -1,8 +1,13 @@
 import { AxiosResponse } from "axios";
 import { useState } from "react";
-import { useMutation, UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { useMutation, UseMutationResult, useQueries, useQuery, useQueryClient } from "react-query";
 
-import { BehandlingDto, UpdateBehandlingRequest, UpdateBehandlingRequestExtended } from "../api/BidragBehandlingApi";
+import {
+    BehandlingDto,
+    RolleDto,
+    UpdateBehandlingRequest,
+    UpdateBehandlingRequestExtended,
+} from "../api/BidragBehandlingApi";
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, PERSON_API } from "../constants/api";
 
@@ -52,6 +57,18 @@ export const useHentPersonData = (ident: string) =>
         staleTime: Infinity,
         suspense: true,
     });
+
+export const usePersonsQueries = (roller: RolleDto[]) =>
+    useQueries(
+        roller.map((rolle) => ({
+            queryKey: ["persons", rolle.ident],
+            queryFn: (): Promise<AxiosResponse<PersonDto>> =>
+                PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident }),
+            staleTime: Infinity,
+            suspense: true,
+            enable: !!rolle,
+        }))
+    );
 
 export const _updateBehandlingExtended = (behandlingId: number) => {
     const queryClient = useQueryClient();
