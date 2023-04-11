@@ -21,11 +21,15 @@ export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
         {cells.map((cell, index) => {
             if (!index)
                 return (
-                    <Table.HeaderCell scope="row" key={cell.key}>
+                    <Table.HeaderCell scope="row" key={cell.key} className="align-middle">
                         {cell}
                     </Table.HeaderCell>
                 );
-            return <Table.DataCell key={index}>{cell}</Table.DataCell>;
+            return (
+                <Table.DataCell key={index} className="align-middle">
+                    {cell}
+                </Table.DataCell>
+            );
         })}
     </Table.Row>
 );

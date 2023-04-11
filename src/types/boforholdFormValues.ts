@@ -1,4 +1,5 @@
 interface BarnPeriode {
+    selected: boolean;
     fraDato: Date | null;
     tilDato: Date | null;
     borMedForeldre: boolean;

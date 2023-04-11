@@ -1,5 +1,5 @@
 import { TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading, Loader, Panel } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
@@ -20,7 +20,6 @@ import { FormControlledSelectField } from "../formFields/FormControlledSelectFie
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
-import { RolleTag } from "../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import { calculateFraDato } from "./helpers/boforholdFormHelpers";
 import { getVirkningstidspunkt } from "./helpers/helpers";
@@ -134,6 +133,9 @@ const BoforholdsForm = ({
                         {!isValidDate(virkningstidspunkt) && (
                             <Alert variant="warning">Mangler virkningstidspunkt</Alert>
                         )}
+                        <Heading level="3" size="medium">
+                            Barn
+                        </Heading>
                         <BarnPerioder barnFraBehandling={barnFraBehandling} virkningstidspunkt={virkningstidspunkt} />
                     </div>
                     <div className="grid gap-y-4 w-max">
@@ -180,16 +182,17 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <FlexRow className="items-center">
-                        <RolleTag rolleType={RolleType.BARN} />
-                        <BodyShort size="small">
-                            <PersonNavn
-                                ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
-                            ></PersonNavn>
-                        </BodyShort>
-                        <BodyShort size="small">{item.ident}</BodyShort>
-                    </FlexRow>
-                    <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
+                    <Panel border className="p-0">
+                        <FlexRow className="items-center p-3">
+                            <BodyShort size="small">
+                                <PersonNavn
+                                    ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
+                                ></PersonNavn>
+                            </BodyShort>
+                            <BodyShort size="small">{item.ident}</BodyShort>
+                        </FlexRow>
+                        <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
+                    </Panel>
                 </Fragment>
             ))}
         </>
@@ -262,6 +265,7 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
     const addPeriode = () => {
         const perioderValues = getValues(`barn.${barnIndex}.perioder`);
         barnPerioder.append({
+            selected: false,
             fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
             tilDato: null,
             borMedForeldre: false,
@@ -278,45 +282,47 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                 </Alert>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Periode", "Bor ikke med foreldre", "Registrert på adresse", "Kilde", ""]}>
+                <TableWrapper heading={["Ta med", "Fra og med", "Til og med", "Registrert på adresse", "Kilde", ""]}>
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <div key={`barn.${barnIndex}.perioder.${index}.fraDato`} className="flex gap-x-4">
-                                    <FormControlledMonthPicker
-                                        name={`barn.${barnIndex}.perioder.${index}.fraDato`}
-                                        label="Periode"
-                                        placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
-                                        onChange={(date) => {
-                                            validatePeriods();
-                                            validateFomOgTom(date, index, "fraDato");
-                                        }}
-                                        toDate={new Date()}
-                                        hideLabel
-                                    />
-                                    <FormControlledMonthPicker
-                                        name={`barn.${barnIndex}.perioder.${index}.tilDato`}
-                                        label="Periode"
-                                        placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.tilDato}
-                                        onChange={(date) => {
-                                            validatePeriods();
-                                            validateFomOgTom(date, index, "tilDato");
-                                        }}
-                                        lastDayOfMonthPicker
-                                        hideLabel
-                                    />
-                                </div>,
                                 <FormControlledCheckbox
-                                    key={`barn.${barnIndex}.perioder.${index}.borMedForeldre`}
-                                    name={`barn.${barnIndex}.perioder.${index}.borMedForeldre`}
+                                    key={`barn.${barnIndex}.perioder.${index}.selected`}
+                                    name={`barn.${barnIndex}.perioder.${index}.selected`}
+                                    className="m-auto"
                                     legend=""
+                                />,
+                                <FormControlledMonthPicker
+                                    key={`barn.${barnIndex}.perioder.${index}.fraDato`}
+                                    name={`barn.${barnIndex}.perioder.${index}.fraDato`}
+                                    label="Fra og med"
+                                    placeholder="MM.ÅÅÅÅ"
+                                    defaultValue={item.fraDato}
+                                    onChange={(date) => {
+                                        validatePeriods();
+                                        validateFomOgTom(date, index, "fraDato");
+                                    }}
+                                    toDate={new Date()}
+                                    hideLabel
+                                />,
+                                <FormControlledMonthPicker
+                                    key={`barn.${barnIndex}.perioder.${index}.tilDato`}
+                                    name={`barn.${barnIndex}.perioder.${index}.tilDato`}
+                                    label="Til og med"
+                                    placeholder="MM.ÅÅÅÅ"
+                                    defaultValue={item.tilDato}
+                                    onChange={(date) => {
+                                        validatePeriods();
+                                        validateFomOgTom(date, index, "tilDato");
+                                    }}
+                                    lastDayOfMonthPicker
+                                    hideLabel
                                 />,
                                 <FormControlledCheckbox
                                     key={`barn.${barnIndex}.perioder.${index}.registrertPaaAdresse`}
                                     name={`barn.${barnIndex}.perioder.${index}.registrertPaaAdresse`}
+                                    className="m-auto"
                                     legend=""
                                 />,
                                 <FormControlledSelectField
@@ -346,9 +352,11 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                     ))}
                 </TableWrapper>
             )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + legg til periode
-            </Button>
+            <div className="p-3">
+                <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
+                    + legg til periode
+                </Button>
+            </div>
         </>
     );
 };

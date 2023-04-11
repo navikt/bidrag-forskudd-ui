@@ -1,4 +1,5 @@
 interface Periode {
+    selected: boolean;
     fraDato: string;
     tilDato: string;
     registrertPaaAdresse: boolean;

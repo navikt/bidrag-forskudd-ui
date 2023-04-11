@@ -240,6 +240,7 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                                 key={`inntekteneSomLeggesTilGrunn.${index}.selected`}
                                 name={`inntekteneSomLeggesTilGrunn.${index}.selected`}
                                 onChange={(value) => handleOnSelect(value.target.checked, index)}
+                                className="m-auto"
                                 legend=""
                             />,
                             <Beskrivelse item={item} index={index} />,
@@ -386,6 +387,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                 <FormControlledCheckbox
                                     key={`utvidetBarnetrygd.${index}.deltBosted`}
                                     name={`utvidetBarnetrygd.${index}.deltBosted`}
+                                    className="m-auto"
                                     legend=""
                                 />,
                                 <FormControlledTextField

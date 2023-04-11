@@ -14,7 +14,14 @@ const chartOptions: EChartsOption = {
         formatter: (params: TopLevelFormatterParams) => {
             if (Array.isArray(params)) {
                 return params
-                    .map((param) => `<p><strong>${param.seriesName}</strong>: ${param.data.toLocaleString()}</p>`)
+                    .map(
+                        (param) =>
+                            `<p><strong>${param.seriesName}</strong>: ${Math.round(
+                                Number(param.data) * 0.95
+                            ).toLocaleString()}</p><p><strong>Bonus</strong>: ${Math.round(
+                                Number(param.data) * 0.05
+                            ).toLocaleString()}</p>`
+                    )
                     .join("");
             }
             return `<p><strong>Lønn</strong>: ${params.data.toLocaleString()}</p>`;

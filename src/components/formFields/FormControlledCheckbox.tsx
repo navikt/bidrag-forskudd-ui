@@ -6,10 +6,12 @@ export const FormControlledCheckbox = ({
     name,
     legend,
     onChange,
+    className,
 }: {
     name: string;
     legend: string;
     onChange?: (value: any) => void;
+    className?: string;
 }) => {
     const {
         control,
@@ -26,7 +28,7 @@ export const FormControlledCheckbox = ({
     };
 
     return (
-        <Checkbox {...field} checked={field.value} onChange={handleOnChange} size="small">
+        <Checkbox {...field} checked={field.value} className={className} onChange={handleOnChange} size="small">
             {legend}
         </Checkbox>
     );
