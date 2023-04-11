@@ -436,8 +436,6 @@ export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
     const { data: data } = useGetBehandling(behandlingId);
 
-    useEffect(() => {}, []);
-
     const {
         control,
         getValues,
