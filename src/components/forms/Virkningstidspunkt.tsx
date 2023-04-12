@@ -29,22 +29,12 @@ const createInitialValues = (behandling: BehandlingDto) =>
         virkningsTidspunktBegrunnelseKunINotat: behandling.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
 
-export default () => {
+const Virkningstidspunkt = () => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const updateBehandling = useUpdateBehandling(behandlingId);
 
-    return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
-            <VirkningstidspunktForm behandling={behandling.data} updateBehandling={updateBehandling} />
-        </Suspense>
-    );
+    return <VirkningstidspunktForm behandling={behandling.data} updateBehandling={updateBehandling} />;
 };
 
 const VirkningstidspunktForm = ({
@@ -179,5 +169,19 @@ const VirkningstidspunktForm = ({
                 </form>
             </FormProvider>
         </div>
+    );
+};
+
+export default () => {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." variant="interaction" />
+                </div>
+            }
+        >
+            <Virkningstidspunkt />
+        </Suspense>
     );
 };

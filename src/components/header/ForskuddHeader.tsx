@@ -1,6 +1,6 @@
 import { Heading, Loader, Modal } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
-import React, { memo, Suspense, useMemo, useState } from "react";
+import React, { memo, Suspense, useState } from "react";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -9,38 +9,21 @@ import { IRolleUI } from "../../types/rolle";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { UpdateForskudd } from "../UpdateForskudd";
 
-export const ForskuddHeader = memo(() => {
+export const Header = memo(() => {
     const { behandlingId } = useForskudd();
     const {
         data: { data: behandling },
     } = useGetBehandling(behandlingId);
 
     const personsQueries = usePersonsQueries(behandling.roller);
-    const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
-    const rollerMedPersonNavn = useMemo(
-        () =>
-            personQueriesSuccess
-                ? behandling.roller.map((rolle) => ({
-                      ...rolle,
-                      navn:
-                          personsQueries.find((query) => rolle.ident === query.data.data.ident)?.data.data.navn ||
-                          "UKJENT",
-                  }))
-                : [],
-        [behandling.roller, personQueriesSuccess]
-    );
+    const personsQueriesFinished = personsQueries.every((query) => query.isSuccess);
+    const rollerMedPersonNavn = personsQueries.map((data) => data.data);
 
     const mutation = _updateBehandlingExtended(behandlingId);
     const [modalOpen, setModalOpen] = useState(false);
 
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
+        <>
             <div className="bg-[var(--a-gray-50)] border-[var(--a-border-divider)] border-solid border-b">
                 <Heading
                     level="1"
@@ -53,7 +36,7 @@ export const ForskuddHeader = memo(() => {
                     Søknad om forskudd <Saksnummer saksnummer={behandling.saksnummer} />
                 </Heading>
                 <div className="grid grid-cols-[max-content_auto]">
-                    <Roller roller={rollerMedPersonNavn} />
+                    {personsQueriesFinished && <Roller roller={rollerMedPersonNavn} />}
                 </div>
             </div>
 
@@ -76,7 +59,7 @@ export const ForskuddHeader = memo(() => {
                     />
                 </Modal.Content>
             </Modal>
-        </Suspense>
+        </>
     );
 });
 
@@ -99,3 +82,15 @@ const Saksnummer = memo(({ saksnummer }: { saksnummer: string }) => (
         Saksnr. {saksnummer} <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
     </span>
 ));
+
+export const ForskuddHeader = () => (
+    <Suspense
+        fallback={
+            <div className="flex justify-center">
+                <Loader size="3xlarge" title="venter..." variant="interaction" />
+            </div>
+        }
+    >
+        <Header />
+    </Suspense>
+);

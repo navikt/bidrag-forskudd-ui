@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMutation, UseMutationResult, useQueries, useQuery, useQueryClient } from "react-query";
 
 import {
@@ -65,6 +65,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
             queryFn: (): Promise<AxiosResponse<PersonDto>> =>
                 PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident }),
             staleTime: Infinity,
+            select: useCallback(({ data }) => ({ ...rolle, navn: data.navn }), []),
             suspense: true,
             enable: !!rolle,
         }))

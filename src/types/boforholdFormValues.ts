@@ -7,6 +7,7 @@ interface BarnPeriode {
     kilde: "" | "offentlig" | "manuelt";
 }
 interface Barn {
+    medISaken: boolean;
     ident: string;
     perioder: BarnPeriode[];
 }

@@ -13,6 +13,7 @@ interface Sivilstand {
     stand: string;
 }
 interface Barn {
+    medISaken: boolean;
     ident: string;
     perioder: Periode[];
 }
@@ -41,6 +42,7 @@ export const barnBoforholdData = (identer: string[]) => {
 
     return identer.map((ident) => ({
         ident,
+        medISaken: true,
         perioder: [],
     }));
 };

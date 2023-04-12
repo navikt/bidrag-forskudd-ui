@@ -1,19 +1,18 @@
 import { InformationSquareIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Loader, Popover } from "@navikt/ds-react";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
+import { RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
-import { useGetBehandling } from "../../../hooks/useApiData";
+import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { PersonNavn } from "../../PersonNavn";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { getVirkningstidspunkt } from "../helpers/helpers";
 import {
@@ -105,7 +104,7 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
             onClick={() => handleOnDelete(index)}
             icon={<TrashIcon aria-hidden />}
             variant="tertiary"
-            size="xsmall"
+            size="small"
         />
     );
 
@@ -407,7 +406,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                     }}
                                     icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
-                                    size="xsmall"
+                                    size="small"
                                 />,
                             ]}
                         />
@@ -437,6 +436,10 @@ export const UtvidetBarnetrygdTabel = () => {
 export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
     const { data: data } = useGetBehandling(behandlingId);
+    const barna = data.data?.roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const personsQueries = usePersonsQueries(barna);
+    const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
+    const barnMedNavn = personsQueries.map((data) => data.data);
 
     const {
         control,
@@ -455,8 +458,6 @@ export const BarnetilleggTabel = () => {
     useEffect(() => {
         validatePeriods();
     }, [watchFieldArray]);
-
-    const getBarn = (roller: RolleDto[]) => roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
 
     const validatePeriods = () => {
         const barnetilleggList = getValues("barnetillegg");
@@ -487,13 +488,7 @@ export const BarnetilleggTabel = () => {
     };
 
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
+        <>
             {errors?.barnetillegg?.types?.overlappingPerioder && (
                 <Alert variant="warning">
                     <BodyShort>{errors.barnetillegg.types.overlappingPerioder}</BodyShort>
@@ -531,11 +526,12 @@ export const BarnetilleggTabel = () => {
                                     <option key={"Velg barn"} value={""}>
                                         Velg barn
                                     </option>
-                                    {getBarn(data.data.roller).map((barn) => (
-                                        <option key={barn.navn} value={barn.ident}>
-                                            <PersonNavn ident={barn.ident}></PersonNavn>
-                                        </option>
-                                    ))}
+                                    {personQueriesSuccess &&
+                                        barnMedNavn.map((barn) => (
+                                            <option key={barn.navn} value={barn.ident}>
+                                                {barn.navn}
+                                            </option>
+                                        ))}
                                 </FormControlledSelectField>,
                                 <FormControlledTextField
                                     key={`barnetillegg.${index}.beloep`}
@@ -554,7 +550,7 @@ export const BarnetilleggTabel = () => {
                                     }}
                                     icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
-                                    size="xsmall"
+                                    size="small"
                                 />,
                             ]}
                         />
@@ -577,6 +573,6 @@ export const BarnetilleggTabel = () => {
             >
                 + legg til periode
             </Button>
-        </Suspense>
+        </>
     );
 };

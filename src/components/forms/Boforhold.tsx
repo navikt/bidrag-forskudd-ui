@@ -1,5 +1,5 @@
 import { TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Loader, Panel } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading, Loader, Panel, Search, TextField } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { UseMutationResult } from "react-query";
@@ -26,18 +26,27 @@ import { getVirkningstidspunkt } from "./helpers/helpers";
 import { checkOverlappingPeriods } from "./helpers/inntektFormHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
-const createInitialValues = (boforhold) => ({
+const createInitialValues = (boforhold, virkningstidspunkt) => ({
     ...boforhold,
     barn: boforhold.barn.length
         ? boforhold.barn.map((barn) => ({
               ...barn,
-              perioder: barn.perioder
+              perioder: barn.perioder.length
                   ? barn.perioder.map((periode) => ({
                         ...periode,
                         fraDato: dateOrNull(periode.fraDato),
                         tilDato: dateOrNull(periode.tilDato),
                     }))
-                  : [],
+                  : [
+                        {
+                            selected: false,
+                            fraDato: virkningstidspunkt,
+                            tilDato: null,
+                            borMedForeldre: false,
+                            registrertPaaAdresse: false,
+                            kilde: "",
+                        },
+                    ],
           }))
         : [],
     sivilstand: boforhold.sivilstand.length
@@ -49,7 +58,7 @@ const createInitialValues = (boforhold) => ({
         : [],
 });
 
-export default () => {
+const Boforhold = () => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const barn = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
@@ -62,20 +71,12 @@ export default () => {
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
 
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
-            <BoforholdsForm
-                boforhold={boforhold}
-                virkningstidspunkt={virkningstidspunkt}
-                barnFraBehandling={barn}
-                mutation={mutation}
-            />
-        </Suspense>
+        <BoforholdsForm
+            boforhold={boforhold}
+            virkningstidspunkt={virkningstidspunkt}
+            barnFraBehandling={barn}
+            mutation={mutation}
+        />
     );
 };
 
@@ -91,7 +92,7 @@ const BoforholdsForm = ({
     mutation: UseMutationResult;
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setActiveStep } = useForskudd();
-    const initialValues = boforholdFormValues ?? createInitialValues(boforhold);
+    const initialValues = boforholdFormValues ?? createInitialValues(boforhold, virkningstidspunkt);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -166,35 +167,80 @@ const BoforholdsForm = ({
 
 const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
     const { control } = useFormContext<BoforholdFormValues>();
-    const inntekteneSomLeggesTilGrunnField = useFieldArray({
+    const barnFieldArray = useFieldArray({
         control,
         name: "barn",
     });
     const watchFieldArray = useWatch({ control, name: "barn" });
-    const controlledFields = inntekteneSomLeggesTilGrunnField.fields.map((field, index) => {
+    const controlledFields = barnFieldArray.fields.map((field, index) => {
         return {
             ...field,
             ...watchFieldArray[index],
         };
     });
 
+    const addBarn = () => {
+        barnFieldArray.append({
+            ident: "",
+            medISaken: false,
+            perioder: [
+                {
+                    selected: false,
+                    fraDato: virkningstidspunkt,
+                    tilDato: null,
+                    borMedForeldre: false,
+                    registrertPaaAdresse: false,
+                    kilde: "",
+                },
+            ],
+        });
+    };
+
     return (
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
                     <Panel border className="p-0">
-                        <FlexRow className="items-center p-3">
-                            <BodyShort size="small">
-                                <PersonNavn
-                                    ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
-                                ></PersonNavn>
-                            </BodyShort>
-                            <BodyShort size="small">{item.ident}</BodyShort>
-                        </FlexRow>
+                        {item.medISaken && (
+                            <FlexRow className="items-center p-3">
+                                <BodyShort size="small">
+                                    <PersonNavn
+                                        ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
+                                    ></PersonNavn>
+                                </BodyShort>
+                                <BodyShort size="small">{item.ident}</BodyShort>
+                            </FlexRow>
+                        )}
+                        {!item.medISaken && (
+                            <FlexRow className="items-center p-3">
+                                <Search
+                                    className="w-fit"
+                                    label="Fødselsnummer/ d-nummer"
+                                    variant="secondary"
+                                    size="small"
+                                    hideLabel={false}
+                                />
+                                <TextField label="Navn" size="small" />
+                                <div className="ml-auto self-end">
+                                    <Button
+                                        type="button"
+                                        onClick={() => barnFieldArray.remove(index)}
+                                        icon={<TrashIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    >
+                                        Slett barn
+                                    </Button>
+                                </div>
+                            </FlexRow>
+                        )}
                         <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
                     </Panel>
                 </Fragment>
             ))}
+            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addBarn}>
+                + legg til barn
+            </Button>
         </>
     );
 };
@@ -336,17 +382,21 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                                     ]}
                                     hideLabel
                                 />,
-                                <Button
-                                    key={`delete-button-${barnIndex}-${index}`}
-                                    type="button"
-                                    onClick={() => {
-                                        barnPerioder.remove(index);
-                                        validatePeriods();
-                                    }}
-                                    icon={<TrashIcon aria-hidden />}
-                                    variant="tertiary"
-                                    size="xsmall"
-                                />,
+                                index ? (
+                                    <Button
+                                        key={`delete-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => {
+                                            barnPerioder.remove(index);
+                                            validatePeriods();
+                                        }}
+                                        icon={<TrashIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <div className="min-w-[40px]"></div>
+                                ),
                             ]}
                         />
                     ))}
@@ -494,7 +544,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                     }}
                                     icon={<TrashIcon aria-hidden />}
                                     variant="tertiary"
-                                    size="xsmall"
+                                    size="small"
                                 />,
                             ]}
                         />
@@ -505,5 +555,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                 + legg til periode
             </Button>
         </>
+    );
+};
+
+export default () => {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." variant="interaction" />
+                </div>
+            }
+        >
+            <Boforhold />
+        </Suspense>
     );
 };
