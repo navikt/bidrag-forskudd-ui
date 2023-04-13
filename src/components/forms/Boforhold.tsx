@@ -2,11 +2,9 @@ import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Loader, Panel, Search, TextField } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
-import { UseMutationResult } from "react-query";
 
 import { useGetBoforhold, usePostBoforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { BoforholdData } from "../../__mocks__/testdata/boforholdTestData";
-import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
+import { RolleType } from "../../api/BidragBehandlingApi";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
@@ -19,6 +17,7 @@ import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPick
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
+import { FormLayout } from "../layout/grid/FormLayout";
 import { PersonNavn } from "../PersonNavn";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import { calculateFraDato } from "./helpers/boforholdFormHelpers";
@@ -58,8 +57,48 @@ const createInitialValues = (boforhold, virkningstidspunkt) => ({
         : [],
 });
 
-const Boforhold = () => {
+const Main = () => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
+    const barnFraBehandling = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
+
+    return (
+        <>
+            {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
+            <Heading level="3" size="medium">
+                Barn
+            </Heading>
+            <BarnPerioder barnFraBehandling={barnFraBehandling} virkningstidspunkt={virkningstidspunkt} />
+            <Heading level="3" size="medium">
+                Sivilstand
+            </Heading>
+            <SivilistandPerioder virkningstidspunkt={virkningstidspunkt} />
+        </>
+    );
+};
+
+const Side = () => {
+    const { setActiveStep } = useForskudd();
+    const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
+
+    return (
+        <>
+            <Heading level="3" size="medium">
+                Begrunnelse
+            </Heading>
+            <FormControlledTextarea
+                name="boforholdBegrunnelseMedIVedtakNotat"
+                label="Begrunnelse (med i vedtaket og notat)"
+            />
+            <FormControlledTextarea name="boforholdBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+            <ActionButtons onNext={onNext} />
+        </>
+    );
+};
+
+const BoforholdsForm = () => {
+    const { behandlingId, virkningstidspunktFormValues, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const barn = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const { data: boforhold } = useGetBoforhold(
@@ -69,29 +108,6 @@ const Boforhold = () => {
     );
     const mutation = usePostBoforhold(behandlingId.toString());
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
-
-    return (
-        <BoforholdsForm
-            boforhold={boforhold}
-            virkningstidspunkt={virkningstidspunkt}
-            barnFraBehandling={barn}
-            mutation={mutation}
-        />
-    );
-};
-
-const BoforholdsForm = ({
-    boforhold,
-    virkningstidspunkt,
-    barnFraBehandling,
-    mutation,
-}: {
-    boforhold: BoforholdData;
-    virkningstidspunkt: Date;
-    barnFraBehandling: RolleDto[];
-    mutation: UseMutationResult;
-}) => {
-    const { boforholdFormValues, setBoforholdFormValues, setActiveStep } = useForskudd();
     const initialValues = boforholdFormValues ?? createInitialValues(boforhold, virkningstidspunkt);
 
     const useFormMethods = useForm({
@@ -121,47 +137,15 @@ const BoforholdsForm = ({
             debouncedOnSave();
         }
     }, [watchAllFields, useFormMethods.formState.isDirty]);
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     return (
-        <FormProvider {...useFormMethods}>
-            <form onSubmit={useFormMethods.handleSubmit(onSave)}>
-                <div className="grid gap-y-8">
-                    <div className="grid gap-y-4 w-max">
-                        <Heading level="2" size="xlarge">
-                            Boforhold
-                        </Heading>
-                        {!isValidDate(virkningstidspunkt) && (
-                            <Alert variant="warning">Mangler virkningstidspunkt</Alert>
-                        )}
-                        <Heading level="3" size="medium">
-                            Barn
-                        </Heading>
-                        <BarnPerioder barnFraBehandling={barnFraBehandling} virkningstidspunkt={virkningstidspunkt} />
-                    </div>
-                    <div className="grid gap-y-4 w-max">
-                        <Heading level="3" size="medium">
-                            Sivilstand
-                        </Heading>
-                        <SivilistandPerioder virkningstidspunkt={virkningstidspunkt} />
-                    </div>
-                    <div className="grid gap-y-4">
-                        <Heading level="3" size="medium">
-                            Begrunnelse
-                        </Heading>
-                        <FormControlledTextarea
-                            name="boforholdBegrunnelseMedIVedtakNotat"
-                            label="Begrunnelse (med i vedtaket og notat)"
-                        />
-                        <FormControlledTextarea
-                            name="boforholdBegrunnelseKunINotat"
-                            label="Begrunnelse (kun med i notat)"
-                        />
-                    </div>
-                    <ActionButtons onNext={onNext} />
-                </div>
-            </form>
-        </FormProvider>
+        <>
+            <FormProvider {...useFormMethods}>
+                <form onSubmit={useFormMethods.handleSubmit(onSave)}>
+                    <FormLayout title="Boforhold" main={<Main />} side={<Side />} />
+                </form>
+            </FormProvider>
+        </>
     );
 };
 
@@ -374,6 +358,7 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                                 <FormControlledSelectField
                                     key={`barn.${barnIndex}.perioder.${index}.kilde`}
                                     name={`barn.${barnIndex}.perioder.${index}.kilde`}
+                                    className="w-fit"
                                     label="Kilde"
                                     options={[
                                         { value: "", text: "Velg kilde" },
@@ -567,7 +552,7 @@ export default () => {
                 </div>
             }
         >
-            <Boforhold />
+            <BoforholdsForm />
         </Suspense>
     );
 };

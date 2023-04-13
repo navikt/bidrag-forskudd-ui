@@ -2,7 +2,7 @@ import { Table } from "@navikt/ds-react";
 import React, { ReactElement, ReactNode } from "react";
 
 export const TableWrapper = ({ heading, children }: { heading: string[]; children: ReactNode }) => (
-    <Table size="small" className="w-fit" zebraStripes>
+    <Table size="small" zebraStripes>
         <Table.Header>
             <Table.Row className="align-baseline">
                 {heading.map((header) => (

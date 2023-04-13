@@ -12,7 +12,7 @@ export const ForskuddPage = () => {
 
     return (
         <PageWrapper name="tracking-wide">
-            <div className="max-w-[1092px] mx-auto px-6 py-6">
+            <div className="max-w-[1280px] mx-auto px-6 py-6">
                 <Stepper
                     aria-labelledby="stepper-heading"
                     activeStep={STEPS[activeStep]}
