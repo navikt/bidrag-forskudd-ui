@@ -39,7 +39,7 @@ const InntektHeader = () => (
     </div>
 );
 const Main = () => (
-    <>
+    <div className="grid gap-y-12">
         <InntektHeader />
         <div className="grid gap-y-4 w-max">
             <div className="flex gap-x-4">
@@ -64,7 +64,7 @@ const Main = () => (
             </Heading>
             <UtvidetBarnetrygdTabel />
         </div>
-    </>
+    </div>
 );
 
 const Side = () => {
