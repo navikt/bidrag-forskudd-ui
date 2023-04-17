@@ -65,6 +65,18 @@ const Main = ({ initialValues, error }) => {
                     <BodyShort size="small">{behandling.datoFom}</BodyShort>
                 </div>
             </FlexRow>
+            <FlexRow>
+                <FormControlledSelectField
+                    name="avslag"
+                    label="Avslag/opphør"
+                    options={[{ value: "", text: "Velg avslag/opphør" }].concat(
+                        Object.entries(Avslag).map((entry) => ({
+                            value: entry[0],
+                            text: entry[1],
+                        }))
+                    )}
+                />
+            </FlexRow>
             <FlexRow className="gap-x-8">
                 <FormControlledSelectField
                     name="aarsak"
@@ -82,16 +94,6 @@ const Main = ({ initialValues, error }) => {
                     label="Virkningstidspunkt"
                     placeholder="MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningsDato}
-                />
-                <FormControlledSelectField
-                    name="avslag"
-                    label="Avslag/opphør"
-                    options={[{ value: "", text: "Velg avslag/opphør" }].concat(
-                        Object.entries(Avslag).map((entry) => ({
-                            value: entry[0],
-                            text: entry[1],
-                        }))
-                    )}
                 />
             </FlexRow>
         </>
