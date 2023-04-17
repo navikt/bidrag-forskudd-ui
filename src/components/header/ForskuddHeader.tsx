@@ -2,10 +2,9 @@ import { Heading, Loader, Modal } from "@navikt/ds-react";
 import { CopyToClipboard } from "@navikt/ds-react-internal";
 import React, { memo, Suspense, useState } from "react";
 
-import { RolleType } from "../../api/BidragBehandlingApi";
+import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import { _updateBehandlingExtended, useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
-import { IRolleUI } from "../../types/rolle";
 import { RolleDetaljer } from "../RolleDetaljer";
 import { UpdateForskudd } from "../UpdateForskudd";
 
@@ -14,10 +13,6 @@ export const Header = memo(() => {
     const {
         data: { data: behandling },
     } = useGetBehandling(behandlingId);
-
-    const personsQueries = usePersonsQueries(behandling.roller);
-    const personsQueriesFinished = personsQueries.every((query) => query.isSuccess);
-    const rollerMedPersonNavn = personsQueries.map((data) => data.data);
 
     const mutation = _updateBehandlingExtended(behandlingId);
     const [modalOpen, setModalOpen] = useState(false);
@@ -36,7 +31,7 @@ export const Header = memo(() => {
                     Søknad om forskudd <Saksnummer saksnummer={behandling.saksnummer} />
                 </Heading>
                 <div className="grid grid-cols-[max-content_auto]">
-                    {personsQueriesFinished && <Roller roller={rollerMedPersonNavn} />}
+                    <Roller roller={behandling.roller} />
                 </div>
             </div>
 
@@ -63,19 +58,27 @@ export const Header = memo(() => {
     );
 });
 
-const Roller = memo(({ roller }: { roller: IRolleUI[] }) => (
-    <>
-        {roller
-            .sort((a, b) => {
-                if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
-                if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
-                return 0;
-            })
-            .map((rolle, i) => (
-                <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
-            ))}
-    </>
-));
+const Roller = memo(({ roller }: { roller: RolleDto[] }) => {
+    const personsQueries = usePersonsQueries(roller);
+    const personsQueriesFinished = personsQueries.every((query) => query.isSuccess);
+    const rollerMedPersonNavn = personsQueries.map((data) => data.data);
+
+    return (
+        personsQueriesFinished && (
+            <>
+                {rollerMedPersonNavn
+                    .sort((a, b) => {
+                        if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
+                        if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
+                        return 0;
+                    })
+                    .map((rolle, i) => (
+                        <RolleDetaljer key={rolle.ident + i} rolle={rolle} withBorder={false} />
+                    ))}
+            </>
+        )
+    );
+});
 
 const Saksnummer = memo(({ saksnummer }: { saksnummer: string }) => (
     <span className="text-base flex items-center font-normal">
