@@ -1,5 +1,5 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { Accordion, Heading, Link } from "@navikt/ds-react";
+import { ExpansionCard, Heading, Link } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
@@ -26,16 +26,16 @@ import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdT
 const InntektHeader = () => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
         <InntektChart />
-        <Accordion>
-            <Accordion.Item>
-                <Accordion.Header>Arbeidsforhold</Accordion.Header>
-                <Accordion.Content>
-                    <QueryErrorWrapper>
-                        <Arbeidsforhold />
-                    </QueryErrorWrapper>
-                </Accordion.Content>
-            </Accordion.Item>
-        </Accordion>
+        <ExpansionCard aria-label="default-demo">
+            <ExpansionCard.Header>
+                <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
+            </ExpansionCard.Header>
+            <ExpansionCard.Content>
+                <QueryErrorWrapper>
+                    <Arbeidsforhold />
+                </QueryErrorWrapper>
+            </ExpansionCard.Content>
+        </ExpansionCard>
     </div>
 );
 const Main = () => (

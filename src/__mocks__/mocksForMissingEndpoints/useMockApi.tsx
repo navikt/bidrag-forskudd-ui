@@ -1,4 +1,4 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { AndreInntekter } from "../testdata/aInntektTestData";
@@ -17,8 +17,8 @@ const fakeFetch = (result, success = true): Promise<any> =>
 
 export const useGetInntekt = (behandlingId: string, success = true) =>
     useQuery({
-        queryKey: `inntekt`,
-        queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`)), success),
+        queryKey: ["inntekt"],
+        queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem("inntekt")), success),
         staleTime: Infinity,
         suspense: true,
     });
@@ -28,18 +28,18 @@ export const usePostInntekt = (behandlingId: string) => {
 
     return useMutation({
         mutationFn: (payload: InntektData): Promise<InntektData> => {
-            localStorage.setItem(`inntekt`, JSON.stringify(payload));
+            localStorage.setItem("inntekt", JSON.stringify(payload));
             return fakeFetch(payload);
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(`inntekt`, data);
+            queryClient.setQueryData(["inntekt"], data);
         },
     });
 };
 
 export const useGetArbeidsforhold = (behandlingId: string, success = true) =>
     useQuery({
-        queryKey: `arbeidsforhold`,
+        queryKey: ["arbeidsforhold"],
         queryFn: (): Promise<ArbeidsforholdData[]> =>
             fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`)), success),
         staleTime: Infinity,
@@ -48,7 +48,7 @@ export const useGetArbeidsforhold = (behandlingId: string, success = true) =>
 
 export const useGetSkattegrunlag = (behandlingId: string) =>
     useQuery({
-        queryKey: `skattegrunlag`,
+        queryKey: ["skattegrunlag"],
         queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
             fakeFetch(JSON.parse(localStorage.getItem(`skattegrunlag`))),
         staleTime: Infinity,
@@ -57,7 +57,7 @@ export const useGetSkattegrunlag = (behandlingId: string) =>
 
 export const useGetAndreTyperInntekt = (behandlingId: string) =>
     useQuery({
-        queryKey: `ainntekt`,
+        queryKey: ["ainntekt"],
         queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
         staleTime: Infinity,
         suspense: true,
@@ -65,7 +65,7 @@ export const useGetAndreTyperInntekt = (behandlingId: string) =>
 
 export const useGetBoforhold = (behandlingId: string, identer: string[], enabled = false) =>
     useQuery({
-        queryKey: `boforhold-${behandlingId}`,
+        queryKey: ["boforhold", behandlingId],
         queryFn: (): Promise<BoforholdData> => fakeFetch(JSON.parse(getBoforholdMockData(behandlingId, identer))),
         staleTime: Infinity,
         suspense: true,
@@ -81,30 +81,32 @@ export const usePostBoforhold = (behandlingId: string) => {
             return fakeFetch(payload);
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(`boforhold-${behandlingId}`, data);
+            queryClient.setQueryData(["boforhold", behandlingId], data);
         },
     });
 };
 
 export const useGetInntektAInntektAndGrunnlag = (behandlingId: string) =>
-    useQueries([
-        {
-            queryKey: "skattegrunlag",
-            queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
-                fakeFetch(JSON.parse(localStorage.getItem(`skattegrunlag`))),
-            staleTime: Infinity,
-            suspense: true,
-        },
-        {
-            queryKey: "ainntekt",
-            queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
-            staleTime: Infinity,
-            suspense: true,
-        },
-        {
-            queryKey: "inntekt",
-            queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`))),
-            staleTime: Infinity,
-            suspense: true,
-        },
-    ]);
+    useQueries({
+        queries: [
+            {
+                queryKey: ["skattegrunlag"],
+                queryFn: (): Promise<HentSkattegrunnlagResponse[]> =>
+                    fakeFetch(JSON.parse(localStorage.getItem(`skattegrunlag`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+            {
+                queryKey: ["ainntekt"],
+                queryFn: (): Promise<AndreInntekter[]> => fakeFetch(JSON.parse(localStorage.getItem(`ainntekt`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+            {
+                queryKey: ["inntekt"],
+                queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem(`inntekt`))),
+                staleTime: Infinity,
+                suspense: true,
+            },
+        ],
+    });

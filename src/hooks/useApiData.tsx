@@ -1,6 +1,6 @@
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback, useState } from "react";
-import { useMutation, UseMutationResult, useQueries, useQuery, useQueryClient } from "react-query";
 
 import {
     BehandlingDto,
@@ -11,14 +11,9 @@ import {
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, PERSON_API } from "../constants/api";
 
-export interface Mutation {
-    mutation: UseMutationResult;
-    error: any;
-}
-
 export const useGetBehandlings = () =>
     useQuery({
-        queryKey: `behandlings`,
+        queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
         suspense: true,
@@ -26,7 +21,7 @@ export const useGetBehandlings = () =>
 
 export const useGetBehandling = (behandlingId: number) =>
     useQuery({
-        queryKey: `behandling-${behandlingId}`,
+        queryKey: ["behandling", behandlingId],
         queryFn: (): Promise<AxiosResponse<BehandlingDto>> => BEHANDLING_API.api.hentBehandling(behandlingId),
         staleTime: Infinity,
         suspense: true,
@@ -40,13 +35,18 @@ export const useUpdateBehandling = (behandlingId: number) => {
         mutationFn: (payload: UpdateBehandlingRequest): Promise<AxiosResponse<BehandlingDto>> =>
             BEHANDLING_API.api.oppdaterBehandling(behandlingId, payload),
         onSuccess: (data) => {
-            queryClient.setQueryData(`behandling-${behandlingId}`, data);
+            queryClient.setQueryData(["behandling", behandlingId], data);
+            console.log("onSuccess");
             setError(undefined);
         },
         onError: (error) => {
+            console.log("onError", error);
             setError(error);
         },
     });
+
+    console.log("error", error);
+    console.log("mutation", mutation);
     return { mutation, error };
 };
 
@@ -59,8 +59,8 @@ export const useHentPersonData = (ident: string) =>
     });
 
 export const usePersonsQueries = (roller: RolleDto[]) =>
-    useQueries(
-        roller.map((rolle) => ({
+    useQueries({
+        queries: roller.map((rolle) => ({
             queryKey: ["persons", rolle.ident],
             queryFn: (): Promise<AxiosResponse<PersonDto>> =>
                 PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident }),
@@ -68,8 +68,8 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
             select: useCallback(({ data }) => ({ ...rolle, navn: data.navn }), []),
             suspense: true,
             enable: !!rolle,
-        }))
-    );
+        })),
+    });
 
 export const _updateBehandlingExtended = (behandlingId: number) => {
     const queryClient = useQueryClient();
@@ -77,7 +77,7 @@ export const _updateBehandlingExtended = (behandlingId: number) => {
         mutationFn: (payload: UpdateBehandlingRequestExtended): Promise<AxiosResponse<BehandlingDto>> =>
             BEHANDLING_API.api.oppdaterBehandlingExtended(behandlingId, payload),
         onSuccess: (data) => {
-            queryClient.setQueryData(`behandling-${behandlingId}`, data);
+            queryClient.setQueryData(["behandling", behandlingId], data);
         },
     });
 };

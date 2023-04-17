@@ -1,5 +1,5 @@
-import { Alert, BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
-import React, { Suspense, useEffect } from "react";
+import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { BehandlingDto } from "../../api/BidragBehandlingApi";
@@ -18,6 +18,7 @@ import { FormControlledSelectField } from "../formFields/FormControlledSelectFie
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
+import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { aarsakToVirkningstidspunktMapper } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
@@ -30,12 +31,11 @@ const createInitialValues = (behandling: BehandlingDto) =>
         virkningsTidspunktBegrunnelseKunINotat: behandling.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
 
-const Main = ({ initialValues }) => {
+const Main = ({ initialValues, error }) => {
     const { behandlingId } = useForskudd();
     const {
         data: { data: behandling },
     } = useGetBehandling(behandlingId);
-    const updateBehandling = useUpdateBehandling(behandlingId);
     const useFormMethods = useFormContext();
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
@@ -46,7 +46,7 @@ const Main = ({ initialValues }) => {
 
     return (
         <>
-            {updateBehandling.error && <Alert variant="error">{updateBehandling.error.message}</Alert>}
+            {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
                     <Label size="small">Søknadstype</Label>
@@ -180,7 +180,7 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Virkningstidspunkt"
-                        main={<Main initialValues={initialValues} />}
+                        main={<Main initialValues={initialValues} error={updateBehandling.error} />}
                         side={<Side />}
                     />
                 </form>
@@ -191,14 +191,8 @@ const VirkningstidspunktForm = () => {
 
 export default () => {
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
+        <QueryErrorWrapper>
             <VirkningstidspunktForm />
-        </Suspense>
+        </QueryErrorWrapper>
     );
 };

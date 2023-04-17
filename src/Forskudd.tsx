@@ -1,7 +1,7 @@
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
+import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "react-query";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";

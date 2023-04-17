@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect } from "chai";
@@ -6,7 +7,6 @@ import { rest } from "msw";
 import { setupServer } from "msw/node";
 import origFetch from "node-fetch";
 import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter } from "react-router-dom";
 import sinon from "sinon";
 

@@ -1,6 +1,6 @@
 import { Button, Select } from "@navikt/ds-react";
+import { UseMutationResult } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { UseMutationResult } from "react-query";
 
 import { BehandlingDto, SoknadFraType, SoknadType } from "../api/BidragBehandlingApi";
 import { SOKNAD_LABELS } from "../constants/soknadFraLabels";
