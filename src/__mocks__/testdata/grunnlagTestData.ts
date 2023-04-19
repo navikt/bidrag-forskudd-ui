@@ -16,15 +16,6 @@ export const createSkattegrunnlag = () =>
                     tekniskNavn: "skattegrunnlag",
                 },
             ],
-            skatteoppgjoersdato: "2023",
-        },
-        {
-            grunnlag: [
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "skattegrunnlag",
-                },
-            ],
             skatteoppgjoersdato: "2022",
         },
         {

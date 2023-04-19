@@ -1,6 +1,6 @@
 import { Barn } from "../__mocks__/testdata/inntektTestData";
 
-export interface InntektSomLeggesTilGrunnFormValues {
+export interface Inntekt {
     aar: string;
     beskrivelse: string;
     fraDato: Date | null;
@@ -25,7 +25,7 @@ export interface UtvidetBarnetrygdFormValues {
     beloep: number;
 }
 export interface InntektFormValues {
-    inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunnFormValues[];
+    inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };
     barnetillegg: BarneTillegFormValues[];
     utvidetBarnetrygd: UtvidetBarnetrygdFormValues[];
     inntektBegrunnelseMedIVedtakNotat: string;

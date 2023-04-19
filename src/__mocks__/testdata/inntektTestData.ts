@@ -1,3 +1,5 @@
+import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
+
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];
 export interface Periode {
@@ -9,14 +11,19 @@ export interface GjennomsnittInntekt {
     maanedInntekt: number;
 }
 
-export interface InntektSomLeggesTilGrunn {
+export interface Inntekt {
+    aar: string;
+    beskrivelse: string;
     fraDato: string | null;
+    fraPostene: boolean;
+    selected: boolean;
+    tekniskNavn: string;
     tilDato: string | null;
     totalt: number | string;
-    beskrivelse: string;
-    aar: string;
-    tekniskNavn: string;
-    fraPostene: boolean;
+}
+export interface InntektSomLeggesTilGrunn {
+    ident: string;
+    inntekt: Inntekt[];
 }
 
 export interface Barn {
@@ -38,36 +45,157 @@ export interface UtvidetBarnetrygd {
     beloep: number;
 }
 export interface InntektData {
-    periode: Nullable<Partial<Periode>>;
     gjennomsnittInntektSisteTreMaaneder: Nullable<GjennomsnittInntekt>;
     gjennomsnittInntektSisteTolvMaaneder: Nullable<GjennomsnittInntekt>;
-    inntekteneSomLeggesTilGrunn: MaybeList<InntektSomLeggesTilGrunn>;
+    inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunn[];
     barnetillegg: MaybeList<BarneTilleg>;
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
     inntektBegrunnelseMedIVedtakNotat: string;
     inntektBegrunnelseKunINotat: string;
-    toTrinnsKontroll: boolean;
 }
-export const inntektData = (data = {}) => {
-    const initialData = {
-        gjennomsnittInntektSisteTreMaaneder: {
-            aarsInntekt: 495000,
-            maanedInntekt: 48500,
-        },
-        gjennomsnittInntektSisteTolvMaaneder: {
-            aarsInntekt: 520000,
-            maanedInntekt: 50500,
-        },
-        inntekteneSomLeggesTilGrunn: [],
-        barnetillegg: [],
-        utvidetBarnetrygd: [],
-        inntektBegrunnelseMedIVedtakNotat: "",
-        inntektBegrunnelseKunINotat: "",
-        toTrinnsKontroll: false,
-    } as InntektData;
 
-    return {
-        ...initialData,
-        ...data,
-    };
+const randomSalary = (max = 1.5e6) => {
+    const min = 2e5;
+    return Math.round(min + Math.random() * (max - min));
 };
+
+export const createInntektSomLeggesTilGrunn = (roller: RolleDto[]) => {
+    const inntekt: Inntekt[] = [
+        {
+            aar: "2022",
+            beskrivelse: "3 Måneder Beregnet",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 520000,
+            tekniskNavn: "gjennomsnittInntektSisteTreMaaneder",
+        },
+        {
+            aar: "2022",
+            beskrivelse: "12 Måneder Beregnet",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 480000,
+            tekniskNavn: "gjennomsnittInntektSisteTolvMaaneder",
+        },
+        {
+            aar: "2022",
+            beskrivelse: "Skattegrunnlag 2022",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: randomSalary().toString(),
+            tekniskNavn: "skattegrunnlag",
+        },
+        {
+            aar: "2021",
+            beskrivelse: "Lønn og trekk 2021",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: randomSalary().toString(),
+            tekniskNavn: "loenn_og_trekk",
+        },
+        {
+            aar: "2020",
+            beskrivelse: "Skattegrunnlag 2020",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: randomSalary().toString(),
+            tekniskNavn: "skattegrunnlag",
+        },
+        {
+            aar: "2019",
+            beskrivelse: "Kapitalinntekt 2019",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 103,
+            tekniskNavn: "kapitalinntekt",
+        },
+        {
+            aar: "2021",
+            beskrivelse: "Kapitalinntekt 2021",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 6060,
+            tekniskNavn: "kapitalinntekt",
+        },
+        {
+            aar: "2021",
+            beskrivelse: "Dagpenger 2021",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 3400,
+            tekniskNavn: "dagpenger",
+        },
+    ];
+
+    const barnInntekt = [
+        {
+            aar: "2022",
+            beskrivelse: "3 Måneder Beregnet",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 320000,
+            tekniskNavn: "gjennomsnittInntektSisteTreMaaneder",
+        },
+        {
+            aar: "2022",
+            beskrivelse: "12 Måneder Beregnet",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: 240000,
+            tekniskNavn: "gjennomsnittInntektSisteTolvMaaneder",
+        },
+        {
+            aar: "2022",
+            beskrivelse: "Skattegrunnlag 2022",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: randomSalary(4e5).toString(),
+            tekniskNavn: "skattegrunnlag",
+        },
+        {
+            aar: "2021",
+            beskrivelse: "Lønn og trekk 2021",
+            fraDato: null,
+            tilDato: null,
+            fraPostene: true,
+            selected: false,
+            totalt: randomSalary(4e5).toString(),
+            tekniskNavn: "loenn_og_trekk",
+        },
+    ];
+
+    return roller.map((rolle, index) => ({
+        ident: rolle.ident,
+        inntekt: rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? inntekt : index % 2 === 0 ? barnInntekt : [],
+    }));
+};
+
+export const inntektData = (roller: RolleDto[]) => ({
+    inntekteneSomLeggesTilGrunn: createInntektSomLeggesTilGrunn(roller),
+    barnetillegg: [],
+    utvidetBarnetrygd: [],
+    inntektBegrunnelseMedIVedtakNotat: "",
+    inntektBegrunnelseKunINotat: "",
+});

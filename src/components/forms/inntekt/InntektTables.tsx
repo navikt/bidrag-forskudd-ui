@@ -1,6 +1,6 @@
 import { InformationSquareIcon, TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { RolleType } from "../../../api/BidragBehandlingApi";
@@ -22,13 +22,13 @@ import {
     syncDates,
 } from "../helpers/inntektFormHelpers";
 
-const Beskrivelse = ({ item, index }) =>
+const Beskrivelse = ({ item, index, ident }) =>
     item.fraPostene ? (
         <BodyShort className="min-w-[215px] capitalize">{item.beskrivelse}</BodyShort>
     ) : (
         <FormControlledSelectField
-            key={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
-            name={`inntekteneSomLeggesTilGrunn.${index}.beskrivelse`}
+            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
+            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 Object.entries(InntektBeskrivelse).map((entry) => ({
@@ -75,7 +75,7 @@ const Detaljer = ({ totalt }) => {
         </>
     );
 };
-const Totalt = ({ item, index }) =>
+const Totalt = ({ item, index, ident }) =>
     item.fraPostene ? (
         <div className="flex items-center gap-x-4">
             <BodyShort className="min-w-[80px] flex justify-end">{item.totalt}</BodyShort>
@@ -84,8 +84,8 @@ const Totalt = ({ item, index }) =>
     ) : (
         <div className="w-[120px]">
             <FormControlledTextField
-                key={`inntekteneSomLeggesTilGrunn.${index}.totalt`}
-                name={`inntekteneSomLeggesTilGrunn.${index}.totalt`}
+                key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
+                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
                 label="Totalt"
                 type="number"
                 min="1"
@@ -118,7 +118,7 @@ const Periode = ({ item, index, datepicker }) => {
     return <div className={`${value || !item.fraPostene ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
 };
 
-export const InntekteneSomLeggesTilGrunnTabel = () => {
+export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const {
@@ -131,10 +131,10 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
     } = useFormContext<InntektFormValues>();
     const inntekteneSomLeggesTilGrunnField = useFieldArray({
         control,
-        name: "inntekteneSomLeggesTilGrunn",
+        name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
-    const watchFieldArray = useWatch({ control, name: "inntekteneSomLeggesTilGrunn" });
+    const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
     useEffect(() => {
         validatePeriods();
@@ -142,11 +142,12 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
 
     const handleOnSelect = (value: boolean, index: number) => {
         if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn");
+            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
             if (inntekteneSomLeggesTilGrunn.length) {
                 syncDates(
                     value,
                     inntekteneSomLeggesTilGrunn,
+                    ident,
                     index,
                     setValue,
                     virkningstidspunkt,
@@ -159,12 +160,12 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
 
     const validatePeriods = () => {
         if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues("inntekteneSomLeggesTilGrunn").filter(
+            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`).filter(
                 (inntekt) => inntekt.selected
             );
 
             if (!inntekteneSomLeggesTilGrunn.length) {
-                clearErrors("inntekteneSomLeggesTilGrunn");
+                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}`);
                 return;
             }
             const dateGaps = findDateGaps(inntekteneSomLeggesTilGrunn, virkningstidspunkt);
@@ -182,21 +183,21 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
                 types = { ...types, overlappingPerioder: JSON.stringify(overlappingPerioder) };
             }
             if (Object.keys(types).length) {
-                setError("inntekteneSomLeggesTilGrunn", { ...errors.inntekteneSomLeggesTilGrunn, types });
+                setError(`inntekteneSomLeggesTilGrunn.${ident}`, { ...errors.inntekteneSomLeggesTilGrunn, types });
             }
             if (!dateGaps?.length) {
                 // @ts-ignore
-                clearErrors("inntekteneSomLeggesTilGrunn.types.periodGaps");
+                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.types.periodGaps`);
             }
             if (!overlappingPerioder?.length) {
                 // @ts-ignore
-                clearErrors("inntekteneSomLeggesTilGrunn.types.overlappingPerioder");
+                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.types.overlappingPerioder`);
             }
         }
     };
 
     const handleOnDelete = (index) => {
-        clearErrors(`inntekteneSomLeggesTilGrunn.${index}`);
+        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${index}`);
         inntekteneSomLeggesTilGrunnField.remove(index);
     };
 
@@ -207,97 +208,93 @@ export const InntekteneSomLeggesTilGrunnTabel = () => {
         };
     });
 
+    const addPeriode = () => {
+        inntekteneSomLeggesTilGrunnField.append({
+            aar: "",
+            fraDato: null,
+            tilDato: null,
+            totalt: "",
+            beskrivelse: "",
+            tekniskNavn: "",
+            selected: false,
+            fraPostene: false,
+        });
+    };
+
     return (
         <>
-            {errors?.inntekteneSomLeggesTilGrunn?.types && (
+            {errors?.inntekteneSomLeggesTilGrunn?.[ident]?.types && (
                 <Alert variant="warning">
-                    {errors.inntekteneSomLeggesTilGrunn.types?.periodGaps && (
-                        <BodyShort>{errors.inntekteneSomLeggesTilGrunn.types.periodGaps}</BodyShort>
+                    {errors.inntekteneSomLeggesTilGrunn[ident].types?.periodGaps && (
+                        <BodyShort>{errors.inntekteneSomLeggesTilGrunn[ident].types.periodGaps}</BodyShort>
                     )}
-                    {errors.inntekteneSomLeggesTilGrunn.types?.overlappingPerioder && (
+                    {errors.inntekteneSomLeggesTilGrunn[ident].types?.overlappingPerioder && (
                         <>
                             <BodyShort>Du har overlappende perioder:</BodyShort>
-                            {JSON.parse(errors.inntekteneSomLeggesTilGrunn.types.overlappingPerioder as string).map(
-                                (perioder) => (
-                                    <BodyShort key={perioder}>
-                                        <span className="capitalize">{perioder[0]}</span> og{" "}
-                                        <span className="capitalize">{perioder[1]}</span>
-                                    </BodyShort>
-                                )
-                            )}
+                            {JSON.parse(
+                                errors.inntekteneSomLeggesTilGrunn[ident].types.overlappingPerioder as string
+                            ).map((perioder) => (
+                                <BodyShort key={perioder}>
+                                    <span className="capitalize">{perioder[0]}</span> og{" "}
+                                    <span className="capitalize">{perioder[1]}</span>
+                                </BodyShort>
+                            ))}
                         </>
                     )}
                 </Alert>
             )}
             {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
-            <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
-                {controlledFields.map((item, index) => (
-                    <TableRowWrapper
-                        key={item.id}
-                        cells={[
-                            <FormControlledCheckbox
-                                key={`inntekteneSomLeggesTilGrunn.${index}.selected`}
-                                name={`inntekteneSomLeggesTilGrunn.${index}.selected`}
-                                onChange={(value) => handleOnSelect(value.target.checked, index)}
-                                className="m-auto"
-                                legend=""
-                            />,
-                            <Beskrivelse item={item} index={index} />,
-                            <Totalt item={item} index={index} />,
-                            <Periode
-                                item={item}
-                                index={index}
-                                datepicker={
-                                    <FormControlledMonthPicker
-                                        key={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
-                                        name={`inntekteneSomLeggesTilGrunn.${index}.fraDato`}
-                                        label="Fra og med"
-                                        placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
-                                        required={item.selected}
-                                        hideLabel
-                                    />
-                                }
-                            />,
-                            <Periode
-                                item={item}
-                                index={index}
-                                datepicker={
-                                    <FormControlledMonthPicker
-                                        key={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
-                                        name={`inntekteneSomLeggesTilGrunn.${index}.tilDato`}
-                                        label="Til og med"
-                                        placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.tilDato}
-                                        hideLabel
-                                    />
-                                }
-                            />,
-                            <DeleteButton item={item} index={index} handleOnDelete={handleOnDelete} />,
-                        ]}
-                    />
-                ))}
-            </TableWrapper>
-            <Button
-                variant="tertiary"
-                type="button"
-                size="small"
-                className="w-fit"
-                onClick={useCallback(
-                    () =>
-                        inntekteneSomLeggesTilGrunnField.append({
-                            aar: "",
-                            fraDato: null,
-                            tilDato: null,
-                            totalt: "",
-                            beskrivelse: "",
-                            tekniskNavn: "",
-                            selected: false,
-                            fraPostene: false,
-                        }),
-                    []
-                )}
-            >
+            {controlledFields.length > 0 && (
+                <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
+                    {controlledFields.map((item, index) => (
+                        <TableRowWrapper
+                            key={item.id}
+                            cells={[
+                                <FormControlledCheckbox
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`}
+                                    name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`}
+                                    onChange={(value) => handleOnSelect(value.target.checked, index)}
+                                    className="m-auto"
+                                    legend=""
+                                />,
+                                <Beskrivelse item={item} index={index} ident={ident} />,
+                                <Totalt item={item} index={index} ident={ident} />,
+                                <Periode
+                                    item={item}
+                                    index={index}
+                                    datepicker={
+                                        <FormControlledMonthPicker
+                                            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
+                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
+                                            label="Fra og med"
+                                            placeholder="MM.ÅÅÅÅ"
+                                            defaultValue={item.fraDato}
+                                            required={item.selected}
+                                            hideLabel
+                                        />
+                                    }
+                                />,
+                                <Periode
+                                    item={item}
+                                    index={index}
+                                    datepicker={
+                                        <FormControlledMonthPicker
+                                            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
+                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
+                                            label="Til og med"
+                                            placeholder="MM.ÅÅÅÅ"
+                                            defaultValue={item.tilDato}
+                                            hideLabel
+                                        />
+                                    }
+                                />,
+                                <DeleteButton item={item} index={index} handleOnDelete={handleOnDelete} />,
+                            ]}
+                        />
+                    ))}
+                </TableWrapper>
+            )}
+            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                 + legg til periode
             </Button>
         </>

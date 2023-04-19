@@ -1,18 +1,17 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { ExpansionCard, Heading, Link } from "@navikt/ds-react";
-import React, { useEffect } from "react";
+import { Alert, BodyShort, ExpansionCard, Heading, Link, Tabs } from "@navikt/ds-react";
+import React, { memo, useEffect } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import {
-    useGetAndreTyperInntekt,
-    useGetInntekt,
-    useGetSkattegrunlag,
-    usePostInntekt,
-} from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetInntekt, usePostInntekt } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { Inntekt } from "../../../__mocks__/testdata/inntektTestData";
+import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { INNTEKT_PERIODE_NOTAT_FIELDS, NOTAT_FIELDS } from "../../../constants/notatFields";
+import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { useGetBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
@@ -23,9 +22,9 @@ import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
-const InntektHeader = () => (
+const InntektHeader = ({ inntekt }: { inntekt: Inntekt[] }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
-        <InntektChart />
+        <InntektChart inntekt={inntekt} />
         <ExpansionCard aria-label="default-demo">
             <ExpansionCard.Header>
                 <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
@@ -38,33 +37,86 @@ const InntektHeader = () => (
         </ExpansionCard>
     </div>
 );
-const Main = () => (
-    <div className="grid gap-y-12">
-        <InntektHeader />
-        <div className="grid gap-y-4 w-max">
-            <div className="flex gap-x-4">
-                <Heading level="3" size="medium">
-                    Inntektene som legges til grunn
-                </Heading>
-                <Link href="" target="_blank" className="font-bold">
-                    A-inntekt <ExternalLinkIcon aria-hidden />
-                </Link>
+
+const Main = memo(
+    ({
+        behandlingRoller,
+        inntektFraPostene,
+    }: {
+        behandlingRoller: RolleDto[];
+        inntektFraPostene: { inntekt: Inntekt[]; ident: string }[];
+    }) => {
+        const roller = behandlingRoller
+            .filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG)
+            .sort((a, b) => {
+                if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
+                if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
+                return 0;
+            });
+
+        return (
+            <div className="grid gap-y-12">
+                <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident}>
+                    <Tabs.List>
+                        {roller.map((rolle) => (
+                            <Tabs.Tab
+                                key={rolle.ident}
+                                value={rolle.ident}
+                                label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
+                                    rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
+                                }`}
+                            />
+                        ))}
+                    </Tabs.List>
+                    {roller.map((rolle) => {
+                        const inntekt = inntektFraPostene.find((inntekt) => inntekt.ident === rolle.ident).inntekt;
+                        return (
+                            <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
+                                <div className="mt-12">
+                                    {inntekt.length > 0 ? (
+                                        <InntektHeader inntekt={inntekt} />
+                                    ) : (
+                                        <Alert variant="info">
+                                            <BodyShort>Ingen inntekt funnet</BodyShort>
+                                        </Alert>
+                                    )}
+                                </div>
+                                <div className="grid gap-y-4 w-max">
+                                    <div className="flex gap-x-4">
+                                        <Heading level="3" size="medium">
+                                            Inntektene som legges til grunn
+                                        </Heading>
+                                        {inntekt.length > 0 && (
+                                            <Link href="" target="_blank" className="font-bold">
+                                                A-inntekt <ExternalLinkIcon aria-hidden />
+                                            </Link>
+                                        )}
+                                    </div>
+                                    <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
+                                </div>
+                                {rolle.rolleType === RolleType.BIDRAGS_MOTTAKER && (
+                                    <>
+                                        <div className="grid gap-y-4 w-max">
+                                            <Heading level="3" size="medium">
+                                                Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
+                                            </Heading>
+                                            <BarnetilleggTabel />
+                                        </div>
+                                        <div className="grid gap-y-4 w-max">
+                                            <Heading level="3" size="medium">
+                                                Utvidet barnetrygd
+                                            </Heading>
+                                            <UtvidetBarnetrygdTabel />
+                                        </div>
+                                    </>
+                                )}
+                            </Tabs.Panel>
+                        );
+                    })}
+                </Tabs>
             </div>
-            <InntekteneSomLeggesTilGrunnTabel />
-        </div>
-        <div className="grid gap-y-4 w-max">
-            <Heading level="3" size="medium">
-                Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
-            </Heading>
-            <BarnetilleggTabel />
-        </div>
-        <div className="grid gap-y-4 w-max">
-            <Heading level="3" size="medium">
-                Utvidet barnetrygd
-            </Heading>
-            <UtvidetBarnetrygdTabel />
-        </div>
-    </div>
+        );
+    }
 );
 
 const Side = () => {
@@ -94,12 +146,18 @@ const Side = () => {
 const InntektForm = () => {
     const channel = new BroadcastChannel("inntekter");
     const { behandlingId, inntektFormValues, setInntektFormValues } = useForskudd();
-    const { data: skattegrunnlager } = useGetSkattegrunlag(behandlingId.toString());
-    const { data: aInntekt } = useGetAndreTyperInntekt(behandlingId.toString());
-    const { data: inntekt } = useGetInntekt(behandlingId.toString());
+    const {
+        data: { data: behandling },
+    } = useGetBehandling(behandlingId);
+    const roller = behandling?.roller?.filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG);
+    const { data: inntekt } = useGetInntekt(behandlingId.toString(), roller);
     const mutation = usePostInntekt(behandlingId.toString());
+    const inntektFraPostene = inntekt.inntekteneSomLeggesTilGrunn.map((inntekt) => ({
+        ...inntekt,
+        inntekt: inntekt.inntekt.filter((i) => i.fraPostene),
+    }));
 
-    const initialValues = inntektFormValues ?? createInitialValues(inntekt, skattegrunnlager, aInntekt);
+    const initialValues = inntektFormValues ?? createInitialValues(inntekt);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -114,10 +172,17 @@ const InntektForm = () => {
             const field = name?.split(".")[0];
             if (NOTAT_FIELDS.includes(field)) {
                 const isPeriodeField = INNTEKT_PERIODE_NOTAT_FIELDS.includes(field);
+                const filterSelectedPeriods = Object.keys(value[field])
+                    .map((ident) => ({
+                        ident,
+                        inntekt: value[field][ident].filter((i) => i.selected),
+                    }))
+                    .filter((value) => value.inntekt.length > 0);
+
                 channel.postMessage(
                     JSON.stringify({
                         field,
-                        value: isPeriodeField ? value[field].filter((inntekt) => inntekt.selected) : value[field],
+                        value: isPeriodeField ? filterSelectedPeriods : value[field],
                     })
                 );
             }
@@ -153,7 +218,11 @@ const InntektForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={useFormMethods.handleSubmit(onSave)}>
-                <FormLayout title="Inntekt" main={<Main />} side={<Side />} />
+                <FormLayout
+                    title="Inntekt"
+                    main={<Main behandlingRoller={behandling.roller} inntektFraPostene={inntektFraPostene} />}
+                    side={<Side />}
+                />
             </form>
         </FormProvider>
     );

@@ -1,10 +1,27 @@
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React from "react";
 
+import { Inntekt } from "../../../__mocks__/testdata/inntektTestData";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 
-const chartOptions: EChartsOption = {
+const mockChartData = (inntekt: Inntekt[]) => {
+    const data = [];
+    const average = Number(inntekt.find((i) => i.tekniskNavn === "gjennomsnittInntektSisteTolvMaaneder").totalt) / 12;
+
+    for (let i = 0; i < 12; i++) {
+        if (i === 7) {
+            data.push(average + 20000);
+        } else if (i === 10) {
+            data.push(average + 10000);
+        } else {
+            data.push(average + Math.round(100 + Math.random() * (4500 - 100)));
+        }
+    }
+    return data;
+};
+
+const buildChartOptions = (inntekt: Inntekt[]): EChartsOption => ({
     legend: {
         show: false,
     },
@@ -42,11 +59,13 @@ const chartOptions: EChartsOption = {
     series: [
         {
             name: "Lønn",
-            data: [47352, 48121, 43271, 45522, 45731, 72321, 50112, 48103, 42335, 44753, 58121, 45733],
+            data: mockChartData(inntekt),
             type: "line",
             smooth: true,
         },
     ],
-};
+});
 
-export const InntektChart = () => <ReactECharts option={chartOptions} />;
+export const InntektChart = ({ inntekt }: { inntekt: Inntekt[] }) => (
+    <ReactECharts option={buildChartOptions(inntekt)} />
+);

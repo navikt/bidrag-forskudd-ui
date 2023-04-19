@@ -1,10 +1,12 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { RolleDto } from "../../api/BidragBehandlingApi";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { AndreInntekter } from "../testdata/aInntektTestData";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { BoforholdData, getBoforholdMockData } from "../testdata/boforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
+import { inntektMockData } from "./mockData";
 
 const fakeFetch = (result, success = true): Promise<any> =>
     new Promise((resolve, reject) => {
@@ -15,10 +17,10 @@ const fakeFetch = (result, success = true): Promise<any> =>
         }
     });
 
-export const useGetInntekt = (behandlingId: string, success = true) =>
+export const useGetInntekt = (behandlingId: string, roller: RolleDto[], success = true) =>
     useQuery({
-        queryKey: ["inntekt"],
-        queryFn: (): Promise<InntektData> => fakeFetch(JSON.parse(localStorage.getItem("inntekt")), success),
+        queryKey: ["inntekt", behandlingId],
+        queryFn: (): Promise<InntektData> => fakeFetch(inntektMockData(behandlingId, roller), success),
         staleTime: Infinity,
         suspense: true,
     });
@@ -28,11 +30,11 @@ export const usePostInntekt = (behandlingId: string) => {
 
     return useMutation({
         mutationFn: (payload: InntektData): Promise<InntektData> => {
-            localStorage.setItem("inntekt", JSON.stringify(payload));
+            localStorage.setItem(`inntekt-${behandlingId}`, JSON.stringify(payload));
             return fakeFetch(payload);
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(["inntekt"], data);
+            queryClient.setQueryData(["inntekt", behandlingId], data);
         },
     });
 };
