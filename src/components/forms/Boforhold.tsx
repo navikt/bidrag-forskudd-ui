@@ -1,14 +1,15 @@
 import { TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Loader, Panel, Search, TextField } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading, Label, Loader, Panel, Radio, RadioGroup, Search } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { useGetBoforhold, usePostBoforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetBoforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { RolleType } from "../../api/BidragBehandlingApi";
+import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling } from "../../hooks/useApiData";
+import { useGetBehandling, useUpdateBehandling } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 import { dateOrNull, isValidDate } from "../../utils/date-utils";
@@ -106,9 +107,13 @@ const BoforholdsForm = () => {
         barn.map((rolle) => rolle.ident),
         !!barn
     );
-    const mutation = usePostBoforhold(behandlingId.toString());
+
+    const updateBehandling = useUpdateBehandling(behandlingId);
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
     const initialValues = boforholdFormValues ?? createInitialValues(boforhold, virkningstidspunkt);
+
+    initialValues.boforholdBegrunnelseKunINotat = behandling.data.boforholdBegrunnelseKunINotat;
+    initialValues.boforholdBegrunnelseMedIVedtakNotat = behandling.data.boforholdBegrunnelseMedIVedtakNotat;
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -125,9 +130,13 @@ const BoforholdsForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
         setBoforholdFormValues(values);
-        mutation.mutate(values, {
-            onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }),
-        });
+        updateBehandling.mutation.mutate(
+            {
+                boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
+                boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
+            },
+            { onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }) }
+        );
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -150,7 +159,7 @@ const BoforholdsForm = () => {
 };
 
 const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
-    const { control } = useFormContext<BoforholdFormValues>();
+    const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
         name: "barn",
@@ -165,8 +174,9 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
 
     const addBarn = () => {
         barnFieldArray.append({
-            ident: "",
+            ident: null,
             medISaken: false,
+            navn: null,
             perioder: [
                 {
                     selected: false,
@@ -196,27 +206,60 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
                             </FlexRow>
                         )}
                         {!item.medISaken && (
-                            <FlexRow className="items-center p-3">
-                                <Search
-                                    className="w-fit"
-                                    label="Fødselsnummer/ d-nummer"
-                                    variant="secondary"
-                                    size="small"
-                                    hideLabel={false}
-                                />
-                                <TextField label="Navn" size="small" />
-                                <div className="ml-auto self-end">
-                                    <Button
-                                        type="button"
-                                        onClick={() => barnFieldArray.remove(index)}
-                                        icon={<TrashIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    >
-                                        Slett barn
-                                    </Button>
-                                </div>
-                            </FlexRow>
+                            <>
+                                <FlexRow className="items-center p-3">
+                                    <div>Barn</div>
+                                    <div className="ml-auto self-end">
+                                        <Button
+                                            type="button"
+                                            onClick={() => barnFieldArray.remove(index)}
+                                            icon={<TrashIcon aria-hidden />}
+                                            variant="tertiary"
+                                            size="small"
+                                        >
+                                            Slett barn
+                                        </Button>
+                                    </div>
+                                </FlexRow>
+                                <FlexRow className="items-center p-3">
+                                    <RadioGroup legend="">
+                                        <Radio value="10">Fødselsnummer/d-nummer</Radio>
+                                        <Radio value="10">Fritekst</Radio>
+                                    </RadioGroup>
+                                    <div>
+                                        <div>
+                                            <Search
+                                                className="w-fit"
+                                                label="Fødselsnummer/ d-nummer"
+                                                variant="secondary"
+                                                size="small"
+                                                hideLabel={false}
+                                                onClear={() => {
+                                                    // TODO nulstil alt for barnet
+                                                    setValue(`barn.${index}.ident`, null);
+                                                    setValue(`barn.${index}.navn`, null);
+                                                }}
+                                                onSearchClick={(value) => {
+                                                    PERSON_API.informasjon
+                                                        .hentPersonPost({ ident: value })
+                                                        .then(({ data }) => {
+                                                            setValue(`barn.${index}.ident`, value);
+                                                            setValue(`barn.${index}.navn`, data.navn);
+                                                        })
+                                                        .catch((r) => {
+                                                            // TODO -> LEGG TIL BARNET MANUELT
+                                                        });
+                                                }}
+                                            />
+                                            <div className="w-fit navds-form-field">
+                                                <Label size="small">Navn</Label>
+                                                <BodyShort size="medium">{controlledFields[index].navn}</BodyShort>
+                                            </div>
+                                        </div>
+                                        <div>fdato</div>
+                                    </div>
+                                </FlexRow>
+                            </>
                         )}
                         <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
                     </Panel>

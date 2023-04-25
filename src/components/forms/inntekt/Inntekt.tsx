@@ -11,7 +11,7 @@ import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling } from "../../../hooks/useApiData";
+import { useGetBehandling, useUpdateBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
@@ -152,6 +152,7 @@ const InntektForm = () => {
     const roller = behandling?.roller?.filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG);
     const { data: inntekt } = useGetInntekt(behandlingId.toString(), roller);
     const mutation = usePostInntekt(behandlingId.toString());
+    const updateBehandling = useUpdateBehandling(behandlingId);
     const inntektFraPostene = inntekt.inntekteneSomLeggesTilGrunn.map((inntekt) => ({
         ...inntekt,
         inntekt: inntekt.inntekt.filter((i) => i.fraPostene),
@@ -204,6 +205,15 @@ const InntektForm = () => {
             {
                 onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }),
             }
+        );
+
+        updateBehandling.mutation.mutate(
+            {
+                inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
+                inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
+            },
+
+            { onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }) }
         );
     };
 

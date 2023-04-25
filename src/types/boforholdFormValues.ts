@@ -8,7 +8,8 @@ interface BarnPeriode {
 }
 interface Barn {
     medISaken: boolean;
-    ident: string;
+    ident?: string;
+    navn?: string;
     perioder: BarnPeriode[];
 }
 

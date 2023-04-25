@@ -37,6 +37,29 @@ export enum AvslagType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
+export interface BehandlingBarnDto {
+    /** @format int64 */
+    id?: number;
+    medISaken: boolean;
+    /** @format date-time */
+    fraDao: string;
+    /** @format date-time */
+    tilDato: string;
+    boStatus: BoStatusType;
+    kilde: string;
+    ident?: string;
+    navn?: string;
+    /** @format date-time */
+    foedselsDato?: string;
+}
+
+export enum BoStatusType {
+    IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
+    DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
+    DOKUMENTERT_BOENDE_HOS_BM = "DOKUMENTERT_BOENDE_HOS_BM",
+    BARN_BOR_ALENE = "BARN_BOR_ALENE",
+}
+
 export enum ForskuddBeregningKodeAarsakType {
     SF = "SF",
     NF = "NF",
@@ -57,6 +80,8 @@ export enum ForskuddBeregningKodeAarsakType {
 }
 
 export interface UpdateBehandlingRequest {
+    /** @uniqueItems true */
+    behandlingBarn?: BehandlingBarnDto[];
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -85,6 +110,8 @@ export interface BehandlingDto {
     behandlerEnhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
+    /** @uniqueItems true */
+    behandlingBarn: BehandlingBarnDto[];
     /** @format date */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
@@ -108,7 +135,6 @@ export interface RolleDto {
     ident: string;
     /** @format date-time */
     opprettetDato: string;
-    navn: string;
 }
 
 export enum RolleType {
