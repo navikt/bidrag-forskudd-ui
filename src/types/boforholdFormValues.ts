@@ -1,9 +1,8 @@
 interface BarnPeriode {
-    selected: boolean;
+    edit: boolean;
     fraDato: Date | null;
     tilDato: Date | null;
-    borMedForeldre: boolean;
-    registrertPaaAdresse: boolean;
+    boStatus: "" | "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
     kilde: "" | "offentlig" | "manuelt";
 }
 interface Barn {

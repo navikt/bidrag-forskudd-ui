@@ -1,4 +1,4 @@
-import { TrashIcon } from "@navikt/aksel-icons";
+import { PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Label, Loader, Panel, Radio, RadioGroup, Search } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
@@ -12,8 +12,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetBehandling, useUpdateBehandling } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { dateOrNull, isValidDate } from "../../utils/date-utils";
-import { FormControlledCheckbox } from "../formFields/FormControlledCheckbox";
+import { dateOrNull, DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -34,16 +33,16 @@ const createInitialValues = (boforhold, virkningstidspunkt) => ({
               perioder: barn.perioder.length
                   ? barn.perioder.map((periode) => ({
                         ...periode,
+                        edit: false,
                         fraDato: dateOrNull(periode.fraDato),
                         tilDato: dateOrNull(periode.tilDato),
                     }))
                   : [
                         {
-                            selected: false,
+                            edit: false,
                             fraDato: virkningstidspunkt,
                             tilDato: null,
-                            borMedForeldre: false,
-                            registrertPaaAdresse: false,
+                            boStatus: false,
                             kilde: "",
                         },
                     ],
@@ -63,6 +62,7 @@ const Main = () => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
     const barnFraBehandling = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const bmIdent = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER);
 
     return (
         <>
@@ -70,7 +70,11 @@ const Main = () => {
             <Heading level="3" size="medium">
                 Barn
             </Heading>
-            <BarnPerioder barnFraBehandling={barnFraBehandling} virkningstidspunkt={virkningstidspunkt} />
+            <BarnPerioder
+                barnFraBehandling={barnFraBehandling}
+                bmIdent={bmIdent}
+                virkningstidspunkt={virkningstidspunkt}
+            />
             <Heading level="3" size="medium">
                 Sivilstand
             </Heading>
@@ -158,7 +162,7 @@ const BoforholdsForm = () => {
     );
 };
 
-const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
+const BarnPerioder = ({ barnFraBehandling, bmIdent, virkningstidspunkt }) => {
     const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
@@ -179,11 +183,10 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
             navn: null,
             perioder: [
                 {
-                    selected: false,
+                    edit: false,
                     fraDato: virkningstidspunkt,
                     tilDato: null,
-                    borMedForeldre: false,
-                    registrertPaaAdresse: false,
+                    boStatus: "",
                     kilde: "",
                 },
             ],
@@ -197,7 +200,7 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
                     <Panel border className="p-0">
                         {item.medISaken && (
                             <FlexRow className="items-center p-3">
-                                <BodyShort size="small">
+                                <BodyShort size="small" className="font-bold">
                                     <PersonNavn
                                         ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
                                     ></PersonNavn>
@@ -261,7 +264,7 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
                                 </FlexRow>
                             </>
                         )}
-                        <Periode barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
+                        <Perioder barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
                     </Panel>
                 </Fragment>
             ))}
@@ -272,7 +275,7 @@ const BarnPerioder = ({ barnFraBehandling, virkningstidspunkt }) => {
     );
 };
 
-const Periode = ({ barnIndex, virkningstidspunkt }) => {
+const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     const {
         control,
         getValues,
@@ -338,11 +341,10 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
     const addPeriode = () => {
         const perioderValues = getValues(`barn.${barnIndex}.perioder`);
         barnPerioder.append({
-            selected: false,
+            edit: false,
             fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
             tilDato: null,
-            borMedForeldre: false,
-            registrertPaaAdresse: false,
+            boStatus: "",
             kilde: "",
         });
     };
@@ -355,60 +357,87 @@ const Periode = ({ barnIndex, virkningstidspunkt }) => {
                 </Alert>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Ta med", "Fra og med", "Til og med", "Registrert på adresse", "Kilde", ""]}>
+                <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", "", ""]}>
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <FormControlledCheckbox
-                                    key={`barn.${barnIndex}.perioder.${index}.selected`}
-                                    name={`barn.${barnIndex}.perioder.${index}.selected`}
-                                    className="m-auto"
-                                    legend=""
-                                />,
-                                <FormControlledMonthPicker
-                                    key={`barn.${barnIndex}.perioder.${index}.fraDato`}
-                                    name={`barn.${barnIndex}.perioder.${index}.fraDato`}
-                                    label="Fra og med"
-                                    placeholder="MM.ÅÅÅÅ"
-                                    defaultValue={item.fraDato}
-                                    onChange={(date) => {
-                                        validatePeriods();
-                                        validateFomOgTom(date, index, "fraDato");
-                                    }}
-                                    toDate={new Date()}
-                                    hideLabel
-                                />,
-                                <FormControlledMonthPicker
-                                    key={`barn.${barnIndex}.perioder.${index}.tilDato`}
-                                    name={`barn.${barnIndex}.perioder.${index}.tilDato`}
-                                    label="Til og med"
-                                    placeholder="MM.ÅÅÅÅ"
-                                    defaultValue={item.tilDato}
-                                    onChange={(date) => {
-                                        validatePeriods();
-                                        validateFomOgTom(date, index, "tilDato");
-                                    }}
-                                    lastDayOfMonthPicker
-                                    hideLabel
-                                />,
-                                <FormControlledCheckbox
-                                    key={`barn.${barnIndex}.perioder.${index}.registrertPaaAdresse`}
-                                    name={`barn.${barnIndex}.perioder.${index}.registrertPaaAdresse`}
-                                    className="m-auto"
-                                    legend=""
-                                />,
-                                <FormControlledSelectField
-                                    key={`barn.${barnIndex}.perioder.${index}.kilde`}
-                                    name={`barn.${barnIndex}.perioder.${index}.kilde`}
-                                    className="w-fit"
-                                    label="Kilde"
-                                    options={[
-                                        { value: "", text: "Velg kilde" },
-                                        { value: "offentlig", text: "Offentlig" },
-                                        { value: "manuelt", text: "Manuelt" },
-                                    ]}
-                                    hideLabel
+                                item.edit ? (
+                                    <FormControlledMonthPicker
+                                        key={`barn.${barnIndex}.perioder.${index}.fraDato`}
+                                        name={`barn.${barnIndex}.perioder.${index}.fraDato`}
+                                        label="Fra og med"
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.fraDato}
+                                        onChange={(date) => {
+                                            validatePeriods();
+                                            validateFomOgTom(date, index, "fraDato");
+                                        }}
+                                        toDate={new Date()}
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort>{item.fraDato ? DateToDDMMYYYYString(item.fraDato) : ""}</BodyShort>
+                                ),
+                                item.edit ? (
+                                    <FormControlledMonthPicker
+                                        key={`barn.${barnIndex}.perioder.${index}.tilDato`}
+                                        name={`barn.${barnIndex}.perioder.${index}.tilDato`}
+                                        label="Til og med"
+                                        placeholder="MM.ÅÅÅÅ"
+                                        defaultValue={item.tilDato}
+                                        onChange={(date) => {
+                                            validatePeriods();
+                                            validateFomOgTom(date, index, "tilDato");
+                                        }}
+                                        lastDayOfMonthPicker
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort>{item.tilDato ? DateToDDMMYYYYString(item.tilDato) : ""}</BodyShort>
+                                ),
+                                item.edit ? (
+                                    <FormControlledSelectField
+                                        key={`barn.${barnIndex}.perioder.${index}.boStatus`}
+                                        name={`barn.${barnIndex}.perioder.${index}.boStatus`}
+                                        className="w-fit"
+                                        label="Status"
+                                        options={[
+                                            { value: "", text: "Velg status" },
+                                            { value: "registrert_paa_adresse", text: "Registrert på adresse" },
+                                            {
+                                                value: "ikke_registrert_paa_adresse",
+                                                text: "Ikke registrert på adresse",
+                                            },
+                                        ]}
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort>{item.boStatus}</BodyShort>
+                                ),
+                                item.edit ? (
+                                    <FormControlledSelectField
+                                        key={`barn.${barnIndex}.perioder.${index}.kilde`}
+                                        name={`barn.${barnIndex}.perioder.${index}.kilde`}
+                                        className="w-fit"
+                                        label="Kilde"
+                                        options={[
+                                            { value: "", text: "Velg kilde" },
+                                            { value: "offentlig", text: "Offentlig" },
+                                            { value: "manuelt", text: "Manuelt" },
+                                        ]}
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort>{item.kilde}</BodyShort>
+                                ),
+                                <Button
+                                    key={`edit-button-${barnIndex}-${index}`}
+                                    type="button"
+                                    onClick={() => {}}
+                                    icon={<PencilIcon aria-hidden />}
+                                    variant="tertiary"
+                                    size="small"
                                 />,
                                 index ? (
                                     <Button

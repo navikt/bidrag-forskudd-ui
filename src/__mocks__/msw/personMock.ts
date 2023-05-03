@@ -74,7 +74,7 @@ const names = {
     ],
 };
 
-const generateName = () => {
+export const generateName = () => {
     const sex = Math.random() < 0.5 ? "female" : "male";
     const firstName = names[sex][Math.floor(Math.random() * names[sex].length)];
     const middleName = names[sex][Math.floor(Math.random() * names[sex].length)];

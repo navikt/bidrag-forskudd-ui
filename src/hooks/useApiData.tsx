@@ -45,8 +45,6 @@ export const useUpdateBehandling = (behandlingId: number) => {
         },
     });
 
-    console.log("error", error);
-    console.log("mutation", mutation);
     return { mutation, error };
 };
 

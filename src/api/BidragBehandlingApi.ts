@@ -41,16 +41,23 @@ export interface BehandlingBarnDto {
     /** @format int64 */
     id?: number;
     medISaken: boolean;
-    /** @format date-time */
-    fraDao: string;
-    /** @format date-time */
-    tilDato: string;
-    boStatus: BoStatusType;
-    kilde: string;
+    /** @uniqueItems true */
+    perioder: BehandlingBarnPeriodeDto[];
     ident?: string;
     navn?: string;
     /** @format date-time */
     foedselsDato?: string;
+}
+
+export interface BehandlingBarnPeriodeDto {
+    /** @format int64 */
+    id?: number;
+    /** @format date-time */
+    fraDato: string;
+    /** @format date-time */
+    tilDato: string;
+    boStatus: BoStatusType;
+    kilde: string;
 }
 
 export enum BoStatusType {
@@ -112,6 +119,8 @@ export interface BehandlingDto {
     roller: RolleDto[];
     /** @uniqueItems true */
     behandlingBarn: BehandlingBarnDto[];
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
     /** @format date */
     virkningsDato?: string;
     aarsak?: ForskuddBeregningKodeAarsakType;
@@ -143,6 +152,29 @@ export enum RolleType {
     BARN = "BARN",
     REELL_MOTTAKER = "REELL_MOTTAKER",
     FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+export interface SivilstandDto {
+    /** @format int64 */
+    id?: number;
+    /** @format date-time */
+    gyldigFraOgMed: string;
+    /** @format date-time */
+    bekreftelsesdato: string;
+    sivilstandType: SivilstandType;
+}
+
+export enum SivilstandType {
+    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
+    GIFT = "GIFT",
+    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
+    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
+    SEPARERT = "SEPARERT",
+    SEPARERT_PARTNER = "SEPARERT_PARTNER",
+    SKILT = "SKILT",
+    SKILT_PARTNER = "SKILT_PARTNER",
+    UGIFT = "UGIFT",
+    UOPPGITT = "UOPPGITT",
 }
 
 export enum SoknadFraType {
@@ -178,6 +210,11 @@ export enum SoknadType {
     REVURDERING = "REVURDERING",
     KONVERTERT = "KONVERTERT",
     MANEDLIG_PALOP = "MANEDLIG_PALOP",
+}
+
+export interface UpdateBehandlingBarnRequest {
+    /** @uniqueItems true */
+    behandlingBarn: BehandlingBarnDto[];
 }
 
 export interface UpdateBehandlingRequestExtended {
@@ -277,7 +314,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.dev.intern.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -367,7 +404,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-feature.dev.intern.nav.no
+ * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -398,6 +435,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
             this.request<BehandlingDto, Error | BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer en behandling barn
+         *
+         * @tags behandling-controller
+         * @name OppdaterBehandlingBarn
+         * @request PUT:/api/behandling/{behandlingId}/barn
+         * @secure
+         */
+        oppdaterBehandlingBarn: (behandlingId: number, data: UpdateBehandlingBarnRequest, params: RequestParams = {}) =>
+            this.request<BehandlingBarnDto[], Error | BehandlingBarnDto[]>({
+                path: `/api/behandling/${behandlingId}/barn`,
                 method: "PUT",
                 body: data,
                 secure: true,
@@ -458,6 +513,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Legger til nye opplysninger til behandling
+         *
+         * @tags behandling-controller
+         * @name AddOpplysningerData
+         * @request POST:/api/behandling/{behandlingId}/opplysninger
+         * @secure
+         */
+        addOpplysningerData: (behandlingId: string, params: RequestParams = {}) =>
+            this.request<void, Error | void>({
+                path: `/api/behandling/${behandlingId}/opplysninger`,
+                method: "POST",
+                secure: true,
                 ...params,
             }),
     };

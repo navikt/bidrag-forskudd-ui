@@ -1,10 +1,8 @@
 interface Periode {
-    selected: boolean;
     fraDato: string;
     tilDato: string;
-    registrertPaaAdresse: boolean;
+    boStatus: "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
     kilde: string;
-    borMedForeldre: boolean;
 }
 
 interface Sivilstand {
