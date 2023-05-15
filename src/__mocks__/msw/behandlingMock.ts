@@ -7,6 +7,7 @@ export function behandlingMock(): RestHandler[] {
     return [
         rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, (req, res, ctx) => {
             if (!localStorage.getItem(`behandling-${req.params.behandlingId}`)) {
+                localStorage.setItem(`behandlingId`, req.params.behandlingId.toString());
                 localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(behandlingMockApiData));
             }
             return res(
@@ -40,5 +41,16 @@ export function behandlingMock(): RestHandler[] {
 
             return res(...response[index]);
         }),
+        rest.get(
+            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/opplysninger/:opplysninger/aktiv`,
+            (req, res, ctx) => {
+                const key = `behandling-${req.params.behandlingId}-opplysninger-${req.params.opplysninger}`;
+
+                if (!localStorage.getItem(key)) {
+                    return res(ctx.set("Content-Type", "application/json"), ctx.status(404));
+                }
+                return res(ctx.set("Content-Type", "application/json"), ctx.body(localStorage.getItem(key)));
+            }
+        ),
     ];
 }

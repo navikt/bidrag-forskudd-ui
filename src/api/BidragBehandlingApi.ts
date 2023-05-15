@@ -45,16 +45,16 @@ export interface BehandlingBarnDto {
     perioder: BehandlingBarnPeriodeDto[];
     ident?: string;
     navn?: string;
-    /** @format date-time */
+    /** @format date */
     foedselsDato?: string;
 }
 
 export interface BehandlingBarnPeriodeDto {
     /** @format int64 */
     id?: number;
-    /** @format date-time */
+    /** @format date */
     fraDato: string;
-    /** @format date-time */
+    /** @format date */
     tilDato: string;
     boStatus: BoStatusType;
     kilde: string;
@@ -157,9 +157,9 @@ export enum RolleType {
 export interface SivilstandDto {
     /** @format int64 */
     id?: number;
-    /** @format date-time */
+    /** @format date */
     gyldigFraOgMed: string;
-    /** @format date-time */
+    /** @format date */
     bekreftelsesdato: string;
     sivilstandType: SivilstandType;
 }
@@ -210,6 +210,39 @@ export enum SoknadType {
     REVURDERING = "REVURDERING",
     KONVERTERT = "KONVERTERT",
     MANEDLIG_PALOP = "MANEDLIG_PALOP",
+}
+
+export interface UpdateBehandlingSivilstandRequest {
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
+}
+
+export interface UpdateBehandlingSivilstandResponse {
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
+}
+
+export interface InntektDto {
+    /** @format int64 */
+    id?: number;
+    taMed: boolean;
+    beskrivelse: string;
+    beløp: number;
+    /** @format date */
+    datoTom: string;
+    /** @format date */
+    datoFom: string;
+    ident: string;
+}
+
+export interface UpdateBehandlingInntekterRequest {
+    /** @uniqueItems true */
+    inntekter: InntektDto[];
+}
+
+export interface UpdateBehandlingInntekterResponse {
+    /** @uniqueItems true */
+    inntekter: InntektDto[];
 }
 
 export interface UpdateBehandlingBarnRequest {
@@ -266,6 +299,34 @@ export interface CreateRolleDto {
 export interface CreateBehandlingResponse {
     /** @format int64 */
     id: number;
+}
+
+export interface AddOpplysningerRequest {
+    /** @format int64 */
+    behandlingId: number;
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    /** data */
+    data: string;
+    /** @format date */
+    hentetDato: string;
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
+}
+
+export interface OpplysningerDto {
+    /** @format int64 */
+    id: number;
+    /** @format int64 */
+    behandlingId: number;
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date */
+    hentetDato: string;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -443,9 +504,49 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Oppdaterer en behandling inntekter
+         *
+         * @tags sivilstand-controller
+         * @name OppdaterSivilstand
+         * @request PUT:/api/behandling/{behandlingId}/sivilstand
+         * @secure
+         */
+        oppdaterSivilstand: (
+            behandlingId: number,
+            data: UpdateBehandlingSivilstandRequest,
+            params: RequestParams = {}
+        ) =>
+            this.request<UpdateBehandlingSivilstandResponse, Error | UpdateBehandlingSivilstandResponse>({
+                path: `/api/behandling/${behandlingId}/sivilstand`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer en behandling inntekter
+         *
+         * @tags inntekter-controller
+         * @name OppdaterInntekter
+         * @request PUT:/api/behandling/{behandlingId}/inntekter
+         * @secure
+         */
+        oppdaterInntekter: (behandlingId: number, data: UpdateBehandlingInntekterRequest, params: RequestParams = {}) =>
+            this.request<UpdateBehandlingInntekterResponse, Error | UpdateBehandlingInntekterResponse>({
+                path: `/api/behandling/${behandlingId}/inntekter`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
          * @description Oppdaterer en behandling barn
          *
-         * @tags behandling-controller
+         * @tags behandling-barn-perioder-controller
          * @name OppdaterBehandlingBarn
          * @request PUT:/api/behandling/{behandlingId}/barn
          * @secure
@@ -519,15 +620,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Legger til nye opplysninger til behandling
          *
-         * @tags behandling-controller
+         * @tags opplysninger-controller
          * @name AddOpplysningerData
          * @request POST:/api/behandling/{behandlingId}/opplysninger
          * @secure
          */
-        addOpplysningerData: (behandlingId: string, params: RequestParams = {}) =>
-            this.request<void, Error | void>({
+        addOpplysningerData: (behandlingId: string, data: AddOpplysningerRequest, params: RequestParams = {}) =>
+            this.request<OpplysningerDto, Error | OpplysningerDto>({
                 path: `/api/behandling/${behandlingId}/opplysninger`,
                 method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Henter aktive opplysninger til behandling
+         *
+         * @tags opplysninger-controller
+         * @name HentAktiv
+         * @request GET:/api/behandling/{behandlingId}/opplysninger/{opplysningerType}/aktiv
+         * @secure
+         */
+        hentAktiv: (behandlingId: number, opplysningerType: OpplysningerType, params: RequestParams = {}) =>
+            this.request<any, Error | OpplysningerDto>({
+                path: `/api/behandling/${behandlingId}/opplysninger/${opplysningerType}/aktiv`,
+                method: "GET",
                 secure: true,
                 ...params,
             }),

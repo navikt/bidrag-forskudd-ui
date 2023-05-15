@@ -44,6 +44,9 @@ export const DDMMYYYYStringToDate = (dateString: string) => {
 export const DateToDDMMYYYYString = (date: Date) =>
     date.toLocaleDateString("nb-NO", { year: "numeric", month: "numeric", day: "numeric" });
 
+export const DateToMMYYYYString = (date: Date) =>
+    date.toLocaleDateString("nb-NO", { year: "numeric", month: "2-digit" });
+
 export const ISODateTimeStringToDDMMYYYYString = (isoDateTimeString: string) => {
     const date = new Date(isoDateTimeString);
     return isValidDate(date) ? DateToDDMMYYYYString(date) : "";

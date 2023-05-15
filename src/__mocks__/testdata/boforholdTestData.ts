@@ -45,8 +45,10 @@ export const barnBoforholdData = (identer: string[]) => {
     }));
 };
 
-export const getBoforholdMockData = (behandlingId, identer: string[]) => {
+export const getBoforholdMockData = (behandlingId) => {
     if (!localStorage.getItem(`boforhold-${behandlingId}`)) {
+        const behandling = JSON.parse(localStorage.getItem(`behandling-${behandlingId}`));
+        const identer = behandling.behandlingBarn.map((barn) => barn.ident);
         localStorage.setItem(`boforhold-${behandlingId}`, JSON.stringify(createBoforholdData(identer)));
     }
 

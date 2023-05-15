@@ -1,7 +1,8 @@
 import {
     BehandlingDto,
     BehandlingType,
-    BoStatusType,
+    OpplysningerDto,
+    OpplysningerType,
     RolleType,
     SivilstandType,
     SoknadFraType,
@@ -49,14 +50,7 @@ export const behandlingMockApiData: BehandlingDto = {
         {
             id: 1,
             medISaken: true,
-            perioder: [
-                {
-                    fraDato: "2023-05-02T11:24:12.190Z",
-                    tilDato: "2023-05-02T11:24:12.190Z",
-                    boStatus: BoStatusType.DOKUMENTERT_BOENDE_HOS_BM,
-                    kilde: "offentlig",
-                },
-            ],
+            perioder: [],
             ident: "03522150877",
             navn: generateName(),
             foedselsDato: "2023-05-02T11:24:12.190Z",
@@ -64,14 +58,7 @@ export const behandlingMockApiData: BehandlingDto = {
         {
             id: 4,
             medISaken: true,
-            perioder: [
-                {
-                    fraDato: "2023-05-02T11:24:12.190Z",
-                    tilDato: "2023-05-02T11:24:12.190Z",
-                    boStatus: BoStatusType.DOKUMENTERT_BOENDE_HOS_BM,
-                    kilde: "offentlig",
-                },
-            ],
+            perioder: [],
             ident: "07512150855",
             navn: generateName(),
             foedselsDato: "2023-05-02T11:24:12.190Z",
@@ -85,4 +72,13 @@ export const behandlingMockApiData: BehandlingDto = {
             sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
         },
     ],
+};
+
+const boforholdOpplysninger: OpplysningerDto = {
+    id: Math.floor(Math.random() * 1000),
+    behandlingId: Number(JSON.parse(localStorage.getItem("behandlingId"))),
+    aktiv: true,
+    opplysningerType: OpplysningerType.BOFORHOLD,
+    data: "",
+    hentetDato: "2023-05-10",
 };

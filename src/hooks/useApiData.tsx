@@ -4,11 +4,12 @@ import { useCallback, useState } from "react";
 
 import {
     BehandlingDto,
+    OpplysningerType,
     RolleDto,
     UpdateBehandlingRequest,
     UpdateBehandlingRequestExtended,
 } from "../api/BidragBehandlingApi";
-import { PersonDto } from "../api/PersonApi";
+import { HusstandsmedlemmerDto, PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, PERSON_API } from "../constants/api";
 
 export const useGetBehandlings = () =>
@@ -36,7 +37,6 @@ export const useUpdateBehandling = (behandlingId: number) => {
             BEHANDLING_API.api.oppdaterBehandling(behandlingId, payload),
         onSuccess: (data) => {
             queryClient.setQueryData(["behandling", behandlingId], data);
-            console.log("onSuccess");
             setError(undefined);
         },
         onError: (error) => {
@@ -65,8 +65,34 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
             staleTime: Infinity,
             select: useCallback(({ data }) => ({ ...rolle, navn: data.navn }), []),
             suspense: true,
-            enable: !!rolle,
+            enabled: !!rolle,
         })),
+    });
+
+export const useGetHusstandsmedlemmer = (ident: string) =>
+    useQuery({
+        queryKey: ["husstandsmedlemmer", ident],
+        queryFn: (): Promise<AxiosResponse<HusstandsmedlemmerDto>> =>
+            PERSON_API.husstandsmedlemmer.hentHusstandsmedlemmer({ ident: ident }),
+        staleTime: Infinity,
+        suspense: true,
+        enabled: !!ident,
+    });
+
+export const useGetBoforoholdOpplysninger = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["boforoholdOpplysninger", behandlingId],
+        queryFn: async (): Promise<AxiosResponse<HusstandsmedlemmerDto>> => {
+            try {
+                const res = await BEHANDLING_API.api.hentAktiv(behandlingId, OpplysningerType.BOFORHOLD);
+                return res;
+            } catch (e) {
+                if (e.response.status === 404) return null;
+                else throw e;
+            }
+        },
+        staleTime: Infinity,
+        suspense: true,
     });
 
 export const _updateBehandlingExtended = (behandlingId: number) => {

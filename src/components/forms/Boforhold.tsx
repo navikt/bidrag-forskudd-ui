@@ -1,6 +1,18 @@
-import { PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Label, Loader, Panel, Radio, RadioGroup, Search } from "@navikt/ds-react";
-import React, { Fragment, Suspense, useEffect } from "react";
+import { HddDownIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import {
+    Accordion,
+    Alert,
+    BodyShort,
+    Button,
+    Heading,
+    Loader,
+    Panel,
+    Radio,
+    RadioGroup,
+    Search,
+    TextField,
+} from "@navikt/ds-react";
+import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { useGetBoforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
@@ -9,60 +21,57 @@ import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling, useUpdateBehandling } from "../../hooks/useApiData";
+import {
+    useGetBehandling,
+    useGetBoforoholdOpplysninger,
+    useGetHusstandsmedlemmer,
+    useUpdateBehandling,
+} from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
+import { DateToDDMMYYYYString, DateToMMYYYYString, isValidDate } from "../../utils/date-utils";
+import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
 import { PersonNavn } from "../PersonNavn";
+import { RolleTag } from "../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
-import { calculateFraDato } from "./helpers/boforholdFormHelpers";
+import { calculateFraDato, createInitialValues, mapHusstandsMedlemmerToBarn } from "./helpers/boforholdFormHelpers";
 import { getVirkningstidspunkt } from "./helpers/helpers";
 import { checkOverlappingPeriods } from "./helpers/inntektFormHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
-const createInitialValues = (boforhold, virkningstidspunkt) => ({
-    ...boforhold,
-    barn: boforhold.barn.length
-        ? boforhold.barn.map((barn) => ({
-              ...barn,
-              perioder: barn.perioder.length
-                  ? barn.perioder.map((periode) => ({
-                        ...periode,
-                        edit: false,
-                        fraDato: dateOrNull(periode.fraDato),
-                        tilDato: dateOrNull(periode.tilDato),
-                    }))
-                  : [
-                        {
-                            edit: false,
-                            fraDato: virkningstidspunkt,
-                            tilDato: null,
-                            boStatus: false,
-                            kilde: "",
-                        },
-                    ],
-          }))
-        : [],
-    sivilstand: boforhold.sivilstand.length
-        ? boforhold.sivilstand.map((stand) => ({
-              ...stand,
-              fraDato: dateOrNull(stand.fraDato),
-              tilDato: dateOrNull(stand.tilDato),
-          }))
-        : [],
-});
+enum BoStatus {
+    registrert_paa_adresse = "Registrert på adresse",
+    ikke_registrert_paa_adresse = "Ikke registrert på adresse",
+}
 
-const Main = () => {
+const Opplysninger = ({ opplysninger, ident }) => {
+    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident).perioder;
+    return perioder.map((periode, index) => (
+        <div
+            key={`${periode.boStatus}-${index}`}
+            className="grid grid-cols-[70px,max-content,70px,auto] items-center gap-x-2"
+        >
+            <BodyShort size="small" className="flex justify-end">
+                {DateToDDMMYYYYString(periode.fraDato)}
+            </BodyShort>
+            <div>{"-"}</div>
+            <BodyShort size="small" className="flex justify-end">
+                {periode.tilDato ? DateToDDMMYYYYString(periode.tilDato) : ""}
+            </BodyShort>
+            <BodyShort size="small">{BoStatus[periode.boStatus]}</BodyShort>
+        </div>
+    ));
+};
+
+const Main = ({ opplysningerFraFolkRegistre }) => {
     const { behandlingId, virkningstidspunktFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
-    const barnFraBehandling = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    const bmIdent = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER);
 
     return (
         <>
@@ -71,9 +80,8 @@ const Main = () => {
                 Barn
             </Heading>
             <BarnPerioder
-                barnFraBehandling={barnFraBehandling}
-                bmIdent={bmIdent}
                 virkningstidspunkt={virkningstidspunkt}
+                opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
             />
             <Heading level="3" size="medium">
                 Sivilstand
@@ -105,19 +113,22 @@ const Side = () => {
 const BoforholdsForm = () => {
     const { behandlingId, virkningstidspunktFormValues, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const barn = behandling.data?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    const { data: boforhold } = useGetBoforhold(
-        behandlingId.toString(),
-        barn.map((rolle) => rolle.ident),
-        !!barn
-    );
+    const { data: boforhold } = useGetBoforhold(behandlingId.toString());
+    const bmIdent = behandling.data?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
+    const {
+        data: {
+            data: { husstandListe },
+        },
+    } = useGetHusstandsmedlemmer(bmIdent);
+    const { data: boforoholdOpplysninger } = useGetBoforoholdOpplysninger(behandlingId);
+    const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(behandling, husstandListe);
+    const opplysninger = boforoholdOpplysninger ? boforoholdOpplysninger : opplysningerFraFolkRegistre;
 
     const updateBehandling = useUpdateBehandling(behandlingId);
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
-    const initialValues = boforholdFormValues ?? createInitialValues(boforhold, virkningstidspunkt);
-
-    initialValues.boforholdBegrunnelseKunINotat = behandling.data.boforholdBegrunnelseKunINotat;
-    initialValues.boforholdBegrunnelseMedIVedtakNotat = behandling.data.boforholdBegrunnelseMedIVedtakNotat;
+    const initialValues =
+        boforholdFormValues ??
+        createInitialValues(behandling, boforhold, opplysninger, boforoholdOpplysninger, virkningstidspunkt);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -155,14 +166,80 @@ const BoforholdsForm = () => {
         <>
             <FormProvider {...useFormMethods}>
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
-                    <FormLayout title="Boforhold" main={<Main />} side={<Side />} />
+                    <FormLayout
+                        title="Boforhold"
+                        main={<Main opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />}
+                        side={<Side />}
+                    />
                 </form>
             </FormProvider>
         </>
     );
 };
 
-const BarnPerioder = ({ barnFraBehandling, bmIdent, virkningstidspunkt }) => {
+const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, index }) => {
+    const [val, setVal] = useState("dnummer");
+    return (
+        <div className="mt-4 mb-4">
+            <FlexRow className="items-center p-3">
+                <div>Barn</div>
+                <div className="ml-auto self-end">
+                    <Button
+                        type="button"
+                        onClick={() => barnFieldArray.remove(index)}
+                        icon={<TrashIcon aria-hidden />}
+                        variant="tertiary"
+                        size="small"
+                    >
+                        Slett barn
+                    </Button>
+                </div>
+            </FlexRow>
+
+            <RadioGroup className="mb-4" size="small" legend="" value={val} onChange={(val) => setVal(val)}>
+                <Radio value="dnummer">Fødselsnummer/d-nummer</Radio>
+                <Radio value="fritekst">Fritekst</Radio>
+            </RadioGroup>
+            <FlexRow>
+                {val === "dnummer" && (
+                    <Search
+                        className="w-fit"
+                        label="Fødselsnummer/ d-nummer"
+                        variant="secondary"
+                        size="small"
+                        hideLabel={false}
+                        onClear={() => {
+                            // TODO nulstil alt for barnet
+                            setValue(`barn.${index}.ident`, null);
+                            setValue(`barn.${index}.navn`, null);
+                        }}
+                        onSearchClick={(value) => {
+                            PERSON_API.informasjon
+                                .hentPersonPost({ ident: value })
+                                .then(({ data }) => {
+                                    setValue(`barn.${index}.ident`, value);
+                                    setValue(`barn.${index}.navn`, data.navn);
+                                })
+                                .catch((r) => {
+                                    // TODO -> LEGG TIL BARNET MANUELT
+                                });
+                        }}
+                    />
+                )}
+                {val === "fritekst" && (
+                    <DatePickerInput
+                        label="Fødselsdato"
+                        placeholder="DD.MM.ÅÅÅÅ"
+                        onChange={(value) => console.log(value)}
+                    />
+                )}
+                <TextField label="Navn" size="small" onChange={() => {}} />
+            </FlexRow>
+        </div>
+    );
+};
+
+const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
     const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
@@ -197,72 +274,40 @@ const BarnPerioder = ({ barnFraBehandling, bmIdent, virkningstidspunkt }) => {
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <Panel border className="p-0">
+                    <Panel className="p-0 border-0 border-[var(--a-border-divider)] border-solid border-b-2">
                         {item.medISaken && (
-                            <FlexRow className="items-center p-3">
-                                <BodyShort size="small" className="font-bold">
-                                    <PersonNavn
-                                        ident={barnFraBehandling.find((b) => b.ident === item.ident).ident}
-                                    ></PersonNavn>
-                                </BodyShort>
-                                <BodyShort size="small">{item.ident}</BodyShort>
-                            </FlexRow>
+                            <div className="grid grid-cols-[max-content,auto] mb-8">
+                                <div className="w-max h-max">
+                                    <RolleTag rolleType={RolleType.BARN} />
+                                </div>
+                                <div>
+                                    <FlexRow className="items-center h-[27px]">
+                                        <BodyShort size="small" className="font-bold">
+                                            <PersonNavn ident={item.ident}></PersonNavn>
+                                        </BodyShort>
+                                        <BodyShort size="small">{item.ident}</BodyShort>
+                                    </FlexRow>
+                                    <Accordion>
+                                        <Accordion.Item>
+                                            <Accordion.Header>Opplysninger fra Folkeregistret</Accordion.Header>
+                                            <Accordion.Content>
+                                                <Opplysninger
+                                                    opplysninger={opplysningerFraFolkRegistre}
+                                                    ident={item.ident}
+                                                />
+                                            </Accordion.Content>
+                                        </Accordion.Item>
+                                    </Accordion>
+                                </div>
+                            </div>
                         )}
                         {!item.medISaken && (
-                            <>
-                                <FlexRow className="items-center p-3">
-                                    <div>Barn</div>
-                                    <div className="ml-auto self-end">
-                                        <Button
-                                            type="button"
-                                            onClick={() => barnFieldArray.remove(index)}
-                                            icon={<TrashIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        >
-                                            Slett barn
-                                        </Button>
-                                    </div>
-                                </FlexRow>
-                                <FlexRow className="items-center p-3">
-                                    <RadioGroup legend="">
-                                        <Radio value="10">Fødselsnummer/d-nummer</Radio>
-                                        <Radio value="10">Fritekst</Radio>
-                                    </RadioGroup>
-                                    <div>
-                                        <div>
-                                            <Search
-                                                className="w-fit"
-                                                label="Fødselsnummer/ d-nummer"
-                                                variant="secondary"
-                                                size="small"
-                                                hideLabel={false}
-                                                onClear={() => {
-                                                    // TODO nulstil alt for barnet
-                                                    setValue(`barn.${index}.ident`, null);
-                                                    setValue(`barn.${index}.navn`, null);
-                                                }}
-                                                onSearchClick={(value) => {
-                                                    PERSON_API.informasjon
-                                                        .hentPersonPost({ ident: value })
-                                                        .then(({ data }) => {
-                                                            setValue(`barn.${index}.ident`, value);
-                                                            setValue(`barn.${index}.navn`, data.navn);
-                                                        })
-                                                        .catch((r) => {
-                                                            // TODO -> LEGG TIL BARNET MANUELT
-                                                        });
-                                                }}
-                                            />
-                                            <div className="w-fit navds-form-field">
-                                                <Label size="small">Navn</Label>
-                                                <BodyShort size="medium">{controlledFields[index].navn}</BodyShort>
-                                            </div>
-                                        </div>
-                                        <div>fdato</div>
-                                    </div>
-                                </FlexRow>
-                            </>
+                            <BarnIkkeMedIBehandling
+                                barnFieldArray={barnFieldArray}
+                                controlledFields={controlledFields}
+                                setValue={setValue}
+                                index={index}
+                            />
                         )}
                         <Perioder barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
                     </Panel>
@@ -281,6 +326,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
         getValues,
         clearErrors,
         setError,
+        setValue,
         formState: { errors },
     } = useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
@@ -341,12 +387,44 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     const addPeriode = () => {
         const perioderValues = getValues(`barn.${barnIndex}.perioder`);
         barnPerioder.append({
-            edit: false,
+            edit: true,
             fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
             tilDato: null,
             boStatus: "",
             kilde: "",
         });
+    };
+
+    const savePeriod = (index) => {
+        const perioderValues = getValues(`barn.${barnIndex}.perioder.${index}`);
+        if (!perioderValues.fraDato || !perioderValues?.boStatus || !perioderValues.kilde) {
+            if (!perioderValues.fraDato) {
+                setError(`barn.${barnIndex}.perioder.${index}.fraDato`, {
+                    type: "datesNotValid",
+                    message: "Fom dato kan ikke være tøm",
+                });
+            } else {
+                clearErrors(`barn.${barnIndex}.perioder.${index}.fraDato`);
+            }
+            if (!perioderValues.boStatus) {
+                setError(`barn.${barnIndex}.perioder.${index}.boStatus`, {
+                    type: "boStatusNotValid",
+                    message: "Status kan ikke vøre tøm",
+                });
+            } else {
+                clearErrors(`barn.${barnIndex}.perioder.${index}.boStatus`);
+            }
+            if (!perioderValues.kilde) {
+                setError(`barn.${barnIndex}.perioder.${index}.kilde`, {
+                    type: "kildeNotValid",
+                    message: "Kilde kan ikke være tøm",
+                });
+            } else {
+                clearErrors(`barn.${barnIndex}.perioder.${index}.kilde`);
+            }
+        } else {
+            setValue(`barn.${barnIndex}.perioder.${index}.edit`, false);
+        }
     };
 
     return (
@@ -377,7 +455,9 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort>{item.fraDato ? DateToDDMMYYYYString(item.fraDato) : ""}</BodyShort>
+                                    <BodyShort key={`barn.${barnIndex}.perioder.${index}.fraDato.placeholder`}>
+                                        {item.fraDato ? DateToMMYYYYString(item.fraDato) : ""}
+                                    </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledMonthPicker
@@ -394,7 +474,9 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort>{item.tilDato ? DateToDDMMYYYYString(item.tilDato) : ""}</BodyShort>
+                                    <BodyShort key={`barn.${barnIndex}.perioder.${index}.tilDato.placeholder`}>
+                                        {item.tilDato ? DateToMMYYYYString(item.tilDato) : ""}
+                                    </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
@@ -413,7 +495,9 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort>{item.boStatus}</BodyShort>
+                                    <BodyShort key={`barn.${barnIndex}.perioder.${index}.boStatus.placeholder`}>
+                                        {BoStatus[item.boStatus]}
+                                    </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
@@ -429,16 +513,32 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort>{item.kilde}</BodyShort>
+                                    <BodyShort
+                                        key={`barn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                        className="capitalize"
+                                    >
+                                        {item.kilde}
+                                    </BodyShort>
                                 ),
-                                <Button
-                                    key={`edit-button-${barnIndex}-${index}`}
-                                    type="button"
-                                    onClick={() => {}}
-                                    icon={<PencilIcon aria-hidden />}
-                                    variant="tertiary"
-                                    size="small"
-                                />,
+                                item.edit ? (
+                                    <Button
+                                        key={`save-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => savePeriod(index)}
+                                        icon={<HddDownIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Button
+                                        key={`edit-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => setValue(`barn.${barnIndex}.perioder.${index}.edit`, true)}
+                                        icon={<PencilIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ),
                                 index ? (
                                     <Button
                                         key={`delete-button-${barnIndex}-${index}`}
@@ -452,7 +552,10 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         size="small"
                                     />
                                 ) : (
-                                    <div className="min-w-[40px]"></div>
+                                    <div
+                                        key={`delete-button-${barnIndex}-${index}.placeholder`}
+                                        className="min-w-[40px]"
+                                    ></div>
                                 ),
                             ]}
                         />
@@ -568,6 +671,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
+                                        key={`sivilstand.${index}.tilDato`}
                                         name={`sivilstand.${index}.tilDato`}
                                         label="Periode"
                                         placeholder="MM.ÅÅÅÅ"
@@ -581,6 +685,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                     />
                                 </div>,
                                 <FormControlledSelectField
+                                    key={`sivilstand.${index}.stand`}
                                     name={`sivilstand.${index}.stand`}
                                     label="Sivilstand"
                                     className="w-52"

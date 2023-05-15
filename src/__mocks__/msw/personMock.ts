@@ -1,7 +1,8 @@
-import { rest, RestHandler } from "msw";
+import { rest, RestHandler, RestRequest } from "msw";
 
 import environment from "../../environment";
 import { PersonDto } from "../../types/personTypes";
+import { createHustandsmedlemmer } from "../testdata/grunnlagTestData";
 
 export default function personMock(): RestHandler[] {
     const baseUrl = environment.url.bidragPerson;
@@ -17,6 +18,13 @@ export default function personMock(): RestHandler[] {
                         navn: generateName(),
                     } as PersonDto)
                 )
+            );
+        }),
+        rest.post(`${baseUrl}/husstandsmedlemmer`, async (req: RestRequest, res, ctx) => {
+            return res(
+                ctx.set("Content-Type", "application/json"),
+                ctx.status(200),
+                ctx.body(JSON.stringify(createHustandsmedlemmer()))
             );
         }),
     ];

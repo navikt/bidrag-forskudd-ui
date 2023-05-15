@@ -30,7 +30,7 @@ export const FormControlledSelectField = ({
         formState: { errors },
     } = useFormContext();
 
-    const { field } = useController({ name, control });
+    const { field, fieldState } = useController({ name, control });
 
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (onSelect) {
@@ -47,6 +47,7 @@ export const FormControlledSelectField = ({
             value={field.value}
             onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
+            error={fieldState?.error?.message}
         >
             {children ||
                 options.map((option) => (

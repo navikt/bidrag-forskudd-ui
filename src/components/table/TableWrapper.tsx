@@ -5,8 +5,8 @@ export const TableWrapper = ({ heading, children }: { heading: string[]; childre
     <Table size="small" zebraStripes>
         <Table.Header>
             <Table.Row className="align-baseline">
-                {heading.map((header) => (
-                    <Table.HeaderCell scope="col" key={header}>
+                {heading.map((header, index) => (
+                    <Table.HeaderCell scope="col" key={`${header}-${index}`}>
                         {header}
                     </Table.HeaderCell>
                 ))}
@@ -26,7 +26,7 @@ export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
                     </Table.HeaderCell>
                 );
             return (
-                <Table.DataCell key={index} className="align-middle">
+                <Table.DataCell key={cell.key} className="align-middle">
                     {cell}
                 </Table.DataCell>
             );

@@ -8,7 +8,8 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
-    const { activeStep, setActiveStep } = useForskudd();
+    const { activeStep, setActiveStep, virkningstidspunktFormValues } = useForskudd();
+    const avslag = virkningstidspunktFormValues?.avslag;
 
     return (
         <PageWrapper name="tracking-wide">
@@ -21,8 +22,8 @@ export const ForskuddPage = () => {
                     className="mb-8"
                 >
                     <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
-                    <Stepper.Step>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
-                    <Stepper.Step>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
+                    <Stepper.Step interactive={avslag === ""}>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
+                    <Stepper.Step interactive={avslag === ""}>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
                 <FormWrapper />
