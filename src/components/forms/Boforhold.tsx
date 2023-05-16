@@ -113,7 +113,7 @@ const Side = () => {
 const BoforholdsForm = () => {
     const { behandlingId, virkningstidspunktFormValues, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const { data: boforhold } = useGetBoforhold(behandlingId.toString());
+    const { data: boforhold } = useGetBoforhold(behandlingId.toString(), behandling.data);
     const bmIdent = behandling.data?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const {
         data: {

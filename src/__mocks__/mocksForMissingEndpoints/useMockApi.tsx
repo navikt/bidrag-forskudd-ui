@@ -65,10 +65,10 @@ export const useGetAndreTyperInntekt = (behandlingId: string) =>
         suspense: true,
     });
 
-export const useGetBoforhold = (behandlingId: string) =>
+export const useGetBoforhold = (behandlingId: string, behandling) =>
     useQuery({
         queryKey: ["boforhold", behandlingId],
-        queryFn: (): Promise<BoforholdData> => fakeFetch(JSON.parse(getBoforholdMockData(behandlingId))),
+        queryFn: (): Promise<BoforholdData> => fakeFetch(JSON.parse(getBoforholdMockData(behandlingId, behandling))),
         staleTime: Infinity,
         suspense: true,
     });
