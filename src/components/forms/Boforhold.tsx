@@ -147,8 +147,8 @@ const BoforholdsForm = () => {
         setBoforholdFormValues(values);
         updateBoforhold.mutation.mutate(
             {
-                behandlingBarn: [],//todo
-                sivilstand: [],//todo
+                behandlingBarn: [], //todo
+                sivilstand: [], //todo
                 boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
                 boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
             },
@@ -235,7 +235,7 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                         onChange={(value) => console.log(value)}
                     />
                 )}
-                <TextField label="Navn" size="small" onChange={() => {}} />
+                <TextField label="Navn" size="small" onChange={() => { }} />
             </FlexRow>
         </div>
     );

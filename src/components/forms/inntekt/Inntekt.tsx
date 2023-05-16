@@ -62,9 +62,8 @@ const Main = memo(
                             <Tabs.Tab
                                 key={rolle.ident}
                                 value={rolle.ident}
-                                label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
-                                    rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
-                                }`}
+                                label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
+                                    }`}
                             />
                         ))}
                     </Tabs.List>
@@ -209,9 +208,9 @@ const InntektForm = () => {
 
         updateInntekter.mutation.mutate(
             {
-                inntekter: [],//todo
-                utvidetbarnetrygd: [],//todo
-                barnetillegg: [],//todo
+                inntekter: [], //todo
+                utvidetbarnetrygd: [], //todo
+                barnetillegg: [], //todo
                 inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
                 inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
             },
