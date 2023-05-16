@@ -1,2 +1,2 @@
 // @ts-ignore
-import("./app.tsx");
+import("./bootstrap.tsx");

@@ -6,7 +6,8 @@ import { useParams } from "react-router-dom";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const ActionButtons = ({ onNext }) => {
-    const { behandlingId } = useParams<{ behandlingId?: string }>();
+    const { behandlingId, saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
+    const notatUrl = `/behandling/${behandlingId}/notat`;
     return (
         <FlexRow className="items-center">
             <Button
@@ -20,7 +21,7 @@ export const ActionButtons = ({ onNext }) => {
             >
                 Gå videre
             </Button>
-            <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold">
+            <Link href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl} target="_blank" className="font-bold">
                 Vis notat <ExternalLinkIcon aria-hidden />
             </Link>
         </FlexRow>
