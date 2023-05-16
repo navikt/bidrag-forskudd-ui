@@ -235,7 +235,7 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                         onChange={(value) => console.log(value)}
                     />
                 )}
-                <TextField label="Navn" size="small" onChange={() => { }} />
+                <TextField label="Navn" size="small" onChange={() => {}} />
             </FlexRow>
         </div>
     );
