@@ -9,7 +9,7 @@ import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling, useUpdateBehandling } from "../../hooks/useApiData";
+import { useGetBehandling, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
 import { dateOrNull, isValidDate } from "../../utils/date-utils";
@@ -127,7 +127,7 @@ const VirkningstidspunktForm = () => {
     const {
         data: { data: behandling },
     } = useGetBehandling(behandlingId);
-    const updateBehandling = useUpdateBehandling(behandlingId);
+    const updateVirkningsTidspunkt = useUpdateVirkningstidspunkt(behandlingId);
     const { virkningstidspunktFormValues, setVirkningstidspunktFormValues } = useForskudd();
     const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
     const channel = new BroadcastChannel("virkningstidspunkt");
@@ -156,7 +156,7 @@ const VirkningstidspunktForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
         setVirkningstidspunktFormValues(values);
-        updateBehandling.mutation.mutate(
+        updateVirkningsTidspunkt.mutation.mutate(
             {
                 virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
                 virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
@@ -182,7 +182,7 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Virkningstidspunkt"
-                        main={<Main initialValues={initialValues} error={updateBehandling.error} />}
+                        main={<Main initialValues={initialValues} error={updateVirkningsTidspunkt.error} />}
                         side={<Side />}
                     />
                 </form>

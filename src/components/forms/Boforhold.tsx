@@ -25,7 +25,7 @@ import {
     useGetBehandling,
     useGetBoforoholdOpplysninger,
     useGetHusstandsmedlemmer,
-    useUpdateBehandling,
+    useUpdateBoforhold,
 } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
@@ -124,7 +124,7 @@ const BoforholdsForm = () => {
     const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(behandling, husstandListe);
     const opplysninger = boforoholdOpplysninger ? boforoholdOpplysninger : opplysningerFraFolkRegistre;
 
-    const updateBehandling = useUpdateBehandling(behandlingId);
+    const updateBoforhold = useUpdateBoforhold(behandlingId);
     const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
     const initialValues =
         boforholdFormValues ??
@@ -145,8 +145,10 @@ const BoforholdsForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
         setBoforholdFormValues(values);
-        updateBehandling.mutation.mutate(
+        updateBoforhold.mutation.mutate(
             {
+                behandlingBarn: [],//todo
+                sivilstand: [],//todo
                 boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
                 boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
             },

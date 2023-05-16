@@ -4,10 +4,15 @@ import { useCallback, useState } from "react";
 
 import {
     BehandlingDto,
+    BoforholdResponse,
+    InntekterResponse,
     OpplysningerType,
     RolleDto,
-    UpdateBehandlingRequest,
     UpdateBehandlingRequestExtended,
+    UpdateBoforholdRequest,
+    UpdateInntekterRequest,
+    UpdateVirkningsTidspunktRequest,
+    VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
 import { HusstandsmedlemmerDto, PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, PERSON_API } from "../constants/api";
@@ -28,15 +33,55 @@ export const useGetBehandling = (behandlingId: number) =>
         suspense: true,
     });
 
-export const useUpdateBehandling = (behandlingId: number) => {
+export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
     const queryClient = useQueryClient();
     const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
-        mutationFn: (payload: UpdateBehandlingRequest): Promise<AxiosResponse<BehandlingDto>> =>
-            BEHANDLING_API.api.oppdaterBehandling(behandlingId, payload),
+        mutationFn: (payload: UpdateVirkningsTidspunktRequest): Promise<AxiosResponse<VirkningsTidspunktResponse>> =>
+            BEHANDLING_API.api.oppdaterVirkningsTidspunkt(behandlingId, payload),
         onSuccess: (data) => {
-            queryClient.setQueryData(["behandling", behandlingId], data);
+            queryClient.setQueryData(["virkningstidspunkt-", behandlingId], data);
+            setError(undefined);
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            setError(error);
+        },
+    });
+
+    return { mutation, error };
+};
+
+export const useUpdateBoforhold = (behandlingId: number) => {
+    const queryClient = useQueryClient();
+    const [error, setError] = useState(undefined);
+
+    const mutation = useMutation({
+        mutationFn: (payload: UpdateBoforholdRequest): Promise<AxiosResponse<BoforholdResponse>> =>
+            BEHANDLING_API.api.oppdatereBoforhold(behandlingId, payload),
+        onSuccess: (data) => {
+            queryClient.setQueryData(["boforhold-", behandlingId], data);
+            setError(undefined);
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            setError(error);
+        },
+    });
+
+    return { mutation, error };
+};
+
+export const useUpdateInntekter = (behandlingId: number) => {
+    const queryClient = useQueryClient();
+    const [error, setError] = useState(undefined);
+
+    const mutation = useMutation({
+        mutationFn: (payload: UpdateInntekterRequest): Promise<AxiosResponse<InntekterResponse>> =>
+            BEHANDLING_API.api.oppdaterInntekter(behandlingId, payload),
+        onSuccess: (data) => {
+            queryClient.setQueryData(["inntekter-", behandlingId], data);
             setError(undefined);
         },
         onError: (error) => {
