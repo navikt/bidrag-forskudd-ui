@@ -2,6 +2,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { useApi } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense } from "react";
+import { useParams } from "react-router-dom";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
@@ -13,6 +14,7 @@ import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
 
 const Vedtak = () => {
+    const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
 
@@ -32,6 +34,11 @@ const Vedtak = () => {
             .then((r) => {})
             .catch((e) => {});
         throw new Error("Function not implemented.");
+    };
+
+    const getNotatUrl = () => {
+        const notatUrl = `/behandling/${behandlingId}/notat`;
+        return saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl;
     };
 
     return (
@@ -85,7 +92,7 @@ const Vedtak = () => {
                     <div>
                         Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
                         basert på opplysningene oppgitt.
-                        <Link href={`/forskudd/${behandlingId}/notat`} target="_blank" className="font-bold ml-2">
+                        <Link href={getNotatUrl()} target="_blank" className="font-bold ml-2">
                             Sjekk notat <ExternalLinkIcon aria-hidden />
                         </Link>
                     </div>

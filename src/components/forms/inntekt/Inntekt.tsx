@@ -64,7 +64,7 @@ const Main = memo(
                                 value={rolle.ident}
                                 label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
                                     rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
-                                }`}
+                                    }`}
                             />
                         ))}
                     </Tabs.List>
@@ -176,7 +176,8 @@ const InntektForm = () => {
                 const filterSelectedPeriods = Object.keys(value[field])
                     .map((ident) => ({
                         ident,
-                        inntekt: value[field][ident].filter((i) => i.selected),
+                        inntekt: [],
+                        // inntekt: value[field][ident].filter((i) => i.selected), // TODO: Marko dette fungerer ikke
                     }))
                     .filter((value) => value.inntekt.length > 0);
 
