@@ -64,7 +64,7 @@ const Main = memo(
                                 value={rolle.ident}
                                 label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
                                     rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
-                                    }`}
+                                }`}
                             />
                         ))}
                     </Tabs.List>
