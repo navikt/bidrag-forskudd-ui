@@ -108,11 +108,11 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
         />
     );
 
-const Periode = ({ item, index, datepicker }) => {
+const Periode = ({ item, index, ident, datepicker }) => {
     const { control } = useFormContext<InntektFormValues>();
     const value = useWatch({
         control,
-        name: `inntekteneSomLeggesTilGrunn.${index}.selected`,
+        name: `inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`,
     });
 
     return <div className={`${value || !item.fraPostene ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
@@ -262,6 +262,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                 <Periode
                                     item={item}
                                     index={index}
+                                    ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
                                             key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
@@ -277,6 +278,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                 <Periode
                                     item={item}
                                     index={index}
+                                    ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
                                             key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
