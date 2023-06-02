@@ -93,6 +93,31 @@ export const useUpdateInntekter = (behandlingId: number) => {
     return { mutation, error };
 };
 
+export const useHentVirkningstidspunktData = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["virkningsTidspunkt", behandlingId],
+        queryFn: (): Promise<AxiosResponse<VirkningsTidspunktResponse>> =>
+            BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId),
+        staleTime: Infinity,
+        suspense: true,
+    });
+
+export const useHentInntekter = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["inntekter", behandlingId],
+        queryFn: (): Promise<AxiosResponse<InntekterResponse>> => BEHANDLING_API.api.hentInntekter(behandlingId),
+        staleTime: Infinity,
+        suspense: true,
+    });
+
+export const useHentBoforhold = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["boforhold", behandlingId],
+        queryFn: (): Promise<AxiosResponse<BoforholdResponse>> => BEHANDLING_API.api.hentBoforhold(behandlingId),
+        staleTime: Infinity,
+        suspense: true,
+    });
+
 export const useHentPersonData = (ident: string) =>
     useQuery({
         queryKey: ["persons", ident],

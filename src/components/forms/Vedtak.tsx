@@ -1,27 +1,36 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { useApi } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
+import { Grunnlag } from "../../api/BidragBeregnForskuddApi";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
-import { useGetBehandling } from "../../hooks/useApiData";
+import { useGetBehandling, useHentBoforhold, useHentInntekter, useHentVirkningstidspunktData } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
+import { BIDRAG_BEREGN_FORSKUDD } from "../../constants/api";
+
+const convertDate = (nbDateString: string): string => nbDateString.split(".").reverse().join("-");
 
 const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: boforhold } = useHentBoforhold(behandlingId);
+    const { data: inntekter } = useHentInntekter(behandlingId);
+    const { data: virkningsTidspunkt} = useHentVirkningstidspunktData(behandlingId);
 
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
+
     const barn = behandling.data.roller.filter((r) => r.rolleType == RolleType.BARN);
 
     const sendeVedtak = (): void => {
+        //TODO
         vedtakApi.vedtak
             .opprettVedtak({
                 kilde: "MANUELT",
@@ -41,11 +50,120 @@ const Vedtak = () => {
         return saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl;
     };
 
+
+    const søknadsBarnInfo = barn.map((b): Grunnlag => {
+            return {
+                referanse: b.ident,//TODO: er det egentlig ident?
+                type: "SOKNADSBARN_INFO",
+                innhold: {
+                    //"soknadsbarnId": 1,//TODO
+                    "fodselsdato": "2023-01-01",//TODO bruk fdato!
+                },
+            }
+        });
+    
+    const bostatus = [{
+        referanse: "",//TODO
+        type: "BOSTATUS",
+        innhold: {
+            "datoFom": "2020-12-01",
+            "datoTil": "2021-01-01",
+            "rolle": "SOKNADSBARN",
+            "bostatusKode": "BOR_MED_FORELDRE"
+            // "fodselsdato": "2023-06-01",
+        },
+    }];
+
+    const sivilstand = boforhold.data.sivilstand.map((s) => {
+        return {
+            "referanse": "1",//TODO
+            "type": "SIVILSTAND",
+            "innhold": {
+              "datoFom": convertDate(s.gyldigFraOgMed),
+              //   "datoTil": "2021-01-01",
+              "datoTil": convertDate(s.bekreftelsesdato),//TODO: må bruke en annen dato
+              "rolle": "BIDRAGSMOTTAKER",
+              "sivilstandKode": s.sivilstandType,
+            }
+        };
+    });
+
+    const inntekterForBeregning = [
+        ...inntekter.data.inntekter.map((inn) => {
+            return {
+                "referanse": "",//TODO
+                "type": "INNTEKT",
+                "innhold": {
+                "datoFom": convertDate(inn.datoFom),
+                "datoTil": convertDate(inn.datoTom),
+                "rolle": "BIDRAGSMOTTAKER",
+                "inntektType": "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",//TODO
+                "belop": inn.beløp,
+                }
+            };
+        }),
+        ...inntekter.data.barnetillegg.map((inn) => {
+            return {
+                "referanse": "",//TODO
+                "type": "INNTEKT",
+                "innhold": {
+                "datoFom": inn.datoFom,
+                "datoTil": inn.datoTom,
+                "rolle": "BIDRAGSMOTTAKER",
+                "inntektType": "EKSTRA_SMAABARNSTILLEGG",
+                /*
+                TODO: hv av disse må vi bruke
+                EKSTRA_SMAABARNSTILLEGG
+                SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG
+                AINNTEKT_KORRIGERT_BARNETILLEGG
+                LONN_SKE_KORRIGERT_BARNETILLEGG
+                PENSJON_KORRIGERT_BARNETILLEGG
+
+                */
+                "belop": inn.barnetillegg,
+                }
+            };
+        }),
+        ...inntekter.data.utvidetbarnetrygd.map((inn) => {
+            return {
+                "referanse": "",//TODO
+                "type": "INNTEKT",
+                "innhold": {
+                "datoFom": inn.datoFom,
+                "datoTil": inn.datoTom,
+                "rolle": "BIDRAGSMOTTAKER",
+                "inntektType": "UTVIDET_BARNETRYGD",
+                "belop": inn.beløp,
+                }
+            };
+        }),
+    ]
+
+    useEffect(() => {
+        const grunnlagListe: Grunnlag[] = [];//Grunnlag
+        grunnlagListe.push(...søknadsBarnInfo);
+        grunnlagListe.push(...bostatus);
+        grunnlagListe.push(...inntekterForBeregning);
+        grunnlagListe.push(...sivilstand);
+
+        BIDRAG_BEREGN_FORSKUDD.beregn.beregnForskudd({
+            // beregnDatoFra: "2023-06-10",
+            beregnDatoFra: convertDate(virkningsTidspunkt.data.virkningsDato),
+            beregnDatoTil: "2023-06-10",//TODO?
+            grunnlagListe: grunnlagListe,
+            // grunnlagListe: [],
+        }).then(({data: r}) => {
+            // beregnetForskuddPeriodeListe?: ResultatPeriode[];
+            // grunnlagListe?: ResultatGrunnlag[];
+            console.log(r)
+        })
+    }, []);
+
     return (
         <div className="grid gap-y-8">
             <div className="grid gap-y-4">
                 <Heading level="2" size="xlarge">
-                    Fatte vedtak
+                    Vedtak
                 </Heading>
             </div>
             <div className="grid gap-y-4">

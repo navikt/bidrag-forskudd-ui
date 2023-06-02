@@ -12,6 +12,7 @@ const url = {
     bidragGrunnlag: process.env.BIDRAG_GRUNNLAG_URL,
     bidragVedtak: process.env.BIDRAG_VEDTAK_URL,
     bisys: process.env.BISYS_URL,
+    bidragBeregnForskudd: process.env.BIDRAG_BEREGN_FORSKUDD_URL,
 };
 
 export default { url, system };
