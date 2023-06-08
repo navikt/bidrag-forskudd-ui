@@ -13,13 +13,13 @@ import { generateName } from "../msw/personMock";
 export const behandlingMockApiData: BehandlingDto = {
     id: 1,
     behandlingType: BehandlingType.FORSKUDD,
-    soknadType: SoknadType.SOKNAD,
+    soknadType: SoknadType.INNKREVING,
     datoFom: "01.01.2023",
     datoTom: "10.03.2123",
     mottatDato: "17.03.2023",
     saksnummer: "2300138",
     behandlerEnhet: "4806",
-    soknadFraType: SoknadFraType.BM,
+    soknadFraType: SoknadFraType.BIDRAGSMOTTAKER,
     roller: [
         {
             id: 1,

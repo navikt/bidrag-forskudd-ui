@@ -10,9 +10,7 @@ import { UpdateForskudd } from "../UpdateForskudd";
 
 export const Header = memo(() => {
     const { behandlingId } = useForskudd();
-    const {
-        data: { data: behandling },
-    } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
 
     const mutation = _updateBehandlingExtended(behandlingId);
     const [modalOpen, setModalOpen] = useState(false);
@@ -61,7 +59,7 @@ export const Header = memo(() => {
 const Roller = memo(({ roller }: { roller: RolleDto[] }) => {
     const personsQueries = usePersonsQueries(roller);
     const personsQueriesFinished = personsQueries.every((query) => query.isSuccess);
-    const rollerMedPersonNavn = personsQueries.map((data) => data.data);
+    const rollerMedPersonNavn = personsQueries.map(({ data }) => data);
 
     return (
         personsQueriesFinished && (

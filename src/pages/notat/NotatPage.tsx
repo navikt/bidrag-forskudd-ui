@@ -41,7 +41,7 @@ const Virkningstidspunkt = () => {
                 </div>
             }
         >
-            <VirkningstidspunktView behandling={behandling.data} />
+            <VirkningstidspunktView behandling={behandling} />
         </Suspense>
     );
 };
@@ -129,9 +129,7 @@ const VirkningstidspunktView = ({ behandling }) => {
 
 const Inntekter = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const {
-        data: { data: behandling },
-    } = useGetBehandling(Number(behandlingId));
+    const { data: behandling } = useGetBehandling(Number(behandlingId));
     const roller = behandling?.roller?.filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG);
     const { data: inntekt } = useGetInntekt(behandlingId, roller);
     const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId);

@@ -2,17 +2,17 @@ import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { BehandlingDto } from "../../api/BidragBehandlingApi";
+import { VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
 import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
+import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { dateOrNull, isValidDate } from "../../utils/date-utils";
+import { DDMMYYYYStringToDate, isValidDate } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -22,20 +22,26 @@ import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { aarsakToVirkningstidspunktMapper } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
-const createInitialValues = (behandling: BehandlingDto) =>
+const createInitialValues = (response: VirkningsTidspunktResponse) =>
     ({
-        virkningsDato: dateOrNull(behandling.virkningsDato),
-        aarsak: behandling.aarsak ?? "",
-        avslag: behandling.avslag ?? "",
-        virkningsTidspunktBegrunnelseMedIVedtakNotat: behandling.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
-        virkningsTidspunktBegrunnelseKunINotat: behandling.virkningsTidspunktBegrunnelseKunINotat ?? "",
+        virkningsDato: response.virkningsDato ? DDMMYYYYStringToDate(response.virkningsDato) : null,
+        aarsak: response.aarsak ?? "",
+        avslag: response.avslag ?? "",
+        virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
+        virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
+
+const createPayload = (values: VirkningstidspunktFormValues) => ({
+    virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
+    virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
+    aarsak: values.aarsak ?? null,
+    avslag: values.avslag ?? null,
+    virkningsDato: values.virkningsDato?.toLocaleDateString("no-NO", { dateStyle: "short" }) ?? null,
+});
 
 const Main = ({ initialValues, error }) => {
     const { behandlingId } = useForskudd();
-    const {
-        data: { data: behandling },
-    } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
     const useFormMethods = useFormContext();
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
@@ -124,12 +130,9 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { behandlingId } = useForskudd();
-    const {
-        data: { data: behandling },
-    } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetVirkningstidspunkt(behandlingId);
     const updateVirkningsTidspunkt = useUpdateVirkningstidspunkt(behandlingId);
-    const { virkningstidspunktFormValues, setVirkningstidspunktFormValues } = useForskudd();
-    const initialValues = virkningstidspunktFormValues ?? createInitialValues(behandling);
+    const initialValues = createInitialValues(behandling);
     const channel = new BroadcastChannel("virkningstidspunkt");
 
     const useFormMethods = useForm({
@@ -144,28 +147,16 @@ const VirkningstidspunktForm = () => {
     const watchAllFields = useWatch({ control: useFormMethods.control });
 
     useEffect(() => {
-        if (!virkningstidspunktFormValues) setVirkningstidspunktFormValues(initialValues);
-
-        return () => setVirkningstidspunktFormValues(useFormMethods.getValues());
-    }, []);
-
-    useEffect(() => {
         channel.postMessage(JSON.stringify(fieldsForNotat));
     }, [fieldsForNotat]);
 
     const onSave = () => {
         const values = useFormMethods.getValues();
-        setVirkningstidspunktFormValues(values);
-        updateVirkningsTidspunkt.mutation.mutate(
-            {
-                virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
-                virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
-                aarsak: values.aarsak ? values.aarsak : null,
-                avslag: values.avslag ? values.avslag : null,
-                virkningsDato: values.virkningsDato?.toLocaleDateString("no-NO", { dateStyle: "short" }) ?? null,
+        updateVirkningsTidspunkt.mutation.mutate(createPayload(values), {
+            onSuccess: () => {
+                useFormMethods.reset(values, { keepValues: true, keepErrors: true });
             },
-            { onSuccess: () => useFormMethods.reset(undefined, { keepValues: true, keepErrors: true }) }
-        );
+        });
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -174,7 +165,7 @@ const VirkningstidspunktForm = () => {
         if (useFormMethods.formState.isDirty) {
             debouncedOnSave();
         }
-    }, [watchAllFields, useFormMethods.formState.isDirty]);
+    }, [watchAllFields]);
 
     return (
         <>

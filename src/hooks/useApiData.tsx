@@ -6,16 +6,24 @@ import {
     BehandlingDto,
     BoforholdResponse,
     InntekterResponse,
+    OpplysningerDto,
     OpplysningerType,
     RolleDto,
+    RolleType,
     UpdateBehandlingRequestExtended,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
     VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
-import { HusstandsmedlemmerDto, PersonDto } from "../api/PersonApi";
-import { BEHANDLING_API, PERSON_API } from "../constants/api";
+import {
+    HentGrunnlagspakkeDto,
+    OppdaterGrunnlagspakkeDto,
+    OppdaterGrunnlagspakkeRequestDto,
+} from "../api/BidragGrunnlagApi";
+import { PersonDto } from "../api/PersonApi";
+import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
+import { deductMonths, toISODateString } from "../utils/date-utils";
 
 export const useGetBehandlings = () =>
     useQuery({
@@ -28,7 +36,21 @@ export const useGetBehandlings = () =>
 export const useGetBehandling = (behandlingId: number) =>
     useQuery({
         queryKey: ["behandling", behandlingId],
-        queryFn: (): Promise<AxiosResponse<BehandlingDto>> => BEHANDLING_API.api.hentBehandling(behandlingId),
+        queryFn: async (): Promise<BehandlingDto> => {
+            const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
+            return data;
+        },
+        staleTime: Infinity,
+        suspense: true,
+    });
+
+export const useGetVirkningstidspunkt = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["virkningstidspunkt", behandlingId],
+        queryFn: async (): Promise<VirkningsTidspunktResponse> => {
+            const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
+            return data;
+        },
         staleTime: Infinity,
         suspense: true,
     });
@@ -38,10 +60,12 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
     const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
-        mutationFn: (payload: UpdateVirkningsTidspunktRequest): Promise<AxiosResponse<VirkningsTidspunktResponse>> =>
-            BEHANDLING_API.api.oppdaterVirkningsTidspunkt(behandlingId, payload),
+        mutationFn: async (payload: UpdateVirkningsTidspunktRequest): Promise<VirkningsTidspunktResponse> => {
+            const { data } = await BEHANDLING_API.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
+            return data;
+        },
         onSuccess: (data) => {
-            queryClient.setQueryData(["virkningstidspunkt-", behandlingId], data);
+            queryClient.setQueryData(["virkningstidspunkt", behandlingId], data);
             setError(undefined);
         },
         onError: (error) => {
@@ -53,15 +77,44 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
     return { mutation, error };
 };
 
+export const useGetBoforhold = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["boforhold", behandlingId],
+        queryFn: async (): Promise<BoforholdResponse> => {
+            const { data } = await BEHANDLING_API.api.hentBoforhold(behandlingId);
+            return data;
+        },
+        staleTime: Infinity,
+        suspense: true,
+    });
+
+export const useGetBoforoholdOpplysninger = (behandlingId: number) =>
+    useQuery({
+        queryKey: ["boforoholdOpplysninger", behandlingId],
+        queryFn: async (): Promise<OpplysningerDto> => {
+            try {
+                const { data } = await BEHANDLING_API.api.hentAktiv(behandlingId, OpplysningerType.BOFORHOLD);
+                return data;
+            } catch (e) {
+                if (e.response.status === 404) return null;
+                else throw e;
+            }
+        },
+        staleTime: Infinity,
+        suspense: true,
+    });
+
 export const useUpdateBoforhold = (behandlingId: number) => {
     const queryClient = useQueryClient();
     const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
-        mutationFn: (payload: UpdateBoforholdRequest): Promise<AxiosResponse<BoforholdResponse>> =>
-            BEHANDLING_API.api.oppdatereBoforhold(behandlingId, payload),
+        mutationFn: async (payload: UpdateBoforholdRequest): Promise<BoforholdResponse> => {
+            const { data } = await BEHANDLING_API.api.oppdatereBoforhold(behandlingId, payload);
+            return data;
+        },
         onSuccess: (data) => {
-            queryClient.setQueryData(["boforhold-", behandlingId], data);
+            queryClient.setQueryData(["boforhold", behandlingId], data);
             setError(undefined);
         },
         onError: (error) => {
@@ -78,10 +131,12 @@ export const useUpdateInntekter = (behandlingId: number) => {
     const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
-        mutationFn: (payload: UpdateInntekterRequest): Promise<AxiosResponse<InntekterResponse>> =>
-            BEHANDLING_API.api.oppdaterInntekter(behandlingId, payload),
+        mutationFn: async (payload: UpdateInntekterRequest): Promise<InntekterResponse> => {
+            const { data } = await BEHANDLING_API.api.oppdaterInntekter(behandlingId, payload);
+            return data;
+        },
         onSuccess: (data) => {
-            queryClient.setQueryData(["inntekter-", behandlingId], data);
+            queryClient.setQueryData(["inntekter", behandlingId], data);
             setError(undefined);
         },
         onError: (error) => {
@@ -121,7 +176,10 @@ export const useHentBoforhold = (behandlingId: number) =>
 export const useHentPersonData = (ident: string) =>
     useQuery({
         queryKey: ["persons", ident],
-        queryFn: (): Promise<AxiosResponse<PersonDto>> => PERSON_API.informasjon.hentPersonPost({ ident: ident }),
+        queryFn: async (): Promise<PersonDto> => {
+            const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
+            return data;
+        },
         staleTime: Infinity,
         suspense: true,
     });
@@ -130,40 +188,138 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
     useQueries({
         queries: roller.map((rolle) => ({
             queryKey: ["persons", rolle.ident],
-            queryFn: (): Promise<AxiosResponse<PersonDto>> =>
-                PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident }),
+            queryFn: async (): Promise<PersonDto> => {
+                const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident });
+                return data;
+            },
             staleTime: Infinity,
-            select: useCallback(({ data }) => ({ ...rolle, navn: data.navn }), []),
+            select: useCallback((data) => ({ ...rolle, navn: data.navn }), []),
             suspense: true,
             enabled: !!rolle,
         })),
     });
 
-export const useGetHusstandsmedlemmer = (ident: string) =>
-    useQuery({
-        queryKey: ["husstandsmedlemmer", ident],
-        queryFn: (): Promise<AxiosResponse<HusstandsmedlemmerDto>> =>
-            PERSON_API.husstandsmedlemmer.hentHusstandsmedlemmer({ ident: ident }),
-        staleTime: Infinity,
-        suspense: true,
-        enabled: !!ident,
-    });
+const createGrunnlagRequest = (behandling) => {
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
+    const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const periodeFra = toISODateString(new Date());
+    const periodeTil = toISODateString(deductMonths(new Date(), 36));
+    const skattegrunnlagBarnRequests = barn?.map((b) => ({
+        type: "SKATTEGRUNNLAG",
+        personId: b.ident,
+        periodeFra,
+        periodeTil,
+    }));
+    const bmRequests = [
+        "SKATTEGRUNNLAG",
+        "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG",
+        "BARNETILLEGG",
+        "HUSSTANDSMEDLEMMER",
+        "SIVILSTAND",
+    ].map((type) => ({
+        type: type,
+        personId: bmIdent,
+        periodeFra,
+        periodeTil,
+    }));
 
-export const useGetBoforoholdOpplysninger = (behandlingId: number) =>
-    useQuery({
-        queryKey: ["boforoholdOpplysninger", behandlingId],
-        queryFn: async (): Promise<AxiosResponse<HusstandsmedlemmerDto>> => {
-            try {
-                const res = await BEHANDLING_API.api.hentAktiv(behandlingId, OpplysningerType.BOFORHOLD);
-                return res;
-            } catch (e) {
-                if (e.response.status === 404) return null;
-                else throw e;
-            }
+    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
+        // @ts-ignore
+        grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
+    };
+
+    return grunnlagRequest;
+};
+
+export const useGrunnlagspakke = (behandling) => {
+    const { data: grunnlagspakkeId } = useQuery({
+        queryKey: ["grunnlagspakkeId"],
+        queryFn: async (): Promise<number> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+                formaal: "FORSKUDD",
+                opprettetAv: "saksbehandler",
+            });
+            return data;
         },
         staleTime: Infinity,
-        suspense: true,
+        enabled: !!behandling,
     });
+
+    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
+
+    const { isSuccess: updateIsSuccess } = useQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
+        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
+                grunnlagspakkeId,
+                grunnlagRequest
+            );
+            return data;
+        },
+        staleTime: Infinity,
+        enabled: !!grunnlagspakkeId,
+    });
+
+    return useQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId],
+        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+            return data;
+        },
+        staleTime: Infinity,
+        enabled: !!updateIsSuccess,
+    });
+};
+
+export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
+    const queryClient = useQueryClient();
+    await queryClient.prefetchQuery({
+        queryKey: ["behandling", behandlingId],
+        queryFn: async (): Promise<BehandlingDto> => {
+            const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
+            return data;
+        },
+        staleTime: Infinity,
+    });
+
+    await queryClient.prefetchQuery({
+        queryKey: ["grunnlagspakkeId"],
+        queryFn: async (): Promise<number> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+                formaal: "FORSKUDD",
+                opprettetAv: "saksbehandler",
+            });
+            return data;
+        },
+        staleTime: Infinity,
+    });
+    const grunnlagspakkeId: number = queryClient.getQueryData(["grunnlagspakkeId"]);
+    const behandling: BehandlingDto = queryClient.getQueryData(["behandling", behandlingId]);
+    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
+
+    await queryClient.prefetchQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
+        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
+                grunnlagspakkeId,
+                grunnlagRequest
+            );
+            return data;
+        },
+        staleTime: Infinity,
+    });
+    await queryClient.prefetchQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId],
+        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+            return data;
+        },
+        staleTime: Infinity,
+    });
+
+    const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
+    return grunnlagspakke;
+};
 
 export const _updateBehandlingExtended = (behandlingId: number) => {
     const queryClient = useQueryClient();

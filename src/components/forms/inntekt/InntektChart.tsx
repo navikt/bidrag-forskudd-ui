@@ -1,5 +1,5 @@
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
-import React from "react";
+import React, { memo } from "react";
 
 import { Inntekt } from "../../../__mocks__/testdata/inntektTestData";
 import { roundDown, roundUp } from "../../../utils/number-utils";
@@ -66,6 +66,21 @@ const buildChartOptions = (inntekt: Inntekt[]): EChartsOption => ({
     ],
 });
 
-export const InntektChart = ({ inntekt }: { inntekt: Inntekt[] }) => (
-    <ReactECharts option={buildChartOptions(inntekt)} />
+const arePropsEqual = (oldProps, newProps) => {
+    return (
+        oldProps.inntekt.length === newProps.inntekt.length &&
+        oldProps.inntekt.every((oldInntekt, index) => {
+            const newInntekt = newProps.inntekt[index];
+            return (
+                oldInntekt.aar === newInntekt.aar &&
+                oldInntekt.tekniskNavn === newInntekt.tekniskNavn &&
+                oldInntekt.totalt === newInntekt.totalt
+            );
+        })
+    );
+};
+
+export const InntektChart = memo(
+    ({ inntekt }: { inntekt: Inntekt[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
+    arePropsEqual
 );

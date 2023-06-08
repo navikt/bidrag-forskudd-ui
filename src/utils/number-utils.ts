@@ -17,3 +17,9 @@ export const roundUp = (num: number) => {
     const numOfDigits = numString.length;
     return (firstDigit + 1) * Math.pow(10, numOfDigits - 1);
 };
+
+export const getRandomInt = () => {
+    const min = Math.ceil(1);
+    const max = Math.floor(10000);
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};

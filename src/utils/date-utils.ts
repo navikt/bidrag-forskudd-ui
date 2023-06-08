@@ -1,5 +1,6 @@
 export const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
 export const toISOStringOrNull = (date?: Date): string | null => date?.toISOString() ?? null;
+export const toISODateString = (date: Date): string => toISOStringOrNull(date).split("T")[0];
 export const addDays = (date: Date, days: number) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -42,7 +43,7 @@ export const DDMMYYYYStringToDate = (dateString: string) => {
 };
 
 export const DateToDDMMYYYYString = (date: Date) =>
-    date.toLocaleDateString("nb-NO", { year: "numeric", month: "numeric", day: "numeric" });
+    date.toLocaleDateString("nb-NO", { year: "numeric", month: "2-digit", day: "2-digit" });
 
 export const DateToMMYYYYString = (date: Date) =>
     date.toLocaleDateString("nb-NO", { year: "numeric", month: "2-digit" });

@@ -5,11 +5,13 @@ import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { useGetVirkningstidspunkt } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
-    const { activeStep, setActiveStep, virkningstidspunktFormValues } = useForskudd();
-    const avslag = virkningstidspunktFormValues?.avslag;
+    const { activeStep, setActiveStep, behandlingId } = useForskudd();
+    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
+    const interactive = !virkningstidspunkt?.avslag;
 
     return (
         <PageWrapper name="tracking-wide">
@@ -22,8 +24,8 @@ export const ForskuddPage = () => {
                     className="mb-8"
                 >
                     <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
-                    <Stepper.Step interactive={avslag === ""}>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
-                    <Stepper.Step interactive={avslag === ""}>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
+                    <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
+                    <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
                 <FormWrapper />

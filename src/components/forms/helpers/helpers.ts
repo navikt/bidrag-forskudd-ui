@@ -1,14 +1,15 @@
 import { AxiosResponse } from "axios";
 
-import { BehandlingDto } from "../../../api/BidragBehandlingApi";
+import { VirkningsTidspunktResponse } from "../../../api/BidragBehandlingApi";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
+import { DDMMYYYYStringToDate } from "../../../utils/date-utils";
 
 export const getVirkningstidspunkt = (
     virkningstidspunktFormValues: VirkningstidspunktFormValues,
-    behandling: AxiosResponse<BehandlingDto>
+    virkningstidspunkt: AxiosResponse<VirkningsTidspunktResponse>
 ) =>
     virkningstidspunktFormValues?.virkningsDato
         ? virkningstidspunktFormValues.virkningsDato
-        : behandling?.data.virkningsDato
-        ? new Date(behandling.data.virkningsDato)
+        : virkningstidspunkt?.data.virkningsDato
+        ? DDMMYYYYStringToDate(virkningstidspunkt.data.virkningsDato)
         : null;

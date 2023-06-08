@@ -146,9 +146,7 @@ const Side = () => {
 const InntektForm = () => {
     const channel = new BroadcastChannel("inntekter");
     const { behandlingId, inntektFormValues, setInntektFormValues } = useForskudd();
-    const {
-        data: { data: behandling },
-    } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
     const roller = behandling?.roller?.filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG);
     const { data: inntekt } = useGetInntekt(behandlingId.toString(), roller);
     const mutation = usePostInntekt(behandlingId.toString());
@@ -195,8 +193,6 @@ const InntektForm = () => {
     useEffect(() => {
         if (!inntektFormValues) setInntektFormValues(initialValues);
         useFormMethods.trigger();
-
-        return () => setInntektFormValues(useFormMethods.getValues());
     }, []);
 
     const onSave = () => {

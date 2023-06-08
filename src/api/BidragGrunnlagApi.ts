@@ -26,22 +26,85 @@ export interface Skattegrunnlag {
     tekniskNavn: string;
 }
 
-export interface SivilstandRequest {
-    personId: string;
-    /** @format date */
-    periodeFra: string;
-}
-
-export interface SivilstandResponse {
-    type: string;
+/** Liste over alle hentede forekomster av sivilstand */
+export interface Sivilstand {
+    type?:
+        | "ENKE_ELLER_ENKEMANN"
+        | "GIFT"
+        | "GJENLEVENDE_PARTNER"
+        | "REGISTRERT_PARTNER"
+        | "SEPARERT"
+        | "SEPARERT_PARTNER"
+        | "SKILT"
+        | "SKILT_PARTNER"
+        | "UGIFT"
+        | "UOPPGITT";
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
     bekreftelsesdato?: string;
 }
 
-export interface SivilstandResponseDto {
-    sivilstand?: SivilstandResponse[];
+export interface SivilstandDto {
+    /** Liste over alle hentede forekomster av sivilstand */
+    sivilstand: Sivilstand[];
+}
+
+export interface EksternePerioderRequest {
+    personIdent: string;
+    /** @format date */
+    fomDato: string;
+    /** @format date */
+    tomDato: string;
+}
+
+export interface EksternPeriodeMedBelop {
+    personIdent: string;
+    /** @format date */
+    fomDato: string;
+    /** @format date */
+    tomDato: string;
+    /** @format int32 */
+    beløp: number;
+    datakilde: string;
+}
+
+export interface EksternePerioderMedBelopResponse {
+    perioder: EksternPeriodeMedBelop[];
+}
+
+export interface Ressurs {
+    data: EksternePerioderMedBelopResponse;
+}
+
+export interface NavnFodselDodDto {
+    /** Gir navn, fødselsdato og fødselsår for angitt person. Fødselsår finnes for alle i PDL, mens noen ikke har utfyllt fødselsdato */
+    navn: string;
+    /** @format date */
+    fødselsdato?: string;
+    /** @format int32 */
+    fødselsår: number;
+    /**
+     * Eventuell dødsdato til personen
+     * @format date
+     */
+    dødsdato?: string;
+    /**
+     * @deprecated
+     * @format date
+     */
+    foedselsdato?: string;
+    /**
+     * @deprecated
+     * @format int32
+     */
+    foedselsaar: number;
+    /**
+     * Eventuell dødsdato til personen
+     * @deprecated
+     * @format date
+     */
+    doedsdato?: string;
 }
 
 export interface BisysDto {
@@ -151,13 +214,8 @@ export interface KsSakPeriode {
     barn: Barn;
 }
 
-export interface HusstandsmedlemmerRequest {
-    personId: string;
-    /** @format date */
-    periodeFra: string;
-}
-
-export interface HusstandResponse {
+/** Periodiser liste over husstander og dens medlemmer i perioden */
+export interface Husstand {
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
@@ -171,52 +229,48 @@ export interface HusstandResponse {
     kommunenummer?: string;
     /** @format int64 */
     matrikkelId?: number;
-    husstandsmedlemmerResponseListe: HusstandsmedlemmerResponse[];
+    husstandsmedlemListe: Husstandsmedlem[];
 }
 
-export interface HusstandsmedlemmerResponse {
+export interface Husstandsmedlem {
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
     gyldigTilOgMed?: string;
-    personId?: string;
-    fornavn?: string;
-    mellomnavn?: string;
-    etternavn?: string;
-    /** @format date */
-    foedselsdato?: string;
-    /** @format date */
-    doedsdato?: string;
-}
-
-export interface HusstandsmedlemmerResponseDto {
-    husstandResponseListe?: HusstandResponse[];
-}
-
-export interface NavnFoedselDoedResponseDto {
-    navn?: string;
-    /** @format date */
-    foedselsdato?: string;
-    /** @format int32 */
-    foedselsaar: number;
-    /** @format date */
-    doedsdato?: string;
-}
-
-export interface ForelderBarnRequest {
     personId: string;
+    navn: string;
     /** @format date */
-    periodeFra: string;
+    fødselsdato?: string;
+    /** @format date */
+    dødsdato?: string;
+    /**
+     * @deprecated
+     * @format date
+     */
+    foedselsdato?: string;
+    /**
+     * @deprecated
+     * @format date
+     */
+    doedsdato?: string;
 }
 
-export interface ForelderBarnRelasjonResponse {
-    relatertPersonsIdent: string;
+export interface HusstandsmedlemmerDto {
+    /** Periodiser liste over husstander og dens medlemmer i perioden */
+    husstandListe: Husstand[];
+}
+
+/** Liste over alle hentede forekomster av foreldre-barnrelasjoner */
+export interface ForelderBarnRelasjon {
+    minRolleForPerson: "BARN" | "FAR" | "MEDMOR" | "MOR";
+    relatertPersonsIdent?: string;
+    /** Hvilken rolle personen i requesten har til personen i responsen */
     relatertPersonsRolle: "BARN" | "FAR" | "MEDMOR" | "MOR";
-    minRolleForPerson?: "BARN" | "FAR" | "MEDMOR" | "MOR";
 }
 
-export interface ForelderBarnRelasjonResponseDto {
-    forelderBarnRelasjonResponse?: ForelderBarnRelasjonResponse[];
+export interface ForelderBarnRelasjonDto {
+    /** Liste over alle hentede forekomster av foreldre-barnrelasjoner */
+    forelderBarnRelasjon: ForelderBarnRelasjon[];
 }
 
 export interface FamilieBaSakRequest {
@@ -323,19 +377,55 @@ export interface HentBarnetilleggPensjonResponse {
     barnetilleggPensjonListe?: BarnetilleggPensjon[];
 }
 
-export interface HentInntektRequest {
-    ident: string;
-    /** @format date */
-    innsynHistoriskeInntekterDato?: string;
-    maanedFom: string;
-    maanedTom: string;
-    ainntektsfilter: string;
-    formaal: string;
+export interface Aktoer {
+    identifikator: string;
+    aktoerType: string;
 }
 
-export interface Aktoer {
-    identifikator?: string;
-    aktoerType?: "AKTOER_ID" | "NATURLIG_IDENT" | "ORGANISASJON";
+export interface HentInntektListeRequest {
+    ident: Aktoer;
+    maanedFom: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    maanedTom: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    ainntektsfilter: string;
+    formaal: string;
 }
 
 export type AldersUfoereEtterlatteAvtalefestetOgKrigspensjon = TilleggsinformasjonDetaljer & {
@@ -617,12 +707,11 @@ export interface GrunnlagRequestDto {
         | "SKATTEGRUNNLAG"
         | "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG"
         | "BARNETILLEGG"
-        | "HUSSTANDSMEDLEMMER"
-        | "EGNE_BARN_I_HUSSTANDEN"
-        | "EGNE_BARN"
+        | "HUSSTANDSMEDLEMMER_OG_EGNE_BARN"
         | "SIVILSTAND"
         | "KONTANTSTOTTE"
-        | "BARNETILSYN";
+        | "BARNETILSYN"
+        | "OVERGANGSSTONAD";
     /**
      * Angir personId som grunnlag skal hentes for
      * @pattern ^[0-9]{11}$
@@ -658,12 +747,11 @@ export interface OppdaterGrunnlagDto {
         | "SKATTEGRUNNLAG"
         | "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG"
         | "BARNETILLEGG"
-        | "HUSSTANDSMEDLEMMER"
-        | "EGNE_BARN_I_HUSSTANDEN"
-        | "EGNE_BARN"
+        | "HUSSTANDSMEDLEMMER_OG_EGNE_BARN"
         | "SIVILSTAND"
         | "KONTANTSTOTTE"
-        | "BARNETILSYN";
+        | "BARNETILSYN"
+        | "OVERGANGSSTONAD";
     /** Angir personId som grunnlag er hentet for */
     personId: string;
     /** Status for utført kall */
@@ -705,7 +793,7 @@ export interface AinntektDto {
      */
     brukFra: string;
     /**
-     * Tidspunkt inntekten ikke lenger er aktiv. Null betyr at inntekten er aktiv
+     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -782,7 +870,7 @@ export interface BarnetilleggDto {
      */
     brukFra: string;
     /**
-     * Tidspunkt stønaden ikke lenger er aktiv. Null betyr at stønaden er aktiv
+     * Tidspunkt stønaden ikke lenger er aktiv som grunnlag. Null betyr at stønaden er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -813,15 +901,15 @@ export interface BarnetilsynDto {
      * @format date
      */
     periodeTil?: string;
-    /** Angir om en inntektsopplysning er aktiv */
+    /** Angir om en stønadsopplysning er aktiv */
     aktiv: boolean;
     /**
-     * Tidspunkt inntekten tas i bruk
+     * Tidspunkt stønadsopplysningen tas i bruk som grunnlag
      * @format date-time
      */
     brukFra: string;
     /**
-     * Tidspunkt inntekten ikke lenger aktiv. Null betyr at inntekten er aktiv
+     * Tidspunkt stønadsopplysning ikke lenger aktiv som grunnlag. Null betyr at stønadsopplysningen er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -841,59 +929,18 @@ export interface BarnetilsynDto {
     hentetTidspunkt: string;
 }
 
-/** Perioder barnet bor i samme husstand som aktuell forelder */
+/** Liste over perioder personen bor i samme husstand som BM/BP */
 export interface BorISammeHusstandDto {
     /**
-     * Barnet bor i husstanden fra- og med måned
+     * Personen bor i samme husstand som BM/BP fra- og med måned
      * @format date
      */
     periodeFra?: string;
     /**
-     * Barnet bor i husstanden til- og med måned
+     * Personen bor i samme husstand som BM/BP til- og med måned
      * @format date
      */
     periodeTil?: string;
-    /** Manuelt opprettet av */
-    opprettetAv?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-}
-
-/** Liste over en persons barn og hvilke perioder de eventuelt deler husstand med personen grunnlaget er hentet inn for */
-export interface EgneBarnDto {
-    /** Id til forelderen. Kan være null ved manuelle registreringer */
-    personIdForelder?: string;
-    /** Identen til barnet */
-    personIdBarn?: string;
-    /** Navn på barnet, format <Fornavn, mellomnavn, Etternavn */
-    navn?: string;
-    /**
-     * Barnets fødselsdato
-     * @format date
-     */
-    foedselsdato?: string;
-    /**
-     * Barnets fødselsår
-     * @format int32
-     */
-    foedselsaar?: number;
-    /**
-     * Barnets eventuelle dødsdato
-     * @format date
-     */
-    doedsdato?: string;
-    /** Manuelt opprettet av */
-    opprettetAv?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-    /** Perioder barnet bor i samme husstand som aktuell forelder */
-    borISammeHusstandDtoListe?: BorISammeHusstandDto[];
 }
 
 export interface HentGrunnlagspakkeDto {
@@ -912,102 +959,23 @@ export interface HentGrunnlagspakkeDto {
     barnetilleggListe: BarnetilleggDto[];
     /** Periodisert liste over innhentet kontantstøtte */
     kontantstotteListe: KontantstotteDto[];
-    /** Liste over en persons barn og hvilke perioder de eventuelt deler husstand med personen grunnlaget er hentet inn for */
-    egneBarnListe: EgneBarnDto[];
-    /** Periodisert liste over innhentede husstander for en person og dens voksne husstandsmedlemmer */
-    husstandListe: HusstandDto[];
+    egneBarnIHusstandenListe: RelatertPersonDto[];
+    husstandmedlemListe: RelatertPersonDto[];
+    /** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
+    husstandmedlemmerOgEgneBarnListe: RelatertPersonDto[];
     /** Periodisert liste over en persons sivilstand */
     sivilstandListe: SivilstandDto[];
     /** Periodisert liste over innhentet barnetilsyn */
     barnetilsynListe: BarnetilsynDto[];
-}
-
-/** Periodisert liste over innhentede husstander for en person og dens voksne husstandsmedlemmer */
-export interface HusstandDto {
-    /** Id til personen husstandsinformasjonen er rapportert for */
-    personId?: string;
-    /**
-     * Personen (BP) bor i husstanden fra- og med måned
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Personen (BP) bor i husstanden til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Navnet på en gate e.l. */
-    adressenavn?: string;
-    /** Nummeret som identifiserer et av flere hus i en gate */
-    husnummer?: string;
-    /** Bokstav som identifiserer del av et bygg */
-    husbokstav?: string;
-    /** En bokstav og fire siffer som identifiserer en boligenhet innenfor et bygg eller en bygningsdel */
-    bruksenhetsnummer?: string;
-    /** Norsk postnummer */
-    postnummer?: string;
-    /** 6 siffer, identifiserer bydel */
-    bydelsnummer?: string;
-    /** Siffer som identifiserer hvilken kommune adressen ligger i */
-    kommunenummer?: string;
-    /**
-     * Nøkkel til geografisk adresse registrert i Kartverkets matrikkel
-     * @format int64
-     */
-    matrikkelId?: number;
-    /** Landkode, skal bare brukes for manuelt registrerte utlandsadresser */
-    landkode?: string;
-    /** Manuelt opprettet av */
-    opprettetAv?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-    /** Periodisert liste over husstandsmedlemmer */
-    husstandsmedlemmerListe?: HusstandsmedlemDto[];
-}
-
-/** Periodisert liste over husstandsmedlemmer */
-export interface HusstandsmedlemDto {
-    /**
-     * Husstandsmedlemmet bor i husstanden fra- og med måned
-     * @format date
-     */
-    periodeFra?: string;
-    /**
-     * Husstandsmedlemmet bor i husstanden til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Identen til husstandsmedlemmet */
-    personId?: string;
-    /** Navn på husstandsmedlemmet, format <Fornavn, mellomnavn, Etternavn */
-    navn?: string;
-    /**
-     * Husstandsmedlemmets fødselsdag
-     * @format date
-     */
-    foedselsdato?: string;
-    /**
-     * Husstandsmedlemmets eventuelle dødsdato
-     * @format date
-     */
-    doedsdato?: string;
-    /** Manuelt opprettet av */
-    opprettetAv?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
+    /** Periodisert liste over innhentet overgangsstønad */
+    overgangsstonadListe: OvergangsstonadDto[];
 }
 
 /** Periodisert liste over innhentet kontantstøtte */
 export interface KontantstotteDto {
-    /** Id til personen som mottar kontatstøtten */
+    /** Id til personen som mottar kontantstøtten */
     partPersonId: string;
-    /** Id til barnet kontatstøtten er for */
+    /** Id til barnet kontantstøtten er for */
     barnPersonId: string;
     /**
      * Periode fra-dato
@@ -1027,7 +995,7 @@ export interface KontantstotteDto {
      */
     brukFra: string;
     /**
-     * Tidspunkt inntekten ikke lenger aktiv. Null betyr at inntekten er aktiv
+     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -1043,29 +1011,78 @@ export interface KontantstotteDto {
     hentetTidspunkt: string;
 }
 
-/** Periodisert liste over en persons sivilstand */
-export interface SivilstandDto {
-    /** Id til personen sivilstanden er rapportert for */
-    personId?: string;
+/** Periodisert liste over innhentet overgangsstønad */
+export interface OvergangsstonadDto {
+    /** Id til personen som mottar overgangsstønaden */
+    partPersonId: string;
     /**
-     * Sivilstand gjelder fra- og med måned
+     * Periode fra-dato
      * @format date
      */
-    periodeFra?: string;
+    periodeFra: string;
     /**
-     * Sivilstand gjelder til- og med måned
+     * Periode til-dato
      * @format date
      */
     periodeTil?: string;
-    /** Personens sivilstand */
-    sivilstand: "GIFT" | "ENSLIG" | "SAMBOER";
-    /** Manuelt opprettet av */
-    opprettetAv?: string;
+    /** Angir om en inntektsopplysning er aktiv */
+    aktiv: boolean;
+    /**
+     * Tidspunkt inntekten tas i bruk
+     * @format date-time
+     */
+    brukFra: string;
+    /**
+     * Tidspunkt inntekten ikke lenger aktiv som grunnlag. Null betyr at inntekten er aktiv
+     * @format date-time
+     */
+    brukTil?: string;
+    /**
+     * Beløp overgangsstønad
+     * @format int32
+     */
+    belop: number;
     /**
      * Hentet tidspunkt
      * @format date-time
      */
     hentetTidspunkt: string;
+}
+
+/** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
+export interface RelatertPersonDto {
+    /** Personid til BM/BP */
+    partPersonId?: string;
+    /** Personid til relatert person. Dette er husstandsmedlem eller barn av BM/BP */
+    relatertPersonPersonId?: string;
+    /** Navn på den relaterte personen, format <Fornavn, mellomnavn, Etternavn */
+    navn?: string;
+    /**
+     * Den relaterte personens fødselsdato
+     * @format date
+     */
+    fodselsdato?: string;
+    /** Angir om den relaterte personen er barn av BM/BP */
+    erBarnAvBmBp: boolean;
+    /** Angir om en grunnlagsopplysning er aktiv */
+    aktiv: boolean;
+    /**
+     * Tidspunkt grunnlaget tas i bruk
+     * @format date-time
+     */
+    brukFra: string;
+    /**
+     * Tidspunkt grunnlaget ikke lenger er aktivt. Null betyr at grunnlaget er aktivt
+     * @format date-time
+     */
+    brukTil?: string;
+    /**
+     * Hentet tidspunkt
+     * @format date-time
+     */
+    hentetTidspunkt: string;
+    /** Liste over perioder personen bor i samme husstand som BM/BP */
+    borISammeHusstandDtoListe: BorISammeHusstandDto[];
 }
 
 /** Periodisert liste over innhentede fra skatt og underliggende poster */
@@ -1090,7 +1107,7 @@ export interface SkattegrunnlagDto {
      */
     brukFra: string;
     /**
-     * Tidspunkt inntekten ikke lenger er aktiv. Null betyr at inntekten er aktiv
+     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -1132,12 +1149,12 @@ export interface UtvidetBarnetrygdOgSmaabarnstilleggDto {
     /** Angir om en stønad er aktiv */
     aktiv: boolean;
     /**
-     * Tidspunkt stønaden taes i bruk
+     * Tidspunkt inntekten taes i bruk
      * @format date-time
      */
     brukFra: string;
     /**
-     * Tidspunkt stønaden ikke lenger er aktiv. Null betyr at stønaden er aktiv
+     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
      * @format date-time
      */
     brukTil?: string;
@@ -1198,7 +1215,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag-feature.dev.intern.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -1288,7 +1305,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-grunnlag
  * @version v1
- * @baseUrl https://bidrag-grunnlag-feature.dev.intern.nav.no
+ * @baseUrl https://bidrag-grunnlag.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     integrasjoner = {
@@ -1320,9 +1337,47 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request POST:/integrasjoner/sivilstand
          * @secure
          */
-        hentSivilstand: (data: SivilstandRequest, params: RequestParams = {}) =>
-            this.request<SivilstandResponseDto, any>({
+        hentSivilstand: (data: string, params: RequestParams = {}) =>
+            this.request<SivilstandDto, any>({
                 path: `/integrasjoner/sivilstand`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags integrasjons-controller
+         * @name HentOvergangsstonad
+         * @summary Kaller familie-ef-sak og henter overgangsstønad
+         * @request POST:/integrasjoner/overgangsstonad
+         * @secure
+         */
+        hentOvergangsstonad: (data: EksternePerioderRequest, params: RequestParams = {}) =>
+            this.request<Ressurs, any>({
+                path: `/integrasjoner/overgangsstonad`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags integrasjons-controller
+         * @name HentFoedselOgDoed
+         * @summary Kaller bidrag-person som igjen henter info om fødselsdato og eventuell død fra PDL
+         * @request POST:/integrasjoner/navnfoedseldoed
+         * @secure
+         */
+        hentFoedselOgDoed: (data: string, params: RequestParams = {}) =>
+            this.request<NavnFodselDodDto, any>({
+                path: `/integrasjoner/navnfoedseldoed`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1358,28 +1413,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request POST:/integrasjoner/husstandsmedlemmer
          * @secure
          */
-        hentHusstandsmedlemmer: (data: HusstandsmedlemmerRequest, params: RequestParams = {}) =>
-            this.request<HusstandsmedlemmerResponseDto, any>({
+        hentHusstandsmedlemmer: (data: string, params: RequestParams = {}) =>
+            this.request<HusstandsmedlemmerDto, any>({
                 path: `/integrasjoner/husstandsmedlemmer`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags integrasjons-controller
-         * @name HentFoedselOgDoed
-         * @summary Kaller bidrag-person som igjen henter info om fødselsdato og eventuell død fra PDL
-         * @request POST:/integrasjoner/forelderbarnrelasjon
-         * @secure
-         */
-        hentFoedselOgDoed: (data: string, params: RequestParams = {}) =>
-            this.request<NavnFoedselDoedResponseDto, any>({
-                path: `/integrasjoner/forelderbarnrelasjon`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1393,12 +1429,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags integrasjons-controller
          * @name HentForelderbarnrelasjon
          * @summary Kaller bidrag-person som igjen henter forelderbarnrelasjoner for angitt person fra PDL
-         * @request POST:/integrasjoner/foedselogdoed
+         * @request POST:/integrasjoner/forelderbarnrelasjon
          * @secure
          */
-        hentForelderbarnrelasjon: (data: ForelderBarnRequest, params: RequestParams = {}) =>
-            this.request<ForelderBarnRelasjonResponseDto, any>({
-                path: `/integrasjoner/foedselogdoed`,
+        hentForelderbarnrelasjon: (data: string, params: RequestParams = {}) =>
+            this.request<ForelderBarnRelasjonDto, any>({
+                path: `/integrasjoner/forelderbarnrelasjon`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1472,9 +1508,28 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request POST:/integrasjoner/ainntekt
          * @secure
          */
-        hentAinntekt: (data: HentInntektRequest, params: RequestParams = {}) =>
+        hentAinntekt: (data: HentInntektListeRequest, params: RequestParams = {}) =>
             this.request<HentInntektListeResponse, any>({
                 path: `/integrasjoner/ainntekt`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags integrasjons-controller
+         * @name HentAinntektAbonnement
+         * @summary Henter A-inntekt med abonnement
+         * @request POST:/integrasjoner/ainntekt/abonnement
+         * @secure
+         */
+        hentAinntektAbonnement: (data: HentInntektListeRequest, params: RequestParams = {}) =>
+            this.request<HentInntektListeResponse, any>({
+                path: `/integrasjoner/ainntekt/abonnement`,
                 method: "POST",
                 body: data,
                 secure: true,

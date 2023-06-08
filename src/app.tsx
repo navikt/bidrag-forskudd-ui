@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ForskuddProvider } from "./context/ForskuddContext";
+import { usePrefetchBehandlingAndGrunnlagspakke } from "./hooks/useApiData";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
 
@@ -62,6 +63,7 @@ export default function App() {
 
 function ForskudWrapper() {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
+    usePrefetchBehandlingAndGrunnlagspakke(Number(behandlingId));
 
     return (
         <>

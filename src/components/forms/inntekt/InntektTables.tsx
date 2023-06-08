@@ -6,15 +6,14 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
-import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { isValidDate } from "../../../utils/date-utils";
+import { DDMMYYYYStringToDate, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { getVirkningstidspunkt } from "../helpers/helpers";
 import {
     checkOverlappingPeriods,
     findDateGaps,
@@ -27,7 +26,6 @@ const Beskrivelse = ({ item, index, ident }) =>
         <BodyShort className="min-w-[215px] capitalize">{item.beskrivelse}</BodyShort>
     ) : (
         <FormControlledSelectField
-            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
@@ -84,7 +82,6 @@ const Totalt = ({ item, index, ident }) =>
     ) : (
         <div className="w-[120px]">
             <FormControlledTextField
-                key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
                 name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
                 label="Totalt"
                 type="number"
@@ -99,7 +96,6 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
         <div className="min-w-[40px]"></div>
     ) : (
         <Button
-            key={`delete-button-${index}`}
             type="button"
             onClick={() => handleOnDelete(index)}
             icon={<TrashIcon aria-hidden />}
@@ -119,8 +115,8 @@ const Periode = ({ item, index, ident, datepicker }) => {
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
-    const { behandlingId, virkningstidspunktFormValues } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { behandlingId } = useForskudd();
+    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const {
         control,
         getValues,
@@ -133,7 +129,9 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         control,
         name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
-    const virkningstidspunkt = getVirkningstidspunkt(virkningstidspunktFormValues, behandling);
+    const virkningstidspunkt = virkningstidspunktValues?.virkningsDato
+        ? DDMMYYYYStringToDate(virkningstidspunktValues.virkningsDato)
+        : null;
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
     useEffect(() => {
@@ -257,15 +255,25 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     className="m-auto"
                                     legend=""
                                 />,
-                                <Beskrivelse item={item} index={index} ident={ident} />,
-                                <Totalt item={item} index={index} ident={ident} />,
+                                <Beskrivelse
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
+                                    item={item}
+                                    index={index}
+                                    ident={ident}
+                                />,
+                                <Totalt
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
+                                    item={item}
+                                    index={index}
+                                    ident={ident}
+                                />,
                                 <Periode
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
                                             label="Fra og med"
                                             placeholder="MM.ÅÅÅÅ"
@@ -276,12 +284,12 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     }
                                 />,
                                 <Periode
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
                                             label="Til og med"
                                             placeholder="MM.ÅÅÅÅ"
@@ -290,7 +298,12 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                         />
                                     }
                                 />,
-                                <DeleteButton item={item} index={index} handleOnDelete={handleOnDelete} />,
+                                <DeleteButton
+                                    key={`delete-button-${index}`}
+                                    item={item}
+                                    index={index}
+                                    handleOnDelete={handleOnDelete}
+                                />,
                             ]}
                         />
                     ))}
@@ -434,11 +447,11 @@ export const UtvidetBarnetrygdTabel = () => {
 
 export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
-    const { data: data } = useGetBehandling(behandlingId);
-    const barna = data.data?.roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const barna = behandling?.roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
-    const barnMedNavn = personsQueries.map((data) => data.data);
+    const barnMedNavn = personsQueries.map(({ data }) => data);
 
     const {
         control,

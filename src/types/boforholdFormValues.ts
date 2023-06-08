@@ -1,3 +1,5 @@
+import { SivilstandType } from "../api/BidragBehandlingApi";
+
 interface BarnPeriode {
     edit: boolean;
     fraDato: Date | null;
@@ -15,11 +17,11 @@ interface Barn {
 interface Sivilstand {
     fraDato: Date | null;
     tilDato: Date | null;
-    stand: "" | "ugift" | "gift" | "skilt";
+    sivilstandType: SivilstandType;
 }
 
 export interface BoforholdFormValues {
-    barn: Barn[];
+    behandlingBarn: Barn[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;
