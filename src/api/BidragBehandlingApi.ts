@@ -165,7 +165,7 @@ export interface SivilstandDto {
     /** @format date */
     gyldigFraOgMed: string;
     /** @format date */
-    bekreftelsesdato: string;
+    datoTom?: string;
     sivilstandType: SivilstandType;
 }
 
@@ -367,6 +367,50 @@ export interface OpplysningerDto {
     hentetDato: string;
 }
 
+/** Beregnet forskudd */
+export interface ForskuddDto {
+    /** Periodisert liste over resultat av forskuddsberegning */
+    beregnetForskuddPeriodeListe: ResultatPeriode[];
+}
+
+/** Periode (fra-til dato */
+export interface Periode {
+    /**
+     * Fra-og-med-dato
+     * @format date
+     */
+    datoFom?: string;
+    /**
+     * Til-dato
+     * @format date
+     */
+    datoTil?: string;
+    /** Periode (fra-til dato */
+    periode: Periode;
+    /** Resultatet av en beregning */
+    resultat: ResultatBeregning;
+}
+
+/** Resultatet av en beregning */
+export interface ResultatBeregning {
+    /** Resultat beløp */
+    belop: number;
+    /** Resultat kode */
+    kode: string;
+    /** Resultat regel */
+    regel: string;
+}
+
+/** Resultatet av en beregning for en gitt periode */
+export interface ResultatPeriode {
+    /** Periode (fra-til dato */
+    periode: Periode;
+    /** Resultatet av en beregning */
+    resultat: ResultatBeregning;
+    /** Beregnet grunnlag innhold */
+    grunnlagReferanseListe: string[];
+}
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
@@ -413,7 +457,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -503,7 +547,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -684,6 +728,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-forskudd-controller
+         * @name BeregnForskudd
+         * @request POST:/api/behandling/{behandlingId}/beregn
+         * @secure
+         */
+        beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<ForskuddDto, Error>({
+                path: `/api/behandling/${behandlingId}/beregn`,
+                method: "POST",
+                secure: true,
                 ...params,
             }),
 
