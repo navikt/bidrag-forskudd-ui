@@ -1,17 +1,11 @@
 import { useApi } from "@navikt/bidrag-ui-common";
 
 import { Api as BidragBehandlingApi, BehandlingDto } from "../api/BidragBehandlingApi";
-import { Api as BidragBeregnForskuddApi } from "../api/BidragBeregnForskuddApi";
 import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
 import { Api as BidragSakApi } from "../api/BidragSakApi";
 import { Api as PersonApi } from "../api/PersonApi";
 import environment from "../environment";
 
-export const BIDRAG_BEREGN_FORSKUDD = useApi(
-    new BidragBeregnForskuddApi({ baseURL: environment.url.bidragBeregnForskudd }),
-    "bidrag-beregn-forskudd-rest",
-    "gcp"
-);
 export const BIDRAG_SAK_API = useApi(new BidragSakApi({ baseURL: environment.url.bidragSak }), "bidrag-sak", "fss");
 export const PERSON_API = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PERSON_URL }), "bidrag-person", "fss");
 export const BIDRAG_GRUNNLAG_API = useApi(
