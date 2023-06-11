@@ -63,10 +63,10 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     return perioder;
 };
 
-export const mapHusstandsMedlemmerToBarn = (behandling, egneBarnIHusstandenListe) => {
+export const mapHusstandsMedlemmerToBarn = (behandling, husstandmedlemmerOgEgneBarnListe) => {
     const barnFraBehandling = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    return egneBarnIHusstandenListe
-        .filter((egneBarn) => barnFraBehandling.find((barn) => barn.ident === egneBarn.relatertPersonPersonId))
+    return husstandmedlemmerOgEgneBarnListe
+        .filter((medlem) => barnFraBehandling.find((barn) => barn.ident === medlem.relatertPersonPersonId))
         .map((barn) => ({
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,

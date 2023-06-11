@@ -10,12 +10,7 @@ import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
 import { BIDRAG_BEREGN_FORSKUDD } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
-import {
-    useGetBehandling,
-    useHentBoforhold,
-    useHentInntekter,
-    useHentVirkningstidspunktData,
-} from "../../hooks/useApiData";
+import { useGetBehandling, useGetVirkningstidspunkt, useHentBoforhold, useHentInntekter } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
@@ -28,7 +23,7 @@ const Vedtak = () => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useHentBoforhold(behandlingId);
     const { data: inntekter } = useHentInntekter(behandlingId);
-    const { data: virkningsTidspunkt } = useHentVirkningstidspunktData(behandlingId);
+    const { data: virkningsTidspunkt } = useGetVirkningstidspunkt(behandlingId);
 
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
@@ -95,7 +90,7 @@ const Vedtak = () => {
     });
 
     const inntekterForBeregning = [
-        ...inntekter.data.inntekter.map((inn) => {
+        ...inntekter.inntekter.map((inn) => {
             return {
                 referanse: "", //TODO
                 type: "INNTEKT",
@@ -108,7 +103,7 @@ const Vedtak = () => {
                 },
             };
         }),
-        ...inntekter.data.barnetillegg.map((inn) => {
+        ...inntekter.barnetillegg.map((inn) => {
             return {
                 referanse: "", //TODO
                 type: "INNTEKT",
@@ -130,7 +125,7 @@ const Vedtak = () => {
                 },
             };
         }),
-        ...inntekter.data.utvidetbarnetrygd.map((inn) => {
+        ...inntekter.utvidetbarnetrygd.map((inn) => {
             return {
                 referanse: "", //TODO
                 type: "INNTEKT",
@@ -155,7 +150,7 @@ const Vedtak = () => {
         BIDRAG_BEREGN_FORSKUDD.beregn
             .beregnForskudd({
                 // beregnDatoFra: "2023-06-10",
-                beregnDatoFra: convertDate(virkningsTidspunkt.data.virkningsDato),
+                beregnDatoFra: convertDate(virkningsTidspunkt.virkningsDato),
                 beregnDatoTil: "2023-06-10", //TODO?
                 grunnlagListe: grunnlagListe,
                 // grunnlagListe: [],

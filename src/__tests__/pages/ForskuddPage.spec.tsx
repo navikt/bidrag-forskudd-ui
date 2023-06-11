@@ -11,6 +11,8 @@ import { BrowserRouter } from "react-router-dom";
 import sinon from "sinon";
 
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
+import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
+import { virkningstidspunktTestData } from "../../__mocks__/testdata/virkningstidspunktTestData";
 import { ForskuddHeader } from "../../components/header/ForskuddHeader";
 import { ForskuddProvider } from "../../context/ForskuddContext";
 import environment from "../../environment";
@@ -39,6 +41,35 @@ const server = setupServer(
     }),
     rest.options(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, (req, res, ctx) => {
         return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
+    }),
+    rest.options(
+        `${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`,
+        (req, res, ctx) => {
+            return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
+        }
+    ),
+    rest.options(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/boforhold`, (req, res, ctx) => {
+        return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
+    }),
+    rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/boforhold`, (req, res, ctx) => {
+        return res(
+            ctx.set({
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            }),
+            ctx.body(JSON.stringify(boforholdData))
+        );
+    }),
+    rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`, (req, res, ctx) => {
+        return res(
+            ctx.set({
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            }),
+            ctx.body(JSON.stringify(virkningstidspunktTestData))
+        );
     }),
     rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, (req, res, ctx) => {
         return res(

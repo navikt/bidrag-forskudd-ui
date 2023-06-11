@@ -13,8 +13,8 @@ export const createInntektPayload = (values: InntektFormValues) => ({
         ident,
         inntekt: values.inntekteneSomLeggesTilGrunn[ident].map((inntekt) => ({
             ...inntekt,
-            fraDato: toISOStringOrNull(inntekt.fraDato),
-            tilDato: toISOStringOrNull(inntekt.tilDato),
+            datoFom: toISOStringOrNull(inntekt.datoFom),
+            datoTom: toISOStringOrNull(inntekt.datoTom),
         })),
     })),
     utvidetBarnetrygd: values.utvidetBarnetrygd.length
@@ -35,35 +35,65 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
 });
 
-export const createInitialValues = (inntekt): InntektFormValues => {
+const mapSkattegrunnlagInntektPerioder = (person, skattegrunnlagListe) =>
+    skattegrunnlagListe.map((inntekt) => ({
+        taMed: false,
+        beskrivelse: inntekt.inntektType,
+        belop: inntekt.belop,
+        datoTom: dateOrNull(person.periodeTil),
+        datoFom: dateOrNull(person.periodeFra),
+        ident: person.personId,
+        fraPostene: true,
+    }));
+
+const getPerioderFraSkattegrunnlagOgAinntekt = (grunnlagspakke) =>
+    grunnlagspakke.skattegrunnlagListe.reduce(
+        (acc, person) => ({
+            ...acc,
+            [person.personId]: acc[person.personId]
+                ? acc[person.personId].concat(mapSkattegrunnlagInntektPerioder(person, person.skattegrunnlagListe))
+                : mapSkattegrunnlagInntektPerioder(person, person.skattegrunnlagListe),
+        }),
+        {}
+    );
+
+const getPerioderFraInntekter = (inntekter) =>
+    inntekter.reduce(
+        (acc, inntekt) => ({
+            ...acc,
+            [inntekt.ident]: acc[inntekt.ident]
+                ? acc[inntekt.ident].concat({
+                      ...inntekt,
+                      datoTom: dateOrNull(inntekt.datoTom),
+                      datoFom: dateOrNull(inntekt.datoFom),
+                  })
+                : [{ ...inntekt, datoTom: dateOrNull(inntekt.datoTom), datoFom: dateOrNull(inntekt.datoFom) }],
+        }),
+        {}
+    );
+
+export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValues => {
     return {
-        inntekteneSomLeggesTilGrunn: inntekt.inntekteneSomLeggesTilGrunn.reduce(
-            (acc, rolle) => ({
-                ...acc,
-                [rolle.ident]: rolle.inntekt.map((inntekt) => ({
-                    ...inntekt,
-                    fraDato: dateOrNull(inntekt.fraDato),
-                    tilDato: dateOrNull(inntekt.tilDato),
-                })),
-            }),
-            {}
-        ),
-        utvidetBarnetrygd: inntekt.utvidetBarnetrygd.length
-            ? inntekt.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
+        inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
+            ? getPerioderFraInntekter(inntekter.inntekter)
+            : getPerioderFraSkattegrunnlagOgAinntekt(grunnlagspakke),
+        utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
+            ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
                   ...utvidetBarnetrygd,
                   fraDato: dateOrNull(utvidetBarnetrygd.fraDato),
                   tilDato: dateOrNull(utvidetBarnetrygd.tilDato),
               }))
             : [],
-        barnetillegg: inntekt.barnetillegg.length
-            ? inntekt.barnetillegg.map((barnetilleg) => ({
+        barnetillegg: inntekter?.barnetillegg?.length
+            ? inntekter.barnetillegg.map((barnetilleg) => ({
                   ...barnetilleg,
                   fraDato: dateOrNull(barnetilleg.fraDato),
                   tilDato: dateOrNull(barnetilleg.tilDato),
               }))
             : [],
-        inntektBegrunnelseMedIVedtakNotat: inntekt.inntektBegrunnelseMedIVedtakNotat,
-        inntektBegrunnelseKunINotat: inntekt.inntektBegrunnelseKunINotat,
+        // TODO implement missing fields in the backend
+        inntektBegrunnelseMedIVedtakNotat: "",
+        inntektBegrunnelseKunINotat: "",
     };
 };
 

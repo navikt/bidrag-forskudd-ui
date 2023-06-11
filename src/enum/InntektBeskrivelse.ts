@@ -1,6 +1,6 @@
-export enum InntektBeskrivelse {
-    ARBEIDSGIVER_INNTEKT = "Inntekstoppl. fra arbeidsgiver",
-    PERSON_INNTEKT = "Personinntekt egne opplysninger",
-    KAPITALINNTEKT = "Kapitalinntekt egne opplysninger",
-    SAKSBEHANDLER = "Saksbehandlers beregnede inntekt",
+export enum InntektType {
+    LOENNSINNTEKT = "Lønn",
+    NAERINGSINNTEKT = "Næringsinntekt",
+    PENSJON_ELLER_TRYGD = "Pensjon eller trygd",
+    YTELSE_FRA_OFFENTLIGE = "Ytelse fra offentlige",
 }

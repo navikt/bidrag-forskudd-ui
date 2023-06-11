@@ -5,7 +5,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
+import { InntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { DDMMYYYYStringToDate, isValidDate } from "../../../utils/date-utils";
@@ -23,15 +23,15 @@ import {
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraPostene ? (
-        <BodyShort className="min-w-[215px] capitalize">{item.beskrivelse}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{InntektType[item.beskrivelse]}</BodyShort>
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
-                Object.entries(InntektBeskrivelse).map((entry) => ({
-                    value: entry[0],
-                    text: entry[1],
+                Object.entries(InntektType).map(([value, text]) => ({
+                    value,
+                    text,
                 }))
             )}
             hideLabel
@@ -76,13 +76,13 @@ const Detaljer = ({ totalt }) => {
 const Totalt = ({ item, index, ident }) =>
     item.fraPostene ? (
         <div className="flex items-center gap-x-4">
-            <BodyShort className="min-w-[80px] flex justify-end">{item.totalt}</BodyShort>
-            <Detaljer totalt={item.totalt} />
+            <BodyShort className="min-w-[80px] flex justify-end">{item.belop}</BodyShort>
+            <Detaljer totalt={item.belop} />
         </div>
     ) : (
         <div className="w-[120px]">
             <FormControlledTextField
-                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
+                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
                 label="Totalt"
                 type="number"
                 min="1"
@@ -108,7 +108,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
     const { control } = useFormContext<InntektFormValues>();
     const value = useWatch({
         control,
-        name: `inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`,
+        name: `inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`,
     });
 
     return <div className={`${value || !item.fraPostene ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
@@ -159,7 +159,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     const validatePeriods = () => {
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`).filter(
-                (inntekt) => inntekt.selected
+                (inntekt) => inntekt.taMed
             );
 
             if (!inntekteneSomLeggesTilGrunn.length) {
@@ -208,13 +208,11 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 
     const addPeriode = () => {
         inntekteneSomLeggesTilGrunnField.append({
-            aar: "",
-            fraDato: null,
-            tilDato: null,
-            totalt: "",
+            datoFom: null,
+            datoTom: null,
+            belop: "",
             beskrivelse: "",
-            tekniskNavn: "",
-            selected: false,
+            taMed: false,
             fraPostene: false,
         });
     };
@@ -249,8 +247,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                             key={item.id}
                             cells={[
                                 <FormControlledCheckbox
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`}
-                                    name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.selected`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
+                                    name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
                                     onChange={(value) => handleOnSelect(value.target.checked, index)}
                                     className="m-auto"
                                     legend=""
@@ -262,38 +260,38 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     ident={ident}
                                 />,
                                 <Totalt
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.totalt`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                 />,
                                 <Periode
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.fraDato`}
+                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
                                             label="Fra og med"
                                             placeholder="MM.ÅÅÅÅ"
-                                            defaultValue={item.fraDato}
-                                            required={item.selected}
+                                            defaultValue={item.datoFom}
+                                            required={item.taMed}
                                             hideLabel
                                         />
                                     }
                                 />,
                                 <Periode
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.tilDato`}
+                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
                                             label="Til og med"
                                             placeholder="MM.ÅÅÅÅ"
-                                            defaultValue={item.tilDato}
+                                            defaultValue={item.datoTom}
                                             hideLabel
                                         />
                                     }

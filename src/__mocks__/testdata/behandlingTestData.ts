@@ -1,8 +1,6 @@
 import {
     BehandlingDto,
     BehandlingType,
-    OpplysningerDto,
-    OpplysningerType,
     RolleType,
     SivilstandType,
     SoknadFraType,
@@ -72,13 +70,10 @@ export const behandlingMockApiData: BehandlingDto = {
             sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
         },
     ],
-};
-
-const boforholdOpplysninger: OpplysningerDto = {
-    id: Math.floor(Math.random() * 1000),
-    behandlingId: Number(JSON.parse(localStorage.getItem("behandlingId"))),
-    aktiv: true,
-    opplysningerType: OpplysningerType.BOFORHOLD,
-    data: "",
-    hentetDato: "2023-05-10",
+    virkningsTidspunktBegrunnelseMedIVedtakNotat: "",
+    virkningsTidspunktBegrunnelseKunINotat: "",
+    boforholdBegrunnelseMedIVedtakNotat: "",
+    boforholdBegrunnelseKunINotat: "",
+    inntektBegrunnelseMedIVedtakNotat: "",
+    inntektBegrunnelseKunINotat: "",
 };

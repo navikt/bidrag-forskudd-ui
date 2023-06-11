@@ -1,14 +1,12 @@
 import { Barn } from "../__mocks__/testdata/inntektTestData";
 
 export interface Inntekt {
-    aar: string;
     beskrivelse: string;
-    fraDato: Date | null;
+    datoFom: Date | null;
+    taMed: boolean;
     fraPostene: boolean;
-    selected: boolean;
-    tekniskNavn: string;
-    tilDato: Date | null;
-    totalt: string;
+    datoTom: Date | null;
+    belop: string;
 }
 
 export interface BarneTillegFormValues {

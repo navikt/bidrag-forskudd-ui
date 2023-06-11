@@ -123,7 +123,7 @@ const BoforholdsForm = () => {
     const { data: boforoholdOpplysninger } = useGetBoforoholdOpplysninger(behandlingId);
     const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(
         behandling,
-        grunnlagspakke.egneBarnIHusstandenListe
+        grunnlagspakke.husstandmedlemmerOgEgneBarnListe
     );
     const opplysninger = boforoholdOpplysninger ? boforoholdOpplysninger : opplysningerFraFolkRegistre;
 

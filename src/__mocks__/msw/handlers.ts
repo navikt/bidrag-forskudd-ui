@@ -1,6 +1,7 @@
 import { behandlingMock } from "./behandlingMock";
 import boforholdMock from "./boforholdMock";
 import grunnlagMock from "./grunnlagMock";
+import inntektMock from "./inntekterMock";
 import logMock from "./logMock";
 import personMock from "./personMock";
 import { hentSakMock } from "./sakMock";
@@ -15,4 +16,5 @@ export const handlers = [
     ...behandlingMock(),
     ...virkningstidspunktMock(),
     ...boforholdMock(),
+    ...inntektMock(),
 ];

@@ -148,19 +148,13 @@ export const useUpdateInntekter = (behandlingId: number) => {
     return { mutation, error };
 };
 
-export const useHentVirkningstidspunktData = (behandlingId: number) =>
-    useQuery({
-        queryKey: ["virkningsTidspunkt", behandlingId],
-        queryFn: (): Promise<AxiosResponse<VirkningsTidspunktResponse>> =>
-            BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId),
-        staleTime: Infinity,
-        suspense: true,
-    });
-
 export const useHentInntekter = (behandlingId: number) =>
     useQuery({
         queryKey: ["inntekter", behandlingId],
-        queryFn: (): Promise<AxiosResponse<InntekterResponse>> => BEHANDLING_API.api.hentInntekter(behandlingId),
+        queryFn: async (): Promise<InntekterResponse> => {
+            const { data } = await BEHANDLING_API.api.hentInntekter(behandlingId);
+            return data;
+        },
         staleTime: Infinity,
         suspense: true,
     });
@@ -202,8 +196,8 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
 const createGrunnlagRequest = (behandling) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    const periodeFra = toISODateString(new Date());
-    const periodeTil = toISODateString(deductMonths(new Date(), 36));
+    const periodeFra = toISODateString(deductMonths(new Date(), 36));
+    const periodeTil = toISODateString(new Date());
     const skattegrunnlagBarnRequests = barn?.map((b) => ({
         type: "SKATTEGRUNNLAG",
         personId: b.ident,
@@ -211,10 +205,11 @@ const createGrunnlagRequest = (behandling) => {
         periodeTil,
     }));
     const bmRequests = [
+        "AINNTEKT",
         "SKATTEGRUNNLAG",
         "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG",
         "BARNETILLEGG",
-        "HUSSTANDSMEDLEMMER",
+        "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
         "SIVILSTAND",
     ].map((type) => ({
         type: type,

@@ -1,4 +1,4 @@
-import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
+import { InntekterResponse, RolleDto, RolleType } from "../../api/BidragBehandlingApi";
 
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];
@@ -199,3 +199,9 @@ export const inntektData = (roller: RolleDto[]) => ({
     inntektBegrunnelseMedIVedtakNotat: "",
     inntektBegrunnelseKunINotat: "",
 });
+
+export const inntektTestData: InntekterResponse = {
+    inntekter: [],
+    barnetillegg: [],
+    utvidetbarnetrygd: [],
+};
