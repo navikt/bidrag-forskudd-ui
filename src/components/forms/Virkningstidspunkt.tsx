@@ -35,7 +35,7 @@ const createPayload = (values: VirkningstidspunktFormValues) => ({
     virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
     virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
     aarsak: values.aarsak ?? null,
-    avslag: values.avslag ?? null,
+    avslag: values.avslag === "" ? null : values.avslag,
     virkningsDato: values.virkningsDato?.toLocaleDateString("no-NO", { dateStyle: "short" }) ?? null,
 });
 
