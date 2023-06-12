@@ -1,6 +1,6 @@
 export const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
 export const toISOStringOrNull = (date?: Date): string | null => date?.toISOString() ?? null;
-export const toISODateString = (date: Date): string => toISOStringOrNull(date)?.split("T")[0] ?? null;
+export const toISODateString = (date?: Date): string | null => toISOStringOrNull(date)?.split("T")[0] ?? null;
 export const addDays = (date: Date, days: number) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);

@@ -86,8 +86,8 @@ export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValue
         utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
             ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
                   ...utvidetBarnetrygd,
-                  fraDato: dateOrNull(utvidetBarnetrygd.fraDato),
-                  tilDato: dateOrNull(utvidetBarnetrygd.tilDato),
+                  datoFom: dateOrNull(utvidetBarnetrygd.datoFom),
+                  datoTom: dateOrNull(utvidetBarnetrygd.datoTom),
               }))
             : grunnlagspakke.ubstListe.map((ubst) => ({
                   deltBoSted: false, // TODO check where to get this value
@@ -98,8 +98,8 @@ export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValue
         barnetillegg: inntekter?.barnetillegg?.length
             ? inntekter.barnetillegg.map((barnetilleg) => ({
                   ...barnetilleg,
-                  fraDato: dateOrNull(barnetilleg.fraDato),
-                  tilDato: dateOrNull(barnetilleg.tilDato),
+                  datoFom: dateOrNull(barnetilleg.datoFom),
+                  datoTom: dateOrNull(barnetilleg.datoTom),
               }))
             : grunnlagspakke.barnetilleggListe.map((periode) => ({
                   ident: periode.barnPersonId,
