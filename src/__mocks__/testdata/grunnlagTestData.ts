@@ -403,14 +403,16 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
         egneBarnIHusstandenListe: getEgneBarnIHusstandenListe(barn, bmIdent, today, barnHusstandsData),
         sivilstandListe: [
             {
-                sivilstand: [
-                    // @ts-ignore
-                    {
-                        type: "GIFT",
-                        gyldigFraOgMed: "2023-06-05",
-                        bekreftelsesdato: "2023-06-05",
-                    },
-                ],
+                aktiv: true,
+                brukFra: "2023-06-12T09:49:13.96137",
+                brukTil: null,
+                hentetTidspunkt: "2023-06-12T09:49:13.96137",
+                periodeFra: "1977-08-02",
+                periodeTil: null,
+                personId: "02487731725",
+                // TODO remove that once grunnlag swagger types are fixed
+                // @ts-ignore
+                sivilstand: "UGIFT",
             },
         ],
         barnetilsynListe: [

@@ -108,12 +108,10 @@ const barnPerioder = (perioder, virkningstidspunkt) => {
 };
 
 const getSivilstandPerioder = (sivilstandListe) => {
-    return sivilstandListe[0].sivilstand.map((periode, i) => ({
-        sivilstandType: periode.type,
-        fraDato: new Date(periode.gyldigFraOgMed),
-        tilDato: sivilstandListe[0].sivilstand[i + 1]
-            ? deductDays(new Date(sivilstandListe[0].sivilstand[i + 1].gyldigFraOgMed), 1)
-            : null,
+    return sivilstandListe.map((periode) => ({
+        sivilstandType: periode.sivilstand,
+        fraDato: dateOrNull(periode.periodeFra),
+        tilDato: dateOrNull(periode.periodeTil),
     }));
 };
 
