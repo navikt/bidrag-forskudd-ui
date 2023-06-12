@@ -9,7 +9,7 @@ export const PERSON_API = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PER
 export const BIDRAG_GRUNNLAG_API = useApi(
     new BidragGrunnlagApi({ baseURL: environment.url.bidragGrunnlag }),
     "bidrag-grunnlag",
-    "fss"
+    "gcp"
 );
 
 export const BEHANDLING_API: BidragBehandlingApi<BehandlingDto> = useApi(
