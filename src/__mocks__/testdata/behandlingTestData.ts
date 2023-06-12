@@ -1,11 +1,4 @@
-import {
-    BehandlingDto,
-    BehandlingType,
-    RolleType,
-    SivilstandType,
-    SoknadFraType,
-    SoknadType,
-} from "../../api/BidragBehandlingApi";
+import { BehandlingDto, BehandlingType, RolleType, SoknadFraType, SoknadType } from "../../api/BidragBehandlingApi";
 import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {
@@ -62,14 +55,7 @@ export const behandlingMockApiData: BehandlingDto = {
             foedselsDato: "2023-05-02T11:24:12.190Z",
         },
     ],
-    sivilstand: [
-        {
-            id: 0,
-            gyldigFraOgMed: "2023-05-02T12:11:14.269Z",
-            bekreftelsesdato: "2023-05-02T12:11:14.269Z",
-            sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
-        },
-    ],
+    sivilstand: [],
     virkningsTidspunktBegrunnelseMedIVedtakNotat: "",
     virkningsTidspunktBegrunnelseKunINotat: "",
     boforholdBegrunnelseMedIVedtakNotat: "",

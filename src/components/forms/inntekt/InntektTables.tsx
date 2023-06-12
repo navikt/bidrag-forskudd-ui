@@ -341,8 +341,8 @@ export const UtvidetBarnetrygdTabel = () => {
             return;
         }
         const filtrertOgSorterListe = utvidetBarnetrygdList
-            .filter((periode) => isValidDate(periode.fraDato))
-            .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+            .filter((periode) => isValidDate(periode.datoFom))
+            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -376,32 +376,32 @@ export const UtvidetBarnetrygdTabel = () => {
                             cells={[
                                 <div key={`utvidetBarnetrygd.${index}.fraDato`} className="flex gap-x-4">
                                     <FormControlledMonthPicker
-                                        key={`utvidetBarnetrygd.${index}.fraDato`}
-                                        name={`utvidetBarnetrygd.${index}.fraDato`}
+                                        key={`utvidetBarnetrygd.${index}.datoFom`}
+                                        name={`utvidetBarnetrygd.${index}.datoFom`}
                                         label="Fra og med"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
+                                        defaultValue={item.datoFom}
                                         required
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
-                                        key={`utvidetBarnetrygd.${index}.tilDato`}
-                                        name={`utvidetBarnetrygd.${index}.tilDato`}
+                                        key={`utvidetBarnetrygd.${index}.datoTom`}
+                                        name={`utvidetBarnetrygd.${index}.datoTom`}
                                         label="Til og med"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
+                                        defaultValue={item.datoTom}
                                         hideLabel
                                     />
                                 </div>,
                                 <FormControlledCheckbox
-                                    key={`utvidetBarnetrygd.${index}.deltBosted`}
-                                    name={`utvidetBarnetrygd.${index}.deltBosted`}
+                                    key={`utvidetBarnetrygd.${index}.deltBoSted`}
+                                    name={`utvidetBarnetrygd.${index}.deltBoSted`}
                                     className="m-auto"
                                     legend=""
                                 />,
                                 <FormControlledTextField
-                                    key={`utvidetBarnetrygd.${index}.beloep`}
-                                    name={`utvidetBarnetrygd.${index}.beloep`}
+                                    key={`utvidetBarnetrygd.${index}.belop`}
+                                    name={`utvidetBarnetrygd.${index}.belop`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -430,10 +430,10 @@ export const UtvidetBarnetrygdTabel = () => {
                 className="w-fit"
                 onClick={() =>
                     fieldArray.append({
-                        fraDato: null,
-                        tilDato: null,
-                        deltBosted: false,
-                        beloep: 0,
+                        datoFom: null,
+                        datoTom: null,
+                        deltBoSted: false,
+                        belop: 0,
                     })
                 }
             >
@@ -477,8 +477,8 @@ export const BarnetilleggTabel = () => {
             return;
         }
         const filtrertOgSorterListe = barnetilleggList
-            .filter((periode) => isValidDate(periode.fraDato))
-            .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+            .filter((periode) => isValidDate(periode.datoFom))
+            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -511,25 +511,25 @@ export const BarnetilleggTabel = () => {
                             key={item.id}
                             cells={[
                                 <FormControlledMonthPicker
-                                    key={`barnetillegg.${index}.fraDato`}
-                                    name={`barnetillegg.${index}.fraDato`}
+                                    key={`barnetillegg.${index}.datoFom`}
+                                    name={`barnetillegg.${index}.datoFom`}
                                     label="Fra og med"
                                     placeholder="MM.ÅÅÅÅ"
-                                    defaultValue={item.fraDato}
+                                    defaultValue={item.datoFom}
                                     required
                                     hideLabel
                                 />,
                                 <FormControlledMonthPicker
-                                    key={`barnetillegg.${index}.tilDato`}
-                                    name={`barnetillegg.${index}.tilDato`}
+                                    key={`barnetillegg.${index}.datoTom`}
+                                    name={`barnetillegg.${index}.datoTom`}
                                     label="Til og med"
                                     placeholder="MM.ÅÅÅÅ"
-                                    defaultValue={item.tilDato}
+                                    defaultValue={item.datoTom}
                                     hideLabel
                                 />,
                                 <FormControlledSelectField
-                                    key={`barnetillegg.${index}.barn`}
-                                    name={`barnetillegg.${index}.barn`}
+                                    key={`barnetillegg.${index}.ident`}
+                                    name={`barnetillegg.${index}.ident`}
                                     label="Barn"
                                     hideLabel
                                 >
@@ -544,8 +544,8 @@ export const BarnetilleggTabel = () => {
                                         ))}
                                 </FormControlledSelectField>,
                                 <FormControlledTextField
-                                    key={`barnetillegg.${index}.beloep`}
-                                    name={`barnetillegg.${index}.beloep`}
+                                    key={`barnetillegg.${index}.barnetillegg`}
+                                    name={`barnetillegg.${index}.barnetillegg`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -574,10 +574,10 @@ export const BarnetilleggTabel = () => {
                 className="w-fit"
                 onClick={() =>
                     fieldArray.append({
-                        fraDato: null,
-                        tilDato: null,
-                        barn: { navn: "", foedselnummer: "" },
-                        beloep: 0,
+                        datoFom: null,
+                        datoTom: null,
+                        ident: "",
+                        barnetillegg: 0,
                     })
                 }
             >

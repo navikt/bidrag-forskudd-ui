@@ -1,5 +1,3 @@
-import { Barn } from "../__mocks__/testdata/inntektTestData";
-
 export interface Inntekt {
     beskrivelse: string;
     datoFom: Date | null;
@@ -10,17 +8,17 @@ export interface Inntekt {
 }
 
 export interface BarneTillegFormValues {
-    fraDato: Date | null;
-    tilDato: Date | null;
-    barn: Barn;
-    beloep: number;
+    datoFom: Date | null;
+    datoTom: Date | null;
+    ident: string;
+    barnetillegg: number;
 }
 
 export interface UtvidetBarnetrygdFormValues {
-    fraDato: Date | null;
-    tilDato: Date | null;
-    deltBosted: boolean;
-    beloep: number;
+    datoFom: Date | null;
+    datoTom: Date | null;
+    deltBoSted: boolean;
+    belop: number;
 }
 export interface InntektFormValues {
     inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };

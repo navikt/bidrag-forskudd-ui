@@ -6,33 +6,39 @@ import {
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { addDays, dateOrNull, deductDays, isValidDate, toISOStringOrNull } from "../../../utils/date-utils";
+import { addDays, dateOrNull, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
 
 export const createInntektPayload = (values: InntektFormValues) => ({
-    inntekteneSomLeggesTilGrunn: Object.keys(values.inntekteneSomLeggesTilGrunn).map((ident) => ({
-        ident,
-        inntekt: values.inntekteneSomLeggesTilGrunn[ident].map((inntekt) => ({
-            ...inntekt,
-            datoFom: toISOStringOrNull(inntekt.datoFom),
-            datoTom: toISOStringOrNull(inntekt.datoTom),
-        })),
-    })),
-    utvidetBarnetrygd: values.utvidetBarnetrygd.length
+    inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
+        .map(([key, value]) =>
+            value.map((inntekt) => {
+                return {
+                    ...inntekt,
+                    ident: key,
+                    beløp: Number(inntekt.belop),
+                    datoFom: toISODateString(inntekt.datoFom),
+                    datoTom: toISODateString(inntekt.datoFom),
+                };
+            })
+        )
+        .flat(),
+    utvidetbarnetrygd: values.utvidetBarnetrygd.length
         ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
-              fraDato: toISOStringOrNull(utvidetBarnetrygd.fraDato),
-              tilDato: toISOStringOrNull(utvidetBarnetrygd.tilDato),
+              beløp: utvidetBarnetrygd.belop,
+              datoFom: toISODateString(utvidetBarnetrygd.datoFom),
+              datoTom: toISODateString(utvidetBarnetrygd.datoTom),
           }))
         : [],
     barnetillegg: values.barnetillegg.length
         ? values.barnetillegg.map((barnetillegg) => ({
               ...barnetillegg,
-              fraDato: toISOStringOrNull(barnetillegg.fraDato),
-              tilDato: toISOStringOrNull(barnetillegg.tilDato),
+              datoFom: toISODateString(barnetillegg.datoFom),
+              datoTom: toISODateString(barnetillegg.datoTom),
           }))
         : [],
-    inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
     inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
+    inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
 });
 
 const mapSkattegrunnlagInntektPerioder = (person, skattegrunnlagListe) =>
@@ -83,14 +89,24 @@ export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValue
                   fraDato: dateOrNull(utvidetBarnetrygd.fraDato),
                   tilDato: dateOrNull(utvidetBarnetrygd.tilDato),
               }))
-            : [],
+            : grunnlagspakke.ubstListe.map((ubst) => ({
+                  deltBoSted: false, // TODO check where to get this value
+                  belop: ubst.belop,
+                  datoFom: dateOrNull(ubst.periodeFra),
+                  datoTom: dateOrNull(ubst.periodeTil),
+              })),
         barnetillegg: inntekter?.barnetillegg?.length
             ? inntekter.barnetillegg.map((barnetilleg) => ({
                   ...barnetilleg,
                   fraDato: dateOrNull(barnetilleg.fraDato),
                   tilDato: dateOrNull(barnetilleg.tilDato),
               }))
-            : [],
+            : grunnlagspakke.barnetilleggListe.map((periode) => ({
+                  ident: periode.barnPersonId,
+                  barnetillegg: periode.belopBrutto,
+                  datoFom: dateOrNull(periode.periodeFra),
+                  datoTom: dateOrNull(periode.periodeTil),
+              })),
         // TODO implement missing fields in the backend
         inntektBegrunnelseMedIVedtakNotat: "",
         inntektBegrunnelseKunINotat: "",

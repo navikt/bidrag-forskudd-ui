@@ -12,11 +12,10 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandling, useGrunnlagspakke, useHentInntekter, useUpdateInntekter } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
-import { toISODateString } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
-import { createInitialValues } from "../helpers/inntektFormHelpers";
+import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
@@ -182,35 +181,14 @@ const InntektForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
 
-        updateInntekter.mutation.mutate(
-            {
-                inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
-                    .map(([key, value]) =>
-                        value.map((inntekt) => {
-                            return {
-                                ...inntekt,
-                                ident: key,
-                                beløp: Number(inntekt.belop),
-                                datoFom: toISODateString(inntekt.datoFom),
-                                datoTom: toISODateString(inntekt.datoFom),
-                            };
-                        })
-                    )
-                    .flat(),
-                utvidetbarnetrygd: [], //todo
-                barnetillegg: [], //todo
-                inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
-                inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
-            },
-
-            { onSuccess: () => useFormMethods.reset(values, { keepValues: true, keepErrors: true }) }
-        );
+        updateInntekter.mutation.mutate(createInntektPayload(values), {
+            onSuccess: () => useFormMethods.reset(values, { keepValues: true, keepErrors: true }),
+        });
     };
 
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        console.log("isDirty", useFormMethods.formState.isDirty);
         if (useFormMethods.formState.isDirty) {
             debouncedOnSave();
         }
