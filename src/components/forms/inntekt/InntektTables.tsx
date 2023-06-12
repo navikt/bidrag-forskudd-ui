@@ -158,11 +158,11 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 
     const validatePeriods = () => {
         if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`).filter(
+            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`)?.filter(
                 (inntekt) => inntekt.taMed
             );
 
-            if (!inntekteneSomLeggesTilGrunn.length) {
+            if (!inntekteneSomLeggesTilGrunn?.length) {
                 clearErrors(`inntekteneSomLeggesTilGrunn.${ident}`);
                 return;
             }

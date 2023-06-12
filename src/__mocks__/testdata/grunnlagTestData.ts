@@ -159,6 +159,152 @@ const getEgneBarnIHusstandenListe = (barn, bmIdent, today, barnHusstandsData) =>
         borISammeHusstandDtoListe: barnHusstandsData[i].borISammeHusstandDtoListe,
     }));
 
+const createSkattegrunnlagListe = (bmIdent, barn, today) =>
+    [
+        {
+            personId: bmIdent,
+            periodeFra: "2022-01-01",
+            periodeTil: "2022-12-31",
+            aktiv: true,
+            brukFra: today,
+            brukTil: today,
+            hentetTidspunkt: today,
+            skattegrunnlagListe: [
+                {
+                    skattegrunnlagType: "ordinær",
+                    inntektType: "LOENNSINNTEKT",
+                    belop: 600000,
+                },
+                {
+                    skattegrunnlagType: "ordinær",
+                    inntektType: "YTELSE_FRA_OFFENTLIGE",
+                    belop: 120000,
+                },
+            ],
+        },
+        {
+            personId: bmIdent,
+            periodeFra: "2021-01-01",
+            periodeTil: "2021-12-31",
+            aktiv: true,
+            brukFra: today,
+            brukTil: today,
+            hentetTidspunkt: today,
+            skattegrunnlagListe: [
+                {
+                    skattegrunnlagType: "ordinær",
+                    inntektType: "LOENNSINNTEKT",
+                    belop: 550000,
+                },
+            ],
+        },
+        {
+            personId: bmIdent,
+            periodeFra: "2020-01-01",
+            periodeTil: "2020-12-31",
+            aktiv: true,
+            brukFra: today,
+            brukTil: today,
+            hentetTidspunkt: today,
+            skattegrunnlagListe: [
+                {
+                    skattegrunnlagType: "ordinær",
+                    inntektType: "LOENNSINNTEKT",
+                    belop: 500000,
+                },
+            ],
+        },
+    ].concat(
+        barn
+            .map((b, i) => {
+                if (i % 2) return null;
+                else
+                    return [
+                        {
+                            personId: b.ident,
+                            periodeFra: "2022-01-01",
+                            periodeTil: "2022-12-31",
+                            aktiv: true,
+                            brukFra: today,
+                            brukTil: today,
+                            hentetTidspunkt: today,
+                            skattegrunnlagListe: [
+                                {
+                                    skattegrunnlagType: "ordinær",
+                                    inntektType: "LOENNSINNTEKT",
+                                    belop: 200000,
+                                },
+                            ],
+                        },
+                        {
+                            personId: b.ident,
+                            periodeFra: "2021-01-01",
+                            periodeTil: "2021-12-31",
+                            aktiv: true,
+                            brukFra: today,
+                            brukTil: today,
+                            hentetTidspunkt: today,
+                            skattegrunnlagListe: [
+                                {
+                                    skattegrunnlagType: "ordinær",
+                                    inntektType: "LOENNSINNTEKT",
+                                    belop: 180000,
+                                },
+                            ],
+                        },
+                        {
+                            personId: b.ident,
+                            periodeFra: "2020-01-01",
+                            periodeTil: "2020-12-31",
+                            aktiv: true,
+                            brukFra: today,
+                            brukTil: today,
+                            hentetTidspunkt: today,
+                            skattegrunnlagListe: [
+                                {
+                                    skattegrunnlagType: "ordinær",
+                                    inntektType: "LOENNSINNTEKT",
+                                    belop: 140000,
+                                },
+                            ],
+                        },
+                    ];
+            })
+            .filter((b) => b !== null)
+            .flat()
+    );
+
+const createUbstListe = (bmIdent) => [
+    {
+        personId: bmIdent,
+        type: "string",
+        periodeFra: "2023-02-01",
+        periodeTil: "2023-03-31",
+        aktiv: true,
+        brukFra: "2023-06-05T09:12:12.850Z",
+        brukTil: "2023-06-05T09:12:12.850Z",
+        belop: 12000,
+        manueltBeregnet: true,
+        hentetTidspunkt: "2023-06-05T09:12:12.850Z",
+    },
+];
+
+const createBarnetillegListe = (bmIdent, barn) => [
+    {
+        partPersonId: bmIdent,
+        barnPersonId: barn[0].ident,
+        barnetilleggType: "string",
+        periodeFra: "2023-01-04",
+        periodeTil: "2023-03-31",
+        aktiv: true,
+        brukFra: "2023-06-05T06:43:12.451Z",
+        brukTil: "2023-06-05T06:43:12.451Z",
+        belopBrutto: 22000,
+        barnType: "string",
+        hentetTidspunkt: "2023-06-05T06:43:12.451Z",
+    },
+];
+
 export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrunnlagspakkeDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
@@ -174,11 +320,11 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
             month = 12;
             i = 0;
             max = 12 - tolvMaaneder.length;
-            year = new Date(year.getFullYear() - 1, 1, 1);
+            year = new Date(year.getFullYear() - 3, 1, 1);
         }
         const m = res === 0 ? 12 : res;
-        const fraDate = new Date(year.getFullYear(), m - 1, 1);
-        const tilDate = new Date(year.getFullYear(), m, 0);
+        const fraDate = new Date(year.getFullYear() - 2, m - 1, 1);
+        const tilDate = new Date(year.getFullYear() - 2, m, 0);
 
         tolvMaaneder.push({
             fra: toISODateString(fraDate),
@@ -225,148 +371,9 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 },
             ],
         })),
-        skattegrunnlagListe: [
-            {
-                personId: bmIdent,
-                periodeFra: "2022-01-01",
-                periodeTil: "2022-12-31",
-                aktiv: true,
-                brukFra: today,
-                brukTil: today,
-                hentetTidspunkt: today,
-                skattegrunnlagListe: [
-                    {
-                        skattegrunnlagType: "ordinær",
-                        inntektType: "LOENNSINNTEKT",
-                        belop: 600000,
-                    },
-                    {
-                        skattegrunnlagType: "ordinær",
-                        inntektType: "YTELSE_FRA_OFFENTLIGE",
-                        belop: 120000,
-                    },
-                ],
-            },
-            {
-                personId: bmIdent,
-                periodeFra: "2021-01-01",
-                periodeTil: "2021-12-31",
-                aktiv: true,
-                brukFra: today,
-                brukTil: today,
-                hentetTidspunkt: today,
-                skattegrunnlagListe: [
-                    {
-                        skattegrunnlagType: "ordinær",
-                        inntektType: "LOENNSINNTEKT",
-                        belop: 550000,
-                    },
-                ],
-            },
-            {
-                personId: bmIdent,
-                periodeFra: "2020-01-01",
-                periodeTil: "2020-12-31",
-                aktiv: true,
-                brukFra: today,
-                brukTil: today,
-                hentetTidspunkt: today,
-                skattegrunnlagListe: [
-                    {
-                        skattegrunnlagType: "ordinær",
-                        inntektType: "LOENNSINNTEKT",
-                        belop: 500000,
-                    },
-                ],
-            },
-        ].concat(
-            barn
-                .map((b, i) => {
-                    if (i % 2) return null;
-                    else
-                        return [
-                            {
-                                personId: b.ident,
-                                periodeFra: "2022-01-01",
-                                periodeTil: "2022-12-31",
-                                aktiv: true,
-                                brukFra: today,
-                                brukTil: today,
-                                hentetTidspunkt: today,
-                                skattegrunnlagListe: [
-                                    {
-                                        skattegrunnlagType: "ordinær",
-                                        inntektType: "LOENNSINNTEKT",
-                                        belop: 200000,
-                                    },
-                                ],
-                            },
-                            {
-                                personId: b.ident,
-                                periodeFra: "2021-01-01",
-                                periodeTil: "2021-12-31",
-                                aktiv: true,
-                                brukFra: today,
-                                brukTil: today,
-                                hentetTidspunkt: today,
-                                skattegrunnlagListe: [
-                                    {
-                                        skattegrunnlagType: "ordinær",
-                                        inntektType: "LOENNSINNTEKT",
-                                        belop: 180000,
-                                    },
-                                ],
-                            },
-                            {
-                                personId: b.ident,
-                                periodeFra: "2020-01-01",
-                                periodeTil: "2020-12-31",
-                                aktiv: true,
-                                brukFra: today,
-                                brukTil: today,
-                                hentetTidspunkt: today,
-                                skattegrunnlagListe: [
-                                    {
-                                        skattegrunnlagType: "ordinær",
-                                        inntektType: "LOENNSINNTEKT",
-                                        belop: 140000,
-                                    },
-                                ],
-                            },
-                        ];
-                })
-                .filter((b) => b !== null)
-                .flat()
-        ),
-        ubstListe: [
-            {
-                personId: bmIdent,
-                type: "string",
-                periodeFra: "2023-02-01",
-                periodeTil: "2023-03-31",
-                aktiv: true,
-                brukFra: "2023-06-05T09:12:12.850Z",
-                brukTil: "2023-06-05T09:12:12.850Z",
-                belop: 12000,
-                manueltBeregnet: true,
-                hentetTidspunkt: "2023-06-05T09:12:12.850Z",
-            },
-        ],
-        barnetilleggListe: [
-            {
-                partPersonId: bmIdent,
-                barnPersonId: barn[0].ident,
-                barnetilleggType: "string",
-                periodeFra: "2023-01-04",
-                periodeTil: "2023-03-31",
-                aktiv: true,
-                brukFra: "2023-06-05T06:43:12.451Z",
-                brukTil: "2023-06-05T06:43:12.451Z",
-                belopBrutto: 22000,
-                barnType: "string",
-                hentetTidspunkt: "2023-06-05T06:43:12.451Z",
-            },
-        ],
+        skattegrunnlagListe: [],
+        ubstListe: [],
+        barnetilleggListe: [],
         kontantstotteListe: [
             {
                 partPersonId: "string",
