@@ -141,8 +141,11 @@ const InntektForm = () => {
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: inntekter } = useHentInntekter(behandlingId);
     const updateInntekter = useUpdateInntekter(behandlingId);
+    const bmOgBarn = behandling.roller.filter(
+        (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
+    );
 
-    const initialValues = createInitialValues(grunnlagspakke, inntekter);
+    const initialValues = createInitialValues(bmOgBarn, grunnlagspakke, inntekter);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,

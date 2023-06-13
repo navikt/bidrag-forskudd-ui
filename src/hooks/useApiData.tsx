@@ -197,12 +197,12 @@ const createGrunnlagRequest = (behandling) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const periodeFra = toISODateString(deductMonths(new Date(), 36));
-    const periodeTil = toISODateString(new Date());
+    const today = toISODateString(new Date());
     const skattegrunnlagBarnRequests = barn?.map((b) => ({
         type: "SKATTEGRUNNLAG",
         personId: b.ident,
         periodeFra,
-        periodeTil,
+        periodeTil: today,
     }));
     const bmRequests = [
         "AINNTEKT",
@@ -212,10 +212,15 @@ const createGrunnlagRequest = (behandling) => {
         "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
         "SIVILSTAND",
     ].map((type) => ({
-        type: type,
+        type,
         personId: bmIdent,
-        periodeFra,
-        periodeTil,
+        periodeFra: Number(today.split(".")[0]) > 6 ? today : toISODateString(deductMonths(new Date(), 1)),
+        periodeTil:
+            type === "AINNTEKT"
+                ? Number(today.split(".")[0]) > 6
+                    ? today
+                    : toISODateString(deductMonths(new Date(), 1))
+                : today,
     }));
 
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {

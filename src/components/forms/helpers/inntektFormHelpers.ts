@@ -41,48 +41,44 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
 });
 
-const mapSkattegrunnlagInntektPerioder = (person, skattegrunnlagListe) =>
-    skattegrunnlagListe.map((inntekt) => ({
+const mapSkattegrunnlagInntektPerioder = (skattegrunlag) =>
+    skattegrunlag.skattegrunnlagListe.map((inntekt) => ({
         taMed: false,
         beskrivelse: inntekt.inntektType,
         belop: inntekt.belop,
-        datoTom: dateOrNull(person.periodeTil),
-        datoFom: dateOrNull(person.periodeFra),
-        ident: person.personId,
+        datoTom: dateOrNull(skattegrunlag.periodeTil),
+        datoFom: dateOrNull(skattegrunlag.periodeFra),
+        ident: skattegrunlag.personId,
         fraPostene: true,
     }));
 
-const getPerioderFraSkattegrunnlagOgAinntekt = (grunnlagspakke) =>
-    grunnlagspakke.skattegrunnlagListe.reduce(
-        (acc, person) => ({
-            ...acc,
-            [person.personId]: acc[person.personId]
-                ? acc[person.personId].concat(mapSkattegrunnlagInntektPerioder(person, person.skattegrunnlagListe))
-                : mapSkattegrunnlagInntektPerioder(person, person.skattegrunnlagListe),
-        }),
-        {}
-    );
+const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
+    ...acc,
+    [rolle.ident]: mapFunction(rolle),
+});
+const mapSkattegrunnlagToRolle = (skattegrunnlagListe) => (rolle) =>
+    skattegrunnlagListe
+        .filter((skattegrunlag) => skattegrunlag.personId === rolle.ident)
+        .map((skattegrunlag) => mapSkattegrunnlagInntektPerioder(skattegrunlag))
+        .flat();
+const mapInntekterToRolle = (inntekter) => (rolle) =>
+    inntekter
+        .filter((inntekt) => inntekt.ident === rolle.ident)
+        .map((inntekt) => ({
+            ...inntekt,
+            datoTom: dateOrNull(inntekt.datoTom),
+            datoFom: dateOrNull(inntekt.datoFom),
+        }));
+const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe) =>
+    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe)), {});
+const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
+    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
-const getPerioderFraInntekter = (inntekter) =>
-    inntekter.reduce(
-        (acc, inntekt) => ({
-            ...acc,
-            [inntekt.ident]: acc[inntekt.ident]
-                ? acc[inntekt.ident].concat({
-                      ...inntekt,
-                      datoTom: dateOrNull(inntekt.datoTom),
-                      datoFom: dateOrNull(inntekt.datoFom),
-                  })
-                : [{ ...inntekt, datoTom: dateOrNull(inntekt.datoTom), datoFom: dateOrNull(inntekt.datoFom) }],
-        }),
-        {}
-    );
-
-export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValues => {
+export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
-            ? getPerioderFraInntekter(inntekter.inntekter)
-            : getPerioderFraSkattegrunnlagOgAinntekt(grunnlagspakke),
+            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
+            : getPerioderFraSkattegrunnlagOgAinntekt(bmOgBarn, grunnlagspakke.skattegrunnlagListe),
         utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
             ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
                   ...utvidetBarnetrygd,
@@ -107,9 +103,8 @@ export const createInitialValues = (grunnlagspakke, inntekter): InntektFormValue
                   datoFom: dateOrNull(periode.periodeFra),
                   datoTom: dateOrNull(periode.periodeTil),
               })),
-        // TODO implement missing fields in the backend
-        inntektBegrunnelseMedIVedtakNotat: "",
-        inntektBegrunnelseKunINotat: "",
+        inntektBegrunnelseMedIVedtakNotat: inntekter.inntektBegrunnelseMedIVedtakNotat,
+        inntektBegrunnelseKunINotat: inntekter.inntektBegrunnelseKunINotat,
     };
 };
 

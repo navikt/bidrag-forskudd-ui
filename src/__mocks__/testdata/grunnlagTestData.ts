@@ -371,7 +371,7 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 },
             ],
         })),
-        skattegrunnlagListe: [],
+        skattegrunnlagListe: createSkattegrunnlagListe(bmIdent, barn, today),
         ubstListe: [],
         barnetilleggListe: [],
         kontantstotteListe: [
