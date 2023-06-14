@@ -12,7 +12,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { DDMMYYYYStringToDate, isValidDate } from "../../utils/date-utils";
+import { DDMMYYYYStringToDate, isValidDate, toISODateString } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -36,7 +36,7 @@ const createPayload = (values: VirkningstidspunktFormValues) => ({
     virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
     aarsak: values.aarsak === "" ? null : values.aarsak,
     avslag: values.avslag === "" ? null : values.avslag,
-    virkningsDato: values.virkningsDato?.toLocaleDateString("no-NO", { dateStyle: "short" }) ?? null,
+    virkningsDato: toISODateString(values.virkningsDato),
 });
 
 const Main = ({ initialValues, error }) => {

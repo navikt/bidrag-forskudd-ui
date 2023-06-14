@@ -214,12 +214,13 @@ const createGrunnlagRequest = (behandling) => {
     ].map((type) => ({
         type,
         personId: bmIdent,
-        periodeFra: Number(today.split(".")[0]) > 6 ? today : toISODateString(deductMonths(new Date(), 1)),
+        periodeFra:
+            type === "AINNTEKT"
+                ? toISODateString(deductMonths(new Date(), Number(today.split("-")[2]) > 6 ? 12 : 13))
+                : periodeFra,
         periodeTil:
             type === "AINNTEKT"
-                ? Number(today.split(".")[0]) > 6
-                    ? today
-                    : toISODateString(deductMonths(new Date(), 1))
+                ? toISODateString(deductMonths(new Date(), Number(today.split("-")[2]) > 6 ? 0 : 1))
                 : today,
     }));
 
