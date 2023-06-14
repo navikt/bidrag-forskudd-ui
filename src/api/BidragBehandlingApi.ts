@@ -9,17 +9,31 @@
  * ---------------------------------------------------------------
  */
 
-export interface CustomFieldError {
-    objectName: string;
-    field: string;
-    message: string;
+export interface AbstractJsonSchemaPropertyObject {
+    title?: string;
+    readOnly?: boolean;
 }
 
-export interface Error {
-    /** @format int32 */
-    status: number;
-    message: string;
-    fieldErrors: CustomFieldError[];
+export interface Item {
+    type?: string;
+    properties?: Record<string, AbstractJsonSchemaPropertyObject>;
+    requiredProperties?: string[];
+}
+
+export interface JsonSchema {
+    title?: string;
+    description?: string;
+    properties?: Record<string, AbstractJsonSchemaPropertyObject>;
+    requiredProperties?: string[];
+    definitions?: Record<string, Item>;
+    type?: string;
+    $schema?: string;
+}
+
+export type Links = Record<string, Link>;
+
+export interface RepresentationModelObject {
+    _links?: Links;
 }
 
 export enum AvslagType {
@@ -35,6 +49,22 @@ export enum AvslagType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum BehandlingType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum BoStatusType {
+    IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
+    DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
+    DOKUMENTERT_BOENDE_HOS_BM = "DOKUMENTERT_BOENDE_HOS_BM",
+    BARN_BOR_ALENE = "BARN_BOR_ALENE",
 }
 
 export enum ForskuddBeregningKodeAarsakType {
@@ -54,6 +84,160 @@ export enum ForskuddBeregningKodeAarsakType {
     PF = "PF",
     EF = "EF",
     FF = "FF",
+}
+
+export enum RolleType {
+    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
+    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BARN = "BARN",
+    REELL_MOTTAKER = "REELL_MOTTAKER",
+    FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+export enum SivilstandType {
+    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
+    GIFT = "GIFT",
+    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
+    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
+    SEPARERT = "SEPARERT",
+    SEPARERT_PARTNER = "SEPARERT_PARTNER",
+    SKILT = "SKILT",
+    SKILT_PARTNER = "SKILT_PARTNER",
+    UGIFT = "UGIFT",
+    UOPPGITT = "UOPPGITT",
+}
+
+export enum SoknadFraType {
+    BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
+    BARN18AAR = "BARN_18_AAR",
+    NAV_BIDRAG = "NAV_BIDRAG",
+    FYLKESNEMDA = "FYLKESNEMDA",
+    NAV_INTERNASJONAL = "NAV_INTERNASJONAL",
+    KOMMUNE = "KOMMUNE",
+    KONVERTERING = "KONVERTERING",
+    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
+    NORSKE_MYNDIGHET = "NORSKE_MYNDIGHET",
+    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
+    UTENLANDSKE_MYNDIGHET = "UTENLANDSKE_MYNDIGHET",
+    VERGE = "VERGE",
+    TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
+    KLAGE_ANKE = "KLAGE_ANKE",
+}
+
+export enum SoknadType {
+    INDEKSREGULERING = "INDEKSREGULERING",
+    ALDERSJUSTERING = "ALDERSJUSTERING",
+    OPPHOR = "OPPHØR",
+    ALDERSOPPHOR = "ALDERSOPPHØR",
+    REVURDERING = "REVURDERING",
+    FASTSETTELSE = "FASTSETTELSE",
+    INNKREVING = "INNKREVING",
+    KLAGE = "KLAGE",
+    ENDRING = "ENDRING",
+    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddBeregningKodeAarsakType;
+    avslag?: AvslagType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelBehandling {
+    _embedded?: {
+        behandlings?: EntityModelBehandling[];
+    };
+    _links?: Links;
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
+export interface CollectionModelObject {
+    _embedded?: {
+        objects?: object[];
+    };
+    _links?: Links;
+}
+
+export interface BehandlingRequestBody {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddBeregningKodeAarsakType;
+    avslag?: AvslagType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+    /** @format int64 */
+    id?: number;
+    roller: string[];
+    behandlingBarn: string[];
+    inntekter: string[];
+    sivilstand: string[];
+    barnetillegg: string[];
+    utvidetbarnetrygd: string[];
+}
+
+export interface OpplysningerRequestBody {
+    behandling: string;
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    /** @format int64 */
+    id?: number;
 }
 
 export interface UpdateVirkningsTidspunktRequest {
@@ -90,12 +274,13 @@ export interface InntektDto {
     id?: number;
     taMed: boolean;
     beskrivelse: string;
-    beløp: number;
+    belop: number;
     /** @format date */
     datoTom: string;
     /** @format date */
     datoFom: string;
     ident: string;
+    fraGrunnlag: boolean;
 }
 
 export interface UpdateInntekterRequest {
@@ -113,7 +298,7 @@ export interface UtvidetbarnetrygdDto {
     /** @format int64 */
     id?: number;
     deltBoSted: boolean;
-    beløp: number;
+    belop: number;
     /** @format date */
     datoFom: string;
     /** @format date */
@@ -152,13 +337,6 @@ export interface BehandlingBarnPeriodeDto {
     kilde: string;
 }
 
-export enum BoStatusType {
-    IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
-    DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
-    DOKUMENTERT_BOENDE_HOS_BM = "DOKUMENTERT_BOENDE_HOS_BM",
-    BARN_BOR_ALENE = "BARN_BOR_ALENE",
-}
-
 export interface SivilstandDto {
     /** @format int64 */
     id?: number;
@@ -167,19 +345,6 @@ export interface SivilstandDto {
     /** @format date */
     datoTom?: string;
     sivilstandType: SivilstandType;
-}
-
-export enum SivilstandType {
-    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
-    GIFT = "GIFT",
-    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
-    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
-    SEPARERT = "SEPARERT",
-    SEPARERT_PARTNER = "SEPARERT_PARTNER",
-    SKILT = "SKILT",
-    SKILT_PARTNER = "SKILT_PARTNER",
-    UGIFT = "UGIFT",
-    UOPPGITT = "UOPPGITT",
 }
 
 export interface UpdateBoforholdRequest {
@@ -198,36 +363,6 @@ export interface BoforholdResponse {
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
     boforholdBegrunnelseKunINotat?: string;
-}
-
-export enum SoknadFraType {
-    BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
-    BARN18AAR = "BARN_18_AAR",
-    NAV_BIDRAG = "NAV_BIDRAG",
-    FYLKESNEMDA = "FYLKESNEMDA",
-    NAV_INTERNASJONAL = "NAV_INTERNASJONAL",
-    KOMMUNE = "KOMMUNE",
-    KONVERTERING = "KONVERTERING",
-    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
-    NORSKE_MYNDIGHET = "NORSKE_MYNDIGHET",
-    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
-    UTENLANDSKE_MYNDIGHET = "UTENLANDSKE_MYNDIGHET",
-    VERGE = "VERGE",
-    TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
-    KLAGE_ANKE = "KLAGE_ANKE",
-}
-
-export enum SoknadType {
-    INDEKSREGULERING = "INDEKSREGULERING",
-    ALDERSJUSTERING = "ALDERSJUSTERING",
-    OPPHOR = "OPPHØR",
-    ALDERSOPPHOR = "ALDERSOPPHØR",
-    REVURDERING = "REVURDERING",
-    FASTSETTELSE = "FASTSETTELSE",
-    INNKREVING = "INNKREVING",
-    KLAGE = "KLAGE",
-    ENDRING = "ENDRING",
-    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
 export interface UpdateBehandlingRequestExtended {
@@ -271,15 +406,6 @@ export interface BehandlingDto {
     inntektBegrunnelseKunINotat?: string;
 }
 
-export enum BehandlingType {
-    BIDRAG = "BIDRAG",
-    FORSKUDD = "FORSKUDD",
-    BIDRAG18AAR = "BIDRAG18AAR",
-    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
-    MOTREGNING = "MOTREGNING",
-    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
-}
-
 export interface RolleDto {
     /** @format int64 */
     id: number;
@@ -287,14 +413,6 @@ export interface RolleDto {
     ident: string;
     /** @format date-time */
     opprettetDato?: string;
-}
-
-export enum RolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
-    BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
 }
 
 export interface CreateBehandlingRequest {
@@ -348,11 +466,6 @@ export interface AddOpplysningerRequest {
     data: string;
     /** @format date */
     hentetDato: string;
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface OpplysningerDto {
@@ -411,6 +524,17 @@ export interface ResultatPeriode {
     grunnlagReferanseListe: string[];
 }
 
+export interface Link {
+    href?: string;
+    hreflang?: string;
+    title?: string;
+    type?: string;
+    deprecation?: string;
+    profile?: string;
+    name?: string;
+    templated?: boolean;
+}
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
@@ -457,7 +581,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -547,9 +671,480 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+    behandlings = {
+        /**
+         * @description get-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name GetCollectionResourceBehandlingGet1
+         * @request GET:/behandlings
+         * @secure
+         */
+        getCollectionResourceBehandlingGet1: (params: RequestParams = {}) =>
+            this.request<CollectionModelEntityModelBehandling, any>({
+                path: `/behandlings`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description create-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name PostCollectionResourceBehandlingPost
+         * @request POST:/behandlings
+         * @secure
+         */
+        postCollectionResourceBehandlingPost: (data: BehandlingRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/behandlings`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags behandling-search-controller
+         * @name ExecuteSearchBehandlingGet
+         * @request GET:/behandlings/search/findBehandlingById
+         * @secure
+         */
+        executeSearchBehandlingGet: (
+            query?: {
+                /** @format int64 */
+                id?: number;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/behandlings/search/findBehandlingById`,
+                method: "GET",
+                query: query,
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags behandling-search-controller
+         * @name ExecuteSearchBehandlingGet1
+         * @request GET:/behandlings/search/hentBehandlinger
+         * @secure
+         */
+        executeSearchBehandlingGet1: (params: RequestParams = {}) =>
+            this.request<CollectionModelEntityModelBehandling, void>({
+                path: `/behandlings/search/hentBehandlinger`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags behandling-search-controller
+         * @name ExecuteSearchBehandlingGet2
+         * @request GET:/behandlings/search/updateVirkningsTidspunkt
+         * @secure
+         */
+        executeSearchBehandlingGet2: (
+            query?: {
+                /** @format int64 */
+                behandlingId?: number;
+                aarsak?: ForskuddBeregningKodeAarsakType;
+                avslag?: AvslagType;
+                /** @format date-time */
+                virkningsDato?: string;
+                virkningsTidspunktBegrunnelseKunINotat?: string;
+                virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<void, void>({
+                path: `/behandlings/search/updateVirkningsTidspunkt`,
+                method: "GET",
+                query: query,
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description get-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name GetItemResourceBehandlingGet
+         * @request GET:/behandlings/{id}
+         * @secure
+         */
+        getItemResourceBehandlingGet: (id: string, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/behandlings/${id}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name PutItemResourceBehandlingPut
+         * @request PUT:/behandlings/{id}
+         * @secure
+         */
+        putItemResourceBehandlingPut: (id: string, data: BehandlingRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/behandlings/${id}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name DeleteItemResourceBehandlingDelete
+         * @request DELETE:/behandlings/{id}
+         * @secure
+         */
+        deleteItemResourceBehandlingDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/behandlings/${id}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-behandling
+         *
+         * @tags behandling-entity-controller
+         * @name PatchItemResourceBehandlingPatch
+         * @request PATCH:/behandlings/{id}
+         * @secure
+         */
+        patchItemResourceBehandlingPatch: (id: string, data: BehandlingRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/behandlings/${id}`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+    };
+    opplysningers = {
+        /**
+         * @description get-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name GetCollectionResourceOpplysningerGet1
+         * @request GET:/opplysningers
+         * @secure
+         */
+        getCollectionResourceOpplysningerGet1: (params: RequestParams = {}) =>
+            this.request<CollectionModelEntityModelOpplysninger, any>({
+                path: `/opplysningers`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description create-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name PostCollectionResourceOpplysningerPost
+         * @request POST:/opplysningers
+         * @secure
+         */
+        postCollectionResourceOpplysningerPost: (data: OpplysningerRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelOpplysninger, any>({
+                path: `/opplysningers`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags opplysninger-search-controller
+         * @name ExecuteSearchOpplysningerGet
+         * @request GET:/opplysningers/search/findActiveByBehandlingIdAndType
+         * @secure
+         */
+        executeSearchOpplysningerGet: (
+            query?: {
+                /** @format int64 */
+                behandlingId?: number;
+                opplysningerType?: OpplysningerType;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<EntityModelOpplysninger, void>({
+                path: `/opplysningers/search/findActiveByBehandlingIdAndType`,
+                method: "GET",
+                query: query,
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name GetItemResourceOpplysningerGet
+         * @request GET:/opplysningers/{id}
+         * @secure
+         */
+        getItemResourceOpplysningerGet: (id: string, params: RequestParams = {}) =>
+            this.request<EntityModelOpplysninger, void>({
+                path: `/opplysningers/${id}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name PutItemResourceOpplysningerPut
+         * @request PUT:/opplysningers/{id}
+         * @secure
+         */
+        putItemResourceOpplysningerPut: (id: string, data: OpplysningerRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelOpplysninger, any>({
+                path: `/opplysningers/${id}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name DeleteItemResourceOpplysningerDelete
+         * @request DELETE:/opplysningers/{id}
+         * @secure
+         */
+        deleteItemResourceOpplysningerDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/opplysningers/${id}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-opplysninger
+         *
+         * @tags opplysninger-entity-controller
+         * @name PatchItemResourceOpplysningerPatch
+         * @request PATCH:/opplysningers/{id}
+         * @secure
+         */
+        patchItemResourceOpplysningerPatch: (id: string, data: OpplysningerRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelOpplysninger, any>({
+                path: `/opplysningers/${id}`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name FollowPropertyReferenceOpplysningerGet1
+         * @request GET:/opplysningers/{id}/behandling
+         * @secure
+         */
+        followPropertyReferenceOpplysningerGet1: (id: string, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/opplysningers/${id}/behandling`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name CreatePropertyReferenceOpplysningerPut
+         * @request PUT:/opplysningers/{id}/behandling
+         * @secure
+         */
+        createPropertyReferenceOpplysningerPut: (id: string, data: CollectionModelObject, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/opplysningers/${id}/behandling`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name DeletePropertyReferenceOpplysningerDelete
+         * @request DELETE:/opplysningers/{id}/behandling
+         * @secure
+         */
+        deletePropertyReferenceOpplysningerDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/opplysningers/${id}/behandling`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name CreatePropertyReferenceOpplysningerPatch
+         * @request PATCH:/opplysningers/{id}/behandling
+         * @secure
+         */
+        createPropertyReferenceOpplysningerPatch: (
+            id: string,
+            data: CollectionModelObject,
+            params: RequestParams = {}
+        ) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/opplysningers/${id}/behandling`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name FollowPropertyReferenceOpplysningerGet
+         * @request GET:/opplysningers/{id}/behandling/{propertyId}
+         * @secure
+         */
+        followPropertyReferenceOpplysningerGet: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/opplysningers/${id}/behandling/${propertyId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-behandling-by-opplysninger-Id
+         *
+         * @tags opplysninger-property-reference-controller
+         * @name DeletePropertyReferenceIdOpplysningerDelete
+         * @request DELETE:/opplysningers/{id}/behandling/{propertyId}
+         * @secure
+         */
+        deletePropertyReferenceIdOpplysningerDelete: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/opplysningers/${id}/behandling/${propertyId}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+    };
+    profile = {
+        /**
+         * No description
+         *
+         * @tags profile-controller
+         * @name ListAllFormsOfMetadata1
+         * @request GET:/profile
+         * @secure
+         */
+        listAllFormsOfMetadata1: (params: RequestParams = {}) =>
+            this.request<RepresentationModelObject, any>({
+                path: `/profile`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags profile-controller
+         * @name Descriptor111
+         * @request GET:/profile/behandlings
+         * @secure
+         */
+        descriptor111: (params: RequestParams = {}) =>
+            this.request<string, any>({
+                path: `/profile/behandlings`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags profile-controller
+         * @name Descriptor112
+         * @request GET:/profile/opplysningers
+         * @secure
+         */
+        descriptor112: (params: RequestParams = {}) =>
+            this.request<string, any>({
+                path: `/profile/opplysningers`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+    };
     api = {
         /**
          * @description Hente virkningstidspunkt data
@@ -560,10 +1155,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentVirkningsTidspunkt: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<VirkningsTidspunktResponse, Error | VirkningsTidspunktResponse>({
+            this.request<VirkningsTidspunktResponse, VirkningsTidspunktResponse>({
                 path: `/api/behandling/${behandlingId}/virkningstidspunkt`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -580,12 +1176,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             data: UpdateVirkningsTidspunktRequest,
             params: RequestParams = {}
         ) =>
-            this.request<VirkningsTidspunktResponse, Error | VirkningsTidspunktResponse>({
+            this.request<VirkningsTidspunktResponse, VirkningsTidspunktResponse>({
                 path: `/api/behandling/${behandlingId}/virkningstidspunkt`,
                 method: "PUT",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -598,10 +1195,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentInntekter: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<InntekterResponse, Error | InntekterResponse>({
+            this.request<InntekterResponse, InntekterResponse>({
                 path: `/api/behandling/${behandlingId}/inntekter`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -614,12 +1212,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdaterInntekter: (behandlingId: number, data: UpdateInntekterRequest, params: RequestParams = {}) =>
-            this.request<InntekterResponse, Error | InntekterResponse>({
+            this.request<InntekterResponse, InntekterResponse>({
                 path: `/api/behandling/${behandlingId}/inntekter`,
                 method: "PUT",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -632,10 +1231,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBoforhold: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<BoforholdResponse, Error>({
+            this.request<BoforholdResponse, any>({
                 path: `/api/behandling/${behandlingId}/boforhold`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -648,12 +1248,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdatereBoforhold: (behandlingId: number, data: UpdateBoforholdRequest, params: RequestParams = {}) =>
-            this.request<BoforholdResponse, Error>({
+            this.request<BoforholdResponse, any>({
                 path: `/api/behandling/${behandlingId}/boforhold`,
                 method: "PUT",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -670,12 +1271,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             data: UpdateBehandlingRequestExtended,
             params: RequestParams = {}
         ) =>
-            this.request<BehandlingDto, Error | BehandlingDto>({
+            this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/behandling/ext/${behandlingId}`,
                 method: "PUT",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -688,10 +1290,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBehandlinger: (params: RequestParams = {}) =>
-            this.request<BehandlingDto[], Error | BehandlingDto[]>({
+            this.request<BehandlingDto[], BehandlingDto[]>({
                 path: `/api/behandling`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -704,12 +1307,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         createBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
-            this.request<CreateBehandlingResponse, Error | CreateBehandlingResponse>({
+            this.request<CreateBehandlingResponse, CreateBehandlingResponse>({
                 path: `/api/behandling`,
                 method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -722,12 +1326,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         addOpplysningerData: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
-            this.request<OpplysningerDto, Error | OpplysningerDto>({
+            this.request<OpplysningerDto, OpplysningerDto>({
                 path: `/api/behandling/${behandlingId}/opplysninger`,
                 method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -740,10 +1345,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<ForskuddDto, Error>({
+            this.request<ForskuddDto, any>({
                 path: `/api/behandling/${behandlingId}/beregn`,
                 method: "POST",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -756,10 +1362,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<BehandlingDto, Error | BehandlingDto>({
+            this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
@@ -772,10 +1379,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentAktiv: (behandlingId: number, opplysningerType: OpplysningerType, params: RequestParams = {}) =>
-            this.request<OpplysningerDto, Error | OpplysningerDto>({
+            this.request<OpplysningerDto, OpplysningerDto>({
                 path: `/api/behandling/${behandlingId}/opplysninger/${opplysningerType}/aktiv`,
                 method: "GET",
                 secure: true,
+                format: "json",
                 ...params,
             }),
     };

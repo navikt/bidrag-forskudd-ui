@@ -2,7 +2,7 @@ export interface Inntekt {
     beskrivelse: string;
     datoFom: Date | null;
     taMed: boolean;
-    fraPostene: boolean;
+    fraGrunnlag: boolean;
     datoTom: Date | null;
     belop: string;
 }

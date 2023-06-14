@@ -31,7 +31,7 @@ import {
 } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { DateToDDMMYYYYString, DateToMMYYYYString, DDMMYYYYStringToDate, isValidDate } from "../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, DateToMMYYYYString, isValidDate } from "../../utils/date-utils";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
@@ -73,9 +73,7 @@ const Opplysninger = ({ opplysninger, ident }) => {
 const Main = ({ opplysningerFraFolkRegistre }) => {
     const { behandlingId } = useForskudd();
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const virkningstidspunkt = virkningstidspunktValues?.virkningsDato
-        ? DDMMYYYYStringToDate(virkningstidspunktValues.virkningsDato)
-        : null;
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
 
     return (
         <>
@@ -128,9 +126,8 @@ const BoforholdsForm = () => {
     const opplysninger = boforoholdOpplysninger ? boforoholdOpplysninger : opplysningerFraFolkRegistre;
 
     const updateBoforhold = useUpdateBoforhold(behandlingId);
-    const virkningstidspunkt = virkningstidspunktValues?.virkningsDato
-        ? DDMMYYYYStringToDate(virkningstidspunktValues.virkningsDato)
-        : null;
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
+
     const initialValues =
         boforholdFormValues ??
         createInitialValues(

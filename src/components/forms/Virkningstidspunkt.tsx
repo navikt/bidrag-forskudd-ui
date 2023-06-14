@@ -12,7 +12,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { DDMMYYYYStringToDate, isValidDate, toISODateString } from "../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isValidDate, toISODateString } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -24,7 +24,7 @@ import { ActionButtons } from "./inntekt/ActionButtons";
 
 const createInitialValues = (response: VirkningsTidspunktResponse) =>
     ({
-        virkningsDato: response.virkningsDato ? DDMMYYYYStringToDate(response.virkningsDato) : null,
+        virkningsDato: dateOrNull(response.virkningsDato),
         aarsak: response.aarsak ?? "",
         avslag: response.avslag ?? "",
         virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
@@ -64,11 +64,11 @@ const Main = ({ initialValues, error }) => {
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Mottat dato</Label>
-                    <BodyShort size="small">{behandling.mottatDato}</BodyShort>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottatDato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Søkt fra dato</Label>
-                    <BodyShort size="small">{behandling.datoFom}</BodyShort>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.datoFom))}</BodyShort>
                 </div>
             </FlexRow>
             <FlexRow>

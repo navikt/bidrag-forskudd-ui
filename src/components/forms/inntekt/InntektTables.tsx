@@ -8,7 +8,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { InntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { DDMMYYYYStringToDate, isValidDate } from "../../../utils/date-utils";
+import { dateOrNull, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -22,7 +22,7 @@ import {
 } from "../helpers/inntektFormHelpers";
 
 const Beskrivelse = ({ item, index, ident }) =>
-    item.fraPostene ? (
+    item.fraGrunnlag ? (
         <BodyShort className="min-w-[215px] capitalize">{InntektType[item.beskrivelse]}</BodyShort>
     ) : (
         <FormControlledSelectField
@@ -74,7 +74,7 @@ const Detaljer = ({ totalt }) => {
     );
 };
 const Totalt = ({ item, index, ident }) =>
-    item.fraPostene ? (
+    item.fraGrunnlag ? (
         <div className="flex items-center gap-x-4">
             <BodyShort className="min-w-[80px] flex justify-end">{item.belop}</BodyShort>
             <Detaljer totalt={item.belop} />
@@ -92,7 +92,7 @@ const Totalt = ({ item, index, ident }) =>
     );
 
 const DeleteButton = ({ item, index, handleOnDelete }) =>
-    item.fraPostene ? (
+    item.fraGrunnlag ? (
         <div className="min-w-[40px]"></div>
     ) : (
         <Button
@@ -111,7 +111,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
         name: `inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`,
     });
 
-    return <div className={`${value || !item.fraPostene ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
+    return <div className={`${value || !item.fraGrunnlag ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
@@ -129,9 +129,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         control,
         name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
-    const virkningstidspunkt = virkningstidspunktValues?.virkningsDato
-        ? DDMMYYYYStringToDate(virkningstidspunktValues.virkningsDato)
-        : null;
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
     useEffect(() => {
@@ -213,7 +212,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             belop: "",
             beskrivelse: "",
             taMed: false,
-            fraPostene: false,
+            fraGrunnlag: false,
         });
     };
 

@@ -15,7 +15,7 @@ export const createInntektPayload = (values: InntektFormValues) => ({
                 return {
                     ...inntekt,
                     ident: key,
-                    beløp: Number(inntekt.belop),
+                    belop: Number(inntekt.belop),
                     datoFom: toISODateString(inntekt.datoFom),
                     datoTom: toISODateString(inntekt.datoFom),
                 };
@@ -25,7 +25,7 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     utvidetbarnetrygd: values.utvidetBarnetrygd.length
         ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
-              beløp: utvidetBarnetrygd.belop,
+              belop: Number(utvidetBarnetrygd.belop),
               datoFom: toISODateString(utvidetBarnetrygd.datoFom),
               datoTom: toISODateString(utvidetBarnetrygd.datoTom),
           }))
@@ -33,6 +33,7 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     barnetillegg: values.barnetillegg.length
         ? values.barnetillegg.map((barnetillegg) => ({
               ...barnetillegg,
+              barnetillegg: Number(barnetillegg.barnetillegg),
               datoFom: toISODateString(barnetillegg.datoFom),
               datoTom: toISODateString(barnetillegg.datoTom),
           }))
@@ -49,7 +50,7 @@ const mapSkattegrunnlagInntektPerioder = (skattegrunlag) =>
         datoTom: dateOrNull(skattegrunlag.periodeTil),
         datoFom: dateOrNull(skattegrunlag.periodeFra),
         ident: skattegrunlag.personId,
-        fraPostene: true,
+        fraGrunnlag: true,
     }));
 
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
