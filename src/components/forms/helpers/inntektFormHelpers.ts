@@ -1,3 +1,4 @@
+import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -14,6 +15,7 @@ export const createInntektPayload = (values: InntektFormValues) => ({
             value.map((inntekt) => {
                 return {
                     ...inntekt,
+                    beskrivelse: inntekt.beskrivelse === "" ? null : inntekt.beskrivelse,
                     ident: key,
                     belop: Number(inntekt.belop),
                     datoFom: toISODateString(inntekt.datoFom),
@@ -42,10 +44,10 @@ export const createInntektPayload = (values: InntektFormValues) => ({
     inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
 });
 
-const mapSkattegrunnlagInntektPerioder = (skattegrunlag) =>
+const mapSkattegrunnlagInntektPerioder = (skattegrunlag: SkattegrunnlagDto) =>
     skattegrunlag.skattegrunnlagListe.map((inntekt) => ({
         taMed: false,
-        beskrivelse: inntekt.inntektType,
+        beskrivelse: inntekt.inntektType ?? "",
         belop: inntekt.belop,
         datoTom: dateOrNull(skattegrunlag.periodeTil),
         datoFom: dateOrNull(skattegrunlag.periodeFra),
@@ -67,6 +69,7 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
         .filter((inntekt) => inntekt.ident === rolle.ident)
         .map((inntekt) => ({
             ...inntekt,
+            beskrivelse: inntekt.beskrivelse ?? "",
             datoTom: dateOrNull(inntekt.datoTom),
             datoFom: dateOrNull(inntekt.datoFom),
         }));
