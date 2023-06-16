@@ -98,8 +98,9 @@ const Main = ({ initialValues, error }) => {
                 <FormControlledMonthPicker
                     name="virkningsDato"
                     label="Virkningstidspunkt"
-                    placeholder="MM.ÅÅÅÅ"
+                    placeholder="DD.MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningsDato}
+                    required
                 />
             </FlexRow>
         </>
@@ -137,6 +138,7 @@ const VirkningstidspunktForm = () => {
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
+        mode: "onChange",
     });
 
     const fieldsForNotat = useWatch({

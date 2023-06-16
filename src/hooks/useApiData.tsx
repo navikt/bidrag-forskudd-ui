@@ -10,7 +10,6 @@ import {
     OpplysningerType,
     RolleDto,
     RolleType,
-    UpdateBehandlingRequestExtended,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
@@ -320,15 +319,4 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
 
     const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
     return grunnlagspakke;
-};
-
-export const _updateBehandlingExtended = (behandlingId: number) => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: UpdateBehandlingRequestExtended): Promise<AxiosResponse<BehandlingDto>> =>
-            BEHANDLING_API.api.oppdaterBehandlingExtended(behandlingId, payload),
-        onSuccess: (data) => {
-            queryClient.setQueryData(["behandling", behandlingId], data);
-        },
-    });
 };

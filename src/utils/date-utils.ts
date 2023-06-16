@@ -1,6 +1,6 @@
 export const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
-export const toISOStringOrNull = (date?: Date): string | null => date?.toISOString() ?? null;
-export const toISODateString = (date?: Date): string | null => toISOStringOrNull(date)?.split("T")[0] ?? null;
+export const toISODateString = (date?: Date): string | null =>
+    date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) ?? null;
 export const addDays = (date: Date, days: number) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -51,4 +51,14 @@ export const DateToMMYYYYString = (date: Date) =>
 export const ISODateTimeStringToDDMMYYYYString = (isoDateTimeString: string) => {
     const date = new Date(isoDateTimeString);
     return isValidDate(date) ? DateToDDMMYYYYString(date) : "";
+};
+
+export const isFirstDayOfMonth = (date) => {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    return firstDay.getDate() === date.getDate();
+};
+
+export const isLastDayOfMonth = (date) => {
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return lastDay.getDate() === date.getDate();
 };

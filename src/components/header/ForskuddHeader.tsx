@@ -1,19 +1,14 @@
-import { Heading, Loader, Modal } from "@navikt/ds-react";
-import { CopyToClipboard } from "@navikt/ds-react-internal";
-import React, { memo, Suspense, useState } from "react";
+import { CopyButton, Heading, Loader } from "@navikt/ds-react";
+import React, { memo, Suspense } from "react";
 
 import { RolleDto, RolleType } from "../../api/BidragBehandlingApi";
 import { useForskudd } from "../../context/ForskuddContext";
-import { _updateBehandlingExtended, useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
+import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
 import { RolleDetaljer } from "../RolleDetaljer";
-import { UpdateForskudd } from "../UpdateForskudd";
 
 export const Header = memo(() => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-
-    const mutation = _updateBehandlingExtended(behandlingId);
-    const [modalOpen, setModalOpen] = useState(false);
 
     return (
         <>
@@ -22,9 +17,6 @@ export const Header = memo(() => {
                     level="1"
                     size="xlarge"
                     className="px-6 py-2 leading-10 flex items-center gap-x-4 border-[var(--a-border-divider)] border-solid border-b"
-                    onDoubleClick={() => {
-                        setModalOpen(true);
-                    }}
                 >
                     Søknad om forskudd <Saksnummer saksnummer={behandling.saksnummer} />
                 </Heading>
@@ -32,26 +24,6 @@ export const Header = memo(() => {
                     <Roller roller={behandling.roller} />
                 </div>
             </div>
-
-            <Modal
-                open={modalOpen}
-                aria-label="Oppdatter søknad"
-                onClose={() => setModalOpen(!modalOpen)}
-                aria-labelledby="modal-heading"
-            >
-                <Modal.Content>
-                    <Heading spacing level="1" size="large" id="modal-heading">
-                        Laborum proident id ullamco
-                    </Heading>
-                    <UpdateForskudd
-                        behandling={behandling}
-                        mutation={mutation}
-                        close={() => {
-                            setModalOpen(!modalOpen);
-                        }}
-                    />
-                </Modal.Content>
-            </Modal>
         </>
     );
 });
@@ -80,7 +52,7 @@ const Roller = memo(({ roller }: { roller: RolleDto[] }) => {
 
 const Saksnummer = memo(({ saksnummer }: { saksnummer: string }) => (
     <span className="text-base flex items-center font-normal">
-        Saksnr. {saksnummer} <CopyToClipboard size="small" copyText={saksnummer} popoverText="Kopierte saksnummer" />
+        Saksnr. {saksnummer} <CopyButton size="small" copyText={saksnummer} />
     </span>
 ));
 
