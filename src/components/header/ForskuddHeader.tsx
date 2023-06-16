@@ -52,7 +52,7 @@ const Roller = memo(({ roller }: { roller: RolleDto[] }) => {
 
 const Saksnummer = memo(({ saksnummer }: { saksnummer: string }) => (
     <span className="text-base flex items-center font-normal">
-        Saksnr. {saksnummer} <CopyButton size="small" copyText={saksnummer} />
+        Saksnr. {saksnummer} <CopyButton size="small" copyText={saksnummer} title={`Kopier ${saksnummer}`} />
     </span>
 ));
 

@@ -1,4 +1,4 @@
-import { CopyToClipboard } from "@navikt/ds-react-internal";
+import { CopyButton } from "@navikt/ds-react";
 import React from "react";
 
 import { IRolleUI } from "../types/rolle";
@@ -14,7 +14,7 @@ export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: IRolleUI; w
             <RolleTag rolleType={rolle.rolleType} />
             <span>{rolle.navn}</span>
             <span className="mx-4">/</span> {rolle.ident}
-            <CopyToClipboard size="small" copyText={rolle.ident} popoverText="Kopierte fødselsnummeret" />
+            <CopyButton size="small" copyText={rolle.ident} title={`Kopier ${rolle.ident}`} />
         </div>
     );
 };
