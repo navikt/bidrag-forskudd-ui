@@ -4,7 +4,7 @@ export interface ResponseData<T> {
     errorMessage?: string;
 }
 
-export function isResponseData<T>(object: ResponseData<T> | T): object is ResponseData<T> {
+export function isResponseData<T extends object>(object: ResponseData<T> | T): object is ResponseData<T> {
     if (!object) {
         return false;
     }

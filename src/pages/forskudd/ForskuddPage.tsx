@@ -1,28 +1,35 @@
-import { useApi } from "@navikt/bidrag-ui-common";
-import { Button } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import { Stepper } from "@navikt/ds-react";
+import React from "react";
 
-import { Api as PersonApi } from "../../api/PersonApi";
+import FormWrapper from "../../components/forms/FormWrapper";
+import { STEPS } from "../../constants/steps";
+import { useForskudd } from "../../context/ForskuddContext";
+import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { useGetVirkningstidspunkt } from "../../hooks/useApiData";
+import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
-
-interface ForskuddPageProps {
-    personId: string;
-}
-
-export default function ForskuddPage({ personId }: ForskuddPageProps) {
-    const [personNavn, setPersonNavn] = useState<string>();
-    const personApi = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PERSON_URL }), "bidrag-person", "fss");
-
-    useEffect(() => {
-        personApi.informasjon.hentPerson(personId).then((res) => {
-            setPersonNavn(res.data.navn);
-        });
-    }, []);
+export const ForskuddPage = () => {
+    const { activeStep, setActiveStep, behandlingId } = useForskudd();
+    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
+    const interactive = !virkningstidspunkt?.avslag;
 
     return (
-        <PageWrapper name={"Forskudd"}>
-            Navnet på personen er {personNavn}
-            <Button>Knapp test</Button>
+        <PageWrapper name="tracking-wide">
+            <div className="max-w-[1280px] mx-auto px-6 py-6">
+                <Stepper
+                    aria-labelledby="stepper-heading"
+                    activeStep={STEPS[activeStep]}
+                    onStepChange={(x) => setActiveStep(x)}
+                    orientation="horizontal"
+                    className="mb-8"
+                >
+                    <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
+                    <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
+                    <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
+                    <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
+                </Stepper>
+                <FormWrapper />
+            </div>
         </PageWrapper>
     );
-}
+};

@@ -19,7 +19,7 @@
   "ts-node": {
     // these overrides are used by ts-node
     "compilerOptions": {
-      "module": "commonjs",
+      "module": "commonjs"
     }
   },
   "include": ["src"]
