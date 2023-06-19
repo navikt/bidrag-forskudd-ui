@@ -6,7 +6,7 @@ import {
     deductDays,
     firstDayOfMonth,
     lastDayOfMonth,
-    toDateString,
+    toISODateString,
 } from "../../../utils/date-utils";
 
 export const calculateFraDato = (fieldArrayValues, virkningstidspunkt) => {
@@ -149,14 +149,15 @@ export const createPayload = (values) => ({
         ...barn,
         perioder: barn.perioder.map((periode) => ({
             ...periode,
-            fraDato: periode.fraDato ? toDateString(periode.fraDato) : "",
-            tilDato: periode.tilDato ? toDateString(periode.tilDato) : "",
+            boStatus: periode.boStatus === "" ? null : periode.boStatus,
+            fraDato: toISODateString(periode.fraDato),
+            tilDato: toISODateString(periode.tilDato),
         })),
     })),
     sivilstand: values.sivilstand.map((periode) => ({
         ...periode,
-        fraDato: periode.fraDato ? toDateString(periode.fraDato) : "",
-        tilDato: periode.tilDato ? toDateString(periode.tilDato) : "",
+        fraDato: toISODateString(periode.fraDato),
+        tilDato: toISODateString(periode.tilDato),
     })),
     boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
     boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
