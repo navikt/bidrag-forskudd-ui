@@ -109,7 +109,9 @@ const Main = ({ initialValues, error }) => {
 
 const Side = () => {
     const { setActiveStep } = useForskudd();
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.BOFORHOLD]);
+    const useFormMethods = useFormContext();
+    const avslag = useFormMethods.getValues("avslag");
+    const onNext = () => setActiveStep(avslag ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
 
     return (
         <>
