@@ -38,6 +38,8 @@ export const FormControlledMonthPicker = ({
             required: required ? "Dato må fylles ut" : false,
             validate: () => {
                 const date = getValues(name);
+                if (!date) return false;
+
                 const isFirstOrLastDayOfMonth = lastDayOfMonthPicker ? isLastDayOfMonth(date) : isFirstDayOfMonth(date);
                 const errorMessage = !isFirstOrLastDayOfMonth
                     ? lastDayOfMonthPicker
