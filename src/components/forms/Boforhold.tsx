@@ -1,6 +1,5 @@
 import { HddDownIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import {
-    Accordion,
     Alert,
     BodyShort,
     Button,
@@ -9,6 +8,7 @@ import {
     Panel,
     Radio,
     RadioGroup,
+    ReadMore,
     Search,
 } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect, useState } from "react";
@@ -293,17 +293,9 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
                                         </BodyShort>
                                         <BodyShort size="small">{item.ident}</BodyShort>
                                     </FlexRow>
-                                    <Accordion>
-                                        <Accordion.Item>
-                                            <Accordion.Header>Opplysninger fra Folkeregistret</Accordion.Header>
-                                            <Accordion.Content>
-                                                <Opplysninger
-                                                    opplysninger={opplysningerFraFolkRegistre}
-                                                    ident={item.ident}
-                                                />
-                                            </Accordion.Content>
-                                        </Accordion.Item>
-                                    </Accordion>
+                                    <ReadMore header="Opplysninger fra Folkeregistret" size="small">
+                                        <Opplysninger opplysninger={opplysningerFraFolkRegistre} ident={item.ident} />
+                                    </ReadMore>
                                 </div>
                             </div>
                         )}

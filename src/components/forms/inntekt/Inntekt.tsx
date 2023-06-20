@@ -24,7 +24,7 @@ import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdT
 const InntektHeader = ({ inntekt }: { inntekt: AinntektDto[] }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
         <InntektChart inntekt={inntekt} />
-        <ExpansionCard aria-label="default-demo">
+        <ExpansionCard aria-label="default-demo" size="small">
             <ExpansionCard.Header>
                 <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
             </ExpansionCard.Header>
