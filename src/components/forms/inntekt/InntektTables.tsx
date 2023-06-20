@@ -23,7 +23,7 @@ import {
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
-        <BodyShort className="min-w-[215px] capitalize">{InntektBeskrivelse[item.beskrivelse]}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{InntektBeskrivelse[item.inntektType]}</BodyShort>
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
@@ -210,7 +210,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             datoFom: null,
             datoTom: null,
             belop: "",
-            beskrivelse: "",
+            inntektType: "",
             taMed: false,
             fraGrunnlag: false,
         });
@@ -253,7 +253,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     legend=""
                                 />,
                                 <Beskrivelse
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektType`}
                                     item={item}
                                     index={index}
                                     ident={ident}

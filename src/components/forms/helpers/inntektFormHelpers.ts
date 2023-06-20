@@ -25,7 +25,7 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
             value.map((inntekt) => {
                 return {
                     ...inntekt,
-                    beskrivelse: inntekt.beskrivelse === "" ? null : inntekt.beskrivelse,
+                    inntektType: inntekt.inntektType === "" ? null : inntekt.inntektType,
                     ident: key,
                     belop: Number(inntekt.belop),
                     datoFom: toISODateString(inntekt.datoFom),
@@ -57,7 +57,7 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
 const mapSkattegrunnlagInntektPerioder = (skattegrunlag: SkattegrunnlagDto) =>
     skattegrunlag.skattegrunnlagListe.map((inntekt) => ({
         taMed: false,
-        beskrivelse: inntekt.inntektType ?? "",
+        inntektType: inntekt.inntektType ?? "",
         belop: inntekt.belop,
         datoTom: dateOrNull(skattegrunlag.periodeTil),
         datoFom: dateOrNull(skattegrunlag.periodeFra),
@@ -93,7 +93,7 @@ const get3and12MonthIncomeFromAinntekt = (ainntektListe, rolle) => {
     return [
         {
             taMed: false,
-            beskrivelse: "TRE_MAANED_BEREGNET",
+            inntektType: "TRE_MAANED_BEREGNET",
             belop: threeMonthsIncome * 4,
             datoTom: null,
             datoFom: null,
@@ -102,7 +102,7 @@ const get3and12MonthIncomeFromAinntekt = (ainntektListe, rolle) => {
         },
         {
             taMed: false,
-            beskrivelse: "TOLV_MAANED_BEREGNET",
+            inntektType: "TOLV_MAANED_BEREGNET",
             belop: yearsIncome,
             datoTom: null,
             datoFom: null,
@@ -124,7 +124,7 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
         .filter((inntekt) => inntekt.ident === rolle.ident)
         .map((inntekt) => ({
             ...inntekt,
-            beskrivelse: inntekt.beskrivelse ?? "",
+            inntektType: inntekt.inntektType ?? "",
             datoTom: dateOrNull(inntekt.datoTom),
             datoFom: dateOrNull(inntekt.datoFom),
         }));

@@ -67,6 +67,31 @@ export enum BoStatusType {
     BARN_BOR_ALENE = "BARN_BOR_ALENE",
 }
 
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddBeregningKodeAarsakType;
+    avslag?: AvslagType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+    _links?: Links;
+}
+
 export enum ForskuddBeregningKodeAarsakType {
     SF = "SF",
     NF = "NF",
@@ -137,41 +162,11 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface EntityModelBehandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: AvslagType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
-    _links?: Links;
-}
-
 export interface CollectionModelEntityModelBehandling {
     _embedded?: {
         behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface EntityModelOpplysninger {
@@ -181,6 +176,11 @@ export interface EntityModelOpplysninger {
     /** @format date-time */
     hentetDato: string;
     _links?: Links;
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface CollectionModelEntityModelOpplysninger {
@@ -273,12 +273,12 @@ export interface InntektDto {
     /** @format int64 */
     id?: number;
     taMed: boolean;
-    beskrivelse: string;
+    inntektType?: string;
     belop: number;
     /** @format date */
-    datoTom: string;
+    datoFom?: string;
     /** @format date */
-    datoFom: string;
+    datoTom?: string;
     ident: string;
     fraGrunnlag: boolean;
 }
@@ -412,6 +412,8 @@ export interface RolleDto {
     rolleType: RolleType;
     ident: string;
     /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
     opprettetDato?: string;
 }
 
@@ -446,9 +448,17 @@ export interface CreateBehandlingRequest {
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
     rolleType: RolleType;
-    /** Fødselsdato */
+    /** F.eks fødselsnummer */
     ident: string;
-    /** @format date-time */
+    /**
+     * F.eks fødselsdato
+     * @format date
+     */
+    fodtDato?: string;
+    /**
+     * Opprettet dato
+     * @format date
+     */
     opprettetDato?: string;
 }
 
@@ -498,10 +508,6 @@ export interface Periode {
      * @format date
      */
     datoTil?: string;
-    /** Periode (fra-til dato */
-    periode: Periode;
-    /** Resultatet av en beregning */
-    resultat: ResultatBeregning;
 }
 
 /** Resultatet av en beregning */
@@ -1345,7 +1351,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<ForskuddDto, any>({
+            this.request<ForskuddDto[], any>({
                 path: `/api/behandling/${behandlingId}/beregn`,
                 method: "POST",
                 secure: true,
