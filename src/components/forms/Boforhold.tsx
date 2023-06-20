@@ -31,7 +31,7 @@ import {
 } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, DateToMMYYYYString, isValidDate } from "../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
@@ -455,7 +455,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
                                         name={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
                                         label="Fra og med"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.fraDato}
                                         onChange={(date) => {
                                             validatePeriods();
@@ -468,7 +468,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     <BodyShort
                                         key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato.placeholder`}
                                     >
-                                        {item.fraDato ? DateToMMYYYYString(item.fraDato) : ""}
+                                        {item.fraDato ? DateToDDMMYYYYString(item.fraDato) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
@@ -476,7 +476,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
                                         name={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
                                         label="Til og med"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.tilDato}
                                         onChange={(date) => {
                                             validatePeriods();
@@ -489,7 +489,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     <BodyShort
                                         key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato.placeholder`}
                                     >
-                                        {item.tilDato ? DateToMMYYYYString(item.tilDato) : ""}
+                                        {item.tilDato ? DateToDDMMYYYYString(item.tilDato) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
@@ -679,7 +679,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         key={`sivilstand.${index}.fraDato`}
                                         name={`sivilstand.${index}.fraDato`}
                                         label="Periode"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.fraDato}
                                         onChange={(date) => {
                                             validatePeriods();
@@ -692,7 +692,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         key={`sivilstand.${index}.tilDato`}
                                         name={`sivilstand.${index}.tilDato`}
                                         label="Periode"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.tilDato}
                                         onChange={(date) => {
                                             validatePeriods();

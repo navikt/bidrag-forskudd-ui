@@ -273,7 +273,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
                                             label="Fra og med"
-                                            placeholder="MM.ÅÅÅÅ"
+                                            placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoFom}
                                             required={item.taMed}
                                             hideLabel
@@ -289,9 +289,10 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
                                             label="Til og med"
-                                            placeholder="MM.ÅÅÅÅ"
+                                            placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoTom}
                                             hideLabel
+                                            lastDayOfMonthPicker
                                         />
                                     }
                                 />,
@@ -378,7 +379,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                         key={`utvidetBarnetrygd.${index}.datoFom`}
                                         name={`utvidetBarnetrygd.${index}.datoFom`}
                                         label="Fra og med"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
                                         required
                                         hideLabel
@@ -387,9 +388,10 @@ export const UtvidetBarnetrygdTabel = () => {
                                         key={`utvidetBarnetrygd.${index}.datoTom`}
                                         name={`utvidetBarnetrygd.${index}.datoTom`}
                                         label="Til og med"
-                                        placeholder="MM.ÅÅÅÅ"
+                                        placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
                                         hideLabel
+                                        lastDayOfMonthPicker
                                     />
                                 </div>,
                                 <FormControlledCheckbox
@@ -513,7 +515,7 @@ export const BarnetilleggTabel = () => {
                                     key={`barnetillegg.${index}.datoFom`}
                                     name={`barnetillegg.${index}.datoFom`}
                                     label="Fra og med"
-                                    placeholder="MM.ÅÅÅÅ"
+                                    placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoFom}
                                     required
                                     hideLabel
@@ -522,9 +524,10 @@ export const BarnetilleggTabel = () => {
                                     key={`barnetillegg.${index}.datoTom`}
                                     name={`barnetillegg.${index}.datoTom`}
                                     label="Til og med"
-                                    placeholder="MM.ÅÅÅÅ"
+                                    placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoTom}
                                     hideLabel
+                                    lastDayOfMonthPicker
                                 />,
                                 <FormControlledSelectField
                                     key={`barnetillegg.${index}.ident`}

@@ -29,7 +29,7 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
                     ident: key,
                     belop: Number(inntekt.belop),
                     datoFom: toISODateString(inntekt.datoFom),
-                    datoTom: toISODateString(inntekt.datoFom),
+                    datoTom: toISODateString(inntekt.datoTom),
                 };
             })
         )
