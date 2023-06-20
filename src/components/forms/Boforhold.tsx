@@ -319,7 +319,7 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
                 </Fragment>
             ))}
             <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addBarn}>
-                + legg til barn
+                + Legg til barn
             </Button>
         </>
     );
@@ -582,7 +582,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
             )}
             <div className="p-3">
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                    + legg til periode
+                    + Legg til periode
                 </Button>
             </div>
         </>
@@ -730,7 +730,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                 </TableWrapper>
             )}
             <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + legg til periode
+                + Legg til periode
             </Button>
         </>
     );

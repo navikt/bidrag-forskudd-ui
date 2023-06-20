@@ -307,7 +307,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                 </TableWrapper>
             )}
             <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + legg til periode
+                + Legg til periode
             </Button>
         </>
     );
@@ -436,7 +436,7 @@ export const UtvidetBarnetrygdTabel = () => {
                     })
                 }
             >
-                + legg til periode
+                + Legg til periode
             </Button>
         </>
     );
@@ -580,7 +580,7 @@ export const BarnetilleggTabel = () => {
                     })
                 }
             >
-                + legg til periode
+                + Legg til periode
             </Button>
         </>
     );
