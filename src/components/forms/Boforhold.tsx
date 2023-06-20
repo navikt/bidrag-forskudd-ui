@@ -155,7 +155,8 @@ const BoforholdsForm = () => {
         const values = useFormMethods.getValues();
         setBoforholdFormValues(values);
         updateBoforhold.mutation.mutate(createPayload(values), {
-            onSuccess: () => useFormMethods.reset(values, { keepValues: true, keepErrors: true }),
+            onSuccess: () =>
+                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
         });
     };
 

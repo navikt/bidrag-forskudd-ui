@@ -185,7 +185,8 @@ const InntektForm = () => {
         const values = useFormMethods.getValues();
 
         updateInntekter.mutation.mutate(createInntektPayload(values), {
-            onSuccess: () => useFormMethods.reset(values, { keepValues: true, keepErrors: true }),
+            onSuccess: () =>
+                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
         });
     };
 
