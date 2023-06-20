@@ -2,55 +2,73 @@ import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/Too
 import React, { memo } from "react";
 
 import { AinntektDto } from "../../../api/BidragGrunnlagApi";
-import { InntektType } from "../../../enum/InntektBeskrivelse";
+import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
+import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../utils/date-utils";
 import { roundDown, roundUp } from "../../../utils/number-utils";
+import { capitalize } from "../../../utils/string-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 
-const getTotalPerPeriode = (inntekt: AinntektDto[]) =>
-    inntekt.map((periode) => periode.ainntektspostListe.reduce((acc, curr) => acc + curr.belop, 0));
+const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
-const monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"];
-const getPeriodeMonth = (inntekt: AinntektDto[]) =>
-    inntekt.map((periode) => monthAbbreviations[Number(periode.periodeFra.split("-")[1]) - 1]);
+const buildChartOptions = (inntekt: AinntektDto[]): EChartsOption => {
+    const today = new Date();
+    const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 11 : 12), 12);
+    const past12Incomes = (inntekt: AinntektDto[]) =>
+        past12Months.map((date) => {
+            const incomeForThatMonth = inntekt.find((periode) =>
+                datesAreFromSameMonthAndYear(new Date(periode.periodeFra), date)
+            );
+            return incomeForThatMonth ?? null;
+        });
 
-const buildChartOptions = (inntekt: AinntektDto[]): EChartsOption => ({
-    legend: {
-        show: false,
-    },
-    tooltip: {
-        trigger: "axis",
-        showContent: true,
-        formatter: (params: TopLevelFormatterParams) =>
-            inntekt[params[0].dataIndex].ainntektspostListe
-                .map(
-                    (inntekt) =>
-                        `<p><strong>${InntektType[inntekt.inntektType]}</strong>: ${Number(
-                            inntekt.belop
-                        ).toLocaleString()}</p>`
-                )
-                .join(""),
-        backgroundColor: "rgb(230,240,255)",
-        borderColor: "rgb(230,240,255)",
-    },
-    xAxis: {
-        type: "category",
-        data: getPeriodeMonth(inntekt),
-    },
-    grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
-    yAxis: {
-        type: "value",
-        min: (value) => roundDown(value.min),
-        max: (value) => roundUp(value.max),
-    },
-    series: [
-        {
-            name: "Lønn",
-            data: getTotalPerPeriode(inntekt),
-            type: "line",
-            smooth: true,
+    const getTotalPerPeriode = (inntekt: AinntektDto[]) =>
+        past12Incomes(inntekt).map((incomeForThatMonth) =>
+            incomeForThatMonth ? incomeForThatMonth.ainntektspostListe.reduce((acc, curr) => acc + curr.belop, 0) : 0
+        );
+
+    return {
+        legend: {
+            show: false,
         },
-    ],
-});
+        tooltip: {
+            trigger: "axis",
+            showContent: true,
+            formatter: (params: TopLevelFormatterParams) => {
+                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.ainntektspostListe;
+                return ainntektspostListe
+                    ? ainntektspostListe
+                          .map(
+                              (inntekt) =>
+                                  `<p><strong>${GrunnlagInntektType[inntekt.inntektType]}</strong>: ${Number(
+                                      inntekt.belop
+                                  ).toLocaleString()}</p>`
+                          )
+                          .join("")
+                    : "Ingen inntekt funnet";
+            },
+            backgroundColor: "rgb(230,240,255)",
+            borderColor: "rgb(230,240,255)",
+        },
+        xAxis: {
+            type: "category",
+            data: getMonths(past12Months),
+        },
+        grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
+        yAxis: {
+            type: "value",
+            min: (value) => roundDown(value.min),
+            max: (value) => roundUp(value.max),
+        },
+        series: [
+            {
+                name: "Lønn",
+                data: getTotalPerPeriode(inntekt),
+                type: "line",
+                smooth: true,
+            },
+        ],
+    };
+};
 
 const arePropsEqual = (oldProps, newProps) => {
     return (

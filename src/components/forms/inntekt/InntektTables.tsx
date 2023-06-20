@@ -5,7 +5,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { InntektType } from "../../../enum/InntektBeskrivelse";
+import { GrunnlagInntektType, InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, isValidDate } from "../../../utils/date-utils";
@@ -23,13 +23,13 @@ import {
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
-        <BodyShort className="min-w-[215px] capitalize">{InntektType[item.beskrivelse]}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{InntektBeskrivelse[item.beskrivelse]}</BodyShort>
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
-                Object.entries(InntektType).map(([value, text]) => ({
+                Object.entries(GrunnlagInntektType).map(([value, text]) => ({
                     value,
                     text,
                 }))

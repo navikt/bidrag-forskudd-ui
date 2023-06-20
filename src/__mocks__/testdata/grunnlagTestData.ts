@@ -320,11 +320,11 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
             month = 12;
             i = 0;
             max = 12 - tolvMaaneder.length;
-            year = new Date(year.getFullYear() - 3, 1, 1);
+            year = new Date(year.getFullYear() - 1, 1, 1);
         }
         const m = res === 0 ? 12 : res;
-        const fraDate = new Date(year.getFullYear() - 2, m - 1, 1);
-        const tilDate = new Date(year.getFullYear() - 2, m, 0);
+        const fraDate = new Date(year.getFullYear(), m - 1, 1);
+        const tilDate = new Date(year.getFullYear(), m, 0);
 
         tolvMaaneder.push({
             fra: toISODateString(fraDate),

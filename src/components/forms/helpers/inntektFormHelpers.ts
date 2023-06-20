@@ -1,3 +1,4 @@
+import { UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import {
     gjennomsnittPerioder,
@@ -7,9 +8,18 @@ import {
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { addDays, dateOrNull, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
+import {
+    addDays,
+    dateOrNull,
+    datesAreFromSameMonthAndYear,
+    deductDays,
+    deductMonths,
+    getAListOfMonthsFromDate,
+    isValidDate,
+    toISODateString,
+} from "../../../utils/date-utils";
 
-export const createInntektPayload = (values: InntektFormValues) => ({
+export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
     inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
         .map(([key, value]) =>
             value.map((inntekt) => {
@@ -59,11 +69,56 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
     [rolle.ident]: mapFunction(rolle),
 });
-const mapSkattegrunnlagToRolle = (skattegrunnlagListe) => (rolle) =>
-    skattegrunnlagListe
-        .filter((skattegrunlag) => skattegrunlag.personId === rolle.ident)
-        .map((skattegrunlag) => mapSkattegrunnlagInntektPerioder(skattegrunlag))
-        .flat();
+
+const get3and12MonthIncomeFromAinntekt = (ainntektListe, rolle) => {
+    const yearsIncomePeriods = getAListOfMonthsFromDate(
+        deductMonths(new Date(), new Date().getDate() > 6 ? 11 : 12),
+        12
+    )
+        .map((date) => {
+            const ainntekt = ainntektListe.find(
+                (ainntekt) =>
+                    ainntekt.personId === rolle.ident &&
+                    datesAreFromSameMonthAndYear(new Date(ainntekt.periodeFra), date)
+            );
+            return ainntekt ?? null;
+        })
+        .map((incomeForThatMonth) =>
+            incomeForThatMonth ? incomeForThatMonth.ainntektspostListe.reduce((acc, curr) => acc + curr.belop, 0) : 0
+        );
+
+    const threeMonthsIncome = yearsIncomePeriods.slice(9).reduce((acc, curr) => acc + curr, 0);
+    const yearsIncome = yearsIncomePeriods.reduce((acc, curr) => acc + curr, 0);
+
+    return [
+        {
+            taMed: false,
+            beskrivelse: "TRE_MAANED_BEREGNET",
+            belop: threeMonthsIncome * 4,
+            datoTom: null,
+            datoFom: null,
+            ident: rolle.ident,
+            fraGrunnlag: true,
+        },
+        {
+            taMed: false,
+            beskrivelse: "TOLV_MAANED_BEREGNET",
+            belop: yearsIncome,
+            datoTom: null,
+            datoFom: null,
+            ident: rolle.ident,
+            fraGrunnlag: true,
+        },
+    ];
+};
+const mapSkattegrunnlagToRolle = (skattegrunnlagListe, ainntektListe) => (rolle) =>
+    get3and12MonthIncomeFromAinntekt(ainntektListe, rolle).concat(
+        skattegrunnlagListe
+            .filter((skattegrunlag) => skattegrunlag.personId === rolle.ident)
+            .map((skattegrunlag) => mapSkattegrunnlagInntektPerioder(skattegrunlag))
+            .flat()
+    );
+
 const mapInntekterToRolle = (inntekter) => (rolle) =>
     inntekter
         .filter((inntekt) => inntekt.ident === rolle.ident)
@@ -73,8 +128,8 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
             datoTom: dateOrNull(inntekt.datoTom),
             datoFom: dateOrNull(inntekt.datoFom),
         }));
-const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe) =>
-    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe)), {});
+const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe, ainntektListe) =>
+    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe, ainntektListe)), {});
 const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
@@ -82,7 +137,11 @@ export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter): Inntek
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
             ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
-            : getPerioderFraSkattegrunnlagOgAinntekt(bmOgBarn, grunnlagspakke.skattegrunnlagListe),
+            : getPerioderFraSkattegrunnlagOgAinntekt(
+                  bmOgBarn,
+                  grunnlagspakke.skattegrunnlagListe,
+                  grunnlagspakke.ainntektListe
+              ),
         utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
             ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
                   ...utvidetBarnetrygd,

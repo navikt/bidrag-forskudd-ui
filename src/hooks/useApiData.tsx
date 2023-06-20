@@ -195,13 +195,14 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
 const createGrunnlagRequest = (behandling) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
-    const periodeFra = toISODateString(deductMonths(new Date(), 36));
-    const today = toISODateString(new Date());
+    const today = new Date();
+    const periodeFra = toISODateString(deductMonths(today, 36));
+
     const skattegrunnlagBarnRequests = barn?.map((b) => ({
         type: "SKATTEGRUNNLAG",
         personId: b.ident,
         periodeFra,
-        periodeTil: today,
+        periodeTil: toISODateString(today),
     }));
     const bmRequests = [
         "AINNTEKT",
@@ -214,13 +215,11 @@ const createGrunnlagRequest = (behandling) => {
         type,
         personId: bmIdent,
         periodeFra:
-            type === "AINNTEKT"
-                ? toISODateString(deductMonths(new Date(), Number(today.split("-")[2]) > 6 ? 12 : 13))
-                : periodeFra,
+            type === "AINNTEKT" ? toISODateString(deductMonths(today, today.getDate() > 6 ? 12 : 13)) : periodeFra,
         periodeTil:
             type === "AINNTEKT"
-                ? toISODateString(deductMonths(new Date(), Number(today.split("-")[2]) > 6 ? 0 : 1))
-                : today,
+                ? toISODateString(deductMonths(today, today.getDate() > 6 ? 0 : 1))
+                : toISODateString(today),
     }));
 
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {

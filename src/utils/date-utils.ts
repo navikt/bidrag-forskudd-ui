@@ -62,3 +62,14 @@ export const isLastDayOfMonth = (date) => {
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return lastDay.getDate() === date.getDate();
 };
+
+export const datesAreFromSameMonthAndYear = (date: Date, testDate: Date) =>
+    date.getMonth() === testDate.getMonth() && date.getFullYear() === testDate.getFullYear();
+
+export const getAListOfMonthsFromDate = (fromDate: Date, numberOfMonths: number): Date[] => {
+    const months = [];
+    for (let i = 0; i <= numberOfMonths - 1; i++) {
+        months.push(addMonths(fromDate, i));
+    }
+    return months;
+};
