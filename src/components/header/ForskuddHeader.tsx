@@ -1,4 +1,4 @@
-import SakHeader from "@navikt/bidrag-ui-common/esm/react_components/header/SakHeader";
+import { SakHeader } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
