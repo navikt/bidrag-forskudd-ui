@@ -1,6 +1,6 @@
 @import "@navikt/ds-css";
 @import "@navikt/ds-css-internal";
-
+@import "@navikt/bidrag-ui-common/styles/index.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
