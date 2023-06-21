@@ -20,6 +20,7 @@ import {
     getOverlappingInntektPerioder,
     syncDates,
 } from "../helpers/inntektFormHelpers";
+import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
@@ -117,6 +118,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const { behandlingId } = useForskudd();
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
+    const { data: behandling } = useGetBehandling(behandlingId);
     const {
         control,
         getValues,
@@ -130,6 +132,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
 
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
@@ -276,6 +279,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoFom}
                                             required={item.taMed}
+                                            fromDate={fom}
+                                            toDate={tom}
                                             hideLabel
                                         />
                                     }
@@ -291,6 +296,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                             label="Til og med"
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoTom}
+                                            fromDate={fom}
+                                            toDate={tom}
                                             hideLabel
                                             lastDayOfMonthPicker
                                         />
@@ -315,6 +322,9 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 };
 
 export const UtvidetBarnetrygdTabel = () => {
+    const { behandlingId } = useForskudd();
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
     const {
         control,
         getValues,
@@ -381,6 +391,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                         label="Fra og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         required
                                         hideLabel
                                     />
@@ -390,6 +402,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                         label="Til og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         hideLabel
                                         lastDayOfMonthPicker
                                     />
@@ -451,6 +465,7 @@ export const BarnetilleggTabel = () => {
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
     const barnMedNavn = personsQueries.map(({ data }) => data);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
 
     const {
         control,
@@ -517,6 +532,8 @@ export const BarnetilleggTabel = () => {
                                     label="Fra og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoFom}
+                                    fromDate={fom}
+                                    toDate={tom}
                                     required
                                     hideLabel
                                 />,
@@ -526,6 +543,8 @@ export const BarnetilleggTabel = () => {
                                     label="Til og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoTom}
+                                    fromDate={fom}
+                                    toDate={tom}
                                     hideLabel
                                     lastDayOfMonthPicker
                                 />,

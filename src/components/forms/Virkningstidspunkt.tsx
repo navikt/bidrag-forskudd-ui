@@ -19,7 +19,7 @@ import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
-import { aarsakToVirkningstidspunktMapper } from "./helpers/virkningstidspunktHelpers";
+import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
 const createInitialValues = (response: VirkningsTidspunktResponse) =>
@@ -49,6 +49,8 @@ const Main = ({ initialValues, error }) => {
             useFormMethods.setValue("virkningsDato", date);
         }
     };
+
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
 
     return (
         <>
@@ -100,6 +102,8 @@ const Main = ({ initialValues, error }) => {
                     label="Virkningstidspunkt"
                     placeholder="DD.MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningsDato}
+                    fromDate={fom}
+                    toDate={tom}
                     required
                 />
             </FlexRow>

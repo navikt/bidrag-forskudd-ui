@@ -57,7 +57,7 @@ export const MonthPicker = ({
 
     return (
         <div className="min-h-96">
-            <NavMonthPicker {...monthpickerProps} onMonthSelect={onMonthSelect}>
+            <NavMonthPicker {...monthpickerProps} onMonthSelect={onMonthSelect} dropdownCaption>
                 <div className="grid gap-4">
                     <NavMonthPicker.Input
                         {...inputProps}

@@ -15,6 +15,7 @@ interface FormControlledDatePickerProps {
     required?: boolean;
     onChange?: (date: Date | undefined) => void;
     toDate?: Date;
+    fromDate?: Date;
     lastDayOfMonthPicker?: boolean;
 }
 
@@ -28,6 +29,7 @@ export const FormControlledMonthPicker = ({
     required,
     onChange,
     toDate,
+    fromDate,
     lastDayOfMonthPicker,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors, getValues } = useFormContext();
@@ -80,6 +82,7 @@ export const FormControlledMonthPicker = ({
             error={fieldState?.error?.message}
             onValidate={onValidate}
             toDate={toDate}
+            fromDate={fromDate}
             lastDayOfMonthPicker={lastDayOfMonthPicker}
         />
     );

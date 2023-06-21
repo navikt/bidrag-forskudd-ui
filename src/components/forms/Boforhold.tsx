@@ -49,6 +49,7 @@ import {
     mapHusstandsMedlemmerToBarn,
 } from "./helpers/boforholdFormHelpers";
 import { checkOverlappingPeriods } from "./helpers/inntektFormHelpers";
+import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
 const Opplysninger = ({ opplysninger, ident }) => {
@@ -319,6 +320,9 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
 };
 
 const Perioder = ({ barnIndex, virkningstidspunkt }) => {
+    const { behandlingId } = useForskudd();
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
     const {
         control,
         getValues,
@@ -454,7 +458,8 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "fraDato");
                                         }}
-                                        toDate={new Date()}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         hideLabel
                                     />
                                 ) : (
@@ -475,6 +480,8 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "tilDato");
                                         }}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         lastDayOfMonthPicker
                                         hideLabel
                                     />
@@ -583,6 +590,9 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
 };
 
 const SivilistandPerioder = ({ virkningstidspunkt }) => {
+    const { behandlingId } = useForskudd();
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
     const {
         control,
         getValues,
@@ -678,7 +688,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "fraDato");
                                         }}
-                                        toDate={new Date()}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
@@ -691,6 +702,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "tilDato");
                                         }}
+                                        fromDate={fom}
+                                        toDate={tom}
                                         lastDayOfMonthPicker
                                         hideLabel
                                     />

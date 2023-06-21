@@ -5,7 +5,7 @@ export const behandlingMockApiData: BehandlingDto = {
     id: 1,
     behandlingType: BehandlingType.FORSKUDD,
     soknadType: SoknadType.INNKREVING,
-    datoFom: "2023-01-01",
+    datoFom: "2022-04-01",
     datoTom: "2023-10-03",
     mottatDato: "2023-11-03",
     saksnummer: "2300138",

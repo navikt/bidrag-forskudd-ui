@@ -18,3 +18,10 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: string, behandling: Beh
     }
     return null;
 };
+
+export const getFomAndTomForMonthPicker = (soktFraDato) => {
+    const soktFraIsInFuture = firstDayOfMonth(new Date(soktFraDato)) > firstDayOfMonth(new Date());
+    const fom = soktFraIsInFuture ? firstDayOfMonth(new Date()) : firstDayOfMonth(new Date(soktFraDato));
+    const tom = soktFraIsInFuture ? firstDayOfMonth(new Date(soktFraDato)) : firstDayOfMonth(new Date());
+    return [fom, tom];
+};
