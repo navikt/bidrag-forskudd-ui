@@ -1,9 +1,8 @@
-import { AvslagType, ForskuddBeregningKodeAarsakType } from "../api/BidragBehandlingApi";
+import { ForskuddAarsakType } from "../api/BidragBehandlingApi";
 
 export interface VirkningstidspunktFormValues {
     virkningsDato?: Date;
-    aarsak: ForskuddBeregningKodeAarsakType | "";
-    avslag: AvslagType | "";
+    aarsak: ForskuddAarsakType | "";
     virkningsTidspunktBegrunnelseMedIVedtakNotat: string;
     virkningsTidspunktBegrunnelseKunINotat: string;
 }

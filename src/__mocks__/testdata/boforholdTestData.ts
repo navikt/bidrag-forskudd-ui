@@ -16,14 +16,14 @@ interface Barn {
     perioder: Periode[];
 }
 export interface BoforholdData {
-    behandlingBarn: Barn[];
+    husstandsBarn: Barn[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;
 }
 
 export const boforholdData: BoforholdData = {
-    behandlingBarn: [],
+    husstandsBarn: [],
     sivilstand: [],
     boforholdBegrunnelseMedIVedtakNotat: "",
     boforholdBegrunnelseKunINotat: "",

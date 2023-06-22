@@ -21,7 +21,7 @@ interface Sivilstand {
 }
 
 export interface BoforholdFormValues {
-    behandlingBarn: Barn[];
+    husstandsBarn: Barn[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;

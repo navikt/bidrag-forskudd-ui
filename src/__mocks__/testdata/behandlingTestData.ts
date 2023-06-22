@@ -37,7 +37,7 @@ export const behandlingMockApiData: BehandlingDto = {
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
     ],
-    behandlingBarn: [
+    husstandsBarn: [
         {
             id: 1,
             medISaken: true,

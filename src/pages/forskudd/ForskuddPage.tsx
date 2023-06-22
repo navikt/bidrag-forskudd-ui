@@ -4,6 +4,7 @@ import React from "react";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
+import { Avslag } from "../../enum/Avslag";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetVirkningstidspunkt } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
@@ -11,7 +12,7 @@ import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep, behandlingId } = useForskudd();
     const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
-    const interactive = !virkningstidspunkt?.avslag;
+    const interactive = !Avslag[virkningstidspunkt?.aarsak];
 
     return (
         <PageWrapper name="tracking-wide">
