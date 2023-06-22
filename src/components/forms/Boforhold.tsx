@@ -250,9 +250,9 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
     const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
-        name: "behandlingBarn",
+        name: "husstandsBarn",
     });
-    const watchFieldArray = useWatch({ control, name: "behandlingBarn" });
+    const watchFieldArray = useWatch({ control, name: "husstandsBarn" });
     const controlledFields = barnFieldArray.fields.map((field, index) => {
         return {
             ...field,
@@ -333,10 +333,10 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     } = useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
-        name: `behandlingBarn.${barnIndex}.perioder`,
+        name: `husstandsBarn.${barnIndex}.perioder`,
     });
 
-    const watchFieldArray = useWatch({ control, name: `behandlingBarn.${barnIndex}.perioder` });
+    const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => {
         return {
             ...field,
@@ -345,27 +345,27 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     });
 
     const validateFomOgTom = (date, index, field) => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         const fomOgTomInvalid =
             field === "fraDato"
                 ? perioderValues[index].tilDato && date > perioderValues[index].tilDato
                 : perioderValues[index].fraDato && date < perioderValues[index].fraDato;
 
         if (fomOgTomInvalid) {
-            setError(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`, {
+            setError(`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`, {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`);
         }
     };
 
     const validatePeriods = () => {
-        const perioder = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioder = getValues(`husstandsBarn.${barnIndex}.perioder`);
 
         if (!perioder.length) {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder`);
             return;
         }
         const filtrertOgSorterListe = perioder
@@ -375,19 +375,19 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
-            setError(`behandlingBarn.${barnIndex}.perioder`, {
+            setError(`husstandsBarn.${barnIndex}.perioder`, {
                 type: "overlappingPerioder",
                 message: "Du har overlappende perioder",
             });
         }
 
         if (!overlappingPerioder?.length) {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder`);
         }
     };
 
     const addPeriode = () => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         barnPerioder.append({
             edit: true,
             fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
@@ -398,47 +398,47 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     };
 
     const savePeriod = (index) => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder.${index}`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder.${index}`);
         // @ts-ignore
         if (!perioderValues.fraDato || !perioderValues?.boStatus || !perioderValues.kilde) {
             // @ts-ignore
             if (!perioderValues.fraDato) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`, {
                     type: "datesNotValid",
                     message: "Fom dato kan ikke være tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`);
             }
             // @ts-ignore
             if (!perioderValues.boStatus) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`, {
                     type: "boStatusNotValid",
                     message: "Status kan ikke vøre tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`);
             }
             // @ts-ignore
             if (!perioderValues.kilde) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.kilde`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`, {
                     type: "kildeNotValid",
                     message: "Kilde kan ikke være tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.kilde`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`);
             }
         } else {
             // @ts-ignore
-            setValue(`behandlingBarn.${barnIndex}.perioder.${index}.edit`, false);
+            setValue(`husstandsBarn.${barnIndex}.perioder.${index}.edit`, false);
         }
     };
 
     return (
         <>
-            {errors?.behandlingBarn && errors.behandlingBarn[barnIndex]?.perioder.type === "overlappingPerioder" && (
+            {errors?.husstandsBarn && errors.husstandsBarn[barnIndex]?.perioder.type === "overlappingPerioder" && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.behandlingBarn[barnIndex].perioder.message}</BodyShort>
+                    <BodyShort>{errors.husstandsBarn[barnIndex].perioder.message}</BodyShort>
                 </Alert>
             )}
             {controlledFields.length > 0 && (
@@ -449,8 +449,8 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                             cells={[
                                 item.edit ? (
                                     <FormControlledMonthPicker
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.fraDato`}
                                         label="Fra og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.fraDato}
@@ -463,16 +463,14 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato.placeholder`}
-                                    >
+                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.fraDato.placeholder`}>
                                         {item.fraDato ? DateToDDMMYYYYString(item.fraDato) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledMonthPicker
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.tilDato`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.tilDato`}
                                         label="Til og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.tilDato}
@@ -486,16 +484,14 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato.placeholder`}
-                                    >
+                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.tilDato.placeholder`}>
                                         {item.tilDato ? DateToDDMMYYYYString(item.tilDato) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
                                         className="w-fit"
                                         label="Status"
                                         options={[
@@ -510,15 +506,15 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
                                     >
                                         {BoStatus[item.boStatus]}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.kilde`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.kilde`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
                                         className="w-fit"
                                         label="Kilde"
                                         options={[
@@ -530,7 +526,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
                                         className="capitalize"
                                     >
                                         {item.kilde}
@@ -550,7 +546,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         key={`edit-button-${barnIndex}-${index}`}
                                         type="button"
                                         onClick={() =>
-                                            setValue(`behandlingBarn.${barnIndex}.perioder.${index}.edit`, true)
+                                            setValue(`husstandsBarn.${barnIndex}.perioder.${index}.edit`, true)
                                         }
                                         icon={<PencilIcon aria-hidden />}
                                         variant="tertiary"

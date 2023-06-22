@@ -36,21 +36,6 @@ export interface RepresentationModelObject {
     _links?: Links;
 }
 
-export enum AvslagType {
-    ANNET_AVSLAG = "ANNET_AVSLAG",
-    PGA_BARNEPENSJ = "PGA_BARNEPENSJ",
-    BARNS_EKTESKAP = "BARNS_EKTESKAP",
-    BARNS_INNTEKT = "BARNS_INNTEKT",
-    PGA_YTELSE_FTRL = "PGA_YTELSE_FTRL",
-    FULLT_UNDERH_OFF = "FULLT_UNDERH_OFF",
-    IKKE_OMSORG = "IKKE_OMSORG",
-    IKKE_OPPH_I_RIKET = "IKKE_OPPH_I_RIKET",
-    MANGL_DOK = "MANGL_DOK",
-    PGA_SAMMENFL = "PGA_SAMMENFL",
-    OPPH_UTLAND = "OPPH_UTLAND",
-    UTENL_YTELSE = "UTENL_YTELSE",
-}
-
 export enum BehandlingType {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -67,32 +52,7 @@ export enum BoStatusType {
     BARN_BOR_ALENE = "BARN_BOR_ALENE",
 }
 
-export interface EntityModelBehandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: AvslagType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
-    _links?: Links;
-}
-
-export enum ForskuddBeregningKodeAarsakType {
+export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
     OF = "OF",
@@ -109,6 +69,18 @@ export enum ForskuddBeregningKodeAarsakType {
     PF = "PF",
     EF = "EF",
     FF = "FF",
+    ANNET_AVSLAG = "ANNET_AVSLAG",
+    PGA_BARNEPENSJ = "PGA_BARNEPENSJ",
+    BARNS_EKTESKAP = "BARNS_EKTESKAP",
+    BARNS_INNTEKT = "BARNS_INNTEKT",
+    PGA_YTELSE_FTRL = "PGA_YTELSE_FTRL",
+    FULLT_UNDERH_OFF = "FULLT_UNDERH_OFF",
+    IKKE_OMSORG = "IKKE_OMSORG",
+    IKKE_OPPH_I_RIKET = "IKKE_OPPH_I_RIKET",
+    MANGL_DOK = "MANGL_DOK",
+    PGA_SAMMENFL = "PGA_SAMMENFL",
+    OPPH_UTLAND = "OPPH_UTLAND",
+    UTENL_YTELSE = "UTENL_YTELSE",
 }
 
 export enum RolleType {
@@ -169,12 +141,27 @@ export interface CollectionModelEntityModelBehandling {
     _links?: Links;
 }
 
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
     /** @format date-time */
-    hentetDato: string;
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddAarsakType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
     _links?: Links;
 }
 
@@ -187,6 +174,15 @@ export interface CollectionModelEntityModelOpplysninger {
     _embedded?: {
         opplysningers?: EntityModelOpplysninger[];
     };
+    _links?: Links;
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
     _links?: Links;
 }
 
@@ -211,8 +207,7 @@ export interface BehandlingRequestBody {
     soknadFra: SoknadFraType;
     /** @format date-time */
     virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: AvslagType;
+    aarsak?: ForskuddAarsakType;
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -222,7 +217,7 @@ export interface BehandlingRequestBody {
     /** @format int64 */
     id?: number;
     roller: string[];
-    behandlingBarn: string[];
+    husstandsBarn: string[];
     inntekter: string[];
     sivilstand: string[];
     barnetillegg: string[];
@@ -243,8 +238,7 @@ export interface OpplysningerRequestBody {
 export interface UpdateVirkningsTidspunktRequest {
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
-    avslag?: AvslagType;
-    aarsak?: ForskuddBeregningKodeAarsakType;
+    aarsak?: ForskuddAarsakType;
     /** @format date */
     virkningsDato?: string;
 }
@@ -252,8 +246,7 @@ export interface UpdateVirkningsTidspunktRequest {
 export interface VirkningsTidspunktResponse {
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
-    avslag?: AvslagType;
-    aarsak?: ForskuddBeregningKodeAarsakType;
+    aarsak?: ForskuddAarsakType;
     /** @format date */
     virkningsDato?: string;
 }
@@ -314,24 +307,30 @@ export interface InntekterResponse {
     utvidetbarnetrygd: UtvidetbarnetrygdDto[];
 }
 
-export interface BehandlingBarnDto {
+export interface HusstandsBarnDto {
     /** @format int64 */
     id?: number;
     medISaken: boolean;
     /** @uniqueItems true */
-    perioder: BehandlingBarnPeriodeDto[];
+    perioder: HusstandsBarnPeriodeDto[];
     ident?: string;
     navn?: string;
     /** @format date */
     foedselsDato?: string;
 }
 
-export interface BehandlingBarnPeriodeDto {
+export interface HusstandsBarnPeriodeDto {
     /** @format int64 */
     id?: number;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     fraDato: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     tilDato: string;
     boStatus: BoStatusType;
     kilde: string;
@@ -349,7 +348,7 @@ export interface SivilstandDto {
 
 export interface UpdateBoforholdRequest {
     /** @uniqueItems true */
-    behandlingBarn: BehandlingBarnDto[];
+    husstandsBarn: HusstandsBarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -358,7 +357,7 @@ export interface UpdateBoforholdRequest {
 
 export interface BoforholdResponse {
     /** @uniqueItems true */
-    behandlingBarn: BehandlingBarnDto[];
+    husstandsBarn: HusstandsBarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -391,13 +390,12 @@ export interface BehandlingDto {
     /** @uniqueItems true */
     roller: RolleDto[];
     /** @uniqueItems true */
-    behandlingBarn: BehandlingBarnDto[];
+    husstandsBarn: HusstandsBarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     /** @format date */
     virkningsDato?: string;
-    aarsak?: ForskuddBeregningKodeAarsakType;
-    avslag?: AvslagType;
+    aarsak?: ForskuddAarsakType;
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -770,8 +768,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             query?: {
                 /** @format int64 */
                 behandlingId?: number;
-                aarsak?: ForskuddBeregningKodeAarsakType;
-                avslag?: AvslagType;
+                aarsak?: ForskuddAarsakType;
                 /** @format date-time */
                 virkningsDato?: string;
                 virkningsTidspunktBegrunnelseKunINotat?: string;

@@ -26,7 +26,6 @@ const createInitialValues = (response: VirkningsTidspunktResponse) =>
     ({
         virkningsDato: dateOrNull(response.virkningsDato),
         aarsak: response.aarsak ?? "",
-        avslag: response.avslag ?? "",
         virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
         virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
@@ -35,7 +34,6 @@ const createPayload = (values: VirkningstidspunktFormValues) => ({
     virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
     virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
     aarsak: values.aarsak === "" ? null : values.aarsak,
-    avslag: values.avslag === "" ? null : values.avslag,
     virkningsDato: toISODateString(values.virkningsDato),
 });
 
@@ -73,30 +71,24 @@ const Main = ({ initialValues, error }) => {
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.datoFom))}</BodyShort>
                 </div>
             </FlexRow>
-            <FlexRow>
-                <FormControlledSelectField
-                    name="avslag"
-                    label="Avslag/opphør"
-                    options={[{ value: "", text: "Velg avslag/opphør" }].concat(
-                        Object.entries(Avslag).map((entry) => ({
-                            value: entry[0],
-                            text: entry[1],
-                        }))
-                    )}
-                />
-            </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField
-                    name="aarsak"
-                    label="Årsak"
-                    onSelect={onAarsakSelect}
-                    options={[{ value: "", text: "Velg årsak" }].concat(
-                        Object.entries(ForskuddBeregningKodeAarsak).map((entry) => ({
-                            value: entry[0],
-                            text: entry[1],
-                        }))
-                    )}
-                />
+                <FormControlledSelectField name="aarsak" label="Årsak" onSelect={onAarsakSelect}>
+                    <option value="">Velg årsak/avslag</option>
+                    <optgroup label="Årsak">
+                        {Object.entries(ForskuddBeregningKodeAarsak).map(([value, text]) => (
+                            <option key={value} value={value}>
+                                {text}
+                            </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="Avslag">
+                        {Object.entries(Avslag).map(([value, text]) => (
+                            <option key={value} value={value}>
+                                {text}
+                            </option>
+                        ))}
+                    </optgroup>
+                </FormControlledSelectField>
                 <FormControlledMonthPicker
                     name="virkningsDato"
                     label="Virkningstidspunkt"
@@ -114,8 +106,9 @@ const Main = ({ initialValues, error }) => {
 const Side = () => {
     const { setActiveStep } = useForskudd();
     const useFormMethods = useFormContext();
-    const avslag = useFormMethods.getValues("avslag");
-    const onNext = () => setActiveStep(avslag ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
+    const aarsak = useFormMethods.getValues("aarsak");
+    const onNext = () =>
+        setActiveStep(Avslag[aarsak] ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
 
     return (
         <>

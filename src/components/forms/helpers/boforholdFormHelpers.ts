@@ -124,8 +124,8 @@ export const createInitialValues = (
     grunnlagspakke
 ) => ({
     ...boforhold,
-    behandlingBarn: boforoholdOpplysninger
-        ? boforhold.behandlingBarn.map((barn) => ({
+    husstandsBarn: boforoholdOpplysninger
+        ? boforhold.husstandsBarn.map((barn) => ({
               ...barn,
               perioder: barn.perioder.map((periode) => ({
                   ...periode,
@@ -145,7 +145,7 @@ export const createInitialValues = (
 });
 
 export const createPayload = (values) => ({
-    behandlingBarn: values.behandlingBarn.map((barn) => ({
+    husstandsBarn: values.husstandsBarn.map((barn) => ({
         ...barn,
         perioder: barn.perioder.map((periode) => ({
             ...periode,
