@@ -43,8 +43,6 @@ const Main = ({ initialValues, error }) => {
     const useFormMethods = useFormContext();
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
-        console.log("date", date);
-        console.log("isValidDate", isValidDate(date));
         if (isValidDate(date)) {
             useFormMethods.setValue("virkningsDato", date);
         }
