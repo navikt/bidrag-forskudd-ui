@@ -1,4 +1,4 @@
-import { UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+import { RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import {
     gjennomsnittPerioder,
@@ -18,6 +18,24 @@ import {
     isValidDate,
     toISODateString,
 } from "../../../utils/date-utils";
+
+const mockUtvidetBarnetrygd = () => [
+    {
+        deltBoSted: true,
+        belop: 29868,
+        datoFom: null,
+        datoTom: null,
+    },
+];
+const mockBarnetillegg = (bmOgBarn) =>
+    bmOgBarn
+        .filter((rolle) => rolle.rolleType === RolleType.BARN)
+        .map(({ ident }) => ({
+            ident,
+            barnetillegg: 3716,
+            datoFom: null,
+            datoTom: null,
+        }));
 
 export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
     inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
@@ -148,24 +166,26 @@ export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter): Inntek
                   datoFom: dateOrNull(utvidetBarnetrygd.datoFom),
                   datoTom: dateOrNull(utvidetBarnetrygd.datoTom),
               }))
-            : grunnlagspakke.ubstListe.map((ubst) => ({
-                  deltBoSted: false, // TODO check where to get this value
-                  belop: ubst.belop,
-                  datoFom: dateOrNull(ubst.periodeFra),
-                  datoTom: dateOrNull(ubst.periodeTil),
-              })),
+            : mockUtvidetBarnetrygd(),
+        // grunnlagspakke.ubstListe.map((ubst) => ({
+        //     deltBoSted: false, // TODO check where to get this value
+        //     belop: ubst.belop,
+        //     datoFom: dateOrNull(ubst.periodeFra),
+        //     datoTom: dateOrNull(ubst.periodeTil),
+        // })),
         barnetillegg: inntekter?.barnetillegg?.length
             ? inntekter.barnetillegg.map((barnetilleg) => ({
                   ...barnetilleg,
                   datoFom: dateOrNull(barnetilleg.datoFom),
                   datoTom: dateOrNull(barnetilleg.datoTom),
               }))
-            : grunnlagspakke.barnetilleggListe.map((periode) => ({
-                  ident: periode.barnPersonId,
-                  barnetillegg: periode.belopBrutto,
-                  datoFom: dateOrNull(periode.periodeFra),
-                  datoTom: dateOrNull(periode.periodeTil),
-              })),
+            : mockBarnetillegg(bmOgBarn),
+        // grunnlagspakke.barnetilleggListe.map((periode) => ({
+        //     ident: periode.barnPersonId,
+        //     barnetillegg: periode.belopBrutto,
+        //     datoFom: dateOrNull(periode.periodeFra),
+        //     datoTom: dateOrNull(periode.periodeTil),
+        // })),
         inntektBegrunnelseMedIVedtakNotat: inntekter.inntektBegrunnelseMedIVedtakNotat,
         inntektBegrunnelseKunINotat: inntekter.inntektBegrunnelseKunINotat,
     };
