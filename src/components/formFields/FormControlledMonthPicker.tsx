@@ -54,7 +54,7 @@ export const FormControlledMonthPicker = ({
     });
 
     const handleChange = (date: Date) => {
-        field.onChange(date);
+        field.onChange(date ?? null);
         clearErrors(name);
 
         if (onChange) {

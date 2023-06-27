@@ -274,6 +274,8 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             .flat()
     );
 
+const createHusstandsmedlemmerListe = (bmIdent, barn, today) => [{}];
+
 const createUbstListe = (bmIdent) => [
     {
         personId: bmIdent,

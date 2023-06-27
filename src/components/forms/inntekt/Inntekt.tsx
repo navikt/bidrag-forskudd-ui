@@ -5,7 +5,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { AinntektDto } from "../../../api/BidragGrunnlagApi";
-import { INNTEKT_PERIODE_NOTAT_FIELDS, NOTAT_FIELDS } from "../../../constants/notatFields";
+import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -157,19 +157,10 @@ const InntektForm = () => {
         const { unsubscribe } = useFormMethods.watch((value, { name }) => {
             const field = name?.split(".")[0];
             if (NOTAT_FIELDS.includes(field)) {
-                const isPeriodeField = INNTEKT_PERIODE_NOTAT_FIELDS.includes(field);
-                const filterSelectedPeriods = Object.keys(value[field])
-                    .map((ident) => ({
-                        ident,
-                        inntekt: [],
-                        // inntekt: value[field][ident].filter((i) => i.selected), // TODO: Marko dette fungerer ikke
-                    }))
-                    .filter((value) => value.inntekt.length > 0);
-
                 channel.postMessage(
                     JSON.stringify({
                         field,
-                        value: isPeriodeField ? filterSelectedPeriods : value[field],
+                        value: value[field],
                     })
                 );
             }

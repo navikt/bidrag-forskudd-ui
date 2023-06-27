@@ -148,7 +148,7 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
         }));
 const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe, ainntektListe) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe, ainntektListe)), {});
-const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
+export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
 export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter): InntektFormValues => {

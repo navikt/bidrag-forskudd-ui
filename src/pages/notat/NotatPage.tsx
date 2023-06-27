@@ -2,15 +2,17 @@ import { BodyLong, BodyShort, Heading, Label, Loader } from "@navikt/ds-react";
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { useGetArbeidsforhold, useGetInntekt } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { useGetArbeidsforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
+import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektFormHelpers";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { PersonNavn } from "../../components/PersonNavn";
 import { TableRowWrapper, TableWrapper } from "../../components/table/TableWrapper";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
-import { useGetBehandling } from "../../hooks/useApiData";
-import { ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
+import { InntektBeskrivelse } from "../../enum/InntektBeskrivelse";
+import { useGetBehandling, useHentInntekter } from "../../hooks/useApiData";
+import { DateToDDMMYYYYString, ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
 
 export enum NotatVirkningsTidspunktFields {
     "virkningsDato",
@@ -130,20 +132,23 @@ const VirkningstidspunktView = ({ behandling }) => {
 const Inntekter = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { data: behandling } = useGetBehandling(Number(behandlingId));
-    const roller = behandling?.roller?.filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG);
-    const { data: inntekt } = useGetInntekt(behandlingId, roller);
+    const bmOgBarn = behandling.roller.filter(
+        (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
+    );
+    const { data: inntekt } = useHentInntekter(Number(behandlingId));
     const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId);
+    const inntektPerioder = getPerioderFraInntekter(bmOgBarn, inntekt.inntekter);
 
     return (
         <Suspense>
-            <InntekterView inntekt={inntekt} arbeidsforholder={arbeidsforholder} roller={roller} />
+            <InntekterView inntekt={inntektPerioder} arbeidsforholder={arbeidsforholder} />
         </Suspense>
     );
 };
 
-const InntekterView = ({ inntekt, arbeidsforholder, roller }) => {
+const InntekterView = ({ inntekt, arbeidsforholder }) => {
     const channel = new BroadcastChannel("inntekter");
-    const [inntekteneSomLeggesTilGrunn, setInntekteneSomLeggesTilGrunn] = useState(inntekt.inntekteneSomLeggesTilGrunn);
+    const [inntekteneSomLeggesTilGrunn, setInntekteneSomLeggesTilGrunn] = useState(inntekt);
 
     useEffect(() => {
         channel.onmessage = (ev) => {
@@ -158,38 +163,8 @@ const InntekterView = ({ inntekt, arbeidsforholder, roller }) => {
         return () => channel.close();
     }, [channel]);
 
-    const bidragsMottakerInntekt = inntekt.inntekteneSomLeggesTilGrunn.find(
-        (i) => i.ident === roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident
-    );
-    const treMaanderBeregnet = bidragsMottakerInntekt.inntekt.find(
-        (inntekt) => inntekt.tekniskNavn === "gjennomsnittInntektSisteTreMaaneder"
-    ).totalt;
-    const tolvMaanderBeregnet = bidragsMottakerInntekt.inntekt.find(
-        (inntekt) => inntekt.tekniskNavn === "gjennomsnittInntektSisteTolvMaaneder"
-    ).totalt;
-
     return (
         <div className="grid gap-y-8 mt-8">
-            <Heading level="3" size="medium">
-                Inntekter
-            </Heading>
-            <div className="grid gap-y-2">
-                <Heading level="4" size="small">
-                    {"<Inntekter og/eller utbetalinger fra NAV>"}
-                </Heading>
-                <div className="flex gap-x-2">
-                    <Label size="small">Gjennomsnitt inntekt siste 3 måneder (omregnet til årsinntekt):</Label>
-                    <BodyShort size="small">
-                        {treMaanderBeregnet}/{Math.round(treMaanderBeregnet / 12)}
-                    </BodyShort>
-                </div>
-                <div className="flex gap-x-2">
-                    <Label size="small">Gjennomsnitt inntekt siste 12 måneder (omregnet til årsinntekt):</Label>
-                    <BodyShort size="small">
-                        {tolvMaanderBeregnet}/{Math.round(tolvMaanderBeregnet / 12)}
-                    </BodyShort>
-                </div>
-            </div>
             <div className="grid gap-y-2">
                 <Heading level="4" size="small">
                     Arbeidsforhold
@@ -224,35 +199,47 @@ const InntekterView = ({ inntekt, arbeidsforholder, roller }) => {
                 <Heading level="4" size="small">
                     Inntekter
                 </Heading>
-                {inntekteneSomLeggesTilGrunn
-                    .map(({ ident, inntekt }) => ({ ident, inntekt: inntekt.filter((inntekt) => inntekt.selected) }))
-                    .filter(({ inntekt }) => inntekt.length > 0)
-                    .map(({ ident, inntekt }, index) => {
-                        return (
-                            <Fragment key={`${inntekt.ident}-${index}`}>
-                                <div className="mt-4">
-                                    <BodyShort size="small">
-                                        <PersonNavn ident={ident} />
-                                        <span className="ml-4">/ {ident}</span>
-                                    </BodyShort>
-                                    <TableWrapper heading={["Periode", "Inntekt", "Beskrivelse"]}>
-                                        {inntekt.map((inntekt, index) => (
-                                            <TableRowWrapper
-                                                key={`${inntekt.beskrivelse}-${index}`}
-                                                cells={[
-                                                    <BodyShort size="small">
-                                                        {inntekt.fraDato} - {inntekt.tilDato}
-                                                    </BodyShort>,
-                                                    <BodyShort size="small">{inntekt.totalt}</BodyShort>,
-                                                    <BodyShort size="small">{inntekt.beskrivelse}</BodyShort>,
-                                                ]}
-                                            />
-                                        ))}
-                                    </TableWrapper>
-                                </div>
-                            </Fragment>
-                        );
-                    })}
+                {inntekteneSomLeggesTilGrunn &&
+                    Object.keys(inntekteneSomLeggesTilGrunn)
+                        .map((ident) => ({
+                            ident,
+                            inntekter: inntekteneSomLeggesTilGrunn[ident].filter((inntekt) => inntekt.taMed),
+                        }))
+                        .filter(({ inntekter }) => inntekter.length > 0)
+                        .map(({ ident, inntekter }, index) => {
+                            return (
+                                <Fragment key={`${ident}-${index}`}>
+                                    <div className="mt-4">
+                                        <BodyShort size="small">
+                                            <PersonNavn ident={ident} />
+                                            <span className="ml-4">/ {ident}</span>
+                                        </BodyShort>
+                                        <TableWrapper heading={["Periode", "Inntekt", "Beskrivelse"]}>
+                                            {inntekter.map((inntekt, index) => (
+                                                <TableRowWrapper
+                                                    key={`${InntektBeskrivelse[inntekt.inntektType]}-${index}`}
+                                                    cells={[
+                                                        <BodyShort key={`${ident}-${index}-periode`} size="small">
+                                                            {inntekt.datoFom &&
+                                                                DateToDDMMYYYYString(new Date(inntekt.datoFom))}{" "}
+                                                            -{" "}
+                                                            {inntekt.datoTom &&
+                                                                DateToDDMMYYYYString(new Date(inntekt.datoTom))}
+                                                        </BodyShort>,
+                                                        <BodyShort key={`${ident}-${index}-belop`} size="small">
+                                                            {inntekt.belop}
+                                                        </BodyShort>,
+                                                        <BodyShort key={`${ident}-${index}-beskrivelse`} size="small">
+                                                            {InntektBeskrivelse[inntekt.inntektType]}
+                                                        </BodyShort>,
+                                                    ]}
+                                                />
+                                            ))}
+                                        </TableWrapper>
+                                    </div>
+                                </Fragment>
+                            );
+                        })}
             </div>
         </div>
     );
