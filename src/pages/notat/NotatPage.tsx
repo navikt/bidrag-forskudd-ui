@@ -196,7 +196,8 @@ const InntekterView = ({ inntekt, arbeidsforholder }) => {
                         <div>
                             <Label size="small">Periode</Label>
                             <BodyShort size="small">
-                                {arbeidsforhold.periode.fraDato} - {arbeidsforhold.periode.tilDato}
+                                {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.fraDato))} -{" "}
+                                {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.tilDato))}
                             </BodyShort>
                         </div>
                         <div>
@@ -209,7 +210,9 @@ const InntekterView = ({ inntekt, arbeidsforholder }) => {
                         </div>
                         <div>
                             <Label size="small">Lønnsendring</Label>
-                            <BodyShort size="small">{arbeidsforhold.sisteLoennsendring}</BodyShort>
+                            <BodyShort size="small">
+                                {DateToDDMMYYYYString(new Date(arbeidsforhold.sisteLoennsendring))}
+                            </BodyShort>
                         </div>
                     </FlexRow>
                 ))}
