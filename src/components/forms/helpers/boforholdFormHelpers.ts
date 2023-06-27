@@ -74,20 +74,18 @@ export const mapHusstandsMedlemmerToBarn = (behandling, husstandmedlemmerOgEgneB
         }));
 };
 
-const getBarnPerioderFromHusstandsListe = (result, virkningstidspunkt) => {
+const getBarnPerioderFromHusstandsListe = (result, datoFom) => {
     return result.map((barn) => ({
         ...barn,
         medISaken: true,
-        perioder: barnPerioder(barn.perioder, virkningstidspunkt),
+        perioder: barnPerioder(barn.perioder, datoFom),
     }));
 };
 
-const barnPerioder = (perioder, virkningstidspunkt) => {
-    const perioderFraVirkningstidspunkt = virkningstidspunkt
-        ? perioder?.filter(
-              (periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(virkningstidspunkt)
-          )
-        : perioder;
+const barnPerioder = (perioder, datoFom) => {
+    const perioderFraVirkningstidspunkt = perioder?.filter(
+        (periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom)
+    );
 
     const result = [];
     perioderFraVirkningstidspunkt?.forEach((periode, i) => {
@@ -96,8 +94,8 @@ const barnPerioder = (perioder, virkningstidspunkt) => {
             kilde: "offentlig",
             fraDato:
                 i === 0
-                    ? virkningstidspunkt
-                        ? new Date(virkningstidspunkt)
+                    ? datoFom
+                        ? new Date(datoFom)
                         : firstDayOfMonth(periode.fraDato)
                     : addDays(result[i - 1].tilDato, 1),
             tilDato: periode.tilDato ? lastDayOfMonth(periode.tilDato) : periode.tilDato,
@@ -107,12 +105,15 @@ const barnPerioder = (perioder, virkningstidspunkt) => {
     return result;
 };
 
-const getSivilstandPerioder = (sivilstandListe) => {
-    return sivilstandListe.map((periode) => ({
-        sivilstandType: periode.sivilstand,
-        gyldigFraOgMed: dateOrNull(periode.periodeFra),
-        datoTom: dateOrNull(periode.periodeTil),
-    }));
+const getSivilstandPerioder = (sivilstandListe, datoFom) => {
+    return sivilstandListe
+        .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
+        .map((periode) => ({
+            sivilstandType: periode.sivilstand,
+            gyldigFraOgMed:
+                new Date(periode.periodeFra) < new Date(datoFom) ? dateOrNull(datoFom) : dateOrNull(periode.periodeFra),
+            datoTom: dateOrNull(periode.periodeTil),
+        }));
 };
 
 export const createInitialValues = (
@@ -120,7 +121,7 @@ export const createInitialValues = (
     boforhold,
     opplysninger,
     boforoholdOpplysninger,
-    virkningstidspunkt,
+    datoFom,
     grunnlagspakke
 ) => ({
     ...boforhold,
@@ -134,14 +135,14 @@ export const createInitialValues = (
                   tilDato: dateOrNull(periode.tilDato),
               })),
           }))
-        : getBarnPerioderFromHusstandsListe(opplysninger, virkningstidspunkt),
+        : getBarnPerioderFromHusstandsListe(opplysninger, datoFom),
     sivilstand: boforhold?.sivilstand?.length
         ? boforhold.sivilstand.map((stand) => ({
               ...stand,
               gyldigFraOgMed: dateOrNull(stand.gyldigFraOgMed),
               datoTom: dateOrNull(stand.datoTom),
           }))
-        : getSivilstandPerioder(grunnlagspakke.sivilstandListe),
+        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
 });
 
 export const createPayload = (values) => ({

@@ -52,29 +52,35 @@ import { checkOverlappingPeriods } from "./helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
 
-const Opplysninger = ({ opplysninger, ident }) => {
+const Opplysninger = ({ opplysninger, datoFom, ident }) => {
     const perioder = opplysninger.find((opplysning) => opplysning.ident === ident).perioder;
-    return perioder.map((periode, index) => (
-        <div
-            key={`${periode.boStatus}-${index}`}
-            className="grid grid-cols-[70px,max-content,70px,auto] items-center gap-x-2"
-        >
-            <BodyShort size="small" className="flex justify-end">
-                {DateToDDMMYYYYString(periode.fraDato)}
-            </BodyShort>
-            <div>{"-"}</div>
-            <BodyShort size="small" className="flex justify-end">
-                {periode.tilDato ? DateToDDMMYYYYString(periode.tilDato) : ""}
-            </BodyShort>
-            <BodyShort size="small">{BoStatusTexts[periode.boStatus]}</BodyShort>
-        </div>
-    ));
+    return perioder
+        .filter((periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom))
+        .map((periode, index) => (
+            <div
+                key={`${periode.boStatus}-${index}`}
+                className="grid grid-cols-[70px,max-content,70px,auto] items-center gap-x-2"
+            >
+                <BodyShort size="small" className="flex justify-end">
+                    {new Date(periode.fraDato) < new Date(datoFom)
+                        ? DateToDDMMYYYYString(datoFom)
+                        : DateToDDMMYYYYString(periode.fraDato)}
+                </BodyShort>
+                <div>{"-"}</div>
+                <BodyShort size="small" className="flex justify-end">
+                    {periode.tilDato ? DateToDDMMYYYYString(periode.tilDato) : ""}
+                </BodyShort>
+                <BodyShort size="small">{BoStatusTexts[periode.boStatus]}</BodyShort>
+            </div>
+        ));
 };
 
 const Main = ({ opplysningerFraFolkRegistre }) => {
     const { behandlingId } = useForskudd();
+    const { data: behandling } = useGetBehandling(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
 
     return (
         <>
@@ -82,10 +88,7 @@ const Main = ({ opplysningerFraFolkRegistre }) => {
             <Heading level="3" size="medium">
                 Barn
             </Heading>
-            <BarnPerioder
-                virkningstidspunkt={virkningstidspunkt}
-                opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
-            />
+            <BarnPerioder datoFom={datoFom} opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />
             <Heading level="3" size="medium">
                 Sivilstand
             </Heading>
@@ -128,17 +131,11 @@ const BoforholdsForm = () => {
 
     const updateBoforhold = useUpdateBoforhold(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
 
     const initialValues =
         boforholdFormValues ??
-        createInitialValues(
-            behandling,
-            boforhold,
-            opplysninger,
-            boforoholdOpplysninger,
-            virkningstidspunkt,
-            grunnlagspakke
-        );
+        createInitialValues(behandling, boforhold, opplysninger, boforoholdOpplysninger, datoFom, grunnlagspakke);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -246,7 +243,7 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
     );
 };
 
-const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
+const BarnPerioder = ({ datoFom, opplysningerFraFolkRegistre }) => {
     const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
@@ -268,7 +265,7 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
             perioder: [
                 {
                     edit: false,
-                    fraDato: virkningstidspunkt,
+                    fraDato: datoFom,
                     tilDato: null,
                     boStatus: "",
                     kilde: "manuelt",
@@ -295,7 +292,11 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
                                         <BodyShort size="small">{item.ident}</BodyShort>
                                     </FlexRow>
                                     <ReadMore header="Opplysninger fra Folkeregistret" size="small">
-                                        <Opplysninger opplysninger={opplysningerFraFolkRegistre} ident={item.ident} />
+                                        <Opplysninger
+                                            opplysninger={opplysningerFraFolkRegistre}
+                                            datoFom={datoFom}
+                                            ident={item.ident}
+                                        />
                                     </ReadMore>
                                 </div>
                             </div>
@@ -308,7 +309,7 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
                                 index={index}
                             />
                         )}
-                        <Perioder barnIndex={index} virkningstidspunkt={virkningstidspunkt} />
+                        <Perioder barnIndex={index} datoFom={datoFom} />
                     </Panel>
                 </Fragment>
             ))}
@@ -319,7 +320,7 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
     );
 };
 
-const Perioder = ({ barnIndex, virkningstidspunkt }) => {
+const Perioder = ({ barnIndex, datoFom }) => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
@@ -390,7 +391,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         barnPerioder.append({
             edit: true,
-            fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
+            fraDato: calculateFraDato(perioderValues, datoFom),
             tilDato: null,
             boStatus: "",
             kilde: "manuelt",
