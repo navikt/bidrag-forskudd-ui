@@ -1,10 +1,10 @@
-import { SivilstandType } from "../api/BidragBehandlingApi";
+import { BoStatusType, SivilstandType } from "../api/BidragBehandlingApi";
 
 interface BarnPeriode {
     edit: boolean;
     fraDato: Date | null;
     tilDato: Date | null;
-    boStatus: "" | "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
+    boStatus: BoStatusType | "";
     kilde: "" | "offentlig" | "manuelt";
 }
 interface Barn {
@@ -15,8 +15,8 @@ interface Barn {
 }
 
 interface Sivilstand {
-    fraDato: Date | null;
-    tilDato: Date | null;
+    gyldigFraOgMed: Date | null;
+    datoTom: Date | null;
     sivilstandType: SivilstandType;
 }
 

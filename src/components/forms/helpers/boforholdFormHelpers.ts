@@ -1,4 +1,4 @@
-import { RolleType } from "../../../api/BidragBehandlingApi";
+import { BoStatusType, RolleType } from "../../../api/BidragBehandlingApi";
 import { RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
 import {
     addDays,
@@ -31,21 +31,21 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
                 perioder.push({
                     fraDato: brukFra < fodselsdato ? fodselsdato : brukFra,
                     tilDato: deductDays(brukFra, 1),
-                    boStatus: "ikke_registrert_paa_adresse",
+                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
                 });
             }
         } else if (addDays(perioder[i - 1].tilDato, 1).toDateString() !== new Date(periode.periodeFra).toDateString()) {
             perioder.push({
                 fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
                 tilDato: deductDays(new Date(periode.periodeFra), 1),
-                boStatus: "ikke_registrert_paa_adresse",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
             });
         }
 
         perioder.push({
             fraDato: dateOrNull(periode.periodeFra),
             tilDato: dateOrNull(periode.periodeTil),
-            boStatus: "registrert_paa_adresse",
+            boStatus: BoStatusType.DOKUMENTERT_BOENDE_HOS_BM,
         });
 
         if (
@@ -56,7 +56,7 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             perioder.push({
                 fraDato: addDays(new Date(periode.periodeTil), 1),
                 tilDato: dateOrNull(egneBarnIHusstanden.brukTil),
-                boStatus: "ikke_registrert_paa_adresse",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
             });
         }
     });
@@ -110,8 +110,8 @@ const barnPerioder = (perioder, virkningstidspunkt) => {
 const getSivilstandPerioder = (sivilstandListe) => {
     return sivilstandListe.map((periode) => ({
         sivilstandType: periode.sivilstand,
-        fraDato: dateOrNull(periode.periodeFra),
-        tilDato: dateOrNull(periode.periodeTil),
+        gyldigFraOgMed: dateOrNull(periode.periodeFra),
+        datoTom: dateOrNull(periode.periodeTil),
     }));
 };
 
@@ -138,8 +138,8 @@ export const createInitialValues = (
     sivilstand: boforhold?.sivilstand?.length
         ? boforhold.sivilstand.map((stand) => ({
               ...stand,
-              fraDato: dateOrNull(stand.fraDato),
-              tilDato: dateOrNull(stand.tilDato),
+              gyldigFraOgMed: dateOrNull(stand.gyldigFraOgMed),
+              datoTom: dateOrNull(stand.datoTom),
           }))
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe),
 });
@@ -156,8 +156,8 @@ export const createPayload = (values) => ({
     })),
     sivilstand: values.sivilstand.map((periode) => ({
         ...periode,
-        fraDato: toISODateString(periode.fraDato),
-        tilDato: toISODateString(periode.tilDato),
+        gyldigFraOgMed: toISODateString(periode.gyldigFraOgMed),
+        datoTom: toISODateString(periode.datoTom),
     })),
     boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
     boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,

@@ -14,11 +14,11 @@ import {
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
+import { BoStatusType, RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
-import { BoStatus } from "../../enum/BoStatus";
+import { BoStatusTexts } from "../../enum/BoStatusTexts";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { SivilstandTypeTexts } from "../../enum/SivilstandTypeTexts";
 import {
@@ -66,7 +66,7 @@ const Opplysninger = ({ opplysninger, ident }) => {
             <BodyShort size="small" className="flex justify-end">
                 {periode.tilDato ? DateToDDMMYYYYString(periode.tilDato) : ""}
             </BodyShort>
-            <BodyShort size="small">{BoStatus[periode.boStatus]}</BodyShort>
+            <BodyShort size="small">{BoStatusTexts[periode.boStatus]}</BodyShort>
         </div>
     ));
 };
@@ -494,21 +494,19 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         name={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
                                         className="w-fit"
                                         label="Status"
-                                        options={[
-                                            { value: "", text: "Velg status" },
-                                            { value: "registrert_paa_adresse", text: "Registrert på adresse" },
-                                            {
-                                                value: "ikke_registrert_paa_adresse",
-                                                text: "Ikke registrert på adresse",
-                                            },
-                                        ]}
+                                        options={[{ value: "", text: "Velg status" }].concat(
+                                            Object.entries(BoStatusType).map(([value, text]) => ({
+                                                value,
+                                                text: BoStatusTexts[text],
+                                            }))
+                                        )}
                                         hideLabel
                                     />
                                 ) : (
                                     <BodyShort
                                         key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
                                     >
-                                        {BoStatus[item.boStatus]}
+                                        {BoStatusTexts[item.boStatus]}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
@@ -613,16 +611,16 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
         const sivilstandPerioder = getValues("sivilstand");
         const fomOgTomInvalid =
             field === "fraDato"
-                ? sivilstandPerioder[index].tilDato && date > sivilstandPerioder[index].tilDato
-                : sivilstandPerioder[index].fraDato && date < sivilstandPerioder[index].fraDato;
+                ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
+                : sivilstandPerioder[index].gyldigFraOgMed && date < sivilstandPerioder[index].gyldigFraOgMed;
 
         if (fomOgTomInvalid) {
-            setError(`sivilstand.${index}.fraDato`, {
+            setError(`sivilstand.${index}.gyldigFraOgMed`, {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
-            clearErrors(`sivilstand.${index}.fraDato`);
+            clearErrors(`sivilstand.${index}.gyldigFraOgMed`);
         }
     };
 
@@ -634,8 +632,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
             return;
         }
         const filtrertOgSorterListe = sivilstandPerioder
-            .filter((periode) => periode.fraDato !== null)
-            .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+            .filter((periode) => periode.gyldigFraOgMed !== null)
+            .sort((a, b) => a.gyldigFraOgMed.getTime() - b.gyldigFraOgMed.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -654,8 +652,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
     const addPeriode = () => {
         const sivilstandPerioderValues = getValues("sivilstand");
         sivilstandPerioder.append({
-            fraDato: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
-            tilDato: null,
+            gyldigFraOgMed: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
+            datoTom: null,
             sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
         });
     };
@@ -679,7 +677,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         name={`sivilstand.${index}.fraDato`}
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
+                                        defaultValue={item.gyldigFraOgMed}
                                         onChange={(date) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "fraDato");
@@ -693,7 +691,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                                         name={`sivilstand.${index}.tilDato`}
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.tilDato}
+                                        defaultValue={item.datoTom}
                                         onChange={(date) => {
                                             validatePeriods();
                                             validateFomOgTom(date, index, "tilDato");
