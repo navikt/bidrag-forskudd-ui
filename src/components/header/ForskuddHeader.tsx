@@ -14,7 +14,7 @@ export const Header = memo(() => {
         <SakHeader
             saksnummer={behandling.saksnummer}
             roller={rollerMedPersonNavn}
-            skjermbilde={{ navn: "Forskudd", referanse: behandlingId }}
+            skjermbilde={{ navn: "Søknad om forskudd", referanse: `#${behandlingId}` }}
         />
     );
 });
