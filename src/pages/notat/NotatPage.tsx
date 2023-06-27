@@ -9,15 +9,17 @@ import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektF
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { PersonNavn } from "../../components/PersonNavn";
 import { TableRowWrapper, TableWrapper } from "../../components/table/TableWrapper";
+import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { InntektBeskrivelse } from "../../enum/InntektBeskrivelse";
-import { useGetBehandling, useHentInntekter } from "../../hooks/useApiData";
+import { useGetBehandling, useGetVirkningstidspunkt, useHentInntekter } from "../../hooks/useApiData";
 import { DateToDDMMYYYYString, ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
 
 export enum NotatVirkningsTidspunktFields {
     "virkningsDato",
     "aarsak",
-    "begrunnelse",
+    "virkningsTidspunktBegrunnelseMedIVedtakNotat",
+    "virkningsTidspunktBegrunnelseKunINotat",
 }
 export default () => {
     return (
@@ -34,6 +36,7 @@ export default () => {
 const Virkningstidspunkt = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { data: behandling } = useGetBehandling(Number(behandlingId));
+    const { data: behandlingVirkningstidspunkt } = useGetVirkningstidspunkt(Number(behandlingId));
 
     return (
         <Suspense
@@ -43,15 +46,23 @@ const Virkningstidspunkt = () => {
                 </div>
             }
         >
-            <VirkningstidspunktView behandling={behandling} />
+            <VirkningstidspunktView
+                behandling={behandling}
+                behandlingVirkningstidspunkt={behandlingVirkningstidspunkt}
+            />
         </Suspense>
     );
 };
 
-const VirkningstidspunktView = ({ behandling }) => {
-    const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandling.virkningsDato);
-    const [aarsak, setAarsak] = useState(behandling.aarsak);
-    const [begrunnelse, setBegrunnelse] = useState(behandling.virkningsTidspunktBegrunnelseMedIVedtakNotat);
+const VirkningstidspunktView = ({ behandling, behandlingVirkningstidspunkt }) => {
+    const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandlingVirkningstidspunkt.virkningsDato);
+    const [aarsak, setAarsak] = useState(behandlingVirkningstidspunkt.aarsak);
+    const [begrunnelse, setBegrunnelse] = useState(
+        behandlingVirkningstidspunkt.virkningsTidspunktBegrunnelseMedIVedtakNotat
+    );
+    const [begrunnelseKunINotat, setBegrunnelseKunINotat] = useState(
+        behandlingVirkningstidspunkt.virkningsTidspunktBegrunnelseKunINotat
+    );
     const channel = new BroadcastChannel("virkningstidspunkt");
 
     useEffect(() => {
@@ -65,8 +76,10 @@ const VirkningstidspunktView = ({ behandling }) => {
             }
             if (aarsak !== data[NotatVirkningsTidspunktFields.aarsak])
                 setAarsak(data[NotatVirkningsTidspunktFields.aarsak]);
-            if (begrunnelse !== data[NotatVirkningsTidspunktFields.begrunnelse])
-                setBegrunnelse(data[NotatVirkningsTidspunktFields.begrunnelse]);
+            if (begrunnelse !== data[NotatVirkningsTidspunktFields.virkningsTidspunktBegrunnelseMedIVedtakNotat])
+                setBegrunnelse(data[NotatVirkningsTidspunktFields.virkningsTidspunktBegrunnelseMedIVedtakNotat]);
+            if (begrunnelseKunINotat !== data[NotatVirkningsTidspunktFields.virkningsTidspunktBegrunnelseKunINotat])
+                setBegrunnelseKunINotat(data[NotatVirkningsTidspunktFields.virkningsTidspunktBegrunnelseKunINotat]);
         };
 
         return () => channel.close();
@@ -102,15 +115,17 @@ const VirkningstidspunktView = ({ behandling }) => {
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Mottatt dato:</Label>
-                    <BodyShort size="small">{behandling.mottatDato}</BodyShort>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottatDato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Søkt fra dato:</Label>
-                    <BodyShort size="small">{behandling.datoFom}</BodyShort>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.datoFom))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Virkningstidspunkt:</Label>
-                    <BodyShort size="small">{virkningstidspunkt}</BodyShort>
+                    <BodyShort size="small">
+                        {virkningstidspunkt ? DateToDDMMYYYYString(new Date(virkningstidspunkt)) : ""}
+                    </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Saksbehandler:</Label>
@@ -118,11 +133,15 @@ const VirkningstidspunktView = ({ behandling }) => {
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Årsak:</Label>
-                    <BodyShort size="small">{ForskuddBeregningKodeAarsak[aarsak]}</BodyShort>
+                    <BodyShort size="small">{ForskuddBeregningKodeAarsak[aarsak] ?? Avslag[aarsak]}</BodyShort>
                 </div>
                 <div>
                     <Label size="small">Begrunnelse:</Label>
                     <BodyLong size="small">{begrunnelse}</BodyLong>
+                </div>
+                <div>
+                    <Label size="small">Begrunnelse kun i notat:</Label>
+                    <BodyLong size="small">{begrunnelseKunINotat}</BodyLong>
                 </div>
             </div>
         </div>

@@ -142,7 +142,12 @@ const VirkningstidspunktForm = () => {
 
     const fieldsForNotat = useWatch({
         control: useFormMethods.control,
-        name: ["virkningsDato", "aarsak", "virkningsTidspunktBegrunnelseMedIVedtakNotat"],
+        name: [
+            "virkningsDato",
+            "aarsak",
+            "virkningsTidspunktBegrunnelseMedIVedtakNotat",
+            "virkningsTidspunktBegrunnelseKunINotat",
+        ],
     });
 
     const watchAllFields = useWatch({ control: useFormMethods.control });
