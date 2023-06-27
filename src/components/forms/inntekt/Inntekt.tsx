@@ -10,8 +10,15 @@ import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling, useGrunnlagspakke, useHentInntekter, useUpdateInntekter } from "../../../hooks/useApiData";
+import {
+    useGetBehandling,
+    useGetVirkningstidspunkt,
+    useGrunnlagspakke,
+    useHentInntekter,
+    useUpdateInntekter,
+} from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { dateOrNull } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -140,12 +147,15 @@ const InntektForm = () => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: inntekter } = useHentInntekter(behandlingId);
+    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const updateInntekter = useUpdateInntekter(behandlingId);
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
     const bmOgBarn = behandling.roller.filter(
         (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
     );
 
-    const initialValues = createInitialValues(bmOgBarn, grunnlagspakke, inntekter);
+    const initialValues = createInitialValues(bmOgBarn, grunnlagspakke, inntekter, datoFom);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
