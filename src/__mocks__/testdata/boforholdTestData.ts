@@ -1,14 +1,16 @@
+import { BoStatusType } from "../../api/BidragBehandlingApi";
+
 interface Periode {
     fraDato: string;
     tilDato: string;
-    boStatus: "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
+    boStatus: BoStatusType | "";
     kilde: string;
 }
 
 interface Sivilstand {
-    fraDato: string;
-    tilDato: string;
-    stand: string;
+    gyldigFraOgMed: string;
+    datoTom: string;
+    sivilstandType: string;
 }
 interface Barn {
     medISaken: boolean;

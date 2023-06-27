@@ -673,28 +673,28 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                             cells={[
                                 <div className="flex gap-x-4">
                                     <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.fraDato`}
-                                        name={`sivilstand.${index}.fraDato`}
+                                        key={`sivilstand.${index}.gyldigFraOgMed`}
+                                        name={`sivilstand.${index}.gyldigFraOgMed`}
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.gyldigFraOgMed}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "fraDato");
+                                            validateFomOgTom(date, index, "gyldigFraOgMed");
                                         }}
                                         fromDate={fom}
                                         toDate={tom}
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.tilDato`}
-                                        name={`sivilstand.${index}.tilDato`}
+                                        key={`sivilstand.${index}.datoTom`}
+                                        name={`sivilstand.${index}.datoTom`}
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "tilDato");
+                                            validateFomOgTom(date, index, "datoTom");
                                         }}
                                         fromDate={fom}
                                         toDate={tom}
