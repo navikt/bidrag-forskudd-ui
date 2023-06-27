@@ -4,6 +4,7 @@ import React from "react";
 
 import { useGetArbeidsforhold } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { useForskudd } from "../../../context/ForskuddContext";
+import { DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const Arbeidsforhold = () => {
@@ -26,7 +27,8 @@ export const Arbeidsforhold = () => {
                     <div>
                         <Label size="small">Periode</Label>
                         <BodyShort size="small">
-                            {arbeidsforhold.periode.fraDato} - {arbeidsforhold.periode.tilDato}
+                            {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.fraDato))} -{" "}
+                            {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.tilDato))}
                         </BodyShort>
                     </div>
                     <div>
@@ -39,7 +41,9 @@ export const Arbeidsforhold = () => {
                     </div>
                     <div>
                         <Label size="small">Lønnsendring</Label>
-                        <BodyShort size="small">{arbeidsforhold.sisteLoennsendring}</BodyShort>
+                        <BodyShort size="small">
+                            {DateToDDMMYYYYString(new Date(arbeidsforhold.sisteLoennsendring))}
+                        </BodyShort>
                     </div>
                 </FlexRow>
             ))}
