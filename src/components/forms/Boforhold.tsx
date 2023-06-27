@@ -271,7 +271,7 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
                     fraDato: virkningstidspunkt,
                     tilDato: null,
                     boStatus: "",
-                    kilde: "",
+                    kilde: "manuelt",
                 },
             ],
         });
@@ -393,7 +393,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
             fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
             tilDato: null,
             boStatus: "",
-            kilde: "",
+            kilde: "manuelt",
         });
     };
 
@@ -418,15 +418,6 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                 });
             } else {
                 clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`);
-            }
-            // @ts-ignore
-            if (!perioderValues.kilde) {
-                setError(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`, {
-                    type: "kildeNotValid",
-                    message: "Kilde kan ikke være tøm",
-                });
-            } else {
-                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`);
             }
         } else {
             // @ts-ignore
@@ -509,27 +500,12 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         {BoStatusTexts[item.boStatus]}
                                     </BodyShort>
                                 ),
-                                item.edit ? (
-                                    <FormControlledSelectField
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
-                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
-                                        className="w-fit"
-                                        label="Kilde"
-                                        options={[
-                                            { value: "", text: "Velg kilde" },
-                                            { value: "offentlig", text: "Offentlig" },
-                                            { value: "manuelt", text: "Manuelt" },
-                                        ]}
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
-                                        className="capitalize"
-                                    >
-                                        {item.kilde}
-                                    </BodyShort>
-                                ),
+                                <BodyShort
+                                    key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                    className="capitalize"
+                                >
+                                    {item.kilde}
+                                </BodyShort>,
                                 item.edit ? (
                                     <Button
                                         key={`save-button-${barnIndex}-${index}`}
