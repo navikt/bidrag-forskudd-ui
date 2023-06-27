@@ -204,12 +204,12 @@ const createGrunnlagRequest = (behandling) => {
         periodeFra,
         periodeTil: toISODateString(today),
     }));
-    const husstandsmedlemmerBarnRequests = barn?.map((b) => ({
-        type: "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
-        personId: b.ident,
-        periodeFra,
-        periodeTil: toISODateString(today),
-    }));
+    // const husstandsmedlemmerBarnRequests = barn?.map((b) => ({
+    //     type: "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
+    //     personId: b.ident,
+    //     periodeFra,
+    //     periodeTil: toISODateString(today),
+    // }));
 
     const bmRequests = [
         "AINNTEKT",
@@ -231,7 +231,8 @@ const createGrunnlagRequest = (behandling) => {
 
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
         // @ts-ignore
-        grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests).concat(husstandsmedlemmerBarnRequests),
+        grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
+        //.concat(husstandsmedlemmerBarnRequests),
     };
 
     return grunnlagRequest;
