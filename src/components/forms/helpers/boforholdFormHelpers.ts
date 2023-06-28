@@ -1,4 +1,4 @@
-import { BoStatusType, RolleType } from "../../../api/BidragBehandlingApi";
+import { BoStatusType } from "../../../api/BidragBehandlingApi";
 import { RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
 import {
     addDays,
@@ -63,10 +63,9 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     return perioder;
 };
 
-export const mapHusstandsMedlemmerToBarn = (behandling, husstandmedlemmerOgEgneBarnListe) => {
-    const barnFraBehandling = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
+export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe) => {
     return husstandmedlemmerOgEgneBarnListe
-        .filter((medlem) => barnFraBehandling.find((barn) => barn.ident === medlem.relatertPersonPersonId))
+        .filter((medlem) => medlem.erBarnAvBmBp)
         .map((barn) => ({
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,
