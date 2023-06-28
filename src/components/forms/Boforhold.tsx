@@ -117,7 +117,6 @@ const Side = () => {
 };
 
 const BoforholdsForm = () => {
-    const channel = new BroadcastChannel("boforhold");
     const { behandlingId, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
@@ -140,10 +139,6 @@ const BoforholdsForm = () => {
     });
 
     const watchAllFields = useWatch({ control: useFormMethods.control });
-
-    useEffect(() => {
-        channel.postMessage(JSON.stringify(watchAllFields));
-    }, [watchAllFields]);
 
     useEffect(() => {
         if (!boforholdFormValues) setBoforholdFormValues(initialValues);
