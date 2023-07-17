@@ -13,18 +13,17 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
 
-const periodeToString = (periode?: number[]) => periode?.join("-")
+const periodeToString = (periode?: number[]) => periode?.join("-");
 
 const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const { data: {
+    const {
         data: {
-            feil: beregingFeil,
-            resultat: beregingResultat,
+            data: { feil: beregingFeil, resultat: beregingResultat },
         },
-    } } = useBeregnForskudd(behandlingId);
+    } = useBeregnForskudd(behandlingId);
 
     const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
@@ -41,8 +40,8 @@ const Vedtak = () => {
                 enhetId: "",
                 grunnlagListe: [],
             })
-            .then((r) => { })
-            .catch((e) => { });
+            .then((r) => {})
+            .catch((e) => {});
         throw new Error("Function not implemented.");
     };
 
@@ -63,38 +62,45 @@ const Vedtak = () => {
                     Oppsummering
                 </Heading>
 
-                {beregingFeil?.map((feil) => <Alert variant="error">{feil}</Alert>)}
-
-                {beregingResultat?.map((item, i) => item.beregnetForskuddPeriodeListe.map(forskudd =>
-                    <div key={i + item.ident} className="mb-8">
-                        <div className="my-8 flex items-center gap-x-2">
-                            <RolleTag rolleType={RolleType.BARN} />
-                            <BodyShort>
-                                <PersonNavn ident={item.ident}></PersonNavn>
-                                <span className="ml-4">{item.ident}</span>
-                            </BodyShort>
-                        </div>
-                        <Table>
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
-                                    {/* <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell> */}
-                                    <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                                <Table.Row>
-                                    <Table.DataCell>{behandling.behandlingType}</Table.DataCell>
-                                    <Table.DataCell>{periodeToString(forskudd.periode?.datoFom)} - {periodeToString(forskudd.periode.datoTil)}</Table.DataCell>
-                                    <Table.DataCell>{forskudd.resultat.belop}</Table.DataCell>
-                                    <Table.DataCell>{forskudd.resultat.kode}</Table.DataCell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table>
-                    </div>
+                {beregingFeil?.map((feil) => (
+                    <Alert variant="error">{feil}</Alert>
                 ))}
+
+                {beregingResultat?.map((item, i) =>
+                    item.beregnetForskuddPeriodeListe.map((forskudd) => (
+                        <div key={i + item.ident} className="mb-8">
+                            <div className="my-8 flex items-center gap-x-2">
+                                <RolleTag rolleType={RolleType.BARN} />
+                                <BodyShort>
+                                    <PersonNavn ident={item.ident}></PersonNavn>
+                                    <span className="ml-4">{item.ident}</span>
+                                </BodyShort>
+                            </div>
+                            <Table>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
+                                        {/* <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell> */}
+                                        <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    <Table.Row>
+                                        <Table.DataCell>{behandling.behandlingType}</Table.DataCell>
+                                        <Table.DataCell>
+                                            {periodeToString(forskudd.periode?.datoFom)} -{" "}
+                                            {periodeToString(forskudd.periode.datoTil)}
+                                        </Table.DataCell>
+                                        <Table.DataCell>{forskudd.resultat.belop}</Table.DataCell>
+                                        <Table.DataCell>{forskudd.resultat.kode}</Table.DataCell>
+                                    </Table.Row>
+                                </Table.Body>
+                            </Table>
+                        </div>
+                    ))
+                )}
             </div>
             <Alert variant="info">
                 <div className="grid gap-y-4">
