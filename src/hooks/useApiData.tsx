@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import {
     BehandlingDto,
     BoforholdResponse,
+    ForskuddBeregningRespons,
     InntekterResponse,
     OpplysningerDto,
     OpplysningerType,
@@ -29,6 +30,13 @@ export const useGetBehandlings = () =>
         queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
+        suspense: true,
+    });
+
+export const useBeregnForskudd = (behandlingId: number) =>
+    useQuery({
+        queryFn: (): Promise<AxiosResponse<ForskuddBeregningRespons>> =>
+            BEHANDLING_API.api.beregnForskudd(behandlingId),
         suspense: true,
     });
 
@@ -233,27 +241,32 @@ const createGrunnlagRequest = (behandling) => {
 
 export const useGrunnlagspakke = (behandling) => {
     const { data: grunnlagspakkeId } = useQuery({
-        queryKey: ["grunnlagspakkeId"],
+        queryKey: ["grunnlagspakkeId", behandlingId],
         queryFn: async (): Promise<number> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
                 opprettetAv: "saksbehandler",
             });
+
+            const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
+
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
+                grunnlagspakkeId,
+                grunnlagRequest
+            );
+
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+            return data;
+
             return data;
         },
         staleTime: Infinity,
         enabled: !!behandling,
     });
 
-    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
-
     const { isSuccess: updateIsSuccess } = useQuery({
         queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
             return data;
         },
         staleTime: Infinity,
@@ -262,10 +275,7 @@ export const useGrunnlagspakke = (behandling) => {
 
     return useQuery({
         queryKey: ["grunnlagspakke", grunnlagspakkeId],
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
-            return data;
-        },
+        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {},
         staleTime: Infinity,
         enabled: !!updateIsSuccess,
     });
