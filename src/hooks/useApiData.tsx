@@ -241,32 +241,27 @@ const createGrunnlagRequest = (behandling) => {
 
 export const useGrunnlagspakke = (behandling) => {
     const { data: grunnlagspakkeId } = useQuery({
-        queryKey: ["grunnlagspakkeId", behandlingId],
+        queryKey: ["grunnlagspakkeId"],
         queryFn: async (): Promise<number> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
                 opprettetAv: "saksbehandler",
             });
-
-            const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
-
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
-
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
-            return data;
-
             return data;
         },
         staleTime: Infinity,
         enabled: !!behandling,
     });
 
+    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
+
     const { isSuccess: updateIsSuccess } = useQuery({
         queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
+                grunnlagspakkeId,
+                grunnlagRequest
+            );
             return data;
         },
         staleTime: Infinity,
@@ -275,7 +270,10 @@ export const useGrunnlagspakke = (behandling) => {
 
     return useQuery({
         queryKey: ["grunnlagspakke", grunnlagspakkeId],
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {},
+        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+            return data;
+        },
         staleTime: Infinity,
         enabled: !!updateIsSuccess,
     });
