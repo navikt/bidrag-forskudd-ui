@@ -40,8 +40,8 @@ const Vedtak = () => {
                 enhetId: "",
                 grunnlagListe: [],
             })
-            .then((r) => { })
-            .catch((e) => { });
+            .then((r) => {})
+            .catch((e) => {});
         throw new Error("Function not implemented.");
     };
 
