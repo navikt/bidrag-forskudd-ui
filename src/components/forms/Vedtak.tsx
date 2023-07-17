@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { useApi } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
@@ -40,8 +40,8 @@ const Vedtak = () => {
                 enhetId: "",
                 grunnlagListe: [],
             })
-            .then((r) => {})
-            .catch((e) => {});
+            .then((r) => { })
+            .catch((e) => { });
         throw new Error("Function not implemented.");
     };
 

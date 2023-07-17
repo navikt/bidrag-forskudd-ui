@@ -42,6 +42,9 @@ const server = setupServer(
     rest.options(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, (req, res, ctx) => {
         return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
     }),
+    rest.options(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/beregn`, (req, res, ctx) => {
+        return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));
+    }),
     rest.options(
         `${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`,
         (req, res, ctx) => {
@@ -59,6 +62,16 @@ const server = setupServer(
                 "Content-Type": "application/json",
             }),
             ctx.body(JSON.stringify(boforholdData))
+        );
+    }),
+    rest.post(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/beregn`, (req, res, ctx) => {
+        return res(
+            ctx.set({
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+            }),
+            ctx.body(JSON.stringify({}))
         );
     }),
     rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`, (req, res, ctx) => {
