@@ -4,8 +4,8 @@ import {
     RolleType,
     UpdateBoforholdRequest,
 } from "../../../api/BidragBehandlingApi";
-import {BarnPeriode} from "../../../types/boforholdFormValues"
 import { RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
+import { BarnPeriode } from "../../../types/boforholdFormValues";
 import {
     addDays,
     dateOrNull,
