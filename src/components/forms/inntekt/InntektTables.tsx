@@ -210,7 +210,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             datoFom: null,
             datoTom: null,
             belop: "",
-            beskrivelse: "",
+            inntektType: "",
             taMed: false,
             fraGrunnlag: false,
         });

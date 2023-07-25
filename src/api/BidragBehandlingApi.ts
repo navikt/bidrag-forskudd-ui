@@ -52,6 +52,37 @@ export enum BoStatusType {
     BARN_BOR_ALENE = "BARN_BOR_ALENE",
 }
 
+export interface CollectionModelEntityModelBehandling {
+    _embedded?: {
+        behandlings?: EntityModelBehandling[];
+    };
+    _links?: Links;
+}
+
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddAarsakType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+    _links?: Links;
+}
+
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -81,11 +112,6 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum RolleType {
@@ -139,6 +165,13 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
 export interface EntityModelOpplysninger {
     aktiv: boolean;
     opplysningerType: OpplysningerType;
@@ -148,47 +181,14 @@ export interface EntityModelOpplysninger {
     _links?: Links;
 }
 
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
-export interface EntityModelBehandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddAarsakType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
-    _links?: Links;
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface CollectionModelObject {
     _embedded?: {
         objects?: object[];
-    };
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelBehandling {
-    _embedded?: {
-        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
@@ -329,6 +329,8 @@ export interface InntekterResponse {
     barnetillegg: BarnetilleggDto[];
     /** @uniqueItems true */
     utvidetbarnetrygd: UtvidetbarnetrygdDto[];
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
 }
 
 export interface HusstandsBarnDto {
@@ -353,12 +355,12 @@ export interface HusstandsBarnPeriodeDto {
      * @format date
      * @example "2025-01-25"
      */
-    fraDato?: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    tilDato?: string;
+    datoTom?: string;
     boStatus: BoStatusType;
     kilde: string;
 }
@@ -546,12 +548,12 @@ export interface Periode {
      * Fra-og-med-dato
      * @format date
      */
-    datoFom?: number[];
+    datoFom?: string;
     /**
      * Til-dato
      * @format date
      */
-    datoTil?: number[];
+    datoTil?: string;
 }
 
 /** Resultatet av en beregning */

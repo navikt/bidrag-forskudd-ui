@@ -70,8 +70,13 @@ const Opplysninger = ({ opplysninger, ident }) => {
     ));
 };
 
-const Main = ({ opplysningerFraFolkRegistre }) => {
-    const { behandlingId } = useForskudd();
+const Main = ({
+    opplysningerFraFolkRegistre,
+    behandlingId,
+}: {
+    opplysningerFraFolkRegistre: any;
+    behandlingId: number;
+}) => {
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
 
@@ -173,7 +178,12 @@ const BoforholdsForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Boforhold"
-                        main={<Main opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />}
+                        main={
+                            <Main
+                                opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
+                                behandlingId={behandlingId}
+                            />
+                        }
                         side={<Side />}
                     />
                 </form>
@@ -215,15 +225,15 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                         hideLabel={false}
                         onClear={() => {
                             // TODO nulstil alt for barnet
-                            setValue(`behandlingBarn.${index}.ident`, null);
-                            setValue(`behandlingBarn.${index}.navn`, null);
+                            setValue(`husstandsBarn.${index}.ident`, null);
+                            setValue(`husstandsBarn.${index}.navn`, null);
                         }}
                         onSearchClick={(value) => {
                             PERSON_API.informasjon
                                 .hentPersonPost({ ident: value })
                                 .then(({ data }) => {
-                                    setValue(`behandlingBarn.${index}.ident`, value);
-                                    setValue(`behandlingBarn.${index}.navn`, data.navn);
+                                    setValue(`husstandsBarn.${index}.ident`, value);
+                                    setValue(`husstandsBarn.${index}.navn`, data.navn);
                                 })
                                 .catch((r) => {
                                     // TODO -> LEGG TIL BARNET MANUELT
@@ -238,7 +248,7 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                         onChange={(value) => console.log(value)}
                     />
                 )}
-                <FormControlledTextField name={`behandlingBarn.${index}.navn`} label="Navn" />
+                <FormControlledTextField name={`husstandsBarn.${index}.navn`} label="Navn" />
             </FlexRow>
         </div>
     );
@@ -248,9 +258,9 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
     const { control, setValue } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
-        name: "behandlingBarn",
+        name: "husstandsBarn",
     });
-    const watchFieldArray = useWatch({ control, name: "behandlingBarn" });
+    const watchFieldArray = useWatch({ control, name: "husstandsBarn" });
     const controlledFields = barnFieldArray.fields.map((field, index) => {
         return {
             ...field,
@@ -266,8 +276,8 @@ const BarnPerioder = ({ virkningstidspunkt, opplysningerFraFolkRegistre }) => {
             perioder: [
                 {
                     edit: false,
-                    fraDato: virkningstidspunkt,
-                    tilDato: null,
+                    datoFom: virkningstidspunkt,
+                    datoTom: null,
                     boStatus: "",
                     kilde: "",
                 },
@@ -336,10 +346,10 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     } = useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
-        name: `behandlingBarn.${barnIndex}.perioder`,
+        name: `husstandsBarn.${barnIndex}.perioder`,
     });
 
-    const watchFieldArray = useWatch({ control, name: `behandlingBarn.${barnIndex}.perioder` });
+    const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => {
         return {
             ...field,
@@ -348,100 +358,100 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
     });
 
     const validateFomOgTom = (date, index, field) => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         const fomOgTomInvalid =
             field === "fraDato"
-                ? perioderValues[index].tilDato && date > perioderValues[index].tilDato
-                : perioderValues[index].fraDato && date < perioderValues[index].fraDato;
+                ? perioderValues[index].datoTom && date > perioderValues[index].datoTom
+                : perioderValues[index].datoFom && date < perioderValues[index].datoFom;
 
         if (fomOgTomInvalid) {
-            setError(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`, {
+            setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`);
         }
     };
 
     const validatePeriods = () => {
-        const perioder = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioder = getValues(`husstandsBarn.${barnIndex}.perioder`);
 
         if (!perioder.length) {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder`);
             return;
         }
         const filtrertOgSorterListe = perioder
-            .filter((periode) => periode.fraDato !== null)
-            .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+            .filter((periode) => periode.datoFom !== null)
+            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
-            setError(`behandlingBarn.${barnIndex}.perioder`, {
+            setError(`husstandsBarn.${barnIndex}.perioder`, {
                 type: "overlappingPerioder",
                 message: "Du har overlappende perioder",
             });
         }
 
         if (!overlappingPerioder?.length) {
-            clearErrors(`behandlingBarn.${barnIndex}.perioder`);
+            clearErrors(`husstandsBarn.${barnIndex}.perioder`);
         }
     };
 
     const addPeriode = () => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         barnPerioder.append({
             edit: true,
-            fraDato: calculateFraDato(perioderValues, virkningstidspunkt),
-            tilDato: null,
+            datoFom: calculateFraDato(perioderValues, virkningstidspunkt),
+            datoTom: null,
             boStatus: "",
             kilde: "",
         });
     };
 
     const savePeriod = (index) => {
-        const perioderValues = getValues(`behandlingBarn.${barnIndex}.perioder.${index}`);
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder.${index}`);
         // @ts-ignore
         if (!perioderValues.fraDato || !perioderValues?.boStatus || !perioderValues.kilde) {
             // @ts-ignore
             if (!perioderValues.fraDato) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                     type: "datesNotValid",
                     message: "Fom dato kan ikke være tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`);
             }
             // @ts-ignore
             if (!perioderValues.boStatus) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`, {
                     type: "boStatusNotValid",
                     message: "Status kan ikke vøre tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`);
             }
             // @ts-ignore
             if (!perioderValues.kilde) {
-                setError(`behandlingBarn.${barnIndex}.perioder.${index}.kilde`, {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`, {
                     type: "kildeNotValid",
                     message: "Kilde kan ikke være tøm",
                 });
             } else {
-                clearErrors(`behandlingBarn.${barnIndex}.perioder.${index}.kilde`);
+                clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.kilde`);
             }
         } else {
             // @ts-ignore
-            setValue(`behandlingBarn.${barnIndex}.perioder.${index}.edit`, false);
+            setValue(`husstandsBarn.${barnIndex}.perioder.${index}.edit`, false);
         }
     };
 
     return (
         <>
-            {errors?.behandlingBarn && errors.behandlingBarn[barnIndex]?.perioder.type === "overlappingPerioder" && (
+            {errors?.husstandsBarn && errors.husstandsBarn[barnIndex]?.perioder.type === "overlappingPerioder" && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.behandlingBarn[barnIndex].perioder.message}</BodyShort>
+                    <BodyShort>{errors.husstandsBarn[barnIndex].perioder.message}</BodyShort>
                 </Alert>
             )}
             {controlledFields.length > 0 && (
@@ -452,50 +462,46 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                             cells={[
                                 item.edit ? (
                                     <FormControlledMonthPicker
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`}
                                         label="Fra og med"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
+                                        defaultValue={item.datoFom}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "fraDato");
+                                            validateFomOgTom(date, index, "datoFom");
                                         }}
                                         toDate={new Date()}
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.fraDato.placeholder`}
-                                    >
-                                        {item.fraDato ? DateToMMYYYYString(item.fraDato) : ""}
+                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}>
+                                        {item.datoFom ? DateToMMYYYYString(item.datoFom) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledMonthPicker
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`}
                                         label="Til og med"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.tilDato}
+                                        defaultValue={item.datoTom}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "tilDato");
+                                            validateFomOgTom(date, index, "datoTom");
                                         }}
                                         lastDayOfMonthPicker
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.tilDato.placeholder`}
-                                    >
-                                        {item.tilDato ? DateToMMYYYYString(item.tilDato) : ""}
+                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}>
+                                        {item.datoTom ? DateToMMYYYYString(item.datoTom) : ""}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
                                         className="w-fit"
                                         label="Status"
                                         options={[
@@ -510,15 +516,15 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
                                     >
                                         {BoStatus[item.boStatus]}
                                     </BodyShort>
                                 ),
                                 item.edit ? (
                                     <FormControlledSelectField
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.kilde`}
-                                        name={`behandlingBarn.${barnIndex}.perioder.${index}.kilde`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.kilde`}
                                         className="w-fit"
                                         label="Kilde"
                                         options={[
@@ -530,7 +536,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`behandlingBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
                                         className="capitalize"
                                     >
                                         {item.kilde}
@@ -550,7 +556,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }) => {
                                         key={`edit-button-${barnIndex}-${index}`}
                                         type="button"
                                         onClick={() =>
-                                            setValue(`behandlingBarn.${barnIndex}.perioder.${index}.edit`, true)
+                                            setValue(`husstandsBarn.${barnIndex}.perioder.${index}.edit`, true)
                                         }
                                         icon={<PencilIcon aria-hidden />}
                                         variant="tertiary"
@@ -613,17 +619,17 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
     const validateFomOgTom = (date, index, field) => {
         const sivilstandPerioder = getValues("sivilstand");
         const fomOgTomInvalid =
-            field === "fraDato"
-                ? sivilstandPerioder[index].tilDato && date > sivilstandPerioder[index].tilDato
-                : sivilstandPerioder[index].fraDato && date < sivilstandPerioder[index].fraDato;
+            field === "gyldigFraOgMed"
+                ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
+                : sivilstandPerioder[index].gyldigFraOgMed && date < sivilstandPerioder[index].gyldigFraOgMed;
 
         if (fomOgTomInvalid) {
-            setError(`sivilstand.${index}.fraDato`, {
+            setError(`sivilstand.${index}.gyldigFraOgMed`, {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
-            clearErrors(`sivilstand.${index}.fraDato`);
+            clearErrors(`sivilstand.${index}.gyldigFraOgMed`);
         }
     };
 
@@ -635,8 +641,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
             return;
         }
         const filtrertOgSorterListe = sivilstandPerioder
-            .filter((periode) => periode.fraDato !== null)
-            .sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+            .filter((periode) => periode.gyldigFraOgMed !== null)
+            .sort((a, b) => a.gyldigFraOgMed.getTime() - b.gyldigFraOgMed.getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -655,8 +661,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
     const addPeriode = () => {
         const sivilstandPerioderValues = getValues("sivilstand");
         sivilstandPerioder.append({
-            fraDato: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
-            tilDato: null,
+            gyldigFraOgMed: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
+            datoTom: null,
             sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
         });
     };
@@ -676,27 +682,27 @@ const SivilistandPerioder = ({ virkningstidspunkt }) => {
                             cells={[
                                 <div className="flex gap-x-4">
                                     <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.fraDato`}
-                                        name={`sivilstand.${index}.fraDato`}
+                                        key={`sivilstand.${index}.gyldigFraOgMed`}
+                                        name={`sivilstand.${index}.gyldigFraOgMed`}
                                         label="Periode"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.fraDato}
+                                        defaultValue={item.gyldigFraOgMed}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "fraDato");
+                                            validateFomOgTom(date, index, "gyldigFraOgMed");
                                         }}
                                         toDate={new Date()}
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.tilDato`}
-                                        name={`sivilstand.${index}.tilDato`}
+                                        key={`sivilstand.${index}.datoTom`}
+                                        name={`sivilstand.${index}.datoTom`}
                                         label="Periode"
                                         placeholder="MM.ÅÅÅÅ"
-                                        defaultValue={item.tilDato}
+                                        defaultValue={item.datoTom}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "tilDato");
+                                            validateFomOgTom(date, index, "datoTom");
                                         }}
                                         lastDayOfMonthPicker
                                         hideLabel

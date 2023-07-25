@@ -1,6 +1,6 @@
 interface Periode {
-    fraDato: string;
-    tilDato: string;
+    datoFom: string;
+    datoTom: string;
     boStatus: "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
     kilde: string;
 }
@@ -16,14 +16,14 @@ interface Barn {
     perioder: Periode[];
 }
 export interface BoforholdData {
-    behandlingBarn: Barn[];
+    husstandsBarn: Barn[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;
 }
 
 export const boforholdData: BoforholdData = {
-    behandlingBarn: [],
+    husstandsBarn: [],
     sivilstand: [],
     boforholdBegrunnelseMedIVedtakNotat: "",
     boforholdBegrunnelseKunINotat: "",

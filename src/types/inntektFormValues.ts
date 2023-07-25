@@ -1,5 +1,5 @@
 export interface Inntekt {
-    beskrivelse: string;
+    inntektType: string;
     datoFom: Date | null;
     taMed: boolean;
     fraGrunnlag: boolean;

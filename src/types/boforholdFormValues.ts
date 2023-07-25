@@ -1,9 +1,9 @@
 import { SivilstandType } from "../api/BidragBehandlingApi";
 
-interface BarnPeriode {
+export interface BarnPeriode {
     edit: boolean;
-    fraDato: Date | null;
-    tilDato: Date | null;
+    datoFom: Date | null;
+    datoTom: Date | null;
     boStatus: "" | "registrert_paa_adresse" | "ikke_registrert_paa_adresse";
     kilde: "" | "offentlig" | "manuelt";
 }
@@ -15,13 +15,13 @@ interface Barn {
 }
 
 interface Sivilstand {
-    fraDato: Date | null;
-    tilDato: Date | null;
+    gyldigFraOgMed: Date | null;
+    datoTom: Date | null;
     sivilstandType: SivilstandType;
 }
 
 export interface BoforholdFormValues {
-    behandlingBarn: Barn[];
+    husstandsBarn: Barn[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;

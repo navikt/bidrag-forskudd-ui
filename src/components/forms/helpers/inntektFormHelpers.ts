@@ -1,4 +1,5 @@
-import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
+import { InntektDto, InntekterResponse, RolleDto } from "../../../api/BidragBehandlingApi";
+import { HentGrunnlagspakkeDto, SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -15,7 +16,7 @@ export const createInntektPayload = (values: InntektFormValues) => ({
             value.map((inntekt) => {
                 return {
                     ...inntekt,
-                    beskrivelse: inntekt.beskrivelse === "" ? null : inntekt.beskrivelse,
+                    inntektType: inntekt.inntektType === "" ? null : inntekt.inntektType,
                     ident: key,
                     belop: Number(inntekt.belop),
                     datoFom: toISODateString(inntekt.datoFom),
@@ -59,32 +60,39 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
     [rolle.ident]: mapFunction(rolle),
 });
-const mapSkattegrunnlagToRolle = (skattegrunnlagListe) => (rolle) =>
+const mapSkattegrunnlagToRolle = (skattegrunnlagListe: SkattegrunnlagDto[]) => (rolle) =>
     skattegrunnlagListe
         .filter((skattegrunlag) => skattegrunlag.personId === rolle.ident)
         .map((skattegrunlag) => mapSkattegrunnlagInntektPerioder(skattegrunlag))
         .flat();
-const mapInntekterToRolle = (inntekter) => (rolle) =>
+
+const mapInntekterToRolle = (inntekter: InntektDto[]) => (rolle) =>
     inntekter
         .filter((inntekt) => inntekt.ident === rolle.ident)
         .map((inntekt) => ({
             ...inntekt,
-            beskrivelse: inntekt.beskrivelse ?? "",
+            inntektType: inntekt.inntektType ?? "",
             datoTom: dateOrNull(inntekt.datoTom),
             datoFom: dateOrNull(inntekt.datoFom),
         }));
-const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe) =>
+
+const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn: RolleDto[], skattegrunnlagListe: SkattegrunnlagDto[]) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe)), {});
-const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
+
+const getPerioderFraInntekter = (bmOgBarn: RolleDto[], inntekter: InntektDto[]) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
-export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter): InntektFormValues => {
+export const createInitialValues = (
+    bmOgBarn: RolleDto[],
+    grunnlagspakke: HentGrunnlagspakkeDto,
+    inntekter: InntekterResponse
+): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
             ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
             : getPerioderFraSkattegrunnlagOgAinntekt(bmOgBarn, grunnlagspakke.skattegrunnlagListe),
-        utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
-            ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
+        utvidetBarnetrygd: inntekter?.utvidetbarnetrygd?.length
+            ? inntekter.utvidetbarnetrygd.map((utvidetBarnetrygd) => ({
                   ...utvidetBarnetrygd,
                   datoFom: dateOrNull(utvidetBarnetrygd.datoFom),
                   datoTom: dateOrNull(utvidetBarnetrygd.datoTom),
@@ -117,7 +125,7 @@ const findPeriodeIndex = (inntekteneSomLeggesTilGrunn, periode) =>
         (inntekt) => inntekt.aar === periode.aar && inntekt.tekniskNavn === periode.tekniskNavn
     );
 export const syncDates = (
-    selected,
+    selected: boolean,
     inntekteneSomLeggesTilGrunn,
     ident,
     index,

@@ -1,4 +1,10 @@
-import { RolleType } from "../../../api/BidragBehandlingApi";
+import {
+    HusstandsBarnDto,
+    HusstandsBarnPeriodeDto,
+    RolleType,
+    UpdateBoforholdRequest,
+} from "../../../api/BidragBehandlingApi";
+import {BarnPeriode} from "../../../types/boforholdFormValues"
 import { RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
 import {
     addDays,
@@ -21,30 +27,30 @@ export const calculateFraDato = (fieldArrayValues, virkningstidspunkt) => {
     return null;
 };
 
-const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
-    const perioder = [];
+const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto): BarnPeriode[] => {
+    const perioder: BarnPeriode[] = [];
     const brukFra = new Date(egneBarnIHusstanden.brukFra);
     const fodselsdato = new Date(egneBarnIHusstanden.fodselsdato);
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         if (i === 0) {
             if (fodselsdato < new Date(periode.periodeFra) && brukFra < new Date(periode.periodeFra)) {
                 perioder.push({
-                    fraDato: brukFra < fodselsdato ? fodselsdato : brukFra,
-                    tilDato: deductDays(brukFra, 1),
+                    datoFom: brukFra < fodselsdato ? fodselsdato : brukFra,
+                    datoTom: deductDays(brukFra, 1),
                     boStatus: "ikke_registrert_paa_adresse",
                 });
             }
-        } else if (addDays(perioder[i - 1].tilDato, 1).toDateString() !== new Date(periode.periodeFra).toDateString()) {
+        } else if (addDays(perioder[i - 1].datoTom, 1).toDateString() !== new Date(periode.periodeFra).toDateString()) {
             perioder.push({
-                fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
-                tilDato: deductDays(new Date(periode.periodeFra), 1),
+                datoFom: addDays(perioder[perioder.length - 1].datoTom, 1),
+                datoTom: deductDays(new Date(periode.periodeFra), 1),
                 boStatus: "ikke_registrert_paa_adresse",
             });
         }
 
         perioder.push({
-            fraDato: dateOrNull(periode.periodeFra),
-            tilDato: dateOrNull(periode.periodeTil),
+            datoFom: dateOrNull(periode.periodeFra),
+            datoTom: dateOrNull(periode.periodeTil),
             boStatus: "registrert_paa_adresse",
         });
 
@@ -54,8 +60,8 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             periode.periodeTil !== egneBarnIHusstanden.brukTil
         ) {
             perioder.push({
-                fraDato: addDays(new Date(periode.periodeTil), 1),
-                tilDato: dateOrNull(egneBarnIHusstanden.brukTil),
+                datoFom: addDays(new Date(periode.periodeTil), 1),
+                datoTom: dateOrNull(egneBarnIHusstanden.brukTil),
                 boStatus: "ikke_registrert_paa_adresse",
             });
         }
@@ -124,8 +130,8 @@ export const createInitialValues = (
     grunnlagspakke
 ) => ({
     ...boforhold,
-    behandlingBarn: boforoholdOpplysninger
-        ? boforhold.behandlingBarn.map((barn) => ({
+    husstandsBarn: boforoholdOpplysninger
+        ? boforhold.husstandsBarn.map((barn) => ({
               ...barn,
               perioder: barn.perioder.map((periode) => ({
                   ...periode,
@@ -142,17 +148,23 @@ export const createInitialValues = (
               tilDato: dateOrNull(stand.tilDato),
           }))
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe),
+    boforholdBegrunnelseMedIVedtakNotat: behandling.boforholdBegrunnelseMedIVedtakNotat,
+    boforholdBegrunnelseKunINotat: behandling.boforholdBegrunnelseKunINotat,
 });
 
-export const createPayload = (values) => ({
-    behandlingBarn: values.behandlingBarn.map((barn) => ({
-        ...barn,
-        perioder: barn.perioder.map((periode) => ({
-            ...periode,
-            fraDato: periode.fraDato ? toDateString(periode.fraDato) : "",
-            tilDato: periode.tilDato ? toDateString(periode.tilDato) : "",
-        })),
-    })),
+export const createPayload = (values): UpdateBoforholdRequest => ({
+    husstandsBarn: values.husstandsBarn.map(
+        (barn): HusstandsBarnDto => ({
+            ...barn,
+            perioder: barn.perioder.map(
+                (periode): HusstandsBarnPeriodeDto => ({
+                    ...periode,
+                    datoFom: periode.fraDato ? toDateString(periode.fraDato) : "",
+                    datoTom: periode.tilDato ? toDateString(periode.tilDato) : "",
+                })
+            ),
+        })
+    ),
     sivilstand: values.sivilstand.map((periode) => ({
         ...periode,
         fraDato: periode.fraDato ? toDateString(periode.fraDato) : "",

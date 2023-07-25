@@ -9,13 +9,13 @@
  * ---------------------------------------------------------------
  */
 
-export interface HentSkattegrunnlagRequest {
+export interface HentSummertSkattegrunnlagRequest {
     inntektsAar: string;
     inntektsFilter: string;
     personId: string;
 }
 
-export interface HentSkattegrunnlagResponse {
+export interface HentSummertSkattegrunnlagResponse {
     grunnlag?: Skattegrunnlag[];
     svalbardGrunnlag?: Skattegrunnlag[];
     skatteoppgjoersdato?: string;
@@ -26,7 +26,7 @@ export interface Skattegrunnlag {
     tekniskNavn: string;
 }
 
-/** Liste over alle hentede forekomster av sivilstand */
+/** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
 export interface Sivilstand {
     type?:
         | "ENKE_ELLER_ENKEMANN"
@@ -45,8 +45,8 @@ export interface Sivilstand {
     bekreftelsesdato?: string;
 }
 
-export interface SivilstandDto {
-    /** Liste over alle hentede forekomster av sivilstand */
+export interface Sivilstandshistorikk {
+    /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
     sivilstand: Sivilstand[];
 }
 
@@ -331,6 +331,56 @@ export interface UtvidetBarnetrygdPeriode {
     deltBosted: boolean;
 }
 
+export interface HentEnhetsregisterRequest {
+    organisasjonsnummer: string;
+    gyldigDato?: string;
+}
+
+export interface Adresse {
+    bruksperiode?: BruksperiodeEreg;
+    gyldighetsperiode?: Gyldighetsperiode;
+    adresselinje1?: string;
+    adresselinje2?: string;
+    adresselinje3?: string;
+    postnummer?: string;
+    poststed?: string;
+    kommunenummer?: string;
+    landkode?: string;
+}
+
+export interface BruksperiodeEreg {
+    /** @format date-time */
+    fom?: string;
+    /** @format date-time */
+    tom?: string;
+}
+
+export interface Gyldighetsperiode {
+    /** @format date */
+    fom?: string;
+    /** @format date */
+    tom?: string;
+}
+
+export interface HentEnhetsregisterResponse {
+    organisasjonsnummer?: string;
+    navn?: Navn;
+    enhetstype?: string;
+    adresse?: Adresse;
+    opphoersdato?: string;
+}
+
+export interface Navn {
+    bruksperiode?: BruksperiodeEreg;
+    gyldighetsperiode?: Gyldighetsperiode;
+    sammensattnavn?: string;
+    navnelinje1?: string;
+    navnelinje2?: string;
+    navnelinje3?: string;
+    navnelinje4?: string;
+    navnelinje5?: string;
+}
+
 export interface BarnetilsynRequest {
     ident: string;
     /** @format date */
@@ -375,6 +425,186 @@ export interface BarnetilleggPensjon {
 
 export interface HentBarnetilleggPensjonResponse {
     barnetilleggPensjonListe?: BarnetilleggPensjon[];
+}
+
+export interface HentArbeidsforholdRequest {
+    arbeidstakerId: string;
+    arbeidsforholdtypeFilter?: string;
+    rapporteringsordningFilter?: string;
+    arbeidsforholdstatusFilter?: string;
+    historikk: boolean;
+    sporingsinformasjon: boolean;
+}
+
+export interface Ansettelsesdetaljer {
+    /** @format double */
+    antallTimerPrUke?: number;
+    arbeidstidsordning?: Kodeverksentitet;
+    ansettelsesform?: Kodeverksentitet;
+    /** @format double */
+    avtaltStillingsprosent?: number;
+    rapporteringsmaaneder?: Rapporteringsmaaneder;
+    type?: string;
+    yrke?: Kodeverksentitet;
+    /** @format date */
+    sisteStillingsprosentendring?: string;
+    /** @format date */
+    sisteLoennsendring?: string;
+}
+
+export interface Ansettelsesperiode {
+    /** @format date */
+    startdato?: string;
+    /** @format date */
+    sluttdato?: string;
+}
+
+export interface Arbeidsforhold {
+    ansettelsesdetaljer?: Ansettelsesdetaljer[];
+    ansettelsesperiode?: Ansettelsesperiode;
+    arbeidssted?: Arbeidssted;
+    arbeidstaker?: Arbeidstaker;
+    bruksperiode?: Bruksperiode;
+    /** @format int32 */
+    navArbeidsforholdId?: number;
+    id?: string;
+    /** @format int32 */
+    navVersjon?: number;
+    opplysningspliktig?: Opplysningspliktig;
+    opprettet?: string;
+    rapporteringsordning?: Kodeverksentitet;
+    sistBekreftet?: string;
+    sistEndret?: string;
+    type?: Kodeverksentitet;
+    permisjoner?: Permisjon[];
+    permitteringer?: Permittering[];
+}
+
+export interface ArbeidsgiverIdenter {
+    gjeldende?: boolean;
+    ident?: string;
+    type?: string;
+}
+
+export interface Arbeidssted {
+    identer?: Identer[];
+    type?: string;
+}
+
+export interface Arbeidstaker {
+    identer?: ArbeidsgiverIdenter[];
+}
+
+export interface Bruksperiode {
+    fom?: string;
+    tom?: string;
+}
+
+export interface IdHistorikk {
+    id?: string;
+    /** @format date */
+    fom?: string;
+    /** @format date */
+    tom?: string;
+}
+
+export interface Identer {
+    ident?: string;
+    type?: string;
+}
+
+export interface Kodeverksentitet {
+    beskrivelse?: string;
+    kode?: string;
+}
+
+export interface Opplysningspliktig {
+    identer?: Identer[];
+    type?: string;
+}
+
+export interface Permisjon {
+    /** @format date */
+    startdato?: string;
+    /** @format date */
+    sluttdato?: string;
+    id?: string;
+    type?: Kodeverksentitet;
+    /** @format double */
+    prosent?: number;
+    varsling?: Kodeverksentitet;
+    idHistorikk?: IdHistorikk[];
+    sporingsinformasjon?: Sporingsinformasjon;
+}
+
+export interface Permittering {
+    /** @format date */
+    startdato?: string;
+    /** @format date */
+    sluttdato?: string;
+    id?: string;
+    type?: Kodeverksentitet;
+    /** @format double */
+    prosent?: number;
+    varsling?: Kodeverksentitet;
+    idHistorikk?: IdHistorikk[];
+    sporingsinformasjon?: Sporingsinformasjon;
+}
+
+export interface Rapporteringsmaaneder {
+    fra?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    til?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+}
+
+export interface Sporingsinformasjon {
+    /** @format date-time */
+    opprettetTidspunkt?: string;
+    opprettetAv?: string;
+    opprettetKilde?: string;
+    opprettetKildereferanse?: string;
+    /** @format date-time */
+    endretTidspunkt?: string;
+    endretAv?: string;
+    endretKilde?: string;
+    endretKildereferanse?: string;
 }
 
 export interface Aktoer {
@@ -691,14 +921,6 @@ export interface TilleggsinformasjonDetaljer {
     detaljerType: string;
 }
 
-/** Request for å opprette ny grunnlagspakke, uten annet innhold */
-export interface OpprettGrunnlagspakkeRequestDto {
-    /** Til hvilket formål skal grunnlagspakken benyttes. BIDRAG, FORSKUDD eller SAERTILSKUDD */
-    formaal: "FORSKUDD" | "BIDRAG" | "SAERTILSKUDD";
-    /** opprettet av */
-    opprettetAv: string;
-}
-
 /** Liste over hvilke typer grunnlag som skal hentes inn. På nivået under er personId og perioder angitt */
 export interface GrunnlagRequestDto {
     /** Hvilken type grunnlag skal hentes */
@@ -711,7 +933,8 @@ export interface GrunnlagRequestDto {
         | "SIVILSTAND"
         | "KONTANTSTOTTE"
         | "BARNETILSYN"
-        | "OVERGANGSSTONAD";
+        | "OVERGANGSSTONAD"
+        | "ARBEIDSFORHOLD";
     /**
      * Angir personId som grunnlag skal hentes for
      * @pattern ^[0-9]{11}$
@@ -727,6 +950,53 @@ export interface GrunnlagRequestDto {
      * @format date
      */
     periodeTil: string;
+}
+
+export interface HentGrunnlagRequestDto {
+    /** Liste over hvilke typer grunnlag som skal hentes inn. På nivået under er personId og perioder angitt */
+    grunnlagRequestDtoListe: GrunnlagRequestDto[];
+}
+
+export interface ArbeidsforholdDto {
+    /** Id til personen arbeidsforholdet gjelder */
+    partPersonId: string;
+    /**
+     * Startdato for arbeidsforholdet
+     * @format date
+     */
+    startdato?: string;
+    /**
+     * Eventuell sluttdato for arbeidsforholdet
+     * @format date
+     */
+    sluttdato?: string;
+    /** Navn på arbeidsgiver */
+    arbeidsgiverNavn?: string;
+    /** Arbeidsgivers organisasjonsnummer */
+    arbeidsgiverOrgnummer?: string;
+    /** Liste av ansettelsesdetaljer, med eventuell historikk */
+    ansettelsesdetaljer?: Ansettelsesdetaljer[];
+    /** Liste over registrerte permisjoner */
+    permisjoner?: Permisjon[];
+    /** Liste over registrerte permitteringer */
+    permitteringer?: Permittering[];
+    /**
+     * Hentet tidspunkt
+     * @format date-time
+     */
+    hentetTidspunkt: string;
+}
+
+export interface HentGrunnlagDto {
+    arbeidsforholdListe: ArbeidsforholdDto[];
+}
+
+/** Request for å opprette ny grunnlagspakke, uten annet innhold */
+export interface OpprettGrunnlagspakkeRequestDto {
+    /** Til hvilket formål skal grunnlagspakken benyttes. BIDRAG, FORSKUDD eller SAERTILSKUDD */
+    formaal: "FORSKUDD" | "BIDRAG" | "SAERTILSKUDD";
+    /** opprettet av */
+    opprettetAv: string;
 }
 
 export interface OppdaterGrunnlagspakkeRequestDto {
@@ -751,7 +1021,8 @@ export interface OppdaterGrunnlagDto {
         | "SIVILSTAND"
         | "KONTANTSTOTTE"
         | "BARNETILSYN"
-        | "OVERGANGSSTONAD";
+        | "OVERGANGSSTONAD"
+        | "ARBEIDSFORHOLD";
     /** Angir personId som grunnlag er hentet for */
     personId: string;
     /** Status for utført kall */
@@ -1085,6 +1356,53 @@ export interface RelatertPersonDto {
     borISammeHusstandDtoListe: BorISammeHusstandDto[];
 }
 
+/** Periodisert liste over en persons sivilstand */
+export interface SivilstandDto {
+    /** Id til personen sivilstanden er rapportert for */
+    personId?: string;
+    /**
+     * Sivilstand gjelder fra- og med måned
+     * @format date
+     */
+    periodeFra?: string;
+    /**
+     * Sivilstand gjelder til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+    /** Personens sivilstand */
+    sivilstand:
+        | "GIFT"
+        | "UGIFT"
+        | "ENSLIG"
+        | "SAMBOER"
+        | "UOPPGITT"
+        | "ENKE_ELLER_ENKEMANN"
+        | "SKILT"
+        | "SEPARERT"
+        | "REGISTRERT_PARTNER"
+        | "SEPARERT_PARTNER"
+        | "SKILT_PARTNER"
+        | "GJENLEVENDE_PARTNER";
+    /** Angir om en grunnlagsopplysning er aktiv */
+    aktiv: boolean;
+    /**
+     * Tidspunkt grunnlaget tas i bruk
+     * @format date-time
+     */
+    brukFra: string;
+    /**
+     * Tidspunkt grunnlaget ikke lenger er aktivt. Null betyr at grunnlaget er aktivt
+     * @format date-time
+     */
+    brukTil?: string;
+    /**
+     * Hentet tidspunkt
+     * @format date-time
+     */
+    hentetTidspunkt: string;
+}
+
 /** Periodisert liste over innhentede fra skatt og underliggende poster */
 export interface SkattegrunnlagDto {
     /** Id til personen inntekten er rapportert for */
@@ -1318,8 +1636,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request POST:/integrasjoner/skattegrunnlag
          * @secure
          */
-        hentSkattegrunnlag: (data: HentSkattegrunnlagRequest, params: RequestParams = {}) =>
-            this.request<HentSkattegrunnlagResponse, any>({
+        hentSkattegrunnlag: (data: HentSummertSkattegrunnlagRequest, params: RequestParams = {}) =>
+            this.request<HentSummertSkattegrunnlagResponse, any>({
                 path: `/integrasjoner/skattegrunnlag`,
                 method: "POST",
                 body: data,
@@ -1338,7 +1656,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentSivilstand: (data: string, params: RequestParams = {}) =>
-            this.request<SivilstandDto, any>({
+            this.request<Sivilstandshistorikk, any>({
                 path: `/integrasjoner/sivilstand`,
                 method: "POST",
                 body: data,
@@ -1465,6 +1783,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * No description
          *
          * @tags integrasjons-controller
+         * @name HentEnhetsinfo
+         * @summary Kaller Ereg og henter info fra enhetsregister
+         * @request POST:/integrasjoner/enhetsinfo
+         * @secure
+         */
+        hentEnhetsinfo: (data: HentEnhetsregisterRequest, params: RequestParams = {}) =>
+            this.request<HentEnhetsregisterResponse, any>({
+                path: `/integrasjoner/enhetsinfo`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags integrasjons-controller
          * @name HentBarnetilsyn
          * @summary Kaller familie-ef-sak/hentPerioderBarnetilsyn for å hente barnetilsyn
          * @request POST:/integrasjoner/barnetilsyn
@@ -1492,6 +1829,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentBarnetilleggPensjon: (data: HentBarnetilleggPensjonRequest, params: RequestParams = {}) =>
             this.request<HentBarnetilleggPensjonResponse, any>({
                 path: `/integrasjoner/barnetillegg`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags integrasjons-controller
+         * @name HentArbeidsforhold
+         * @summary Kaller Aareg og henter arbeidsforhold
+         * @request POST:/integrasjoner/arbeidsforhold
+         * @secure
+         */
+        hentArbeidsforhold: (data: HentArbeidsforholdRequest, params: RequestParams = {}) =>
+            this.request<Arbeidsforhold[], any>({
+                path: `/integrasjoner/arbeidsforhold`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1537,11 +1893,31 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 ...params,
             }),
     };
+    hentgrunnlag = {
+        /**
+         * No description
+         *
+         * @tags grunnlag-controller
+         * @name HentGrunnlag
+         * @summary Trigger innhenting av grunnlag for personer angitt i requesten
+         * @request POST:/hentgrunnlag
+         * @secure
+         */
+        hentGrunnlag: (data: HentGrunnlagRequestDto, params: RequestParams = {}) =>
+            this.request<HentGrunnlagDto, HentGrunnlagDto>({
+                path: `/hentgrunnlag`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+    };
     grunnlagspakke = {
         /**
          * No description
          *
-         * @tags grunnlagspakke-controller
+         * @tags grunnlag-controller
          * @name OpprettNyGrunnlagspakke
          * @summary Oppretter grunnlagspakke
          * @request POST:/grunnlagspakke
@@ -1560,7 +1936,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
-         * @tags grunnlagspakke-controller
+         * @tags grunnlag-controller
          * @name OppdaterGrunnlagspakke
          * @summary Trigger innhenting av grunnlag for grunnlagspakke
          * @request POST:/grunnlagspakke/{grunnlagspakkeId}/oppdater
@@ -1583,7 +1959,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
-         * @tags grunnlagspakke-controller
+         * @tags grunnlag-controller
          * @name LukkGrunnlagspakke
          * @summary Setter gyldigTil-dato = dagens dato for angitt grunnlagspakke
          * @request POST:/grunnlagspakke/{grunnlagspakkeId}/lukk
@@ -1600,7 +1976,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
-         * @tags grunnlagspakke-controller
+         * @tags grunnlag-controller
          * @name HentGrunnlagspakke
          * @summary Finn alle data for en grunnlagspakke
          * @request GET:/grunnlagspakke/{grunnlagspakkeId}
