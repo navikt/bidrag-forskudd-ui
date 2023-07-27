@@ -1,11 +1,11 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { useApi } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
-import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
+import { OpprettVedtakRequestDtoKilde, OpprettVedtakRequestDtoType } from "../../api/BidragVedtakApi";
+import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useBeregnForskudd, useGetBehandling } from "../../hooks/useApiData";
@@ -19,26 +19,22 @@ const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const {
-        data: {
-            data: { feil: beregingFeil, resultat: beregingResultat },
-        },
-    } = useBeregnForskudd(behandlingId);
+    const { data: forskuddBeregningRespons } = useBeregnForskudd(behandlingId);
 
-    const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
+    // const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
 
     // const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
 
     const sendeVedtak = (): void => {
         //TODO
-        vedtakApi.vedtak
+        BIDRAG_VEDTAK_API.vedtak
             .opprettVedtak({
-                kilde: "MANUELT",
-                type: "INDEKSREGULERING",
+                type: OpprettVedtakRequestDtoType.INDEKSREGULERING,
                 opprettetAv: "",
                 vedtakTidspunkt: "",
                 enhetId: "",
                 grunnlagListe: [],
+                kilde: OpprettVedtakRequestDtoKilde.MANUELT,
             })
             .then((r) => {})
             .catch((e) => {});
@@ -62,12 +58,12 @@ const Vedtak = () => {
                     Oppsummering
                 </Heading>
 
-                {beregingFeil?.map((feil) => (
+                {forskuddBeregningRespons?.feil?.map((feil) => (
                     <Alert variant="error">{feil}</Alert>
                 ))}
 
-                {beregingResultat?.map((item, i) =>
-                    item.beregnetForskuddPeriodeListe.map((forskudd) => (
+                {forskuddBeregningRespons?.resultat?.map((item, i) =>
+                    item.beregnetForskuddPeriodeListe.map((resultatPeriode) => (
                         <div key={i + item.ident} className="mb-8">
                             <div className="my-8 flex items-center gap-x-2">
                                 <RolleTag rolleType={RolleType.BARN} />
@@ -88,13 +84,12 @@ const Vedtak = () => {
                                 </Table.Header>
                                 <Table.Body>
                                     <Table.Row>
-                                        <Table.DataCell>{behandling.behandlingType}</Table.DataCell>
+                                        <Table.DataCell>{behandling?.behandlingType}</Table.DataCell>
                                         <Table.DataCell>
-                                            {periodeToString(forskudd.periode?.datoFom)} -{" "}
-                                            {periodeToString(forskudd.periode.datoTil)}
+                                            {resultatPeriode.periode?.datoFom} - {resultatPeriode.periode?.datoTil}
                                         </Table.DataCell>
-                                        <Table.DataCell>{forskudd.resultat.belop}</Table.DataCell>
-                                        <Table.DataCell>{forskudd.resultat.kode}</Table.DataCell>
+                                        <Table.DataCell>{resultatPeriode.resultat.belop}</Table.DataCell>
+                                        <Table.DataCell>{resultatPeriode.resultat.kode}</Table.DataCell>
                                     </Table.Row>
                                 </Table.Body>
                             </Table>

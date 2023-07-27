@@ -15,27 +15,15 @@ export type JsonNode = object;
 /** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
 export interface OpprettBehandlingsreferanseRequestDto {
     /** Kilde/type for en behandlingsreferanse */
-    kilde: "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
+    kilde: OpprettBehandlingsreferanseRequestDtoKilde;
     /** Kildesystemets referanse til behandlingen */
     referanse: string;
 }
 
 /** Liste over alle engangsbeløp som inngår i vedtaket */
 export interface OpprettEngangsbelopRequestDto {
-    /**
-     * Id for eventuelt engangsbeløp som skal endres, skal være id for opprinnelig engangsbeløp
-     * @format int32
-     */
-    endrerId?: number;
     /** Beløpstype. Saertilskudd, gebyr m.m. */
-    type:
-        | "DIREKTE_OPPGJOR"
-        | "ETTERGIVELSE"
-        | "ETTERGIVELSE_TILBAKEKREVING"
-        | "TILBAKEKREVING"
-        | "SAERTILSKUDD"
-        | "GEBYR_MOTTAKER"
-        | "GEBYR_SKYLDNER";
+    type: OpprettEngangsbelopRequestDtoType;
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale engangsbeløpet */
@@ -53,12 +41,21 @@ export interface OpprettEngangsbelopRequestDto {
     valutakode: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
     /** Angir om engangsbeløpet skal innkreves */
-    innkreving: "JA" | "NEI";
+    innkreving: OpprettEngangsbelopRequestDtoInnkreving;
     /** Angir om et engangsbeløp skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på. Utgjør sammen med referanse en unik id for et engangsbeløp
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse, brukes for å kunne omgjøre engangsbeløp senere i et klagevedtak. Unik innenfor et vedtak */
+    referanse: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i engangsbeløpet */
     grunnlagReferanseListe: string[];
 }
@@ -68,47 +65,7 @@ export interface OpprettGrunnlagRequestDto {
     /** Referanse til grunnlaget */
     referanse: string;
     /** Grunnlagstype */
-    type:
-        | "SAERFRADRAG"
-        | "SOKNADSBARN_INFO"
-        | "SKATTEKLASSE"
-        | "BARN_I_HUSSTAND"
-        | "BOSTATUS"
-        | "BOSTATUS_BP"
-        | "INNTEKT"
-        | "INNTEKT_BARN"
-        | "INNTEKT_UTVIDET_BARNETRYGD"
-        | "NETTO_SAERTILSKUDD"
-        | "SAMVAERSKLASSE"
-        | "BIDRAGSEVNE"
-        | "SAMVAERSFRADRAG"
-        | "SJABLON"
-        | "LOPENDE_BIDRAG"
-        | "FAKTISK_UTGIFT"
-        | "BARNETILSYN_MED_STONAD"
-        | "FORPLEINING_UTGIFT"
-        | "BARN"
-        | "SIVILSTAND"
-        | "BARNETILLEGG"
-        | "BARNETILLEGG_FORSVARET"
-        | "DELT_BOSTED"
-        | "NETTO_BARNETILSYN"
-        | "UNDERHOLDSKOSTNAD"
-        | "BPS_ANDEL_UNDERHOLDSKOSTNAD"
-        | "TILLEGGSBIDRAG"
-        | "MAKS_BIDRAG_PER_BARN"
-        | "BPS_ANDEL_SAERTILSKUDD"
-        | "MAKS_GRENSE_25_INNTEKT"
-        | "GEBYRFRITAK"
-        | "SOKNAD_INFO"
-        | "BARN_INFO"
-        | "PERSON_INFO"
-        | "SAKSBEHANDLER_INFO"
-        | "VEDTAK_INFO"
-        | "INNBETALT_BELOP"
-        | "FORHOLDSMESSIG_FORDELING"
-        | "SLUTTBEREGNING_BBM"
-        | "KLAGE_STATISTIKK";
+    type: OpprettGrunnlagRequestDtoType;
     /** Innholdet i grunnlaget */
     innhold: JsonNode;
 }
@@ -116,7 +73,7 @@ export interface OpprettGrunnlagRequestDto {
 /** Liste over alle stønadsendringer som inngår i vedtaket */
 export interface OpprettStonadsendringRequestDto {
     /** Stønadstype */
-    type: "BIDRAG" | "FORSKUDD" | "BIDRAG18AAR" | "EKTEFELLEBIDRAG" | "MOTREGNING" | "OPPFOSTRINGSBIDRAG";
+    type: OpprettStonadsendringRequestDtoType;
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale bidraget */
@@ -128,9 +85,16 @@ export interface OpprettStonadsendringRequestDto {
     /** Angir første år en stønad skal indeksreguleres */
     indeksreguleringAar?: string;
     /** Angir om stønaden skal innkreves */
-    innkreving: "JA" | "NEI";
+    innkreving: OpprettStonadsendringRequestDtoInnkreving;
     /** Angir om en stønad skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle perioder som inngår i stønadsendringen */
     periodeListe: OpprettVedtakPeriodeRequestDto[];
 }
@@ -156,33 +120,25 @@ export interface OpprettVedtakPeriodeRequestDto {
     valutakode: string;
     /** Resultatkoden tilhørende stønadsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
     /** Liste over alle grunnlag som inngår i perioden */
     grunnlagReferanseListe: string[];
 }
 
 export interface OpprettVedtakRequestDto {
     /** Hva er kilden til vedtaket. Automatisk eller manuelt */
-    kilde: "MANUELT" | "AUTOMATISK";
+    kilde: OpprettVedtakRequestDtoKilde;
     /** Type vedtak */
-    type:
-        | "INDEKSREGULERING"
-        | "ALDERSJUSTERING"
-        | "OPPHØR"
-        | "ALDERSOPPHØR"
-        | "REVURDERING"
-        | "FASTSETTELSE"
-        | "INNKREVING"
-        | "KLAGE"
-        | "ENDRING"
-        | "ENDRING_MOTTAKER";
+    type: OpprettVedtakRequestDtoType;
     /**
      * Id til saksbehandler/batchjobb evt. annet som oppretter vedtaket
      * @minLength 5
      * @maxLength 2147483647
      */
     opprettetAv: string;
+    /** Saksbehandlers navn */
+    opprettetAvNavn?: string;
     /**
      * Tidspunkt/timestamp når vedtaket er fattet
      * @format date-time
@@ -190,8 +146,6 @@ export interface OpprettVedtakRequestDto {
     vedtakTidspunkt: string;
     /** Id til enheten som er ansvarlig for vedtaket */
     enhetId: string;
-    /** Referanse som brukes i utlandssaker */
-    eksternReferanse?: string;
     /**
      * Settes hvis overføring til Elin skal utsettes
      * @format date
@@ -210,37 +164,15 @@ export interface OpprettVedtakRequestDto {
 /** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
 export interface BehandlingsreferanseDto {
     /** Kilde/type for en behandlingsreferanse */
-    kilde: "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
+    kilde: BehandlingsreferanseDtoKilde;
     /** Kildesystemets referanse til behandlingen */
     referanse: string;
 }
 
 /** Liste over alle engangsbeløp som inngår i vedtaket */
 export interface EngangsbelopDto {
-    /**
-     * Vil inneholde opprinnelig engangsbeløpId, også der det har vært korrigeringer
-     * @format int32
-     */
-    id: number;
-    /**
-     * Løpenr innenfor vedtak
-     * @format int32
-     */
-    lopenr: number;
-    /**
-     * Id for eventuelt engangsbeløp som skal endres, skal være id for opprinnelig engangsbeløp
-     * @format int32
-     */
-    endrerId?: number;
     /** Type Engangsbeløp. Saertilskudd, gebyr m.m. */
-    type:
-        | "DIREKTE_OPPGJOR"
-        | "ETTERGIVELSE"
-        | "ETTERGIVELSE_TILBAKEKREVING"
-        | "TILBAKEKREVING"
-        | "SAERTILSKUDD"
-        | "GEBYR_MOTTAKER"
-        | "GEBYR_SKYLDNER";
+    type: EngangsbelopDtoType;
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale engangsbeløpet */
@@ -255,12 +187,21 @@ export interface EngangsbelopDto {
     valutakode?: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
     /** Angir om engangsbeløpet skal innkreves */
-    innkreving: "JA" | "NEI";
+    innkreving: EngangsbelopDtoInnkreving;
     /** Angir om et engangsbeløp skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på. Utgjør sammen med referanse en unik id for et engangsbeløp
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse, brukes for å kunne omgjøre engangsbeløp senere i et klagevedtak. Unik innenfor et vedtak */
+    referanse: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i beregningen */
     grunnlagReferanseListe: string[];
 }
@@ -270,47 +211,7 @@ export interface GrunnlagDto {
     /** Referanse til grunnlaget */
     referanse: string;
     /** Grunnlagstype */
-    type:
-        | "SAERFRADRAG"
-        | "SOKNADSBARN_INFO"
-        | "SKATTEKLASSE"
-        | "BARN_I_HUSSTAND"
-        | "BOSTATUS"
-        | "BOSTATUS_BP"
-        | "INNTEKT"
-        | "INNTEKT_BARN"
-        | "INNTEKT_UTVIDET_BARNETRYGD"
-        | "NETTO_SAERTILSKUDD"
-        | "SAMVAERSKLASSE"
-        | "BIDRAGSEVNE"
-        | "SAMVAERSFRADRAG"
-        | "SJABLON"
-        | "LOPENDE_BIDRAG"
-        | "FAKTISK_UTGIFT"
-        | "BARNETILSYN_MED_STONAD"
-        | "FORPLEINING_UTGIFT"
-        | "BARN"
-        | "SIVILSTAND"
-        | "BARNETILLEGG"
-        | "BARNETILLEGG_FORSVARET"
-        | "DELT_BOSTED"
-        | "NETTO_BARNETILSYN"
-        | "UNDERHOLDSKOSTNAD"
-        | "BPS_ANDEL_UNDERHOLDSKOSTNAD"
-        | "TILLEGGSBIDRAG"
-        | "MAKS_BIDRAG_PER_BARN"
-        | "BPS_ANDEL_SAERTILSKUDD"
-        | "MAKS_GRENSE_25_INNTEKT"
-        | "GEBYRFRITAK"
-        | "SOKNAD_INFO"
-        | "BARN_INFO"
-        | "PERSON_INFO"
-        | "SAKSBEHANDLER_INFO"
-        | "VEDTAK_INFO"
-        | "INNBETALT_BELOP"
-        | "FORHOLDSMESSIG_FORDELING"
-        | "SLUTTBEREGNING_BBM"
-        | "KLAGE_STATISTIKK";
+    type: GrunnlagDtoType;
     /** Innholdet i grunnlaget */
     innhold: JsonNode;
 }
@@ -318,7 +219,7 @@ export interface GrunnlagDto {
 /** Liste over alle stønadsendringer som inngår i vedtaket */
 export interface StonadsendringDto {
     /** Stønadstype */
-    type: "BIDRAG" | "FORSKUDD" | "BIDRAG18AAR" | "EKTEFELLEBIDRAG" | "MOTREGNING" | "OPPFOSTRINGSBIDRAG";
+    type: StonadsendringDtoType;
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale bidraget */
@@ -330,30 +231,29 @@ export interface StonadsendringDto {
     /** Angir første år en stønad skal indeksreguleres */
     indeksreguleringAar?: string;
     /** Angir om stønaden skal innkreves */
-    innkreving: "JA" | "NEI";
+    innkreving: StonadsendringDtoInnkreving;
     /** Angir om en stønad skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle perioder som inngår i stønadsendringen */
     periodeListe: VedtakPeriodeDto[];
 }
 
 export interface VedtakDto {
     /** Hva er kilden til vedtaket. Automatisk eller manuelt */
-    kilde: "MANUELT" | "AUTOMATISK";
+    kilde: VedtakDtoKilde;
     /** Type vedtak */
-    type:
-        | "INDEKSREGULERING"
-        | "ALDERSJUSTERING"
-        | "OPPHØR"
-        | "ALDERSOPPHØR"
-        | "REVURDERING"
-        | "FASTSETTELSE"
-        | "INNKREVING"
-        | "KLAGE"
-        | "ENDRING"
-        | "ENDRING_MOTTAKER";
+    type: VedtakDtoType;
     /** Id til saksbehandler/batchjobb evt annet som opprettet vedtaket */
     opprettetAv: string;
+    /** Saksbehandlers navn */
+    opprettetAvNavn?: string;
     /**
      * Tidspunkt/timestamp når vedtaket er fattet
      * @format date-time
@@ -361,8 +261,6 @@ export interface VedtakDto {
     vedtakTidspunkt: string;
     /** Id til enheten som er ansvarlig for vedtaket */
     enhetId: string;
-    /** Referanse som brukes i utlandssaker */
-    eksternReferanse?: string;
     /**
      * Settes hvis overføring til Elin skal utsettes
      * @format date
@@ -401,10 +299,216 @@ export interface VedtakPeriodeDto {
     valutakode?: string;
     /** Resultatkoden tilhørende  stønadsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
     /** Liste over alle grunnlag som inngår i perioden */
     grunnlagReferanseListe: string[];
+}
+
+/** Kilde/type for en behandlingsreferanse */
+export enum OpprettBehandlingsreferanseRequestDtoKilde {
+    BISYS_SOKNAD = "BISYS_SOKNAD",
+    BISYS_KLAGE_REF_SOKNAD = "BISYS_KLAGE_REF_SOKNAD",
+}
+
+/** Beløpstype. Saertilskudd, gebyr m.m. */
+export enum OpprettEngangsbelopRequestDtoType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+/** Angir om engangsbeløpet skal innkreves */
+export enum OpprettEngangsbelopRequestDtoInnkreving {
+    JA = "JA",
+    NEI = "NEI",
+}
+
+/** Grunnlagstype */
+export enum OpprettGrunnlagRequestDtoType {
+    SAERFRADRAG = "SAERFRADRAG",
+    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
+    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNAD_INFO = "SOKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALT_BELOP = "INNBETALT_BELOP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+}
+
+/** Stønadstype */
+export enum OpprettStonadsendringRequestDtoType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+/** Angir om stønaden skal innkreves */
+export enum OpprettStonadsendringRequestDtoInnkreving {
+    JA = "JA",
+    NEI = "NEI",
+}
+
+/** Hva er kilden til vedtaket. Automatisk eller manuelt */
+export enum OpprettVedtakRequestDtoKilde {
+    MANUELT = "MANUELT",
+    AUTOMATISK = "AUTOMATISK",
+}
+
+/** Type vedtak */
+export enum OpprettVedtakRequestDtoType {
+    INDEKSREGULERING = "INDEKSREGULERING",
+    ALDERSJUSTERING = "ALDERSJUSTERING",
+    OPPHOR = "OPPHØR",
+    ALDERSOPPHOR = "ALDERSOPPHØR",
+    REVURDERING = "REVURDERING",
+    FASTSETTELSE = "FASTSETTELSE",
+    INNKREVING = "INNKREVING",
+    KLAGE = "KLAGE",
+    ENDRING = "ENDRING",
+    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
+/** Kilde/type for en behandlingsreferanse */
+export enum BehandlingsreferanseDtoKilde {
+    BISYS_SOKNAD = "BISYS_SOKNAD",
+    BISYS_KLAGE_REF_SOKNAD = "BISYS_KLAGE_REF_SOKNAD",
+}
+
+/** Type Engangsbeløp. Saertilskudd, gebyr m.m. */
+export enum EngangsbelopDtoType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+/** Angir om engangsbeløpet skal innkreves */
+export enum EngangsbelopDtoInnkreving {
+    JA = "JA",
+    NEI = "NEI",
+}
+
+/** Grunnlagstype */
+export enum GrunnlagDtoType {
+    SAERFRADRAG = "SAERFRADRAG",
+    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
+    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNAD_INFO = "SOKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALT_BELOP = "INNBETALT_BELOP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+}
+
+/** Stønadstype */
+export enum StonadsendringDtoType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+/** Angir om stønaden skal innkreves */
+export enum StonadsendringDtoInnkreving {
+    JA = "JA",
+    NEI = "NEI",
+}
+
+/** Hva er kilden til vedtaket. Automatisk eller manuelt */
+export enum VedtakDtoKilde {
+    MANUELT = "MANUELT",
+    AUTOMATISK = "AUTOMATISK",
+}
+
+/** Type vedtak */
+export enum VedtakDtoType {
+    INDEKSREGULERING = "INDEKSREGULERING",
+    ALDERSJUSTERING = "ALDERSJUSTERING",
+    OPPHOR = "OPPHØR",
+    ALDERSOPPHOR = "ALDERSOPPHØR",
+    REVURDERING = "REVURDERING",
+    FASTSETTELSE = "FASTSETTELSE",
+    INNKREVING = "INNKREVING",
+    KLAGE = "KLAGE",
+    ENDRING = "ENDRING",
+    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -453,7 +557,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-vedtak-feature.dev.intern.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-vedtak-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -543,10 +647,29 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-vedtak
  * @version v1
- * @baseUrl https://bidrag-vedtak-feature.dev.intern.nav.no
+ * @baseUrl https://bidrag-vedtak-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     vedtak = {
+        /**
+         * No description
+         *
+         * @tags vedtak-controller
+         * @name OppdaterVedtak
+         * @summary Oppdaterer grunnlag på et eksisterende vedtak
+         * @request POST:/vedtak/oppdater/{vedtakId}
+         * @secure
+         */
+        oppdaterVedtak: (vedtakId: number, data: OpprettVedtakRequestDto, params: RequestParams = {}) =>
+            this.request<number, void>({
+                path: `/vedtak/oppdater/${vedtakId}`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
         /**
          * No description
          *

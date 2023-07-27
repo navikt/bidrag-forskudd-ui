@@ -35,8 +35,10 @@ export const useGetBehandlings = () =>
 
 export const useBeregnForskudd = (behandlingId: number) =>
     useQuery({
-        queryFn: (): Promise<AxiosResponse<ForskuddBeregningRespons>> =>
-            BEHANDLING_API.api.beregnForskudd(behandlingId),
+        queryFn: async (): Promise<ForskuddBeregningRespons> => {
+            const { data } = await BEHANDLING_API.api.beregnForskudd(behandlingId);
+            return data;
+        },
         suspense: true,
     });
 
