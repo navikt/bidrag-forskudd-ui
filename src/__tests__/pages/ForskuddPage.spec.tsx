@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect } from "chai";
 import { describe } from "mocha";
@@ -13,7 +13,6 @@ import sinon from "sinon";
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
 import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
 import { virkningstidspunktTestData } from "../../__mocks__/testdata/virkningstidspunktTestData";
-import { ForskuddHeader } from "../../components/header/ForskuddHeader";
 import { ForskuddProvider } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
@@ -168,30 +167,6 @@ describe("ForskuddPage", () => {
         await waitFor(() => {
             const activeStepButton = document.querySelector(".navds-stepper__step--active");
             expect(activeStepButton.innerHTML).includes("Vedtak");
-        });
-    });
-
-    it.skip("should render header with roles", async () => {
-        renderWithRouter(
-            <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={1}>
-                    <ForskuddHeader />
-                </ForskuddProvider>
-            </QueryClientProvider>,
-            { route: "/forskudd/1?steg=virkningstidspunkt" }
-        );
-
-        await waitFor(() => {
-            const heading = screen.getByText("Søknad om forskudd");
-            const buttons = screen.getAllByRole("button");
-            const buttonTexts = [
-                `Kopier ${behandlingMockApiData.saksnummer}`,
-                ...behandlingMockApiData.roller.map((rolle) => `Kopier ${rolle.ident}`),
-            ];
-            buttons.every((button, index) => {
-                expect(button.innerHTML).includes(buttonTexts[index]);
-            });
-            expect(heading.innerHTML).includes(`Saksnr. ${behandlingMockApiData.saksnummer}`);
         });
     });
 });

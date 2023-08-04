@@ -122,7 +122,7 @@ const barnHusstandsData = [
         borISammeHusstandDtoListe: [
             {
                 periodeFra: "2020-06-05",
-                periodeTil: toISODateString(new Date()),
+                periodeTil: null,
             },
         ],
     },
@@ -139,7 +139,7 @@ const barnHusstandsData = [
             },
             {
                 periodeFra: "2022-01-01",
-                periodeTil: toISODateString(new Date()),
+                periodeTil: null,
             },
         ],
     },

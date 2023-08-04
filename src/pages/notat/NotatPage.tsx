@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useGetArbeidsforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
+import { createInitialValues, mapHusstandsMedlemmerToBarn } from "../../components/forms/helpers/boforholdFormHelpers";
 import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektFormHelpers";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { PersonNavn } from "../../components/PersonNavn";
@@ -12,8 +13,15 @@ import { TableRowWrapper, TableWrapper } from "../../components/table/TableWrapp
 import { Avslag } from "../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
 import { InntektBeskrivelse } from "../../enum/InntektBeskrivelse";
-import { useGetBehandling, useGetVirkningstidspunkt, useHentInntekter } from "../../hooks/useApiData";
-import { DateToDDMMYYYYString, ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
+import {
+    useGetBehandling,
+    useGetBoforhold,
+    useGetBoforoholdOpplysninger,
+    useGetVirkningstidspunkt,
+    useGrunnlagspakke,
+    useHentInntekter,
+} from "../../hooks/useApiData";
+import { dateOrNull, DateToDDMMYYYYString, ISODateTimeStringToDDMMYYYYString } from "../../utils/date-utils";
 
 export enum NotatVirkningsTidspunktFields {
     "virkningsDato",
@@ -28,6 +36,15 @@ export default () => {
                 <Virkningstidspunkt />
                 <NavLogo />
             </div>
+            <Suspense
+                fallback={
+                    <div className="flex justify-center">
+                        <Loader size="3xlarge" title="venter..." variant="interaction" />
+                    </div>
+                }
+            >
+                <Boforhold />
+            </Suspense>
             <Inntekter />
         </div>
     );
@@ -146,6 +163,31 @@ const VirkningstidspunktView = ({ behandling, behandlingVirkningstidspunkt }) =>
             </div>
         </div>
     );
+};
+
+const Boforhold = () => {
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
+    const { data: behandling } = useGetBehandling(Number(behandlingId));
+    const { data: boforhold } = useGetBoforhold(Number(behandlingId));
+    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
+    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(Number(behandlingId));
+    const { data: boforoholdOpplysninger } = useGetBoforoholdOpplysninger(Number(behandlingId));
+    const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe);
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
+
+    const initialValues = createInitialValues(
+        behandling,
+        boforhold,
+        opplysningerFraFolkRegistre,
+        datoFom,
+        grunnlagspakke,
+        !!boforoholdOpplysninger?.data
+    );
+
+    console.log(initialValues);
+
+    return null;
 };
 
 const Inntekter = () => {

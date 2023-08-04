@@ -1,6 +1,7 @@
 import { Stepper } from "@navikt/ds-react";
 import React from "react";
 
+import { BidragContainer } from "../../../../bidrag-ui-common";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -16,7 +17,7 @@ export const ForskuddPage = () => {
 
     return (
         <PageWrapper name="tracking-wide">
-            <div className="max-w-[1280px] mx-auto px-6 py-6">
+            <BidragContainer className="container p-6">
                 <Stepper
                     aria-labelledby="stepper-heading"
                     activeStep={STEPS[activeStep]}
@@ -30,7 +31,7 @@ export const ForskuddPage = () => {
                     <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                 </Stepper>
                 <FormWrapper />
-            </div>
+            </BidragContainer>
         </PageWrapper>
     );
 };

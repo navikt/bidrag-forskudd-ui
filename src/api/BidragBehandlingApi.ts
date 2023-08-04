@@ -52,6 +52,22 @@ export enum BoStatusType {
     BARN_BOR_ALENE = "BARN_BOR_ALENE",
 }
 
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -81,6 +97,11 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum RolleType {
@@ -134,13 +155,6 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface CollectionModelEntityModelBehandling {
-    _embedded?: {
-        behandlings?: EntityModelBehandling[];
-    };
-    _links?: Links;
-}
-
 export interface EntityModelBehandling {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -153,6 +167,8 @@ export interface EntityModelBehandling {
     saksnummer: string;
     behandlerEnhet: string;
     soknadFra: SoknadFraType;
+    stonadType?: EntityModelBehandlingStonadType;
+    engangsbelopType?: EntityModelBehandlingEngangsbelopType;
     /** @format date-time */
     virkningsDato?: string;
     aarsak?: ForskuddAarsakType;
@@ -165,30 +181,16 @@ export interface EntityModelBehandling {
     _links?: Links;
 }
 
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
-}
-
-export interface CollectionModelEntityModelOpplysninger {
+export interface CollectionModelObject {
     _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
+        objects?: object[];
     };
     _links?: Links;
 }
 
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    _links?: Links;
-}
-
-export interface CollectionModelObject {
+export interface CollectionModelEntityModelBehandling {
     _embedded?: {
-        objects?: object[];
+        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
@@ -205,6 +207,8 @@ export interface BehandlingRequestBody {
     saksnummer: string;
     behandlerEnhet: string;
     soknadFra: SoknadFraType;
+    stonadType?: BehandlingRequestBodyStonadType;
+    engangsbelopType?: BehandlingRequestBodyEngangsbelopType;
     /** @format date-time */
     virkningsDato?: string;
     aarsak?: ForskuddAarsakType;
@@ -239,7 +243,10 @@ export interface UpdateVirkningsTidspunktRequest {
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
     aarsak?: ForskuddAarsakType;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     virkningsDato?: string;
 }
 
@@ -247,7 +254,10 @@ export interface VirkningsTidspunktResponse {
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
     aarsak?: ForskuddAarsakType;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     virkningsDato?: string;
 }
 
@@ -256,10 +266,16 @@ export interface BarnetilleggDto {
     id?: number;
     ident: string;
     barnetillegg: number;
-    /** @format date */
-    datoFom: string;
-    /** @format date */
-    datoTom: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
 }
 
 export interface InntektDto {
@@ -268,9 +284,15 @@ export interface InntektDto {
     taMed: boolean;
     inntektType?: string;
     belop: number;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     datoFom?: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     datoTom?: string;
     ident: string;
     fraGrunnlag: boolean;
@@ -292,10 +314,16 @@ export interface UtvidetbarnetrygdDto {
     id?: number;
     deltBoSted: boolean;
     belop: number;
-    /** @format date */
-    datoFom: string;
-    /** @format date */
-    datoTom: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
 }
 
 export interface InntekterResponse {
@@ -305,6 +333,8 @@ export interface InntekterResponse {
     barnetillegg: BarnetilleggDto[];
     /** @uniqueItems true */
     utvidetbarnetrygd: UtvidetbarnetrygdDto[];
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
 }
 
 export interface HusstandsBarnDto {
@@ -315,7 +345,10 @@ export interface HusstandsBarnDto {
     perioder: HusstandsBarnPeriodeDto[];
     ident?: string;
     navn?: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     foedselsDato?: string;
 }
 
@@ -326,12 +359,12 @@ export interface HusstandsBarnPeriodeDto {
      * @format date
      * @example "2025-01-25"
      */
-    fraDato: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    tilDato: string;
+    datoTom?: string;
     boStatus: BoStatusType;
     kilde: string;
 }
@@ -339,9 +372,15 @@ export interface HusstandsBarnPeriodeDto {
 export interface SivilstandDto {
     /** @format int64 */
     id?: number;
-    /** @format date */
-    gyldigFraOgMed: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    gyldigFraOgMed?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     datoTom?: string;
     sivilstandType: SivilstandType;
 }
@@ -367,9 +406,15 @@ export interface BoforholdResponse {
 export interface UpdateBehandlingRequestExtended {
     soknadType: SoknadType;
     soknadFraType: SoknadFraType;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     datoFom: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     mottatDato: string;
 }
 
@@ -441,6 +486,8 @@ export interface CreateBehandlingRequest {
      * @uniqueItems true
      */
     roller: CreateRolleDto[];
+    stonadType: CreateBehandlingRequestStonadType;
+    engangsbelopType: CreateBehandlingRequestEngangsbelopType;
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -472,7 +519,10 @@ export interface AddOpplysningerRequest {
     opplysningerType: OpplysningerType;
     /** data */
     data: string;
-    /** @format date */
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
     hentetDato: string;
 }
 
@@ -488,10 +538,14 @@ export interface OpplysningerDto {
     hentetDato: string;
 }
 
-/** Beregnet forskudd */
-export interface ForskuddDto {
-    /** Periodisert liste over resultat av forskuddsberegning */
+export interface ForskuddBeregningPerBarn {
+    ident: string;
     beregnetForskuddPeriodeListe: ResultatPeriode[];
+}
+
+export interface ForskuddBeregningRespons {
+    resultat?: ForskuddBeregningPerBarn[];
+    feil?: string[];
 }
 
 /** Periode (fra-til dato */
@@ -537,6 +591,63 @@ export interface Link {
     profile?: string;
     name?: string;
     templated?: boolean;
+}
+
+export enum EntityModelBehandlingStonadType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum EntityModelBehandlingEngangsbelopType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum BehandlingRequestBodyStonadType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum BehandlingRequestBodyEngangsbelopType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum CreateBehandlingRequestStonadType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum CreateBehandlingRequestEngangsbelopType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -1348,7 +1459,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<ForskuddDto[], any>({
+            this.request<ForskuddBeregningRespons, any>({
                 path: `/api/behandling/${behandlingId}/beregn`,
                 method: "POST",
                 secure: true,

@@ -80,7 +80,7 @@ const Main = ({ behandlingRoller, ainntekt }: { behandlingRoller: RolleDto[]; ai
                                     </Alert>
                                 )}
                             </div>
-                            <div className="grid gap-y-4 w-max">
+                            <div className="grid gap-y-4">
                                 <div className="flex gap-x-4">
                                     <Heading level="3" size="medium">
                                         Inntektene som legges til grunn
@@ -95,13 +95,13 @@ const Main = ({ behandlingRoller, ainntekt }: { behandlingRoller: RolleDto[]; ai
                             </div>
                             {rolle.rolleType === RolleType.BIDRAGS_MOTTAKER && (
                                 <>
-                                    <div className="grid gap-y-4 w-max">
+                                    <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
                                             Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
                                         </Heading>
                                         <BarnetilleggTabel />
                                     </div>
-                                    <div className="grid gap-y-4 w-max">
+                                    <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
                                             Utvidet barnetrygd
                                         </Heading>

@@ -4,7 +4,7 @@ export interface Inntekt {
     taMed: boolean;
     fraGrunnlag: boolean;
     datoTom: Date | null;
-    belop: string;
+    belop: number;
 }
 
 export interface BarneTillegFormValues {
