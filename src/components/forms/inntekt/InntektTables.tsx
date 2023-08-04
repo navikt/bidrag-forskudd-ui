@@ -212,7 +212,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         inntekteneSomLeggesTilGrunnField.append({
             datoFom: null,
             datoTom: null,
-            belop: "",
+            belop: 0,
             inntektType: "",
             taMed: false,
             fraGrunnlag: false,

@@ -13,7 +13,7 @@ interface FormControlledDatePickerProps {
     hideLabel?: boolean;
     className?: string;
     required?: boolean;
-    onChange?: (date: Date | undefined) => void;
+    onChange?: (date: Date | null) => void;
     toDate?: Date;
     fromDate?: Date;
     lastDayOfMonthPicker?: boolean;
@@ -54,17 +54,21 @@ export const FormControlledMonthPicker = ({
     });
 
     const handleChange = (date: Date) => {
+        const dateValue = date ?? null;
         field.onChange(date ?? null);
-        clearErrors(name);
 
         if (onChange) {
-            onChange(date);
+            onChange(dateValue);
         }
     };
 
     const onValidate = (monthValidation: MonthValidationT) => {
         if (!monthValidation.isValidMonth && !monthValidation.isEmpty) {
             setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+            return;
+        }
+        if (required && monthValidation.isEmpty) {
+            setError(name, { type: "notValid", message: "Dato må fylles ut" });
             return;
         }
         clearErrors(name);

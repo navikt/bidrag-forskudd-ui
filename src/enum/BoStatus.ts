@@ -1,4 +1,4 @@
-export enum BoStatus {
-    registrert_paa_adresse = "Registrert på adresse",
-    ikke_registrert_paa_adresse = "Ikke registrert på adresse",
+export enum BoStatusUI {
+    IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
+    REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
