@@ -1,7 +1,6 @@
+import { BidragCell, BidragGrid } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
 import React from "react";
-
-import { BidragCell, BidragGrid } from "../../../../../bidrag-ui-common";
 
 export const FormLayout = ({ title, main, side }) => (
     <>
