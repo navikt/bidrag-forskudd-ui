@@ -1,7 +1,7 @@
+import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Stepper } from "@navikt/ds-react";
 import React from "react";
 
-import { BidragContainer } from "../../../../bidrag-ui-common";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
