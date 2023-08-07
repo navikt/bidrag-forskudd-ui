@@ -34,7 +34,7 @@ jobs:
       - name: Check lint
         run: yarn lint
       - name: Run tests and build
-        run: yarn test && yarn build
+        run: yarn build && yarn test
 
   deploy-to-feature:
     name: Deploy to feature
