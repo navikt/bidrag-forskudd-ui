@@ -12,7 +12,7 @@
     "build": "npm-run-all build:api build:webpack",
     "build:dev": "yarn build:api:dev && yarn build:webpack",
     "build:webpack": "webpack --config webpack.prod.config.js",
-    "build:api": "npm-run-all -p -r api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling api:bidragSak",
+    "build:api": "npm-run-all -s api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling api:bidragSak",
     "build:api:dev": "env-cmd -f env/.env.dev yarn build:api",
     "api:person": "swagger-typescript-api -p $BIDRAG_PERSON_URL/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "swagger-typescript-api -p $BIDRAG_GRUNNLAG_URL/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
