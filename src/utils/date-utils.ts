@@ -53,12 +53,12 @@ export const ISODateTimeStringToDDMMYYYYString = (isoDateTimeString: string) => 
     return isValidDate(date) ? DateToDDMMYYYYString(date) : "";
 };
 
-export const isFirstDayOfMonth = (date) => {
+export const isFirstDayOfMonth = (date: Date) => {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
     return firstDay.getDate() === date.getDate();
 };
 
-export const isLastDayOfMonth = (date) => {
+export const isLastDayOfMonth = (date: Date) => {
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return lastDay.getDate() === date.getDate();
 };

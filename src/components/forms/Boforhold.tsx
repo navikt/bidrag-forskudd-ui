@@ -1,4 +1,4 @@
-import { TrashIcon } from "@navikt/aksel-icons";
+import { ArrowUndoIcon, TrashIcon } from "@navikt/aksel-icons";
 import {
     Alert,
     BodyShort,
@@ -32,7 +32,7 @@ import {
 } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isValidDate, toISODateString } from "../../utils/date-utils";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
@@ -48,6 +48,7 @@ import {
     checkOverlappingPeriods,
     createInitialValues,
     createPayload,
+    getBarnPerioder,
     mapHusstandsMedlemmerToBarn,
     syncDates,
 } from "./helpers/boforholdFormHelpers";
@@ -151,23 +152,25 @@ const BoforholdsForm = () => {
 
     const watchAllFields = useWatch({ control: useFormMethods.control });
 
-    useEffect(() => {
-        channel.postMessage(JSON.stringify(watchAllFields));
-    }, [watchAllFields]);
-
     const onSave = () => {
         const values = useFormMethods.getValues();
         updateBoforhold.mutation.mutate(createPayload(values), {
             onSuccess: () =>
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
+                useFormMethods.reset(values, {
+                    keepErrors: true,
+                    keepValues: true,
+                    keepDefaultValues: true,
+                    keepDirtyValues: true,
+                }),
         });
     };
 
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        if (useFormMethods.formState.isDirty) {
+        if (initialValues) {
             debouncedOnSave();
+            channel.postMessage(JSON.stringify(watchAllFields));
         }
     }, [watchAllFields, useFormMethods.formState.isDirty]);
 
@@ -275,7 +278,7 @@ const BarnPerioder = ({
             navn: null,
             perioder: [
                 {
-                    datoFom: datoFom,
+                    datoFom: toISODateString(datoFom),
                     datoTom: null,
                     boStatus: "",
                     kilde: "manuelt",
@@ -323,7 +326,11 @@ const BarnPerioder = ({
                                 index={index}
                             />
                         )}
-                        <Perioder barnIndex={index} virkningstidspunkt={datoFom} />
+                        <Perioder
+                            barnIndex={index}
+                            virkningstidspunkt={datoFom}
+                            opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
+                        />
                     </Panel>
                 </Fragment>
             ))}
@@ -334,9 +341,18 @@ const BarnPerioder = ({
     );
 };
 
-const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkningstidspunkt: Date }) => {
+const Perioder = ({
+    barnIndex,
+    virkningstidspunkt,
+    opplysningerFraFolkRegistre,
+}: {
+    barnIndex: number;
+    virkningstidspunkt: Date;
+    opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
+}) => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
+    const [showUndoButton, setShowUndoButton] = useState(false);
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
     const {
         control,
@@ -344,12 +360,15 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
         clearErrors,
         setError,
         setValue,
+        getFieldState,
         formState: { errors },
     } = useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
         name: `husstandsBarn.${barnIndex}.perioder`,
     });
+
+    const [lastPeriodsState, setLastPeriodsState] = useState(getValues(`husstandsBarn.${barnIndex}.perioder`));
 
     const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => {
@@ -358,17 +377,28 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
             ...watchFieldArray[index],
         };
     });
+    const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder`);
 
-    const validateFomOgTom = (date: Date | null, index: number, field: "datoFom" | "datoTom") => {
+    useEffect(() => {
+        if (fieldState.isDirty) {
+            setShowUndoButton(true);
+        }
+    }, [watchFieldArray, fieldState.isDirty]);
+
+    const undoAction = () => {
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+        setLastPeriodsState(perioderValues);
+        setValue(`husstandsBarn.${barnIndex}.perioder`, lastPeriodsState);
+    };
+
+    const validateFomOgTom = (index: number) => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         const fomOgTomInvalid =
-            field === "datoFom"
-                ? perioderValues[index].datoTom && (date === null || date > perioderValues[index].datoTom)
-                : perioderValues[index].datoFom && date && date < perioderValues[index].datoFom;
-
+            perioderValues[index].datoTom !== null &&
+            new Date(perioderValues[index].datoTom) < new Date(perioderValues[index].datoFom);
         if (fomOgTomInvalid) {
             setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
-                type: "datesNotValid",
+                type: "notValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
@@ -385,7 +415,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
         }
         const filtrertOgSorterListe = perioder
             .filter((periode) => periode.datoFom !== null)
-            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
+            .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -403,6 +433,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
 
     const addPeriode = () => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+        setLastPeriodsState(perioderValues);
         const datoFom = calculateFraDato(perioderValues, virkningstidspunkt);
         barnPerioder.append({
             datoFom,
@@ -412,11 +443,27 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
         });
     };
 
-    const syncAndValidateDates = (date: Date | null, periodeIndex: number, field: "datoFom" | "datoTom") => {
+    const onDateChange = (date: string | null, periodeIndex: number, field: "datoFom" | "datoTom") => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
         syncDates(perioderValues, date, barnIndex, periodeIndex, field, setValue);
         validatePeriods();
-        validateFomOgTom(date, periodeIndex, field);
+    };
+
+    const onRemovePeriode = (index) => {
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+        setLastPeriodsState(perioderValues);
+        barnPerioder.remove(index);
+        validatePeriods();
+    };
+
+    const resetTilDataFraFreg = () => {
+        const barn = getValues(`husstandsBarn.${barnIndex}`);
+        setLastPeriodsState(barn.perioder);
+        const opplysningFraFreg = opplysningerFraFolkRegistre.find((opplysning) => opplysning.ident === barn.ident);
+        setValue(
+            `husstandsBarn.${barnIndex}.perioder`,
+            getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt)
+        );
     };
 
     return (
@@ -425,6 +472,19 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
                 <Alert variant="warning" className="mb-4">
                     <BodyShort>{errors.root[`${barnIndex}-boforhold`].message}</BodyShort>
                 </Alert>
+            )}
+            {showUndoButton && (
+                <div className="my-4 grid justify-items-end">
+                    <Button
+                        variant="tertiary"
+                        type="button"
+                        size="small"
+                        className="w-fit"
+                        onClick={resetTilDataFraFreg}
+                    >
+                        Reset til data fra FREG
+                    </Button>
+                </div>
             )}
             {controlledFields.length > 0 && (
                 <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", ""]}>
@@ -438,7 +498,8 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
                                     label="Fra og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoFom}
-                                    onChange={(date) => syncAndValidateDates(date, index, "datoFom")}
+                                    onChange={(date) => onDateChange(date, index, "datoFom")}
+                                    customValidation={() => validateFomOgTom(index)}
                                     fromDate={fom}
                                     toDate={tom}
                                     hideLabel
@@ -450,7 +511,8 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
                                     label="Til og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoTom}
-                                    onChange={(date) => syncAndValidateDates(date, index, "datoTom")}
+                                    onChange={(date) => onDateChange(date, index, "datoTom")}
+                                    customValidation={(date) => validateFomOgTom(index)}
                                     fromDate={fom}
                                     toDate={tom}
                                     lastDayOfMonthPicker
@@ -479,10 +541,7 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
                                     <Button
                                         key={`delete-button-${barnIndex}-${index}`}
                                         type="button"
-                                        onClick={() => {
-                                            barnPerioder.remove(index);
-                                            validatePeriods();
-                                        }}
+                                        onClick={() => onRemovePeriode(index)}
                                         icon={<TrashIcon aria-hidden />}
                                         variant="tertiary"
                                         size="small"
@@ -498,7 +557,20 @@ const Perioder = ({ barnIndex, virkningstidspunkt }: { barnIndex: number; virkni
                     ))}
                 </TableWrapper>
             )}
-            <div className="p-3">
+            <div className="my-4 grid gap-4">
+                {showUndoButton && (
+                    <Button
+                        variant="tertiary"
+                        type="button"
+                        size="small"
+                        className="w-fit"
+                        onClick={undoAction}
+                        iconPosition="right"
+                        icon={<ArrowUndoIcon aria-hidden />}
+                    >
+                        Angre siste steg
+                    </Button>
+                )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                     + Legg til periode
                 </Button>
@@ -557,7 +629,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         }
         const filtrertOgSorterListe = sivilstandPerioder
             .filter((periode) => periode.gyldigFraOgMed !== null)
-            .sort((a, b) => a.gyldigFraOgMed.getTime() - b.gyldigFraOgMed.getTime());
+            .sort((a, b) => new Date(a.gyldigFraOgMed).getTime() - new Date(b.gyldigFraOgMed).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 

@@ -351,8 +351,8 @@ export const UtvidetBarnetrygdTabel = () => {
             return;
         }
         const filtrertOgSorterListe = utvidetBarnetrygdList
-            .filter((periode) => isValidDate(periode.datoFom))
-            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
+            .filter((periode) => periode.datoFom && isValidDate(periode.datoFom))
+            .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -493,8 +493,8 @@ export const BarnetilleggTabel = () => {
             return;
         }
         const filtrertOgSorterListe = barnetilleggList
-            .filter((periode) => isValidDate(periode.datoFom))
-            .sort((a, b) => a.datoFom.getTime() - b.datoFom.getTime());
+            .filter((periode) => periode.datoFom && isValidDate(periode.datoFom))
+            .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
