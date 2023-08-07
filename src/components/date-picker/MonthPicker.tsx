@@ -1,7 +1,7 @@
 import { MonthPicker as NavMonthPicker, MonthValidationT, useMonthpicker } from "@navikt/ds-react";
 import { useEffect } from "react";
 
-import { isValidDate, lastDayOfMonth } from "../../utils/date-utils";
+import { dateOrNull, isValidDate, lastDayOfMonth } from "../../utils/date-utils";
 
 interface MonthPickerInputProps {
     onChange: (selectedDay: Date | undefined) => void;
@@ -10,12 +10,12 @@ interface MonthPickerInputProps {
     placeholder?: string;
     hideLabel?: boolean;
     className?: string;
-    defaultValue?: Date;
+    defaultValue?: string;
     error?: string;
     onValidate?: (monthValidation: MonthValidationT) => void;
     toDate?: Date;
     lastDayOfMonthPicker?: boolean;
-    fieldValue?: Date;
+    fieldValue?: string;
 }
 export const MonthPicker = ({
     label,
@@ -31,17 +31,17 @@ export const MonthPicker = ({
     lastDayOfMonthPicker,
     fieldValue,
 }: MonthPickerInputProps) => {
-    const { monthpickerProps, inputProps, selectedMonth, setSelected } = useMonthpicker({
+    const { monthpickerProps, inputProps, setSelected } = useMonthpicker({
         fromDate,
         toDate,
+        defaultSelected: isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null,
+        inputFormat: "dd.MM.yyyy",
         onValidate: (val) => {
             if (onValidate) onValidate(val);
         },
         onMonthChange: (date) => {
             onChange(date);
         },
-        defaultSelected: isValidDate(defaultValue) ? defaultValue : null,
-        inputFormat: "dd.MM.yyyy",
     });
 
     const onMonthSelect = (date) => {
@@ -50,9 +50,8 @@ export const MonthPicker = ({
     };
 
     useEffect(() => {
-        if (isValidDate(fieldValue) && selectedMonth?.toLocaleString() !== fieldValue?.toLocaleString()) {
-            setSelected(fieldValue);
-        }
+        const value = isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null;
+        setSelected(value);
     }, [fieldValue]);
 
     return (

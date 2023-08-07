@@ -160,7 +160,9 @@ const VirkningstidspunktForm = () => {
         const values = useFormMethods.getValues();
         updateVirkningsTidspunkt.mutation.mutate(createPayload(values), {
             onSuccess: () => {
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true });
+                useFormMethods.reset(values, {
+                    keepErrors: true,
+                });
             },
         });
     };
@@ -171,7 +173,7 @@ const VirkningstidspunktForm = () => {
         if (useFormMethods.formState.isDirty) {
             debouncedOnSave();
         }
-    }, [watchAllFields]);
+    }, [watchAllFields, useFormMethods.formState.isDirty]);
 
     return (
         <>

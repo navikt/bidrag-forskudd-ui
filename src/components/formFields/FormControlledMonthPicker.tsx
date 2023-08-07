@@ -2,18 +2,19 @@ import { MonthValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
-import { isFirstDayOfMonth, isLastDayOfMonth } from "../../utils/date-utils";
+import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "../../utils/date-utils";
 import { MonthPicker } from "../date-picker/MonthPicker";
 
 interface FormControlledDatePickerProps {
     name: string;
     label: string;
-    defaultValue: Date | null;
+    defaultValue: string | null;
     placeholder: string;
     hideLabel?: boolean;
     className?: string;
     required?: boolean;
-    onChange?: (date: Date | null) => void;
+    onChange?: (date: string | null) => void;
+    customValidation?: (date: string) => void;
     toDate?: Date;
     fromDate?: Date;
     lastDayOfMonthPicker?: boolean;
@@ -31,38 +32,29 @@ export const FormControlledMonthPicker = ({
     toDate,
     fromDate,
     lastDayOfMonthPicker,
+    customValidation,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors, getValues } = useFormContext();
     const { field, fieldState } = useController({
         name,
         control,
-        rules: {
-            required: required ? "Dato må fylles ut" : false,
-            validate: () => {
-                const date = getValues(name);
-                if (!date) return false;
-
-                const isFirstOrLastDayOfMonth = lastDayOfMonthPicker ? isLastDayOfMonth(date) : isFirstDayOfMonth(date);
-                const errorMessage = !isFirstOrLastDayOfMonth
-                    ? lastDayOfMonthPicker
-                        ? "Dato må være den siste i måneden"
-                        : "Dato må være den første i måneden"
-                    : undefined;
-                return errorMessage ?? false;
-            },
-        },
     });
 
     const handleChange = (date: Date) => {
-        const dateValue = date ?? null;
-        field.onChange(date ?? null);
+        const value = date ? toISODateString(date) : null;
+        field.onChange(value);
 
         if (onChange) {
-            onChange(dateValue);
+            onChange(value);
         }
     };
 
     const onValidate = (monthValidation: MonthValidationT) => {
+        const date: string = getValues(name);
+        const isFirstOrLastDayOfMonth = lastDayOfMonthPicker
+            ? isLastDayOfMonth(new Date(date))
+            : isFirstDayOfMonth(new Date(date));
+
         if (!monthValidation.isValidMonth && !monthValidation.isEmpty) {
             setError(name, { type: "notValid", message: "Dato er ikke gylid" });
             return;
@@ -71,7 +63,23 @@ export const FormControlledMonthPicker = ({
             setError(name, { type: "notValid", message: "Dato må fylles ut" });
             return;
         }
+        if (date) {
+            if (!isFirstOrLastDayOfMonth) {
+                setError(name, {
+                    type: "notValid",
+                    message: lastDayOfMonthPicker
+                        ? "Dato må være den siste i måneden"
+                        : "Dato må være den første i måneden",
+                });
+                return;
+            }
+        }
         clearErrors(name);
+
+        if (customValidation) {
+            customValidation(date);
+            return;
+        }
     };
 
     return (

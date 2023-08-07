@@ -10,7 +10,6 @@ import {
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import {
     addDays,
-    dateOrNull,
     datesAreFromSameMonthAndYear,
     deductDays,
     deductMonths,
@@ -46,8 +45,6 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
                     inntektType: inntekt.inntektType === "" ? null : inntekt.inntektType,
                     ident: key,
                     belop: Number(inntekt.belop),
-                    datoFom: toISODateString(inntekt.datoFom),
-                    datoTom: toISODateString(inntekt.datoTom),
                 };
             })
         )
@@ -56,16 +53,12 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
         ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
               ...utvidetBarnetrygd,
               belop: Number(utvidetBarnetrygd.belop),
-              datoFom: toISODateString(utvidetBarnetrygd.datoFom),
-              datoTom: toISODateString(utvidetBarnetrygd.datoTom),
           }))
         : [],
     barnetillegg: values.barnetillegg.length
         ? values.barnetillegg.map((barnetillegg) => ({
               ...barnetillegg,
               barnetillegg: Number(barnetillegg.barnetillegg),
-              datoFom: toISODateString(barnetillegg.datoFom),
-              datoTom: toISODateString(barnetillegg.datoTom),
           }))
         : [],
     inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
@@ -77,8 +70,8 @@ const mapSkattegrunnlagInntektPerioder = (skattegrunlag: SkattegrunnlagDto) =>
         taMed: false,
         inntektType: inntekt.inntektType ?? "",
         belop: inntekt.belop,
-        datoTom: dateOrNull(skattegrunlag.periodeTil),
-        datoFom: dateOrNull(skattegrunlag.periodeFra),
+        datoTom: skattegrunlag.periodeTil,
+        datoFom: skattegrunlag.periodeFra,
         ident: skattegrunlag.personId,
         fraGrunnlag: true,
     }));
@@ -143,8 +136,6 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
         .map((inntekt) => ({
             ...inntekt,
             inntektType: inntekt.inntektType ?? "",
-            datoTom: dateOrNull(inntekt.datoTom),
-            datoFom: dateOrNull(inntekt.datoFom),
         }));
 const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe, ainntektListe) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe, ainntektListe)), {});
@@ -161,11 +152,7 @@ export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter, datoFom
                   grunnlagspakke.ainntektListe
               ),
         utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
-            ? inntekter.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
-                  ...utvidetBarnetrygd,
-                  datoFom: dateOrNull(utvidetBarnetrygd.datoFom),
-                  datoTom: dateOrNull(utvidetBarnetrygd.datoTom),
-              }))
+            ? inntekter.utvidetBarnetrygd
             : mockUtvidetBarnetrygd(datoFom),
         // grunnlagspakke.ubstListe.map((ubst) => ({
         //     deltBoSted: false, // TODO check where to get this value
@@ -173,13 +160,7 @@ export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter, datoFom
         //     datoFom: dateOrNull(ubst.periodeFra),
         //     datoTom: dateOrNull(ubst.periodeTil),
         // })),
-        barnetillegg: inntekter?.barnetillegg?.length
-            ? inntekter.barnetillegg.map((barnetilleg) => ({
-                  ...barnetilleg,
-                  datoFom: dateOrNull(barnetilleg.datoFom),
-                  datoTom: dateOrNull(barnetilleg.datoTom),
-              }))
-            : mockBarnetillegg(bmOgBarn, datoFom),
+        barnetillegg: inntekter?.barnetillegg?.length ? inntekter.barnetillegg : mockBarnetillegg(bmOgBarn, datoFom),
         // grunnlagspakke.barnetilleggListe.map((periode) => ({
         //     ident: periode.barnPersonId,
         //     barnetillegg: periode.belopBrutto,
@@ -231,8 +212,8 @@ export const syncDates = (
             const forstePostPeriode = postSelectedPerioder[0];
             const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
             setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.fraDato`,
-                virkningstidspunkt
+                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
+                toISODateString(virkningstidspunkt)
             );
         }
 
@@ -241,8 +222,8 @@ export const syncDates = (
             const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
             if (!(new Date(forstePostPeriode.aar).getFullYear() < virkningstidspunkt.getFullYear())) {
                 setValue(
-                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.fraDato`,
-                    virkningstidspunkt
+                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
+                    toISODateString(virkningstidspunkt)
                 );
             }
         }
@@ -250,35 +231,35 @@ export const syncDates = (
         if (preSelectedPerioder.length === 1 && !postSelectedPerioder.length) {
             const sistePrePeriode = preSelectedPerioder[0];
             const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
-            setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.tilDato`, null);
+            setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`, null);
             setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.fraDato`,
-                virkningstidspunkt
+                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoFom`,
+                toISODateString(virkningstidspunkt)
             );
         } else if (preSelectedPerioder.length) {
             const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
             const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
             if (postSelectedPerioder.length) {
                 setValue(
-                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.tilDato`,
-                    fieldValue.tilDato
+                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`,
+                    fieldValue.datoTom
                 );
                 if (!inntekteneSomLeggesTilGrunn[sistePrePeriodeIndex].fraDato) {
                     setValue(
-                        `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.fraDato`,
-                        fieldValue.fraDato
+                        `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoFom`,
+                        fieldValue.datoFom
                     );
                 }
             }
 
             if (!postSelectedPerioder.length) {
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.tilDato`, null);
+                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`, null);
             }
         }
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`, null);
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.tilDato`, null);
-        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`);
-        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.tilDato`);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, null);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, null);
+        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`);
+        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`);
         return;
     }
 
@@ -290,7 +271,7 @@ export const syncDates = (
         perioderSomKanIkkeOverlapeKunMedHverandre.includes(fieldValue.tekniskNavn) ||
         gjennomsnittPerioder.includes(fieldValue.tekniskNavn)
     ) {
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`, virkningstidspunkt);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, toISODateString(virkningstidspunkt));
     } else {
         const fraDato =
             !preSelectedPerioder.length || periodeErFraSammeAarSomVirkningsTidspunkt
@@ -301,15 +282,15 @@ export const syncDates = (
             : null;
 
         if (periodeErFoerVirkningsTidspunkt && postSelectedPerioder.length) {
-            setError(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`, {
+            setError(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, {
                 type: "invalid",
                 message: "Dato må settes manuelt",
             });
             return;
         }
 
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`, fraDato);
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.tilDato`, tilDato);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, fraDato);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, tilDato);
 
         if (
             (periodeErFraSammeAarSomVirkningsTidspunkt || periodeErFoerVirkningsTidspunkt) &&
@@ -320,14 +301,14 @@ export const syncDates = (
             );
             preSelectedPerioderIndexes.forEach((index) => {
                 setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.selected`, false);
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.fraDato`, null);
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.tilDato`, null);
+                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, null);
+                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, null);
             });
         } else if (preSelectedPerioder.length) {
             const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
             const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
             setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.tilDato`,
+                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`,
                 deductDays(fraDato, 1)
             );
         }
@@ -336,7 +317,7 @@ export const syncDates = (
             const forstePostPeriode = postSelectedPerioder[0];
             const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
             setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.fraDato`,
+                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
                 addDays(tilDato, 1)
             );
         }
@@ -345,8 +326,8 @@ export const syncDates = (
 
 export const findDateGaps = (perioder, virkningstidspunkt) => {
     const filteredAndSortedPerioder = perioder
-        .filter((periode) => isValidDate(periode.fraDato))
-        .sort((a, b) => a.fraDato - b.fraDato);
+        .filter((periode) => periode.fraDato && isValidDate(periode.fraDato))
+        .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
 
     if (!filteredAndSortedPerioder.length) return;
 
@@ -355,16 +336,15 @@ export const findDateGaps = (perioder, virkningstidspunkt) => {
 
     filteredAndSortedPerioder.forEach((periode, i) => {
         const prevTilDato = i === 0 ? virkningstidspunkt : filteredAndSortedPerioder[i - 1].tilDato;
-        const currFraDato = filteredAndSortedPerioder[i].fraDato;
-        if (prevTilDato !== null && currFraDato - prevTilDato > 86400000) {
+        const currFraDato = new Date(filteredAndSortedPerioder[i].fraDato);
+        if (prevTilDato !== null && currFraDato.getTime() - new Date(prevTilDato).getTime() > 86400000) {
             const gapFrom = new Date(prevTilDato.getTime() + 86400000);
-            const gapTo = new Date(currFraDato.getTime());
-            gaps.push({ fra: gapFrom.toLocaleDateString(), til: gapTo.toLocaleDateString() });
+            gaps.push({ fra: gapFrom.toLocaleDateString(), til: currFraDato.toLocaleDateString() });
         }
     });
 
     const lastToDate = filteredAndSortedPerioder[filteredAndSortedPerioder.length - 1].tilDato;
-    if (lastToDate !== null && today.getTime() - lastToDate.getTime() > 86400000) {
+    if (lastToDate !== null && today.getTime() - new Date(lastToDate).getTime() > 86400000) {
         const gapFrom = new Date(lastToDate.getTime() + 86400000);
         gaps.push({ fra: gapFrom.toLocaleDateString(), til: today.toLocaleDateString() });
     }
@@ -377,8 +357,8 @@ export const checkOverlappingPeriods = (perioder) => {
     for (let i = 0; i < perioder.length; i++) {
         for (let j = i + 1; j < perioder.length; j++) {
             if (
-                (perioder[i].tilDato === null || perioder[i].tilDato >= perioder[j].fraDato) &&
-                (perioder[j].tilDato === null || perioder[j].tilDato >= perioder[i].fraDato)
+                (perioder[i].tilDato === null || new Date(perioder[i].tilDato) >= new Date(perioder[j].fraDato)) &&
+                (perioder[j].tilDato === null || new Date(perioder[j].tilDato) >= new Date(perioder[i].fraDato))
             ) {
                 overlappingPeriods.push([`${perioder[i].beskrivelse}`, `${perioder[j].beskrivelse}`]);
             }
@@ -390,14 +370,19 @@ export const checkOverlappingPeriods = (perioder) => {
 
 export const getOverlappingInntektPerioder = (perioder) => {
     const ytelsePerioder = perioder
-        .filter((periode) => isValidDate(periode.fraDato) && perioderSomIkkeKanOverlape.includes(periode.tekniskNavn))
-        .sort((a, b) => a.fraDato - b.fraDato);
+        .filter(
+            (periode) =>
+                periode.fraDato &&
+                isValidDate(periode.fraDato) &&
+                perioderSomIkkeKanOverlape.includes(periode.tekniskNavn)
+        )
+        .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
     const overlappingPeriods = checkOverlappingPeriods(ytelsePerioder);
 
     perioderSomKanIkkeOverlapeKunMedHverandre.forEach((tekniskNavn) => {
         const filteredAndSortedPerioder = perioder
-            .filter((periode) => isValidDate(periode.fraDato) && periode.tekniskNavn === tekniskNavn)
-            .sort((a, b) => a.fraDato - b.fraDato);
+            .filter((periode) => periode.fraDato && isValidDate(periode.fraDato) && periode.tekniskNavn === tekniskNavn)
+            .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
 
         overlappingPeriods.concat(checkOverlappingPeriods(filteredAndSortedPerioder));
     });

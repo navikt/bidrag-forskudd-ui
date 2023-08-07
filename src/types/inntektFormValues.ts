@@ -1,22 +1,22 @@
 export interface Inntekt {
     inntektType: string;
-    datoFom: Date | null;
+    datoFom: string | null;
     taMed: boolean;
     fraGrunnlag: boolean;
-    datoTom: Date | null;
+    datoTom: string | null;
     belop: number;
 }
 
 export interface BarneTillegFormValues {
-    datoFom: Date | null;
-    datoTom: Date | null;
+    datoFom: string | null;
+    datoTom: string | null;
     ident: string;
     barnetillegg: number;
 }
 
 export interface UtvidetBarnetrygdFormValues {
-    datoFom: Date | null;
-    datoTom: Date | null;
+    datoFom: string | null;
+    datoTom: string | null;
     deltBoSted: boolean;
     belop: number;
 }

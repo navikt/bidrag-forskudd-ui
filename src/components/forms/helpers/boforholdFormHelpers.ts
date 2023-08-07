@@ -21,12 +21,14 @@ import {
 
 export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | Sivilstand[], virkningstidspunkt: Date) => {
     if (fieldArrayValues.length && !fieldArrayValues.some((periode) => periode.datoTom === null)) {
-        const filtrertOgSorterListe = fieldArrayValues.sort((a, b) => a.datoTom.getTime() - b.datoTom.getTime());
-        return addDays(filtrertOgSorterListe[filtrertOgSorterListe.length - 1].datoTom, 1);
+        const filtrertOgSorterListe = fieldArrayValues.sort(
+            (a, b) => new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime()
+        );
+        return toISODateString(addDays(new Date(filtrertOgSorterListe[filtrertOgSorterListe.length - 1].datoTom), 1));
     }
 
     if (!fieldArrayValues.length) {
-        return virkningstidspunkt;
+        return toISODateString(virkningstidspunkt);
     }
     return null;
 };
@@ -83,23 +85,25 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
         }));
 };
 
-const barnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], datoFom: Date) => {
+export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], datoFom: Date) => {
     const perioderFraVirkningstidspunkt = perioder?.filter(
         (periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom)
     );
 
-    const result: { boStatus: BoStatusUI; kilde: "offentlig" | "manuelt"; datoFom: Date; datoTom: Date | null }[] = [];
+    const result: { boStatus: BoStatusUI; kilde: "offentlig" | "manuelt"; datoFom: string; datoTom: string | null }[] =
+        [];
     perioderFraVirkningstidspunkt?.forEach((periode, i) => {
         result.push({
             boStatus: periode.boStatus,
             kilde: "offentlig",
-            datoFom:
+            datoFom: toISODateString(
                 i === 0
                     ? datoFom
                         ? new Date(datoFom)
                         : firstDayOfMonth(periode.fraDato)
-                    : addDays(result[i - 1].datoTom, 1),
-            datoTom: periode.tilDato ? lastDayOfMonth(periode.tilDato) : periode.tilDato,
+                    : addDays(new Date(result[i - 1].datoTom), 1)
+            ),
+            datoTom: toISODateString(periode.tilDato ? lastDayOfMonth(periode.tilDato) : periode.tilDato),
         });
     });
 
@@ -112,7 +116,7 @@ const getBarnPerioderFromHusstandsListe = (
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         medISaken: true,
-        perioder: barnPerioder(barn.perioder, datoFom),
+        perioder: getBarnPerioder(barn.perioder, datoFom),
     }));
 };
 
@@ -121,9 +125,10 @@ const getSivilstandPerioder = (sivilstandListe, datoFom) => {
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
         .map((periode) => ({
             sivilstandType: periode.sivilstand,
-            gyldigFraOgMed:
-                new Date(periode.periodeFra) < new Date(datoFom) ? dateOrNull(datoFom) : dateOrNull(periode.periodeFra),
-            datoTom: dateOrNull(periode.periodeTil),
+            gyldigFraOgMed: toISODateString(
+                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : periode.periodeFra
+            ),
+            datoTom: periode.periodeTil,
         }));
 };
 
@@ -137,21 +142,10 @@ export const createInitialValues = (
 ) => ({
     ...boforhold,
     husstandsBarn: boforoholdOpplysningerExistInDb
-        ? boforhold.husstandsBarn.map((barn) => ({
-              ...barn,
-              perioder: barn.perioder.map((periode) => ({
-                  ...periode,
-                  datoFom: dateOrNull(periode.datoFom),
-                  datoTom: dateOrNull(periode.datoTom),
-              })),
-          }))
+        ? boforhold.husstandsBarn
         : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
     sivilstand: boforhold?.sivilstand?.length
-        ? boforhold.sivilstand.map((stand) => ({
-              ...stand,
-              gyldigFraOgMed: dateOrNull(stand.gyldigFraOgMed),
-              datoTom: dateOrNull(stand.datoTom),
-          }))
+        ? boforhold.sivilstand
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
 });
 
@@ -161,15 +155,9 @@ export const createPayload = (values: BoforholdFormValues) => ({
         perioder: barn.perioder.map((periode) => ({
             ...periode,
             boStatus: periode.boStatus === "" ? null : periode.boStatus,
-            datoFom: toISODateString(periode.datoFom),
-            datoTom: toISODateString(periode.datoTom),
         })),
     })),
-    sivilstand: values.sivilstand.map((periode) => ({
-        ...periode,
-        gyldigFraOgMed: toISODateString(periode.gyldigFraOgMed),
-        datoTom: toISODateString(periode.datoTom),
-    })),
+    sivilstand: values.sivilstand,
     boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
     boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
 });
@@ -193,17 +181,23 @@ export const checkOverlappingPeriods = (perioder) => {
 
 export const syncDates = (
     periods: BarnPeriode[],
-    date: Date | null,
+    date: string | null,
     barnIndex: number,
     periodeIndex: number,
     field: "datoFom" | "datoTom",
     setValue: UseFormSetValue<BoforholdFormValues>
 ) => {
     if (field === "datoFom" && periods[periodeIndex - 1] && date) {
-        setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex - 1}.datoTom`, deductDays(date, 1));
+        setValue(
+            `husstandsBarn.${barnIndex}.perioder.${periodeIndex - 1}.datoTom`,
+            toISODateString(deductDays(new Date(date), 1))
+        );
     }
     if (field === "datoTom" && periods[periodeIndex + 1] && date) {
-        setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex + 1}.datoFom`, addDays(date, 1));
+        setValue(
+            `husstandsBarn.${barnIndex}.perioder.${periodeIndex + 1}.datoFom`,
+            toISODateString(addDays(new Date(date), 1))
+        );
     }
     setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex}.${field}`, date);
 };

@@ -2,9 +2,9 @@ import { BoStatusType, SivilstandType } from "../api/BidragBehandlingApi";
 import { BoStatusUI } from "../enum/BoStatus";
 
 export interface BarnPeriode {
-    datoFom: Date | null;
-    datoTom: Date | null;
-    boStatus: BoStatusType | "";
+    datoFom?: string | null;
+    datoTom?: string | null;
+    boStatus: BoStatusType | BoStatusUI | "";
     kilde: "offentlig" | "manuelt";
 }
 interface Barn {
@@ -15,8 +15,8 @@ interface Barn {
 }
 
 export interface Sivilstand {
-    gyldigFraOgMed: Date | null;
-    datoTom: Date | null;
+    gyldigFraOgMed: string | null;
+    datoTom: string | null;
     sivilstandType: SivilstandType;
 }
 

@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, ExpansionCard, Heading, Link, Tabs } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { AinntektDto } from "../../../api/BidragGrunnlagApi";
@@ -161,23 +161,6 @@ const InntektForm = () => {
         defaultValues: initialValues,
     });
 
-    const watchAllFields = useWatch({ control: useFormMethods.control });
-
-    useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch((value, { name }) => {
-            const field = name?.split(".")[0];
-            if (NOTAT_FIELDS.includes(field)) {
-                channel.postMessage(
-                    JSON.stringify({
-                        field,
-                        value: value[field],
-                    })
-                );
-            }
-        });
-        return () => unsubscribe();
-    }, [useFormMethods.watch]);
-
     useEffect(() => {
         useFormMethods.trigger();
     }, []);
@@ -194,10 +177,23 @@ const InntektForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        if (useFormMethods.formState.isDirty) {
-            debouncedOnSave();
-        }
-    }, [watchAllFields, useFormMethods.formState.isDirty]);
+        const { unsubscribe } = useFormMethods.watch((value, { name }) => {
+            if (useFormMethods.formState.isDirty) {
+                debouncedOnSave();
+            }
+
+            const field = name?.split(".")[0];
+            if (NOTAT_FIELDS.includes(field)) {
+                channel.postMessage(
+                    JSON.stringify({
+                        field,
+                        value: value[field],
+                    })
+                );
+            }
+        });
+        return () => unsubscribe();
+    }, [useFormMethods.watch, useFormMethods.formState.isDirty]);
 
     return (
         <FormProvider {...useFormMethods}>
