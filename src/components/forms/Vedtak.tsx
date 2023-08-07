@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 import { RolleType } from "../../api/BidragBehandlingApi";
 import { OpprettVedtakRequestDtoKilde, OpprettVedtakRequestDtoType } from "../../api/BidragVedtakApi";
-import { BIDRAG_VEDTAK_API } from "../../constants/api";
+import { BIDRAG_VEDTAK_API, BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useBeregnForskudd, useGetBehandling } from "../../hooks/useApiData";
@@ -21,23 +21,17 @@ const Vedtak = () => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: forskuddBeregningRespons } = useBeregnForskudd(behandlingId);
 
-    // const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
-
-    // const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
-
-    const sendeVedtak = (): void => {
-        //TODO
-        BIDRAG_VEDTAK_API.vedtak
+    const opprettVedtak = async () => {
+        const {data: vedtakId} = await BIDRAG_VEDTAK_API.vedtak
             .opprettVedtak({
                 type: OpprettVedtakRequestDtoType.INDEKSREGULERING,
                 opprettetAv: "",
                 vedtakTidspunkt: "",
-                enhetId: "",
+                enhetId: behandling.behandlerEnhet,
                 grunnlagListe: [],
                 kilde: OpprettVedtakRequestDtoKilde.MANUELT,
-            })
-            .then((r) => {})
-            .catch((e) => {});
+            });
+        
         throw new Error("Function not implemented.");
     };
 
@@ -112,7 +106,7 @@ const Vedtak = () => {
                 </div>
             </Alert>
             <FlexRow>
-                <Button loading={false} onClick={sendeVedtak} className="w-max" size="small">
+                <Button loading={false} onClick={opprettVedtak} className="w-max" size="small">
                     Fatte vedtak
                 </Button>
                 <Button
