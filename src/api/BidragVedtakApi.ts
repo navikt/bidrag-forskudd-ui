@@ -22,11 +22,6 @@ export interface OpprettBehandlingsreferanseRequestDto {
 
 /** Liste over alle engangsbeløp som inngår i vedtaket */
 export interface OpprettEngangsbelopRequestDto {
-    /**
-     * Id for eventuelt engangsbeløp som skal endres, skal være id for opprinnelig engangsbeløp
-     * @format int32
-     */
-    endrerId?: number;
     /** Beløpstype. Saertilskudd, gebyr m.m. */
     type:
         | "DIREKTE_OPPGJOR"
@@ -53,12 +48,21 @@ export interface OpprettEngangsbelopRequestDto {
     valutakode: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
     /** Angir om engangsbeløpet skal innkreves */
     innkreving: "JA" | "NEI";
     /** Angir om et engangsbeløp skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på. Utgjør sammen med referanse en unik id for et engangsbeløp
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse, brukes for å kunne omgjøre engangsbeløp senere i et klagevedtak. Unik innenfor et vedtak */
+    referanse: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i engangsbeløpet */
     grunnlagReferanseListe: string[];
 }
@@ -131,6 +135,13 @@ export interface OpprettStonadsendringRequestDto {
     innkreving: "JA" | "NEI";
     /** Angir om en stønad skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle perioder som inngår i stønadsendringen */
     periodeListe: OpprettVedtakPeriodeRequestDto[];
 }
@@ -156,8 +167,8 @@ export interface OpprettVedtakPeriodeRequestDto {
     valutakode: string;
     /** Resultatkoden tilhørende stønadsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
     /** Liste over alle grunnlag som inngår i perioden */
     grunnlagReferanseListe: string[];
 }
@@ -183,6 +194,8 @@ export interface OpprettVedtakRequestDto {
      * @maxLength 2147483647
      */
     opprettetAv: string;
+    /** Saksbehandlers navn */
+    opprettetAvNavn?: string;
     /**
      * Tidspunkt/timestamp når vedtaket er fattet
      * @format date-time
@@ -190,8 +203,6 @@ export interface OpprettVedtakRequestDto {
     vedtakTidspunkt: string;
     /** Id til enheten som er ansvarlig for vedtaket */
     enhetId: string;
-    /** Referanse som brukes i utlandssaker */
-    eksternReferanse?: string;
     /**
      * Settes hvis overføring til Elin skal utsettes
      * @format date
@@ -217,21 +228,6 @@ export interface BehandlingsreferanseDto {
 
 /** Liste over alle engangsbeløp som inngår i vedtaket */
 export interface EngangsbelopDto {
-    /**
-     * Vil inneholde opprinnelig engangsbeløpId, også der det har vært korrigeringer
-     * @format int32
-     */
-    id: number;
-    /**
-     * Løpenr innenfor vedtak
-     * @format int32
-     */
-    lopenr: number;
-    /**
-     * Id for eventuelt engangsbeløp som skal endres, skal være id for opprinnelig engangsbeløp
-     * @format int32
-     */
-    endrerId?: number;
     /** Type Engangsbeløp. Saertilskudd, gebyr m.m. */
     type:
         | "DIREKTE_OPPGJOR"
@@ -255,12 +251,21 @@ export interface EngangsbelopDto {
     valutakode?: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
     /** Angir om engangsbeløpet skal innkreves */
     innkreving: "JA" | "NEI";
     /** Angir om et engangsbeløp skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på. Utgjør sammen med referanse en unik id for et engangsbeløp
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse, brukes for å kunne omgjøre engangsbeløp senere i et klagevedtak. Unik innenfor et vedtak */
+    referanse: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i beregningen */
     grunnlagReferanseListe: string[];
 }
@@ -333,6 +338,13 @@ export interface StonadsendringDto {
     innkreving: "JA" | "NEI";
     /** Angir om en stønad skal endres som følge av vedtaket */
     endring: boolean;
+    /**
+     * VedtakId for vedtaket det er klaget på
+     * @format int32
+     */
+    omgjorVedtakId?: number;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
     /** Liste over alle perioder som inngår i stønadsendringen */
     periodeListe: VedtakPeriodeDto[];
 }
@@ -354,6 +366,8 @@ export interface VedtakDto {
         | "ENDRING_MOTTAKER";
     /** Id til saksbehandler/batchjobb evt annet som opprettet vedtaket */
     opprettetAv: string;
+    /** Saksbehandlers navn */
+    opprettetAvNavn?: string;
     /**
      * Tidspunkt/timestamp når vedtaket er fattet
      * @format date-time
@@ -361,8 +375,6 @@ export interface VedtakDto {
     vedtakTidspunkt: string;
     /** Id til enheten som er ansvarlig for vedtaket */
     enhetId: string;
-    /** Referanse som brukes i utlandssaker */
-    eksternReferanse?: string;
     /**
      * Settes hvis overføring til Elin skal utsettes
      * @format date
@@ -401,8 +413,8 @@ export interface VedtakPeriodeDto {
     valutakode?: string;
     /** Resultatkoden tilhørende  stønadsbeløpet */
     resultatkode: string;
-    /** Referanse - beslutningslinjeId -> bidrag-regnskap */
-    referanse?: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
     /** Liste over alle grunnlag som inngår i perioden */
     grunnlagReferanseListe: string[];
 }
@@ -453,7 +465,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-vedtak-feature.dev.intern.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-vedtak-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -543,10 +555,29 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-vedtak
  * @version v1
- * @baseUrl https://bidrag-vedtak-feature.dev.intern.nav.no
+ * @baseUrl https://bidrag-vedtak-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     vedtak = {
+        /**
+         * No description
+         *
+         * @tags vedtak-controller
+         * @name OppdaterVedtak
+         * @summary Oppdaterer grunnlag på et eksisterende vedtak
+         * @request POST:/vedtak/oppdater/{vedtakId}
+         * @secure
+         */
+        oppdaterVedtak: (vedtakId: number, data: OpprettVedtakRequestDto, params: RequestParams = {}) =>
+            this.request<number, void>({
+                path: `/vedtak/oppdater/${vedtakId}`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
         /**
          * No description
          *

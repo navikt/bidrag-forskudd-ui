@@ -47,24 +47,41 @@ export enum BehandlingType {
 
 export enum BoStatusType {
     IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
-    DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
-    DOKUMENTERT_BOENDE_HOS_BM = "DOKUMENTERT_BOENDE_HOS_BM",
-    BARN_BOR_ALENE = "BARN_BOR_ALENE",
+    REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
-export interface CollectionModelEntityModelOpplysninger {
+export interface CollectionModelEntityModelBehandling {
     _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
+        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
 
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
     /** @format date-time */
-    hentetDato: string;
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    stonadType?: EntityModelBehandlingStonadType;
+    engangsbelopType?: EntityModelBehandlingEngangsbelopType;
+    /** @format int64 */
+    vedtakId?: number;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddAarsakType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
     _links?: Links;
 }
 
@@ -97,11 +114,6 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum RolleType {
@@ -155,42 +167,30 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface EntityModelBehandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
-    /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    stonadType?: EntityModelBehandlingStonadType;
-    engangsbelopType?: EntityModelBehandlingEngangsbelopType;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddAarsakType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
     _links?: Links;
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface CollectionModelObject {
     _embedded?: {
         objects?: object[];
-    };
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelBehandling {
-    _embedded?: {
-        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
@@ -209,6 +209,8 @@ export interface BehandlingRequestBody {
     soknadFra: SoknadFraType;
     stonadType?: BehandlingRequestBodyStonadType;
     engangsbelopType?: BehandlingRequestBodyEngangsbelopType;
+    /** @format int64 */
+    vedtakId?: number;
     /** @format date-time */
     virkningsDato?: string;
     aarsak?: ForskuddAarsakType;
@@ -376,7 +378,7 @@ export interface SivilstandDto {
      * @format date
      * @example "2025-01-25"
      */
-    gyldigFraOgMed?: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -696,7 +698,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -786,7 +788,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     behandlings = {
@@ -872,10 +874,35 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags behandling-search-controller
          * @name ExecuteSearchBehandlingGet2
-         * @request GET:/behandlings/search/updateVirkningsTidspunkt
+         * @request GET:/behandlings/search/oppdaterVedtakId
          * @secure
          */
         executeSearchBehandlingGet2: (
+            query?: {
+                /** @format int64 */
+                behandlingId?: number;
+                /** @format int64 */
+                vedtakId?: number;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<void, void>({
+                path: `/behandlings/search/oppdaterVedtakId`,
+                method: "GET",
+                query: query,
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags behandling-search-controller
+         * @name ExecuteSearchBehandlingGet3
+         * @request GET:/behandlings/search/updateVirkningsTidspunkt
+         * @secure
+         */
+        executeSearchBehandlingGet3: (
             query?: {
                 /** @format int64 */
                 behandlingId?: number;
@@ -1297,6 +1324,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer vedtak id
+         *
+         * @tags behandling-controller
+         * @name OppdaterVedtakId
+         * @request PUT:/api/behandling/{behandlingId}/vedtak/{vedtakId}
+         * @secure
+         */
+        oppdaterVedtakId: (behandlingId: number, vedtakId: number, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/api/behandling/${behandlingId}/vedtak/${vedtakId}`,
+                method: "PUT",
+                secure: true,
                 ...params,
             }),
 
