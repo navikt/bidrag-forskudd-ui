@@ -124,9 +124,7 @@ const getSivilstandPerioder = (sivilstandListe, datoFom): SivilstandDto[] => {
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
         .map((periode) => ({
             sivilstandType: periode.sivilstand,
-            datoFom: toISODateString(
-                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : periode.periodeFra
-            ),
+            datoFom: toISODateString(new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : periode.periodeFra),
             datoTom: periode.periodeTil,
         }));
 };
