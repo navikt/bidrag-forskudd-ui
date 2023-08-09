@@ -10,33 +10,71 @@
  */
 
 export interface PersonRequest {
-    /** Identen til personen */
     ident: string;
 }
 
-/** Liste over alle hentede forekomster av sivilstand */
+/** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
 export interface Sivilstand {
-    type?: string;
+    type?:
+        | "ENKE_ELLER_ENKEMANN"
+        | "GIFT"
+        | "GJENLEVENDE_PARTNER"
+        | "REGISTRERT_PARTNER"
+        | "SEPARERT"
+        | "SEPARERT_PARTNER"
+        | "SKILT"
+        | "SKILT_PARTNER"
+        | "UGIFT"
+        | "UOPPGITT";
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
     bekreftelsesdato?: string;
 }
 
-export interface SivilstandDto {
-    /** Liste over alle hentede forekomster av sivilstand */
-    sivilstand?: Sivilstand[];
+export interface Sivilstandshistorikk {
+    /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
+    sivilstand: Sivilstand[];
 }
 
-export interface NavnFoedselDoedDto {
+export interface HentePersonidenterRequest {
+    ident: string;
+    /** @uniqueItems true */
+    grupper: ("AKTORID" | "FOLKEREGISTERIDENT" | "NPID")[];
+    inkludereHistoriske: boolean;
+}
+
+export interface PersonidentDto {
+    ident: string;
+    historisk: boolean;
+    gruppe: "AKTORID" | "FOLKEREGISTERIDENT" | "NPID";
+}
+
+export interface NavnFodselDodDto {
     /** Gir navn, fødselsdato og fødselsår for angitt person. Fødselsår finnes for alle i PDL, mens noen ikke har utfyllt fødselsdato */
-    navn?: string;
+    navn: string;
     /** @format date */
-    foedselsdato?: string;
+    fødselsdato?: string;
     /** @format int32 */
+    fødselsår: number;
+    /**
+     * Eventuell dødsdato til personen
+     * @format date
+     */
+    dødsdato?: string;
+    /**
+     * @deprecated
+     * @format date
+     */
+    foedselsdato?: string;
+    /**
+     * @deprecated
+     * @format int32
+     */
     foedselsaar: number;
     /**
      * Eventuell dødsdato til personen
+     * @deprecated
      * @format date
      */
     doedsdato?: string;
@@ -67,9 +105,20 @@ export interface PersonDto {
     /** Etternavn til personen */
     etternavn?: string;
     /** Kjønn til personen */
+    kjønn?: "KVINNE" | "MANN" | "UKJENT";
+    /**
+     * Kjønn til personen
+     * @deprecated
+     */
     kjoenn?: "KVINNE" | "MANN" | "UKJENT";
     /**
      * Dødsdato til personen
+     * @format date
+     */
+    dødsdato?: string;
+    /**
+     * Dødsdato til personen
+     * @deprecated
      * @format date
      */
     doedsdato?: string;
@@ -77,18 +126,129 @@ export interface PersonDto {
      * Fødselsdato til personen
      * @format date
      */
+    fødselsdato?: string;
+    /**
+     * Fødselsdato til personen
+     * @deprecated
+     * @format date
+     */
     foedselsdato?: string;
     /** Diskresjonskode (personvern) */
-    diskresjonskode?: string;
+    diskresjonskode?: "SPSF" | "SPFO" | "URIK" | "MILI" | "PEND" | "SVAL" | "P19";
     /** Aktør id til personen */
+    aktørId?: string;
+    /**
+     * Aktør id til personen
+     * @deprecated
+     */
     aktoerId?: string;
+    /** Kortnavn på personen, navn som benyttes ved maskinelle utskrifter (maks 40 tegn) */
+    kortnavn?: string;
     /**
      * Kortnavn på personen, navn som benyttes ved maskinelle utskrifter (maks 40 tegn)
      * @deprecated
      */
     kortNavn?: string;
-    /** Kortnavn på personen, navn som benyttes ved maskinelle utskrifter (maks 40 tegn) */
-    kortnavn?: string;
+}
+
+export interface DodsboDto {
+    /** Fra Tingretten angis skifteformen for booppgjøret. */
+    skifteform: "OFFENTLIG" | "ANNET";
+    /**
+     * Attestutstedelsesdato for skifteattest.
+     * @format date
+     */
+    attestutstedelsesdato: string;
+    /** Kontaktadresse i Norge eller utlandet for person, advokat eller oganisasjon. */
+    kontaktadresse: DodsboKontaktadresse;
+    /** Navn på kontaktperson for dødsboet. Dette kan være en person, advokat eller oganisasjon. */
+    kontaktperson: string;
+}
+
+/** Kontaktadresse i Norge eller utlandet for person, advokat eller oganisasjon. */
+export interface DodsboKontaktadresse {
+    /** Adresselinje 1 */
+    adresselinje1: string;
+    /** Adresselinje 2 */
+    adresselinje2?: string;
+    /** Postnummer. */
+    postnummer: string;
+    /** Poststed */
+    poststed: string;
+    /** Landkode 3 siffer. */
+    land3?: string;
+}
+
+/** Representerer kontonummer for en person. For norske kontonummer er det kun norskKontornr som er utfyllt, ellers benyttes de andre feltene for utlandske kontonummer. */
+export interface KontonummerDto {
+    /** Norsk kontonummer, 11 siffer. */
+    norskKontonr?: string;
+    /** IBAN angir kontonummeret på et internasjonalt format. */
+    iban?: string;
+    /** SWIFT angir banken på et internasjonalt format */
+    swift?: string;
+    /** Bankens navn. */
+    banknavn?: string;
+    /** Bankens landkode. */
+    banklandkode?: string;
+    /** BankCode. Format varierer. */
+    bankkode?: string;
+    /**
+     * Bankkode. Format varierer.
+     * @deprecated
+     */
+    bankcode?: string;
+    /** Kontoens valuta. */
+    valutakode?: string;
+    /** Adressefelt 1, utenlandsk bank */
+    bankadresse1?: string;
+    /** Adressefelt 2, utenlandsk bank */
+    bankadresse2?: string;
+    /** Adressefelt 3, utenlandsk bank */
+    bankadresse3?: string;
+    /** Tilleggsinformasjon */
+    metadata: MetadataDto;
+}
+
+/** Tilleggsinformasjon */
+export interface MetadataDto {
+    /** @format date-time */
+    gyldigFom: string;
+    opprettetAv: string;
+    kilde?: string;
+}
+
+export interface PersonAdresseDto {
+    /** Gyldige adressetyper: BOSTEDSADRESSE, KONTAKTADRESSE, eller OPPHOLDSADRESSE */
+    adressetype: "BOSTEDSADRESSE" | "KONTAKTADRESSE" | "OPPHOLDSADRESSE" | "DELT_BOSTED";
+    /** Adresselinje 1 */
+    adresselinje1?: string;
+    /** Adresselinje 2 */
+    adresselinje2?: string;
+    /** Adresselinje 3 */
+    adresselinje3?: string;
+    /** Bruksenhetsnummer */
+    bruksenhetsnummer?: string;
+    /** Postnummer, tilgjengelig hvis norsk adresse */
+    postnummer?: string;
+    /** Poststed, tilgjengelig hvis norsk adresse */
+    poststed?: string;
+    /** To-bokstavers landkode ihht iso3166-1 alfa-2 */
+    land: string;
+    /** Trebokstavs landkode ihht iso3166-1 alfa-3 */
+    land3: string;
+}
+
+/** Representerer en person med tilhørende informasjon om navn, fødselsdato, adresse, gradering, språk, dødsdato, dødsbo og tidligere identer */
+export interface PersondetaljerDto {
+    person: PersonDto;
+    adresse?: PersonAdresseDto;
+    /** Representerer kontonummer for en person. For norske kontonummer er det kun norskKontornr som er utfyllt, ellers benyttes de andre feltene for utlandske kontonummer. */
+    kontonummer?: KontonummerDto;
+    dødsbo?: DodsboDto;
+    språk?: string;
+    /** Liste over tidligere identer personen har hatt. */
+    tidligereIdenter?: string[];
 }
 
 /** Periodiser liste over husstander og dens medlemmer i perioden */
@@ -114,19 +274,27 @@ export interface Husstandsmedlem {
     gyldigFraOgMed?: string;
     /** @format date */
     gyldigTilOgMed?: string;
-    personId?: string;
-    fornavn?: string;
-    mellomnavn?: string;
-    etternavn?: string;
+    personId: string;
+    navn: string;
     /** @format date */
+    fødselsdato?: string;
+    /** @format date */
+    dødsdato?: string;
+    /**
+     * @deprecated
+     * @format date
+     */
     foedselsdato?: string;
-    /** @format date */
+    /**
+     * @deprecated
+     * @format date
+     */
     doedsdato?: string;
 }
 
 export interface HusstandsmedlemmerDto {
     /** Periodiser liste over husstander og dens medlemmer i perioden */
-    husstandListe?: Husstand[];
+    husstandListe: Husstand[];
 }
 
 export interface Graderingsinfo {
@@ -140,51 +308,36 @@ export interface GeografiskTilknytningDto {
     /** Identen til personen */
     ident: string;
     /** Aktørid til personen */
+    aktørId?: string;
+    /**
+     * Aktørid til personen
+     * @deprecated
+     */
     aktoerId?: string;
     /** Geografisk tilknytning til personen */
     geografiskTilknytning?: string;
     /** Om geografisk tilknytning til personen er utlandet. Geografisktilknytning feltet vil da ha landkode istedenfor kommune/bydel nummer */
     erUtland: boolean;
     /** Diskresjonskode (personvern) */
-    diskresjonskode?: string;
+    diskresjonskode?: "SPSF" | "SPFO" | "URIK" | "MILI" | "PEND" | "SVAL" | "P19";
 }
 
 /** Liste over alle hentede forekomster av foreldre-barnrelasjoner */
 export interface ForelderBarnRelasjon {
     minRolleForPerson: "BARN" | "FAR" | "MEDMOR" | "MOR";
     relatertPersonsIdent?: string;
+    /** Hvilken rolle personen i requesten har til personen i responsen */
     relatertPersonsRolle: "BARN" | "FAR" | "MEDMOR" | "MOR";
 }
 
 export interface ForelderBarnRelasjonDto {
     /** Liste over alle hentede forekomster av foreldre-barnrelasjoner */
-    forelderBarnRelasjon?: ForelderBarnRelasjon[];
+    forelderBarnRelasjon: ForelderBarnRelasjon[];
 }
 
 export interface Fodselsdatoer {
     /** Map med ident til fødselsdato-elementer. */
     identerTilDatoer: Record<string, string>;
-}
-
-export interface PersonAdresseDto {
-    /** Gyldige adressetyper: BOSTEDSADRESSE, KONTAKTADRESSE, eller OPPHOLDSADRESSE */
-    adressetype: "BOSTEDSADRESSE" | "KONTAKTADRESSE" | "OPPHOLDSADRESSE" | "DELT_BOSTED";
-    /** Adresselinje 1 */
-    adresselinje1?: string;
-    /** Adresselinje 2 */
-    adresselinje2?: string;
-    /** Adresselinje 3 */
-    adresselinje3?: string;
-    /** Bruksenhetsnummer */
-    bruksenhetsnummer?: string;
-    /** Postnummer, tilgjengelig hvis norsk adresse */
-    postnummer?: string;
-    /** Poststed, tilgjengelig hvis norsk adresse */
-    poststed?: string;
-    /** To-bokstavers landkode ihht iso3166-1 alfa-2 */
-    land: string;
-    /** Trebokstavs landkode ihht iso3166-1 alfa-3 */
-    land3: string;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -233,7 +386,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-person-feature.dev.adeo.no/bidrag-person",
+            baseURL: axiosConfig.baseURL || "https://bidrag-person-feature.dev.intern.nav.no/bidrag-person",
         });
         this.secure = secure;
         this.format = format;
@@ -323,7 +476,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-person
  * @version v1
- * @baseUrl https://bidrag-person-feature.dev.adeo.no/bidrag-person
+ * @baseUrl https://bidrag-person-feature.dev.intern.nav.no/bidrag-person
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     spraak = {
@@ -349,13 +502,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent sivilstand for en person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentSivilstand
          * @request POST:/sivilstand
          * @secure
          */
         hentSivilstand: (data: PersonRequest, params: RequestParams = {}) =>
-            this.request<SivilstandDto, any>({
+            this.request<Sivilstandshistorikk, any>({
                 path: `/sivilstand`,
                 method: "POST",
                 body: data,
@@ -367,17 +520,36 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent sivilstand for en person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name GetSivilstand
          * @request GET:/sivilstand/{ident}
          * @deprecated
          * @secure
          */
         getSivilstand: (ident: string, params: RequestParams = {}) =>
-            this.request<SivilstandDto, any>({
+            this.request<Sivilstandshistorikk, any>({
                 path: `/sivilstand/${ident}`,
                 method: "GET",
                 secure: true,
+                ...params,
+            }),
+    };
+    personidenter = {
+        /**
+         * @description Henter alle identer som er registrert for en person
+         *
+         * @tags person-controller
+         * @name HentePersonidenter
+         * @request POST:/personidenter
+         * @secure
+         */
+        hentePersonidenter: (data: HentePersonidenterRequest, params: RequestParams = {}) =>
+            this.request<PersonidentDto[], any>({
+                path: `/personidenter`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
                 ...params,
             }),
     };
@@ -385,13 +557,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent informasjon om en persons navn, fødselsdata og eventuell død
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentNavnFoedselDoed
          * @request POST:/navnfoedseldoed
          * @secure
          */
         hentNavnFoedselDoed: (data: PersonRequest, params: RequestParams = {}) =>
-            this.request<NavnFoedselDoedDto, any>({
+            this.request<NavnFodselDodDto, any>({
                 path: `/navnfoedseldoed`,
                 method: "POST",
                 body: data,
@@ -403,14 +575,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent informasjon om en persons navn, fødselsdata og eventuell død
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name GetNavnFoedselDoed
          * @request GET:/navnfoedseldoed/{ident}
          * @deprecated
          * @secure
          */
         getNavnFoedselDoed: (ident: string, params: RequestParams = {}) =>
-            this.request<NavnFoedselDoedDto, any>({
+            this.request<NavnFodselDodDto, any>({
                 path: `/navnfoedseldoed/${ident}`,
                 method: "GET",
                 secure: true,
@@ -438,6 +610,42 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     };
     informasjon = {
         /**
+         * @description Hent informasjon om person. Dette innebærer fornavn/etternavn, fødselsdato, adresse, gradering, språk, dødsdato, dødsbo og tidligere identer. Dette endepunktet er ikke cached.
+         *
+         * @tags person-controller
+         * @name HentPersoninformasjonDetaljer
+         * @request POST:/informasjon/detaljer
+         * @secure
+         */
+        hentPersoninformasjonDetaljer: (data: PersonRequest, params: RequestParams = {}) =>
+            this.request<PersondetaljerDto, PersondetaljerDto>({
+                path: `/informasjon/detaljer`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Hent informasjon om en person
+         *
+         * @tags person-controller
+         * @name HentPersonPost
+         * @request POST:/informasjon/
+         * @secure
+         */
+        hentPersonPost: (data: PersonRequest, params: RequestParams = {}) =>
+            this.request<PersonDto, PersonDto>({
+                path: `/informasjon/`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
          * @description Hent informasjon om en person
          *
          * @tags person-controller
@@ -446,7 +654,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @deprecated
          * @secure
          */
-        hentPerson1: (ident: string, params: RequestParams = {}) =>
+        hentPerson1: (params: RequestParams = {}) =>
             this.request<PersonDto, PersonDto>({
                 path: `/informasjon`,
                 method: "GET",
@@ -458,11 +666,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @description Hent informasjon om en person
          *
          * @tags person-controller
-         * @name HentPersonPost
+         * @name HentPersonPost1
          * @request POST:/informasjon
          * @secure
          */
-        hentPersonPost: (data: PersonRequest, params: RequestParams = {}) =>
+        hentPersonPost1: (data: PersonRequest, params: RequestParams = {}) =>
             this.request<PersonDto, PersonDto>({
                 path: `/informasjon`,
                 method: "POST",
@@ -493,7 +701,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent alle personer som bor i samme husstand som angitt person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentHusstandsmedlemmer
          * @request POST:/husstandsmedlemmer
          * @secure
@@ -511,7 +719,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent alle personer som bor i samme husstand som angitt person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name GetHusstandsmedlemmer
          * @request GET:/husstandsmedlemmer/{ident}
          * @deprecated
@@ -529,7 +737,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent graderingsinfo for en liste med personer
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentGraderinger
          * @request POST:/graderingsinfo
          * @secure
@@ -548,7 +756,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent informasjon om geografisk tilknytning for en person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentGeografiskTilknytning
          * @request POST:/geografisktilknytning
          * @secure
@@ -566,7 +774,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent informasjon om geografisk tilknytning for en person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name GetGeografiskTilknytning
          * @request GET:/geografisktilknytning/{ident}
          * @deprecated
@@ -580,16 +788,54 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 ...params,
             }),
     };
+    geografiskTilknytning = {
+        /**
+         * @description Hent informasjon om geografisk tilknytning for en person
+         *
+         * @tags person-controller
+         * @name HentGeografiskTilknytning1
+         * @request POST:/geografisk_tilknytning
+         * @secure
+         */
+        hentGeografiskTilknytning1: (data: string, params: RequestParams = {}) =>
+            this.request<GeografiskTilknytningDto, any>({
+                path: `/geografisk_tilknytning`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+    };
+    forelderbarnrelasjoner = {
+        /**
+         * @description Hent alle forelder/barn-relasjoner for en person
+         *
+         * @tags person-controller
+         * @name HentForelderBarnRelasjon
+         * @request POST:/forelderbarnrelasjoner
+         * @secure
+         */
+        hentForelderBarnRelasjon: (data: string, params: RequestParams = {}) =>
+            this.request<ForelderBarnRelasjonDto, any>({
+                path: `/forelderbarnrelasjoner`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+    };
     forelderbarnrelasjon = {
         /**
          * @description Hent alle forelder/barn-relasjoner for en person
          *
-         * @tags person-controller-kt
-         * @name HentForelderBarnRelasjon
+         * @tags person-controller
+         * @name HentForelderBarnRelasjon1
          * @request POST:/forelderbarnrelasjon
          * @secure
          */
-        hentForelderBarnRelasjon: (data: PersonRequest, params: RequestParams = {}) =>
+        hentForelderBarnRelasjon1: (data: PersonRequest, params: RequestParams = {}) =>
             this.request<ForelderBarnRelasjonDto, any>({
                 path: `/forelderbarnrelasjon`,
                 method: "POST",
@@ -602,7 +848,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent alle forelder/barn-relasjoner for en person
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name GetForelderBarnRelasjon
          * @request GET:/forelderbarnrelasjon/{ident}
          * @deprecated
@@ -620,7 +866,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hent fødselsdatoer for en liste med personer
          *
-         * @tags person-controller-kt
+         * @tags person-controller
          * @name HentFodselsdatoer
          * @request POST:/fodselsdatoer
          * @secure

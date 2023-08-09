@@ -608,15 +608,15 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         const fomOgTomInvalid =
             field === "fraDato"
                 ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
-                : sivilstandPerioder[index].gyldigFraOgMed && date < sivilstandPerioder[index].gyldigFraOgMed;
+                : sivilstandPerioder[index].datoFom && date < sivilstandPerioder[index].datoFom;
 
         if (fomOgTomInvalid) {
-            setError(`sivilstand.${index}.gyldigFraOgMed`, {
+            setError(`sivilstand.${index}.datoFom`, {
                 type: "datesNotValid",
                 message: "Fom dato kan ikke være før tom dato",
             });
         } else {
-            clearErrors(`sivilstand.${index}.gyldigFraOgMed`);
+            clearErrors(`sivilstand.${index}.datoFom`);
         }
     };
 
@@ -628,8 +628,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             return;
         }
         const filtrertOgSorterListe = sivilstandPerioder
-            .filter((periode) => periode.gyldigFraOgMed !== null)
-            .sort((a, b) => new Date(a.gyldigFraOgMed).getTime() - new Date(b.gyldigFraOgMed).getTime());
+            .filter((periode) => periode.datoFom !== null)
+            .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
@@ -648,7 +648,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const addPeriode = () => {
         const sivilstandPerioderValues = getValues("sivilstand");
         sivilstandPerioder.append({
-            gyldigFraOgMed: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
+            datoFom: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
             datoTom: null,
             sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
         });
@@ -669,14 +669,14 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             cells={[
                                 <div className="flex gap-x-4">
                                     <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.gyldigFraOgMed`}
-                                        name={`sivilstand.${index}.gyldigFraOgMed`}
+                                        key={`sivilstand.${index}.datoFom`}
+                                        name={`sivilstand.${index}.datoFom`}
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.gyldigFraOgMed}
+                                        defaultValue={item.datoFom}
                                         onChange={(date) => {
                                             validatePeriods();
-                                            validateFomOgTom(date, index, "gyldigFraOgMed");
+                                            validateFomOgTom(date, index, "datoFom");
                                         }}
                                         fromDate={fom}
                                         toDate={tom}

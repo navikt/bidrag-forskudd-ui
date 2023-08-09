@@ -1,4 +1,4 @@
-import { BoStatusType, SivilstandType } from "../api/BidragBehandlingApi";
+import { BoStatusType, SivilstandDto } from "../api/BidragBehandlingApi";
 import { BoStatusUI } from "../enum/BoStatus";
 
 export interface BarnPeriode {
@@ -14,15 +14,9 @@ interface Barn {
     perioder: BarnPeriode[];
 }
 
-export interface Sivilstand {
-    gyldigFraOgMed: string | null;
-    datoTom: string | null;
-    sivilstandType: SivilstandType;
-}
-
 export interface BoforholdFormValues {
     husstandsBarn: Barn[];
-    sivilstand: Sivilstand[];
+    sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;
 }

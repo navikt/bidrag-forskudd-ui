@@ -1,6 +1,6 @@
 import { UseFormSetValue } from "react-hook-form";
 
-import { BehandlingDto, BoforholdResponse } from "../../../api/BidragBehandlingApi";
+import { BehandlingDto, BoforholdResponse, SivilstandDto } from "../../../api/BidragBehandlingApi";
 import { HentGrunnlagspakkeDto, RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
 import { BoStatusUI } from "../../../enum/BoStatus";
 import {
@@ -8,7 +8,6 @@ import {
     BoforholdFormValues,
     OpplysningFraFolkeRegistre,
     OpplysningFraFolkeRegistrePeriode,
-    Sivilstand,
 } from "../../../types/boforholdFormValues";
 import {
     addDays,
@@ -19,7 +18,7 @@ import {
     toISODateString,
 } from "../../../utils/date-utils";
 
-export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | Sivilstand[], virkningstidspunkt: Date) => {
+export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto[], virkningstidspunkt: Date) => {
     if (fieldArrayValues.length && !fieldArrayValues.some((periode) => periode.datoTom === null)) {
         const filtrertOgSorterListe = fieldArrayValues.sort(
             (a, b) => new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime()
@@ -120,14 +119,12 @@ const getBarnPerioderFromHusstandsListe = (
     }));
 };
 
-const getSivilstandPerioder = (sivilstandListe, datoFom) => {
+const getSivilstandPerioder = (sivilstandListe, datoFom): SivilstandDto[] => {
     return sivilstandListe
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
         .map((periode) => ({
             sivilstandType: periode.sivilstand,
-            gyldigFraOgMed: toISODateString(
-                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : periode.periodeFra
-            ),
+            datoFom: toISODateString(new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : periode.periodeFra),
             datoTom: periode.periodeTil,
         }));
 };

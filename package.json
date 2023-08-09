@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "ts": "tsc --build",
     "lint": "eslint ./src/**/*.{js,ts,tsx} package.json --quiet",
     "fix-lint": "eslint ./src/**/*.{js,ts,tsx} package.json --quiet --fix",
     "test": "cross-env NODE_ENV=TEST mocha --config .mocharc.js --spec ./src/__tests__/**/**/*.spec.{js,ts,tsx} --exit",
@@ -10,15 +11,14 @@
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.js",
     "build": "webpack --config webpack.prod.config.js",
-    "build:api": "npm-run-all -p -r api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling api:bidragSak",
-    "api:person": "swagger-typescript-api -p https://bidrag-person-feature.dev.adeo.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
-    "api:bidragGrunnlag": "swagger-typescript-api -p https://bidrag-grunnlag.intern.dev.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
-    "api:bidragVedtak": "swagger-typescript-api -p https://bidrag-vedtak-feature.dev.intern.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
+    "build:api": "npm-run-all -p api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling",
+    "api:person": "swagger-typescript-api -p https://bidrag-person-feature.dev.intern.nav.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
+    "api:bidragGrunnlag": "swagger-typescript-api -p https://bidrag-grunnlag-feature.intern.dev.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
+    "api:bidragVedtak": "swagger-typescript-api -p https://bidrag-vedtak-feature.intern.dev.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
     "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
     "api:bidragBehandlingQ2": "swagger-typescript-api -p https://bidrag-behandling.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
     "local:api:bidragBehandling": "swagger-typescript-api -p http://localhost:8999/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
-    "types:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs -o src/types",
-    "api:bidragSak": "swagger-typescript-api -p https://bidrag-sak-feature.dev.adeo.no/v3/api-docs --axios -n BidragSakApi.ts -o src/api"
+    "types:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs -o src/types"
   },
   "dependencies": {
     "@navikt/aksel-icons": "3.2.2",
