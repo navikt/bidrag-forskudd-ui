@@ -1,15 +1,15 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { useApi } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { RolleType } from "../../api/BidragBehandlingApi";
-import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
+import { ForskuddBeregningRespons, RolleType } from "../../api/BidragBehandlingApi";
+import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useGetBehandling } from "../../hooks/useApiData";
+import { toISODateString } from "../../utils/date-utils";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
@@ -18,25 +18,24 @@ const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
+    const [beregnetForskudd, setBeregnetForskudd] = useState<ForskuddBeregningRespons | undefined>(undefined);
 
-    const vedtakApi = useApi(new BidragVedtakApi({ baseURL: environment.url.bidragSak }), "bidrag-vedtak", "fss");
+    const fatteVedtak = async () => {
+        const now = toISODateString(new Date());
+        const saksBehandlerId = ""; // TODO
 
-    const barn = behandling.roller.filter((r) => r.rolleType == RolleType.BARN);
+        const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
+            kilde: "MANUELT",
+            type: behandling.soknadType,
+            opprettetAv: saksBehandlerId,
+            vedtakTidspunkt: now,
+            enhetId: behandling.behandlerEnhet,
+            grunnlagListe: [
+                //TODO
+            ],
+        });
 
-    const sendeVedtak = (): void => {
-        //TODO
-        vedtakApi.vedtak
-            .opprettVedtak({
-                kilde: "MANUELT",
-                type: "INDEKSREGULERING",
-                opprettetAv: "",
-                vedtakTidspunkt: "",
-                enhetId: "",
-                grunnlagListe: [],
-            })
-            .then((r) => {})
-            .catch((e) => {});
-        throw new Error("Function not implemented.");
+        await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
     };
 
     const getNotatUrl = () => {
@@ -45,16 +44,26 @@ const Vedtak = () => {
     };
 
     useEffect(() => {
-        BEHANDLING_API.api
-            .beregnForskudd(behandlingId)
-            .then((r) => {
-                //TODO
-            })
-            .catch((e) => {});
+        BEHANDLING_API.api.beregnForskudd(behandlingId).then(({ data }) => {
+            setBeregnetForskudd(data);
+        });
     }, []);
 
     return (
         <div className="grid gap-y-8">
+            {beregnetForskudd && (
+                <Alert variant="error" className="w-8/12 m-auto mt-8">
+                    <div>
+                        <BodyShort size="small">
+                            <ul>
+                                {beregnetForskudd.feil?.map((f) => (
+                                    <li>{f}</li>
+                                ))}
+                            </ul>
+                        </BodyShort>
+                    </div>
+                </Alert>
+            )}
             <div className="grid gap-y-4">
                 <Heading level="2" size="xlarge">
                     Vedtak
@@ -64,37 +73,53 @@ const Vedtak = () => {
                 <Heading level="3" size="medium">
                     Oppsummering
                 </Heading>
-                {barn.map((item, i) => (
-                    <div key={i + item.ident} className="mb-8">
-                        <div className="my-8 flex items-center gap-x-2">
-                            <RolleTag rolleType={item.rolleType} />
-                            <BodyShort>
-                                <PersonNavn ident={item.ident}></PersonNavn>
-                                <span className="ml-4">{item.ident}</span>
-                            </BodyShort>
+                {beregnetForskudd &&
+                    beregnetForskudd.resultat?.map((r) => (
+                        <>
+                            {r.ident}{" "}
+                            {r.beregnetForskuddPeriodeListe.map((p) => (
+                                <>
+                                    {p.resultat.belop} {p.periode.datoFom} {p.periode.datoTil}
+                                </>
+                            ))}
+                        </>
+                    ))}
+
+                {behandling &&
+                    beregnetForskudd &&
+                    beregnetForskudd.resultat?.map((r, i) => (
+                        <div key={i + r.ident} className="mb-8">
+                            <div className="my-8 flex items-center gap-x-2">
+                                <RolleTag rolleType={RolleType.BARN} />
+                                <BodyShort>
+                                    <PersonNavn ident={r.ident}></PersonNavn>
+                                    <span className="ml-4">{r.ident}</span>
+                                </BodyShort>
+                            </div>
+                            <Table>
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {r.beregnetForskuddPeriodeListe.map((periode) => (
+                                        <Table.Row>
+                                            <Table.DataCell>{behandling.behandlingType}</Table.DataCell>
+                                            <Table.DataCell>
+                                                {periode.periode.datoFom} - {periode.periode.datoTil}
+                                            </Table.DataCell>
+                                            <Table.DataCell>{periode.resultat.belop}</Table.DataCell>
+                                            <Table.DataCell>{periode.sivilstandType}</Table.DataCell>
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table>
                         </div>
-                        <Table>
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                                <Table.Row>
-                                    <Table.DataCell>Forskudd</Table.DataCell>
-                                    <Table.DataCell>01.07.2022 - 31.08.2022</Table.DataCell>
-                                    <Table.DataCell>651 555</Table.DataCell>
-                                    <Table.DataCell>Ugift</Table.DataCell>
-                                    <Table.DataCell>Opph pga høy inntekt</Table.DataCell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table>
-                    </div>
-                ))}
+                    ))}
             </div>
             <Alert variant="info">
                 <div className="grid gap-y-4">
@@ -111,7 +136,13 @@ const Vedtak = () => {
                 </div>
             </Alert>
             <FlexRow>
-                <Button loading={false} onClick={sendeVedtak} className="w-max" size="small">
+                <Button
+                    loading={false}
+                    disabled={beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0}
+                    onClick={fatteVedtak}
+                    className="w-max"
+                    size="small"
+                >
                     Fatte vedtak
                 </Button>
                 <Button

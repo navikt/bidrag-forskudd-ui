@@ -3,7 +3,7 @@ import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useGetArbeidsforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { RolleType } from "../../api/BidragBehandlingApi";
+import { BehandlingDto, RolleType, VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { createInitialValues, mapHusstandsMedlemmerToBarn } from "../../components/forms/helpers/boforholdFormHelpers";
 import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektFormHelpers";
@@ -71,7 +71,13 @@ const Virkningstidspunkt = () => {
     );
 };
 
-const VirkningstidspunktView = ({ behandling, behandlingVirkningstidspunkt }) => {
+const VirkningstidspunktView = ({
+    behandling,
+    behandlingVirkningstidspunkt,
+}: {
+    behandling: BehandlingDto;
+    behandlingVirkningstidspunkt: VirkningsTidspunktResponse;
+}) => {
     const [virkningstidspunkt, setVirkningstidspunkt] = useState(behandlingVirkningstidspunkt.virkningsDato);
     const [aarsak, setAarsak] = useState(behandlingVirkningstidspunkt.aarsak);
     const [begrunnelse, setBegrunnelse] = useState(
