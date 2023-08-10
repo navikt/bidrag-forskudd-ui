@@ -582,6 +582,7 @@ export interface ResultatPeriode {
     resultat: ResultatBeregning;
     /** Beregnet grunnlag innhold */
     grunnlagReferanseListe: string[];
+    sivilstandType?: SivilstandType;
 }
 
 export interface Link {
