@@ -50,38 +50,19 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
-export interface CollectionModelEntityModelBehandling {
+export interface CollectionModelEntityModelOpplysninger {
     _embedded?: {
-        behandlings?: EntityModelBehandling[];
+        opplysningers?: EntityModelOpplysninger[];
     };
     _links?: Links;
 }
 
-export interface EntityModelBehandling {
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
     /** @format date-time */
-    datoFom: string;
-    /** @format date-time */
-    datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    saksnummer: string;
-    behandlerEnhet: string;
-    soknadFra: SoknadFraType;
-    stonadType?: EntityModelBehandlingStonadType;
-    engangsbelopType?: EntityModelBehandlingEngangsbelopType;
-    /** @format int64 */
-    vedtakId?: number;
-    /** @format date-time */
-    virkningsDato?: string;
-    aarsak?: ForskuddAarsakType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
+    hentetDato: string;
     _links?: Links;
 }
 
@@ -114,6 +95,11 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum RolleType {
@@ -167,30 +153,44 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
+export interface EntityModelBehandling {
+    behandlingType: BehandlingType;
+    soknadType: SoknadType;
     /** @format date-time */
-    hentetDato: string;
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    behandlerEnhet: string;
+    soknadFra: SoknadFraType;
+    stonadType?: EntityModelBehandlingStonadType;
+    engangsbelopType?: EntityModelBehandlingEngangsbelopType;
+    /** @format int64 */
+    vedtakId?: number;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddAarsakType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
     _links?: Links;
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface CollectionModelObject {
     _embedded?: {
         objects?: object[];
+    };
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelBehandling {
+    _embedded?: {
+        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
@@ -543,12 +543,25 @@ export interface OpplysningerDto {
 export interface ForskuddBeregningPerBarn {
     ident: string;
     beregnetForskuddPeriodeListe: ResultatPeriode[];
+    grunnlagListe?: GrunnlagDto[];
 }
 
 export interface ForskuddBeregningRespons {
     resultat?: ForskuddBeregningPerBarn[];
     feil?: string[];
 }
+
+export interface GrunnlagDto {
+    /** Referanse til grunnlaget */
+    referanse: string;
+    /** Grunnlagstype */
+    type: GrunnlagDtoType;
+    /** Innholdet i grunnlaget */
+    innhold: JsonNode;
+}
+
+/** Innholdet i grunnlaget */
+export type JsonNode = object;
 
 /** Periode (fra-til dato */
 export interface Periode {
@@ -651,6 +664,52 @@ export enum CreateBehandlingRequestEngangsbelopType {
     SAERTILSKUDD = "SAERTILSKUDD",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+/** Grunnlagstype */
+export enum GrunnlagDtoType {
+    SAERFRADRAG = "SAERFRADRAG",
+    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
+    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
+    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNAD_INFO = "SOKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALT_BELOP = "INNBETALT_BELOP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
