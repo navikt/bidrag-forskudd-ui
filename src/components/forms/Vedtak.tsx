@@ -25,7 +25,7 @@ const Vedtak = () => {
         const saksBehandlerId = ""; // TODO
 
         if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
-            const grunnlagList = beregnetForskudd.resultat!.flatMap(i => i.grunnlagListe || []) || [];
+            const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
 
             const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
                 kilde: "MANUELT",
@@ -33,12 +33,12 @@ const Vedtak = () => {
                 opprettetAv: saksBehandlerId,
                 vedtakTidspunkt: now,
                 enhetId: behandling.behandlerEnhet,
-                grunnlagListe: grunnlagList,
+                grunnlagListe: grunnlagListe,
             });
 
             await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
         } else {
-            console.log("behanlding eller beregnetForskudd er undefined")
+            console.log("behanlding eller beregnetForskudd er undefined");
         }
     };
 
