@@ -21,21 +21,25 @@ const Vedtak = () => {
     const [beregnetForskudd, setBeregnetForskudd] = useState<ForskuddBeregningRespons | undefined>(undefined);
 
     const fatteVedtak = async () => {
-        const now = toISODateString(new Date());
+        const now = toISODateString(new Date())!;
         const saksBehandlerId = ""; // TODO
 
-        const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
-            kilde: "MANUELT",
-            type: behandling.soknadType,
-            opprettetAv: saksBehandlerId,
-            vedtakTidspunkt: now,
-            enhetId: behandling.behandlerEnhet,
-            grunnlagListe: [
-                //TODO
-            ],
-        });
+        if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
+            const grunnlagList = beregnetForskudd.resultat!.flatMap(i => i.grunnlagListe || []) || [];
 
-        await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
+            const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
+                kilde: "MANUELT",
+                type: behandling.soknadType,
+                opprettetAv: saksBehandlerId,
+                vedtakTidspunkt: now,
+                enhetId: behandling.behandlerEnhet,
+                grunnlagListe: grunnlagList,
+            });
+
+            await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
+        } else {
+            console.log("behanlding eller beregnetForskudd er undefined")
+        }
     };
 
     const getNotatUrl = () => {
