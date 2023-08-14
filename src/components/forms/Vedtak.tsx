@@ -1,4 +1,5 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
+import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -22,9 +23,9 @@ const Vedtak = () => {
 
     const fatteVedtak = async () => {
         const now = toISODateString(new Date())!;
-        const saksBehandlerId = ""; // TODO
 
         if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
+            const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
             const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
 
             const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
