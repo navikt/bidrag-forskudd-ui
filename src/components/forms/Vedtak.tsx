@@ -11,7 +11,7 @@ import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useGetBehandling } from "../../hooks/useApiData";
-import { toISODateString } from "../../utils/date-utils";
+import { toISODateTimeString } from "../../utils/date-utils";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { RolleTag } from "../RolleTag";
@@ -23,7 +23,7 @@ const Vedtak = () => {
     const [beregnetForskudd, setBeregnetForskudd] = useState<ForskuddBeregningRespons | undefined>(undefined);
 
     const fatteVedtak = async () => {
-        const now = toISODateString(new Date())!;
+        const now = toISODateTimeString(new Date())!;
 
         if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
             const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
@@ -44,7 +44,7 @@ const Vedtak = () => {
                     kilde: "BISYS_KLAGE_REF_SOKNAD",
                     referanse: behandling.soknadRefId.toString(),
                 });
-            const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
+            const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                 kilde: "MANUELT",
                 type: behandling.soknadType,
                 opprettetAv: saksBehandlerId,
@@ -94,12 +94,12 @@ const Vedtak = () => {
                     </div>
                 </Alert>
             )}
-            <div className="grid gap-y-4">
+            <div className="grid gap-y-2">
                 <Heading level="2" size="xlarge">
                     Vedtak
                 </Heading>
             </div>
-            <div className="grid gap-y-4">
+            <div className="grid gap-y-2">
                 <Heading level="3" size="medium">
                     Oppsummering
                 </Heading>
@@ -108,11 +108,10 @@ const Vedtak = () => {
                     beregnetForskudd &&
                     beregnetForskudd.resultat?.map((r, i) => (
                         <div key={i + r.ident} className="mb-8">
-                            <div className="my-8 flex items-center gap-x-2">
+                            <div className="my-4 flex items-center gap-x-2">
                                 <RolleTag rolleType={RolleType.BARN} />
                                 <BodyShort>
-                                    <PersonNavn ident={r.ident}></PersonNavn>
-                                    <span className="ml-4">{r.ident}</span>
+                                    <PersonNavn ident={r.ident}></PersonNavn> / <span className="ml-1">{r.ident}</span>
                                 </BodyShort>
                             </div>
                             <Table>
