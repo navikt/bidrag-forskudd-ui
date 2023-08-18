@@ -15,7 +15,7 @@ export type JsonNode = object;
 /** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
 export interface OpprettBehandlingsreferanseRequestDto {
     /** Kilde/type for en behandlingsreferanse */
-    kilde: "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
+    kilde: "BEHANDLING_ID" | "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
     /** Kildesystemets referanse til behandlingen */
     referanse: string;
 }
@@ -82,6 +82,8 @@ export interface OpprettGrunnlagRequestDto {
         | "INNTEKT"
         | "INNTEKT_BARN"
         | "INNTEKT_UTVIDET_BARNETRYGD"
+        | "KAPITALINNTEKT"
+        | "KAPITALINNTEKT_BARN"
         | "NETTO_SAERTILSKUDD"
         | "SAMVAERSKLASSE"
         | "BIDRAGSEVNE"
@@ -221,7 +223,7 @@ export interface OpprettVedtakRequestDto {
 /** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
 export interface BehandlingsreferanseDto {
     /** Kilde/type for en behandlingsreferanse */
-    kilde: "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
+    kilde: "BEHANDLING_ID" | "BISYS_SOKNAD" | "BISYS_KLAGE_REF_SOKNAD";
     /** Kildesystemets referanse til behandlingen */
     referanse: string;
 }
@@ -285,6 +287,8 @@ export interface GrunnlagDto {
         | "INNTEKT"
         | "INNTEKT_BARN"
         | "INNTEKT_UTVIDET_BARNETRYGD"
+        | "KAPITALINNTEKT"
+        | "KAPITALINNTEKT_BARN"
         | "NETTO_SAERTILSKUDD"
         | "SAMVAERSKLASSE"
         | "BIDRAGSEVNE"

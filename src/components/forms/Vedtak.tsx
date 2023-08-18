@@ -1,10 +1,11 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
 import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { ForskuddBeregningRespons, RolleType } from "../../api/BidragBehandlingApi";
+import { ForskuddBeregningRespons, ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
+import { OpprettBehandlingsreferanseRequestDto } from "../../api/BidragVedtakApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -28,6 +29,21 @@ const Vedtak = () => {
             const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
             const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
 
+            const behandlingReferanseListe: OpprettBehandlingsreferanseRequestDto[] = [
+                {
+                    kilde: "BEHANDLING_ID",
+                    referanse: behandlingId.toString(),
+                },
+                {
+                    kilde: "BISYS_SOKNAD",
+                    referanse: behandling.soknadId.toString(),
+                },
+            ];
+            behandling.soknadRefId &&
+                behandlingReferanseListe.push({
+                    kilde: "BISYS_KLAGE_REF_SOKNAD",
+                    referanse: behandling.soknadRefId.toString(),
+                });
             const { data: vedtakId } = await BIDRAG_VEDTAK_API.opprettVedtak({
                 kilde: "MANUELT",
                 type: behandling.soknadType,
@@ -35,6 +51,7 @@ const Vedtak = () => {
                 vedtakTidspunkt: now,
                 enhetId: behandling.behandlerEnhet,
                 grunnlagListe: grunnlagListe,
+                behandlingsreferanseListe: behandlingReferanseListe,
             });
 
             await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
@@ -48,6 +65,14 @@ const Vedtak = () => {
         return saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl;
     };
 
+    const getInntektForPeriode = (periode: ResultatPeriode): number => {
+        const grunnlagListe = beregnetForskudd.resultat[0].grunnlagListe;
+        const inntekter = grunnlagListe
+            .filter((g) => g.type == "INNTEKT")
+            .filter((g) => periode.grunnlagReferanseListe.includes(g.referanse));
+        return inntekter.reduce((currentValue, g) => (g.innhold["belop"] as number) + currentValue, 0);
+    };
+
     useEffect(() => {
         BEHANDLING_API.api.beregnForskudd(behandlingId).then(({ data }) => {
             setBeregnetForskudd(data);
@@ -56,7 +81,7 @@ const Vedtak = () => {
 
     return (
         <div className="grid gap-y-8">
-            {beregnetForskudd && (
+            {beregnetForskudd?.feil && (
                 <Alert variant="error" className="w-8/12 m-auto mt-8">
                     <div>
                         <BodyShort size="small">
@@ -78,17 +103,6 @@ const Vedtak = () => {
                 <Heading level="3" size="medium">
                     Oppsummering
                 </Heading>
-                {beregnetForskudd &&
-                    beregnetForskudd.resultat?.map((r) => (
-                        <>
-                            {r.ident}{" "}
-                            {r.beregnetForskuddPeriodeListe.map((p) => (
-                                <>
-                                    {p.resultat.belop} {p.periode.datoFom} {p.periode.datoTil}
-                                </>
-                            ))}
-                        </>
-                    ))}
 
                 {behandling &&
                     beregnetForskudd &&
@@ -104,18 +118,25 @@ const Vedtak = () => {
                             <Table>
                                 <Table.Header>
                                     <Table.Row>
-                                        <Table.HeaderCell scope="col">Type søknad</Table.HeaderCell>
                                         <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                                         <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+                                        <Table.HeaderCell scope="col">Forskudd</Table.HeaderCell>
                                         <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
                                     </Table.Row>
                                 </Table.Header>
                                 <Table.Body>
                                     {r.beregnetForskuddPeriodeListe.map((periode) => (
                                         <Table.Row>
-                                            <Table.DataCell>{behandling.behandlingType}</Table.DataCell>
                                             <Table.DataCell>
-                                                {periode.periode.datoFom} - {periode.periode.datoTil}
+                                                {dateToDDMMYYYYString(new Date(periode.periode.datoFom))} -{" "}
+                                                {periode.periode.datoTil
+                                                    ? dateToDDMMYYYYString(new Date(periode.periode.datoTil))
+                                                    : ""}
+                                            </Table.DataCell>
+                                            <Table.DataCell>{getInntektForPeriode(periode)}</Table.DataCell>
+                                            <Table.DataCell>
+                                                {periode.resultat.kode?.toLowerCase()?.replaceAll("_", " ")}
                                             </Table.DataCell>
                                             <Table.DataCell>{periode.resultat.belop}</Table.DataCell>
                                             <Table.DataCell>{periode.sivilstandType}</Table.DataCell>
