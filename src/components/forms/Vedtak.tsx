@@ -1,6 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, RedirectTo, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
+import { useMutation } from "@tanstack/react-query";
 import React, { Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -21,44 +22,48 @@ const Vedtak = () => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const [beregnetForskudd, setBeregnetForskudd] = useState<ForskuddBeregningRespons | undefined>(undefined);
+    const fatteVedtakFn = useMutation({
+        mutationFn: async () => {
+            const now = toISODateTimeString(new Date())!;
 
-    const fatteVedtak = async () => {
-        const now = toISODateTimeString(new Date())!;
+            if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
+                const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
+                const saksBehandlerNavn = await SecuritySessionUtils.hentSaksbehandlerNavn();
+                const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
 
-        if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
-            const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
-            const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
-
-            const behandlingReferanseListe: OpprettBehandlingsreferanseRequestDto[] = [
-                {
-                    kilde: "BEHANDLING_ID",
-                    referanse: behandlingId.toString(),
-                },
-                {
-                    kilde: "BISYS_SOKNAD",
-                    referanse: behandling.soknadId.toString(),
-                },
-            ];
-            behandling.soknadRefId &&
-                behandlingReferanseListe.push({
-                    kilde: "BISYS_KLAGE_REF_SOKNAD",
-                    referanse: behandling.soknadRefId.toString(),
+                const behandlingReferanseListe: OpprettBehandlingsreferanseRequestDto[] = [
+                    {
+                        kilde: "BEHANDLING_ID",
+                        referanse: behandlingId.toString(),
+                    },
+                    {
+                        kilde: "BISYS_SOKNAD",
+                        referanse: behandling.soknadId.toString(),
+                    },
+                ];
+                behandling.soknadRefId &&
+                    behandlingReferanseListe.push({
+                        kilde: "BISYS_KLAGE_REF_SOKNAD",
+                        referanse: behandling.soknadRefId.toString(),
+                    });
+                const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
+                    kilde: "MANUELT",
+                    type: behandling.soknadType,
+                    opprettetAv: saksBehandlerId,
+                    opprettetAvNavn: saksBehandlerNavn,
+                    vedtakTidspunkt: now,
+                    enhetId: behandling.behandlerEnhet,
+                    grunnlagListe: grunnlagListe,
+                    behandlingsreferanseListe: behandlingReferanseListe,
                 });
-            const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
-                kilde: "MANUELT",
-                type: behandling.soknadType,
-                opprettetAv: saksBehandlerId,
-                vedtakTidspunkt: now,
-                enhetId: behandling.behandlerEnhet,
-                grunnlagListe: grunnlagListe,
-                behandlingsreferanseListe: behandlingReferanseListe,
-            });
 
-            await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
-        } else {
-            console.log("behanlding eller beregnetForskudd er undefined");
-        }
-    };
+                await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
+            }
+        },
+        onSuccess: () => {
+            RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
+        },
+    });
 
     const getNotatUrl = () => {
         const notatUrl = `/behandling/${behandlingId}/notat`;
@@ -94,6 +99,14 @@ const Vedtak = () => {
                     </div>
                 </Alert>
             )}
+            {fatteVedtakFn.isError && (
+                <Alert variant="error" className="w-8/12 m-auto mt-8">
+                    <div>
+                        <BodyShort size="small">Det skjedde en feil ved fatte vedtak</BodyShort>
+                    </div>
+                </Alert>
+            )}
+            {behandling.erVedtakFattet && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="xlarge">
                     Vedtak
@@ -146,45 +159,50 @@ const Vedtak = () => {
                         </div>
                     ))}
             </div>
-            <Alert variant="info">
-                <div className="grid gap-y-4">
-                    <Heading level="3" size="medium">
-                        Sjekk notat
-                    </Heading>
-                    <div>
-                        Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert automatisk
-                        basert på opplysningene oppgitt.
-                        <Link href={getNotatUrl()} target="_blank" className="font-bold ml-2">
-                            Sjekk notat <ExternalLinkIcon aria-hidden />
-                        </Link>
-                    </div>
-                </div>
-            </Alert>
-            <FlexRow>
-                <Button
-                    loading={false}
-                    disabled={beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0}
-                    onClick={fatteVedtak}
-                    className="w-max"
-                    size="small"
-                >
-                    Fatte vedtak
-                </Button>
-                <Button
-                    type="button"
-                    loading={false}
-                    variant="secondary"
-                    onClick={() => {
-                        // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
-                        // og kanskje stateId?
-                        window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
-                    }}
-                    className="w-max"
-                    size="small"
-                >
-                    Avbryt
-                </Button>
-            </FlexRow>
+            {!behandling.erVedtakFattet && (
+                <>
+                    <Alert variant="info">
+                        <div className="grid gap-y-4">
+                            <Heading level="3" size="medium">
+                                Sjekk notat
+                            </Heading>
+                            <div>
+                                Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert
+                                automatisk basert på opplysningene oppgitt.
+                                <Link href={getNotatUrl()} target="_blank" className="font-bold ml-2">
+                                    Sjekk notat <ExternalLinkIcon aria-hidden />
+                                </Link>
+                            </div>
+                        </div>
+                    </Alert>
+                    <FlexRow>
+                        <Button
+                            loading={fatteVedtakFn.isLoading}
+                            disabled={beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0}
+                            onClick={() => fatteVedtakFn.mutate()}
+                            className="w-max"
+                            size="small"
+                        >
+                            Fatte vedtak og gå til sakshistorikk
+                        </Button>
+                        <Button
+                            type="button"
+                            loading={false}
+                            disabled={fatteVedtakFn.isLoading}
+                            variant="secondary"
+                            onClick={() => {
+                                // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
+                                // og kanskje stateId?
+                                window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
+                            }}
+                            className="w-max"
+                            size="small"
+                        >
+                            Avbryt
+                        </Button>
+                    </FlexRow>
+                </>
+            )}
         </div>
     );
 };

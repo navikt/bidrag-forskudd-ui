@@ -50,6 +50,22 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -135,22 +151,6 @@ export enum SoknadType {
     KLAGE = "KLAGE",
     ENDRING = "ENDRING",
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
-}
-
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
 }
 
 export interface EntityModelBehandling {
@@ -433,6 +433,7 @@ export interface BehandlingDto {
     id: number;
     behandlingType: BehandlingType;
     soknadType: SoknadType;
+    erVedtakFattet: boolean;
     /** @format date */
     datoFom: string;
     /** @format date */
