@@ -54,6 +54,25 @@ const Vedtak = () => {
                     vedtakTidspunkt: now,
                     enhetId: behandling.behandlerEnhet,
                     grunnlagListe: grunnlagListe,
+                    stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({
+                        type: behandling.behandlingType,
+                        sakId: saksnummer,
+                        skyldnerId: "1",
+                        kravhaverId: "1",
+                        innkreving: "NEI",
+                        endring: false,
+                        mottakerId: resultat.ident,
+                        periodeListe: resultat.beregnetForskuddPeriodeListe.map((liste) => ({
+                            fomDato: liste.periode?.datoFom,
+                            tilDato: liste.periode?.datoTil,
+                            belop: liste.resultat.belop,
+                            valutakode: "NOK",
+                            resultatkode: liste.resultat.kode,
+                            grunnlagReferanseListe: liste.grunnlagReferanseListe.filter(
+                                (r) => !r.startsWith("Sjablon") // TODO: Vedtak liker ikke sjablon verdiene.
+                            ),
+                        })),
+                    })),
                     behandlingsreferanseListe: behandlingReferanseListe,
                 });
 
