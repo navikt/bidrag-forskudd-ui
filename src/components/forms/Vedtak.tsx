@@ -1,17 +1,19 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, RedirectTo, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
-import React, { Suspense, useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 
-import { ForskuddBeregningRespons, ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
+import { ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
 import { OpprettBehandlingsreferanseRequestDto } from "../../api/BidragVedtakApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
-import { useGetBehandling } from "../../hooks/useApiData";
+import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
+import { mapGrunnlagPersonInfo, mapResultatKodeToDisplayValue } from "../../mapper/VedtakBeregningkMapper";
+import { uniqueByKey } from "../../utils/array-utils";
 import { toISODateTimeString } from "../../utils/date-utils";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
@@ -21,7 +23,12 @@ const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const [beregnetForskudd, setBeregnetForskudd] = useState<ForskuddBeregningRespons | undefined>(undefined);
+    const personsQueries = usePersonsQueries(behandling.roller);
+    const { data: beregnetForskudd } = useQuery({
+        queryKey: ["beregning"],
+        queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
+        select: (data) => data.data,
+    });
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
             const now = toISODateTimeString(new Date())!;
@@ -41,6 +48,10 @@ const Vedtak = () => {
                         referanse: behandling.soknadId.toString(),
                     },
                 ];
+                const personInfoListe = personsQueries.map((p) => p.data);
+                const bidragsMottaker = behandling.roller.find(
+                    (rolle) => rolle.rolleType == RolleType.BIDRAGS_MOTTAKER
+                );
                 behandling.soknadRefId &&
                     behandlingReferanseListe.push({
                         kilde: "BISYS_KLAGE_REF_SOKNAD",
@@ -53,15 +64,20 @@ const Vedtak = () => {
                     opprettetAvNavn: saksBehandlerNavn,
                     vedtakTidspunkt: now,
                     enhetId: behandling.behandlerEnhet,
-                    grunnlagListe: grunnlagListe,
+                    grunnlagListe: [
+                        //TODO: Skal inntekter ikke valgt tas med?
+                        //TODO: Skal barn i samme hustand men ikke i søknaden tas med i grunnlagslisten? (Kan feks i framtiden klage over feil tall på barn i hustand)
+                        ...uniqueByKey(grunnlagListe, "referanse"),
+                        ...mapGrunnlagPersonInfo(behandling, personInfoListe),
+                    ],
                     stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({
                         type: behandling.behandlingType,
                         sakId: saksnummer,
-                        skyldnerId: "1",
-                        kravhaverId: "1",
-                        innkreving: "NEI",
+                        skyldnerId: "NAV",
+                        kravhaverId: resultat.ident,
+                        innkreving: "JA",
                         endring: false,
-                        mottakerId: resultat.ident,
+                        mottakerId: bidragsMottaker.ident,
                         periodeListe: resultat.beregnetForskuddPeriodeListe.map((liste) => ({
                             fomDato: liste.periode?.datoFom,
                             tilDato: liste.periode?.datoTil,
@@ -69,7 +85,7 @@ const Vedtak = () => {
                             valutakode: "NOK",
                             resultatkode: liste.resultat.kode,
                             grunnlagReferanseListe: liste.grunnlagReferanseListe.filter(
-                                (r) => !r.startsWith("Sjablon") // TODO: Vedtak liker ikke sjablon verdiene.
+                                (r) => !r.startsWith("Sjablon") // TODO: Vedtak liker ikke sjablon verdiene. Dette må diskuteres med Lars Otto/Magnus
                             ),
                         })),
                     })),
@@ -96,12 +112,6 @@ const Vedtak = () => {
             .filter((g) => periode.grunnlagReferanseListe.includes(g.referanse));
         return inntekter.reduce((currentValue, g) => (g.innhold["belop"] as number) + currentValue, 0);
     };
-
-    useEffect(() => {
-        BEHANDLING_API.api.beregnForskudd(behandlingId).then(({ data }) => {
-            setBeregnetForskudd(data);
-        });
-    }, []);
 
     return (
         <div className="grid gap-y-8">
@@ -167,7 +177,7 @@ const Vedtak = () => {
                                             </Table.DataCell>
                                             <Table.DataCell>{getInntektForPeriode(periode)}</Table.DataCell>
                                             <Table.DataCell>
-                                                {periode.resultat.kode?.toLowerCase()?.replaceAll("_", " ")}
+                                                {mapResultatKodeToDisplayValue(periode.resultat.kode)}
                                             </Table.DataCell>
                                             <Table.DataCell>{periode.resultat.belop}</Table.DataCell>
                                             <Table.DataCell>{periode.sivilstandType}</Table.DataCell>
@@ -186,7 +196,7 @@ const Vedtak = () => {
                                 Sjekk notat
                             </Heading>
                             <div>
-                                Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorik. Notatet blir generert
+                                Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorikk. Notatet blir generert
                                 automatisk basert på opplysningene oppgitt.
                                 <Link href={getNotatUrl()} target="_blank" className="font-bold ml-2">
                                     Sjekk notat <ExternalLinkIcon aria-hidden />
@@ -210,9 +220,7 @@ const Vedtak = () => {
                             disabled={fatteVedtakFn.isLoading}
                             variant="secondary"
                             onClick={() => {
-                                // TODO: legge til en sjekk/bekreftelse for å gå tilbake til bisys
-                                // og kanskje stateId?
-                                window.location.href = `${environment.url.bisys}Oppgaveliste.do`;
+                                RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
                             }}
                             className="w-max"
                             size="small"
