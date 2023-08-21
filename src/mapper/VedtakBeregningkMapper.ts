@@ -1,4 +1,5 @@
 import { BehandlingDto, BehandlingType, GrunnlagDto, GrunnlagDtoType, RolleType } from "../api/BidragBehandlingApi";
+import { OpprettBehandlingsreferanseRequestDto } from "../api/BidragVedtakApi";
 import { PersonDto } from "../api/PersonApi";
 import { mapRolle } from "../types/rolle";
 
@@ -19,6 +20,28 @@ export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: Pers
                 rolle: mapRolle(rolle.rolleType),
             },
         }));
+}
+
+export function mapBehandlingReferanseliste(
+    behandlingId: number,
+    behandling: BehandlingDto
+): OpprettBehandlingsreferanseRequestDto[] {
+    const behandlingReferanseListe: OpprettBehandlingsreferanseRequestDto[] = [
+        {
+            kilde: "BEHANDLING_ID",
+            referanse: behandlingId.toString(),
+        },
+        {
+            kilde: "BISYS_SOKNAD",
+            referanse: behandling.soknadId.toString(),
+        },
+    ];
+    behandling.soknadRefId &&
+        behandlingReferanseListe.push({
+            kilde: "BISYS_KLAGE_REF_SOKNAD",
+            referanse: behandling.soknadRefId.toString(),
+        });
+    return behandlingReferanseListe;
 }
 export function mapResultatKodeToDisplayValue(kode: string): string {
     switch (kode) {

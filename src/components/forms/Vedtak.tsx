@@ -6,13 +6,16 @@ import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 
 import { ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
-import { OpprettBehandlingsreferanseRequestDto } from "../../api/BidragVedtakApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
-import { mapGrunnlagPersonInfo, mapResultatKodeToDisplayValue } from "../../mapper/VedtakBeregningkMapper";
+import {
+    mapBehandlingReferanseliste,
+    mapGrunnlagPersonInfo,
+    mapResultatKodeToDisplayValue,
+} from "../../mapper/VedtakBeregningkMapper";
 import { uniqueByKey } from "../../utils/array-utils";
 import { toISODateTimeString } from "../../utils/date-utils";
 import { FlexRow } from "../layout/grid/FlexRow";
@@ -37,26 +40,10 @@ const Vedtak = () => {
                 const saksBehandlerId = await SecuritySessionUtils.hentSaksbehandlerId();
                 const saksBehandlerNavn = await SecuritySessionUtils.hentSaksbehandlerNavn();
                 const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
-
-                const behandlingReferanseListe: OpprettBehandlingsreferanseRequestDto[] = [
-                    {
-                        kilde: "BEHANDLING_ID",
-                        referanse: behandlingId.toString(),
-                    },
-                    {
-                        kilde: "BISYS_SOKNAD",
-                        referanse: behandling.soknadId.toString(),
-                    },
-                ];
                 const personInfoListe = personsQueries.map((p) => p.data);
                 const bidragsMottaker = behandling.roller.find(
                     (rolle) => rolle.rolleType == RolleType.BIDRAGS_MOTTAKER
                 );
-                behandling.soknadRefId &&
-                    behandlingReferanseListe.push({
-                        kilde: "BISYS_KLAGE_REF_SOKNAD",
-                        referanse: behandling.soknadRefId.toString(),
-                    });
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
                     type: behandling.soknadType,
@@ -65,7 +52,8 @@ const Vedtak = () => {
                     vedtakTidspunkt: now,
                     enhetId: behandling.behandlerEnhet,
                     grunnlagListe: [
-                        //TODO: Skal inntekter ikke valgt tas med?
+                        //TODO: Skal inntekter ikke valgt tas med? Må da legge til valgt: true på innhold
+                        //TODO: Inntekter må inkludere rolle (BIDRAGSMOTTAKER, BIDRAGSPLIKTIG, BARN)
                         //TODO: Skal barn i samme hustand men ikke i søknaden tas med i grunnlagslisten? (Kan feks i framtiden klage over feil tall på barn i hustand)
                         ...uniqueByKey(grunnlagListe, "referanse"),
                         ...mapGrunnlagPersonInfo(behandling, personInfoListe),
@@ -84,19 +72,17 @@ const Vedtak = () => {
                             belop: liste.resultat.belop,
                             valutakode: "NOK",
                             resultatkode: liste.resultat.kode,
-                            grunnlagReferanseListe: liste.grunnlagReferanseListe.filter(
-                                (r) => !r.startsWith("Sjablon") // TODO: Vedtak liker ikke sjablon verdiene. Dette må diskuteres med Lars Otto/Magnus
-                            ),
+                            grunnlagReferanseListe: liste.grunnlagReferanseListe,
                         })),
                     })),
-                    behandlingsreferanseListe: behandlingReferanseListe,
+                    behandlingsreferanseListe: mapBehandlingReferanseliste(behandlingId, behandling),
                 });
 
                 await BEHANDLING_API.api.oppdaterVedtakId(behandlingId, vedtakId);
             }
         },
         onSuccess: () => {
-            RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
+            // RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
         },
     });
 
