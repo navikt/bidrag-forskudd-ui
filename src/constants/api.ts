@@ -10,8 +10,8 @@ export const PERSON_API = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PER
 export const BIDRAG_VEDTAK_API = useApi(
     new BidragVedtakApi({ baseURL: environment.url.bidragVedtak }),
     "bidrag-vedtak",
-    "fss"
-).vedtak;
+    "gcp"
+);
 export const BIDRAG_GRUNNLAG_API = useApi(
     new BidragGrunnlagApi({ baseURL: environment.url.bidragGrunnlag }),
     "bidrag-grunnlag",

@@ -163,6 +163,10 @@ export interface EntityModelBehandling {
     /** @format date-time */
     mottatDato: string;
     saksnummer: string;
+    /** @format int64 */
+    soknadId: number;
+    /** @format int64 */
+    soknadRefId?: number;
     behandlerEnhet: string;
     soknadFra: SoknadFraType;
     stonadType?: EntityModelBehandlingStonadType;
@@ -205,6 +209,10 @@ export interface BehandlingRequestBody {
     /** @format date-time */
     mottatDato: string;
     saksnummer: string;
+    /** @format int64 */
+    soknadId: number;
+    /** @format int64 */
+    soknadRefId?: number;
     behandlerEnhet: string;
     soknadFra: SoknadFraType;
     stonadType?: BehandlingRequestBodyStonadType;
@@ -425,6 +433,7 @@ export interface BehandlingDto {
     id: number;
     behandlingType: BehandlingType;
     soknadType: SoknadType;
+    erVedtakFattet: boolean;
     /** @format date */
     datoFom: string;
     /** @format date */
@@ -433,6 +442,8 @@ export interface BehandlingDto {
     mottatDato: string;
     soknadFraType: SoknadFraType;
     saksnummer: string;
+    /** @format int64 */
+    soknadId: number;
     behandlerEnhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
@@ -442,6 +453,8 @@ export interface BehandlingDto {
     sivilstand: SivilstandDto[];
     /** @format date */
     virkningsDato?: string;
+    /** @format int64 */
+    soknadRefId?: number;
     aarsak?: ForskuddAarsakType;
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
@@ -490,6 +503,10 @@ export interface CreateBehandlingRequest {
     roller: CreateRolleDto[];
     stonadType: CreateBehandlingRequestStonadType;
     engangsbelopType: CreateBehandlingRequestEngangsbelopType;
+    /** @format int64 */
+    soknadId: number;
+    /** @format int64 */
+    soknadRefId?: number;
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */

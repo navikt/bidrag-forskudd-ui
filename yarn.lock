@@ -207,12 +207,13 @@
   resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/4.1.4/3911a16c0813685bdd6ac6921ac9114f20899aef#3911a16c0813685bdd6ac6921ac9114f20899aef"
   integrity sha512-hY+uCHwbkyqPe8P5r5VIzaLNb3oDTP3R6/Z0l/FFQLy4I/jTdCXSnyY40rCn1buD16j8RyVmbYalLJKUGw5u9Q==
 
-"@navikt/bidrag-ui-common@^1.7.0":
-  version "1.7.0"
-  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.7.0/8ac2c0326e89c33404e1f277ea8ab3d41a415999#8ac2c0326e89c33404e1f277ea8ab3d41a415999"
-  integrity sha512-r4prXPbqi5rDP4em71TyBFUyAh6pW9Tm5dc8k1MBpTOa/dAZznVGFyLILxc4h5Gxmo9wezjNjyrAS4u9v2Tyjg==
+"@navikt/bidrag-ui-common@^1.8.7":
+  version "1.8.7"
+  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.8.7/495198662e4253a6247d1a89a50397aa2b28772a#495198662e4253a6247d1a89a50397aa2b28772a"
+  integrity sha512-XLV+MF98Y8N4OOe7IimT68rd0R9l04a7MXeU1jePeeXkDj5KoQsgUL8m19h0n5XaIrENrtwPWlxo/DgQalAj1A==
   dependencies:
-    axios "^1.3.4"
+    axios "^1.4.0"
+    echarts "^5.4.2"
     lodash.debounce "^4.0.8"
     uuid "^9.0.0"
 
@@ -1393,7 +1394,7 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-axios@^1.3.4:
+axios@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.4.0.tgz#38a7bf1224cd308de271146038b551d725f0be1f"
   integrity sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==
@@ -2250,6 +2251,14 @@ echarts@^5.4.1:
   dependencies:
     tslib "2.3.0"
     zrender "5.4.1"
+
+echarts@^5.4.2:
+  version "5.4.3"
+  resolved "https://registry.yarnpkg.com/echarts/-/echarts-5.4.3.tgz#f5522ef24419164903eedcfd2b506c6fc91fb20c"
+  integrity sha512-mYKxLxhzy6zyTi/FaEbJMOZU1ULGEQHaeIeuMR5L+JnJTpz+YR03mnnpBhbR4+UYJAgiXgpyTVLffPAjOTLkZA==
+  dependencies:
+    tslib "2.3.0"
+    zrender "5.4.4"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -6500,5 +6509,12 @@ zrender@5.4.1:
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/zrender/-/zrender-5.4.1.tgz#892f864b885c71e1dc25dcb3c7a4ba42678d3f11"
   integrity sha512-M4Z05BHWtajY2241EmMPHglDQAJ1UyHQcYsxDNzD9XLSkPDqMq4bB28v9Pb4mvHnVQ0GxyTklZ/69xCFP6RXBA==
+  dependencies:
+    tslib "2.3.0"
+
+zrender@5.4.4:
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/zrender/-/zrender-5.4.4.tgz#8854f1d95ecc82cf8912f5a11f86657cb8c9e261"
+  integrity sha512-0VxCNJ7AGOMCWeHVyTrGzUgrK4asT4ml9PEkeGirAkKNYXYzoPJCLvmyfdoOXcjTHPs10OZVMfD1Rwg16AZyYw==
   dependencies:
     tslib "2.3.0"
