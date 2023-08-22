@@ -12,7 +12,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isValidDate, toISODateString } from "../../utils/date-utils";
+import { DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -24,17 +24,15 @@ import { ActionButtons } from "./inntekt/ActionButtons";
 
 const createInitialValues = (response: VirkningsTidspunktResponse) =>
     ({
-        virkningsDato: dateOrNull(response.virkningsDato),
+        virkningsDato: response.virkningsDato,
         aarsak: response.aarsak ?? "",
         virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
         virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
     } as VirkningstidspunktFormValues);
 
 const createPayload = (values: VirkningstidspunktFormValues) => ({
-    virkningsTidspunktBegrunnelseMedIVedtakNotat: values.virkningsTidspunktBegrunnelseMedIVedtakNotat,
-    virkningsTidspunktBegrunnelseKunINotat: values.virkningsTidspunktBegrunnelseKunINotat,
+    ...values,
     aarsak: values.aarsak === "" ? null : values.aarsak,
-    virkningsDato: toISODateString(values.virkningsDato),
 });
 
 const Main = ({ initialValues, error }) => {
@@ -137,7 +135,6 @@ const VirkningstidspunktForm = () => {
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
-        mode: "onChange",
     });
 
     const fieldsForNotat = useWatch({

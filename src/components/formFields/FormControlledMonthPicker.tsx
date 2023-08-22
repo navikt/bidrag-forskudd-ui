@@ -87,7 +87,6 @@ export const FormControlledMonthPicker = ({
             label={label}
             placeholder={placeholder}
             onChange={(value) => handleChange(value)}
-            fieldValue={field.value}
             defaultValue={defaultValue}
             hideLabel={hideLabel}
             className={className}

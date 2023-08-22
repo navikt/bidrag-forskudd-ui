@@ -15,7 +15,6 @@ interface MonthPickerInputProps {
     onValidate?: (monthValidation: MonthValidationT) => void;
     toDate?: Date;
     lastDayOfMonthPicker?: boolean;
-    fieldValue?: string;
 }
 export const MonthPicker = ({
     label,
@@ -29,7 +28,6 @@ export const MonthPicker = ({
     onValidate,
     error,
     lastDayOfMonthPicker,
-    fieldValue,
 }: MonthPickerInputProps) => {
     const { monthpickerProps, inputProps, setSelected } = useMonthpicker({
         fromDate,
@@ -52,7 +50,7 @@ export const MonthPicker = ({
     useEffect(() => {
         const value = isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null;
         setSelected(value);
-    }, [fieldValue]);
+    }, [defaultValue]);
 
     return (
         <div className="min-h-96">
