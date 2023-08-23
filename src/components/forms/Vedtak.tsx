@@ -34,6 +34,7 @@ const Vedtak = () => {
     });
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
+            if (process.env.DISABLE_FATTE_VEDTAK == "true") return;
             const now = toISODateTimeString(new Date())!;
 
             if (behandling && beregnetForskudd && beregnetForskudd.resultat) {
@@ -193,7 +194,10 @@ const Vedtak = () => {
                     <FlexRow>
                         <Button
                             loading={fatteVedtakFn.isLoading}
-                            disabled={beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0}
+                            disabled={
+                                (beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0) ||
+                                process.env.DISABLE_FATTE_VEDTAK == "true"
+                            }
                             onClick={() => fatteVedtakFn.mutate()}
                             className="w-max"
                             size="small"

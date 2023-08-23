@@ -14,6 +14,7 @@ module.exports = merge(webpackCommon, {
             BIDRAG_BEHANDLING_URL: "",
             BIDRAG_GRUNNLAG_URL: "",
             BISYS_URL: "",
+            DISABLE_FATTE_VEDTAK: "",
         }),
     ],
 });
