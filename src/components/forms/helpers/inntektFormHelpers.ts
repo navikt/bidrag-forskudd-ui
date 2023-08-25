@@ -1,5 +1,6 @@
-import { RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+import { InntekterResponse, RolleDto, RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
+import { TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -22,7 +23,7 @@ const mockUtvidetBarnetrygd = (datoFom) => [
     {
         deltBoSted: true,
         belop: 29868,
-        datoFom: new Date(datoFom),
+        datoFom: toISODateString(new Date(datoFom)),
         datoTom: null,
     },
 ];
@@ -32,7 +33,7 @@ const mockBarnetillegg = (bmOgBarn, datoFom) =>
         .map(({ ident }) => ({
             ident,
             barnetillegg: 3716,
-            datoFom: new Date(datoFom),
+            datoFom: toISODateString(new Date(datoFom)),
             datoTom: null,
         }));
 
@@ -49,10 +50,10 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
             })
         )
         .flat(),
-    utvidetbarnetrygd: values.utvidetBarnetrygd.length
-        ? values.utvidetBarnetrygd.map((utvidetBarnetrygd) => ({
-              ...utvidetBarnetrygd,
-              belop: Number(utvidetBarnetrygd.belop),
+    utvidetbarnetrygd: values.utvidetbarnetrygd.length
+        ? values.utvidetbarnetrygd.map((utvidetbarnetrygd) => ({
+              ...utvidetbarnetrygd,
+              belop: Number(utvidetbarnetrygd.belop),
           }))
         : [],
     barnetillegg: values.barnetillegg.length
@@ -122,13 +123,6 @@ const get3and12MonthIncomeFromAinntekt = (ainntektListe, rolle) => {
         },
     ];
 };
-const mapSkattegrunnlagToRolle = (skattegrunnlagListe, ainntektListe) => (rolle) =>
-    get3and12MonthIncomeFromAinntekt(ainntektListe, rolle).concat(
-        skattegrunnlagListe
-            .filter((skattegrunlag) => skattegrunlag.personId === rolle.ident)
-            .map((skattegrunlag) => mapSkattegrunnlagInntektPerioder(skattegrunlag))
-            .flat()
-    );
 
 const mapInntekterToRolle = (inntekter) => (rolle) =>
     inntekter
@@ -137,22 +131,38 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
             ...inntekt,
             inntektType: inntekt.inntektType ?? "",
         }));
-const getPerioderFraSkattegrunnlagOgAinntekt = (bmOgBarn, skattegrunnlagListe, ainntektListe) =>
-    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapSkattegrunnlagToRolle(skattegrunnlagListe, ainntektListe)), {});
 export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
-export const createInitialValues = (bmOgBarn, grunnlagspakke, inntekter, datoFom): InntektFormValues => {
+const getPerioderFraBidragInntekt = (bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[]) =>
+    bidragInntekt.reduce(
+        (acc, curr) => ({
+            ...acc,
+            [curr.ident]: curr.data.summertAarsinntektListe.map((inntekt) => ({
+                taMed: false,
+                inntektType: inntekt.visningsnavn,
+                belop: inntekt.sumInntekt,
+                datoTom: inntekt.periodeTil,
+                datoFom: inntekt.periodeFra,
+                ident: curr.ident,
+                fraGrunnlag: true,
+            })),
+        }),
+        {}
+    );
+
+export const createInitialValues = (
+    bmOgBarn: RolleDto[],
+    bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[],
+    inntekter: InntekterResponse,
+    datoFom: Date
+): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
             ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
-            : getPerioderFraSkattegrunnlagOgAinntekt(
-                  bmOgBarn,
-                  grunnlagspakke.skattegrunnlagListe,
-                  grunnlagspakke.ainntektListe
-              ),
-        utvidetBarnetrygd: inntekter?.utvidetBarnetrygd?.length
-            ? inntekter.utvidetBarnetrygd
+            : getPerioderFraBidragInntekt(bidragInntekt),
+        utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
+            ? inntekter.utvidetbarnetrygd
             : mockUtvidetBarnetrygd(datoFom),
         // grunnlagspakke.ubstListe.map((ubst) => ({
         //     deltBoSted: false, // TODO check where to get this value

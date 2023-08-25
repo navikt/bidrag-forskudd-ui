@@ -1,8 +1,7 @@
 import { UseFormSetValue } from "react-hook-form";
 
-import { BehandlingDto, BoforholdResponse, SivilstandDto } from "../../../api/BidragBehandlingApi";
+import { BehandlingDto, BoforholdResponse, BoStatusType, SivilstandDto } from "../../../api/BidragBehandlingApi";
 import { HentGrunnlagspakkeDto, RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
-import { BoStatusUI } from "../../../enum/BoStatus";
 import {
     BarnPeriode,
     BoforholdFormValues,
@@ -42,21 +41,21 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
                 perioder.push({
                     fraDato: brukFra < fodselsdato ? fodselsdato : brukFra,
                     tilDato: deductDays(brukFra, 1),
-                    boStatus: BoStatusUI.IKKE_REGISTRERT_PA_ADRESSE,
+                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
                 });
             }
         } else if (addDays(perioder[i - 1].tilDato, 1).toDateString() !== new Date(periode.periodeFra).toDateString()) {
             perioder.push({
                 fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
                 tilDato: deductDays(new Date(periode.periodeFra), 1),
-                boStatus: BoStatusUI.IKKE_REGISTRERT_PA_ADRESSE,
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
             });
         }
 
         perioder.push({
             fraDato: dateOrNull(periode.periodeFra),
             tilDato: dateOrNull(periode.periodeTil),
-            boStatus: BoStatusUI.REGISTRERT_PA_ADRESSE,
+            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
         });
 
         if (
@@ -67,7 +66,7 @@ const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             perioder.push({
                 fraDato: addDays(new Date(periode.periodeTil), 1),
                 tilDato: dateOrNull(egneBarnIHusstanden.brukTil),
-                boStatus: BoStatusUI.IKKE_REGISTRERT_PA_ADRESSE,
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
             });
         }
     });
@@ -89,8 +88,12 @@ export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], d
         (periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom)
     );
 
-    const result: { boStatus: BoStatusUI; kilde: "offentlig" | "manuelt"; datoFom: string; datoTom: string | null }[] =
-        [];
+    const result: {
+        boStatus: BoStatusType;
+        kilde: "offentlig" | "manuelt";
+        datoFom: string;
+        datoTom: string | null;
+    }[] = [];
     perioderFraVirkningstidspunkt?.forEach((periode, i) => {
         result.push({
             boStatus: periode.boStatus,

@@ -5,7 +5,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { RolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { GrunnlagInntektType, InntektBeskrivelse } from "../../../enum/InntektBeskrivelse";
+import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, isValidDate } from "../../../utils/date-utils";
@@ -24,7 +24,7 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
-        <BodyShort className="min-w-[215px] capitalize">{InntektBeskrivelse[item.inntektType]}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{item.inntektType}</BodyShort>
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
@@ -334,20 +334,20 @@ export const UtvidetBarnetrygdTabel = () => {
     } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
-        name: "utvidetBarnetrygd",
+        name: "utvidetbarnetrygd",
     });
 
-    const watchFieldArray = useWatch({ control, name: "utvidetBarnetrygd" });
+    const watchFieldArray = useWatch({ control, name: "utvidetbarnetrygd" });
 
     useEffect(() => {
         validatePeriods();
     }, [watchFieldArray]);
 
     const validatePeriods = () => {
-        const utvidetBarnetrygdList = getValues("utvidetBarnetrygd");
+        const utvidetBarnetrygdList = getValues("utvidetbarnetrygd");
 
         if (!utvidetBarnetrygdList.length) {
-            clearErrors("utvidetBarnetrygd");
+            clearErrors("utvidetbarnetrygd");
             return;
         }
         const filtrertOgSorterListe = utvidetBarnetrygdList
@@ -357,8 +357,8 @@ export const UtvidetBarnetrygdTabel = () => {
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
-            setError("utvidetBarnetrygd", {
-                ...errors.utvidetBarnetrygd,
+            setError("utvidetbarnetrygd", {
+                ...errors.utvidetbarnetrygd,
                 types: {
                     overlappingPerioder: "Du har overlappende perioder",
                 },
@@ -373,9 +373,9 @@ export const UtvidetBarnetrygdTabel = () => {
 
     return (
         <>
-            {errors?.utvidetBarnetrygd?.types?.overlappingPerioder && (
+            {errors?.utvidetbarnetrygd?.types?.overlappingPerioder && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.utvidetBarnetrygd.types.overlappingPerioder}</BodyShort>
+                    <BodyShort>{errors.utvidetbarnetrygd.types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
@@ -426,7 +426,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                     key={`delete-button-${index}`}
                                     type="button"
                                     onClick={() => {
-                                        clearErrors(`utvidetBarnetrygd.${index}`);
+                                        clearErrors(`utvidetbarnetrygd.${index}`);
                                         fieldArray.remove(index);
                                     }}
                                     icon={<TrashIcon aria-hidden />}
