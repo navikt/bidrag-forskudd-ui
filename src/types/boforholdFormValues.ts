@@ -1,11 +1,10 @@
 import { BoStatusType, SivilstandDto } from "../api/BidragBehandlingApi";
-import { BoStatusUI } from "../enum/BoStatus";
 
 export interface BarnPeriode {
     datoFom?: string | null;
     datoTom?: string | null;
-    boStatus: BoStatusType | BoStatusUI | "";
-    kilde: "offentlig" | "manuelt";
+    boStatus: BoStatusType | "";
+    kilde: string;
 }
 interface Barn {
     medISaken: boolean;
@@ -17,14 +16,14 @@ interface Barn {
 export interface BoforholdFormValues {
     husstandsBarn: Barn[];
     sivilstand: SivilstandDto[];
-    boforholdBegrunnelseMedIVedtakNotat: string;
-    boforholdBegrunnelseKunINotat: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
 }
 
 export interface OpplysningFraFolkeRegistrePeriode {
     fraDato: Date;
     tilDato: Date;
-    boStatus: BoStatusUI;
+    boStatus: BoStatusType;
 }
 
 export interface OpplysningFraFolkeRegistre {

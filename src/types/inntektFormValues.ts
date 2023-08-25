@@ -15,15 +15,15 @@ export interface BarneTillegFormValues {
 }
 
 export interface UtvidetBarnetrygdFormValues {
-    datoFom: string | null;
-    datoTom: string | null;
+    datoFom?: string;
+    datoTom?: string;
     deltBoSted: boolean;
     belop: number;
 }
 export interface InntektFormValues {
     inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };
     barnetillegg: BarneTillegFormValues[];
-    utvidetBarnetrygd: UtvidetBarnetrygdFormValues[];
+    utvidetbarnetrygd: UtvidetBarnetrygdFormValues[];
     inntektBegrunnelseMedIVedtakNotat: string;
     inntektBegrunnelseKunINotat: string;
 }

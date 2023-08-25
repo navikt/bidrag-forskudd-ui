@@ -12,6 +12,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import {
     useGetBehandling,
+    useGetBidragInntektQueries,
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
     useHentInntekter,
@@ -148,6 +149,8 @@ const InntektForm = () => {
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: inntekter } = useHentInntekter(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
+    const bidragInntektQueries = useGetBidragInntektQueries(behandling, grunnlagspakke);
+    const bidragInntekt = bidragInntektQueries.map(({ data }) => data);
     const updateInntekter = useUpdateInntekter(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
@@ -155,7 +158,7 @@ const InntektForm = () => {
         (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
     );
 
-    const initialValues = createInitialValues(bmOgBarn, grunnlagspakke, inntekter, datoFom);
+    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, datoFom);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,

@@ -20,8 +20,9 @@ import {
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
 } from "../api/BidragGrunnlagApi";
+import { TransformerInntekterRequestDto, TransformerInntekterResponseDto } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
-import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
+import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 
 export const useGetBehandlings = () =>
@@ -192,7 +193,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
         })),
     });
 
-const createGrunnlagRequest = (behandling) => {
+const createGrunnlagRequest = (behandling: BehandlingDto) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const today = new Date();
@@ -204,12 +205,6 @@ const createGrunnlagRequest = (behandling) => {
         periodeFra,
         periodeTil: toISODateString(today),
     }));
-    // const husstandsmedlemmerBarnRequests = barn?.map((b) => ({
-    //     type: "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
-    //     personId: b.ident,
-    //     periodeFra,
-    //     periodeTil: toISODateString(today),
-    // }));
 
     const bmRequests = [
         "AINNTEKT",
@@ -232,13 +227,40 @@ const createGrunnlagRequest = (behandling) => {
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
         // @ts-ignore
         grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
-        //.concat(husstandsmedlemmerBarnRequests),
     };
 
     return grunnlagRequest;
 };
 
-export const useGrunnlagspakke = (behandling) => {
+const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
+    const barnIdenter = behandling?.roller
+        ?.filter((rolle) => rolle.rolleType === RolleType.BARN)
+        .map((barn) => barn.ident);
+
+    const requests: { ident: string; request: TransformerInntekterRequestDto }[] = barnIdenter
+        .concat(bmIdent)
+        .map((ident) => ({
+            ident,
+            request: {
+                ainntektListe: grunnlagspakke.ainntektListe.filter((ainntekt) => ainntekt.personId === ident),
+                skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe.filter(
+                    (skattegrunnlag) => skattegrunnlag.personId === ident
+                ),
+                overgangsstonadListe: grunnlagspakke.overgangsstonadListe.filter(
+                    (overgangsstonad) => overgangsstonad.partPersonId === ident
+                ),
+                kontantstotteListe: grunnlagspakke.kontantstotteListe.filter(
+                    (kontantstotte) => kontantstotte.partPersonId === ident
+                ),
+                ubstListe: grunnlagspakke.ubstListe.filter((ubst) => ubst.personId === ident),
+            },
+        }));
+
+    return requests;
+};
+
+export const useGrunnlagspakke = (behandling: BehandlingDto) => {
     const { data: grunnlagspakkeId } = useQuery({
         queryKey: ["grunnlagspakkeId"],
         queryFn: async (): Promise<number> => {
@@ -325,5 +347,35 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     });
 
     const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
-    return grunnlagspakke;
+    const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
+
+    bidragIncomeRequests.forEach((request) => {
+        queryClient.prefetchQuery({
+            queryKey: ["bidraginntekt", request.ident],
+            queryFn: async () => {
+                const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
+                return data;
+            },
+            staleTime: Infinity,
+        });
+    });
+};
+
+export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
+    const requests = createBidragIncomeRequest(behandling, grunnlagspakke);
+
+    return useQueries({
+        queries: requests.map((request) => {
+            return {
+                queryKey: ["bidragInntekt", request.ident],
+                queryFn: async (): Promise<{ ident: string; data: TransformerInntekterResponseDto }> => {
+                    const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
+                    return { ident: request.ident, data: data };
+                },
+                staleTime: Infinity,
+                suspense: true,
+                enabled: !!behandling && !!grunnlagspakke,
+            };
+        }),
+    });
 };

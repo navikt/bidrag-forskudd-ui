@@ -14,11 +14,10 @@ import {
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
+import { BoStatusType, RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
-import { BoStatusUI } from "../../enum/BoStatus";
 import { BoStatusTexts } from "../../enum/BoStatusTexts";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { SivilstandTypeTexts } from "../../enum/SivilstandTypeTexts";
@@ -524,7 +523,7 @@ const Perioder = ({
                                     className="w-fit"
                                     label="Status"
                                     options={[{ value: "", text: "Velg status" }].concat(
-                                        Object.entries(BoStatusUI).map(([value, text]) => ({
+                                        Object.entries(BoStatusType).map(([value, text]) => ({
                                             value,
                                             text: BoStatusTexts[text],
                                         }))

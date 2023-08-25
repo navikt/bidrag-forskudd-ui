@@ -3,6 +3,8 @@ import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {
     id: 1,
+    soknadId: 1234,
+    erVedtakFattet: false,
     behandlingType: BehandlingType.FORSKUDD,
     soknadType: SoknadType.INNKREVING,
     datoFom: "2022-04-01",
