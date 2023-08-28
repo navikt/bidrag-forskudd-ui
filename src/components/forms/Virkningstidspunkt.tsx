@@ -43,6 +43,7 @@ const Main = ({ initialValues, error }) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
         if (isValidDate(date)) {
             useFormMethods.setValue("virkningsDato", date);
+            useFormMethods.clearErrors("virkningsDato");
         }
     };
 
@@ -158,7 +159,9 @@ const VirkningstidspunktForm = () => {
         updateVirkningsTidspunkt.mutation.mutate(createPayload(values), {
             onSuccess: () => {
                 useFormMethods.reset(values, {
+                    keepValues: true,
                     keepErrors: true,
+                    keepDefaultValues: true,
                 });
             },
         });

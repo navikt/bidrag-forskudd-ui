@@ -38,6 +38,7 @@ export const FormControlledMonthPicker = ({
     const { field, fieldState } = useController({
         name,
         control,
+        rules: { required },
     });
 
     const handleChange = (date: Date) => {
@@ -95,6 +96,7 @@ export const FormControlledMonthPicker = ({
             toDate={toDate}
             fromDate={fromDate}
             lastDayOfMonthPicker={lastDayOfMonthPicker}
+            fieldValue={field.value}
         />
     );
 };
