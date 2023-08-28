@@ -50,8 +50,12 @@ export const MonthPicker = ({
     };
 
     useEffect(() => {
-        if (isValidDate(fieldValue) && selectedMonth?.toLocaleString() !== fieldValue?.toLocaleString()) {
-            setSelected(fieldValue);
+        const value = fieldValue === null ? null : new Date(fieldValue);
+        if (
+            (isValidDate(value) && selectedMonth?.toLocaleString() !== value?.toLocaleString()) ||
+            (value === null && selectedMonth !== null)
+        ) {
+            setSelected(value);
         }
     }, [defaultValue, fieldValue]);
 
