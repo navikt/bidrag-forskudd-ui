@@ -14,12 +14,7 @@ import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthP
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import {
-    checkOverlappingPeriods,
-    findDateGaps,
-    getOverlappingInntektPerioder,
-    syncDates,
-} from "../helpers/inntektFormHelpers";
+import { checkOverlappingPeriods, findDateGaps, getOverlappingInntektPerioder } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const Beskrivelse = ({ item, index, ident }) =>
@@ -144,16 +139,17 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
             if (inntekteneSomLeggesTilGrunn.length) {
-                syncDates(
-                    value,
-                    inntekteneSomLeggesTilGrunn,
-                    ident,
-                    index,
-                    setValue,
-                    virkningstidspunkt,
-                    setError,
-                    clearErrors
-                );
+                // TODO implement logic ones it is documented with new income types
+                // syncDates(
+                //     value,
+                //     inntekteneSomLeggesTilGrunn,
+                //     ident,
+                //     index,
+                //     setValue,
+                //     virkningstidspunkt,
+                //     setError,
+                //     clearErrors
+                // );
             }
         }
     };
