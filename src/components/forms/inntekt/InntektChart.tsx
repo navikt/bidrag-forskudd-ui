@@ -1,8 +1,7 @@
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React, { memo } from "react";
 
-import { AinntektDto } from "../../../api/BidragGrunnlagApi";
-import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
+import { SummertMaanedsinntekt } from "../../../api/BidragInntektApi";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../utils/date-utils";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { capitalize } from "../../../utils/string-utils";
@@ -10,21 +9,21 @@ import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
-const buildChartOptions = (inntekt: AinntektDto[]): EChartsOption => {
+const buildChartOptions = (inntekt: SummertMaanedsinntekt[]): EChartsOption => {
     const today = new Date();
     const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 11 : 12), 12);
-    const past12Incomes = (inntekt: AinntektDto[]) =>
+    const past12Incomes = (inntekt: SummertMaanedsinntekt[]) =>
         past12Months.map((date) => {
             const incomeForThatMonth = inntekt.find((periode) =>
-                datesAreFromSameMonthAndYear(new Date(periode.periodeFra), date)
+                // @ts-ignore
+                // TODO fix type in swagger
+                datesAreFromSameMonthAndYear(new Date(periode.periode), date)
             );
             return incomeForThatMonth ?? null;
         });
 
-    const getTotalPerPeriode = (inntekt: AinntektDto[]) =>
-        past12Incomes(inntekt).map((incomeForThatMonth) =>
-            incomeForThatMonth ? incomeForThatMonth.ainntektspostListe.reduce((acc, curr) => acc + curr.belop, 0) : 0
-        );
+    const getTotalPerPeriode = (inntekt: SummertMaanedsinntekt[]) =>
+        past12Incomes(inntekt).map((incomeForThatMonth) => (incomeForThatMonth ? incomeForThatMonth.sumInntekt : 0));
 
     return {
         legend: {
@@ -34,13 +33,13 @@ const buildChartOptions = (inntekt: AinntektDto[]): EChartsOption => {
             trigger: "axis",
             showContent: true,
             formatter: (params: TopLevelFormatterParams) => {
-                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.ainntektspostListe;
+                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.inntektPostListe;
                 return ainntektspostListe
                     ? ainntektspostListe
                           .map(
                               (inntekt) =>
-                                  `<p><strong>${GrunnlagInntektType[inntekt.inntektType]}</strong>: ${Number(
-                                      inntekt.belop
+                                  `<p><strong>${inntekt.visningsnavn}</strong>: ${Number(
+                                      inntekt.beløp
                                   ).toLocaleString()}</p>`
                           )
                           .join("")
@@ -76,16 +75,15 @@ const arePropsEqual = (oldProps, newProps) => {
         oldProps.inntekt.every((oldInntekt, index) => {
             const newInntekt = newProps.inntekt[index];
             return (
-                oldInntekt.periodeFra === newInntekt.periodeFra &&
-                oldInntekt.periodeTil === newInntekt.periodeTil &&
-                oldInntekt.beskrivelse === newInntekt.beskrivelse &&
-                oldInntekt.ainntektspostListe.length === newInntekt.ainntektspostListe.length
+                oldInntekt.periode === newInntekt.periode &&
+                oldInntekt.visningsnavn === newInntekt.visningsnavn &&
+                oldInntekt.inntektPostListe.length === newInntekt.inntektPostListe.length
             );
         })
     );
 };
 
 export const InntektChart = memo(
-    ({ inntekt }: { inntekt: AinntektDto[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
+    ({ inntekt }: { inntekt: SummertMaanedsinntekt[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
     arePropsEqual
 );

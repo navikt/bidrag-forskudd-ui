@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
-import { AinntektDto } from "../../../api/BidragGrunnlagApi";
+import { SummertMaanedsinntekt } from "../../../api/BidragInntektApi";
 import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -29,7 +29,7 @@ import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
-const InntektHeader = ({ inntekt }: { inntekt: AinntektDto[] }) => (
+const InntektHeader = ({ inntekt }: { inntekt: SummertMaanedsinntekt[] }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
         <InntektChart inntekt={inntekt} />
         <ExpansionCard aria-label="default-demo" size="small">
@@ -45,7 +45,13 @@ const InntektHeader = ({ inntekt }: { inntekt: AinntektDto[] }) => (
     </div>
 );
 
-const Main = ({ behandlingRoller, ainntekt }: { behandlingRoller: RolleDto[]; ainntekt: AinntektDto[] }) => {
+const Main = ({
+    behandlingRoller,
+    ainntekt,
+}: {
+    behandlingRoller: RolleDto[];
+    ainntekt: { [ident: string]: SummertMaanedsinntekt[] };
+}) => {
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG)
         .sort((a, b) => {
@@ -69,7 +75,7 @@ const Main = ({ behandlingRoller, ainntekt }: { behandlingRoller: RolleDto[]; ai
                     ))}
                 </Tabs.List>
                 {roller.map((rolle) => {
-                    const inntekt = ainntekt.filter((inntekt) => inntekt.personId === rolle.ident);
+                    const inntekt = ainntekt[rolle.ident];
                     return (
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
                             <div className="mt-12">
@@ -151,6 +157,10 @@ const InntektForm = () => {
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const bidragInntektQueries = useGetBidragInntektQueries(behandling, grunnlagspakke);
     const bidragInntekt = bidragInntektQueries.map(({ data }) => data);
+    const ainntekt: { [ident: string]: SummertMaanedsinntekt[] } = bidragInntekt.reduce(
+        (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMaanedsinntektListe }),
+        {}
+    );
     const updateInntekter = useUpdateInntekter(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
@@ -203,7 +213,7 @@ const InntektForm = () => {
             <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                 <FormLayout
                     title="Inntekt"
-                    main={<Main behandlingRoller={behandling.roller} ainntekt={grunnlagspakke.ainntektListe} />}
+                    main={<Main behandlingRoller={behandling.roller} ainntekt={ainntekt} />}
                     side={<Side />}
                 />
             </form>
