@@ -76,7 +76,7 @@ export const datesAreFromSameMonthAndYear = (date: Date, testDate: Date) =>
 export const getAListOfMonthsFromDate = (fromDate: Date, numberOfMonths: number): Date[] => {
     const months = [];
     for (let i = 0; i <= numberOfMonths - 1; i++) {
-        months.push(addMonths(fromDate, i));
+        months.push(addMonths(firstDayOfMonth(fromDate), i));
     }
     return months;
 };
