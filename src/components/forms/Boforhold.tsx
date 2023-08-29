@@ -32,7 +32,7 @@ import {
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isValidDate, toISODateString } from "../../utils/date-utils";
-import { DatePickerInput } from "../date-picker/DatePickerInput";
+import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -188,8 +188,10 @@ const BoforholdsForm = () => {
     );
 };
 
-const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, index }) => {
-    const [val, setVal] = useState("dnummer");
+const BarnIkkeMedIBehandling = ({ barnFieldArray, setValue, item, index }) => {
+    const [val, setVal] = useState(item.foedselsDato ? "fritekst" : "dnummer");
+    const [ident, setIdent] = useState("");
+    const [error, setError] = useState(null);
     return (
         <div className="mt-4 mb-4">
             <FlexRow className="items-center p-3">
@@ -207,7 +209,23 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                 </div>
             </FlexRow>
 
-            <RadioGroup className="mb-4" size="small" legend="" value={val} onChange={(val) => setVal(val)}>
+            <RadioGroup
+                className="mb-4"
+                size="small"
+                legend=""
+                value={val}
+                onChange={(val) => {
+                    setVal(val);
+                    if (val === "fritekst") {
+                        setValue(`husstandsBarn.${index}.ident`, "");
+                        setValue(`husstandsBarn.${index}.navn`, "");
+                        setIdent("");
+                        setError(null);
+                    } else {
+                        setValue(`husstandsBarn.${index}.foedselsDato`, null);
+                    }
+                }}
+            >
                 <Radio value="dnummer">Fødselsnummer/d-nummer</Radio>
                 <Radio value="fritekst">Fritekst</Radio>
             </RadioGroup>
@@ -219,32 +237,39 @@ const BarnIkkeMedIBehandling = ({ barnFieldArray, controlledFields, setValue, in
                         variant="secondary"
                         size="small"
                         hideLabel={false}
+                        error={error}
+                        onChange={(val) => {
+                            setValue(`husstandsBarn.${index}.ident`, val);
+                            setIdent(val);
+                        }}
                         onClear={() => {
-                            // TODO nulstil alt for barnet
-                            setValue(`behandlingBarn.${index}.ident`, null);
-                            setValue(`behandlingBarn.${index}.navn`, null);
+                            setValue(`husstandsBarn.${index}.ident`, "");
+                            setValue(`husstandsBarn.${index}.navn`, "");
+                            setIdent("");
+                            setError(null);
                         }}
                         onSearchClick={(value) => {
                             PERSON_API.informasjon
                                 .hentPersonPost({ ident: value })
                                 .then(({ data }) => {
-                                    setValue(`behandlingBarn.${index}.ident`, value);
-                                    setValue(`behandlingBarn.${index}.navn`, data.navn);
+                                    setValue(`husstandsBarn.${index}.navn`, data.navn);
+                                    setError(null);
                                 })
-                                .catch((r) => {
-                                    // TODO -> LEGG TIL BARNET MANUELT
+                                .catch(() => {
+                                    setError(`Finner ikke person med ident: ${ident}`);
                                 });
                         }}
                     />
                 )}
                 {val === "fritekst" && (
-                    <DatePickerInput
+                    <FormControlledDatePicker
+                        name={`husstandsBarn.${index}.foedselsDato`}
                         label="Fødselsdato"
                         placeholder="DD.MM.ÅÅÅÅ"
-                        onChange={(value) => console.log(value)}
+                        defaultValue={item?.foedselsdato}
                     />
                 )}
-                <FormControlledTextField name={`behandlingBarn.${index}.navn`} label="Navn" />
+                <FormControlledTextField name={`husstandsBarn.${index}.navn`} label="Navn" />
             </FlexRow>
         </div>
     );
@@ -272,9 +297,10 @@ const BarnPerioder = ({
 
     const addBarn = () => {
         barnFieldArray.append({
-            ident: null,
+            ident: "",
             medISaken: false,
-            navn: null,
+            navn: "",
+            foedselsDato: null,
             perioder: [
                 {
                     datoFom: toISODateString(datoFom),
@@ -320,7 +346,7 @@ const BarnPerioder = ({
                         {!item.medISaken && (
                             <BarnIkkeMedIBehandling
                                 barnFieldArray={barnFieldArray}
-                                controlledFields={controlledFields}
+                                item={item}
                                 setValue={setValue}
                                 index={index}
                             />
