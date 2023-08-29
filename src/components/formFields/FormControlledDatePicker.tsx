@@ -31,7 +31,7 @@ export const FormControlledDatePicker = ({
         name,
         control,
         rules: {
-            required: required ? "Dato må fylles ut" : false,
+            required,
         },
     });
 
