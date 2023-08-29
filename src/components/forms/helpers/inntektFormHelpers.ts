@@ -1,5 +1,4 @@
 import { InntekterResponse, RolleDto, RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
-import { SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
@@ -9,15 +8,7 @@ import {
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import {
-    addDays,
-    datesAreFromSameMonthAndYear,
-    deductDays,
-    deductMonths,
-    getAListOfMonthsFromDate,
-    isValidDate,
-    toISODateString,
-} from "../../../utils/date-utils";
+import { addDays, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
 
 const mockUtvidetBarnetrygd = (datoFom) => [
     {
@@ -66,63 +57,10 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
     inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
 });
 
-const mapSkattegrunnlagInntektPerioder = (skattegrunlag: SkattegrunnlagDto) =>
-    skattegrunlag.skattegrunnlagListe.map((inntekt) => ({
-        taMed: false,
-        inntektType: inntekt.inntektType ?? "",
-        belop: inntekt.belop,
-        datoTom: skattegrunlag.periodeTil,
-        datoFom: skattegrunlag.periodeFra,
-        ident: skattegrunlag.personId,
-        fraGrunnlag: true,
-    }));
-
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
     [rolle.ident]: mapFunction(rolle),
 });
-
-const get3and12MonthIncomeFromAinntekt = (ainntektListe, rolle) => {
-    const yearsIncomePeriods = getAListOfMonthsFromDate(
-        deductMonths(new Date(), new Date().getDate() > 6 ? 11 : 12),
-        12
-    )
-        .map((date) => {
-            const ainntekt = ainntektListe.find(
-                (ainntekt) =>
-                    ainntekt.personId === rolle.ident &&
-                    datesAreFromSameMonthAndYear(new Date(ainntekt.periodeFra), date)
-            );
-            return ainntekt ?? null;
-        })
-        .map((incomeForThatMonth) =>
-            incomeForThatMonth ? incomeForThatMonth.ainntektspostListe.reduce((acc, curr) => acc + curr.belop, 0) : 0
-        );
-
-    const threeMonthsIncome = yearsIncomePeriods.slice(9).reduce((acc, curr) => acc + curr, 0);
-    const yearsIncome = yearsIncomePeriods.reduce((acc, curr) => acc + curr, 0);
-
-    return [
-        {
-            taMed: false,
-            inntektType: "TRE_MAANED_BEREGNET",
-            belop: threeMonthsIncome * 4,
-            datoTom: null,
-            datoFom: null,
-            ident: rolle.ident,
-            fraGrunnlag: true,
-        },
-        {
-            taMed: false,
-            inntektType: "TOLV_MAANED_BEREGNET",
-            belop: yearsIncome,
-            datoTom: null,
-            datoFom: null,
-            ident: rolle.ident,
-            fraGrunnlag: true,
-        },
-    ];
-};
 
 const mapInntekterToRolle = (inntekter) => (rolle) =>
     inntekter
