@@ -38,7 +38,7 @@ export const FormControlledMonthPicker = ({
     const { field, fieldState } = useController({
         name,
         control,
-        rules: { required: required ? "Dato må fylles ut" : false },
+        rules: { required },
     });
 
     const handleChange = (date: Date) => {
