@@ -15,7 +15,7 @@ interface MonthPickerInputProps {
     onValidate?: (monthValidation: MonthValidationT) => void;
     toDate?: Date;
     lastDayOfMonthPicker?: boolean;
-    fieldValue?: Date;
+    fieldValue?: Date | string;
 }
 export const MonthPicker = ({
     label,

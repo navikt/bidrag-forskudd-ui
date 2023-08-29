@@ -2,12 +2,13 @@ import { DateValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
+import { toISODateString } from "../../utils/date-utils";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 
 interface FormControlledDatePickerProps {
     name: string;
     label: string;
-    defaultValue: Date | null;
+    defaultValue: string | null;
     placeholder: string;
     hideLabel?: boolean;
     className?: string;
@@ -35,10 +36,9 @@ export const FormControlledDatePicker = ({
     });
 
     const handleChange = (date: Date) => {
-        if (date) {
-            clearErrors(name);
-        }
-        field.onChange(date);
+        const value = date ? toISODateString(date) : null;
+        field.onChange(value);
+
         if (onChange) {
             onChange(date);
         }
@@ -62,6 +62,7 @@ export const FormControlledDatePicker = ({
             className={className}
             error={fieldState?.error?.message}
             onValidate={onValidate}
+            fieldValue={field.value}
         />
     );
 };

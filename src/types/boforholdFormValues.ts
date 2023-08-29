@@ -10,6 +10,7 @@ interface Barn {
     medISaken: boolean;
     ident?: string;
     navn?: string;
+    foedselsDato?: string | null;
     perioder: BarnPeriode[];
 }
 

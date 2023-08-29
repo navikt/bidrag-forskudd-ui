@@ -9,6 +9,15 @@ export default function personMock(): RestHandler[] {
     return [
         rest.post(`${baseUrl}/informasjon`, async (req, res, ctx) => {
             const requestBody = await req.json();
+
+            if (requestBody.ident === "errorIdent") {
+                return res(
+                    ctx.set("Content-Type", "application/json"),
+                    // Respond with the "ArrayBuffer".
+                    ctx.status(404)
+                );
+            }
+
             return res(
                 ctx.set("Content-Type", "application/json"),
                 // Respond with the "ArrayBuffer".

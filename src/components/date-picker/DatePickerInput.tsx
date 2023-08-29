@@ -1,6 +1,8 @@
 import { DatePicker, DateValidationT, useDatepicker } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
+import { dateOrNull, isValidDate } from "../../utils/date-utils";
+
 interface DatePickerInputProps {
     onChange: (selectedDay: Date | undefined) => void;
     label: string;
@@ -8,10 +10,11 @@ interface DatePickerInputProps {
     placeholder?: string;
     hideLabel?: boolean;
     className?: string;
-    defaultValue?: Date;
+    defaultValue?: string;
     error?: string;
     strategy?: "absolute" | "fixed";
     onValidate?: (dateValidation: DateValidationT) => void;
+    fieldValue?: Date | string;
 }
 
 export const DatePickerInput = ({
@@ -25,6 +28,7 @@ export const DatePickerInput = ({
     onValidate,
     error,
     strategy = "absolute",
+    fieldValue,
 }: DatePickerInputProps) => {
     const { datepickerProps, inputProps, setSelected } = useDatepicker({
         onDateChange: (date) => {
@@ -34,15 +38,19 @@ export const DatePickerInput = ({
             if (onValidate) onValidate(val);
         },
         fromDate,
-        defaultSelected: defaultValue,
+        defaultSelected: isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null,
     });
     datepickerProps.strategy = strategy;
 
     useEffect(() => {
-        if (datepickerProps.selected?.toLocaleString() !== defaultValue?.toLocaleString()) {
-            setSelected(defaultValue);
+        const value = fieldValue === null ? null : new Date(fieldValue);
+        if (
+            (isValidDate(value) && datepickerProps.selected?.toLocaleString() !== value?.toLocaleString()) ||
+            (value === null && datepickerProps.selected !== null)
+        ) {
+            setSelected(value);
         }
-    }, [defaultValue]);
+    }, [defaultValue, fieldValue]);
 
     return (
         <DatePicker {...datepickerProps}>
