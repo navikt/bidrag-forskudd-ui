@@ -1,8 +1,5 @@
-import { InntekterResponse, RolleDto, RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
-<<<<<<< Updated upstream
-=======
-import { HentGrunnlagspakkeDto, SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
->>>>>>> Stashed changes
+import { InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+import { HentGrunnlagspakkeDto } from "../../../api/BidragGrunnlagApi";
 import { TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
@@ -13,24 +10,6 @@ import {
 } from "../../../constants/inntektene";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { addDays, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
-
-const mockUtvidetBarnetrygd = (datoFom) => [
-    {
-        deltBoSted: true,
-        belop: 29868,
-        datoFom: toISODateString(new Date(datoFom)),
-        datoTom: null,
-    },
-];
-const mockBarnetillegg = (bmOgBarn, datoFom) =>
-    bmOgBarn
-        .filter((rolle) => rolle.rolleType === RolleType.BARN)
-        .map(({ ident }) => ({
-            ident,
-            barnetillegg: 3716,
-            datoFom: toISODateString(new Date(datoFom)),
-            datoTom: null,
-        }));
 
 export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
     inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
