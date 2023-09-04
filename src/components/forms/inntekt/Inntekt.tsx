@@ -168,7 +168,7 @@ const InntektForm = () => {
         (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
     );
 
-    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, datoFom);
+    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagspakke, datoFom);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,

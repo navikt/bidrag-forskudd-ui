@@ -1,4 +1,8 @@
 import { InntekterResponse, RolleDto, RolleType, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+<<<<<<< Updated upstream
+=======
+import { HentGrunnlagspakkeDto, SkattegrunnlagDto } from "../../../api/BidragGrunnlagApi";
+>>>>>>> Stashed changes
 import { TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
@@ -93,6 +97,7 @@ export const createInitialValues = (
     bmOgBarn: RolleDto[],
     bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[],
     inntekter: InntekterResponse,
+    grunnlagspakke: HentGrunnlagspakkeDto,
     datoFom: Date
 ): InntektFormValues => {
     return {
@@ -101,20 +106,20 @@ export const createInitialValues = (
             : getPerioderFraBidragInntekt(bidragInntekt),
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd
-            : mockUtvidetBarnetrygd(datoFom),
-        // grunnlagspakke.ubstListe.map((ubst) => ({
-        //     deltBoSted: false, // TODO check where to get this value
-        //     belop: ubst.belop,
-        //     datoFom: dateOrNull(ubst.periodeFra),
-        //     datoTom: dateOrNull(ubst.periodeTil),
-        // })),
-        barnetillegg: inntekter?.barnetillegg?.length ? inntekter.barnetillegg : mockBarnetillegg(bmOgBarn, datoFom),
-        // grunnlagspakke.barnetilleggListe.map((periode) => ({
-        //     ident: periode.barnPersonId,
-        //     barnetillegg: periode.belopBrutto,
-        //     datoFom: dateOrNull(periode.periodeFra),
-        //     datoTom: dateOrNull(periode.periodeTil),
-        // })),
+            : grunnlagspakke.ubstListe.map((ubst) => ({
+                  deltBoSted: false, // TODO check where to get this value
+                  belop: ubst.belop,
+                  datoFom: ubst.periodeFra,
+                  datoTom: ubst.periodeTil,
+              })),
+        barnetillegg: inntekter?.barnetillegg?.length
+            ? inntekter.barnetillegg
+            : grunnlagspakke.barnetilleggListe.map((periode) => ({
+                  ident: periode.barnPersonId,
+                  barnetillegg: periode.belopBrutto,
+                  datoFom: periode.periodeFra,
+                  datoTom: periode.periodeTil,
+              })),
         inntektBegrunnelseMedIVedtakNotat: inntekter.inntektBegrunnelseMedIVedtakNotat,
         inntektBegrunnelseKunINotat: inntekter.inntektBegrunnelseKunINotat,
     };
