@@ -3,9 +3,10 @@ import { Alert, BodyShort, ExpansionCard, Heading, Link, Tabs } from "@navikt/ds
 import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { RolleDto, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
+import { RolleDto, RolleType } from "../../../api/BidragBehandlingApi";
 import { SummertMaanedsinntekt } from "../../../api/BidragInntektApi";
 import { NOTAT_FIELDS } from "../../../constants/notatFields";
+import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -52,22 +53,24 @@ const Main = ({
     ainntekt: { [ident: string]: SummertMaanedsinntekt[] };
 }) => {
     const roller = behandlingRoller
-        .filter((rolle) => rolle.rolleType !== RolleDtoRolleType.BP)
+        .filter((rolle) => rolle.rolleType !== RolleType.BIDRAGSPLIKTIG)
         .sort((a, b) => {
-            if (a.rolleType === RolleDtoRolleType.BM || b.rolleType === RolleDtoRolleType.BA) return -1;
-            if (b.rolleType === RolleDtoRolleType.BM || a.rolleType === RolleDtoRolleType.BA) return 1;
+            if (a.rolleType === RolleType.BIDRAGSMOTTAKER || b.rolleType === RolleType.BARN) return -1;
+            if (b.rolleType === RolleType.BIDRAGSMOTTAKER || a.rolleType === RolleType.BARN) return 1;
             return 0;
         });
 
     return (
         <div className="grid gap-y-12">
-            <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleDtoRolleType.BM).ident}>
+            <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident}>
                 <Tabs.List>
                     {roller.map((rolle) => (
                         <Tabs.Tab
                             key={rolle.ident}
                             value={rolle.ident}
-                            label={`${rolle.rolleType} ${rolle.rolleType === RolleDtoRolleType.BM ? "" : rolle.ident}`}
+                            label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
+                                rolle.rolleType === RolleType.BIDRAGSMOTTAKER ? "" : rolle.ident
+                            }`}
                         />
                     ))}
                 </Tabs.List>
@@ -97,7 +100,7 @@ const Main = ({
                                 </div>
                                 <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
                             </div>
-                            {rolle.rolleType === RolleDtoRolleType.BM && (
+                            {rolle.rolleType === RolleType.BIDRAGSMOTTAKER && (
                                 <>
                                     <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
@@ -162,7 +165,7 @@ const InntektForm = () => {
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
     const bmOgBarn = behandling.roller.filter(
-        (rolle) => rolle.rolleType === RolleDtoRolleType.BM || rolle.rolleType === RolleDtoRolleType.BA
+        (rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER || rolle.rolleType === RolleType.BARN
     );
 
     const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagspakke, datoFom);

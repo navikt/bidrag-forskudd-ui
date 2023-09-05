@@ -1,10 +1,4 @@
-import {
-    BehandlingDto,
-    BehandlingType,
-    RolleDtoRolleType,
-    SoknadFraType,
-    SoknadType,
-} from "../../api/BidragBehandlingApi";
+import { BehandlingDto, BehandlingType, RolleType, SoknadFraType, SoknadType } from "../../api/BidragBehandlingApi";
 import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {
@@ -22,25 +16,25 @@ export const behandlingMockApiData: BehandlingDto = {
     roller: [
         {
             id: 1,
-            rolleType: RolleDtoRolleType.BA,
+            rolleType: RolleType.BARN,
             ident: "03522150877",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
         {
             id: 4,
-            rolleType: RolleDtoRolleType.BA,
+            rolleType: RolleType.BARN,
             ident: "07512150855",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
         {
             id: 2,
-            rolleType: RolleDtoRolleType.BP,
+            rolleType: RolleType.BIDRAGSPLIKTIG,
             ident: "31459900198",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
         {
             id: 3,
-            rolleType: RolleDtoRolleType.BM,
+            rolleType: RolleType.BIDRAGSMOTTAKER,
             ident: "21470262629",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },

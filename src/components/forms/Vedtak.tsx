@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { Suspense } from "react";
 import { useParams } from "react-router-dom";
 
-import { ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -42,7 +42,7 @@ const Vedtak = () => {
                 const saksBehandlerNavn = await SecuritySessionUtils.hentSaksbehandlerNavn();
                 const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
                 const personInfoListe = personsQueries.map((p) => p.data);
-                const bidragsMottaker = behandling.roller.find((rolle) => rolle.rolleType == RolleDtoRolleType.BM);
+                const bidragsMottaker = behandling.roller.find((rolle) => rolle.rolleType == RolleType.BIDRAGSMOTTAKER);
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
                     type: behandling.soknadType,
@@ -136,7 +136,7 @@ const Vedtak = () => {
                     beregnetForskudd.resultat?.map((r, i) => (
                         <div key={i + r.ident} className="mb-8">
                             <div className="my-4 flex items-center gap-x-2">
-                                <RolleTag rolleType={RolleDtoRolleType.BA} />
+                                <RolleTag rolleType={RolleType.BARN} />
                                 <BodyShort>
                                     <PersonNavn ident={r.ident}></PersonNavn> / <span className="ml-1">{r.ident}</span>
                                 </BodyShort>

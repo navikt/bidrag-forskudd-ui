@@ -1,14 +1,14 @@
-import { RolleDto, RolleDtoRolleType } from "../api/BidragBehandlingApi";
+import { RolleDto, RolleType } from "../api/BidragBehandlingApi";
 
 export interface IRolleUI extends RolleDto {
     navn: string;
 }
 
-export function mapRolle(rolle: RolleDtoRolleType): string {
+export function mapRolle(rolle: RolleType): string {
     switch (rolle) {
-        case RolleDtoRolleType.BM:
+        case RolleType.BIDRAGSMOTTAKER:
             return "BIDRAGSMOTTAKER";
-        case RolleDtoRolleType.BP:
+        case RolleType.BIDRAGSPLIKTIG:
             return "BIDRAGSPLIKTIG";
     }
     return rolle;

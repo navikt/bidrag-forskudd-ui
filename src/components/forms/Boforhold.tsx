@@ -14,7 +14,7 @@ import {
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { BoStatusType, RolleDtoRolleType, SivilstandType } from "../../api/BidragBehandlingApi";
+import { BoStatusType, RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -321,7 +321,7 @@ const BarnPerioder = ({
                             <div className="mb-8">
                                 <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                     <div className="w-max h-max">
-                                        <RolleTag rolleType={RolleDtoRolleType.BA} />
+                                        <RolleTag rolleType={RolleType.BARN} />
                                     </div>
                                     <div>
                                         <FlexRow className="items-center h-[27px]">
