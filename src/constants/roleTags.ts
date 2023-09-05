@@ -1,17 +1,17 @@
-import { RolleType } from "../api/BidragBehandlingApi";
+import { RolleDtoRolleType } from "../api/BidragBehandlingApi";
 
 export const ROLE_TAGS = {
-    [RolleType.BIDRAGSMOTTAKER]: "success",
-    [RolleType.BIDRAGSPLIKTIG]: "alt1",
-    [RolleType.BARN]: "alt1",
-    [RolleType.REELLMOTTAKER]: "alt3",
-    [RolleType.FEILREGISTRERT]: "alt3",
+    [RolleDtoRolleType.BM]: "success",
+    [RolleDtoRolleType.BP]: "alt1",
+    [RolleDtoRolleType.BA]: "alt1",
+    [RolleDtoRolleType.RM]: "alt3",
+    [RolleDtoRolleType.FR]: "alt3",
 } as const;
 
 export const ROLE_FORKORTELSER = {
-    [RolleType.BIDRAGSMOTTAKER]: "BM",
-    [RolleType.BIDRAGSPLIKTIG]: "BP",
-    [RolleType.BARN]: "BA",
-    [RolleType.REELLMOTTAKER]: "RM",
-    [RolleType.FEILREGISTRERT]: "FR",
+    [RolleDtoRolleType.BM]: "BM",
+    [RolleDtoRolleType.BP]: "BP",
+    [RolleDtoRolleType.BA]: "BA",
+    [RolleDtoRolleType.RM]: "RM",
+    [RolleDtoRolleType.FR]: "FR",
 } as const;

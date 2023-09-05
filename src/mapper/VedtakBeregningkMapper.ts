@@ -1,12 +1,18 @@
-import { BehandlingDto, BehandlingType, GrunnlagDto, GrunnlagDtoType, RolleType } from "../api/BidragBehandlingApi";
+import {
+    BehandlingDto,
+    BehandlingType,
+    GrunnlagDto,
+    GrunnlagDtoType,
+    RolleDtoRolleType,
+} from "../api/BidragBehandlingApi";
 import { OpprettBehandlingsreferanseRequestDto } from "../api/BidragVedtakApi";
 import { PersonDto } from "../api/PersonApi";
 import { mapRolle } from "../types/rolle";
 
 export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: PersonDto[]): GrunnlagDto[] {
     //TODO: Skal barninfo legges til med navn osv?
-    const rollerForskudd = [RolleType.BIDRAGSMOTTAKER];
-    const rollerSoknad = [RolleType.BIDRAGSMOTTAKER, RolleType.BIDRAGSPLIKTIG, RolleType.REELLMOTTAKER];
+    const rollerForskudd = [RolleDtoRolleType.BM];
+    const rollerSoknad = [RolleDtoRolleType.BM, RolleDtoRolleType.BP, RolleDtoRolleType.RM];
     const hentPersonInfoForRoller =
         behandling.behandlingType == BehandlingType.FORSKUDD ? rollerForskudd : rollerSoknad;
     return behandling.roller

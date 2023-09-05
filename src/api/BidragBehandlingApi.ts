@@ -81,12 +81,9 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
-export enum RolleType {
-    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
-    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
-    BARN = "BARN",
-    REELLMOTTAKER = "REELLMOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum SivilstandType {
@@ -132,6 +129,22 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
 export interface EntityModelBehandling {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -164,37 +177,16 @@ export interface EntityModelBehandling {
     _links?: Links;
 }
 
-export interface CollectionModelEntityModelBehandling {
-    _embedded?: {
-        behandlings?: EntityModelBehandling[];
-    };
-    _links?: Links;
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
-}
-
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
 export interface CollectionModelObject {
     _embedded?: {
         objects?: object[];
+    };
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelBehandling {
+    _embedded?: {
+        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
@@ -487,7 +479,7 @@ export interface BehandlingDto {
 export interface RolleDto {
     /** @format int64 */
     id: number;
-    rolleType: RolleType;
+    rolleType: RolleDtoRolleType;
     ident: string;
     /** @format date-time */
     fodtDato?: string;
@@ -515,7 +507,7 @@ export interface BehandlingInfoDto {
 
 export interface ForsendelseRolleDto {
     fødselsnummer: string;
-    type: RolleType;
+    type: ForsendelseRolleDtoType;
 }
 
 export interface InitalizeForsendelseRequest {
@@ -566,7 +558,7 @@ export interface CreateBehandlingRequest {
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
-    rolleType: CreateRolleDtoRolleType;
+    rolleType: CreateRolleRolleType;
     /** F.eks fødselsnummer */
     ident: string;
     /**
@@ -579,6 +571,14 @@ export interface CreateRolleDto {
      * @format date
      */
     opprettetDato?: string;
+}
+
+export enum CreateRolleRolleType {
+    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
+    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BARN = "BARN",
+    REELL_MOTTAKER = "REELL_MOTTAKER",
+    FEILREGISTRERT = "FEILREGISTRERT",
 }
 
 export interface CreateBehandlingResponse {
@@ -719,6 +719,14 @@ export enum BehandlingRequestBodyEngangsbelopType {
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
 }
 
+export enum RolleDtoRolleType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
+}
+
 export enum BehandlingInfoDtoStonadType {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -751,6 +759,14 @@ export enum BehandlingInfoDtoVedtakType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
+export enum ForsendelseRolleDtoType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
+}
+
 export enum CreateBehandlingRequestStonadType {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -768,14 +784,6 @@ export enum CreateBehandlingRequestEngangsbelopType {
     SAERTILSKUDD = "SAERTILSKUDD",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
-}
-
-export enum CreateRolleDtoRolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
-    BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
 }
 
 /** Grunnlagstype */

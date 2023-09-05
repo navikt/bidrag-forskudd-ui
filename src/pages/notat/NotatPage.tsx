@@ -3,7 +3,7 @@ import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useGetArbeidsforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { BehandlingDto, RolleType, VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
+import { BehandlingDto, RolleDtoRolleType, VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { createInitialValues, mapHusstandsMedlemmerToBarn } from "../../components/forms/helpers/boforholdFormHelpers";
 import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektFormHelpers";
@@ -121,9 +121,7 @@ const VirkningstidspunktView = ({
                     <Label size="small">BM:</Label>
                     <BodyShort size="small">
                         <PersonNavn
-                            ident={
-                                behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident
-                            }
+                            ident={behandling.roller.find((rolle) => rolle.rolleType === RolleDtoRolleType.BM).ident}
                         ></PersonNavn>
                     </BodyShort>
                 </div>
@@ -200,7 +198,7 @@ const Inntekter = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { data: behandling } = useGetBehandling(Number(behandlingId));
     const bmOgBarn = behandling.roller.filter(
-        (rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER || rolle.rolleType === RolleType.BARN
+        (rolle) => rolle.rolleType === RolleDtoRolleType.BM || rolle.rolleType === RolleDtoRolleType.BA
     );
     const { data: inntekt } = useHentInntekter(Number(behandlingId));
     const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId);

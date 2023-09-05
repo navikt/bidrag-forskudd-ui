@@ -9,7 +9,7 @@ import {
     OpplysningerDto,
     OpplysningerType,
     RolleDto,
-    RolleType,
+    RolleDtoRolleType,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
@@ -194,8 +194,8 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
     });
 
 const createGrunnlagRequest = (behandling: BehandlingDto) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident;
-    const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleDtoRolleType.BM).ident;
+    const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BA);
     const today = new Date();
     const periodeFra = toISODateString(deductMonths(today, 36));
 
@@ -233,9 +233,9 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
 };
 
 const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident;
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleDtoRolleType.BM).ident;
     const barnIdenter = behandling?.roller
-        ?.filter((rolle) => rolle.rolleType === RolleType.BARN)
+        ?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BA)
         .map((barn) => barn.ident);
 
     const requests: { ident: string; request: TransformerInntekterRequestDto }[] = barnIdenter
