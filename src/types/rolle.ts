@@ -6,9 +6,9 @@ export interface IRolleUI extends RolleDto {
 
 export function mapRolle(rolle: RolleType): string {
     switch (rolle) {
-        case RolleType.BIDRAGS_MOTTAKER:
+        case RolleType.BIDRAGSMOTTAKER:
             return "BIDRAGSMOTTAKER";
-        case RolleType.BIDRAGS_PLIKTIG:
+        case RolleType.BIDRAGSPLIKTIG:
             return "BIDRAGSPLIKTIG";
     }
     return rolle;

@@ -188,7 +188,7 @@ export const createInntektSomLeggesTilGrunn = (roller: RolleDto[]) => {
 
     return roller.map((rolle, index) => ({
         ident: rolle.ident,
-        inntekt: rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? inntekt : index % 2 === 0 ? barnInntekt : [],
+        inntekt: rolle.rolleType === RolleType.BIDRAGSMOTTAKER ? inntekt : index % 2 === 0 ? barnInntekt : [],
     }));
 };
 

@@ -42,9 +42,7 @@ const Vedtak = () => {
                 const saksBehandlerNavn = await SecuritySessionUtils.hentSaksbehandlerNavn();
                 const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
                 const personInfoListe = personsQueries.map((p) => p.data);
-                const bidragsMottaker = behandling.roller.find(
-                    (rolle) => rolle.rolleType == RolleType.BIDRAGS_MOTTAKER
-                );
+                const bidragsMottaker = behandling.roller.find((rolle) => rolle.rolleType == RolleType.BIDRAGSMOTTAKER);
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
                     type: behandling.soknadType,
