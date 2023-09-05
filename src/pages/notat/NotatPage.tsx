@@ -122,7 +122,7 @@ const VirkningstidspunktView = ({
                     <BodyShort size="small">
                         <PersonNavn
                             ident={
-                                behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident
+                                behandling.roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident
                             }
                         ></PersonNavn>
                     </BodyShort>
@@ -200,7 +200,7 @@ const Inntekter = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { data: behandling } = useGetBehandling(Number(behandlingId));
     const bmOgBarn = behandling.roller.filter(
-        (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
+        (rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER || rolle.rolleType === RolleType.BARN
     );
     const { data: inntekt } = useHentInntekter(Number(behandlingId));
     const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId);

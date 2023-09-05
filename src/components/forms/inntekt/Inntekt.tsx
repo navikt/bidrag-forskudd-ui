@@ -53,23 +53,23 @@ const Main = ({
     ainntekt: { [ident: string]: SummertMaanedsinntekt[] };
 }) => {
     const roller = behandlingRoller
-        .filter((rolle) => rolle.rolleType !== RolleType.BIDRAGS_PLIKTIG)
+        .filter((rolle) => rolle.rolleType !== RolleType.BIDRAGSPLIKTIG)
         .sort((a, b) => {
-            if (a.rolleType === RolleType.BIDRAGS_MOTTAKER || b.rolleType === RolleType.BARN) return -1;
-            if (b.rolleType === RolleType.BIDRAGS_MOTTAKER || a.rolleType === RolleType.BARN) return 1;
+            if (a.rolleType === RolleType.BIDRAGSMOTTAKER || b.rolleType === RolleType.BARN) return -1;
+            if (b.rolleType === RolleType.BIDRAGSMOTTAKER || a.rolleType === RolleType.BARN) return 1;
             return 0;
         });
 
     return (
         <div className="grid gap-y-12">
-            <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident}>
+            <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident}>
                 <Tabs.List>
                     {roller.map((rolle) => (
                         <Tabs.Tab
                             key={rolle.ident}
                             value={rolle.ident}
                             label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
-                                rolle.rolleType === RolleType.BIDRAGS_MOTTAKER ? "" : rolle.ident
+                                rolle.rolleType === RolleType.BIDRAGSMOTTAKER ? "" : rolle.ident
                             }`}
                         />
                     ))}
@@ -100,7 +100,7 @@ const Main = ({
                                 </div>
                                 <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
                             </div>
-                            {rolle.rolleType === RolleType.BIDRAGS_MOTTAKER && (
+                            {rolle.rolleType === RolleType.BIDRAGSMOTTAKER && (
                                 <>
                                     <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
@@ -165,7 +165,7 @@ const InntektForm = () => {
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
     const bmOgBarn = behandling.roller.filter(
-        (rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER || rolle.rolleType === RolleType.BARN
+        (rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER || rolle.rolleType === RolleType.BARN
     );
 
     const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagspakke, datoFom);

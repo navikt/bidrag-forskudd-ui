@@ -5,8 +5,8 @@ import { mapRolle } from "../types/rolle";
 
 export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: PersonDto[]): GrunnlagDto[] {
     //TODO: Skal barninfo legges til med navn osv?
-    const rollerForskudd = [RolleType.BIDRAGS_MOTTAKER];
-    const rollerSoknad = [RolleType.BIDRAGS_MOTTAKER, RolleType.BIDRAGS_PLIKTIG, RolleType.REELL_MOTTAKER];
+    const rollerForskudd = [RolleType.BIDRAGSMOTTAKER];
+    const rollerSoknad = [RolleType.BIDRAGSMOTTAKER, RolleType.BIDRAGSPLIKTIG, RolleType.REELLMOTTAKER];
     const hentPersonInfoForRoller =
         behandling.behandlingType == BehandlingType.FORSKUDD ? rollerForskudd : rollerSoknad;
     return behandling.roller

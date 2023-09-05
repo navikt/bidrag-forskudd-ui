@@ -28,13 +28,13 @@ export const behandlingMockApiData: BehandlingDto = {
         },
         {
             id: 2,
-            rolleType: RolleType.BIDRAGS_PLIKTIG,
+            rolleType: RolleType.BIDRAGSPLIKTIG,
             ident: "31459900198",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
         {
             id: 3,
-            rolleType: RolleType.BIDRAGS_MOTTAKER,
+            rolleType: RolleType.BIDRAGSMOTTAKER,
             ident: "21470262629",
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },

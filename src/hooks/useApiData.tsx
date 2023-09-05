@@ -194,7 +194,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
     });
 
 const createGrunnlagRequest = (behandling: BehandlingDto) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleType.BARN);
     const today = new Date();
     const periodeFra = toISODateString(deductMonths(today, 36));
@@ -233,7 +233,7 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
 };
 
 const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGS_MOTTAKER).ident;
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleType.BIDRAGSMOTTAKER).ident;
     const barnIdenter = behandling?.roller
         ?.filter((rolle) => rolle.rolleType === RolleType.BARN)
         .map((barn) => barn.ident);

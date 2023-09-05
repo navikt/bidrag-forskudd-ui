@@ -50,22 +50,6 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    _links?: Links;
-}
-
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -97,16 +81,11 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
-}
-
 export enum RolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
+    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
     BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
+    REELLMOTTAKER = "REELLMOTTAKER",
     FEILREGISTRERT = "FEILREGISTRERT",
 }
 
@@ -185,16 +164,37 @@ export interface EntityModelBehandling {
     _links?: Links;
 }
 
-export interface CollectionModelObject {
+export interface CollectionModelEntityModelBehandling {
     _embedded?: {
-        objects?: object[];
+        behandlings?: EntityModelBehandling[];
     };
     _links?: Links;
 }
 
-export interface CollectionModelEntityModelBehandling {
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
+}
+
+export interface EntityModelOpplysninger {
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelOpplysninger {
     _embedded?: {
-        behandlings?: EntityModelBehandling[];
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
+export interface CollectionModelObject {
+    _embedded?: {
+        objects?: object[];
     };
     _links?: Links;
 }
@@ -306,6 +306,26 @@ export interface InntektDto {
     datoTom?: string;
     ident: string;
     fraGrunnlag: boolean;
+    /** @uniqueItems true */
+    inntektPostListe: InntektPost[];
+}
+
+export interface InntektPost {
+    /**
+     * Kode for inntektspost
+     * @example "bonus"
+     */
+    kode: string;
+    /**
+     * Visningsnavn for kode
+     * @example "Bonus"
+     */
+    visningsnavn: string;
+    /**
+     * Beløp som utgør inntektsposten
+     * @example 60000
+     */
+    beløp: number;
 }
 
 export interface UpdateInntekterRequest {
@@ -475,6 +495,41 @@ export interface RolleDto {
     opprettetDato?: string;
 }
 
+export interface BehandlingInfoDto {
+    /** @format int64 */
+    vedtakId?: number;
+    /** @format int64 */
+    behandlingId?: number;
+    /** @format int64 */
+    soknadId: number;
+    erFattetBeregnet?: boolean;
+    erVedtakIkkeTilbakekreving: boolean;
+    stonadType?: BehandlingInfoDtoStonadType;
+    engangsBelopType?: BehandlingInfoDtoEngangsBelopType;
+    behandlingType?: string;
+    soknadType?: string;
+    soknadFra?: SoknadFraType;
+    vedtakType?: BehandlingInfoDtoVedtakType;
+    barnIBehandling: string[];
+}
+
+export interface ForsendelseRolleDto {
+    fødselsnummer: string;
+    type: RolleType;
+}
+
+export interface InitalizeForsendelseRequest {
+    /**
+     * @minLength 0
+     * @maxLength 7
+     */
+    saksnummer: string;
+    behandlingInfo: BehandlingInfoDto;
+    enhet: string;
+    tema?: string;
+    roller: ForsendelseRolleDto[];
+}
+
 export interface CreateBehandlingRequest {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -511,7 +566,7 @@ export interface CreateBehandlingRequest {
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
-    rolleType: RolleType;
+    rolleType: CreateRolleDtoRolleType;
     /** F.eks fødselsnummer */
     ident: string;
     /**
@@ -664,6 +719,38 @@ export enum BehandlingRequestBodyEngangsbelopType {
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
 }
 
+export enum BehandlingInfoDtoStonadType {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum BehandlingInfoDtoEngangsBelopType {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    TILBAKEKREVING = "TILBAKEKREVING",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum BehandlingInfoDtoVedtakType {
+    INDEKSREGULERING = "INDEKSREGULERING",
+    ALDERSJUSTERING = "ALDERSJUSTERING",
+    OPPHOR = "OPPHØR",
+    ALDERSOPPHOR = "ALDERSOPPHØR",
+    REVURDERING = "REVURDERING",
+    FASTSETTELSE = "FASTSETTELSE",
+    INNKREVING = "INNKREVING",
+    KLAGE = "KLAGE",
+    ENDRING = "ENDRING",
+    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
 export enum CreateBehandlingRequestStonadType {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -681,6 +768,14 @@ export enum CreateBehandlingRequestEngangsbelopType {
     SAERTILSKUDD = "SAERTILSKUDD",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum CreateRolleDtoRolleType {
+    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
+    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BARN = "BARN",
+    REELL_MOTTAKER = "REELL_MOTTAKER",
+    FEILREGISTRERT = "FEILREGISTRERT",
 }
 
 /** Grunnlagstype */
@@ -1508,6 +1603,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/behandling/ext/${behandlingId}`,
                 method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppretter forsendelse for behandling eller vedtak. Skal bare benyttes hvis vedtakId eller behandlingId mangler for behandling (Søknad som behandles gjennom Bisys)
+         *
+         * @tags forsendelse-controller
+         * @name OpprettForsendelse
+         * @request POST:/api/forsendelse/init
+         * @secure
+         */
+        opprettForsendelse: (data: InitalizeForsendelseRequest, params: RequestParams = {}) =>
+            this.request<string[], any>({
+                path: `/api/forsendelse/init`,
+                method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
