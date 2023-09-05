@@ -167,7 +167,7 @@ const BoforholdsForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        if (initialValues) {
+        if (initialValues && useFormMethods.formState.isDirty) {
             debouncedOnSave();
             channel.postMessage(JSON.stringify(watchAllFields));
         }
