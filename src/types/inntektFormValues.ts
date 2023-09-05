@@ -8,8 +8,8 @@ export interface Inntekt {
 }
 
 export interface BarneTillegFormValues {
-    datoFom: string | null;
-    datoTom: string | null;
+    datoFom?: string | null;
+    datoTom?: string | null;
     ident: string;
     barnetillegg: number;
 }
