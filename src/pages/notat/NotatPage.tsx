@@ -3,7 +3,7 @@ import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { useGetArbeidsforhold } from "../../__mocks__/mocksForMissingEndpoints/useMockApi";
-import { BehandlingDto, RolleType, VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
+import { BehandlingDto, OpplysningerType, RolleType, VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
 import { NavLogo } from "../../assets/NavLogo";
 import { createInitialValues, mapHusstandsMedlemmerToBarn } from "../../components/forms/helpers/boforholdFormHelpers";
 import { getPerioderFraInntekter } from "../../components/forms/helpers/inntektFormHelpers";
@@ -16,7 +16,7 @@ import { InntektBeskrivelse } from "../../enum/InntektBeskrivelse";
 import {
     useGetBehandling,
     useGetBoforhold,
-    useGetBoforoholdOpplysninger,
+    useGetOpplysninger,
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
     useHentInntekter,
@@ -177,7 +177,7 @@ const Boforhold = () => {
     const { data: boforhold } = useGetBoforhold(Number(behandlingId));
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(Number(behandlingId));
-    const { data: boforoholdOpplysninger } = useGetBoforoholdOpplysninger(Number(behandlingId));
+    const { data: boforoholdOpplysninger } = useGetOpplysninger(Number(behandlingId), OpplysningerType.BOFORHOLD);
     const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
