@@ -1,4 +1,4 @@
-import { ArrowUndoIcon, TrashIcon } from "@navikt/aksel-icons";
+import { ArrowUndoIcon, ClockDashedIcon, TrashIcon } from "@navikt/aksel-icons";
 import {
     Alert,
     BodyShort,
@@ -14,7 +14,13 @@ import {
 import React, { Fragment, Suspense, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { BoStatusType, RolleType, SivilstandType } from "../../api/BidragBehandlingApi";
+import {
+    BoStatusType,
+    OpplysningerDto,
+    OpplysningerType,
+    RolleType,
+    SivilstandType,
+} from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -22,16 +28,23 @@ import { BoStatusTexts } from "../../enum/BoStatusTexts";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { SivilstandTypeTexts } from "../../enum/SivilstandTypeTexts";
 import {
+    useAddOpplysningerData,
     useGetBehandling,
     useGetBoforhold,
-    useGetBoforoholdOpplysninger,
+    useGetOpplysninger,
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
     useUpdateBoforhold,
 } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isValidDate, toISODateString } from "../../utils/date-utils";
+import {
+    dateOrNull,
+    DateToDDMMYYYYString,
+    ISODateTimeStringToDDMMYYYYString,
+    isValidDate,
+    toISODateString,
+} from "../../utils/date-utils";
 import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
@@ -45,9 +58,12 @@ import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import {
     calculateFraDato,
     checkOverlappingPeriods,
+    compareOpplysninger,
     createInitialValues,
     createPayload,
     getBarnPerioder,
+    getBarnPerioderFromHusstandsListe,
+    getSivilstandPerioder,
     mapHusstandsMedlemmerToBarn,
     syncDates,
 } from "./helpers/boforholdFormHelpers";
@@ -79,8 +95,14 @@ const Opplysninger = ({ opplysninger, datoFom, ident }) => {
 
 const Main = ({
     opplysningerFraFolkRegistre,
+    opplysningerChanges,
+    updateOpplysninger,
+    boforoholdOpplysninger,
 }: {
     opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
+    opplysningerChanges: string[];
+    updateOpplysninger: () => void;
+    boforoholdOpplysninger: OpplysningerDto;
 }) => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
@@ -90,6 +112,27 @@ const Main = ({
 
     return (
         <>
+            {opplysningerChanges.length > 0 && (
+                <Alert variant="info">
+                    <div className="flex items-center mb-4">
+                        Nye opplysninger tilgjengelig. Sist hentet{" "}
+                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysninger.hentetDato)}
+                        <Button
+                            variant="tertiary"
+                            size="small"
+                            className="ml-8"
+                            icon={<ClockDashedIcon aria-hidden />}
+                            onClick={updateOpplysninger}
+                        >
+                            Oppdater
+                        </Button>
+                    </div>
+                    <p>Følgende endringer har blitt utført:</p>
+                    {opplysningerChanges.map((change) => (
+                        <p key={change}>{change}</p>
+                    ))}
+                </Alert>
+            )}
             {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
             <Heading level="3" size="medium">
                 Barn
@@ -128,18 +171,21 @@ const BoforholdsForm = () => {
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const { data: boforoholdOpplysninger } = useGetBoforoholdOpplysninger(behandlingId);
+    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
+    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.BOFORHOLD);
     const channel = new BroadcastChannel("boforhold");
-    const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe);
-
+    const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(
+        grunnlagspakke.husstandmedlemmerOgEgneBarnListe
+    );
     const updateBoforhold = useUpdateBoforhold(behandlingId);
+    const [opplysningerChanges, setOpplysningerChanges] = useState(["adsadas", "kmklnklnkln"]);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
 
     const initialValues = createInitialValues(
         behandling,
         boforhold,
-        opplysningerFraFolkRegistre,
+        husstandsOpplysningerFraFolkRegistre,
         datoFom,
         grunnlagspakke,
         !!boforoholdOpplysninger?.data
@@ -171,7 +217,58 @@ const BoforholdsForm = () => {
             debouncedOnSave();
             channel.postMessage(JSON.stringify(watchAllFields));
         }
+
+        if (!boforoholdOpplysninger) {
+            saveOpplysninger.mutate({
+                behandlingId,
+                aktiv: true,
+                opplysningerType: OpplysningerType.BOFORHOLD,
+                data: JSON.stringify({
+                    husstand: husstandsOpplysningerFraFolkRegistre,
+                    sivilstand: grunnlagspakke.sivilstandListe,
+                }),
+                hentetDato: toISODateString(new Date()),
+            });
+            onSave();
+        }
     }, [watchAllFields, useFormMethods.formState.isDirty]);
+
+    useEffect(() => {
+        if (boforoholdOpplysninger) {
+            const savedOpplysninger = JSON.parse(boforoholdOpplysninger.data);
+            const changesInOpplysninger = compareOpplysninger(savedOpplysninger, {
+                husstand: husstandsOpplysningerFraFolkRegistre,
+                sivilstand: grunnlagspakke.sivilstandListe,
+            });
+
+            if (changesInOpplysninger.length) {
+                setOpplysningerChanges(changesInOpplysninger);
+            }
+        }
+    }, []);
+
+    const updateOpplysninger = () => {
+        saveOpplysninger.mutate({
+            behandlingId,
+            aktiv: true,
+            opplysningerType: OpplysningerType.BOFORHOLD,
+            data: JSON.stringify({
+                husstand: husstandsOpplysningerFraFolkRegistre,
+                sivilstand: grunnlagspakke.sivilstandListe,
+            }),
+            hentetDato: toISODateString(new Date()),
+        });
+
+        const fieldValues = useFormMethods.getValues();
+        const values = {
+            ...fieldValues,
+            husstandsBarn: getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom),
+            sivilstand: getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
+        };
+        useFormMethods.reset(values);
+        updateBoforhold.mutation.mutate(values);
+        setOpplysningerChanges([]);
+    };
 
     return (
         <>
@@ -179,7 +276,14 @@ const BoforholdsForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Boforhold"
-                        main={<Main opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />}
+                        main={
+                            <Main
+                                opplysningerFraFolkRegistre={husstandsOpplysningerFraFolkRegistre}
+                                opplysningerChanges={opplysningerChanges}
+                                updateOpplysninger={updateOpplysninger}
+                                boforoholdOpplysninger={boforoholdOpplysninger}
+                            />
+                        }
                         side={<Side />}
                     />
                 </form>

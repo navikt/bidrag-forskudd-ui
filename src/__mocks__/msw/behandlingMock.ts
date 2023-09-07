@@ -52,5 +52,19 @@ export function behandlingMock(): RestHandler[] {
                 return res(ctx.set("Content-Type", "application/json"), ctx.body(localStorage.getItem(key)));
             }
         ),
+        rest.post(
+            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/opplysninger`,
+            async (req, res, ctx) => {
+                const body = await req.json();
+                const key = `behandling-${req.params.behandlingId}-opplysninger-${body.opplysningerType}`;
+                localStorage.setItem(key, JSON.stringify(body));
+
+                return res(
+                    ctx.set("Content-Type", "application/json"),
+                    ctx.status(200),
+                    ctx.body(localStorage.getItem(key))
+                );
+            }
+        ),
     ];
 }

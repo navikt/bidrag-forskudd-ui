@@ -111,7 +111,7 @@ export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], d
 
     return result;
 };
-const getBarnPerioderFromHusstandsListe = (
+export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
     datoFom: Date
 ) => {
@@ -122,7 +122,7 @@ const getBarnPerioderFromHusstandsListe = (
     }));
 };
 
-const getSivilstandPerioder = (sivilstandListe, datoFom): SivilstandDto[] => {
+export const getSivilstandPerioder = (sivilstandListe, datoFom): SivilstandDto[] => {
     return sivilstandListe
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
         .map((periode) => ({
@@ -200,4 +200,64 @@ export const syncDates = (
         );
     }
     setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex}.${field}`, date);
+};
+
+export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
+    const changedLog = [];
+
+    if (savedOpplysninger.husstand.length < latestOpplysninger.husstand.length) {
+        changedLog.push("Det er flere barn registret i folkeregistre.");
+    }
+    if (savedOpplysninger.husstand.length > latestOpplysninger.husstand.length) {
+        changedLog.push("Det er fære barn registret i folkeregistre.");
+    }
+
+    savedOpplysninger.husstand.forEach((barn) => {
+        const barnInLatestOpplysninger = latestOpplysninger.husstand.find((b) => barn.ident === b.ident);
+        if (barnInLatestOpplysninger.perioder.length > barn.perioder.length) {
+            changedLog.push(`En eller flere perioder har blitt lagt til barn med ident - ${barn.ident}`);
+        }
+        if (barnInLatestOpplysninger.perioder.length < barn.perioder.length) {
+            changedLog.push(`Det er minst en periode mindre i folkeregistre for barn med ident - ${barn.ident}`);
+        }
+        barn.perioder.forEach((periode, index) => {
+            const periodeFraLatestOpplysninger = barnInLatestOpplysninger.perioder[index];
+            if (periodeFraLatestOpplysninger) {
+                if (
+                    periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
+                    periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil
+                ) {
+                    changedLog.push(
+                        `Datoene for en eller flere perioder har blitt endret for barn med ident - ${barn.ident}`
+                    );
+                }
+                if (periode.boStatus !== periodeFraLatestOpplysninger.boStatus) {
+                    changedLog.push(
+                        `Bostatus for en eller flere perioder har blitt endret for barn med ident - ${barn.ident}`
+                    );
+                }
+            }
+        });
+    });
+
+    if (savedOpplysninger.sivilstand.length !== latestOpplysninger.sivilstand.length) {
+        changedLog.push("Antall sivilstands perioder har blitt endret i folkeregisteret");
+    } else {
+        savedOpplysninger.sivilstand.forEach((periode, index) => {
+            const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];
+            if (periodeFraLatestOpplysninger.personId === periode.personId) {
+                if (
+                    periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
+                    periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil
+                ) {
+                    changedLog.push("Datoene for en eller flere sivilstand perioder har blitt endret");
+                }
+                if (periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand) {
+                    changedLog.push("Status for en eller flere sivilstand perioder har blitt endret");
+                }
+            }
+        });
+    }
+
+    return changedLog;
 };

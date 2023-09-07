@@ -3,6 +3,7 @@ import { AxiosResponse } from "axios";
 import { useCallback, useState } from "react";
 
 import {
+    AddOpplysningerRequest,
     BehandlingDto,
     BoforholdResponse,
     InntekterResponse,
@@ -88,12 +89,12 @@ export const useGetBoforhold = (behandlingId: number) =>
         suspense: true,
     });
 
-export const useGetBoforoholdOpplysninger = (behandlingId: number) =>
+export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
     useQuery({
-        queryKey: ["boforoholdOpplysninger", behandlingId],
+        queryKey: ["opplysninger", behandlingId, opplysningerType],
         queryFn: async (): Promise<OpplysningerDto> => {
             try {
-                const { data } = await BEHANDLING_API.api.hentAktiv(behandlingId, OpplysningerType.BOFORHOLD);
+                const { data } = await BEHANDLING_API.api.hentAktiv(behandlingId, opplysningerType);
                 return data;
             } catch (e) {
                 if (e.response.status === 404) return null;
@@ -378,4 +379,26 @@ export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagsp
             };
         }),
     });
+};
+
+export const useAddOpplysningerData = (behandlingId: number, opplysningerType: OpplysningerType) => {
+    const queryClient = useQueryClient();
+    const [error, setError] = useState(undefined);
+
+    const mutation = useMutation({
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
+            const { data } = await BEHANDLING_API.api.addOpplysningerData(behandlingId, payload);
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(["opplysninger", behandlingId, opplysningerType], data);
+            setError(undefined);
+        },
+        onError: (error) => {
+            console.log("onError", error);
+            setError(error);
+        },
+    });
+
+    return { mutation, error };
 };
