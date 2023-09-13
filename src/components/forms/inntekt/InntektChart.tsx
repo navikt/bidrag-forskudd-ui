@@ -11,7 +11,7 @@ const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocal
 
 const buildChartOptions = (inntekt: SummertMaanedsinntekt[]): EChartsOption => {
     const today = new Date();
-    const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 11 : 12), 12);
+    const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 12 : 13), 12);
     const past12Incomes = (inntekt: SummertMaanedsinntekt[]) =>
         past12Months.map((date) => {
             const incomeForThatMonth = inntekt.find((periode) =>

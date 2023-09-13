@@ -1,11 +1,11 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, RedirectTo, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading, Link, Loader, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading, Link, Table } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { Suspense } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 
-import { ResultatPeriode, RolleType } from "../../api/BidragBehandlingApi";
+import { ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -20,6 +20,7 @@ import { uniqueByKey } from "../../utils/array-utils";
 import { toISODateTimeString } from "../../utils/date-utils";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
+import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
 
 const Vedtak = () => {
@@ -42,7 +43,9 @@ const Vedtak = () => {
                 const saksBehandlerNavn = await SecuritySessionUtils.hentSaksbehandlerNavn();
                 const grunnlagListe = beregnetForskudd.resultat!.flatMap((i) => i.grunnlagListe || []) || [];
                 const personInfoListe = personsQueries.map((p) => p.data);
-                const bidragsMottaker = behandling.roller.find((rolle) => rolle.rolleType == RolleType.BIDRAGSMOTTAKER);
+                const bidragsMottaker = behandling.roller.find(
+                    (rolle) => rolle.rolleType == RolleDtoRolleType.BIDRAGSMOTTAKER
+                );
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
                     type: behandling.soknadType,
@@ -136,7 +139,7 @@ const Vedtak = () => {
                     beregnetForskudd.resultat?.map((r, i) => (
                         <div key={i + r.ident} className="mb-8">
                             <div className="my-4 flex items-center gap-x-2">
-                                <RolleTag rolleType={RolleType.BARN} />
+                                <RolleTag rolleType={RolleDtoRolleType.BARN} />
                                 <BodyShort>
                                     <PersonNavn ident={r.ident}></PersonNavn> / <span className="ml-1">{r.ident}</span>
                                 </BodyShort>
@@ -224,14 +227,8 @@ const Vedtak = () => {
 
 export default () => {
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
+        <QueryErrorWrapper>
             <Vedtak />
-        </Suspense>
+        </QueryErrorWrapper>
     );
 };
