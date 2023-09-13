@@ -3,7 +3,7 @@ import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleType } from "../../../api/BidragBehandlingApi";
+import { RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
@@ -212,6 +212,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             inntektType: "",
             taMed: false,
             fraGrunnlag: false,
+            inntektPostListe: [],
         });
     };
 
@@ -457,7 +458,7 @@ export const UtvidetBarnetrygdTabel = () => {
 export const BarnetilleggTabel = () => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const barna = behandling?.roller.filter((rolle) => rolle.rolleType === RolleType.BARN);
+    const barna = behandling?.roller.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
     const barnMedNavn = personsQueries.map(({ data }) => data);

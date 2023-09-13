@@ -1,6 +1,10 @@
 import { InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
-import { HentGrunnlagspakkeDto } from "../../../api/BidragGrunnlagApi";
-import { TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
+import {
+    BarnetilleggDto,
+    HentGrunnlagspakkeDto,
+    UtvidetBarnetrygdOgSmaabarnstilleggDto,
+} from "../../../api/BidragGrunnlagApi";
+import { SummertAarsinntekt, TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -20,6 +24,7 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
                     inntektType: inntekt.inntektType === "" ? null : inntekt.inntektType,
                     ident: key,
                     belop: Number(inntekt.belop),
+                    inntektPostListe: inntekt.inntektPostListe,
                 };
             })
         )
@@ -55,7 +60,9 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
 export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
-const getPerioderFraBidragInntekt = (bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[]) =>
+export const getPerioderFraBidragInntekt = (
+    bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[]
+) =>
     bidragInntekt.reduce(
         (acc, curr) => ({
             ...acc,
@@ -67,6 +74,7 @@ const getPerioderFraBidragInntekt = (bidragInntekt: { ident: string; data: Trans
                 datoFom: inntekt.periodeFra,
                 ident: curr.ident,
                 fraGrunnlag: true,
+                inntektPostListe: inntekt.inntektPostListe,
             })),
         }),
         {}
@@ -76,8 +84,7 @@ export const createInitialValues = (
     bmOgBarn: RolleDto[],
     bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[],
     inntekter: InntekterResponse,
-    grunnlagspakke: HentGrunnlagspakkeDto,
-    datoFom: Date
+    grunnlagspakke: HentGrunnlagspakkeDto
 ): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
@@ -86,7 +93,7 @@ export const createInitialValues = (
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd
             : grunnlagspakke.ubstListe.map((ubst) => ({
-                  deltBoSted: false, // TODO check where to get this value
+                  deltBoSted: false,
                   belop: ubst.belop,
                   datoFom: ubst.periodeFra,
                   datoTom: ubst.periodeTil,
@@ -320,4 +327,81 @@ export const getOverlappingInntektPerioder = (perioder) => {
     });
 
     return overlappingPeriods;
+};
+
+interface InntektOpplysninger {
+    inntekt: { ident: string; summertAarsinntektListe: SummertAarsinntekt[] }[];
+    utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
+    barnetillegg: BarnetilleggDto[];
+}
+export const compareOpplysninger = (
+    savedOpplysninger: InntektOpplysninger,
+    latestOpplysninger: InntektOpplysninger
+) => {
+    const changedLog = [];
+
+    savedOpplysninger.inntekt.forEach((personInntekt) => {
+        const inntektListeInLatestOpplysninger = latestOpplysninger.inntekt.find(
+            (i) => personInntekt.ident === i.ident
+        );
+
+        if (
+            inntektListeInLatestOpplysninger.summertAarsinntektListe.length >
+            personInntekt.summertAarsinntektListe.length
+        ) {
+            changedLog.push(
+                `En eller flere inntekt perioder har blitt lagt til rolle med ident - ${personInntekt.ident}`
+            );
+        }
+
+        if (
+            inntektListeInLatestOpplysninger.summertAarsinntektListe.length <
+            personInntekt.summertAarsinntektListe.length
+        ) {
+            changedLog.push(
+                `Det er minst en inntekt som legges til grunn mindre for person med ident - ${personInntekt.ident}`
+            );
+        }
+
+        personInntekt.summertAarsinntektListe.forEach((summertAarsinntekt, index) => {
+            const summertAarsinntektFraLatestOpplysninger =
+                inntektListeInLatestOpplysninger.summertAarsinntektListe.find(
+                    (aarsInntekt) => aarsInntekt.visningsnavn === summertAarsinntekt.visningsnavn
+                );
+            if (summertAarsinntektFraLatestOpplysninger) {
+                if (summertAarsinntektFraLatestOpplysninger.sumInntekt !== summertAarsinntekt.sumInntekt) {
+                    changedLog.push(
+                        `Sum for ${summertAarsinntekt.visningsnavn} har blitt endret for rolle med ident - ${personInntekt.ident} fra ${summertAarsinntekt.sumInntekt} til ${summertAarsinntektFraLatestOpplysninger.sumInntekt}`
+                    );
+                }
+            }
+        });
+    });
+
+    if (savedOpplysninger.utvidetbarnetrygd.length !== latestOpplysninger.utvidetbarnetrygd.length) {
+        changedLog.push(`Antall utvidet barnetrygd perioder har blitt endret`);
+    } else {
+        savedOpplysninger.utvidetbarnetrygd.forEach((utvidetbarnetrygd, index) => {
+            const utvidetbarnetrygdInLatestOpplysninger = latestOpplysninger.utvidetbarnetrygd[index];
+
+            if (utvidetbarnetrygdInLatestOpplysninger) {
+                if (utvidetbarnetrygd.belop !== utvidetbarnetrygdInLatestOpplysninger.belop) {
+                    changedLog.push(`Beløp for en eller flere perioder har blitt endret`);
+                }
+            }
+        });
+    }
+
+    if (savedOpplysninger.barnetillegg.length !== latestOpplysninger.barnetillegg.length) {
+        changedLog.push("Antall barnetillegg perioder har blitt endret");
+    } else {
+        savedOpplysninger.barnetillegg.forEach((periode, index) => {
+            const periodeFraLatestOpplysninger = latestOpplysninger.barnetillegg[index];
+            if (periodeFraLatestOpplysninger.belopBrutto === periode.belopBrutto) {
+                changedLog.push("Belop for en eller flere barnetillegg perioder har blitt endret");
+            }
+        });
+    }
+
+    return changedLog;
 };

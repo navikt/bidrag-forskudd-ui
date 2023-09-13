@@ -1,3 +1,5 @@
+import { InntektPost } from "../api/BidragBehandlingApi";
+
 export interface Inntekt {
     inntektType: string;
     datoFom: string | null;
@@ -5,6 +7,7 @@ export interface Inntekt {
     fraGrunnlag: boolean;
     datoTom: string | null;
     belop: number;
+    inntektPostListe: InntektPost[];
 }
 
 export interface BarneTillegFormValues {

@@ -236,6 +236,17 @@ export const bidragInntektTestData = {
                 },
             ],
         },
+        {
+            periode: "2023-08",
+            sumInntekt: 30000,
+            inntektPostListe: [
+                {
+                    kode: "fastloenn",
+                    visningsnavn: "Fastlønn",
+                    beløp: 30000,
+                },
+            ],
+        },
     ],
     summertAarsinntektListe: [
         {
@@ -365,7 +376,7 @@ export const bidragInntektTestData = {
         },
         {
             inntektBeskrivelse: "OVERGANGSSTØNAD",
-            visningsnavn: "Overgangsstønad",
+            visningsnavn: "Overgangsstønad 2021",
             referanse: "",
             sumInntekt: 100,
             periodeFra: "2021-12",
@@ -380,7 +391,7 @@ export const bidragInntektTestData = {
         },
         {
             inntektBeskrivelse: "OVERGANGSSTØNAD",
-            visningsnavn: "Overgangsstønad",
+            visningsnavn: "Overgangsstønad 2022",
             referanse: "",
             sumInntekt: 9000,
             periodeFra: "2022-01",
@@ -450,7 +461,7 @@ export const bidragInntektTestData = {
         },
         {
             inntektBeskrivelse: "OVERGANGSSTØNAD",
-            visningsnavn: "Overgangsstønad",
+            visningsnavn: "Overgangsstønad 2023",
             referanse: "",
             sumInntekt: 6200,
             periodeFra: "2023-01",

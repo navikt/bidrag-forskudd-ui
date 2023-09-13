@@ -1,24 +1,13 @@
 import { ArrowUndoIcon, ClockDashedIcon, TrashIcon } from "@navikt/aksel-icons";
-import {
-    Alert,
-    BodyShort,
-    Button,
-    Heading,
-    Loader,
-    Panel,
-    Radio,
-    RadioGroup,
-    ReadMore,
-    Search,
-} from "@navikt/ds-react";
-import React, { Fragment, Suspense, useEffect, useState } from "react";
+import { Alert, BodyShort, Button, Heading, Panel, Radio, RadioGroup, ReadMore, Search } from "@navikt/ds-react";
+import React, { Fragment, useEffect, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
     BoStatusType,
     OpplysningerDto,
     OpplysningerType,
-    RolleType,
+    RolleDtoRolleType,
     SivilstandType,
 } from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
@@ -53,6 +42,7 @@ import { FormControlledTextField } from "../formFields/FormControlledTextField";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
 import { PersonNavn } from "../PersonNavn";
+import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import {
@@ -178,7 +168,7 @@ const BoforholdsForm = () => {
         grunnlagspakke.husstandmedlemmerOgEgneBarnListe
     );
     const updateBoforhold = useUpdateBoforhold(behandlingId);
-    const [opplysningerChanges, setOpplysningerChanges] = useState(["adsadas", "kmklnklnkln"]);
+    const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
 
@@ -425,7 +415,7 @@ const BarnPerioder = ({
                             <div className="mb-8">
                                 <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                     <div className="w-max h-max">
-                                        <RolleTag rolleType={RolleType.BARN} />
+                                        <RolleTag rolleType={RolleDtoRolleType.BARN} />
                                     </div>
                                     <div>
                                         <FlexRow className="items-center h-[27px]">
@@ -863,14 +853,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
 export default () => {
     return (
-        <Suspense
-            fallback={
-                <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
-                </div>
-            }
-        >
+        <QueryErrorWrapper>
             <BoforholdsForm />
-        </Suspense>
+        </QueryErrorWrapper>
     );
 };

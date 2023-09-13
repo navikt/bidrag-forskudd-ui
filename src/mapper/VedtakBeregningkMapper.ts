@@ -1,19 +1,23 @@
-import { BehandlingDto, BehandlingType, GrunnlagDto, GrunnlagDtoType, RolleType } from "../api/BidragBehandlingApi";
-import { OpprettBehandlingsreferanseRequestDto } from "../api/BidragVedtakApi";
+import { BehandlingDto, BehandlingType, RolleDtoRolleType } from "../api/BidragBehandlingApi";
+import { OpprettBehandlingsreferanseRequestDto, OpprettGrunnlagRequestDto } from "../api/BidragVedtakApi";
 import { PersonDto } from "../api/PersonApi";
 import { mapRolle } from "../types/rolle";
 
-export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: PersonDto[]): GrunnlagDto[] {
+export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: PersonDto[]): OpprettGrunnlagRequestDto[] {
     //TODO: Skal barninfo legges til med navn osv?
-    const rollerForskudd = [RolleType.BIDRAGSMOTTAKER];
-    const rollerSoknad = [RolleType.BIDRAGSMOTTAKER, RolleType.BIDRAGSPLIKTIG, RolleType.REELLMOTTAKER];
+    const rollerForskudd = [RolleDtoRolleType.BIDRAGSMOTTAKER];
+    const rollerSoknad = [
+        RolleDtoRolleType.BIDRAGSMOTTAKER,
+        RolleDtoRolleType.BIDRAGSPLIKTIG,
+        RolleDtoRolleType.REELMOTTAKER,
+    ];
     const hentPersonInfoForRoller =
         behandling.behandlingType == BehandlingType.FORSKUDD ? rollerForskudd : rollerSoknad;
     return behandling.roller
         .filter((rolle) => hentPersonInfoForRoller.includes(rolle.rolleType))
         .map((rolle) => ({
             referanse: "Mottatt_PersonInfo_" + mapRolle(rolle.rolleType),
-            type: GrunnlagDtoType.PERSON_INFO,
+            type: "PERSON_INFO",
             innhold: {
                 fnr: rolle.ident,
                 navn: rolleInfo.find((info) => info.ident == rolle.ident).navn,
