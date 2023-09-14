@@ -2,24 +2,28 @@ import { BehandlingDto, ForskuddAarsakType } from "../../../api/BidragBehandling
 import { deductMonths, firstDayOfMonth } from "../../../utils/date-utils";
 
 export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | string, behandling: BehandlingDto) => {
+    const datoFom = new Date(behandling.datoFom);
+    const mottatDato = new Date(behandling.mottatDato);
+    const mottatOrSoktFraDato = datoFom.getTime() > mottatDato.getTime() ? datoFom : mottatDato;
+
     switch (aarsak) {
         // Fra samlivsbrudd
         case ForskuddAarsakType.BF:
-            return firstDayOfMonth(new Date(behandling.datoFom));
+            return firstDayOfMonth(datoFom);
         // Fra barnets flyttemåned
         case ForskuddAarsakType.CF:
-            return firstDayOfMonth(new Date(behandling.datoFom));
+            return firstDayOfMonth(datoFom);
         // Fra kravfremsettelse
         case ForskuddAarsakType.DF:
-            return firstDayOfMonth(new Date(behandling.mottatDato));
+            return firstDayOfMonth(mottatOrSoktFraDato);
         // 3 måneder tilbake
         case ForskuddAarsakType.EF:
-            return new Date() > new Date(behandling.datoFom)
-                ? firstDayOfMonth(deductMonths(new Date(behandling.mottatDato), 3))
+            return new Date().getTime() > datoFom.getTime()
+                ? firstDayOfMonth(deductMonths(mottatOrSoktFraDato, 3))
                 : null;
         // Fra søknadstidspunkt
         case ForskuddAarsakType.HF:
-            return firstDayOfMonth(new Date(behandling.datoFom));
+            return firstDayOfMonth(datoFom);
         default:
             return null;
     }
