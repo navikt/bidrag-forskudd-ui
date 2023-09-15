@@ -12,12 +12,6 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | st
             : treMaanederTilbakeFraMottatDato;
 
     switch (aarsak) {
-        // Fra samlivsbrudd
-        case ForskuddAarsakType.BF:
-            return firstDayOfMonth(soktFraDato);
-        // Fra barnets flyttemåned
-        case ForskuddAarsakType.CF:
-            return firstDayOfMonth(soktFraDato);
         // Fra kravfremsettelse
         case ForskuddAarsakType.DF:
             return firstDayOfMonth(mottatOrSoktFraDato);

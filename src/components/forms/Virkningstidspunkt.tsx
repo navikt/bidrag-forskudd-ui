@@ -12,7 +12,7 @@ import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
 import { useDebounce } from "../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { DateToDDMMYYYYString, isValidDate } from "../../utils/date-utils";
+import { DateToDDMMYYYYString } from "../../utils/date-utils";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
@@ -41,10 +41,9 @@ const Main = ({ initialValues, error }) => {
     const useFormMethods = useFormContext();
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
-        if (isValidDate(date)) {
-            useFormMethods.setValue("virkningsDato", date);
-            useFormMethods.clearErrors("virkningsDato");
-        }
+
+        useFormMethods.setValue("virkningsDato", date);
+        useFormMethods.clearErrors("virkningsDato");
     };
 
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
