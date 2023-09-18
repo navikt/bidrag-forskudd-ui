@@ -13,6 +13,7 @@ module.exports = merge(webpackCommon, {
             BIDRAG_VEDTAK_URL: "",
             BIDRAG_BEHANDLING_URL: "",
             BIDRAG_GRUNNLAG_URL: "",
+            BIDRAG_INNTEKT: "",
             BISYS_URL: "",
             DISABLE_FATTE_VEDTAK: "",
         }),
