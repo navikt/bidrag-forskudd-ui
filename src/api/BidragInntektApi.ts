@@ -161,41 +161,17 @@ export interface OvergangsstonadDto {
 }
 
 /** Periodisert liste over inntekter fra Sigrun */
-export interface SkattegrunnlagDto {
-    /** Id til personen inntekten er rapportert for */
-    personId: string;
+export interface SkattegrunnlagForLigningsar {
     /**
-     * Periode fra
-     * @format date
+     * Årstall skattegrunnlaget gjelder for
+     * @format int32
      */
-    periodeFra: string;
-    /**
-     * Periode frem til
-     * @format date
-     */
-    periodeTil: string;
-    /** Angir om en inntektsopplysning er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten taes i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-    /** Liste over poster med skattegrunnlag */
-    skattegrunnlagListe: SkattegrunnlagspostDto[];
+    ligningsår: number;
+    /** Poster med skattegrunnlag */
+    skattegrunnlagsposter: SkattegrunnlagspostDto[];
 }
 
-/** Liste over poster med skattegrunnlag */
+/** Poster med skattegrunnlag */
 export interface SkattegrunnlagspostDto {
     /** Type skattegrunnlag, ordinær eller Svalbard */
     skattegrunnlagType: string;
@@ -205,11 +181,11 @@ export interface SkattegrunnlagspostDto {
     belop: number;
 }
 
-export interface TransformerInntekterRequestDto {
+export interface TransformerInntekterRequest {
     /** Periodisert liste over inntekter fra Ainntekt */
     ainntektListe: AinntektDto[];
     /** Periodisert liste over inntekter fra Sigrun */
-    skattegrunnlagListe: SkattegrunnlagDto[];
+    skattegrunnlagListe: SkattegrunnlagForLigningsar[];
     /** Periodisert liste over utvidet barnetrygd og småbarnstillegg */
     ubstListe: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
     /** Periodisert liste over kontantstøtte */
@@ -280,12 +256,12 @@ export interface InntektPost {
 export interface SummertAarsinntekt {
     /**
      * Beskrivelse av inntekt
-     * @example "LIGNINGSINNTEKT"
+     * @example "AINNTEKT"
      */
     inntektBeskrivelse: SummertAarsinntektInntektBeskrivelse;
     /**
      * Visningsnavn for inntekt
-     * @example "Ligningsinntekt"
+     * @example "Lønn og trekk 2022"
      */
     visningsnavn: string;
     /**
@@ -300,7 +276,7 @@ export interface SummertAarsinntekt {
     sumInntekt: number;
     /**
      * Periode (YYYYMM) som inntekten gjelder fra
-     * @example 202301
+     * @example "2023-01"
      */
     periodeFra: {
         /** @format int32 */
@@ -312,12 +288,12 @@ export interface SummertAarsinntekt {
     };
     /**
      * Periode (YYYYMM) som inntekten gjelder til
-     * @example 202312
+     * @example "2023-12"
      */
     periodeTil?: {
         /** @format int32 */
         year?: number;
-        month?: AinntektDto7;
+        month?: AinntektDto10;
         /** @format int32 */
         monthValue?: number;
         leapYear?: boolean;
@@ -330,7 +306,7 @@ export interface SummertAarsinntekt {
 export interface SummertMaanedsinntekt {
     /**
      * Periode (YYYYMM)
-     * @example 202301
+     * @example "2023-01"
      */
     periode: {
         /** @format int32 */
@@ -349,7 +325,7 @@ export interface SummertMaanedsinntekt {
     inntektPostListe: InntektPost[];
 }
 
-export interface TransformerInntekterResponseDto {
+export interface TransformerInntekterResponse {
     /**
      * Dato + commit hash
      * @example "20230705081501_68e71c7"
@@ -380,7 +356,7 @@ export interface GetKodeverkKoderBetydningerResponse {
 
 /**
  * Beskrivelse av inntekt
- * @example "LIGNINGSINNTEKT"
+ * @example "AINNTEKT"
  */
 export enum SummertAarsinntektInntektBeskrivelse {
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -411,7 +387,7 @@ export enum SummertAarsinntektMonth {
     DECEMBER = "DECEMBER",
 }
 
-export enum AinntektDto7 {
+export enum AinntektDto10 {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
     MARCH = "MARCH",
@@ -586,12 +562,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags inntekt-controller
          * @name TransformerInntekter
-         * @summary Transformerer inntekt
+         * @summary Transformerer inntekter
          * @request POST:/transformer
          * @secure
          */
-        transformerInntekter: (data: TransformerInntekterRequestDto, params: RequestParams = {}) =>
-            this.request<TransformerInntekterResponseDto, TransformerInntekterResponseDto>({
+        transformerInntekter: (data: TransformerInntekterRequest, params: RequestParams = {}) =>
+            this.request<TransformerInntekterResponse, TransformerInntekterResponse>({
                 path: `/transformer`,
                 method: "POST",
                 body: data,
@@ -605,12 +581,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * No description
          *
          * @tags integrasjons-controller
-         * @name HentKodeverkSkattegrunnlag
+         * @name HentKodeverk
          * @summary Kaller Felles Kodeverk og henter verdier
          * @request GET:/integrasjoner/kodeverk
          * @secure
          */
-        hentKodeverkSkattegrunnlag: (
+        hentKodeverk: (
             query: {
                 kodeverk: string;
             },

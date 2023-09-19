@@ -4,7 +4,7 @@ import {
     HentGrunnlagspakkeDto,
     UtvidetBarnetrygdOgSmaabarnstilleggDto,
 } from "../../../api/BidragGrunnlagApi";
-import { SummertAarsinntekt, TransformerInntekterResponseDto } from "../../../api/BidragInntektApi";
+import { SummertAarsinntekt, TransformerInntekterResponse } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -60,9 +60,7 @@ const mapInntekterToRolle = (inntekter) => (rolle) =>
 export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
-export const getPerioderFraBidragInntekt = (
-    bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[]
-) =>
+export const getPerioderFraBidragInntekt = (bidragInntekt: { ident: string; data: TransformerInntekterResponse }[]) =>
     bidragInntekt.reduce(
         (acc, curr) => ({
             ...acc,
@@ -82,7 +80,7 @@ export const getPerioderFraBidragInntekt = (
 
 export const createInitialValues = (
     bmOgBarn: RolleDto[],
-    bidragInntekt: { ident: string; data: TransformerInntekterResponseDto }[],
+    bidragInntekt: { ident: string; data: TransformerInntekterResponse }[],
     inntekter: InntekterResponse,
     grunnlagspakke: HentGrunnlagspakkeDto
 ): InntektFormValues => {
