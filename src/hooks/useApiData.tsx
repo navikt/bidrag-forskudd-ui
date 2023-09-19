@@ -21,7 +21,7 @@ import {
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
 } from "../api/BidragGrunnlagApi";
-import { TransformerInntekterRequestDto, TransformerInntekterResponseDto } from "../api/BidragInntektApi";
+import { TransformerInntekterRequest } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
@@ -239,23 +239,29 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
         ?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN)
         .map((barn) => barn.ident);
 
-    const requests: { ident: string; request: TransformerInntekterRequestDto }[] = barnIdenter
+    const requests: { ident: string; request: TransformerInntekterRequest }[] = barnIdenter
         .concat(bmIdent)
         .map((ident) => ({
             ident,
             request: {
-                ainntektListe: grunnlagspakke.ainntektListe.filter((ainntekt) => ainntekt.personId === ident),
-                skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe.filter(
-                    (skattegrunnlag) => skattegrunnlag.personId === ident
-                ),
-                overgangsstonadListe: grunnlagspakke.overgangsstonadListe.filter(
+                ainntektsposter: grunnlagspakke.ainntektListe
+                    .filter((ainntekt) => ainntekt.personId === ident)
+                    .flatMap((ainntekt) =>
+                        ainntekt.ainntektspostListe.map((ainntekt) => ({
+                            ...ainntekt,
+                            belop: Math.round(ainntekt.belop),
+                        }))
+                    ),
+                skattegrunnlagsliste: grunnlagspakke.skattegrunnlagListe
+                    .filter((skattegrunnlag) => skattegrunnlag.personId === ident)
+                    .map((skattegrunnlag) => ({
+                        skattegrunnlagsposter: skattegrunnlag.skattegrunnlagListe,
+                        ligningsår: new Date(Date.parse(skattegrunnlag.periodeFra)).getFullYear(),
+                    })),
+                overgangsstonadsliste: grunnlagspakke.overgangsstonadListe.filter(
                     (overgangsstonad) => overgangsstonad.partPersonId === ident
                 ),
-                kontantstotteListe: grunnlagspakke.kontantstotteListe.filter(
-                    (kontantstotte) => kontantstotte.partPersonId === ident
-                ),
-                ubstListe: grunnlagspakke.ubstListe.filter((ubst) => ubst.personId === ident),
-            },
+            } as TransformerInntekterRequest,
         }));
 
     return requests;

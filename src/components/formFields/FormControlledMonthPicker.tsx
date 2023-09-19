@@ -57,7 +57,7 @@ export const FormControlledMonthPicker = ({
             : isFirstDayOfMonth(new Date(date));
 
         if (!monthValidation.isValidMonth && !monthValidation.isEmpty) {
-            setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+            setError(name, { type: "notValid", message: "Dato er ikke gyldig" });
             return;
         }
         if (required && monthValidation.isEmpty) {

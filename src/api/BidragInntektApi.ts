@@ -10,42 +10,7 @@
  */
 
 /** Periodisert liste over inntekter fra Ainntekt */
-export interface AinntektDto {
-    /** Id til personen inntekten er rapportert for */
-    personId: string;
-    /**
-     * Periode fra-dato
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til-dato
-     * @format date
-     */
-    periodeTil: string;
-    /** Angir om en inntektsopplysning er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten taes i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-    /** Liste over poster for innhentede inntektsposter */
-    ainntektspostListe: AinntektspostDto[];
-}
-
-/** Liste over poster for innhentede inntektsposter */
-export interface AinntektspostDto {
+export interface Ainntektspost {
     /** Perioden innteksposten er utbetalt YYYYMM */
     utbetalingsperiode?: string;
     /**
@@ -58,74 +23,14 @@ export interface AinntektspostDto {
      * @format date
      */
     opptjeningsperiodeTil?: string;
-    /** Id til de som rapporterer inn inntekten */
-    opplysningspliktigId?: string;
-    /** Id til virksomheten som rapporterer inn inntekten */
-    virksomhetId?: string;
-    /** Type inntekt, Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-    inntektType: string;
-    /** Type fordel, Kontantytelse, Naturalytelse, Utgiftsgodtgjorelse */
-    fordelType?: string;
     /** Beskrivelse av inntekt */
     beskrivelse?: string;
     /** Belop */
     belop: number;
-    /**
-     * Fra-dato etterbetaling
-     * @format date
-     */
-    etterbetalingsperiodeFra?: string;
-    /**
-     * Til-dato etterbetaling
-     * @format date
-     */
-    etterbetalingsperiodeTil?: string;
-}
-
-/** Periodisert liste over kontantstøtte */
-export interface KontantstotteDto {
-    /** Id til personen som mottar kontantstøtten */
-    partPersonId: string;
-    /** Id til barnet kontantstøtten er for */
-    barnPersonId: string;
-    /**
-     * Periode fra-dato
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til-dato
-     * @format date
-     */
-    periodeTil?: string;
-    /** Angir om en inntektsopplysning er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten tas i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
-    /**
-     * Beløpet kontantstøtten er på
-     * @format int32
-     */
-    belop: number;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
 }
 
 /** Periodisert liste over overgangsstønad */
-export interface OvergangsstonadDto {
-    /** Id til personen som mottar overgangsstønaden */
-    partPersonId: string;
+export interface Overgangsstonad {
     /**
      * Periode fra-dato
      * @format date
@@ -136,66 +41,25 @@ export interface OvergangsstonadDto {
      * @format date
      */
     periodeTil?: string;
-    /** Angir om en inntektsopplysning er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten tas i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
     /**
      * Beløp overgangsstønad
      * @format int32
      */
     belop: number;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
 }
 
 /** Periodisert liste over inntekter fra Sigrun */
-export interface SkattegrunnlagDto {
-    /** Id til personen inntekten er rapportert for */
-    personId: string;
+export interface SkattegrunnlagForLigningsar {
     /**
-     * Periode fra
-     * @format date
+     * Årstall skattegrunnlaget gjelder for
+     * @format int32
      */
-    periodeFra: string;
-    /**
-     * Periode frem til
-     * @format date
-     */
-    periodeTil: string;
-    /** Angir om en inntektsopplysning er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten taes i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
-    /** Liste over poster med skattegrunnlag */
-    skattegrunnlagListe: SkattegrunnlagspostDto[];
+    ligningsår: number;
+    /** Poster med skattegrunnlag */
+    skattegrunnlagsposter: SkattegrunnlagspostDto[];
 }
 
-/** Liste over poster med skattegrunnlag */
+/** Poster med skattegrunnlag */
 export interface SkattegrunnlagspostDto {
     /** Type skattegrunnlag, ordinær eller Svalbard */
     skattegrunnlagType: string;
@@ -205,56 +69,13 @@ export interface SkattegrunnlagspostDto {
     belop: number;
 }
 
-export interface TransformerInntekterRequestDto {
+export interface TransformerInntekterRequest {
     /** Periodisert liste over inntekter fra Ainntekt */
-    ainntektListe: AinntektDto[];
+    ainntektsposter: Ainntektspost[];
     /** Periodisert liste over inntekter fra Sigrun */
-    skattegrunnlagListe: SkattegrunnlagDto[];
-    /** Periodisert liste over utvidet barnetrygd og småbarnstillegg */
-    ubstListe: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
-    /** Periodisert liste over kontantstøtte */
-    kontantstotteListe: KontantstotteDto[];
+    skattegrunnlagsliste: SkattegrunnlagForLigningsar[];
     /** Periodisert liste over overgangsstønad */
-    overgangsstonadListe: OvergangsstonadDto[];
-}
-
-/** Periodisert liste over utvidet barnetrygd og småbarnstillegg */
-export interface UtvidetBarnetrygdOgSmaabarnstilleggDto {
-    /** Id til personen ubst er rapportert for */
-    personId: string;
-    /** Type stønad, utvidet barnetrygd eller småbarnstillegg */
-    type: string;
-    /**
-     * Periode fra- og med måned
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Angir om en stønad er aktiv */
-    aktiv: boolean;
-    /**
-     * Tidspunkt inntekten taes i bruk
-     * @format date-time
-     */
-    brukFra: string;
-    /**
-     * Tidspunkt inntekten ikke lenger er aktiv som grunnlag. Null betyr at inntekten er aktiv
-     * @format date-time
-     */
-    brukTil?: string;
-    /** Beløp */
-    belop: number;
-    /** Angir om stønaden er manuelt beregnet */
-    manueltBeregnet: boolean;
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
-    hentetTidspunkt: string;
+    overgangsstonadsliste: Overgangsstonad[];
 }
 
 /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
@@ -280,12 +101,12 @@ export interface InntektPost {
 export interface SummertAarsinntekt {
     /**
      * Beskrivelse av inntekt
-     * @example "LIGNINGSINNTEKT"
+     * @example "AINNTEKT"
      */
     inntektBeskrivelse: SummertAarsinntektInntektBeskrivelse;
     /**
      * Visningsnavn for inntekt
-     * @example "Ligningsinntekt"
+     * @example "Lønn og trekk 2022"
      */
     visningsnavn: string;
     /**
@@ -300,7 +121,7 @@ export interface SummertAarsinntekt {
     sumInntekt: number;
     /**
      * Periode (YYYYMM) som inntekten gjelder fra
-     * @example 202301
+     * @example "2023-01"
      */
     periodeFra: {
         /** @format int32 */
@@ -312,12 +133,12 @@ export interface SummertAarsinntekt {
     };
     /**
      * Periode (YYYYMM) som inntekten gjelder til
-     * @example 202312
+     * @example "2023-12"
      */
     periodeTil?: {
         /** @format int32 */
         year?: number;
-        month?: AinntektDto7;
+        month?: Ainntektspost4;
         /** @format int32 */
         monthValue?: number;
         leapYear?: boolean;
@@ -330,7 +151,7 @@ export interface SummertAarsinntekt {
 export interface SummertMaanedsinntekt {
     /**
      * Periode (YYYYMM)
-     * @example 202301
+     * @example "2023-01"
      */
     periode: {
         /** @format int32 */
@@ -349,7 +170,7 @@ export interface SummertMaanedsinntekt {
     inntektPostListe: InntektPost[];
 }
 
-export interface TransformerInntekterResponseDto {
+export interface TransformerInntekterResponse {
     /**
      * Dato + commit hash
      * @example "20230705081501_68e71c7"
@@ -380,7 +201,7 @@ export interface GetKodeverkKoderBetydningerResponse {
 
 /**
  * Beskrivelse av inntekt
- * @example "LIGNINGSINNTEKT"
+ * @example "AINNTEKT"
  */
 export enum SummertAarsinntektInntektBeskrivelse {
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -411,7 +232,7 @@ export enum SummertAarsinntektMonth {
     DECEMBER = "DECEMBER",
 }
 
-export enum AinntektDto7 {
+export enum Ainntektspost4 {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
     MARCH = "MARCH",
@@ -586,12 +407,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags inntekt-controller
          * @name TransformerInntekter
-         * @summary Transformerer inntekt
+         * @summary Transformerer inntekter
          * @request POST:/transformer
          * @secure
          */
-        transformerInntekter: (data: TransformerInntekterRequestDto, params: RequestParams = {}) =>
-            this.request<TransformerInntekterResponseDto, TransformerInntekterResponseDto>({
+        transformerInntekter: (data: TransformerInntekterRequest, params: RequestParams = {}) =>
+            this.request<TransformerInntekterResponse, TransformerInntekterResponse>({
                 path: `/transformer`,
                 method: "POST",
                 body: data,
@@ -605,12 +426,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * No description
          *
          * @tags integrasjons-controller
-         * @name HentKodeverkSkattegrunnlag
+         * @name HentKodeverk
          * @summary Kaller Felles Kodeverk og henter verdier
          * @request GET:/integrasjoner/kodeverk
          * @secure
          */
-        hentKodeverkSkattegrunnlag: (
+        hentKodeverk: (
             query: {
                 kodeverk: string;
             },
