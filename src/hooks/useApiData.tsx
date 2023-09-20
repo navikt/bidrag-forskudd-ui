@@ -21,7 +21,7 @@ import {
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
 } from "../api/BidragGrunnlagApi";
-import { TransformerInntekterRequest } from "../api/BidragInntektApi";
+import { TransformerInntekterRequest, TransformerInntekterResponse } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
@@ -375,7 +375,7 @@ export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagsp
         queries: requests.map((request) => {
             return {
                 queryKey: ["bidragInntekt", request.ident],
-                queryFn: async (): Promise<{ ident: string; data: TransformerInntekterResponseDto }> => {
+                queryFn: async (): Promise<{ ident: string; data: TransformerInntekterResponse }> => {
                     const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
                     return { ident: request.ident, data: data };
                 },

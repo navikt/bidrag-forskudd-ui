@@ -1,4 +1,4 @@
-import { InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+import { InntektDto, InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import {
     BarnetilleggDto,
     HentGrunnlagspakkeDto,
@@ -12,7 +12,7 @@ import {
     perioderSomKanIkkeOverlapeKunMedHverandre,
     ytelsePerioder,
 } from "../../../constants/inntektene";
-import { InntektFormValues } from "../../../types/inntektFormValues";
+import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
 import { addDays, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
 
 export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
@@ -25,6 +25,8 @@ export const createInntektPayload = (values: InntektFormValues): UpdateInntekter
                     ident: key,
                     belop: Number(inntekt.belop),
                     inntektPostListe: inntekt.inntektPostListe,
+                    datoFom: toISODateString(new Date(inntekt.datoFom)),
+                    datoTom: inntekt.datoTom ? toISODateString(new Date(inntekt.datoTom)) : null,
                 };
             })
         )
@@ -50,30 +52,44 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     [rolle.ident]: mapFunction(rolle),
 });
 
-const mapInntekterToRolle = (inntekter) => (rolle) =>
-    inntekter
-        .filter((inntekt) => inntekt.ident === rolle.ident)
-        .map((inntekt) => ({
-            ...inntekt,
-            inntektType: inntekt.inntektType ?? "",
-        }));
-export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
-    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
+const mapInntekterToRolle =
+    (inntekter: InntektDto[], inntekterTransformed: InntektTransformed[]) =>
+    (rolle): Inntekt[] =>
+        inntekter
+            .filter((inntekt) => inntekt.ident === rolle.ident)
+            .map((inntekt) => ({
+                ...inntekt,
+                inntektType: inntekt.inntektType ?? "",
+                datoFom: inntekt.datoFom ?? null,
+                datoTom: inntekt.datoTom ?? null,
+                inntektBeskrivelse: mapInntektBeskrivelse(
+                    inntekterTransformed.find((t) => t.ident == inntekt.ident)?.data,
+                    inntekt.inntektType
+                ),
+            }));
 
-export const getPerioderFraBidragInntekt = (bidragInntekt: { ident: string; data: TransformerInntekterResponse }[]) =>
+// TODO: Midlertidlig løsning helt til visningsnavn lagres i backend
+const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntektType: string) =>
+    bidragInntekt.summertAarsinntektListe.find((v) => v.inntektBeskrivelse == inntektType)?.visningsnavn;
+
+export const getPerioderFraInntekter = (bmOgBarn, inntekter, inntekterTransformed: InntektTransformed[]) =>
+    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter, inntekterTransformed)), {});
+
+export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[]) =>
     bidragInntekt.reduce(
         (acc, curr) => ({
             ...acc,
             [curr.ident]: curr.data.summertAarsinntektListe.map((inntekt) => ({
                 taMed: false,
-                inntektType: inntekt.visningsnavn,
+                inntektBeskrivelse: inntekt.visningsnavn,
+                inntektType: inntekt.inntektBeskrivelse,
                 belop: inntekt.sumInntekt,
-                datoTom: inntekt.periodeTil,
-                datoFom: inntekt.periodeFra,
+                datoTom: inntekt.periodeTil as string,
+                datoFom: inntekt.periodeFra as string,
                 ident: curr.ident,
                 fraGrunnlag: true,
                 inntektPostListe: inntekt.inntektPostListe,
-            })),
+            })) as Inntekt[],
         }),
         {}
     );
@@ -86,7 +102,7 @@ export const createInitialValues = (
 ): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
-            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
+            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter, bidragInntekt)
             : getPerioderFraBidragInntekt(bidragInntekt),
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd

@@ -41,10 +41,7 @@ export interface Overgangsstonad {
      * @format date
      */
     periodeTil?: string;
-    /**
-     * Beløp overgangsstønad
-     * @format int32
-     */
+    /** Beløp overgangsstønad */
     belop: number;
 }
 
@@ -138,7 +135,7 @@ export interface SummertAarsinntekt {
     periodeTil?: {
         /** @format int32 */
         year?: number;
-        month?: Ainntektspost4;
+        month?: Ainntektspost5;
         /** @format int32 */
         monthValue?: number;
         leapYear?: boolean;
@@ -232,7 +229,7 @@ export enum SummertAarsinntektMonth {
     DECEMBER = "DECEMBER",
 }
 
-export enum Ainntektspost4 {
+export enum Ainntektspost5 {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
     MARCH = "MARCH",

@@ -61,9 +61,9 @@ import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers"
 import { ActionButtons } from "./inntekt/ActionButtons";
 
 const Opplysninger = ({ opplysninger, datoFom, ident }) => {
-    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident).perioder;
+    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
     return perioder
-        .filter((periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom))
+        ?.filter((periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom))
         .map((periode, index) => (
             <div
                 key={`${periode.boStatus}-${index}`}
