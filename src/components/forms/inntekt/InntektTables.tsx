@@ -19,10 +19,10 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 
 const Beskrivelse = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
-        <BodyShort className="min-w-[215px] capitalize">{item.inntektType}</BodyShort>
+        <BodyShort className="min-w-[215px] capitalize">{item.inntektBeskrivelse}</BodyShort>
     ) : (
         <FormControlledSelectField
-            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beskrivelse`}
+            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektType`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 Object.entries(GrunnlagInntektType).map(([value, text]) => ({
@@ -210,6 +210,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             datoTom: null,
             belop: 0,
             inntektType: "",
+            inntektBeskrivelse: "",
             taMed: false,
             fraGrunnlag: false,
             inntektPostListe: [],
@@ -253,7 +254,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     legend=""
                                 />,
                                 <Beskrivelse
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektType`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektBeskrivelse`}
                                     item={item}
                                     index={index}
                                     ident={ident}

@@ -1,4 +1,5 @@
 import { ClockDashedIcon, ExternalLinkIcon } from "@navikt/aksel-icons";
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, ExpansionCard, Heading, Link, Tabs } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -245,7 +246,11 @@ const InntektForm = () => {
                     data: JSON.stringify({
                         inntekt: bidragInntekt.map((personInntekt) => ({
                             ident: personInntekt.ident,
-                            summertAarsinntektListe: personInntekt.data.summertAarsinntektListe,
+                            summertAarsinntektListe: personInntekt.data.summertAarsinntektListe.map((inntekt) => ({
+                                ...inntekt,
+                                datoFom: dateToDDMMYYYYString(new Date(inntekt.periodeFra)),
+                                datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTil)),
+                            })),
                         })),
                         utvidetbarnetrygd: grunnlagspakke.ubstListe,
                         barnetillegg: grunnlagspakke.barnetilleggListe,
