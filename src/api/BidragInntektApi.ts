@@ -117,29 +117,17 @@ export interface SummertAarsinntekt {
      */
     sumInntekt: number;
     /**
-     * Periode (YYYYMM) som inntekten gjelder fra
+     * Første måned (YYYYMM) i perioden inntekten gjelder for
+     * @pattern YYYYMM
      * @example "2023-01"
      */
-    periodeFra: {
-        /** @format int32 */
-        year?: number;
-        month?: SummertAarsinntektMonth;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periodeFra: string;
     /**
-     * Periode (YYYYMM) som inntekten gjelder til
+     * Siste månded (YYYYMM) i perioden inntekten gjelder for
+     * @pattern YYYYMM
      * @example "2023-12"
      */
-    periodeTil?: {
-        /** @format int32 */
-        year?: number;
-        month?: Ainntektspost5;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periodeTom?: string;
     /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
     inntektPostListe: InntektPost[];
 }
@@ -148,16 +136,10 @@ export interface SummertAarsinntekt {
 export interface SummertMaanedsinntekt {
     /**
      * Periode (YYYYMM)
+     * @pattern YYYYMM
      * @example "2023-01"
      */
-    periode: {
-        /** @format int32 */
-        year?: number;
-        month?: SummertMaanedsinntektMonth;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periode: string;
     /**
      * Summert inntekt for måneden
      * @example 50000
@@ -212,51 +194,6 @@ export enum SummertAarsinntektInntektBeskrivelse {
     OVERGANGSSTONAD = "OVERGANGSSTØNAD",
     OVERGANGSSTONADBEREGNET3MND = "OVERGANGSSTØNAD_BEREGNET_3MND",
     OVERGANGSSTONADBEREGNET12MND = "OVERGANGSSTØNAD_BEREGNET_12MND",
-}
-
-export enum SummertAarsinntektMonth {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum Ainntektspost5 {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum SummertMaanedsinntektMonth {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
