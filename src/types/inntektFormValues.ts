@@ -1,6 +1,8 @@
 import { InntektPost } from "../api/BidragBehandlingApi";
+import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
 export interface Inntekt {
+    inntektBeskrivelse: string;
     inntektType: string;
     datoFom: string | null;
     taMed: boolean;
@@ -29,4 +31,9 @@ export interface InntektFormValues {
     utvidetbarnetrygd: UtvidetBarnetrygdFormValues[];
     inntektBegrunnelseMedIVedtakNotat: string;
     inntektBegrunnelseKunINotat: string;
+}
+
+export interface InntektTransformed {
+    ident: string;
+    data: TransformerInntekterResponse;
 }
