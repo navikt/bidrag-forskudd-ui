@@ -135,7 +135,8 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
     const sivilstandListeAfterDatoFom = sivilstandListe.filter(
         (periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom)
     );
-    const sivilstandListeWithPeriodeTil = sivilstandListeAfterDatoFom
+    // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
+    const sivilstandListeWithValidPeriodeTil = sivilstandListeAfterDatoFom
         .map((periodeA) => {
             if (periodeA.periodeTil == null) {
                 const nextPeriode = sivilstandListeAfterDatoFom.find(
@@ -153,7 +154,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom));
 
     //@ts-ignore
-    return sivilstandListeWithPeriodeTil
+    return sivilstandListeWithValidPeriodeTil
         .map((periode) => {
             const periodDatoFom =
                 new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra);
