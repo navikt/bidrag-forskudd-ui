@@ -153,14 +153,17 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
         .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom));
 
     //@ts-ignore
-    return sivilstandListeWithPeriodeTil.map((periode) => {
-        const periodDatoFom = new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra);
-        return {
-            sivilstandType: periode.sivilstand,
-            datoFom: firstDayOfMonth(periodDatoFom),
-            datoTom: periode.periodeTil,
-        };
-    });
+    return sivilstandListeWithPeriodeTil
+        .map((periode) => {
+            const periodDatoFom =
+                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra);
+            return {
+                sivilstandType: periode.sivilstand,
+                datoFom: toISODateString(firstDayOfMonth(periodDatoFom)),
+                datoTom: periode.periodeTil != null ? toISODateString(periode.periodeTil) : null,
+            };
+        })
+        .sort((periodeA, periodeB) => (new Date(periodeA.datoFom) > new Date(periodeB.datoFom) ? 1 : -1));
 };
 
 export const createInitialValues = (
@@ -173,10 +176,13 @@ export const createInitialValues = (
 ) => ({
     ...boforhold,
     husstandsBarn: boforoholdOpplysningerExistInDb
-        ? boforhold.husstandsBarn
+        ? boforhold.husstandsBarn.map((barn) => ({
+              ...barn,
+              perioder: barn.perioder?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)),
+          }))
         : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
     sivilstand: boforhold?.sivilstand?.length
-        ? boforhold.sivilstand
+        ? boforhold.sivilstand?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1))
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
 });
 
