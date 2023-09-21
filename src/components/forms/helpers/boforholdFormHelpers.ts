@@ -176,7 +176,7 @@ export const createInitialValues = (
         ? boforhold.husstandsBarn
         : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
     sivilstand: boforhold?.sivilstand?.length
-        ? getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom)
+        ? boforhold.sivilstand
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
 });
 
