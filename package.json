@@ -73,7 +73,7 @@
     "esm": "^3.2.25",
     "file-loader": "^6.2.0",
     "global-jsdom": "^8.7.0",
-    "graphql": "^16.6.0",
+    "graphql": "^16.8.1",
     "html-webpack-plugin": "^5.5.0",
     "ignore-styles": "^5.0.1",
     "jsdom": "^21.1.0",
