@@ -133,12 +133,15 @@ export const getBarnPerioderFromHusstandsListe = (
 
 export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], datoFom: Date): SivilstandDto[] => {
     const sivilstandListeAfterDatoFom = sivilstandListe.filter(
-        (periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom)
+        (periode) =>
+            periode.periodeFra === null ||
+            periode.periodeTil === null ||
+            new Date(periode.periodeTil) > new Date(datoFom)
     );
     // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
     const sivilstandListeWithValidPeriodeTil = sivilstandListeAfterDatoFom
         .map((periodeA) => {
-            if (periodeA.periodeTil == null) {
+            if (periodeA.periodeTil == null && periodeA.periodeFra != null) {
                 const nextPeriode = sivilstandListeAfterDatoFom.find(
                     (periodeB) =>
                         periodeB.periodeTil == null && new Date(periodeA.periodeFra) < new Date(periodeB.periodeFra)
@@ -157,14 +160,20 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
     return sivilstandListeWithValidPeriodeTil
         .map((periode) => {
             const periodDatoFom =
-                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra);
+                periode.periodeFra != null
+                    ? new Date(periode.periodeFra) < new Date(datoFom)
+                        ? datoFom
+                        : new Date(periode.periodeFra)
+                    : null;
             return {
                 sivilstandType: periode.sivilstand,
-                datoFom: toISODateString(firstDayOfMonth(periodDatoFom)),
+                datoFom: periodDatoFom != null ? toISODateString(firstDayOfMonth(periodDatoFom)) : null,
                 datoTom: periode.periodeTil != null ? toISODateString(periode.periodeTil) : null,
             };
         })
-        .sort((periodeA, periodeB) => (new Date(periodeA.datoFom) > new Date(periodeB.datoFom) ? 1 : -1));
+        .sort((periodeA, periodeB) =>
+            periodeB.datoFom == null ? 1 : new Date(periodeA.datoFom) > new Date(periodeB.datoFom) ? 1 : -1
+        );
 };
 
 export const createInitialValues = (
