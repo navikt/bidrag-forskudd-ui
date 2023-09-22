@@ -1,7 +1,11 @@
 import { UseFormSetValue } from "react-hook-form";
 
 import { BehandlingDto, BoforholdResponse, BoStatusType, SivilstandDto } from "../../../api/BidragBehandlingApi";
-import { HentGrunnlagspakkeDto, RelatertPersonDto } from "../../../api/BidragGrunnlagApi";
+import {
+    HentGrunnlagspakkeDto,
+    RelatertPersonDto,
+    SivilstandDto as SivilstandDtoGrunnlag,
+} from "../../../api/BidragGrunnlagApi";
 import {
     BarnPeriode,
     BoforholdFormValues,
@@ -12,6 +16,7 @@ import {
     addDays,
     dateOrNull,
     deductDays,
+    deductMonths,
     firstDayOfMonth,
     lastDayOfMonth,
     toISODateString,
@@ -19,10 +24,14 @@ import {
 
 export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto[], virkningstidspunkt: Date) => {
     if (fieldArrayValues.length && !fieldArrayValues.some((periode) => periode.datoTom === null)) {
-        const filtrertOgSorterListe = fieldArrayValues.sort(
-            (a, b) => new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime()
-        );
-        return toISODateString(addDays(new Date(filtrertOgSorterListe[filtrertOgSorterListe.length - 1].datoTom), 1));
+        const filtrertOgSorterListe = fieldArrayValues.sort((a, b) => {
+            if (a.datoTom == null || b.datoTom == null) {
+                return a.datoTom == null ? 1 : -1;
+            }
+            return new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime();
+        });
+        const lastDatoTom = filtrertOgSorterListe[filtrertOgSorterListe.length - 1].datoTom;
+        return lastDatoTom == null ? null : toISODateString(addDays(new Date(lastDatoTom), 1));
     }
 
     if (!fieldArrayValues.length) {
@@ -122,16 +131,40 @@ export const getBarnPerioderFromHusstandsListe = (
     }));
 };
 
-export const getSivilstandPerioder = (sivilstandListe, datoFom): SivilstandDto[] => {
-    return sivilstandListe
-        .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom))
-        .map((periode) => ({
-            sivilstandType: periode.sivilstand,
-            datoFom: toISODateString(
-                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra)
-            ),
-            datoTom: periode.periodeTil,
-        }));
+export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], datoFom: Date): SivilstandDto[] => {
+    const sivilstandListeAfterDatoFom = sivilstandListe.filter(
+        (periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom)
+    );
+    // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
+    const sivilstandListeWithValidPeriodeTil = sivilstandListeAfterDatoFom
+        .map((periodeA) => {
+            if (periodeA.periodeTil == null) {
+                const nextPeriode = sivilstandListeAfterDatoFom.find(
+                    (periodeB) =>
+                        periodeB.periodeTil == null && new Date(periodeA.periodeFra) < new Date(periodeB.periodeFra)
+                );
+                return {
+                    ...periodeA,
+                    periodeTil: nextPeriode?.periodeFra
+                        ? lastDayOfMonth(deductMonths(new Date(nextPeriode.periodeFra), 1))
+                        : null,
+                };
+            }
+        })
+        .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom));
+
+    //@ts-ignore
+    return sivilstandListeWithValidPeriodeTil
+        .map((periode) => {
+            const periodDatoFom =
+                new Date(periode.periodeFra) < new Date(datoFom) ? datoFom : new Date(periode.periodeFra);
+            return {
+                sivilstandType: periode.sivilstand,
+                datoFom: toISODateString(firstDayOfMonth(periodDatoFom)),
+                datoTom: periode.periodeTil != null ? toISODateString(periode.periodeTil) : null,
+            };
+        })
+        .sort((periodeA, periodeB) => (new Date(periodeA.datoFom) > new Date(periodeB.datoFom) ? 1 : -1));
 };
 
 export const createInitialValues = (
@@ -144,10 +177,13 @@ export const createInitialValues = (
 ) => ({
     ...boforhold,
     husstandsBarn: boforoholdOpplysningerExistInDb
-        ? boforhold.husstandsBarn
+        ? boforhold.husstandsBarn.map((barn) => ({
+              ...barn,
+              perioder: barn.perioder?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)),
+          }))
         : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
     sivilstand: boforhold?.sivilstand?.length
-        ? boforhold.sivilstand
+        ? boforhold.sivilstand?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1))
         : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
 });
 

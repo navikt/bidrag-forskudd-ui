@@ -1,3 +1,5 @@
+import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
+
 import { InntektDto, InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import {
     BarnetilleggDto,
@@ -64,13 +66,18 @@ const mapInntekterToRolle =
                 datoTom: inntekt.datoTom ?? null,
                 inntektBeskrivelse: mapInntektBeskrivelse(
                     inntekterTransformed.find((t) => t.ident == inntekt.ident)?.data,
-                    inntekt.inntektType
+                    inntekt
                 ),
-            }));
+            }))
+            .sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1));
 
 // TODO: Midlertidlig løsning helt til visningsnavn lagres i backend
-const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntektType: string) =>
-    bidragInntekt.summertAarsinntektListe.find((v) => v.inntektBeskrivelse == inntektType)?.visningsnavn;
+const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntekt: InntektDto) =>
+    bidragInntekt.summertAarsinntektListe.find(
+        (v) =>
+            v.inntektBeskrivelse == inntekt.inntektType &&
+            new Date(v.periodeFra).getFullYear() == new Date(inntekt.datoFom).getFullYear()
+    )?.visningsnavn;
 
 export const getPerioderFraInntekter = (bmOgBarn, inntekter, inntekterTransformed: InntektTransformed[]) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter, inntekterTransformed)), {});
@@ -79,17 +86,24 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
     bidragInntekt.reduce(
         (acc, curr) => ({
             ...acc,
-            [curr.ident]: curr.data.summertAarsinntektListe.map((inntekt) => ({
-                taMed: false,
-                inntektBeskrivelse: inntekt.visningsnavn,
-                inntektType: inntekt.inntektBeskrivelse,
-                belop: inntekt.sumInntekt,
-                datoTom: inntekt.periodeTil as string,
-                datoFom: inntekt.periodeFra as string,
-                ident: curr.ident,
-                fraGrunnlag: true,
-                inntektPostListe: inntekt.inntektPostListe,
-            })) as Inntekt[],
+            [curr.ident]: curr.data.summertAarsinntektListe
+                .map((inntekt) => {
+                    return {
+                        taMed: false,
+                        inntektBeskrivelse: inntekt.visningsnavn,
+                        inntektType: inntekt.inntektBeskrivelse,
+                        belop: inntekt.sumInntekt,
+                        datoTom:
+                            inntekt.periodeTom != null
+                                ? toISODateString(lastDayOfMonth(new Date(inntekt.periodeTom)))
+                                : null,
+                        datoFom: inntekt.periodeFra,
+                        ident: curr.ident,
+                        fraGrunnlag: true,
+                        inntektPostListe: inntekt.inntektPostListe,
+                    };
+                })
+                .sort((a: Inntekt, b: Inntekt) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)) as Inntekt[],
         }),
         {}
     );

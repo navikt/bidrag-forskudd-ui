@@ -216,7 +216,7 @@ const InntektForm = () => {
 
         updateInntekter.mutation.mutate(createInntektPayload(values), {
             onSuccess: () =>
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
+                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: false }),
         });
     };
 
@@ -224,9 +224,12 @@ const InntektForm = () => {
 
     useEffect(() => {
         const { unsubscribe } = useFormMethods.watch((value, { name }) => {
-            if (useFormMethods.formState.isDirty) {
-                debouncedOnSave();
-            }
+            // isDirty is not always working
+            // if (useFormMethods.formState.isDirty) {
+            //     debouncedOnSave();
+            // }
+
+            debouncedOnSave();
 
             const field = name?.split(".")[0];
             if (NOTAT_FIELDS.includes(field)) {
@@ -249,7 +252,7 @@ const InntektForm = () => {
                             summertAarsinntektListe: personInntekt.data.summertAarsinntektListe.map((inntekt) => ({
                                 ...inntekt,
                                 datoFom: dateToDDMMYYYYString(new Date(inntekt.periodeFra)),
-                                datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTil)),
+                                datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTom)),
                             })),
                         })),
                         utvidetbarnetrygd: grunnlagspakke.ubstListe,

@@ -1,7 +1,11 @@
 export enum GrunnlagInntektType {
     LOENNSINNTEKT = "Lønn",
+    KAPITALINNTEKT_EGNE_OPPLYSNINGER = "Kapitalinntekt egne opplysninger",
+    PERSONINNTEKT_EGNE_OPPLYSNINGER = "Personinntekt egne opplysninger",
+    SAKSBEHANDLER_BEREGNET_INNTEKT = "Saksbehandlers beregnede inntekt",
     NAERINGSINNTEKT = "Næringsinntekt",
-    PENSJON_ELLER_TRYGD = "Pensjon eller trygd",
+    EKSTRA_SMAABARNSTILLEGG = "Småbarnstillegg",
+    KONTANTSTOTTE = "Kontantstøtte",
     YTELSE_FRA_OFFENTLIGE = "Ytelse fra offentlige",
 }
 
@@ -12,8 +16,11 @@ export enum InntektTypeBeregnet {
 
 export const InntektBeskrivelse = {
     LOENNSINNTEKT: GrunnlagInntektType.LOENNSINNTEKT,
+    EKSTRA_SMAABARNSTILLEGG: GrunnlagInntektType.EKSTRA_SMAABARNSTILLEGG,
+    KONTANTSTOTTE: GrunnlagInntektType.KONTANTSTOTTE,
+    KAPITALINNTEKT_EGNE_OPPLYSNINGER: GrunnlagInntektType.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+    PERSONINNTEKT_EGNE_OPPLYSNINGER: GrunnlagInntektType.PERSONINNTEKT_EGNE_OPPLYSNINGER,
     NAERINGSINNTEKT: GrunnlagInntektType.NAERINGSINNTEKT,
-    PENSJON_ELLER_TRYGD: GrunnlagInntektType.PENSJON_ELLER_TRYGD,
     YTELSE_FRA_OFFENTLIGE: GrunnlagInntektType.YTELSE_FRA_OFFENTLIGE,
     TRE_MAANED_BEREGNET: InntektTypeBeregnet.TRE_MAANED_BEREGNET,
     TOLV_MAANED_BEREGNET: InntektTypeBeregnet.TOLV_MAANED_BEREGNET,

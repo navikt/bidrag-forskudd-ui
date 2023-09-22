@@ -365,7 +365,7 @@ export const UtvidetBarnetrygdTabel = () => {
 
         if (!overlappingPerioder?.length) {
             // @ts-ignore
-            clearErrors("utvidetBarnetrygd.types.overlappingPerioder");
+            clearErrors("utvidetbarnetrygd.types.overlappingPerioder");
         }
     };
 
@@ -382,10 +382,10 @@ export const UtvidetBarnetrygdTabel = () => {
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <div key={`utvidetBarnetrygd.${index}.fraDato`} className="flex gap-x-4">
+                                <div key={`utvidetbarnetrygd.${index}.fraDato`} className="flex gap-x-4">
                                     <FormControlledMonthPicker
-                                        key={`utvidetBarnetrygd.${index}.datoFom`}
-                                        name={`utvidetBarnetrygd.${index}.datoFom`}
+                                        key={`utvidetbarnetrygd.${index}.datoFom`}
+                                        name={`utvidetbarnetrygd.${index}.datoFom`}
                                         label="Fra og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
@@ -395,8 +395,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                         hideLabel
                                     />
                                     <FormControlledMonthPicker
-                                        key={`utvidetBarnetrygd.${index}.datoTom`}
-                                        name={`utvidetBarnetrygd.${index}.datoTom`}
+                                        key={`utvidetbarnetrygd.${index}.datoTom`}
+                                        name={`utvidetbarnetrygd.${index}.datoTom`}
                                         label="Til og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
@@ -407,14 +407,14 @@ export const UtvidetBarnetrygdTabel = () => {
                                     />
                                 </div>,
                                 <FormControlledCheckbox
-                                    key={`utvidetBarnetrygd.${index}.deltBoSted`}
-                                    name={`utvidetBarnetrygd.${index}.deltBoSted`}
+                                    key={`utvidetbarnetrygd.${index}.deltBosted`}
+                                    name={`utvidetbarnetrygd.${index}.deltBosted`}
                                     className="m-auto"
                                     legend=""
                                 />,
                                 <FormControlledTextField
-                                    key={`utvidetBarnetrygd.${index}.belop`}
-                                    name={`utvidetBarnetrygd.${index}.belop`}
+                                    key={`utvidetbarnetrygd.${index}.belop`}
+                                    name={`utvidetbarnetrygd.${index}.belop`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
