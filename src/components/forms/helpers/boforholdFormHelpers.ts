@@ -132,17 +132,12 @@ export const getBarnPerioderFromHusstandsListe = (
 };
 
 export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], datoFom: Date): SivilstandDto[] => {
-    const sivilstandListeAfterDatoFom = sivilstandListe.filter(
-        (periode) =>
-            periode.periodeFra === null ||
-            periode.periodeTil === null ||
-            new Date(periode.periodeTil) > new Date(datoFom)
-    );
+    console.log(sivilstandListe);
     // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
-    const sivilstandListeWithValidPeriodeTil = sivilstandListeAfterDatoFom
+    const sivilstandListeWithValidPeriodeTil = sivilstandListe
         .map((periodeA) => {
             if (periodeA.periodeTil == null && periodeA.periodeFra != null) {
-                const nextPeriode = sivilstandListeAfterDatoFom.find(
+                const nextPeriode = sivilstandListe.find(
                     (periodeB) =>
                         periodeB.periodeTil == null && new Date(periodeA.periodeFra) < new Date(periodeB.periodeFra)
                 );
@@ -153,8 +148,14 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
                         : null,
                 };
             }
+            return periodeA;
         })
-        .filter((periode) => periode.periodeTil === null || new Date(periode.periodeTil) > new Date(datoFom));
+        .filter(
+            (periode) =>
+                periode?.periodeFra === null ||
+                periode?.periodeTil === null ||
+                new Date(periode.periodeTil) > new Date(datoFom)
+        );
 
     //@ts-ignore
     return sivilstandListeWithValidPeriodeTil
