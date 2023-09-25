@@ -132,7 +132,6 @@ export const getBarnPerioderFromHusstandsListe = (
 };
 
 export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], datoFom: Date): SivilstandDto[] => {
-    console.log(sivilstandListe);
     // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
     const sivilstandListeWithValidPeriodeTil = sivilstandListe
         .map((periodeA) => {
