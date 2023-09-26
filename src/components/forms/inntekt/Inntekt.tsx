@@ -186,10 +186,10 @@ const InntektForm = () => {
     const channel = new BroadcastChannel("inntekter");
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { data: inntekter } = useHentInntekter(behandlingId);
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const grunnlagspakke = useGrunnlagspakke();
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertMaanedsinntekt[] } = bidragInntekt.reduce(
         (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMaanedsinntektListe }),

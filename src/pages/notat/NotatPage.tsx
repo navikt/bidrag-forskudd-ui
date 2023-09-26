@@ -181,7 +181,7 @@ const Boforhold = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { data: behandling } = useGetBehandling(Number(behandlingId));
     const { data: boforhold } = useGetBoforhold(Number(behandlingId));
-    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
+    const grunnlagspakke = useGrunnlagspakke();
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(Number(behandlingId));
     const { data: boforoholdOpplysninger } = useGetOpplysninger(Number(behandlingId), OpplysningerType.BOFORHOLD);
     const opplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe);

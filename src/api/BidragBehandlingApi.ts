@@ -50,22 +50,6 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
-export interface EntityModelOpplysninger {
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    _links?: Links;
-}
-
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -95,11 +79,6 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
-}
-
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum SivilstandType {
@@ -145,6 +124,26 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
+export interface EntityModelRolle {
+    rolleType: EntityModelRolleRolleType;
+    ident: string;
+    /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
+    opprettetDato?: string;
+    deleted: boolean;
+    /** @format int32 */
+    soknadsLinje: number;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelRolle {
+    _embedded?: {
+        rolles?: EntityModelRolle[];
+    };
+    _links?: Links;
+}
+
 export interface EntityModelBehandling {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -174,6 +173,9 @@ export interface EntityModelBehandling {
     boforholdBegrunnelseKunINotat?: string;
     inntektBegrunnelseMedIVedtakNotat?: string;
     inntektBegrunnelseKunINotat?: string;
+    /** @format int64 */
+    grunnlagspakkeId?: number;
+    deleted: boolean;
     _links?: Links;
 }
 
@@ -184,9 +186,38 @@ export interface CollectionModelObject {
     _links?: Links;
 }
 
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
+}
+
+export interface EntityModelOpplysninger {
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    /** @format date-time */
+    ts?: string;
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
 export interface CollectionModelEntityModelBehandling {
     _embedded?: {
         behandlings?: EntityModelBehandling[];
+    };
+    _links?: Links;
+}
+
+export interface CollectionModelRolle {
+    _embedded?: {
+        rolles?: RolleResponse[];
     };
     _links?: Links;
 }
@@ -222,23 +253,59 @@ export interface BehandlingRequestBody {
     inntektBegrunnelseKunINotat?: string;
     /** @format int64 */
     id?: number;
+    /** @format int64 */
+    grunnlagspakkeId?: number;
     roller: string[];
     husstandsBarn: string[];
     inntekter: string[];
     sivilstand: string[];
     barnetillegg: string[];
     utvidetbarnetrygd: string[];
+    deleted: boolean;
+}
+
+export interface RolleRequestBody {
+    behandling: string;
+    rolleType: RolleRequestBodyRolleType;
+    ident: string;
+    /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
+    opprettetDato?: string;
+    /** @format int64 */
+    id?: number;
+    deleted: boolean;
+    /** @format int32 */
+    soknadsLinje: number;
+}
+
+export interface RolleResponse {
+    rolleType: RolleResponseRolleType;
+    ident: string;
+    /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
+    opprettetDato?: string;
+    deleted: boolean;
+    /** @format int32 */
+    soknadsLinje: number;
 }
 
 export interface OpplysningerRequestBody {
     behandling: string;
-    aktiv: boolean;
     opplysningerType: OpplysningerType;
     data: string;
     /** @format date-time */
     hentetDato: string;
+    /** @format date-time */
+    ts?: string;
     /** @format int64 */
     id?: number;
+}
+
+export interface UpdateBehandlingRequest {
+    /** @format int64 */
+    grunnlagspakkeId?: number;
 }
 
 export interface UpdateVirkningsTidspunktRequest {
@@ -261,6 +328,36 @@ export interface VirkningsTidspunktResponse {
      * @example "2025-01-25"
      */
     virkningsDato?: string;
+}
+
+/** Rolle beskrivelse som er brukte til å opprette nye roller */
+export interface CreateRolleDto {
+    rolleType: CreateRolleRolleType;
+    /** F.eks fødselsnummer */
+    ident: string;
+    /**
+     * F.eks fødselsdato
+     * @format date
+     */
+    fodtDato?: string;
+    /**
+     * Opprettet dato
+     * @format date
+     */
+    opprettetDato?: string;
+    erSlettet: boolean;
+}
+
+export enum CreateRolleRolleType {
+    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
+    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
+    BARN = "BARN",
+    REELL_MOTTAKER = "REELL_MOTTAKER",
+    FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+export interface SyncRollerRequest {
+    roller: CreateRolleDto[];
 }
 
 export interface BarnetilleggDto {
@@ -444,7 +541,7 @@ export interface BehandlingInfoDto {
 }
 
 export interface ForsendelseRolleDto {
-    fødselsnummer: string;
+    fødselsnummer?: string;
     type: ForsendelseRolleDtoType;
 }
 
@@ -494,31 +591,6 @@ export interface CreateBehandlingRequest {
     soknadRefId?: number;
 }
 
-/** Rolle beskrivelse som er brukte til å opprette nye roller */
-export interface CreateRolleDto {
-    rolleType: CreateRolleRolleType;
-    /** F.eks fødselsnummer */
-    ident: string;
-    /**
-     * F.eks fødselsdato
-     * @format date
-     */
-    fodtDato?: string;
-    /**
-     * Opprettet dato
-     * @format date
-     */
-    opprettetDato?: string;
-}
-
-export enum CreateRolleRolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
-    BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
-}
-
 export interface CreateBehandlingResponse {
     /** @format int64 */
     id: number;
@@ -543,7 +615,6 @@ export interface OpplysningerDto {
     id: number;
     /** @format int64 */
     behandlingId: number;
-    aktiv: boolean;
     opplysningerType: OpplysningerType;
     data: string;
     /** @format date */
@@ -636,6 +707,8 @@ export interface BehandlingDto {
     virkningsDato?: string;
     /** @format int64 */
     soknadRefId?: number;
+    /** @format int64 */
+    grunnlagspakkeId?: number;
     aarsak?: ForskuddAarsakType;
     virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
     virkningsTidspunktBegrunnelseKunINotat?: string;
@@ -665,6 +738,14 @@ export interface Link {
     profile?: string;
     name?: string;
     templated?: boolean;
+}
+
+export enum EntityModelRolleRolleType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
 }
 
 export enum EntityModelBehandlingStonadType {
@@ -703,6 +784,22 @@ export enum BehandlingRequestBodyEngangsbelopType {
     SAERTILSKUDD = "SAERTILSKUDD",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum RolleRequestBodyRolleType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
+}
+
+export enum RolleResponseRolleType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
 }
 
 export enum BehandlingInfoDtoStonadType {
@@ -1112,6 +1209,110 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 format: "json",
                 ...params,
             }),
+
+        /**
+         * @description get-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name FollowPropertyReferenceBehandlingGet1
+         * @request GET:/behandlings/{id}/roller
+         * @secure
+         */
+        followPropertyReferenceBehandlingGet1: (id: string, params: RequestParams = {}) =>
+            this.request<CollectionModelRolle, void>({
+                path: `/behandlings/${id}/roller`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name CreatePropertyReferenceBehandlingPut
+         * @request PUT:/behandlings/{id}/roller
+         * @secure
+         */
+        createPropertyReferenceBehandlingPut: (id: string, data: CollectionModelObject, params: RequestParams = {}) =>
+            this.request<CollectionModelRolle, any>({
+                path: `/behandlings/${id}/roller`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name DeletePropertyReferenceBehandlingDelete
+         * @request DELETE:/behandlings/{id}/roller
+         * @secure
+         */
+        deletePropertyReferenceBehandlingDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/behandlings/${id}/roller`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name CreatePropertyReferenceBehandlingPatch
+         * @request PATCH:/behandlings/{id}/roller
+         * @secure
+         */
+        createPropertyReferenceBehandlingPatch: (id: string, data: CollectionModelObject, params: RequestParams = {}) =>
+            this.request<CollectionModelRolle, any>({
+                path: `/behandlings/${id}/roller`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name FollowPropertyReferenceBehandlingGet
+         * @request GET:/behandlings/{id}/roller/{propertyId}
+         * @secure
+         */
+        followPropertyReferenceBehandlingGet: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<CollectionModelRolle, void>({
+                path: `/behandlings/${id}/roller/${propertyId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-rolle-by-behandling-Id
+         *
+         * @tags behandling-property-reference-controller
+         * @name DeletePropertyReferenceIdBehandlingDelete
+         * @request DELETE:/behandlings/{id}/roller/{propertyId}
+         * @secure
+         */
+        deletePropertyReferenceIdBehandlingDelete: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/behandlings/${id}/roller/${propertyId}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
     };
     opplysningers = {
         /**
@@ -1155,7 +1356,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags opplysninger-search-controller
          * @name ExecuteSearchOpplysningerGet
-         * @request GET:/opplysningers/search/findActiveByBehandlingIdAndType
+         * @request GET:/opplysningers/search/findTopByBehandlingIdAndOpplysningerTypeOrderByTsDescIdDesc
          * @secure
          */
         executeSearchOpplysningerGet: (
@@ -1167,7 +1368,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             params: RequestParams = {}
         ) =>
             this.request<EntityModelOpplysninger, void>({
-                path: `/opplysningers/search/findActiveByBehandlingIdAndType`,
+                path: `/opplysningers/search/findTopByBehandlingIdAndOpplysningerTypeOrderByTsDescIdDesc`,
                 method: "GET",
                 query: query,
                 secure: true,
@@ -1405,8 +1606,296 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 format: "json",
                 ...params,
             }),
+
+        /**
+         * No description
+         *
+         * @tags profile-controller
+         * @name Descriptor113
+         * @request GET:/profile/rolles
+         * @secure
+         */
+        descriptor113: (params: RequestParams = {}) =>
+            this.request<string, any>({
+                path: `/profile/rolles`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+    };
+    rolles = {
+        /**
+         * @description get-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name GetCollectionResourceRolleGet1
+         * @request GET:/rolles
+         * @secure
+         */
+        getCollectionResourceRolleGet1: (params: RequestParams = {}) =>
+            this.request<CollectionModelEntityModelRolle, any>({
+                path: `/rolles`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description create-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name PostCollectionResourceRollePost
+         * @request POST:/rolles
+         * @secure
+         */
+        postCollectionResourceRollePost: (data: RolleRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelRolle, any>({
+                path: `/rolles`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags rolle-search-controller
+         * @name ExecuteSearchRolleGet
+         * @request GET:/rolles/search/findRollerByBehandlingId
+         * @secure
+         */
+        executeSearchRolleGet: (
+            query?: {
+                /** @format int64 */
+                behandlingId?: number;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<CollectionModelEntityModelRolle, void>({
+                path: `/rolles/search/findRollerByBehandlingId`,
+                method: "GET",
+                query: query,
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name GetItemResourceRolleGet
+         * @request GET:/rolles/{id}
+         * @secure
+         */
+        getItemResourceRolleGet: (id: string, params: RequestParams = {}) =>
+            this.request<EntityModelRolle, void>({
+                path: `/rolles/${id}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name PutItemResourceRollePut
+         * @request PUT:/rolles/{id}
+         * @secure
+         */
+        putItemResourceRollePut: (id: string, data: RolleRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelRolle, any>({
+                path: `/rolles/${id}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name DeleteItemResourceRolleDelete
+         * @request DELETE:/rolles/{id}
+         * @secure
+         */
+        deleteItemResourceRolleDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/rolles/${id}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-rolle
+         *
+         * @tags rolle-entity-controller
+         * @name PatchItemResourceRollePatch
+         * @request PATCH:/rolles/{id}
+         * @secure
+         */
+        patchItemResourceRollePatch: (id: string, data: RolleRequestBody, params: RequestParams = {}) =>
+            this.request<EntityModelRolle, any>({
+                path: `/rolles/${id}`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name FollowPropertyReferenceRolleGet1
+         * @request GET:/rolles/{id}/behandling
+         * @secure
+         */
+        followPropertyReferenceRolleGet1: (id: string, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/rolles/${id}/behandling`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description update-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name CreatePropertyReferenceRollePut
+         * @request PUT:/rolles/{id}/behandling
+         * @secure
+         */
+        createPropertyReferenceRollePut: (id: string, data: CollectionModelObject, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/rolles/${id}/behandling`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name DeletePropertyReferenceRolleDelete
+         * @request DELETE:/rolles/{id}/behandling
+         * @secure
+         */
+        deletePropertyReferenceRolleDelete: (id: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/rolles/${id}/behandling`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description patch-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name CreatePropertyReferenceRollePatch
+         * @request PATCH:/rolles/{id}/behandling
+         * @secure
+         */
+        createPropertyReferenceRollePatch: (id: string, data: CollectionModelObject, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, any>({
+                path: `/rolles/${id}/behandling`,
+                method: "PATCH",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description get-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name FollowPropertyReferenceRolleGet
+         * @request GET:/rolles/{id}/behandling/{propertyId}
+         * @secure
+         */
+        followPropertyReferenceRolleGet: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<EntityModelBehandling, void>({
+                path: `/rolles/${id}/behandling/${propertyId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description delete-behandling-by-rolle-Id
+         *
+         * @tags rolle-property-reference-controller
+         * @name DeletePropertyReferenceIdRolleDelete
+         * @request DELETE:/rolles/{id}/behandling/{propertyId}
+         * @secure
+         */
+        deletePropertyReferenceIdRolleDelete: (id: string, propertyId: string, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/rolles/${id}/behandling/${propertyId}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
     };
     api = {
+        /**
+         * @description Hente en behandling
+         *
+         * @tags behandling-controller
+         * @name HentBehandling
+         * @request GET:/api/behandling/{behandlingId}
+         * @secure
+         */
+        hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere behandling
+         *
+         * @tags behandling-controller
+         * @name UpdateBehandling
+         * @request PUT:/api/behandling/{behandlingId}
+         * @secure
+         */
+        updateBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/behandling/${behandlingId}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
         /**
          * @description Hente virkningstidspunkt data
          *
@@ -1460,6 +1949,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 path: `/api/behandling/${behandlingId}/vedtak/${vedtakId}`,
                 method: "PUT",
                 secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description Sync fra behandling
+         *
+         * @tags behandling-controller
+         * @name SyncRoller
+         * @request PUT:/api/behandling/{behandlingId}/roller/sync
+         * @secure
+         */
+        syncRoller: (behandlingId: number, data: SyncRollerRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/behandling/${behandlingId}/roller/sync`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
                 ...params,
             }),
 
@@ -1621,23 +2128,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             this.request<ForskuddBeregningRespons, any>({
                 path: `/api/behandling/${behandlingId}/beregn`,
                 method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Hente en behandling
-         *
-         * @tags behandling-controller
-         * @name HentBehandling
-         * @request GET:/api/behandling/{behandlingId}
-         * @secure
-         */
-        hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<BehandlingDto, BehandlingDto>({
-                path: `/api/behandling/${behandlingId}`,
-                method: "GET",
                 secure: true,
                 format: "json",
                 ...params,
