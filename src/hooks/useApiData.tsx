@@ -267,44 +267,12 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
     return requests;
 };
 
-export const useGrunnlagspakke = (behandling: BehandlingDto) => {
-    const { data: grunnlagspakkeId } = useQuery({
-        queryKey: ["grunnlagspakkeId"],
-        queryFn: async (): Promise<number> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
-                formaal: "FORSKUDD",
-                opprettetAv: "saksbehandler",
-            });
-            return data;
-        },
-        staleTime: Infinity,
-        enabled: !!behandling,
-    });
+export const useGrunnlagspakke = () => {
+    const queryClient = useQueryClient();
+    const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
+    const grunnlagspakke = queryClient.getQueryData<HentGrunnlagspakkeDto>(["grunnlagspakke", grunnlagspakkeId]);
 
-    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
-
-    const { isSuccess: updateIsSuccess } = useQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
-        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
-            return data;
-        },
-        staleTime: Infinity,
-        enabled: !!grunnlagspakkeId,
-    });
-
-    return useQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId],
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
-            return data;
-        },
-        staleTime: Infinity,
-        enabled: !!updateIsSuccess,
-    });
+    return grunnlagspakke;
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
@@ -318,19 +286,29 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         staleTime: Infinity,
     });
 
-    await queryClient.prefetchQuery({
-        queryKey: ["grunnlagspakkeId"],
-        queryFn: async (): Promise<number> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
-                formaal: "FORSKUDD",
-                opprettetAv: "saksbehandler",
-            });
-            return data;
-        },
-        staleTime: Infinity,
-    });
-    const grunnlagspakkeId: number = queryClient.getQueryData(["grunnlagspakkeId"]);
     const behandling: BehandlingDto = queryClient.getQueryData(["behandling", behandlingId]);
+
+    if (behandling?.grunnlagspakkeId) {
+        queryClient.setQueryData(["grunnlagspakkeId"], behandling.grunnlagspakkeId);
+    } else {
+        await queryClient.prefetchQuery({
+            queryKey: ["grunnlagspakkeId"],
+            queryFn: async (): Promise<number> => {
+                const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+                    formaal: "FORSKUDD",
+                    opprettetAv: "saksbehandler",
+                });
+                return data;
+            },
+            staleTime: Infinity,
+        });
+
+        const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
+        await BEHANDLING_API.api.updateBehandling(behandlingId, { grunnlagspakkeId });
+        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeId: grunnlagspakkeId });
+    }
+
+    const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
 
     await queryClient.prefetchQuery({
