@@ -190,6 +190,7 @@ const InntektForm = () => {
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const grunnlagspakke = useGrunnlagspakke();
+    console.log("grunnlagspakke", grunnlagspakke);
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertMaanedsinntekt[] } = bidragInntekt.reduce(
         (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMaanedsinntektListe }),
