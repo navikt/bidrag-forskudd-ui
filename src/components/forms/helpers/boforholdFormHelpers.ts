@@ -168,7 +168,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
             return {
                 sivilstandType: periode.sivilstand,
                 datoFom: periodDatoFom != null ? toISODateString(firstDayOfMonth(periodDatoFom)) : null,
-                datoTom: periode.periodeTil != null ? toISODateString(periode.periodeTil) : null,
+                datoTom: periode.periodeTil != null ? toISODateString(new Date(periode.periodeTil)) : null,
             };
         })
         .sort((periodeA, periodeB) =>
