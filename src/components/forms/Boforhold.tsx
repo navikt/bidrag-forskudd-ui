@@ -162,7 +162,7 @@ const BoforholdsForm = () => {
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.BOFORHOLD);
-    const grunnlagspakke = useGrunnlagspakke();
+    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const channel = new BroadcastChannel("boforhold");
     const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(
         grunnlagspakke.husstandmedlemmerOgEgneBarnListe

@@ -11,6 +11,7 @@ import {
     OpplysningerType,
     RolleDto,
     RolleDtoRolleType,
+    UpdateBehandlingRequest,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
@@ -267,12 +268,57 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
     return requests;
 };
 
-export const useGrunnlagspakke = () => {
-    const queryClient = useQueryClient();
-    const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
-    const grunnlagspakke = queryClient.getQueryData<HentGrunnlagspakkeDto>(["grunnlagspakke", grunnlagspakkeId]);
+const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
+    const { data: grunnlagspakkeId } = useQuery({
+        queryKey: ["grunnlagspakkeId"],
+        queryFn: async (): Promise<number> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+                formaal: "FORSKUDD",
+                opprettetAv: "saksbehandler",
+            });
+            return data;
+        },
+        staleTime: Infinity,
+        enabled: !!behandling,
+    });
 
-    return grunnlagspakke;
+    const mutation = useMutation({
+        mutationFn: async (payload: UpdateBehandlingRequest): Promise<void> => {
+            await BEHANDLING_API.api.updateBehandling(behandling.id, payload);
+        },
+    });
+    mutation.mutate({ grunnlagspakkeId });
+
+    return grunnlagspakkeId;
+};
+
+export const useGrunnlagspakke = (behandling: BehandlingDto) => {
+    const grunnlagspakkeId = behandling?.grunnlagspakkeId
+        ? behandling.grunnlagspakkeId
+        : useCreateGrunnlagspakke(behandling);
+    const grunnlagRequest = createGrunnlagRequest(behandling);
+    const { isSuccess: updateIsSuccess } = useQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
+        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
+                grunnlagspakkeId,
+                grunnlagRequest
+            );
+            return data;
+        },
+        staleTime: Infinity,
+        enabled: !!grunnlagspakkeId,
+    });
+
+    return useQuery({
+        queryKey: ["grunnlagspakke", grunnlagspakkeId],
+        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+            return data;
+        },
+        staleTime: Infinity,
+        enabled: !!updateIsSuccess,
+    });
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
@@ -309,7 +355,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     }
 
     const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
-    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = createGrunnlagRequest(behandling);
+    const grunnlagRequest = createGrunnlagRequest(behandling);
 
     await queryClient.prefetchQuery({
         queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
