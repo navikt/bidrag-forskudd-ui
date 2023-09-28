@@ -268,12 +268,12 @@ export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
     );
 
     if (added.length) {
-        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra folkeregistre:");
+        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra folkeregisteret:");
         added.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
     if (removed.length) {
-        changedLog.push("Barn som finnes ikke i nye opplysninger fra folkeregistre:");
+        changedLog.push("Barn som ikke finnes i nye opplysninger fra folkeregisteret:");
         removed.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
