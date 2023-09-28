@@ -259,16 +259,34 @@ export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
         changedLog.push("Det er fære barn registret i folkeregistre.");
     }
 
+    const removed = savedOpplysninger.husstand?.filter(
+        (b) => !latestOpplysninger.husstand?.some((barn) => barn.ident === b.ident)
+    );
+
+    const added = latestOpplysninger.husstand?.filter(
+        (b) => !savedOpplysninger.husstand.some((barn) => barn.ident === b.ident)
+    );
+
+    if (added.length) {
+        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra folkeregistre:");
+        added.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
+    }
+
+    if (removed.length) {
+        changedLog.push("Barn som finnes ikke i nye opplysninger fra folkeregistre:");
+        removed.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
+    }
+
     savedOpplysninger.husstand.forEach((barn) => {
         const barnInLatestOpplysninger = latestOpplysninger.husstand.find((b) => barn.ident === b.ident);
-        if (barnInLatestOpplysninger.perioder.length > barn.perioder.length) {
+        if (barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length > barn.perioder.length) {
             changedLog.push(`En eller flere perioder har blitt lagt til barn med ident - ${barn.ident}`);
         }
-        if (barnInLatestOpplysninger.perioder.length < barn.perioder.length) {
+        if (barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length < barn.perioder.length) {
             changedLog.push(`Det er minst en periode mindre i folkeregistre for barn med ident - ${barn.ident}`);
         }
         barn.perioder.forEach((periode, index) => {
-            const periodeFraLatestOpplysninger = barnInLatestOpplysninger.perioder[index];
+            const periodeFraLatestOpplysninger = barnInLatestOpplysninger?.perioder[index];
             if (periodeFraLatestOpplysninger) {
                 if (
                     periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
@@ -292,7 +310,7 @@ export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
     } else {
         savedOpplysninger.sivilstand.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];
-            if (periodeFraLatestOpplysninger.personId === periode.personId) {
+            if (periodeFraLatestOpplysninger && periodeFraLatestOpplysninger.personId === periode.personId) {
                 if (
                     periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
                     periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil
