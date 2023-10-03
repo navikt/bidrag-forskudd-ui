@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { Grunnlag, ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
 import { BIDRAG_VEDTAK_API } from "../../constants/api";
 import { BEHANDLING_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -22,6 +22,15 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
+import { OpprettGrunnlagRequestDto } from "../../api/BidragVedtakApi";
+
+function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
+    return {
+        referanse: grunnlag.referanse,
+        type: grunnlag.type,
+        innhold: grunnlag.innhold,
+    };
+}
 
 const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
@@ -57,7 +66,7 @@ const Vedtak = () => {
                         //TODO: Skal inntekter ikke valgt tas med? Må da legge til valgt: true på innhold
                         //TODO: Inntekter må inkludere rolle (BIDRAGSMOTTAKER, BIDRAGSPLIKTIG, BARN)
                         //TODO: Skal barn i samme hustand men ikke i søknaden tas med i grunnlagslisten? (Kan feks i framtiden klage over feil tall på barn i hustand)
-                        ...uniqueByKey(grunnlagListe, "referanse"),
+                        ...uniqueByKey(grunnlagListe, "referanse").map(grunnlagTilOpprettGrunnlagRequestDto),
                         ...mapGrunnlagPersonInfo(behandling, personInfoListe),
                     ],
                     stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({

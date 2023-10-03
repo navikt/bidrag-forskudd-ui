@@ -50,6 +50,23 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
+export interface CollectionModelEntityModelOpplysninger {
+    _embedded?: {
+        opplysningers?: EntityModelOpplysninger[];
+    };
+    _links?: Links;
+}
+
+export interface EntityModelOpplysninger {
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    hentetDato: string;
+    /** @format date-time */
+    ts?: string;
+    _links?: Links;
+}
+
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -79,6 +96,11 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export enum SivilstandType {
@@ -124,26 +146,6 @@ export enum SoknadType {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface EntityModelRolle {
-    rolleType: EntityModelRolleRolleType;
-    ident: string;
-    /** @format date-time */
-    fodtDato?: string;
-    /** @format date-time */
-    opprettetDato?: string;
-    deleted: boolean;
-    /** @format int32 */
-    soknadsLinje: number;
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelRolle {
-    _embedded?: {
-        rolles?: EntityModelRolle[];
-    };
-    _links?: Links;
-}
-
 export interface EntityModelBehandling {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -186,28 +188,6 @@ export interface CollectionModelObject {
     _links?: Links;
 }
 
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
-}
-
-export interface EntityModelOpplysninger {
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    hentetDato: string;
-    /** @format date-time */
-    ts?: string;
-    _links?: Links;
-}
-
-export interface CollectionModelEntityModelOpplysninger {
-    _embedded?: {
-        opplysningers?: EntityModelOpplysninger[];
-    };
-    _links?: Links;
-}
-
 export interface CollectionModelEntityModelBehandling {
     _embedded?: {
         behandlings?: EntityModelBehandling[];
@@ -219,6 +199,26 @@ export interface CollectionModelRolle {
     _embedded?: {
         rolles?: RolleResponse[];
     };
+    _links?: Links;
+}
+
+export interface CollectionModelEntityModelRolle {
+    _embedded?: {
+        rolles?: EntityModelRolle[];
+    };
+    _links?: Links;
+}
+
+export interface EntityModelRolle {
+    rolleType: EntityModelRolleRolleType;
+    ident: string;
+    /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
+    opprettetDato?: string;
+    deleted: boolean;
+    /** @format int32 */
+    soknadsLinje: number;
     _links?: Links;
 }
 
@@ -637,7 +637,7 @@ export interface Grunnlag {
     /** Referanse */
     referanse?: string;
     /** Type */
-    type?: string;
+    type?: GrunnlagType;
     /** Innhold */
     innhold?: JsonNode;
 }
@@ -740,14 +740,6 @@ export interface Link {
     templated?: boolean;
 }
 
-export enum EntityModelRolleRolleType {
-    BA = "BA",
-    BM = "BM",
-    BP = "BP",
-    FR = "FR",
-    RM = "RM",
-}
-
 export enum EntityModelBehandlingStonadType {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -765,6 +757,14 @@ export enum EntityModelBehandlingEngangsbelopType {
     SAERTILSKUDD = "SAERTILSKUDD",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+}
+
+export enum EntityModelRolleRolleType {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
 }
 
 export enum BehandlingRequestBodyStonadType {
@@ -861,6 +861,52 @@ export enum CreateBehandlingRequestEngangsbelopType {
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
 }
 
+/** Type */
+export enum GrunnlagType {
+    SAERFRADRAG = "SAERFRADRAG",
+    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
+    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
+    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNAD_INFO = "SOKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALT_BELOP = "INNBETALT_BELOP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+}
+
 export enum RolleDtoRolleType {
     BARN = "BARN",
     BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
@@ -915,7 +961,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -1005,7 +1051,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     behandlings = {
