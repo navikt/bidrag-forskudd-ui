@@ -746,6 +746,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             clearErrors("sivilstand");
             return;
         }
+
         const filtrertOgSorterListe = sivilstandPerioder
             .filter((periode) => periode.datoFom !== null)
             .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());

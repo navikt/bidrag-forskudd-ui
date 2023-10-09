@@ -223,16 +223,16 @@ export const createPayload = (values: BoforholdFormValues) => ({
     boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
 });
 
-export const checkOverlappingPeriods = (perioder) => {
+export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: string }[]) => {
     const overlappingPeriods = [];
 
     for (let i = 0; i < perioder.length; i++) {
         for (let j = i + 1; j < perioder.length; j++) {
             if (
-                (perioder[i].datoTom === null || perioder[i].datoTom >= perioder[j].datoFom) &&
-                (perioder[j].datoTom === null || perioder[j].datoTom >= perioder[i].datoFom)
+                perioder[i].datoTom === null ||
+                new Date(perioder[i].datoTom).getTime() >= new Date(perioder[j].datoFom).getTime()
             ) {
-                overlappingPeriods.push([`${perioder[i]}`, `${perioder[j]}`]);
+                overlappingPeriods.push([`${perioder[i].datoTom}`, `${perioder[j].datoFom}`]);
             }
         }
     }
