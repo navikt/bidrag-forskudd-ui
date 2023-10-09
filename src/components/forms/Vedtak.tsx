@@ -6,9 +6,9 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import { ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
-import { BIDRAG_VEDTAK_API } from "../../constants/api";
-import { BEHANDLING_API } from "../../constants/api";
+import { BEHANDLING_API, BIDRAG_VEDTAK_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
+import { Avslag } from "../../enum/Avslag";
 import environment from "../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
 import {
@@ -28,10 +28,12 @@ const Vedtak = () => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
+    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.aarsak);
     const { data: beregnetForskudd } = useQuery({
         queryKey: ["beregning"],
         queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
         select: (data) => data.data,
+        enabled: !isAvslag,
     });
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
@@ -175,8 +177,45 @@ const Vedtak = () => {
                             </Table>
                         </div>
                     ))}
+
+                {behandling &&
+                    isAvslag &&
+                    behandling.roller
+                        .filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN)
+                        .map((barn, i) => (
+                            <div key={i + barn.ident} className="mb-8">
+                                <div className="my-4 flex items-center gap-x-2">
+                                    <RolleTag rolleType={RolleDtoRolleType.BARN} />
+                                    <BodyShort>
+                                        <PersonNavn ident={barn.ident}></PersonNavn> /{" "}
+                                        <span className="ml-1">{barn.ident}</span>
+                                    </BodyShort>
+                                </div>
+                                <Table>
+                                    <Table.Header>
+                                        <Table.Row>
+                                            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                                            <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+                                            <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
+                                        </Table.Row>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        <Table.Row>
+                                            <Table.DataCell>
+                                                {dateToDDMMYYYYString(
+                                                    new Date(behandling.virkningsDato ?? behandling.datoFom)
+                                                )}{" "}
+                                                -
+                                            </Table.DataCell>
+                                            <Table.DataCell>Avslag</Table.DataCell>
+                                            <Table.DataCell>{Avslag[behandling.aarsak]}</Table.DataCell>
+                                        </Table.Row>
+                                    </Table.Body>
+                                </Table>
+                            </div>
+                        ))}
             </div>
-            {!behandling.erVedtakFattet && (
+            {!behandling.erVedtakFattet && !isAvslag && (
                 <>
                     <Alert variant="info">
                         <div className="grid gap-y-4">
