@@ -40,42 +40,56 @@ export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto
     return null;
 };
 
-const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
+export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     const perioder: OpplysningFraFolkeRegistrePeriode[] = [];
-    const brukFra = new Date(egneBarnIHusstanden.brukFra);
     const fodselsdato = new Date(egneBarnIHusstanden.fodselsdato);
+    let j = 0;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
-        if (i === 0) {
-            if (fodselsdato < new Date(periode.periodeFra) && brukFra < new Date(periode.periodeFra)) {
+        const prevPeriod = i !== 0 ? perioder[i - (1 + j)] : undefined;
+        const prevPeriodIsRegistrert = prevPeriod?.boStatus === BoStatusType.REGISTRERT_PA_ADRESSE;
+        const prevPeriodTilOrCurrentPeriodFraIsNull = prevPeriod?.tilDato === null || periode.periodeFra === null;
+        const prevPeriodTilOrCurrentPeriodFraAreAdjacentDays =
+            prevPeriod && addDays(prevPeriod.tilDato, 1).toDateString() === new Date(periode.periodeFra).toDateString();
+        const firstPeriod = i === 0;
+        const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
+        const fodselsDatoIsBeforePeriodeFra = fodselsdato < new Date(periode.periodeFra);
+
+        if (
+            prevPeriodIsRegistrert &&
+            (prevPeriodTilOrCurrentPeriodFraIsNull || prevPeriodTilOrCurrentPeriodFraAreAdjacentDays)
+        ) {
+            prevPeriod.tilDato = dateOrNull(periode.periodeTil);
+            j += 1;
+        } else {
+            if (firstPeriod && fodselsDatoIsBeforePeriodeFra) {
+                const nestePeriodeFra = egneBarnIHusstanden.borISammeHusstandDtoListe[i + 1]?.periodeFra;
                 perioder.push({
-                    fraDato: brukFra < fodselsdato ? fodselsdato : brukFra,
-                    tilDato: deductDays(brukFra, 1),
+                    fraDato: fodselsdato,
+                    tilDato: nestePeriodeFra ? deductDays(new Date(nestePeriodeFra), 1) : null,
                     boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
                 });
             }
-        } else if (addDays(perioder[i - 1].tilDato, 1).toDateString() !== new Date(periode.periodeFra).toDateString()) {
-            perioder.push({
-                fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
-                tilDato: deductDays(new Date(periode.periodeFra), 1),
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-            });
-        }
 
-        perioder.push({
-            fraDato: dateOrNull(periode.periodeFra),
-            tilDato: dateOrNull(periode.periodeTil),
-            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-        });
+            if (!firstPeriod && !prevPeriodTilOrCurrentPeriodFraAreAdjacentDays) {
+                perioder.push({
+                    fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
+                    tilDato: deductDays(new Date(periode.periodeFra), 1),
+                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                });
+            }
 
-        if (
-            i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1 &&
-            periode.periodeTil &&
-            periode.periodeTil !== egneBarnIHusstanden.brukTil
-        ) {
+            if (lastPeriod && periode.periodeTil && periode.periodeTil !== egneBarnIHusstanden.brukTil) {
+                perioder.push({
+                    fraDato: addDays(new Date(periode.periodeTil), 1),
+                    tilDato: dateOrNull(egneBarnIHusstanden.brukTil),
+                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                });
+            }
+
             perioder.push({
-                fraDato: addDays(new Date(periode.periodeTil), 1),
-                tilDato: dateOrNull(egneBarnIHusstanden.brukTil),
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                fraDato: dateOrNull(periode.periodeFra),
+                tilDato: dateOrNull(periode.periodeTil),
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
             });
         }
     });

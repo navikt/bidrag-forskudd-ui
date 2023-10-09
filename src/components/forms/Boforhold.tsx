@@ -118,8 +118,8 @@ const Main = ({
                         </Button>
                     </div>
                     <p>Følgende endringer har blitt utført:</p>
-                    {opplysningerChanges.map((change) => (
-                        <p key={change}>{change}</p>
+                    {opplysningerChanges.map((change, i) => (
+                        <p key={change + i}>{change}</p>
                     ))}
                 </Alert>
             )}
