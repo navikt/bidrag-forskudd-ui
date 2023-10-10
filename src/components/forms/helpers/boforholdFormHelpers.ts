@@ -42,7 +42,7 @@ export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto
 
 export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     const perioder: OpplysningFraFolkeRegistrePeriode[] = [];
-    const fodselsdato = new Date(egneBarnIHusstanden.fodselsdato);
+    const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
     let j = 0;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         const prevPeriod = i !== 0 ? perioder[i - (1 + j)] : undefined;
@@ -52,7 +52,8 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             prevPeriod && addDays(prevPeriod.tilDato, 1).toDateString() === new Date(periode.periodeFra).toDateString();
         const firstPeriod = i === 0;
         const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
-        const fodselsDatoIsBeforePeriodeFra = fodselsdato < new Date(periode.periodeFra);
+        const fodselsDatoIsBeforePeriodeFra =
+            fodselsdato && fodselsdato.getTime() < new Date(periode.periodeFra).getTime();
 
         if (
             prevPeriodIsRegistrert &&
@@ -62,10 +63,9 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             j += 1;
         } else {
             if (firstPeriod && fodselsDatoIsBeforePeriodeFra) {
-                const nestePeriodeFra = egneBarnIHusstanden.borISammeHusstandDtoListe[i + 1]?.periodeFra;
                 perioder.push({
                     fraDato: fodselsdato,
-                    tilDato: nestePeriodeFra ? deductDays(new Date(nestePeriodeFra), 1) : null,
+                    tilDato: periode.periodeFra ? deductDays(new Date(periode.periodeFra), 1) : null,
                     boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
                 });
             }
@@ -106,28 +106,22 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
         }));
 };
 
-export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], datoFom: Date) => {
-    const perioderFraVirkningstidspunkt = perioder?.filter(
-        (periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom)
+export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], virkningsOrSoktFraDato: Date) => {
+    const perioderEtterVirkningstidspunkt = perioder?.filter(
+        (periode) => periode.tilDato === null || (periode.tilDato && periode.tilDato > virkningsOrSoktFraDato)
     );
 
     const result: {
         boStatus: BoStatusType;
-        kilde: "offentlig" | "manuelt";
+        kilde: "offentlig";
         datoFom: string;
         datoTom: string | null;
     }[] = [];
-    perioderFraVirkningstidspunkt?.forEach((periode, i) => {
+    perioderEtterVirkningstidspunkt?.forEach((periode, i) => {
         result.push({
             boStatus: periode.boStatus,
             kilde: "offentlig",
-            datoFom: toISODateString(
-                i === 0
-                    ? datoFom
-                        ? new Date(datoFom)
-                        : firstDayOfMonth(periode.fraDato)
-                    : addDays(new Date(result[i - 1].datoTom), 1)
-            ),
+            datoFom: toISODateString(i === 0 ? virkningsOrSoktFraDato : addDays(new Date(result[i - 1].datoTom), 1)),
             datoTom: toISODateString(periode.tilDato ? lastDayOfMonth(periode.tilDato) : periode.tilDato),
         });
     });
@@ -136,12 +130,12 @@ export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], d
 };
 export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
-    datoFom: Date
+    virkningsOrSoktFraDato: Date
 ) => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         medISaken: true,
-        perioder: getBarnPerioder(barn.perioder, datoFom),
+        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato),
     }));
 };
 
@@ -194,7 +188,7 @@ export const createInitialValues = (
     behandling: BehandlingDto,
     boforhold: BoforholdResponse,
     opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
-    datoFom: Date,
+    virkningsOrSoktFraDato: Date,
     grunnlagspakke: HentGrunnlagspakkeDto,
     boforoholdOpplysningerExistInDb: boolean
 ) => ({
@@ -204,10 +198,10 @@ export const createInitialValues = (
               ...barn,
               perioder: barn.perioder?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)),
           }))
-        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
+        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
     sivilstand: boforhold?.sivilstand?.length
         ? boforhold.sivilstand?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1))
-        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
+        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, virkningsOrSoktFraDato),
 });
 
 export const createPayload = (values: BoforholdFormValues) => ({
@@ -263,7 +257,10 @@ export const syncDates = (
     setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex}.${field}`, date);
 };
 
-export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
+export const compareOpplysninger = (
+    savedOpplysninger: { husstand: OpplysningFraFolkeRegistre[]; sivilstand: SivilstandDtoGrunnlag[] },
+    latestOpplysninger: { husstand: OpplysningFraFolkeRegistre[]; sivilstand: SivilstandDtoGrunnlag[] }
+) => {
     const changedLog = [];
 
     if (savedOpplysninger.husstand.length < latestOpplysninger.husstand.length) {
@@ -303,8 +300,8 @@ export const compareOpplysninger = (savedOpplysninger, latestOpplysninger) => {
             const periodeFraLatestOpplysninger = barnInLatestOpplysninger?.perioder[index];
             if (periodeFraLatestOpplysninger) {
                 if (
-                    periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
-                    periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil
+                    periode.fraDato !== periodeFraLatestOpplysninger.fraDato ||
+                    periode.tilDato !== periodeFraLatestOpplysninger.tilDato
                 ) {
                     changedLog.push(
                         `Datoene for en eller flere perioder har blitt endret for barn med ident - ${barn.ident}`
