@@ -169,14 +169,14 @@ const BoforholdsForm = () => {
     );
     const updateBoforhold = useUpdateBoforhold(behandlingId);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const virkningstidspunkt = dateOrNull(virkningstidspunktValues?.virkningsDato);
-    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
+    const virkningsOrSoktFraDato =
+        dateOrNull(virkningstidspunktValues?.virkningsDato) ?? dateOrNull(behandling?.datoFom);
 
     const initialValues = createInitialValues(
         behandling,
         boforhold,
         husstandsOpplysningerFraFolkRegistre,
-        datoFom,
+        virkningsOrSoktFraDato,
         grunnlagspakke,
         !!boforoholdOpplysninger?.data
     );
@@ -252,8 +252,11 @@ const BoforholdsForm = () => {
         const fieldValues = useFormMethods.getValues();
         const values = {
             ...fieldValues,
-            husstandsBarn: getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom),
-            sivilstand: getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
+            husstandsBarn: getBarnPerioderFromHusstandsListe(
+                husstandsOpplysningerFraFolkRegistre,
+                virkningsOrSoktFraDato
+            ),
+            sivilstand: getSivilstandPerioder(grunnlagspakke.sivilstandListe, virkningsOrSoktFraDato),
         };
         useFormMethods.reset(values);
         updateBoforhold.mutation.mutate(values);
