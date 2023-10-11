@@ -169,6 +169,7 @@ const VirkningstidspunktForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
+        console.log("called use effected with dependencies watchAllFields and formState.isDirty");
         if (useFormMethods.formState.isDirty) {
             debouncedOnSave();
         }
