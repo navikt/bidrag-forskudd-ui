@@ -130,12 +130,12 @@ export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], v
 };
 export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
-    datoFom: Date
+    virkningsOrSoktFraDato: Date
 ) => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         medISaken: true,
-        perioder: getBarnPerioder(barn.perioder, datoFom),
+        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato),
     }));
 };
 
@@ -188,7 +188,7 @@ export const createInitialValues = (
     behandling: BehandlingDto,
     boforhold: BoforholdResponse,
     opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
-    datoFom: Date,
+    virkningsOrSoktFraDato: Date,
     grunnlagspakke: HentGrunnlagspakkeDto,
     boforoholdOpplysningerExistInDb: boolean
 ) => ({
@@ -198,10 +198,10 @@ export const createInitialValues = (
               ...barn,
               perioder: barn.perioder?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)),
           }))
-        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, datoFom),
+        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
     sivilstand: boforhold?.sivilstand?.length
         ? boforhold.sivilstand?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1))
-        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, datoFom),
+        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, virkningsOrSoktFraDato),
 });
 
 export const createPayload = (values: BoforholdFormValues) => ({

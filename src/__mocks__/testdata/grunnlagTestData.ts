@@ -125,7 +125,7 @@ const barnHusstandsData = [
                 periodeTil: "2020-06-05",
             },
             {
-                periodeFra: "2020-06-05",
+                periodeFra: "2020-06-06",
                 periodeTil: null,
             },
         ],
