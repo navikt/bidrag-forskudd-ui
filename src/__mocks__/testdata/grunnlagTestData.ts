@@ -121,7 +121,11 @@ const barnHusstandsData = [
         fodselsdato: "2020-06-05",
         borISammeHusstandDtoListe: [
             {
-                periodeFra: "2020-06-05",
+                periodeFra: null,
+                periodeTil: "2020-06-05",
+            },
+            {
+                periodeFra: "2020-06-06",
                 periodeTil: null,
             },
         ],
@@ -131,10 +135,14 @@ const barnHusstandsData = [
         borISammeHusstandDtoListe: [
             {
                 periodeFra: "2018-06-05",
-                periodeTil: "2019-04-04",
+                periodeTil: null,
             },
             {
-                periodeFra: "2020-03-01",
+                periodeFra: null,
+                periodeTil: "2020-03-01",
+            },
+            {
+                periodeFra: "2020-04-01",
                 periodeTil: "2021-07-07",
             },
             {
