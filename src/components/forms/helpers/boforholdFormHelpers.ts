@@ -293,32 +293,30 @@ export const compareOpplysninger = (
 
     savedOpplysninger.husstand.forEach((barn) => {
         const barnInLatestOpplysninger = latestOpplysninger.husstand.find((b) => barn.ident === b.ident);
-        if (barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length > barn.perioder.length) {
-            changedLog.push(`En eller flere perioder har blitt lagt til barn med ident - ${barn.ident}`);
-        }
-        if (barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length < barn.perioder.length) {
-            changedLog.push(`Det er minst en periode mindre i folkeregistre for barn med ident - ${barn.ident}`);
-        }
-        barn.perioder.forEach((periode, index) => {
-            const periodeFraLatestOpplysninger = barnInLatestOpplysninger?.perioder[index];
-            if (periodeFraLatestOpplysninger) {
-                if (
-                    toISODateString(dateOrNull(periode.fraDato)) !==
-                        toISODateString(periodeFraLatestOpplysninger.fraDato) ||
-                    toISODateString(dateOrNull(periode.tilDato)) !==
-                        toISODateString(periodeFraLatestOpplysninger.tilDato)
-                ) {
-                    changedLog.push(
-                        `Datoene for en eller flere perioder har blitt endret for barn med ident - ${barn.ident}`
-                    );
+        const notTheSameNumberOfPeriods =
+            barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length !== barn.perioder.length;
+        const statusOrDatesChangedForSomePeriods = (
+            perioder: { fraDato: string; tilDato: string; boStatus: string }[]
+        ) => {
+            let changed = false;
+            perioder.forEach((periode, index) => {
+                const periodeFraLatestOpplysninger = barnInLatestOpplysninger?.perioder[index];
+                if (periodeFraLatestOpplysninger) {
+                    if (
+                        toISODateString(dateOrNull(periode.fraDato)) !==
+                            toISODateString(periodeFraLatestOpplysninger.fraDato) ||
+                        toISODateString(dateOrNull(periode.tilDato)) !==
+                            toISODateString(periodeFraLatestOpplysninger.tilDato) ||
+                        periode.boStatus !== periodeFraLatestOpplysninger.boStatus
+                    ) {
+                        changed = true;
+                    }
                 }
-                if (periode.boStatus !== periodeFraLatestOpplysninger.boStatus) {
-                    changedLog.push(
-                        `Bostatus for en eller flere perioder har blitt endret for barn med ident - ${barn.ident}`
-                    );
-                }
-            }
-        });
+            });
+        };
+        if (notTheSameNumberOfPeriods || statusOrDatesChangedForSomePeriods(barn.perioder)) {
+            changedLog.push(`En eller flere perioder har blitt endret for barn med ident - ${barn.ident}`);
+        }
     });
 
     if (savedOpplysninger.sivilstand.length !== latestOpplysninger.sivilstand.length) {
@@ -329,12 +327,10 @@ export const compareOpplysninger = (
             if (periodeFraLatestOpplysninger && periodeFraLatestOpplysninger.personId === periode.personId) {
                 if (
                     periode.periodeFra !== periodeFraLatestOpplysninger.periodeFra ||
-                    periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil
+                    periode.periodeTil !== periodeFraLatestOpplysninger.periodeTil ||
+                    periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand
                 ) {
-                    changedLog.push("Datoene for en eller flere sivilstand perioder har blitt endret");
-                }
-                if (periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand) {
-                    changedLog.push("Status for en eller flere sivilstand perioder har blitt endret");
+                    changedLog.push("En eller flere sivilstand perioder har blitt endret");
                 }
             }
         });

@@ -586,13 +586,253 @@ describe("BoforholdFormHelpers", () => {
             ],
         };
         const result = compareOpplysninger(savedOpplysninger, latestOpplysninger);
-        expect(result.length).equals(3);
-        expect(result[0]).equals("En eller flere perioder har blitt lagt til barn med ident - 05492256961");
-        expect(result[1]).equals(
-            "Datoene for en eller flere perioder har blitt endret for barn med ident - 05492256961"
-        );
-        expect(result[2]).equals(
-            "Bostatus for en eller flere perioder har blitt endret for barn med ident - 05492256961"
-        );
+        expect(result.length).equals(1);
+        expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
+    });
+
+    it("compareOpplysninger should return an array with changes for husstand per child and sivilstand when there are changes in the latest opplysninger", () => {
+        const savedOpplysninger = {
+            husstand: [
+                {
+                    ident: "05492256961",
+                    navn: "AKTVERDIG ODDE",
+                    perioder: [
+                        {
+                            fraDato: "2022-09-05T00:00:00.000Z",
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+                {
+                    ident: "10411473223",
+                    navn: "EKSTRA FAMILIEBARNEHAGE",
+                    perioder: [
+                        {
+                            fraDato: "2014-01-10T00:00:00.000Z",
+                            tilDato: "2022-09-04T00:00:00.000Z",
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: "2022-09-05T00:00:00.000Z",
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+            ],
+            sivilstand: [
+                {
+                    personId: "20468520282",
+                    periodeFra: "1985-06-20",
+                    periodeTil: "2023-07-04",
+                    sivilstand: "UGIFT",
+                    aktiv: true,
+                    brukFra: "2023-10-11T09:43:03.38538",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                },
+                {
+                    personId: "20468520282",
+                    periodeFra: "2023-07-05",
+                    periodeTil: "2023-10-04",
+                    sivilstand: "UGIFT",
+                    aktiv: true,
+                    brukFra: "2023-10-11T09:43:03.38538",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                },
+                {
+                    personId: "20468520282",
+                    periodeFra: "2023-10-05",
+                    periodeTil: null,
+                    sivilstand: "UGIFT",
+                    aktiv: true,
+                    brukFra: "2023-10-11T09:43:03.38538",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                },
+            ],
+        };
+        const latestOpplysninger = {
+            husstand: [
+                {
+                    ident: "05492256961",
+                    navn: "AKTVERDIG ODDE",
+                    perioder: [
+                        {
+                            fraDato: new Date("2022-09-05T00:00:00.000Z"),
+                            tilDato: new Date("2022-10-07T00:00:00.000Z"),
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: new Date("2022-10-08T00:00:00.000Z"),
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+                {
+                    ident: "10411473223",
+                    navn: "EKSTRA FAMILIEBARNEHAGE",
+                    perioder: [
+                        {
+                            fraDato: new Date("2014-01-10T00:00:00.000Z"),
+                            tilDato: new Date("2022-09-04T00:00:00.000Z"),
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: new Date("2022-09-05T00:00:00.000Z"),
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+            ],
+            sivilstand: [
+                {
+                    personId: "20468520282",
+                    periodeFra: "1985-06-20",
+                    periodeTil: "2023-07-04",
+                    sivilstand: "UGIFT" as const,
+                    aktiv: true,
+                    brukFra: "2023-10-11T10:16:45.6057",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                },
+                {
+                    personId: "20468520282",
+                    periodeFra: "2023-07-04",
+                    periodeTil: null,
+                    sivilstand: "UGIFT" as const,
+                    aktiv: true,
+                    brukFra: "2023-10-11T10:16:45.6057",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                },
+            ],
+        };
+        const result = compareOpplysninger(savedOpplysninger, latestOpplysninger);
+        expect(result.length).equals(2);
+        expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
+        expect(result[1]).equals("Antall sivilstands perioder har blitt endret i folkeregisteret");
+    });
+
+    it("compareOpplysninger should return an array with changes for sivilstand status when there are changes in the latest opplysninger", () => {
+        const savedOpplysninger = {
+            husstand: [
+                {
+                    ident: "05492256961",
+                    navn: "AKTVERDIG ODDE",
+                    perioder: [
+                        {
+                            fraDato: "2022-09-05T00:00:00.000Z",
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+                {
+                    ident: "10411473223",
+                    navn: "EKSTRA FAMILIEBARNEHAGE",
+                    perioder: [
+                        {
+                            fraDato: "2014-01-10T00:00:00.000Z",
+                            tilDato: "2022-09-04T00:00:00.000Z",
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: "2022-09-05T00:00:00.000Z",
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+            ],
+            sivilstand: [
+                {
+                    personId: "20468520282",
+                    periodeFra: "1985-06-20",
+                    periodeTil: "2023-07-04",
+                    sivilstand: "UGIFT",
+                    aktiv: true,
+                    brukFra: "2023-10-11T09:43:03.38538",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                },
+                {
+                    personId: "20468520282",
+                    periodeFra: "2023-07-04",
+                    periodeTil: null,
+                    sivilstand: "ENKE_ELLER_ENKEMANN",
+                    aktiv: true,
+                    brukFra: "2023-10-11T09:43:03.38538",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                },
+            ],
+        };
+        const latestOpplysninger = {
+            husstand: [
+                {
+                    ident: "05492256961",
+                    navn: "AKTVERDIG ODDE",
+                    perioder: [
+                        {
+                            fraDato: new Date("2022-09-05T00:00:00.000Z"),
+                            tilDato: new Date("2022-10-07T00:00:00.000Z"),
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: new Date("2022-10-08T00:00:00.000Z"),
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+                {
+                    ident: "10411473223",
+                    navn: "EKSTRA FAMILIEBARNEHAGE",
+                    perioder: [
+                        {
+                            fraDato: new Date("2014-01-10T00:00:00.000Z"),
+                            tilDato: new Date("2022-09-04T00:00:00.000Z"),
+                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        },
+                        {
+                            fraDato: new Date("2022-09-05T00:00:00.000Z"),
+                            tilDato: null,
+                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        },
+                    ],
+                },
+            ],
+            sivilstand: [
+                {
+                    personId: "20468520282",
+                    periodeFra: "1985-06-20",
+                    periodeTil: "2023-07-04",
+                    sivilstand: "UGIFT" as const,
+                    aktiv: true,
+                    brukFra: "2023-10-11T10:16:45.6057",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                },
+                {
+                    personId: "20468520282",
+                    periodeFra: "2023-07-04",
+                    periodeTil: null,
+                    sivilstand: "UGIFT" as const,
+                    aktiv: true,
+                    brukFra: "2023-10-11T10:16:45.6057",
+                    brukTil: null,
+                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                },
+            ],
+        };
+        const result = compareOpplysninger(savedOpplysninger, latestOpplysninger);
+        expect(result.length).equals(2);
+        expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
+        expect(result[1]).equals("En eller flere sivilstand perioder har blitt endret");
     });
 });
