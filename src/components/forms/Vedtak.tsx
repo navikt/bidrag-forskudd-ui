@@ -6,6 +6,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import { Grunnlag, ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { OpprettGrunnlagRequestDto } from "../../api/BidragVedtakApi";
 import { BEHANDLING_API, BIDRAG_VEDTAK_API } from "../../constants/api";
 import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
@@ -22,7 +23,6 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
-import { OpprettGrunnlagRequestDto } from "../../api/BidragVedtakApi";
 
 function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
     return {
