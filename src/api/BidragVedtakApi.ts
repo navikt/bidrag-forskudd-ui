@@ -27,10 +27,11 @@ export interface OpprettEngangsbelopRequestDto {
         | "DIREKTE_OPPGJOR"
         | "ETTERGIVELSE"
         | "ETTERGIVELSE_TILBAKEKREVING"
-        | "TILBAKEKREVING"
-        | "SAERTILSKUDD"
         | "GEBYR_MOTTAKER"
-        | "GEBYR_SKYLDNER";
+        | "GEBYR_SKYLDNER"
+        | "INNKREVING_GJELD"
+        | "SAERTILSKUDD"
+        | "TILBAKEKREVING";
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale engangsbeløpet */
@@ -235,10 +236,11 @@ export interface EngangsbelopDto {
         | "DIREKTE_OPPGJOR"
         | "ETTERGIVELSE"
         | "ETTERGIVELSE_TILBAKEKREVING"
-        | "TILBAKEKREVING"
-        | "SAERTILSKUDD"
         | "GEBYR_MOTTAKER"
-        | "GEBYR_SKYLDNER";
+        | "GEBYR_SKYLDNER"
+        | "INNKREVING_GJELD"
+        | "SAERTILSKUDD"
+        | "TILBAKEKREVING";
     /** Referanse til sak */
     sakId: string;
     /** Id til den som skal betale engangsbeløpet */
