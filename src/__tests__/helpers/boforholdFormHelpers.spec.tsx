@@ -7,7 +7,7 @@ import {
     compareOpplysninger,
     fillInPeriodGaps,
     getBarnPerioderFromHusstandsListe,
-    mapHusstandsMedlemmerToBarn
+    mapHusstandsMedlemmerToBarn,
 } from "../../components/forms/helpers/boforholdFormHelpers";
 import { toISODateString } from "../../utils/date-utils";
 
