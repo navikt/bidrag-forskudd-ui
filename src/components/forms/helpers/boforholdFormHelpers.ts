@@ -267,10 +267,10 @@ export const compareOpplysninger = (
     const changedLog = [];
 
     if (savedOpplysninger.husstand.length < latestOpplysninger.husstand.length) {
-        changedLog.push("Det er flere barn registret i Folkeregisteret.");
+        changedLog.push("Det er flere barn registret på samme adresse i Folkeregisteret.");
     }
     if (savedOpplysninger.husstand.length > latestOpplysninger.husstand.length) {
-        changedLog.push("Det er færre barn registrert i Folkeregisteret.");
+        changedLog.push("Det er færre barn registrert på samme adresse i Folkeregisteret.");
     }
 
     const removed = savedOpplysninger.husstand?.filter(
@@ -282,12 +282,12 @@ export const compareOpplysninger = (
     );
 
     if (added.length) {
-        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra folkeregisteret:");
+        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra Folkeregisteret:");
         added.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
     if (removed.length) {
-        changedLog.push("Barn som ikke finnes i nye opplysninger fra folkeregisteret:");
+        changedLog.push("Barn som ikke finnes i nye opplysninger fra Folkeregisteret:");
         removed.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
@@ -341,9 +341,9 @@ export const compareOpplysninger = (
     };
 
     if (savedOpplysninger.sivilstand.length !== latestOpplysninger.sivilstand.length) {
-        changedLog.push("Antall sivilstands perioder har blitt endret i folkeregisteret");
+        changedLog.push("Antall sivilstandsperioder har blitt endret i Folkeregisteret");
     } else if (oneOrMoreSivilstandPeriodsChanged(savedOpplysninger.sivilstand)) {
-        changedLog.push("En eller flere sivilstand perioder har blitt endret");
+        changedLog.push("En eller flere sivilstandsperioder har blitt endret");
     }
 
     return changedLog;
