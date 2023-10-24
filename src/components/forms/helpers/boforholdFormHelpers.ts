@@ -267,10 +267,10 @@ export const compareOpplysninger = (
     const changedLog = [];
 
     if (savedOpplysninger.husstand.length < latestOpplysninger.husstand.length) {
-        changedLog.push("Det er flere barn registret i folkeregistre.");
+        changedLog.push("Det er flere barn registret i Folkeregisteret.");
     }
     if (savedOpplysninger.husstand.length > latestOpplysninger.husstand.length) {
-        changedLog.push("Det er fære barn registret i folkeregistre.");
+        changedLog.push("Det er færre barn registrert i Folkeregisteret.");
     }
 
     const removed = savedOpplysninger.husstand?.filter(
