@@ -5,6 +5,7 @@ import { BoStatusType } from "../../api/BidragBehandlingApi";
 import {
     checkOverlappingPeriods,
     compareOpplysninger,
+    editPeriods,
     fillInPeriodGaps,
     getBarnPerioderFromHusstandsListe,
     mapHusstandsMedlemmerToBarn,
@@ -223,7 +224,7 @@ describe("BoforholdFormHelpers", () => {
         expect(result[0].perioder[1].boStatus).equals("IKKE_REGISTRERT_PA_ADRESSE");
     });
 
-    it("should create husstands periods from the data from folkeregistre", () => {
+    it("should create husstands periods from the folkeregistre data", () => {
         const datoFom = new Date("2020-06-01");
         const husstandsOpplysningerFraFolkRegistre = [
             {
@@ -310,6 +311,79 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
         const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom);
+        result.forEach((r, i) => {
+            r.perioder.forEach((periode, j) => {
+                expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
+                expect(periode.datoTom).equals(expectedResult[i].perioder[j].datoTom);
+                expect(periode.boStatus).equals(expectedResult[i].perioder[j].boStatus);
+            });
+        });
+    });
+
+    it("periods should get registrert status if there is 1 or more days with registrert status, only if a whole month is ikke registrert it should get status ikke registrert", () => {
+        const datoFom = new Date("2019-04-01");
+        const husstandsOpplysningerFraFolkRegistre = [
+            {
+                ident: "07512150855",
+                navn: "",
+                perioder: [
+                    {
+                        fraDato: new Date("2019-04-01"),
+                        tilDato: new Date("2020-03-01"),
+                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                    },
+                    {
+                        fraDato: new Date("2020-03-02"),
+                        tilDato: new Date("2020-03-31"),
+                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                    },
+                    {
+                        fraDato: new Date("2020-04-01"),
+                        tilDato: new Date("2021-07-07"),
+                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                    },
+                    {
+                        fraDato: new Date("2021-07-08"),
+                        tilDato: new Date("2021-12-31"),
+                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                    },
+                    {
+                        fraDato: new Date("2022-01-01"),
+                        tilDato: null,
+                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                    },
+                ],
+            },
+        ];
+        const expectedResult = [
+            {
+                ident: "07512150855",
+                navn: "",
+                perioder: [
+                    {
+                        datoFom: "2019-04-01",
+                        datoTom: "2021-07-31",
+                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        kilde: "offentlig",
+                    },
+                    {
+                        datoFom: "2021-08-01",
+                        datoTom: "2021-12-31",
+                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        kilde: "offentlig",
+                    },
+                    {
+                        datoFom: "2022-01-01",
+                        datoTom: null,
+                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        kilde: "offentlig",
+                    },
+                ],
+                medISaken: true,
+            },
+        ];
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom);
+        expect(result[0].perioder.length).equals(expectedResult[0].perioder.length);
         result.forEach((r, i) => {
             r.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
@@ -834,5 +908,370 @@ describe("BoforholdFormHelpers", () => {
         expect(result.length).equals(2);
         expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
         expect(result[1]).equals("En eller flere sivilstand perioder har blitt endret");
+    });
+
+    it("should remove all periods after edited period if edited period has no datoTom", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: null,
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-06-01",
+                datoTom: "2022-06-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-07-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: null,
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 1);
+        expect(updatedPeriods.length).equals(2);
+        updatedPeriods.forEach((period, index) => {
+            expect(period.datoFom).equals(expectedResult[index].datoFom);
+            expect(period.datoTom).equals(expectedResult[index].datoTom);
+            expect(period.boStatus).equals(expectedResult[index].boStatus);
+        });
+    });
+
+    it("should only have edited period if all periods are after it and edited has no datoTom", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-03-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-07-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-03-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 2);
+        expect(updatedPeriods.length).equals(1);
+        expect(updatedPeriods[0].datoFom).equals(expectedResult[0].datoFom);
+        expect(updatedPeriods[0].datoTom).equals(expectedResult[0].datoTom);
+        expect(updatedPeriods[0].boStatus).equals(expectedResult[0].boStatus);
+        expect(updatedPeriods[0].kilde).equals(expectedResult[0].kilde);
+    });
+
+    it("should remove all periods that overlap with editedPeriod and merge the ones that have same status", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-06-01",
+                datoTom: "2022-06-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-07-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 5);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should modify all periods that overlap with editedPeriod and merge the ones that have the same status", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-06-01",
+                datoTom: "2022-06-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-07-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 5);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should modify dates and kilde for periods that overlap with editedPeriod", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-06-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-06-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-06-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-07-01",
+                datoTom: "2022-07-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 3);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should only modify adjacent periods dates if edited period is in the middle and only dates are changed", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-09-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 1);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should modify and merge adjacent periods if edited period is in the middle and status is changed", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 1);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
     });
 });

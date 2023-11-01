@@ -25,12 +25,12 @@ export interface Ainntektspost {
     opptjeningsperiodeTil?: string;
     /** Beskrivelse av inntekt */
     beskrivelse?: string;
-    /** Belop */
-    belop: number;
+    /** Beløp */
+    beløp: number;
 }
 
-/** Periodisert liste over overgangsstønad */
-export interface Overgangsstonad {
+/** Periodisert liste over kontantstøtte */
+export interface Kontantstotte {
     /**
      * Periode fra-dato
      * @format date
@@ -41,8 +41,10 @@ export interface Overgangsstonad {
      * @format date
      */
     periodeTil?: string;
-    /** Beløp overgangsstønad */
-    belop: number;
+    /** Beløp kontantstøtte */
+    beløp: number;
+    /** Id til barnet kontantstøtten mottas for */
+    barnPersonId: string;
 }
 
 /** Periodisert liste over inntekter fra Sigrun */
@@ -71,8 +73,28 @@ export interface TransformerInntekterRequest {
     ainntektsposter: Ainntektspost[];
     /** Periodisert liste over inntekter fra Sigrun */
     skattegrunnlagsliste: SkattegrunnlagForLigningsar[];
-    /** Periodisert liste over overgangsstønad */
-    overgangsstonadsliste: Overgangsstonad[];
+    /** Periodisert liste over kontantstøtte */
+    kontantstøtteliste: Kontantstotte[];
+    /** Periodisert liste over utvidet barnetrygd og småbarnstillegg */
+    utvidetBarnetrygdOgSmåbarnstilleggliste: UtvidetBarnetrygdOgSmabarnstillegg[];
+}
+
+/** Periodisert liste over utvidet barnetrygd og småbarnstillegg */
+export interface UtvidetBarnetrygdOgSmabarnstillegg {
+    /** Type stønad, utvidet barnetrygd eller småbarnstillegg */
+    type: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil?: string;
+    /** Beløp utvidet barnetrygd eller småbarnstillegg */
+    beløp: number;
 }
 
 /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
@@ -94,13 +116,30 @@ export interface InntektPost {
     beløp: number;
 }
 
-/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-export interface SummertAarsinntekt {
+/** Liste over summerte månedsinntekter (Ainntekt ++)) */
+export interface SummertManedsinntekt {
     /**
-     * Beskrivelse av inntekt
+     * Periode (YYYYMM)
+     * @pattern YYYYMM
+     * @example "2023-01"
+     */
+    periode: string;
+    /**
+     * Summert inntekt for måneden
+     * @example 50000
+     */
+    sumInntekt: number;
+    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
+    inntektPostListe: InntektPost[];
+}
+
+/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
+export interface SummertArsinntekt {
+    /**
+     * Type inntektrapportering
      * @example "AINNTEKT"
      */
-    inntektBeskrivelse: SummertAarsinntektInntektBeskrivelse;
+    inntektRapportering: SummertArsinntektInntektRapportering;
     /**
      * Visningsnavn for inntekt
      * @example "Lønn og trekk 2022"
@@ -128,24 +167,12 @@ export interface SummertAarsinntekt {
      * @example "2023-12"
      */
     periodeTom?: string;
+    /**
+     * Id til barnet kontantstøtten mottas for, brukes kun for kontantstøtte
+     * @example "12345678910"
+     */
+    gjelderBarnPersonId: string;
     /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
-    inntektPostListe: InntektPost[];
-}
-
-/** Liste over summerte månedsinntekter (Ainntekt ++)) */
-export interface SummertMaanedsinntekt {
-    /**
-     * Periode (YYYYMM)
-     * @pattern YYYYMM
-     * @example "2023-01"
-     */
-    periode: string;
-    /**
-     * Summert inntekt for måneden
-     * @example 50000
-     */
-    sumInntekt: number;
-    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
     inntektPostListe: InntektPost[];
 }
 
@@ -156,9 +183,9 @@ export interface TransformerInntekterResponse {
      */
     versjon: string;
     /** Liste over summerte månedsinntekter (Ainntekt ++)) */
-    summertMaanedsinntektListe: SummertMaanedsinntekt[];
+    summertMånedsinntektListe: SummertManedsinntekt[];
     /** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-    summertAarsinntektListe: SummertAarsinntekt[];
+    summertÅrsinntektListe: SummertArsinntekt[];
 }
 
 export interface Beskrivelse {
@@ -179,21 +206,48 @@ export interface GetKodeverkKoderBetydningerResponse {
 }
 
 /**
- * Beskrivelse av inntekt
+ * Type inntektrapportering
  * @example "AINNTEKT"
  */
-export enum SummertAarsinntektInntektBeskrivelse {
+export enum SummertArsinntektInntektRapportering {
+    AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
     AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
-    AINNTEKT = "AINNTEKT",
-    LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
     KAPITALINNTEKT = "KAPITALINNTEKT",
-    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
-    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
     KONTANTSTOTTE = "KONTANTSTØTTE",
-    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
-    OVERGANGSSTONADBEREGNET3MND = "OVERGANGSSTØNAD_BEREGNET_3MND",
-    OVERGANGSSTONADBEREGNET12MND = "OVERGANGSSTØNAD_BEREGNET_12MND",
+    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
+    PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
+    KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
+    SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
+    LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
+    NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
+    YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
+    AAP = "AAP",
+    AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
+    BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
+    BARNS_SYKDOM = "BARNS_SYKDOM",
+    DAGPENGER = "DAGPENGER",
+    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
+    FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
+    FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
+    FODSELADOPSJON = "FØDSEL_ADOPSJON",
+    INNTEKTSOPPLYSNINGER_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
+    KAPITALINNTEKT_SKE = "KAPITALINNTEKT_SKE",
+    LIGNINGSOPPLYSNINGER_MANGLER = "LIGNINGSOPPLYSNINGER_MANGLER",
+    LIGNING_SKE = "LIGNING_SKE",
+    LONNSKE = "LØNN_SKE",
+    LONNSKEKORRIGERTBARNETILLEGG = "LØNN_SKE_KORRIGERT_BARNETILLEGG",
+    LONNTREKK = "LØNN_TREKK",
+    MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
+    NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
+    PENSJON = "PENSJON",
+    PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
+    REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
+    SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
+    SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
+    SYKEPENGER = "SYKEPENGER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";

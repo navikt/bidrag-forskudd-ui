@@ -43,10 +43,11 @@ export const FormControlledMonthPicker = ({
 
     const handleChange = (date: Date) => {
         const value = date ? toISODateString(date) : null;
-        field.onChange(value);
 
         if (onChange) {
             onChange(value);
+        } else {
+            field.onChange(value);
         }
     };
 
@@ -56,31 +57,24 @@ export const FormControlledMonthPicker = ({
             ? isLastDayOfMonth(new Date(date))
             : isFirstDayOfMonth(new Date(date));
 
-        if (!monthValidation.isValidMonth && !monthValidation.isEmpty) {
-            setError(name, { type: "notValid", message: "Dato er ikke gyldig" });
-            return;
-        }
-        if (required && monthValidation.isEmpty) {
-            setError(name, { type: "notValid", message: "Dato må fylles ut" });
-            return;
-        }
-        if (date) {
-            if (!isFirstOrLastDayOfMonth) {
-                setError(name, {
-                    type: "notValid",
-                    message: lastDayOfMonthPicker
-                        ? "Dato må være den siste i måneden"
-                        : "Dato må være den første i måneden",
-                });
-                return;
-            }
-        }
-        clearErrors(name);
+        const invalidDate =
+            !monthValidation.isValidMonth && !monthValidation.isEmpty ? "Dato er ikke gyldig" : undefined;
+        const emptyField = required && monthValidation.isEmpty ? "Dato må fylles ut" : undefined;
+        const isNotFirstOrLastDayOfMonth = date && !isFirstOrLastDayOfMonth;
+        const notFirstDayOrLastDayOfMonthError = isNotFirstOrLastDayOfMonth
+            ? lastDayOfMonthPicker
+                ? "Dato må være den siste i måneden"
+                : "Dato må være den første i måneden"
+            : undefined;
+        const error = invalidDate || emptyField || notFirstDayOrLastDayOfMonthError;
 
-        if (customValidation) {
-            customValidation(date);
+        if (error) {
+            setError(name, { type: "notValid", message: error });
             return;
         }
+
+        clearErrors(name);
+        customValidation?.(date);
     };
 
     return (

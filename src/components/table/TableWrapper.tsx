@@ -23,12 +23,12 @@ export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
         {cells.map((cell, index) => {
             if (!index)
                 return (
-                    <Table.HeaderCell scope="row" key={cell.key} className="align-middle">
+                    <Table.HeaderCell scope="row" key={cell.key} className="align-top">
                         {cell}
                     </Table.HeaderCell>
                 );
             return (
-                <Table.DataCell key={cell.key} className="align-middle">
+                <Table.DataCell key={cell.key} className="align-top">
                     {cell}
                 </Table.DataCell>
             );

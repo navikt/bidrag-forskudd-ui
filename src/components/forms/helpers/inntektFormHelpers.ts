@@ -6,7 +6,7 @@ import {
     HentGrunnlagspakkeDto,
     UtvidetBarnetrygdOgSmaabarnstilleggDto,
 } from "../../../api/BidragGrunnlagApi";
-import { SummertAarsinntekt, TransformerInntekterResponse } from "../../../api/BidragInntektApi";
+import { SummertArsinntekt, TransformerInntekterResponse } from "../../../api/BidragInntektApi";
 import {
     gjennomsnittPerioder,
     innhentendeTotalsummertInntekter,
@@ -73,9 +73,9 @@ const mapInntekterToRolle =
 
 // TODO: Midlertidlig løsning helt til visningsnavn lagres i backend
 const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntekt: InntektDto) =>
-    bidragInntekt.summertAarsinntektListe.find(
+    bidragInntekt.summertÅrsinntektListe.find(
         (v) =>
-            v.inntektBeskrivelse == inntekt.inntektType &&
+            v.visningsnavn == inntekt.inntektType &&
             new Date(v.periodeFra).getFullYear() == new Date(inntekt.datoFom).getFullYear()
     )?.visningsnavn;
 
@@ -86,12 +86,12 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
     bidragInntekt.reduce(
         (acc, curr) => ({
             ...acc,
-            [curr.ident]: curr.data.summertAarsinntektListe
+            [curr.ident]: curr.data.summertÅrsinntektListe
                 .map((inntekt) => {
                     return {
                         taMed: false,
                         inntektBeskrivelse: inntekt.visningsnavn,
-                        inntektType: inntekt.inntektBeskrivelse,
+                        inntektType: inntekt.inntektRapportering,
                         belop: inntekt.sumInntekt,
                         datoTom:
                             inntekt.periodeTom != null
@@ -358,7 +358,7 @@ export const getOverlappingInntektPerioder = (perioder) => {
 };
 
 interface InntektOpplysninger {
-    inntekt: { ident: string; summertAarsinntektListe: SummertAarsinntekt[] }[];
+    inntekt: { ident: string; summertAarsinntektListe: SummertArsinntekt[] }[];
     utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
     barnetillegg: BarnetilleggDto[];
 }
