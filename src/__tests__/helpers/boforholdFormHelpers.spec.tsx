@@ -13,7 +13,7 @@ import {
 import { toISODateString } from "../../utils/date-utils";
 
 describe("BoforholdFormHelpers", () => {
-    it("should fill in a period with status IKKE IKKE_REGISTRERT_PA_ADRESSE if there is a gap between 2 periods in folkeregistre", () => {
+    it("should fill in a period with status IKKE IKKE_REGISTRERT_PA_ADRESSE if there is a gap between 2 periods in Folkeregistre", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
             relatertPersonPersonId: "07512150855",
@@ -789,7 +789,7 @@ describe("BoforholdFormHelpers", () => {
         const result = compareOpplysninger(savedOpplysninger, latestOpplysninger);
         expect(result.length).equals(2);
         expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
-        expect(result[1]).equals("Antall sivilstands perioder har blitt endret i folkeregisteret");
+        expect(result[1]).equals("Antall sivilstandsperioder har blitt endret i Folkeregisteret");
     });
 
     it("compareOpplysninger should return an array with changes for sivilstand status when there are changes in the latest opplysninger", () => {
@@ -907,7 +907,7 @@ describe("BoforholdFormHelpers", () => {
         const result = compareOpplysninger(savedOpplysninger, latestOpplysninger);
         expect(result.length).equals(2);
         expect(result[0]).equals("En eller flere perioder har blitt endret for barn med ident - 05492256961");
-        expect(result[1]).equals("En eller flere sivilstand perioder har blitt endret");
+        expect(result[1]).equals("En eller flere sivilstandsperioder har blitt endret");
     });
 
     it("should remove all periods after edited period if edited period has no datoTom", () => {
