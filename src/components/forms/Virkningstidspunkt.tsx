@@ -147,8 +147,6 @@ const VirkningstidspunktForm = () => {
         ],
     });
 
-    const watchAllFields = useWatch({ control: useFormMethods.control });
-
     useEffect(() => {
         channel.postMessage(JSON.stringify(fieldsForNotat));
     }, [fieldsForNotat]);
@@ -169,11 +167,10 @@ const VirkningstidspunktForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        console.log("called use effected with dependencies watchAllFields and formState.isDirty");
-        if (useFormMethods.formState.isDirty) {
-            debouncedOnSave();
-        }
-    }, [watchAllFields, useFormMethods.formState.isDirty]);
+        const { unsubscribe } = useFormMethods.watch(() => debouncedOnSave());
+
+        return () => unsubscribe();
+    }, []);
 
     return (
         <>

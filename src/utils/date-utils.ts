@@ -80,3 +80,17 @@ export const getAListOfMonthsFromDate = (fromDate: Date, numberOfMonths: number)
     }
     return months;
 };
+
+export const periodCoversMinOneFullCalendarMonth = (startDate: Date, endDate: Date) => {
+    const yearsDiff = endDate.getFullYear() - startDate.getFullYear();
+    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    const endDateIsLastDayOfMonth = isLastDayOfMonth(endDate);
+
+    if (yearsDiff === 0) {
+        if (isFirstDayOfMonth(startDate) && endDateIsLastDayOfMonth) return true;
+
+        return monthDiff >= (endDateIsLastDayOfMonth ? 1 : 2);
+    }
+
+    return endDateIsLastDayOfMonth || monthDiff + 12 > 1;
+};

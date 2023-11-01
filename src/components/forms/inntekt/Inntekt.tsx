@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { OpplysningerDto, OpplysningerType, RolleDto, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
-import { SummertMaanedsinntekt } from "../../../api/BidragInntektApi";
+import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -36,7 +36,7 @@ import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
-const InntektHeader = ({ inntekt }: { inntekt: SummertMaanedsinntekt[] }) => (
+const InntektHeader = ({ inntekt }: { inntekt: SummertManedsinntekt[] }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
         <InntektChart inntekt={inntekt} />
         <ExpansionCard aria-label="default-demo" size="small">
@@ -60,7 +60,7 @@ const Main = ({
     inntektOpplysninger,
 }: {
     behandlingRoller: RolleDto[];
-    ainntekt: { [ident: string]: SummertMaanedsinntekt[] };
+    ainntekt: { [ident: string]: SummertManedsinntekt[] };
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
     inntektOpplysninger: OpplysningerDto;
@@ -191,8 +191,8 @@ const InntektForm = () => {
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
-    const ainntekt: { [ident: string]: SummertMaanedsinntekt[] } = bidragInntekt.reduce(
-        (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMaanedsinntektListe }),
+    const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
+        (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMånedsinntektListe }),
         {}
     );
     const updateInntekter = useUpdateInntekter(behandlingId);
@@ -216,7 +216,7 @@ const InntektForm = () => {
 
         updateInntekter.mutation.mutate(createInntektPayload(values), {
             onSuccess: () =>
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: false }),
+                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
         });
     };
 
@@ -224,43 +224,40 @@ const InntektForm = () => {
 
     useEffect(() => {
         const { unsubscribe } = useFormMethods.watch((value, { name }) => {
-            // isDirty is not always working
-            // if (useFormMethods.formState.isDirty) {
-            //     debouncedOnSave();
-            // }
+            if (useFormMethods.formState.isDirty) {
+                debouncedOnSave();
 
-            debouncedOnSave();
+                const field = name?.split(".")[0];
+                if (NOTAT_FIELDS.includes(field)) {
+                    channel.postMessage(
+                        JSON.stringify({
+                            field,
+                            value: value[field],
+                        })
+                    );
+                }
 
-            const field = name?.split(".")[0];
-            if (NOTAT_FIELDS.includes(field)) {
-                channel.postMessage(
-                    JSON.stringify({
-                        field,
-                        value: value[field],
-                    })
-                );
-            }
-
-            if (!inntektOpplysninger) {
-                saveOpplysninger.mutate({
-                    behandlingId,
-                    aktiv: true,
-                    opplysningerType: OpplysningerType.INNTEKTSOPPLYSNINGER,
-                    data: JSON.stringify({
-                        inntekt: bidragInntekt.map((personInntekt) => ({
-                            ident: personInntekt.ident,
-                            summertAarsinntektListe: personInntekt.data.summertAarsinntektListe.map((inntekt) => ({
-                                ...inntekt,
-                                datoFom: dateToDDMMYYYYString(new Date(inntekt.periodeFra)),
-                                datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTom)),
+                if (!inntektOpplysninger) {
+                    saveOpplysninger.mutate({
+                        behandlingId,
+                        aktiv: true,
+                        opplysningerType: OpplysningerType.INNTEKTSOPPLYSNINGER,
+                        data: JSON.stringify({
+                            inntekt: bidragInntekt.map((personInntekt) => ({
+                                ident: personInntekt.ident,
+                                summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe.map((inntekt) => ({
+                                    ...inntekt,
+                                    datoFom: dateToDDMMYYYYString(new Date(inntekt.periodeFra)),
+                                    datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTom)),
+                                })),
                             })),
-                        })),
-                        utvidetbarnetrygd: grunnlagspakke.ubstListe,
-                        barnetillegg: grunnlagspakke.barnetilleggListe,
-                    }),
-                    hentetDato: toISODateString(new Date()),
-                });
-                onSave();
+                            utvidetbarnetrygd: grunnlagspakke.ubstListe,
+                            barnetillegg: grunnlagspakke.barnetilleggListe,
+                        }),
+                        hentetDato: toISODateString(new Date()),
+                    });
+                    onSave();
+                }
             }
         });
         return () => unsubscribe();
@@ -272,7 +269,7 @@ const InntektForm = () => {
             const changesInOpplysninger = compareOpplysninger(savedOpplysninger, {
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
-                    summertAarsinntektListe: personInntekt.data.summertAarsinntektListe,
+                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
@@ -292,7 +289,7 @@ const InntektForm = () => {
             data: JSON.stringify({
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
-                    summertAarsinntektListe: personInntekt.data.summertAarsinntektListe,
+                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,

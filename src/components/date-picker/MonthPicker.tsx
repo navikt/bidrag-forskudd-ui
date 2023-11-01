@@ -36,12 +36,8 @@ export const MonthPicker = ({
         toDate,
         defaultSelected: isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null,
         inputFormat: "dd.MM.yyyy",
-        onValidate: (val) => {
-            if (onValidate) onValidate(val);
-        },
-        onMonthChange: (date) => {
-            onChange(date);
-        },
+        onValidate: (val) => onValidate?.(val),
+        onMonthChange: (date) => onChange(date),
     });
 
     const onMonthSelect = (date) => {
@@ -62,7 +58,7 @@ export const MonthPicker = ({
     return (
         <div className="min-h-96">
             <NavMonthPicker {...monthpickerProps} onMonthSelect={onMonthSelect} dropdownCaption>
-                <div className="grid gap-4">
+                <div className="grid gap-4 w-min">
                     <NavMonthPicker.Input
                         {...inputProps}
                         className={className}

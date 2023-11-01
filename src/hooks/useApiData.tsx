@@ -32,7 +32,6 @@ export const useGetBehandlings = () =>
         queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
-        suspense: true,
     });
 
 export const useGetBehandling = (behandlingId: number) =>
@@ -43,7 +42,6 @@ export const useGetBehandling = (behandlingId: number) =>
             return data;
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
@@ -54,7 +52,6 @@ export const useGetVirkningstidspunkt = (behandlingId: number) =>
             return data;
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
@@ -87,7 +84,6 @@ export const useGetBoforhold = (behandlingId: number) =>
             return data;
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
@@ -103,7 +99,6 @@ export const useGetOpplysninger = (behandlingId: number, opplysningerType: Opply
             }
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useUpdateBoforhold = (behandlingId: number) => {
@@ -158,7 +153,6 @@ export const useHentInntekter = (behandlingId: number) =>
             return data;
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useHentBoforhold = (behandlingId: number) =>
@@ -166,7 +160,6 @@ export const useHentBoforhold = (behandlingId: number) =>
         queryKey: ["boforhold", behandlingId],
         queryFn: (): Promise<AxiosResponse<BoforholdResponse>> => BEHANDLING_API.api.hentBoforhold(behandlingId),
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const useHentPersonData = (ident: string) =>
@@ -177,7 +170,6 @@ export const useHentPersonData = (ident: string) =>
             return data;
         },
         staleTime: Infinity,
-        suspense: true,
     });
 
 export const usePersonsQueries = (roller: RolleDto[]) =>
@@ -250,7 +242,7 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
                     .flatMap((ainntekt) =>
                         ainntekt.ainntektspostListe.map((ainntekt) => ({
                             ...ainntekt,
-                            belop: Math.round(ainntekt.belop),
+                            beløp: Math.round(ainntekt.belop),
                         }))
                     ),
                 skattegrunnlagsliste: grunnlagspakke.skattegrunnlagListe
@@ -262,6 +254,12 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
                 overgangsstonadsliste: grunnlagspakke.overgangsstonadListe.filter(
                     (overgangsstonad) => overgangsstonad.partPersonId === ident
                 ),
+                kontantstøtteliste: grunnlagspakke.kontantstotteListe
+                    .filter((kontantstotte) => kontantstotte.barnPersonId === ident)
+                    .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.belop })),
+                utvidetBarnetrygdOgSmåbarnstilleggliste: grunnlagspakke.ubstListe
+                    .filter((ubst) => ubst.personId === ident)
+                    .map((ubst) => ({ ...ubst, beløp: ubst.belop })),
             } as TransformerInntekterRequest,
         }));
 

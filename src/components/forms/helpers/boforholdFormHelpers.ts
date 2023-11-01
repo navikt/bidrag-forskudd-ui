@@ -1,16 +1,16 @@
+import { isLastDayOfMonth } from "@navikt/bidrag-ui-common";
 import { UseFormSetValue } from "react-hook-form";
 
-import { BehandlingDto, BoforholdResponse, BoStatusType, SivilstandDto } from "../../../api/BidragBehandlingApi";
-import {
-    HentGrunnlagspakkeDto,
-    RelatertPersonDto,
-    SivilstandDto as SivilstandDtoGrunnlag,
-} from "../../../api/BidragGrunnlagApi";
+import { BoforholdResponse, BoStatusType, SivilstandDto } from "../../../api/BidragBehandlingApi";
+import { RelatertPersonDto, SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
 import {
     BarnPeriode,
     BoforholdFormValues,
-    OpplysningFraFolkeRegistre,
-    OpplysningFraFolkeRegistrePeriode,
+    BoforholdOpplysninger,
+    HusstandOpplysningFraFolkeRegistre,
+    HusstandOpplysningPeriode,
+    ParsedBoforholdOpplysninger,
+    SavedOpplysningFraFolkeRegistrePeriode,
 } from "../../../types/boforholdFormValues";
 import {
     addDays,
@@ -19,6 +19,7 @@ import {
     deductMonths,
     firstDayOfMonth,
     lastDayOfMonth,
+    periodCoversMinOneFullCalendarMonth,
     toISODateString,
 } from "../../../utils/date-utils";
 
@@ -41,7 +42,7 @@ export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto
 };
 
 export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
-    const perioder: OpplysningFraFolkeRegistrePeriode[] = [];
+    const perioder: HusstandOpplysningPeriode[] = [];
     const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
     let j = 0;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
@@ -106,9 +107,9 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
         }));
 };
 
-export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], virkningsOrSoktFraDato: Date) => {
+export const getBarnPerioder = (perioder: HusstandOpplysningPeriode[], virkningsOrSoktFraDato: Date) => {
     const perioderEtterVirkningstidspunkt = perioder?.filter(
-        (periode) => periode.tilDato === null || (periode.tilDato && periode.tilDato > virkningsOrSoktFraDato)
+        ({ tilDato }) => tilDato === null || (tilDato && tilDato > virkningsOrSoktFraDato)
     );
 
     const result: {
@@ -117,19 +118,49 @@ export const getBarnPerioder = (perioder: OpplysningFraFolkeRegistrePeriode[], v
         datoFom: string;
         datoTom: string | null;
     }[] = [];
-    perioderEtterVirkningstidspunkt?.forEach((periode, i) => {
-        result.push({
-            boStatus: periode.boStatus,
-            kilde: "offentlig",
-            datoFom: toISODateString(i === 0 ? virkningsOrSoktFraDato : addDays(new Date(result[i - 1].datoTom), 1)),
-            datoTom: toISODateString(periode.tilDato ? lastDayOfMonth(periode.tilDato) : periode.tilDato),
-        });
+    perioderEtterVirkningstidspunkt?.forEach(({ fraDato, tilDato, boStatus }) => {
+        const isRegistrertPeriode = boStatus === BoStatusType.REGISTRERT_PA_ADRESSE;
+        const prevPeriode = result[result.length - 1];
+        const datoFom = toISODateString(
+            result.length === 0 ? virkningsOrSoktFraDato : addDays(new Date(result[result.length - 1].datoTom), 1)
+        );
+        const datoTom = toISODateString(tilDato ? lastDayOfMonth(tilDato) : tilDato);
+
+        if (isRegistrertPeriode) {
+            if (prevPeriode && prevPeriode.boStatus === BoStatusType.REGISTRERT_PA_ADRESSE) {
+                result[result.length - 1].datoTom = datoTom;
+            } else {
+                result.push({
+                    datoFom,
+                    datoTom,
+                    boStatus,
+                    kilde: "offentlig",
+                });
+            }
+        } else {
+            const coversAtLeastOneCalendarMonth = tilDato
+                ? periodCoversMinOneFullCalendarMonth(fraDato, tilDato)
+                : true;
+
+            if (coversAtLeastOneCalendarMonth) {
+                result.push({
+                    boStatus,
+                    datoFom,
+                    datoTom: tilDato
+                        ? isLastDayOfMonth(tilDato)
+                            ? toISODateString(tilDato)
+                            : toISODateString(lastDayOfMonth(deductMonths(tilDato, 1)))
+                        : null,
+                    kilde: "offentlig",
+                });
+            }
+        }
     });
 
     return result;
 };
 export const getBarnPerioderFromHusstandsListe = (
-    opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
+    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
     virkningsOrSoktFraDato: Date
 ) => {
     return opplysningerFraFolkRegistre.map((barn) => ({
@@ -185,23 +216,20 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDtoGrunnlag[], 
 };
 
 export const createInitialValues = (
-    behandling: BehandlingDto,
     boforhold: BoforholdResponse,
-    opplysningerFraFolkRegistre: OpplysningFraFolkeRegistre[],
-    virkningsOrSoktFraDato: Date,
-    grunnlagspakke: HentGrunnlagspakkeDto,
-    boforoholdOpplysningerExistInDb: boolean
+    opplysningerFraFolkRegistre: {
+        husstand: HusstandOpplysningFraFolkeRegistre[];
+        sivilstand: SivilstandDtoGrunnlag[];
+    },
+    virkningsOrSoktFraDato: Date
 ) => ({
     ...boforhold,
-    husstandsBarn: boforoholdOpplysningerExistInDb
-        ? boforhold.husstandsBarn.map((barn) => ({
-              ...barn,
-              perioder: barn.perioder?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)),
-          }))
-        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
+    husstandsBarn: boforhold?.husstandsBarn?.length
+        ? boforhold.husstandsBarn
+        : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre.husstand, virkningsOrSoktFraDato),
     sivilstand: boforhold?.sivilstand?.length
-        ? boforhold.sivilstand?.sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1))
-        : getSivilstandPerioder(grunnlagspakke.sivilstandListe, virkningsOrSoktFraDato),
+        ? boforhold.sivilstand
+        : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
 });
 
 export const createPayload = (values: BoforholdFormValues) => ({
@@ -234,35 +262,146 @@ export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: 
     return overlappingPeriods;
 };
 
-export const syncDates = (
-    periods: BarnPeriode[],
+export const editPeriods = (periods: BarnPeriode[], periodeIndex: number): BarnPeriode[] => {
+    const editedPeriod = periods[periodeIndex];
+    let startIndex = 0;
+    let deleteCount = 0;
+
+    const setPrevPeriod = (prevPeriod) => {
+        const datoTom = toISODateString(deductDays(new Date(editedPeriod.datoFom), 1));
+        const sameDate = datoTom === prevPeriod.datoTom;
+        prevPeriod.datoTom = datoTom;
+        prevPeriod.kilde = sameDate ? prevPeriod.kilde : "manuelt";
+    };
+
+    const setPostPeriod = (postPeriod) => {
+        const datoFom = toISODateString(addDays(new Date(editedPeriod.datoTom), 1));
+        const sameDate = datoFom === postPeriod.datoFom;
+        postPeriod.datoFom = datoFom;
+        postPeriod.kilde = sameDate ? postPeriod.kilde : "manuelt";
+    };
+
+    if (editedPeriod.datoTom === null) {
+        const updatedPeriods = periods.filter(
+            (period) => new Date(period.datoFom).getTime() <= new Date(editedPeriod.datoFom).getTime()
+        );
+
+        const prevPeriod = updatedPeriods[updatedPeriods.length - 2];
+
+        if (prevPeriod) {
+            const sameStatus = prevPeriod.boStatus === editedPeriod.boStatus;
+
+            if (sameStatus) {
+                prevPeriod.datoTom = editedPeriod.datoTom;
+                prevPeriod.kilde = "manuelt";
+                updatedPeriods.pop();
+            } else {
+                setPrevPeriod(prevPeriod);
+            }
+        }
+
+        return updatedPeriods;
+    }
+
+    if (periodeIndex + 1 === periods.length) {
+        periods.pop();
+        const indexBeforeEditedPeriod = periods.findIndex(
+            (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
+        );
+        const indexAfterEditedPeriod = periods.findIndex(
+            (period) =>
+                period.datoTom === null || new Date(period.datoTom).getTime() > new Date(editedPeriod.datoTom).getTime()
+        );
+
+        if (indexBeforeEditedPeriod !== -1) {
+            startIndex = indexBeforeEditedPeriod + 1;
+            const prevPeriod = periods[indexBeforeEditedPeriod];
+
+            if (prevPeriod) {
+                const sameStatus = prevPeriod.boStatus === editedPeriod.boStatus;
+
+                if (sameStatus) {
+                    startIndex -= 1;
+                    deleteCount += 1;
+                    editedPeriod.datoFom = prevPeriod.datoFom;
+                } else {
+                    setPrevPeriod(prevPeriod);
+                }
+            }
+        }
+
+        if (indexAfterEditedPeriod !== -1) {
+            deleteCount = deleteCount + (indexAfterEditedPeriod - 1 - indexBeforeEditedPeriod);
+            const postPeriod = periods[indexAfterEditedPeriod];
+
+            if (postPeriod) {
+                const sameStatus = postPeriod.boStatus === editedPeriod.boStatus;
+
+                if (sameStatus) {
+                    deleteCount += 1;
+                    editedPeriod.datoTom = postPeriod.datoTom;
+                } else {
+                    setPostPeriod(postPeriod);
+                }
+            }
+        }
+
+        periods.splice(startIndex, deleteCount, editedPeriod);
+
+        return periods;
+    }
+
+    const prevPeriod = periods[periodeIndex - 1];
+    const postPeriod = periods[periodeIndex + 1];
+
+    if (prevPeriod) {
+        const sameStatus = prevPeriod.boStatus === editedPeriod.boStatus;
+
+        if (sameStatus) {
+            startIndex = periodeIndex - 1;
+            deleteCount = 2;
+            editedPeriod.datoFom = prevPeriod.datoFom;
+        } else {
+            setPrevPeriod(prevPeriod);
+        }
+    }
+
+    if (postPeriod) {
+        const sameStatus = postPeriod.boStatus === editedPeriod.boStatus;
+
+        if (sameStatus) {
+            deleteCount += 1;
+        } else {
+            setPostPeriod(postPeriod);
+        }
+    }
+
+    if (deleteCount) {
+        periods.splice(startIndex, deleteCount, editedPeriod);
+    }
+
+    return periods;
+};
+
+export const syncSivilstandDates = (
+    periods: SivilstandDto[],
     date: string | null,
-    barnIndex: number,
     periodeIndex: number,
     field: "datoFom" | "datoTom",
     setValue: UseFormSetValue<BoforholdFormValues>
 ) => {
     if (field === "datoFom" && periods[periodeIndex - 1] && date) {
-        setValue(
-            `husstandsBarn.${barnIndex}.perioder.${periodeIndex - 1}.datoTom`,
-            toISODateString(deductDays(new Date(date), 1))
-        );
+        setValue(`sivilstand.${periodeIndex - 1}.datoTom`, toISODateString(deductDays(new Date(date), 1)));
     }
     if (field === "datoTom" && periods[periodeIndex + 1] && date) {
-        setValue(
-            `husstandsBarn.${barnIndex}.perioder.${periodeIndex + 1}.datoFom`,
-            toISODateString(addDays(new Date(date), 1))
-        );
+        setValue(`sivilstand.${periodeIndex + 1}.datoFom`, toISODateString(addDays(new Date(date), 1)));
     }
-    setValue(`husstandsBarn.${barnIndex}.perioder.${periodeIndex}.${field}`, date);
+    setValue(`sivilstand.${periodeIndex}.${field}`, date);
 };
 
 export const compareOpplysninger = (
-    savedOpplysninger: {
-        husstand: { ident: string; navn: string; perioder: { fraDato: string; tilDato: string; boStatus: string }[] }[];
-        sivilstand: { personId: string; periodeFra: string; periodeTil: string; sivilstand: string }[];
-    },
-    latestOpplysninger: { husstand: OpplysningFraFolkeRegistre[]; sivilstand: SivilstandDtoGrunnlag[] }
+    savedOpplysninger: ParsedBoforholdOpplysninger,
+    latestOpplysninger: BoforholdOpplysninger
 ) => {
     const changedLog = [];
 
@@ -295,9 +434,7 @@ export const compareOpplysninger = (
         const barnInLatestOpplysninger = latestOpplysninger.husstand.find((b) => barn.ident === b.ident);
         const notTheSameNumberOfPeriods =
             barnInLatestOpplysninger && barnInLatestOpplysninger.perioder.length !== barn.perioder.length;
-        const statusOrDatesChangedForSomePeriods = (
-            perioder: { fraDato: string; tilDato: string; boStatus: string }[]
-        ) => {
+        const statusOrDatesChangedForSomePeriods = (perioder: SavedOpplysningFraFolkeRegistrePeriode[]) => {
             let changed = false;
             perioder.forEach((periode, index) => {
                 const periodeFraLatestOpplysninger = barnInLatestOpplysninger?.perioder[index];
@@ -321,9 +458,7 @@ export const compareOpplysninger = (
         }
     });
 
-    const oneOrMoreSivilstandPeriodsChanged = (
-        sivilstandPerioder: { personId: string; periodeFra: string; periodeTil: string; sivilstand: string }[]
-    ) => {
+    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandDtoGrunnlag[]) => {
         let changed = false;
         sivilstandPerioder.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];

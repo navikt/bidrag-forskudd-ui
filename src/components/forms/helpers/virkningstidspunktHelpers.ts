@@ -1,3 +1,5 @@
+import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
+
 import { BehandlingDto, ForskuddAarsakType } from "../../../api/BidragBehandlingApi";
 import { deductMonths, firstDayOfMonth } from "../../../utils/date-utils";
 
@@ -26,9 +28,13 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | st
     }
 };
 
-export const getFomAndTomForMonthPicker = (soktFraDato) => {
-    const soktFraIsInFuture = firstDayOfMonth(new Date(soktFraDato)) > firstDayOfMonth(new Date());
-    const fom = soktFraIsInFuture ? firstDayOfMonth(new Date()) : firstDayOfMonth(new Date(soktFraDato));
-    const tom = soktFraIsInFuture ? firstDayOfMonth(new Date(soktFraDato)) : firstDayOfMonth(new Date());
+export const getFomAndTomForMonthPicker = (virkningstidspunkt) => {
+    const virkningstidspunktIsInFuture = firstDayOfMonth(new Date(virkningstidspunkt)) > firstDayOfMonth(new Date());
+    const fom = virkningstidspunktIsInFuture
+        ? firstDayOfMonth(new Date())
+        : firstDayOfMonth(new Date(virkningstidspunkt));
+    const tom = virkningstidspunktIsInFuture
+        ? lastDayOfMonth(new Date(virkningstidspunkt))
+        : lastDayOfMonth(new Date());
     return [fom, tom];
 };
