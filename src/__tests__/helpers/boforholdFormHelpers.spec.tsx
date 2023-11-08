@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { BoStatusType } from "../../api/BidragBehandlingApi";
+import { BoStatusType, SivilstandType } from "../../api/BidragBehandlingApi";
 import {
     checkOverlappingPeriods,
     compareOpplysninger,
@@ -469,24 +469,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -522,24 +512,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -580,24 +560,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -638,24 +608,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -697,34 +657,19 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-05",
-                    periodeTil: "2023-10-04",
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "2023-07-05",
+                    datoTom: "2023-10-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-10-05",
-                    periodeTil: null,
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "2023-10-05",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -765,24 +710,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -825,24 +760,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "ENKE_ELLER_ENKEMANN",
-                    aktiv: true,
-                    brukFra: "2023-10-11T09:43:03.38538",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T09:43:03.38538",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -883,24 +808,14 @@ describe("BoforholdFormHelpers", () => {
             ],
             sivilstand: [
                 {
-                    personId: "20468520282",
-                    periodeFra: "1985-06-20",
-                    periodeTil: "2023-07-04",
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "1985-06-20",
+                    datoTom: "2023-07-04",
+                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
                 },
                 {
-                    personId: "20468520282",
-                    periodeFra: "2023-07-04",
-                    periodeTil: null,
-                    sivilstand: "UGIFT" as const,
-                    aktiv: true,
-                    brukFra: "2023-10-11T10:16:45.6057",
-                    brukTil: null,
-                    hentetTidspunkt: "2023-10-11T10:16:45.6057",
+                    datoFom: "2023-07-04",
+                    datoTom: null,
+                    sivilstandType: SivilstandType.GIFT,
                 },
             ],
         };
@@ -1262,13 +1177,177 @@ describe("BoforholdFormHelpers", () => {
         const expectedResult = [
             {
                 datoFom: "2022-04-01",
-                datoTom: "2022-08-31",
+                datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
                 kilde: "manuelt",
             },
         ];
 
         const updatedPeriods = editPeriods(testPeriods, 1);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should change kilde to manuelt to all periods edited by a change", () => {
+        const testPeriods = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-05-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2022-04-01",
+                datoTom: "2022-04-30",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-05-01",
+                datoTom: "2022-08-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-09-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 1);
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should remove all periods where datoFom is equal or bigger than new period datoFom", () => {
+        const testPeriods = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-07-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 3);
+
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should split a period in 3 parts if edited period has different status and datoFom and datoTom in a period", () => {
+        const testPeriods = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-07-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2021-09-01",
+                datoTom: "2021-10-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-07-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: "2021-08-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2021-09-01",
+                datoTom: "2021-10-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2021-11-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: "manuelt",
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: "offentlig",
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 3);
+
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))

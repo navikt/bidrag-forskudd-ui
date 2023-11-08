@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { BoforholdFormValues } from "../types/boforholdFormValues";
 import { InntektFormValues } from "../types/inntektFormValues";
 import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
 
@@ -14,8 +15,8 @@ interface IForskuddContext {
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
     setInntektFormValues: (values: InntektFormValues) => void;
-    boforholdFormValues: any;
-    setBoforholdFormValues: (values: any) => void;
+    boforholdFormValues: BoforholdFormValues;
+    setBoforholdFormValues: (values: BoforholdFormValues) => void;
 }
 
 interface IForskuddContextProps {

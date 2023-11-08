@@ -1,5 +1,4 @@
 import { BoStatusType, SivilstandDto } from "../api/BidragBehandlingApi";
-import { SivilstandDto as SivilstandDtoGrunnlag } from "../api/BidragGrunnlagApi";
 
 export interface BarnPeriode {
     datoFom?: string | null;
@@ -48,10 +47,10 @@ export interface SavedHustandOpplysninger {
 
 export interface BoforholdOpplysninger {
     husstand: HusstandOpplysningFraFolkeRegistre[];
-    sivilstand: SivilstandDtoGrunnlag[];
+    sivilstand: SivilstandDto[];
 }
 
 export interface ParsedBoforholdOpplysninger {
     husstand: SavedHustandOpplysninger[];
-    sivilstand: SivilstandDtoGrunnlag[];
+    sivilstand: SivilstandDto[];
 }

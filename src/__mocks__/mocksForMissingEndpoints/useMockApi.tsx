@@ -32,5 +32,4 @@ export const useGetArbeidsforhold = (behandlingId: string, success = true) =>
         queryFn: (): Promise<ArbeidsforholdData[]> =>
             fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`)), success),
         staleTime: Infinity,
-        suspense: true,
     });

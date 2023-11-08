@@ -23,6 +23,17 @@ export enum BoStatusType {
     REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
 }
 
+export enum Engangsbeloptype {
+    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    ETTERGIVELSE = "ETTERGIVELSE",
+    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
+    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
+    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
+    INNKREVING_GJELD = "INNKREVING_GJELD",
+    SAERTILSKUDD = "SAERTILSKUDD",
+    TILBAKEKREVING = "TILBAKEKREVING",
+}
+
 export enum ForskuddAarsakType {
     SF = "SF",
     NF = "NF",
@@ -54,34 +65,17 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
-export enum SivilstandType {
-    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
-    GIFT = "GIFT",
-    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
-    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
-    SEPARERT = "SEPARERT",
-    SEPARERT_PARTNER = "SEPARERT_PARTNER",
-    SKILT = "SKILT",
-    SKILT_PARTNER = "SKILT_PARTNER",
-    UGIFT = "UGIFT",
-    UOPPGITT = "UOPPGITT",
+export enum Rolletype {
+    BA = "BA",
+    BM = "BM",
+    BP = "BP",
+    FR = "FR",
+    RM = "RM",
 }
 
-export enum SoknadFraType {
-    BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
-    BARN18AAR = "BARN_18_AAR",
-    NAV_BIDRAG = "NAV_BIDRAG",
-    FYLKESNEMDA = "FYLKESNEMDA",
-    NAV_INTERNASJONAL = "NAV_INTERNASJONAL",
-    KOMMUNE = "KOMMUNE",
-    KONVERTERING = "KONVERTERING",
-    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
-    NORSKE_MYNDIGHET = "NORSKE_MYNDIGHET",
-    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
-    UTENLANDSKE_MYNDIGHET = "UTENLANDSKE_MYNDIGHET",
-    VERGE = "VERGE",
-    TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
-    KLAGE_ANKE = "KLAGE_ANKE",
+export enum SivilstandType {
+    BOR_ALENE_MED_BARN = "BOR_ALENE_MED_BARN",
+    GIFT = "GIFT",
 }
 
 export enum SoknadType {
@@ -95,6 +89,32 @@ export enum SoknadType {
     KLAGE = "KLAGE",
     ENDRING = "ENDRING",
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
+export enum Stonadstype {
+    BIDRAG = "BIDRAG",
+    FORSKUDD = "FORSKUDD",
+    BIDRAG18AAR = "BIDRAG18AAR",
+    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
+    MOTREGNING = "MOTREGNING",
+    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
+}
+
+export enum SoktAvType {
+    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
+    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
+    BARN18AAR = "BARN_18_AAR",
+    BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
+    NAV_BIDRAG = "NAV_BIDRAG",
+    FYLKESNEMDA = "FYLKESNEMDA",
+    NAV_INTERNASJONALT = "NAV_INTERNASJONALT",
+    KOMMUNE = "KOMMUNE",
+    NORSKE_MYNDIGHET = "NORSKE_MYNDIGHET",
+    UTENLANDSKE_MYNDIGHET = "UTENLANDSKE_MYNDIGHET",
+    VERGE = "VERGE",
+    TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
+    KLAGE_ANKE = "KLAGE_ANKE",
+    KONVERTERING = "KONVERTERING",
 }
 
 export enum OpplysningerType {
@@ -330,18 +350,18 @@ export interface BehandlingInfoDto {
     soknadId: number;
     erFattetBeregnet?: boolean;
     erVedtakIkkeTilbakekreving: boolean;
-    stonadType?: BehandlingInfoDtoStonadType;
-    engangsBelopType?: BehandlingInfoDtoEngangsBelopType;
+    stonadType?: Stonadstype;
+    engangsBelopType?: Engangsbeloptype;
     behandlingType?: string;
     soknadType?: string;
-    soknadFra?: SoknadFraType;
-    vedtakType?: BehandlingInfoDtoVedtakType;
+    soknadFra?: SoktAvType;
+    vedtakType?: Vedtakstype;
     barnIBehandling: string[];
 }
 
 export interface ForsendelseRolleDto {
     fødselsnummer?: string;
-    type: ForsendelseRolleDtoType;
+    type: Rolletype;
 }
 
 export interface InitalizeForsendelseRequest {
@@ -357,6 +377,19 @@ export interface InitalizeForsendelseRequest {
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatus;
 }
 
+export enum Vedtakstype {
+    INDEKSREGULERING = "INDEKSREGULERING",
+    ALDERSJUSTERING = "ALDERSJUSTERING",
+    OPPHOR = "OPPHØR",
+    ALDERSOPPHOR = "ALDERSOPPHØR",
+    REVURDERING = "REVURDERING",
+    FASTSETTELSE = "FASTSETTELSE",
+    INNKREVING = "INNKREVING",
+    KLAGE = "KLAGE",
+    ENDRING = "ENDRING",
+    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
+}
+
 export interface CreateBehandlingRequest {
     behandlingType: BehandlingType;
     soknadType: SoknadType;
@@ -366,7 +399,7 @@ export interface CreateBehandlingRequest {
     datoTom: string;
     /** @format date-time */
     mottatDato: string;
-    soknadFra: SoknadFraType;
+    soknadFra: SoktAvType;
     /**
      * @minLength 0
      * @maxLength 7
@@ -383,8 +416,8 @@ export interface CreateBehandlingRequest {
      * @uniqueItems true
      */
     roller: CreateRolleDto[];
-    stonadType: CreateBehandlingRequestStonadType;
-    engangsbelopType: CreateBehandlingRequestEngangsbelopType;
+    stonadType: Stonadstype;
+    engangsbelopType: Engangsbeloptype;
     /** @format int64 */
     soknadId: number;
     /** @format int64 */
@@ -434,15 +467,69 @@ export interface ForskuddBeregningRespons {
 
 /** Grunnlag */
 export interface Grunnlag {
-    /** Referanse */
-    referanse?: string;
-    /** Type */
-    type?: GrunnlagType;
-    /** Innhold */
+    /** Referanse (unikt navn på grunnlaget) */
+    navn?: string;
+    /** Grunnlagstype */
+    type?: Grunnlagstype;
+    /** Liste over grunnlagsreferanser */
+    grunnlagsreferanseListe?: string[];
+    /** Grunnlagsinnhold (generisk) */
     innhold?: JsonNode;
 }
 
-/** Innhold */
+/** Grunnlagstype */
+export enum Grunnlagstype {
+    SAERFRADRAG = "SAERFRADRAG",
+    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
+    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
+    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNAD_INFO = "SOKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALT_BELOP = "INNBETALT_BELOP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+    PERSON = "PERSON",
+    BOSTATUS_PERIODE = "BOSTATUS_PERIODE",
+    BEREGNING_INNTEKT_RAPPORTERING_PERIODE = "BEREGNING_INNTEKT_RAPPORTERING_PERIODE",
+    SIVILSTAND_PERIODE = "SIVILSTAND_PERIODE",
+    VIRKNINGSDATO = "VIRKNINGSDATO",
+    NOTAT = "NOTAT",
+}
+
+/** Grunnlagsinnhold (generisk) */
 export type JsonNode = object;
 
 /** Periode (fra-til dato */
@@ -492,7 +579,7 @@ export interface BehandlingDto {
     datoTom: string;
     /** @format date */
     mottatDato: string;
-    soknadFraType: SoknadFraType;
+    soknadFraType: SoktAvType;
     saksnummer: string;
     /** @format int64 */
     soknadId: number;
@@ -529,115 +616,10 @@ export interface RolleDto {
     opprettetDato?: string;
 }
 
-export enum BehandlingInfoDtoStonadType {
-    BIDRAG = "BIDRAG",
-    FORSKUDD = "FORSKUDD",
-    BIDRAG18AAR = "BIDRAG18AAR",
-    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
-    MOTREGNING = "MOTREGNING",
-    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
-}
-
-export enum BehandlingInfoDtoEngangsBelopType {
-    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
-    ETTERGIVELSE = "ETTERGIVELSE",
-    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
-    TILBAKEKREVING = "TILBAKEKREVING",
-    SAERTILSKUDD = "SAERTILSKUDD",
-    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
-    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
-}
-
-export enum BehandlingInfoDtoVedtakType {
-    INDEKSREGULERING = "INDEKSREGULERING",
-    ALDERSJUSTERING = "ALDERSJUSTERING",
-    OPPHOR = "OPPHØR",
-    ALDERSOPPHOR = "ALDERSOPPHØR",
-    REVURDERING = "REVURDERING",
-    FASTSETTELSE = "FASTSETTELSE",
-    INNKREVING = "INNKREVING",
-    KLAGE = "KLAGE",
-    ENDRING = "ENDRING",
-    ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
-}
-
-export enum ForsendelseRolleDtoType {
-    BA = "BA",
-    BM = "BM",
-    BP = "BP",
-    FR = "FR",
-    RM = "RM",
-}
-
 export enum InitalizeForsendelseRequestBehandlingStatus {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
     FEILREGISTRERT = "FEILREGISTRERT",
-}
-
-export enum CreateBehandlingRequestStonadType {
-    BIDRAG = "BIDRAG",
-    FORSKUDD = "FORSKUDD",
-    BIDRAG18AAR = "BIDRAG18AAR",
-    EKTEFELLEBIDRAG = "EKTEFELLEBIDRAG",
-    MOTREGNING = "MOTREGNING",
-    OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
-}
-
-export enum CreateBehandlingRequestEngangsbelopType {
-    DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
-    ETTERGIVELSE = "ETTERGIVELSE",
-    ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
-    TILBAKEKREVING = "TILBAKEKREVING",
-    SAERTILSKUDD = "SAERTILSKUDD",
-    GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
-    GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
-}
-
-/** Type */
-export enum GrunnlagType {
-    SAERFRADRAG = "SAERFRADRAG",
-    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
-    SKATTEKLASSE = "SKATTEKLASSE",
-    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
-    BOSTATUS = "BOSTATUS",
-    BOSTATUS_BP = "BOSTATUS_BP",
-    INNTEKT = "INNTEKT",
-    INNTEKT_BARN = "INNTEKT_BARN",
-    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
-    KAPITALINNTEKT = "KAPITALINNTEKT",
-    KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
-    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
-    SAMVAERSKLASSE = "SAMVAERSKLASSE",
-    BIDRAGSEVNE = "BIDRAGSEVNE",
-    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
-    SJABLON = "SJABLON",
-    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
-    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
-    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
-    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
-    BARN = "BARN",
-    SIVILSTAND = "SIVILSTAND",
-    BARNETILLEGG = "BARNETILLEGG",
-    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
-    DELT_BOSTED = "DELT_BOSTED",
-    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
-    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
-    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
-    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
-    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
-    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
-    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
-    GEBYRFRITAK = "GEBYRFRITAK",
-    SOKNAD_INFO = "SOKNAD_INFO",
-    BARN_INFO = "BARN_INFO",
-    PERSON_INFO = "PERSON_INFO",
-    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
-    VEDTAK_INFO = "VEDTAK_INFO",
-    INNBETALT_BELOP = "INNBETALT_BELOP",
-    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
-    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
-    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
 }
 
 export enum RolleDtoRolleType {

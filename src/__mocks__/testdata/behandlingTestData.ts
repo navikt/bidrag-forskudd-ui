@@ -2,8 +2,8 @@ import {
     BehandlingDto,
     BehandlingType,
     RolleDtoRolleType,
-    SoknadFraType,
     SoknadType,
+    SoktAvType,
 } from "../../api/BidragBehandlingApi";
 import { generateName } from "../msw/personMock";
 
@@ -18,7 +18,7 @@ export const behandlingMockApiData: BehandlingDto = {
     mottatDato: "2019-11-03",
     saksnummer: "2300138",
     behandlerEnhet: "4806",
-    soknadFraType: SoknadFraType.BIDRAGSMOTTAKER,
+    soknadFraType: SoktAvType.BIDRAGSMOTTAKER,
     roller: [
         {
             id: 1,
