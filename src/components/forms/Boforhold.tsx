@@ -1,13 +1,26 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Panel, Radio, RadioGroup, ReadMore, Search } from "@navikt/ds-react";
+import {
+    Alert,
+    BodyShort,
+    Box,
+    Button,
+    Heading,
+    Radio,
+    RadioGroup,
+    ReadMore,
+    Search,
+    TextField,
+    VStack,
+} from "@navikt/ds-react";
 import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
-import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
+import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
     BoStatusType,
     OpplysningerDto,
     OpplysningerType,
     RolleDtoRolleType,
+    SivilstandDto,
     SivilstandType,
 } from "../../api/BidragBehandlingApi";
 import { PERSON_API } from "../../constants/api";
@@ -43,11 +56,10 @@ import {
     isValidDate,
     toISODateString,
 } from "../../utils/date-utils";
-import { FormControlledDatePicker } from "../formFields/FormControlledDatePicker";
+import { DatePickerInput } from "../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
-import { FormControlledTextField } from "../formFields/FormControlledTextField";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
 import { ErrorModal } from "../modal/ErrorModal";
@@ -57,15 +69,15 @@ import { RolleTag } from "../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
 import {
     calculateFraDato,
-    checkOverlappingPeriods,
     compareOpplysninger,
     createInitialValues,
     editPeriods,
+    editSivilstandPeriods,
     getBarnPerioder,
     getBarnPerioderFromHusstandsListe,
     getSivilstandPerioder,
+    mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
-    syncSivilstandDates,
 } from "./helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
@@ -201,7 +213,7 @@ const Side = () => {
 };
 
 const BoforholdsForm = () => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId, setBoforholdFormValues } = useForskudd();
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
@@ -211,7 +223,7 @@ const BoforholdsForm = () => {
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const opplysningerFraFolkRegistre = {
         husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
-        sivilstand: grunnlagspakke.sivilstandListe,
+        sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(grunnlagspakke.sivilstandListe),
     };
     const updateBoforhold = useUpdateBoforhold(behandlingId);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
@@ -226,6 +238,12 @@ const BoforholdsForm = () => {
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    useEffect(() => {
+        if (initialValues) {
+            setBoforholdFormValues(initialValues);
+        }
+    }, [initialValues]);
 
     useEffect(() => {
         if (savedOpplysninger) {
@@ -267,13 +285,14 @@ const BoforholdsForm = () => {
         };
         useFormMethods.reset(values);
         updateBoforhold.mutation.mutate(values);
+        setBoforholdFormValues(values);
         setOpplysningerChanges([]);
     };
 
     return (
         <>
             <FormProvider {...useFormMethods}>
-                <form>
+                <form onSubmit={(e) => e.preventDefault()}>
                     <FormLayout
                         title="Boforhold"
                         main={
@@ -300,90 +319,179 @@ const BoforholdsForm = () => {
     );
 };
 
-const BarnIkkeMedIBehandling = ({ barnFieldArray, setValue, item, index }) => {
-    const [val, setVal] = useState(item.foedselsDato ? "fritekst" : "dnummer");
+const AddBarnForm = ({
+    datoFom,
+    setOpenAddBarnForm,
+    barnFieldArray,
+}: {
+    datoFom: Date;
+    setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
+    barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsBarn">;
+}) => {
+    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const saveBoforhold = useOnSaveBoforhold();
+    const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
+    const [foedselsDato, setFoedselsDato] = useState(null);
+    const [navn, setNavn] = useState("");
     const [error, setError] = useState(null);
-    return (
-        <div className="mt-4 mb-4">
-            <FlexRow className="items-center p-3">
-                <div>Barn</div>
-                <div className="ml-auto self-end">
-                    <Button
-                        type="button"
-                        onClick={() => barnFieldArray.remove(index)}
-                        icon={<TrashIcon aria-hidden />}
-                        variant="tertiary"
-                        size="small"
-                    >
-                        Slett barn
-                    </Button>
-                </div>
-            </FlexRow>
 
-            <RadioGroup
-                className="mb-4"
-                size="small"
-                legend=""
-                value={val}
-                onChange={(val) => {
-                    setVal(val);
-                    if (val === "fritekst") {
-                        setValue(`husstandsBarn.${index}.ident`, "");
-                        setValue(`husstandsBarn.${index}.navn`, "");
+    const validateForm = () => {
+        let formErrors = { ...error };
+
+        if (navn === "") {
+            formErrors = { ...formErrors, navn: "Navn må fylles ut" };
+        } else {
+            delete formErrors.navn;
+        }
+
+        if (val === "fritekst") {
+            if (!isValidDate(foedselsDato)) {
+                formErrors = { ...formErrors, foedselsDato: "Dato er ikke gylid" };
+            } else {
+                delete formErrors.foedselsDato;
+            }
+        }
+
+        if (val === "dnummer") {
+            if (ident === "") {
+                formErrors = { ...formErrors, ident: "Ident må fylles ut" };
+            } else {
+                delete formErrors.ident;
+            }
+        }
+        return formErrors;
+    };
+
+    const onSaveAddedBarn = () => {
+        const formErrors = validateForm();
+
+        if (Object.keys(formErrors).length) {
+            setError(formErrors);
+            return;
+        }
+
+        const addedBarn = {
+            ident: val === "dnummer" ? ident : "",
+            medISaken: false,
+            navn: navn,
+            foedselsDato: val === "dnummer" ? "" : toISODateString(foedselsDato),
+            perioder: [
+                {
+                    datoFom: toISODateString(datoFom),
+                    datoTom: null,
+                    boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                    kilde: "manuelt",
+                },
+            ],
+        };
+        const husstandsBarn = [...boforholdFormValues.husstandsBarn].concat(addedBarn);
+        barnFieldArray.append(addedBarn);
+        const updatedValues = {
+            ...boforholdFormValues,
+            husstandsBarn,
+        };
+
+        setBoforholdFormValues(updatedValues);
+        saveBoforhold(updatedValues);
+        setOpenAddBarnForm(false);
+    };
+
+    const onSearchClick = (value) => {
+        PERSON_API.informasjon
+            .hentPersonPost({ ident: value })
+            .then(({ data }) => {
+                setNavn(data.navn);
+                const formErrors = { ...error };
+                delete formErrors.ident;
+                delete formErrors.navn;
+                setError(formErrors);
+            })
+            .catch(() => {
+                setError({ ...error, ident: `Finner ikke person med ident: ${value}` });
+            });
+    };
+
+    const onSearchClear = () => {
+        setIdent("");
+        setNavn("");
+        const formErrors = { ...error };
+        delete formErrors.ident;
+        delete formErrors.navn;
+        setError(formErrors);
+    };
+
+    return (
+        <Box className="mt-4 mb-4 p-4" borderWidth="1">
+            <VStack gap="4">
+                <FlexRow className="items-center">
+                    <div>Barn</div>
+                    <div className="ml-auto self-end">
+                        <Button
+                            type="button"
+                            onClick={() => setOpenAddBarnForm(false)}
+                            icon={<TrashIcon aria-hidden />}
+                            variant="tertiary"
+                            size="small"
+                        />
+                    </div>
+                </FlexRow>
+
+                <RadioGroup
+                    className="mb-4"
+                    size="small"
+                    legend=""
+                    value={val}
+                    onChange={(val) => {
+                        setVal(val);
                         setIdent("");
+                        setFoedselsDato(null);
                         setError(null);
-                    } else {
-                        setValue(`husstandsBarn.${index}.foedselsDato`, null);
-                    }
-                }}
-            >
-                <Radio value="dnummer">Fødselsnummer/d-nummer</Radio>
-                <Radio value="fritekst">Fritekst</Radio>
-            </RadioGroup>
-            <FlexRow>
-                {val === "dnummer" && (
-                    <Search
-                        className="w-fit"
-                        label="Fødselsnummer/ d-nummer"
-                        variant="secondary"
+                    }}
+                >
+                    <Radio value="dnummer">Fødselsnummer/d-nummer</Radio>
+                    <Radio value="fritekst">Fritekst</Radio>
+                </RadioGroup>
+                <FlexRow>
+                    {val === "dnummer" && (
+                        <Search
+                            className="w-fit"
+                            label="Fødselsnummer/ d-nummer"
+                            variant="secondary"
+                            size="small"
+                            hideLabel={false}
+                            error={error?.ident}
+                            onChange={(value) => setIdent(value)}
+                            onClear={onSearchClear}
+                            onSearchClick={onSearchClick}
+                        />
+                    )}
+                    {val === "fritekst" && (
+                        <DatePickerInput
+                            label="Fødselsdato"
+                            placeholder="DD.MM.ÅÅÅÅ"
+                            onChange={(value) => setFoedselsDato(value)}
+                            defaultValue={null}
+                            fieldValue={foedselsDato}
+                            error={error?.foedselsDato}
+                        />
+                    )}
+                    <TextField
+                        name="navn"
+                        label="Navn"
                         size="small"
-                        hideLabel={false}
-                        error={error}
-                        onChange={(val) => {
-                            setValue(`husstandsBarn.${index}.ident`, val);
-                            setIdent(val);
-                        }}
-                        onClear={() => {
-                            setValue(`husstandsBarn.${index}.ident`, "");
-                            setValue(`husstandsBarn.${index}.navn`, "");
-                            setIdent("");
-                            setError(null);
-                        }}
-                        onSearchClick={(value) => {
-                            PERSON_API.informasjon
-                                .hentPersonPost({ ident: value })
-                                .then(({ data }) => {
-                                    setValue(`husstandsBarn.${index}.navn`, data.navn);
-                                    setError(null);
-                                })
-                                .catch(() => {
-                                    setError(`Finner ikke person med ident: ${ident}`);
-                                });
-                        }}
+                        value={navn}
+                        onChange={(e) => setNavn(e.target.value)}
+                        error={error?.navn}
                     />
-                )}
-                {val === "fritekst" && (
-                    <FormControlledDatePicker
-                        name={`husstandsBarn.${index}.foedselsDato`}
-                        label="Fødselsdato"
-                        placeholder="DD.MM.ÅÅÅÅ"
-                        defaultValue={item?.foedselsdato}
-                    />
-                )}
-                <FormControlledTextField name={`husstandsBarn.${index}.navn`} label="Navn" />
-            </FlexRow>
-        </div>
+                </FlexRow>
+                <FlexRow>
+                    <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={onSaveAddedBarn}>
+                        Lagre
+                    </Button>
+                </FlexRow>
+            </VStack>
+        </Box>
     );
 };
 
@@ -392,11 +500,12 @@ const BarnPerioder = ({
     opplysningerFraFolkRegistre,
     setErrorModalOpen,
 }: {
-    datoFom: Date | null;
+    datoFom: Date;
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
-    const { control, setValue } = useFormContext<BoforholdFormValues>();
+    const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
+    const { control } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
         name: "husstandsBarn",
@@ -409,43 +518,31 @@ const BarnPerioder = ({
         };
     });
 
-    const addBarn = () => {
-        barnFieldArray.append({
-            ident: "",
-            medISaken: false,
-            navn: "",
-            foedselsDato: null,
-            perioder: [
-                {
-                    datoFom: toISODateString(datoFom),
-                    datoTom: null,
-                    boStatus: "",
-                    kilde: "manuelt",
-                },
-            ],
-        });
+    const onOpenAddBarnForm = () => {
+        setOpenAddBarnForm(true);
     };
 
     return (
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <Panel className="p-0">
-                        {item.medISaken && (
-                            <div className="mb-8">
-                                <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
-                                    <div className="w-max h-max">
-                                        <RolleTag rolleType={RolleDtoRolleType.BARN} />
-                                    </div>
-                                    <div>
-                                        <FlexRow className="items-center h-[27px]">
-                                            <BodyShort size="small" className="font-bold">
-                                                <PersonNavn ident={item.ident}></PersonNavn>
-                                            </BodyShort>
-                                            <BodyShort size="small">{item.ident}</BodyShort>
-                                        </FlexRow>
-                                    </div>
+                    <Box className="p-0">
+                        <div className="mb-8">
+                            <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
+                                <div className="w-max h-max">
+                                    <RolleTag rolleType={RolleDtoRolleType.BARN} />
                                 </div>
+                                <div>
+                                    <FlexRow className="items-center h-[27px]">
+                                        <BodyShort size="small" className="font-bold">
+                                            {item.medISaken && <PersonNavn ident={item.ident}></PersonNavn>}
+                                            {!item.medISaken && item.navn}
+                                        </BodyShort>
+                                        <BodyShort size="small">{item.ident}</BodyShort>
+                                    </FlexRow>
+                                </div>
+                            </div>
+                            {item.ident !== "" && (
                                 <div>
                                     <ReadMore header="Opplysninger fra Folkeregistret" size="small">
                                         <Opplysninger
@@ -455,28 +552,29 @@ const BarnPerioder = ({
                                         />
                                     </ReadMore>
                                 </div>
-                            </div>
-                        )}
-                        {!item.medISaken && (
-                            <BarnIkkeMedIBehandling
-                                barnFieldArray={barnFieldArray}
-                                item={item}
-                                setValue={setValue}
-                                index={index}
-                            />
-                        )}
+                            )}
+                        </div>
                         <Perioder
                             barnIndex={index}
                             virkningstidspunkt={datoFom}
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                             setErrorModalOpen={setErrorModalOpen}
                         />
-                    </Panel>
+                    </Box>
                 </Fragment>
             ))}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addBarn}>
-                + Legg til barn
-            </Button>
+            {openAddBarnForm && (
+                <AddBarnForm
+                    datoFom={datoFom}
+                    setOpenAddBarnForm={setOpenAddBarnForm}
+                    barnFieldArray={barnFieldArray}
+                />
+            )}
+            {!openAddBarnForm && (
+                <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
+                    + Legg til barn
+                </Button>
+            )}
         </>
     );
 };
@@ -492,7 +590,9 @@ const Perioder = ({
     opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
     setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
+    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
+    const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const saveBoforhold = useOnSaveBoforhold();
@@ -509,9 +609,7 @@ const Perioder = ({
         control,
         name: `husstandsBarn.${barnIndex}.perioder`,
     });
-
-    const [lastPeriodsState, setLastPeriodsState] = useState(getValues(`husstandsBarn.${barnIndex}.perioder`));
-
+    const [lastPeriodsState, setLastPeriodsState] = useState([]);
     const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => {
         return {
@@ -519,11 +617,9 @@ const Perioder = ({
             ...watchFieldArray[index],
         };
     });
-    const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder`);
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as BarnPeriode[];
-        console.log("perioderValues", perioderValues);
         if (perioderValues[index].datoFom === null) {
             setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
@@ -531,25 +627,32 @@ const Perioder = ({
             });
         }
         const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}`);
-        console.log("fieldState", fieldState);
-
         if (!fieldState.error) {
-            setEditableRow("");
-            setValue(`husstandsBarn.${barnIndex}.perioder`, editPeriods(perioderValues, barnIndex, index));
-            saveBoforhold(getValues());
+            updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 
-    useEffect(() => {
-        if (fieldState.isDirty) {
-            setShowUndoButton(true);
-        }
-    }, [watchFieldArray, fieldState.isDirty]);
-
     const undoAction = () => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        setLastPeriodsState(perioderValues);
-        setValue(`husstandsBarn.${barnIndex}.perioder`, lastPeriodsState);
+        updatedAndSave(lastPeriodsState);
+    };
+
+    const updatedAndSave = (updatedPeriods: BarnPeriode[]) => {
+        setLastPeriodsState(boforholdFormValues.husstandsBarn[barnIndex].perioder);
+        const husstandsBarn = [...boforholdFormValues.husstandsBarn];
+        husstandsBarn.splice(barnIndex, 1, {
+            ...boforholdFormValues.husstandsBarn[barnIndex],
+            perioder: updatedPeriods,
+        });
+        const updatedValues = {
+            ...boforholdFormValues,
+            husstandsBarn,
+        };
+        setBoforholdFormValues(updatedValues);
+        setValue(`husstandsBarn.${barnIndex}.perioder`, updatedPeriods);
+        saveBoforhold(updatedValues);
+        setShowUndoButton(true);
+        setShowResetButton(true);
+        setEditableRow("");
     };
 
     const validateFomOgTom = (index: number) => {
@@ -570,7 +673,6 @@ const Perioder = ({
 
     const addPeriode = () => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        setLastPeriodsState(perioderValues);
         barnPerioder.append({
             datoFom: null,
             datoTom: null,
@@ -578,52 +680,50 @@ const Perioder = ({
             kilde: "manuelt",
         });
         setEditableRow(`${barnIndex}.${perioderValues.length}`);
-        setShowUndoButton(true);
-    };
-
-    const onDateChange = () => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        setLastPeriodsState(perioderValues);
     };
 
     const onRemovePeriode = (index) => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        setLastPeriodsState(perioderValues);
-        barnPerioder.remove(index);
-        saveBoforhold(getValues());
-        setShowUndoButton(true);
+        const updatedPeriods = boforholdFormValues.husstandsBarn[barnIndex].perioder.filter((_, i) => i !== index);
+        updatedAndSave(updatedPeriods);
     };
 
     const resetTilDataFraFreg = () => {
         const barn = getValues(`husstandsBarn.${barnIndex}`);
-        setLastPeriodsState(barn.perioder);
         const opplysningFraFreg = opplysningerFraFolkRegistre.find((opplysning) => opplysning.ident === barn.ident);
-        setValue(
-            `husstandsBarn.${barnIndex}.perioder`,
-            getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt)
-        );
+        const perioderFraFreg = getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt);
+        updatedAndSave(perioderFraFreg);
+        setShowResetButton(false);
     };
 
     const onEditRow = (index: number) => {
         const editableRowIndex = editableRow.split(".")[1];
 
+        if (editableRowIndex && Number(editableRowIndex) !== index) {
+            setErrorModalOpen(true);
+        }
+
         if (!editableRowIndex) {
             setEditableRow(`${barnIndex}.${index}`);
-        } else {
-            const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${Number(editableRowIndex)}`);
-
-            if (fieldState.error) {
-                setErrorModalOpen(true);
-            } else {
-                setEditableRow(`${barnIndex}.${index}`);
-            }
         }
     };
 
     return (
         <>
-            {showUndoButton && (
-                <div className="my-4 grid justify-items-end">
+            <div className="my-4 flex justify-between">
+                {showUndoButton && (
+                    <Button
+                        variant="tertiary"
+                        type="button"
+                        size="small"
+                        className="w-fit"
+                        onClick={undoAction}
+                        iconPosition="right"
+                        icon={<ArrowUndoIcon aria-hidden />}
+                    >
+                        Angre siste steg
+                    </Button>
+                )}
+                {showResetButton && (
                     <Button
                         variant="tertiary"
                         type="button"
@@ -633,8 +733,9 @@ const Perioder = ({
                     >
                         Reset til data fra FREG
                     </Button>
-                </div>
-            )}
+                )}
+            </div>
+
             {controlledFields.length > 0 && (
                 <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", "", ""]}>
                     {controlledFields.map((item, index) => (
@@ -742,19 +843,6 @@ const Perioder = ({
                 </TableWrapper>
             )}
             <div className="my-4 grid gap-4">
-                {showUndoButton && (
-                    <Button
-                        variant="tertiary"
-                        type="button"
-                        size="small"
-                        className="w-fit"
-                        onClick={undoAction}
-                        iconPosition="right"
-                        icon={<ArrowUndoIcon aria-hidden />}
-                    >
-                        Angre siste steg
-                    </Button>
-                )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                     + Legg til periode
                 </Button>
@@ -770,10 +858,14 @@ const SivilistandPerioder = ({
     datoFom: Date | null;
     setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
+    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const saveBoforhold = useOnSaveBoforhold();
+    const [editableRow, setEditableRow] = useState(null);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
     const {
         control,
         getValues,
+        getFieldState,
         clearErrors,
         setError,
         setValue,
@@ -808,46 +900,49 @@ const SivilistandPerioder = ({
             clearErrors(`sivilstand.${index}.datoFom`);
         }
     };
-
-    const validatePeriods = () => {
-        const sivilstandPerioder = getValues("sivilstand");
-
-        if (!sivilstandPerioder.length) {
-            clearErrors("root.sivilstand");
-            return;
-        }
-
-        const filtrertOgSorterListe = sivilstandPerioder
-            .filter((periode) => periode.datoFom !== null)
-            .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
-
-        const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
-
-        if (overlappingPerioder?.length) {
-            setError("root.sivilstand", {
-                type: "overlappingPerioder",
-                message: "Du har overlappende perioder",
-            });
-        }
-
-        if (!overlappingPerioder?.length) {
-            clearErrors("root.sivilstand");
-        }
-    };
-
-    const onDateChange = (date: string | null, periodeIndex: number, field: "datoFom" | "datoTom") => {
-        const perioderValues = getValues(`sivilstand`);
-        syncSivilstandDates(perioderValues, date, periodeIndex, field, setValue);
-        validatePeriods();
-    };
-
     const addPeriode = () => {
         const sivilstandPerioderValues = getValues("sivilstand");
         sivilstandPerioder.append({
             datoFom: calculateFraDato(sivilstandPerioderValues, datoFom),
             datoTom: null,
-            sivilstandType: SivilstandType.ENKE_ELLER_ENKEMANN,
+            sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
         });
+        setEditableRow(sivilstandPerioderValues.length);
+    };
+
+    const updatedAndSave = (sivilstand: SivilstandDto[]) => {
+        const updatedValues = {
+            ...boforholdFormValues,
+            sivilstand,
+        };
+        setBoforholdFormValues(updatedValues);
+        setValue(`sivilstand`, sivilstand);
+        saveBoforhold(updatedValues);
+        setEditableRow(null);
+    };
+
+    const onSaveRow = (index: number) => {
+        const perioderValues = getValues(`sivilstand`);
+        if (perioderValues[index].datoFom === null) {
+            setError(`sivilstand.${index}.datoFom`, {
+                type: "notValid",
+                message: "Dato må fylles ut",
+            });
+        }
+        const fieldState = getFieldState(`sivilstand.${index}`);
+        if (!fieldState.error) {
+            updatedAndSave(editSivilstandPeriods(perioderValues, index));
+        }
+    };
+
+    const onEditRow = (index: number) => {
+        if (editableRow && Number(editableRow) !== index) {
+            setErrorModalOpen(true);
+        }
+
+        if (!editableRow) {
+            setEditableRow(index);
+        }
     };
 
     return (
@@ -858,59 +953,97 @@ const SivilistandPerioder = ({
                 </Alert>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", ""]}>
+                <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "", ""]}>
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
-                                <FormControlledMonthPicker
-                                    key={`sivilstand.${index}.datoFom`}
-                                    name={`sivilstand.${index}.datoFom`}
-                                    label="Periode"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item.datoFom}
-                                    onChange={(date) => onDateChange(date, index, "datoFom")}
-                                    customValidation={(date) => validateFomOgTom(date, index, "datoFom")}
-                                    fromDate={fom}
-                                    toDate={tom}
-                                    hideLabel
-                                    required
-                                />,
-                                <FormControlledMonthPicker
-                                    key={`sivilstand.${index}.datoTom`}
-                                    name={`sivilstand.${index}.datoTom`}
-                                    label="Periode"
-                                    placeholder="DD.MM.ÅÅÅÅ"
-                                    defaultValue={item.datoTom}
-                                    onChange={(date) => onDateChange(date, index, "datoTom")}
-                                    customValidation={(date) => validateFomOgTom(date, index, "datoTom")}
-                                    fromDate={fom}
-                                    toDate={tom}
-                                    lastDayOfMonthPicker
-                                    hideLabel
-                                />,
-                                <FormControlledSelectField
-                                    key={`sivilstand.${index}.sivilstandType`}
-                                    name={`sivilstand.${index}.sivilstandType`}
-                                    label="Sivilstand"
-                                    className="w-52"
-                                    options={Object.entries(SivilstandType).map((entry) => ({
-                                        value: entry[0],
-                                        text: SivilstandTypeTexts[entry[0]],
-                                    }))}
-                                    hideLabel
-                                />,
-                                <Button
-                                    key={`delete-button-${index}`}
-                                    type="button"
-                                    onClick={() => {
-                                        sivilstandPerioder.remove(index);
-                                        validatePeriods();
-                                    }}
-                                    icon={<TrashIcon aria-hidden />}
-                                    variant="tertiary"
-                                    size="small"
-                                />,
+                                editableRow === index ? (
+                                    <FormControlledMonthPicker
+                                        key={`sivilstand.${index}.datoFom`}
+                                        name={`sivilstand.${index}.datoFom`}
+                                        label="Periode"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item.datoFom}
+                                        customValidation={(date) => validateFomOgTom(date, index, "datoFom")}
+                                        fromDate={fom}
+                                        toDate={tom}
+                                        hideLabel
+                                        required
+                                    />
+                                ) : (
+                                    <BodyShort key={`sivilstand.${index}.datoFom.placeholder`}>
+                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
+                                    </BodyShort>
+                                ),
+                                editableRow === index ? (
+                                    <FormControlledMonthPicker
+                                        key={`sivilstand.${index}.datoTom`}
+                                        name={`sivilstand.${index}.datoTom`}
+                                        label="Periode"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item.datoTom}
+                                        customValidation={(date) => validateFomOgTom(date, index, "datoTom")}
+                                        fromDate={fom}
+                                        toDate={tom}
+                                        lastDayOfMonthPicker
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
+                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
+                                    </BodyShort>
+                                ),
+                                editableRow === index ? (
+                                    <FormControlledSelectField
+                                        key={`sivilstand.${index}.sivilstandType`}
+                                        name={`sivilstand.${index}.sivilstandType`}
+                                        label="Sivilstand"
+                                        className="w-52"
+                                        options={Object.entries(SivilstandType).map((entry) => ({
+                                            value: entry[0],
+                                            text: SivilstandTypeTexts[entry[0]],
+                                        }))}
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
+                                        {SivilstandTypeTexts[item.sivilstandType]}
+                                    </BodyShort>
+                                ),
+                                editableRow === index ? (
+                                    <Button
+                                        key={`save-button-${index}`}
+                                        type="button"
+                                        onClick={() => onSaveRow(index)}
+                                        icon={<FloppydiskIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Button
+                                        key={`edit-button-${index}`}
+                                        type="button"
+                                        onClick={() => onEditRow(index)}
+                                        icon={<PencilIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ),
+                                index ? (
+                                    <Button
+                                        key={`delete-button-${index}`}
+                                        type="button"
+                                        onClick={() => {
+                                            sivilstandPerioder.remove(index);
+                                        }}
+                                        icon={<TrashIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
+                                ),
                             ]}
                         />
                     ))}

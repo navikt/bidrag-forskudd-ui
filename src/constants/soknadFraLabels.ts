@@ -1,18 +1,18 @@
-import { SoknadFraType } from "../api/BidragBehandlingApi";
+import { SoktAvType } from "../api/BidragBehandlingApi";
 
 export const SOKNAD_LABELS = {
-    [SoknadFraType.BIDRAGSMOTTAKER]: "BM",
-    [SoknadFraType.BM_I_ANNEN_SAK]: "BM i annen sak",
-    [SoknadFraType.FYLKESNEMDA]: "Fylkesnemda",
-    [SoknadFraType.NAV_BIDRAG]: "NAV bidrag",
-    [SoknadFraType.BARN18AAR]: "BARN18",
-    [SoknadFraType.KONVERTERING]: "Konvertering",
-    [SoknadFraType.NAV_INTERNASJONAL]: "NAV internasjonal",
-    [SoknadFraType.NORSKE_MYNDIGHET]: "Norske myndigheter",
-    [SoknadFraType.BIDRAGSPLIKTIG]: "BP",
-    [SoknadFraType.TRYGDEETATEN_INNKREVING]: "Trygdeetaten innkreving",
-    [SoknadFraType.UTENLANDSKE_MYNDIGHET]: "Utenlandske myndigheter",
-    [SoknadFraType.VERGE]: "Verge",
-    [SoknadFraType.KOMMUNE]: "Kommune",
-    [SoknadFraType.KLAGE_ANKE]: "Klage anke",
+    [SoktAvType.BIDRAGSMOTTAKER]: "BM",
+    [SoktAvType.BM_I_ANNEN_SAK]: "BM i annen sak",
+    [SoktAvType.FYLKESNEMDA]: "Fylkesnemda",
+    [SoktAvType.NAV_BIDRAG]: "NAV bidrag",
+    [SoktAvType.BARN18AAR]: "BARN18",
+    [SoktAvType.KONVERTERING]: "Konvertering",
+    [SoktAvType.NAV_INTERNASJONALT]: "NAV internasjonal",
+    [SoktAvType.NORSKE_MYNDIGHET]: "Norske myndigheter",
+    [SoktAvType.BIDRAGSPLIKTIG]: "BP",
+    [SoktAvType.TRYGDEETATEN_INNKREVING]: "Trygdeetaten innkreving",
+    [SoktAvType.UTENLANDSKE_MYNDIGHET]: "Utenlandske myndigheter",
+    [SoktAvType.VERGE]: "Verge",
+    [SoktAvType.KOMMUNE]: "Kommune",
+    [SoktAvType.KLAGE_ANKE]: "Klage anke",
 } as const;
