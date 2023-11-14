@@ -33,11 +33,8 @@ export const FormControlledSelectField = ({
     const { field, fieldState } = useController({ name, control });
 
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        if (onSelect) {
-            onSelect(e.target.value);
-        } else {
-            field.onChange(e.target.value);
-        }
+        field.onChange(e.target.value);
+        onSelect?.(e.target.value);
     };
 
     return (
