@@ -101,6 +101,7 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
     return husstandmedlemmerOgEgneBarnListe
         .filter((medlem) => medlem.erBarnAvBmBp)
         .map((barn) => ({
+            foedselsDato: barn.fodselsdato,
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,
             perioder: fillInPeriodGaps(barn),
