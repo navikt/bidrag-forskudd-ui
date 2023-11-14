@@ -1,3 +1,4 @@
+import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback, useState } from "react";
@@ -181,7 +182,15 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                 return data;
             },
             staleTime: Infinity,
-            select: useCallback((data) => ({ ...rolle, navn: data.navn, kortnavn: data.kortnavn }), []),
+            select: useCallback(
+                (data) => ({
+                    ...rolle,
+                    rolleType: rolle.rolleType as unknown as RolleTypeFullName,
+                    navn: data.navn,
+                    kortnavn: data.kortnavn,
+                }),
+                []
+            ),
             suspense: true,
             enabled: !!rolle,
         })),
