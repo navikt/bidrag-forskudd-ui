@@ -13,8 +13,6 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | st
             ? firstDayOfMonth(soktFraDato)
             : treMaanederTilbakeFraMottatDato;
 
-    console.log(aarsak);
-
     switch (aarsak) {
         // Fra kravfremsettelse
         case ForskuddAarsakType.DF:
