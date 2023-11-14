@@ -18,13 +18,18 @@ export default function personMock(): RestHandler[] {
                 );
             }
 
+            const name = generateName();
+            const lastIndex = name.lastIndexOf(" ");
+            const shortName = name.substring(0, lastIndex);
+
             return res(
                 ctx.set("Content-Type", "application/json"),
                 // Respond with the "ArrayBuffer".
                 ctx.body(
                     JSON.stringify({
                         ident: requestBody.ident,
-                        navn: generateName(),
+                        navn: name,
+                        kortnavn: shortName,
                     } as PersonDto)
                 )
             );
