@@ -14,27 +14,34 @@ export interface PersonRequest {
 }
 
 /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
-export interface Sivilstand {
-    type?:
-        | "ENKE_ELLER_ENKEMANN"
-        | "GIFT"
-        | "GJENLEVENDE_PARTNER"
-        | "REGISTRERT_PARTNER"
-        | "SEPARERT"
-        | "SEPARERT_PARTNER"
-        | "SKILT"
-        | "SKILT_PARTNER"
-        | "UGIFT"
-        | "UOPPGITT";
+export interface SivilstandDto {
+    type?: Sivilstandstype;
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
     bekreftelsesdato?: string;
+    master?: string;
+    /** @format date-time */
+    registrert?: string;
+    historisk?: boolean;
 }
 
-export interface Sivilstandshistorikk {
+export interface SivilstandshistorikkDto {
     /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
-    sivilstand: Sivilstand[];
+    sivilstandDto: SivilstandDto[];
+}
+
+export enum Sivilstandstype {
+    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
+    GIFT = "GIFT",
+    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
+    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
+    SEPARERT = "SEPARERT",
+    SEPARERT_PARTNER = "SEPARERT_PARTNER",
+    SKILT = "SKILT",
+    SKILT_PARTNER = "SKILT_PARTNER",
+    UGIFT = "UGIFT",
+    UOPPGITT = "UOPPGITT",
 }
 
 export interface HentePersonidenterRequest {
@@ -151,6 +158,14 @@ export interface PersonDto {
     kortNavn?: string;
 }
 
+/** Gyldige adressetyper: BOSTEDSADRESSE, KONTAKTADRESSE, eller OPPHOLDSADRESSE */
+export enum Adressetype {
+    BOSTEDSADRESSE = "BOSTEDSADRESSE",
+    KONTAKTADRESSE = "KONTAKTADRESSE",
+    OPPHOLDSADRESSE = "OPPHOLDSADRESSE",
+    DELT_BOSTED = "DELT_BOSTED",
+}
+
 export interface DodsboDto {
     /** Fra Tingretten angis skifteformen for booppgjøret. */
     skifteform: "OFFENTLIG" | "ANNET";
@@ -220,7 +235,7 @@ export interface MetadataDto {
 
 export interface PersonAdresseDto {
     /** Gyldige adressetyper: BOSTEDSADRESSE, KONTAKTADRESSE, eller OPPHOLDSADRESSE */
-    adressetype: "BOSTEDSADRESSE" | "KONTAKTADRESSE" | "OPPHOLDSADRESSE" | "DELT_BOSTED";
+    adressetype: Adressetype;
     /** Adresselinje 1 */
     adresselinje1?: string;
     /** Adresselinje 2 */
@@ -508,29 +523,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentSivilstand: (data: PersonRequest, params: RequestParams = {}) =>
-            this.request<Sivilstandshistorikk, any>({
+            this.request<SivilstandshistorikkDto, any>({
                 path: `/sivilstand`,
                 method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * @description Hent sivilstand for en person
-         *
-         * @tags person-controller
-         * @name GetSivilstand
-         * @request GET:/sivilstand/{ident}
-         * @deprecated
-         * @secure
-         */
-        getSivilstand: (ident: string, params: RequestParams = {}) =>
-            this.request<Sivilstandshistorikk, any>({
-                path: `/sivilstand/${ident}`,
-                method: "GET",
-                secure: true,
                 ...params,
             }),
     };

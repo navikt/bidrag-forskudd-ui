@@ -527,7 +527,7 @@ const BarnPerioder = ({
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
                     <Box className="p-0">
-                        <div className="mb-8">
+                        <div className="mb-4">
                             <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                 <div className="w-max h-max">
                                     <RolleTag rolleType={RolleDtoRolleType.BARN} />
@@ -709,7 +709,7 @@ const Perioder = ({
 
     return (
         <>
-            <div className="my-4 flex justify-between">
+            <div className="flex justify-between">
                 {showUndoButton && (
                     <Button
                         variant="tertiary"
