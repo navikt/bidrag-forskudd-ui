@@ -17,6 +17,10 @@ interface IForskuddContext {
     setInntektFormValues: (values: InntektFormValues) => void;
     boforholdFormValues: BoforholdFormValues;
     setBoforholdFormValues: (values: BoforholdFormValues) => void;
+    errorMessage: { title: string; text: string };
+    errorModalOpen: boolean;
+    setErrorMessage: (message: { title: string; text: string }) => void;
+    setErrorModalOpen: (open: boolean) => void;
 }
 
 interface IForskuddContextProps {
@@ -30,6 +34,8 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
     const [boforholdFormValues, setBoforholdFormValues] = useState(undefined);
+    const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
+    const [errorModalOpen, setErrorModalOpen] = useState(false);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
@@ -47,8 +53,20 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
             setInntektFormValues,
             boforholdFormValues,
             setBoforholdFormValues,
+            errorMessage,
+            setErrorMessage,
+            errorModalOpen,
+            setErrorModalOpen,
         }),
-        [activeStep, behandlingId, virkningstidspunktFormValues, inntektFormValues, boforholdFormValues]
+        [
+            activeStep,
+            behandlingId,
+            virkningstidspunktFormValues,
+            inntektFormValues,
+            boforholdFormValues,
+            errorMessage,
+            errorModalOpen,
+        ]
     );
 
     return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;

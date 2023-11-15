@@ -311,8 +311,9 @@ export const editPeriods = (periodsList: BarnPeriode[], periodeIndex: number): B
     const prevPeriodIndex = startIndex ? startIndex - 1 : 0;
     const prevPeriod = startIndex ? periods[prevPeriodIndex] : undefined;
     const postPeriod = postPeriodIndex !== -1 ? periods[postPeriodIndex] : undefined;
+    const existingPeriodCoversWholeEditedPeriod = prevPeriodIndex === postPeriodIndex;
 
-    if (prevPeriodIndex === postPeriodIndex) {
+    if (existingPeriodCoversWholeEditedPeriod) {
         const sameStatus = prevPeriod.boStatus === editedPeriod.boStatus;
 
         if (sameStatus) {
