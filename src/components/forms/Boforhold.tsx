@@ -23,6 +23,7 @@ import {
     SivilstandDto,
     SivilstandType,
 } from "../../api/BidragBehandlingApi";
+import { PersonDto } from "../../api/PersonApi";
 import { PERSON_API } from "../../constants/api";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -334,6 +335,7 @@ const AddBarnForm = ({
     const [ident, setIdent] = useState("");
     const [foedselsDato, setFoedselsDato] = useState(null);
     const [navn, setNavn] = useState("");
+    const [person, setPerson] = useState<PersonDto>(null);
     const [error, setError] = useState(null);
 
     const validateForm = () => {
@@ -375,7 +377,7 @@ const AddBarnForm = ({
             ident: val === "dnummer" ? ident : "",
             medISaken: false,
             navn: navn,
-            foedselsDato: val === "dnummer" ? "" : toISODateString(foedselsDato),
+            foedselsDato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsDato),
             perioder: [
                 {
                     datoFom: toISODateString(datoFom),
@@ -402,6 +404,7 @@ const AddBarnForm = ({
             .hentPersonPost({ ident: value })
             .then(({ data }) => {
                 setNavn(data.navn);
+                setPerson(data);
                 const formErrors = { ...error };
                 delete formErrors.ident;
                 delete formErrors.navn;
@@ -415,6 +418,7 @@ const AddBarnForm = ({
     const onSearchClear = () => {
         setIdent("");
         setNavn("");
+        setPerson(null);
         const formErrors = { ...error };
         delete formErrors.ident;
         delete formErrors.navn;

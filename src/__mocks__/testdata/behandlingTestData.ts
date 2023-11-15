@@ -52,7 +52,7 @@ export const behandlingMockApiData: BehandlingDto = {
             perioder: [],
             ident: "03522150877",
             navn: generateName(),
-            foedselsDato: "2023-05-02T11:24:12.190Z",
+            foedselsDato: "2023-05-02",
         },
         {
             id: 4,
@@ -60,7 +60,7 @@ export const behandlingMockApiData: BehandlingDto = {
             perioder: [],
             ident: "07512150855",
             navn: generateName(),
-            foedselsDato: "2023-05-02T11:24:12.190Z",
+            foedselsDato: "2023-05-02",
         },
     ],
     sivilstand: [],
