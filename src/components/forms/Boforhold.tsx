@@ -1,4 +1,5 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     Alert,
     BodyShort,
@@ -63,7 +64,6 @@ import { FormControlledSelectField } from "../formFields/FormControlledSelectFie
 import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
 import { FlexRow } from "../layout/grid/FlexRow";
 import { FormLayout } from "../layout/grid/FormLayout";
-import { ErrorModal } from "../modal/ErrorModal";
 import { PersonNavn } from "../PersonNavn";
 import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
@@ -124,13 +124,11 @@ const Main = ({
     opplysningerFraFolkRegistre,
     opplysningerChanges,
     updateOpplysninger,
-    setErrorModalOpen,
     boforoholdOpplysninger,
 }: {
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
     boforoholdOpplysninger: OpplysningerDto;
 }) => {
     const { behandlingId } = useForskudd();
@@ -166,15 +164,11 @@ const Main = ({
             <Heading level="3" size="medium">
                 Barn
             </Heading>
-            <BarnPerioder
-                datoFom={datoFom}
-                opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
-                setErrorModalOpen={setErrorModalOpen}
-            />
+            <BarnPerioder datoFom={datoFom} opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />
             <Heading level="3" size="medium">
                 Sivilstand
             </Heading>
-            <SivilistandPerioder datoFom={datoFom} setErrorModalOpen={setErrorModalOpen} />
+            <SivilistandPerioder datoFom={datoFom} />
         </>
     );
 };
@@ -215,7 +209,6 @@ const Side = () => {
 
 const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
-    const [errorModalOpen, setErrorModalOpen] = useState(false);
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
@@ -305,15 +298,11 @@ const BoforholdsForm = () => {
                                 }
                                 opplysningerChanges={opplysningerChanges}
                                 updateOpplysninger={updateOpplysninger}
-                                setErrorModalOpen={setErrorModalOpen}
                                 boforoholdOpplysninger={boforoholdOpplysninger}
                             />
                         }
                         side={<Side />}
                     />
-                    {errorModalOpen && (
-                        <ErrorModal errorModalOpen={errorModalOpen} setErrorModalOpen={setErrorModalOpen} />
-                    )}
                 </form>
             </FormProvider>
         </>
@@ -502,11 +491,9 @@ const AddBarnForm = ({
 const BarnPerioder = ({
     datoFom,
     opplysningerFraFolkRegistre,
-    setErrorModalOpen,
 }: {
     datoFom: Date;
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
-    setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
@@ -562,7 +549,6 @@ const BarnPerioder = ({
                             barnIndex={index}
                             virkningstidspunkt={datoFom}
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
-                            setErrorModalOpen={setErrorModalOpen}
                         />
                     </Box>
                 </Fragment>
@@ -587,14 +573,12 @@ const Perioder = ({
     barnIndex,
     virkningstidspunkt,
     opplysningerFraFolkRegistre,
-    setErrorModalOpen,
 }: {
     barnIndex: number;
     virkningstidspunkt: Date;
     opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
-    setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
 }) => {
-    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
@@ -630,9 +614,49 @@ const Perioder = ({
                 message: "Dato må fylles ut",
             });
         }
+
+        if (perioderValues[index].datoTom !== null) {
+            const laterPeriodExists = perioderValues
+                .filter((periode, i) => i !== index)
+                .some(
+                    (periode) =>
+                        periode.datoTom === null ||
+                        new Date(periode.datoTom).getTime() >= new Date(perioderValues[index].datoTom).getTime()
+                );
+
+            if (!laterPeriodExists) {
+                setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`, {
+                    type: "notValid",
+                    message: "Det er ingen løpende status i beregningen",
+                });
+            }
+
+            if (laterPeriodExists) {
+                const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
+                if (fieldState.error && fieldState.error.message === "Det må være minst en løpende periode") {
+                    clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
+                }
+            }
+        }
+
+        const periods = editPeriods(perioderValues, index);
+        const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
+        const virkningsDatoIsInFuture = virkningstidspunkt > firstDayOfCurrentMonth;
+        const futurePeriodExists = periods.some((periode) =>
+            virkningsDatoIsInFuture
+                ? new Date(periode.datoFom).getTime() > virkningstidspunkt.getTime()
+                : new Date(periode.datoFom).getTime() > firstDayOfCurrentMonth.getTime()
+        );
+
+        if (futurePeriodExists) {
+            setErrorMessage({ title: "Feil i periodisering", text: "Det kan ikke periodiseres fremover i tid." });
+            setErrorModalOpen(true);
+            return;
+        }
+
         const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}`);
         if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index));
+            updatedAndSave(periods);
         }
     };
 
@@ -703,6 +727,10 @@ const Perioder = ({
         const editableRowIndex = editableRow.split(".")[1];
 
         if (editableRowIndex && Number(editableRowIndex) !== index) {
+            setErrorMessage({
+                title: "Fullfør redigering",
+                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            });
             setErrorModalOpen(true);
         }
 
@@ -855,14 +883,8 @@ const Perioder = ({
     );
 };
 
-const SivilistandPerioder = ({
-    datoFom,
-    setErrorModalOpen,
-}: {
-    datoFom: Date | null;
-    setErrorModalOpen: Dispatch<SetStateAction<boolean>>;
-}) => {
-    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
+    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [editableRow, setEditableRow] = useState(null);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
@@ -941,6 +963,10 @@ const SivilistandPerioder = ({
 
     const onEditRow = (index: number) => {
         if (editableRow && Number(editableRow) !== index) {
+            setErrorMessage({
+                title: "Fullfør redigering",
+                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            });
             setErrorModalOpen(true);
         }
 

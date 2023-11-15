@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
+import { ErrorModal } from "./components/modal/ErrorModal";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { usePrefetchBehandlingAndGrunnlagspakke } from "./hooks/useApiData";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
@@ -70,6 +71,7 @@ function ForskudWrapper() {
             <ForskuddProvider behandlingId={Number(behandlingId)}>
                 <ForskuddHeader />
                 <ForskuddPage />
+                <ErrorModal />
             </ForskuddProvider>
         </>
     );

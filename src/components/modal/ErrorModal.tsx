@@ -2,27 +2,41 @@ import "./errorModal.css";
 
 import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { BodyLong, Heading, Modal } from "@navikt/ds-react";
-import React from "react";
+import React, { useEffect } from "react";
 
-export const ErrorModal = ({ errorModalOpen, setErrorModalOpen }) => (
-    <Modal
-        open={errorModalOpen}
-        onClose={() => setErrorModalOpen(false)}
-        aria-labelledby="modal-heading"
-        className="error-modal"
-    >
-        <Modal.Header>
-            <Heading level="1" size="large" id="modal-heading">
-                <div className="error-heading">
-                    <XMarkOctagonFillIcon title="a11y-title" fontSize="1.5rem" className="error-icon" />
-                    Fullfør redigering
-                </div>
-            </Heading>
-        </Modal.Header>
-        <Modal.Body>
-            <BodyLong className="error-body">
-                Det er en periode som er under redigering. Fullfør redigering eller slett periode.
-            </BodyLong>
-        </Modal.Body>
-    </Modal>
-);
+import { useForskudd } from "../../context/ForskuddContext";
+
+export const ErrorModal = () => {
+    const { errorMessage, setErrorMessage, errorModalOpen, setErrorModalOpen } = useForskudd();
+
+    useEffect(() => {
+        return () => {
+            setErrorModalOpen(false);
+            setErrorMessage(null);
+        };
+    }, []);
+
+    return (
+        <Modal
+            open={errorModalOpen}
+            onClose={() => {
+                setErrorModalOpen(false);
+                setErrorMessage(null);
+            }}
+            aria-labelledby="modal-heading"
+            className="error-modal"
+        >
+            <Modal.Header>
+                <Heading level="1" size="large" id="modal-heading">
+                    <div className="error-heading">
+                        <XMarkOctagonFillIcon title="a11y-title" fontSize="1.5rem" className="error-icon" />
+                        {errorMessage?.title}
+                    </div>
+                </Heading>
+            </Modal.Header>
+            <Modal.Body>
+                <BodyLong className="error-body">{errorMessage?.text}</BodyLong>
+            </Modal.Body>
+        </Modal>
+    );
+};
