@@ -27,7 +27,9 @@ import { TransformerInntekterRequest, TransformerInntekterResponse } from "../ap
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
-
+export const MutationKeys = {
+    updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
+};
 export const useGetBehandlings = () =>
     useQuery({
         queryKey: ["behandlings"],
@@ -104,24 +106,23 @@ export const useGetOpplysninger = (behandlingId: number, opplysningerType: Opply
 
 export const useUpdateBoforhold = (behandlingId: number) => {
     const queryClient = useQueryClient();
-    const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
         mutationFn: async (payload: UpdateBoforholdRequest): Promise<BoforholdResponse> => {
             const { data } = await BEHANDLING_API.api.oppdatereBoforhold(behandlingId, payload);
             return data;
         },
+        networkMode: "always",
         onSuccess: (data) => {
             queryClient.setQueryData(["boforhold", behandlingId], data);
-            setError(undefined);
         },
         onError: (error) => {
             console.log("onError", error);
-            setError(error);
         },
     });
 
-    return { mutation, error };
+    return { mutation, error: mutation.isError };
 };
 
 export const useUpdateInntekter = (behandlingId: number) => {
@@ -420,8 +421,6 @@ export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagsp
 
 export const useAddOpplysningerData = (behandlingId: number, opplysningerType: OpplysningerType) => {
     const queryClient = useQueryClient();
-    const [error, setError] = useState(undefined);
-
     const mutation = useMutation({
         mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
             const { data } = await BEHANDLING_API.api.addOpplysningerData(behandlingId, payload);
@@ -429,13 +428,8 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
         },
         onSuccess: (data) => {
             queryClient.setQueryData(["opplysninger", behandlingId, opplysningerType], data);
-            setError(undefined);
-        },
-        onError: (error) => {
-            console.log("onError", error);
-            setError(error);
         },
     });
 
-    return { mutation, error };
+    return { mutation, error: mutation.isError };
 };
