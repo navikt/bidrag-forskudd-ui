@@ -1,5 +1,6 @@
 import { BidragCell, BidragGrid, SaveStatusIndicator } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
+import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -7,13 +8,21 @@ import { MutationKeys } from "../../../hooks/useApiData";
 
 export const FormLayout = ({ title, main, side }) => {
     const { behandlingId } = useForskudd();
+    const queryClient = useQueryClient();
     return (
         <>
             <div className="flex flex-row gap-2">
                 <Heading level="2" size="xlarge">
                     {title}
                 </Heading>
-                <SaveStatusIndicator mutationKey={MutationKeys.updateBoforhold(behandlingId)} />
+                <SaveStatusIndicator
+                    mutationKey={[
+                        MutationKeys.updateBoforhold(behandlingId),
+                        MutationKeys.updateVirkningstidspunkt(behandlingId),
+                        MutationKeys.updateInntekter(behandlingId),
+                    ]}
+                    queryClient={queryClient}
+                />
             </div>
 
             <BidragGrid className="grid grid-cols-12 gap-6">

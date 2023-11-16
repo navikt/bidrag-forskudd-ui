@@ -1,7 +1,7 @@
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 import {
     AddOpplysningerRequest,
@@ -29,6 +29,8 @@ import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } f
 import { deductMonths, toISODateString } from "../utils/date-utils";
 export const MutationKeys = {
     updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
+    updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
+    updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
 };
 export const useGetBehandlings = () =>
     useQuery({
@@ -59,24 +61,22 @@ export const useGetVirkningstidspunkt = (behandlingId: number) =>
 
 export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
     const queryClient = useQueryClient();
-    const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
+        mutationKey: MutationKeys.updateVirkningstidspunkt(behandlingId),
         mutationFn: async (payload: UpdateVirkningsTidspunktRequest): Promise<VirkningsTidspunktResponse> => {
             const { data } = await BEHANDLING_API.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
             return data;
         },
         onSuccess: (data) => {
             queryClient.setQueryData(["virkningstidspunkt", behandlingId], data);
-            setError(undefined);
         },
         onError: (error) => {
             console.log("onError", error);
-            setError(error);
         },
     });
 
-    return { mutation, error };
+    return { mutation, error: mutation.isError };
 };
 
 export const useGetBoforhold = (behandlingId: number) =>
@@ -127,24 +127,22 @@ export const useUpdateBoforhold = (behandlingId: number) => {
 
 export const useUpdateInntekter = (behandlingId: number) => {
     const queryClient = useQueryClient();
-    const [error, setError] = useState(undefined);
 
     const mutation = useMutation({
+        mutationKey: MutationKeys.updateInntekter(behandlingId),
         mutationFn: async (payload: UpdateInntekterRequest): Promise<InntekterResponse> => {
             const { data } = await BEHANDLING_API.api.oppdaterInntekter(behandlingId, payload);
             return data;
         },
         onSuccess: (data) => {
             queryClient.setQueryData(["inntekter", behandlingId], data);
-            setError(undefined);
         },
         onError: (error) => {
             console.log("onError", error);
-            setError(error);
         },
     });
 
-    return { mutation, error };
+    return { mutation, error: mutation.isError };
 };
 
 export const useHentInntekter = (behandlingId: number) =>
