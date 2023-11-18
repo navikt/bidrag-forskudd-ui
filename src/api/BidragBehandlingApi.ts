@@ -9,7 +9,7 @@
  * ---------------------------------------------------------------
  */
 
-export enum BehandlingType {
+export enum Behandlingstype {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
     BIDRAG18AAR = "BIDRAG18AAR",
@@ -63,6 +63,11 @@ export enum ForskuddAarsakType {
     PGA_SAMMENFL = "PGA_SAMMENFL",
     OPPH_UTLAND = "OPPH_UTLAND",
     UTENL_YTELSE = "UTENL_YTELSE",
+}
+
+export enum Kilde {
+    MANUELT = "MANUELT",
+    OFFENTLIG = "OFFENTLIG",
 }
 
 export enum Rolletype {
@@ -152,16 +157,18 @@ export interface VirkningsTidspunktResponse {
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
     rolleType: CreateRolleRolleType;
-    /** F.eks fødselsnummer */
-    ident: string;
+    /** F.eks fødselsnummer. Påkrevd for alle rolletyper utenom for barn som ikke inngår i beregning. */
+    ident?: string | null;
+    /** Navn på rolleinnehaver hvis ident er ukjent. Gjelder kun barn som ikke inngår i beregning */
+    navn?: string | null;
     /**
      * F.eks fødselsdato
-     * @format date
+     * @format date-time
      */
     fodtDato?: string;
     /**
      * Opprettet dato
-     * @format date
+     * @format date-time
      */
     opprettetDato?: string;
     erSlettet: boolean;
@@ -275,21 +282,6 @@ export interface InntekterResponse {
     inntektBegrunnelseKunINotat?: string;
 }
 
-export interface HusstandsBarnDto {
-    /** @format int64 */
-    id?: number;
-    medISaken: boolean;
-    /** @uniqueItems true */
-    perioder: HusstandsBarnPeriodeDto[];
-    ident?: string;
-    navn?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    foedselsDato?: string;
-}
-
 export interface HusstandsBarnPeriodeDto {
     /** @format int64 */
     id?: number;
@@ -304,7 +296,22 @@ export interface HusstandsBarnPeriodeDto {
      */
     datoTom?: string;
     boStatus: BoStatusType;
-    kilde: string;
+    kilde: Kilde;
+}
+
+export interface HusstandsbarnDto {
+    /** @format int64 */
+    id?: number;
+    medISak: boolean;
+    /** @uniqueItems true */
+    perioder: HusstandsBarnPeriodeDto[];
+    ident?: string;
+    navn?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    foedselsdato?: string;
 }
 
 export interface SivilstandDto {
@@ -321,11 +328,12 @@ export interface SivilstandDto {
      */
     datoTom?: string;
     sivilstandType: SivilstandType;
+    kilde: Kilde;
 }
 
 export interface UpdateBoforholdRequest {
     /** @uniqueItems true */
-    husstandsBarn: HusstandsBarnDto[];
+    husstandsBarn: HusstandsbarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -334,7 +342,7 @@ export interface UpdateBoforholdRequest {
 
 export interface BoforholdResponse {
     /** @uniqueItems true */
-    husstandsBarn: HusstandsBarnDto[];
+    husstandsBarn: HusstandsbarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
@@ -391,7 +399,7 @@ export enum Vedtakstype {
 }
 
 export interface CreateBehandlingRequest {
-    behandlingType: BehandlingType;
+    behandlingType: Behandlingstype;
     soknadType: SoknadType;
     /** @format date-time */
     datoFom: string;
@@ -455,7 +463,7 @@ export interface OpplysningerDto {
 }
 
 export interface ForskuddBeregningPerBarn {
-    ident: string;
+    referanseTilBarn?: string;
     beregnetForskuddPeriodeListe: ResultatPeriode[];
     grunnlagListe?: Grunnlag[];
 }
@@ -468,7 +476,7 @@ export interface ForskuddBeregningRespons {
 /** Grunnlag */
 export interface Grunnlag {
     /** Referanse (unikt navn på grunnlaget) */
-    navn?: string;
+    referanse?: string;
     /** Grunnlagstype */
     type?: Grunnlagstype;
     /** Liste over grunnlagsreferanser */
@@ -570,8 +578,8 @@ export interface ResultatPeriode {
 export interface BehandlingDto {
     /** @format int64 */
     id: number;
-    behandlingType: BehandlingType;
-    soknadType: SoknadType;
+    behandlingtype: Behandlingstype;
+    søknadstype: SoknadType;
     erVedtakFattet: boolean;
     /** @format date */
     datoFom: string;
@@ -582,34 +590,35 @@ export interface BehandlingDto {
     soknadFraType: SoktAvType;
     saksnummer: string;
     /** @format int64 */
-    soknadId: number;
-    behandlerEnhet: string;
+    soknadsid: number;
+    behandlerenhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
     /** @uniqueItems true */
-    husstandsBarn: HusstandsBarnDto[];
+    husstandsbarn: HusstandsbarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     /** @format date */
-    virkningsDato?: string;
+    virkningsdato?: string;
     /** @format int64 */
     soknadRefId?: number;
     /** @format int64 */
-    grunnlagspakkeId?: number;
-    aarsak?: ForskuddAarsakType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
+    grunnlagspakkeid?: number;
+    getårsak?: ForskuddAarsakType;
+    virkningstidspunktBegrunnelseMedIVedtaksnotat?: string;
+    virkningstidspunktBegrunnelseKunINotat?: string;
+    boforholdsbegrunnelseMedIVedtaksnotat?: string;
+    boforholdsbegrunnelseKunINotat?: string;
+    inntektsbegrunnelseMedIVedtaksnotat?: string;
+    inntektsbegrunnelseKunINotat?: string;
 }
 
 export interface RolleDto {
     /** @format int64 */
     id: number;
     rolleType: RolleDtoRolleType;
-    ident: string;
+    ident?: string;
+    navn?: string;
     /** @format date-time */
     fodtDato?: string;
     /** @format date-time */

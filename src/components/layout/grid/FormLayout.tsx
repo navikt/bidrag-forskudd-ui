@@ -24,7 +24,6 @@ export const FormLayout = ({ title, main, side }) => {
                     queryClient={queryClient}
                 />
             </div>
-
             <BidragGrid className="grid grid-cols-12 gap-6">
                 <BidragCell className="sm:col-span-12 md:col-span-12 xl:col-span-12 2xl:col-span-8 mt-4 h-fit grid gap-y-4">
                     {main}

@@ -1,16 +1,22 @@
 import { isLastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { UseFormSetValue } from "react-hook-form";
 
-import { BoforholdResponse, BoStatusType, SivilstandDto, SivilstandType } from "../../../api/BidragBehandlingApi";
+import {
+    BoforholdResponse,
+    BoStatusType,
+    HusstandsBarnPeriodeDto,
+    Kilde,
+    SivilstandDto,
+    SivilstandType,
+} from "../../../api/BidragBehandlingApi";
 import { RelatertPersonDto, SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
 import {
-    BarnPeriode,
     BoforholdFormValues,
     BoforholdOpplysninger,
     HusstandOpplysningFraFolkeRegistre,
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
+    SivilstandOpplysninger,
 } from "../../../types/boforholdFormValues";
 import {
     addDays,
@@ -23,14 +29,22 @@ import {
     toISODateString,
 } from "../../../utils/date-utils";
 
-export const calculateFraDato = (fieldArrayValues: BarnPeriode[] | SivilstandDto[], virkningstidspunkt: Date) => {
-    if (fieldArrayValues.length && !fieldArrayValues.some((periode) => periode.datoTom === null)) {
-        const filtrertOgSorterListe = fieldArrayValues.sort((a, b) => {
-            if (a.datoTom == null || b.datoTom == null) {
-                return a.datoTom == null ? 1 : -1;
+export const calculateFraDato = (
+    fieldArrayValues: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    virkningstidspunkt: Date
+) => {
+    if (
+        fieldArrayValues.length &&
+        !fieldArrayValues.some((periode: HusstandsBarnPeriodeDto | SivilstandDto) => periode.datoTom === null)
+    ) {
+        const filtrertOgSorterListe = fieldArrayValues.sort(
+            (a: HusstandsBarnPeriodeDto | SivilstandDto, b: HusstandsBarnPeriodeDto | SivilstandDto) => {
+                if (a.datoTom == null || b.datoTom == null) {
+                    return a.datoTom == null ? 1 : -1;
+                }
+                return new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime();
             }
-            return new Date(a.datoTom).getTime() - new Date(b.datoTom).getTime();
-        });
+        );
         const lastDatoTom = filtrertOgSorterListe[filtrertOgSorterListe.length - 1].datoTom;
         return lastDatoTom == null ? null : toISODateString(addDays(new Date(lastDatoTom), 1));
     }
@@ -123,7 +137,7 @@ const getSivilstandType = (
         | "SKILT_PARTNER"
         | "GJENLEVENDE_PARTNER"
 ): SivilstandType => {
-    if (sivilstand === "GIFT" || sivilstand === "SAMBOER") {
+    if (["GIFT", "SAMBOER", "REGISTRERT_PARTNER"].includes(sivilstand)) {
         return SivilstandType.GIFT;
     }
     return SivilstandType.BOR_ALENE_MED_BARN;
@@ -131,7 +145,7 @@ const getSivilstandType = (
 
 export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
     sivilstandListe: SivilstandDtoGrunnlag[]
-): SivilstandDto[] => {
+): SivilstandOpplysninger[] => {
     return sivilstandListe.map((sivilstand) => ({
         datoFom: sivilstand.periodeFra,
         datoTom: sivilstand.periodeTil,
@@ -146,7 +160,7 @@ export const getBarnPerioder = (perioder: HusstandOpplysningPeriode[], virknings
 
     const result: {
         boStatus: BoStatusType;
-        kilde: "offentlig";
+        kilde: Kilde.OFFENTLIG;
         datoFom: string;
         datoTom: string | null;
     }[] = [];
@@ -166,7 +180,7 @@ export const getBarnPerioder = (perioder: HusstandOpplysningPeriode[], virknings
                     datoFom,
                     datoTom,
                     boStatus,
-                    kilde: "offentlig",
+                    kilde: Kilde.OFFENTLIG,
                 });
             }
         } else {
@@ -183,7 +197,7 @@ export const getBarnPerioder = (perioder: HusstandOpplysningPeriode[], virknings
                             ? toISODateString(new Date(tilDato))
                             : toISODateString(lastDayOfMonth(deductMonths(new Date(tilDato), 1)))
                         : null,
-                    kilde: "offentlig",
+                    kilde: Kilde.OFFENTLIG,
                 });
             }
         }
@@ -197,12 +211,12 @@ export const getBarnPerioderFromHusstandsListe = (
 ) => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
-        medISaken: true,
+        medISak: true,
         perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato),
     }));
 };
 
-export const getSivilstandPerioder = (sivilstandListe: SivilstandDto[], datoFom: Date): SivilstandDto[] => {
+export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[], datoFom: Date): SivilstandDto[] => {
     // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
     const sivilstandListeWithValidPeriodeTil = sivilstandListe
         .map((periodeA) => {
@@ -237,6 +251,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandDto[], datoFom:
                 sivilstandType: periode.sivilstandType,
                 datoFom: periodDatoFom != null ? toISODateString(firstDayOfMonth(periodDatoFom)) : null,
                 datoTom: periode.datoTom != null ? toISODateString(new Date(periode.datoTom)) : null,
+                kilde: Kilde.OFFENTLIG,
             };
         })
         .sort((periodeA, periodeB) =>
@@ -248,7 +263,7 @@ export const createInitialValues = (
     boforhold: BoforholdResponse,
     opplysningerFraFolkRegistre: {
         husstand: HusstandOpplysningFraFolkeRegistre[];
-        sivilstand: SivilstandDto[];
+        sivilstand: SivilstandOpplysninger[];
     },
     virkningsOrSoktFraDato: Date
 ) => ({
@@ -262,13 +277,7 @@ export const createInitialValues = (
 });
 
 export const createPayload = (values: BoforholdFormValues) => ({
-    husstandsBarn: values.husstandsBarn.map((barn) => ({
-        ...barn,
-        perioder: barn.perioder.map((periode) => ({
-            ...periode,
-            boStatus: periode.boStatus === "" ? null : periode.boStatus,
-        })),
-    })),
+    husstandsBarn: values.husstandsBarn,
     sivilstand: values.sivilstand,
     boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
     boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
@@ -291,10 +300,23 @@ export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: 
     return overlappingPeriods;
 };
 
-export const editPeriods = (periodsList: BarnPeriode[], periodeIndex: number): BarnPeriode[] => {
-    const periods = [...periodsList];
-    const editedPeriod = { ...periods[periodeIndex], kilde: "manuelt" };
-    periods.splice(periodeIndex, 1);
+function returnTypedPeriods(periodsList: HusstandsBarnPeriodeDto[]): HusstandsBarnPeriodeDto[];
+function returnTypedPeriods(periodsList: SivilstandDto[]): SivilstandDto[];
+function returnTypedPeriods(
+    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[]
+): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
+    return periodsList;
+}
+export function editPeriods(periodsList: HusstandsBarnPeriodeDto[], periodeIndex: number): HusstandsBarnPeriodeDto[];
+export function editPeriods(periodsList: SivilstandDto[], periodeIndex: number): SivilstandDto[];
+export function editPeriods(
+    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    periodeIndex: number
+): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
+    const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELT };
+    const statusField = Object.hasOwn(periodsList[0], "boStatus") ? "boStatus" : "sivilstandType";
+
+    const periods = periodsList.toSpliced(periodeIndex, 1);
     let startIndex = periods.filter(
         (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
     ).length;
@@ -314,34 +336,43 @@ export const editPeriods = (periodsList: BarnPeriode[], periodeIndex: number): B
     const existingPeriodCoversWholeEditedPeriod = prevPeriodIndex === postPeriodIndex;
 
     if (existingPeriodCoversWholeEditedPeriod) {
-        const sameStatus = prevPeriod.boStatus === editedPeriod.boStatus;
+        const sameStatus = prevPeriod[statusField] === editedPeriod[statusField];
 
         if (sameStatus) {
             return periods;
         } else {
-            periods.splice(
-                prevPeriodIndex,
-                1,
+            const periodsToEdit = [
                 {
                     datoFom: prevPeriod.datoFom,
                     datoTom: toISODateString(deductDays(new Date(editedPeriod.datoFom), 1)),
-                    boStatus: prevPeriod.boStatus,
-                    kilde: "manuelt",
+                    [statusField]: prevPeriod[statusField],
+                    kilde: Kilde.MANUELT,
                 },
                 editedPeriod,
                 {
                     datoFom: toISODateString(addDays(new Date(editedPeriod.datoTom), 1)),
                     datoTom: prevPeriod.datoTom,
-                    boStatus: prevPeriod.boStatus,
-                    kilde: "manuelt",
-                }
-            );
-            return periods;
+                    [statusField]: prevPeriod[statusField],
+                    kilde: Kilde.MANUELT,
+                },
+            ];
+
+            if (statusField === "boStatus") {
+                return periods.toSpliced(
+                    prevPeriodIndex,
+                    1,
+                    ...returnTypedPeriods(periodsToEdit as HusstandsBarnPeriodeDto[])
+                );
+            }
+
+            if (statusField === "sivilstandType") {
+                return periods.toSpliced(prevPeriodIndex, 1, ...returnTypedPeriods(periodsToEdit as SivilstandDto[]));
+            }
         }
     }
 
     if (prevPeriod) {
-        const sameStatus = editedPeriod.boStatus === prevPeriod.boStatus;
+        const sameStatus = editedPeriod[statusField] === prevPeriod[statusField];
 
         if (sameStatus) {
             startIndex -= 1;
@@ -351,12 +382,12 @@ export const editPeriods = (periodsList: BarnPeriode[], periodeIndex: number): B
             const editedPeriodDatoFomMinusOneDay = toISODateString(deductDays(new Date(editedPeriod.datoFom), 1));
             const adjacentDates = editedPeriodDatoFomMinusOneDay === prevPeriod.datoTom;
             prevPeriod.datoTom = editedPeriodDatoFomMinusOneDay;
-            prevPeriod.kilde = adjacentDates ? prevPeriod.kilde : "manuelt";
+            prevPeriod.kilde = adjacentDates ? prevPeriod.kilde : Kilde.MANUELT;
         }
     }
 
     if (postPeriod) {
-        const sameStatus = editedPeriod.boStatus === postPeriod.boStatus;
+        const sameStatus = editedPeriod[statusField] === postPeriod[statusField];
 
         if (sameStatus) {
             deleteCount += 1;
@@ -365,119 +396,31 @@ export const editPeriods = (periodsList: BarnPeriode[], periodeIndex: number): B
             const editedPeriodDatoTomPlusOneDay = toISODateString(addDays(new Date(editedPeriod.datoTom), 1));
             const adjacentDates = editedPeriodDatoTomPlusOneDay === postPeriod.datoFom;
             postPeriod.datoFom = editedPeriodDatoTomPlusOneDay;
-            postPeriod.kilde = adjacentDates ? postPeriod.kilde : "manuelt";
+            postPeriod.kilde = adjacentDates ? postPeriod.kilde : Kilde.MANUELT;
         }
     }
 
-    periods.splice(startIndex, deleteCount, editedPeriod);
-
-    return periods;
-};
-
-const getPreAndPostPeriods = (periodsList, periodeIndex) => {
-    const periods = [...periodsList];
-    const editedPeriod = { ...periods[periodeIndex] };
-    periods.splice(periodeIndex, 1);
-    const startIndex = periods.filter(
-        (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
-    ).length;
-    const postPeriodIndex = editedPeriod.datoTom
-        ? periods.findIndex(
-              (period) =>
-                  period.datoTom === null ||
-                  new Date(period.datoTom).getTime() > new Date(editedPeriod.datoTom).getTime()
-          )
-        : -1;
-
-    const deleteCount = postPeriodIndex === -1 ? periods.length - startIndex : postPeriodIndex - startIndex;
-
-    const prevPeriodIndex = startIndex ? startIndex - 1 : 0;
-    const prevPeriod = startIndex ? periods[prevPeriodIndex] : undefined;
-    const postPeriod = postPeriodIndex !== -1 ? periods[postPeriodIndex] : undefined;
-
-    return { prevPeriod, editedPeriod, periods, prevPeriodIndex, postPeriodIndex, startIndex, deleteCount, postPeriod };
-};
-
-export const editSivilstandPeriods = (periodsList: SivilstandDto[], periodeIndex: number): SivilstandDto[] => {
-    const {
-        prevPeriod,
-        editedPeriod,
-        periods,
-        prevPeriodIndex,
-        postPeriodIndex,
-        startIndex: sIndex,
-        deleteCount: dCount,
-        postPeriod,
-    } = getPreAndPostPeriods(periodsList, periodeIndex);
-
-    let startIndex = sIndex;
-    let deleteCount = dCount;
-    const sameStatus = prevPeriod?.sivilstandType === editedPeriod.sivilstandType;
-
-    if (prevPeriodIndex === postPeriodIndex) {
-        if (sameStatus) {
-            return periods;
-        } else {
-            periods.splice(
-                prevPeriodIndex,
-                1,
-                {
-                    datoFom: prevPeriod.datoFom,
-                    datoTom: toISODateString(deductDays(new Date(editedPeriod.datoFom), 1)),
-                    sivilstandType: prevPeriod.sivilstandType,
-                },
-                editedPeriod,
-                {
-                    datoFom: toISODateString(addDays(new Date(editedPeriod.datoTom), 1)),
-                    datoTom: prevPeriod.datoTom,
-                    sivilstandType: prevPeriod.sivilstandType,
-                }
-            );
-            return periods;
-        }
+    if (statusField === "boStatus") {
+        return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsBarnPeriodeDto);
     }
 
-    if (prevPeriod) {
-        if (sameStatus) {
-            startIndex -= 1;
-            deleteCount += 1;
-            editedPeriod.datoFom = prevPeriod.datoFom;
-        } else {
-            const editedPeriodDatoFomMinusOneDay = toISODateString(deductDays(new Date(editedPeriod.datoFom), 1));
-            prevPeriod.datoTom = editedPeriodDatoFomMinusOneDay;
-        }
+    if (statusField === "sivilstandType") {
+        return periods.toSpliced(startIndex, deleteCount, editedPeriod as SivilstandDto);
     }
+}
 
-    if (postPeriod) {
-        const sameStatus = editedPeriod.sivilstandType === postPeriod.sivilstandType;
+export const removeAndEditPeriods = (
+    periodsList: HusstandsBarnPeriodeDto[],
+    index: number
+): HusstandsBarnPeriodeDto[] => {
+    const periodToRemove = periodsList[index];
+    const prevPeriod = periodsList[index - 1];
+    const postPeriod = periodsList[index + 1];
 
-        if (sameStatus) {
-            deleteCount += 1;
-            editedPeriod.datoTom = postPeriod.datoTom;
-        } else {
-            const editedPeriodDatoTomPlusOneDay = toISODateString(addDays(new Date(editedPeriod.datoTom), 1));
-            postPeriod.datoFom = editedPeriodDatoTomPlusOneDay;
-        }
-    }
+    prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : periodToRemove.datoTom;
+    prevPeriod.kilde = Kilde.MANUELT;
 
-    periods.splice(startIndex, deleteCount, editedPeriod);
-
-    return periods;
-};
-export const syncSivilstandDates = (
-    periods: SivilstandDto[],
-    date: string | null,
-    periodeIndex: number,
-    field: "datoFom" | "datoTom",
-    setValue: UseFormSetValue<BoforholdFormValues>
-) => {
-    if (field === "datoFom" && periods[periodeIndex - 1] && date) {
-        setValue(`sivilstand.${periodeIndex - 1}.datoTom`, toISODateString(deductDays(new Date(date), 1)));
-    }
-    if (field === "datoTom" && periods[periodeIndex + 1] && date) {
-        setValue(`sivilstand.${periodeIndex + 1}.datoFom`, toISODateString(addDays(new Date(date), 1)));
-    }
-    setValue(`sivilstand.${periodeIndex}.${field}`, date);
+    return periodsList.filter((_, i) => i !== index && i !== index + 1);
 };
 
 export const compareOpplysninger = (
@@ -539,7 +482,7 @@ export const compareOpplysninger = (
         }
     });
 
-    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandDto[]) => {
+    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandOpplysninger[]) => {
         let changed = false;
         sivilstandPerioder.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];

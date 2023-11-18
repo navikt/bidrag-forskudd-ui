@@ -18,6 +18,8 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     BoStatusType,
+    HusstandsBarnPeriodeDto,
+    Kilde,
     OpplysningerDto,
     OpplysningerType,
     RolleDtoRolleType,
@@ -43,7 +45,6 @@ import {
 import { useDebounce } from "../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../hooks/useOnSaveBoforhold";
 import {
-    BarnPeriode,
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
     HusstandOpplysningPeriode,
@@ -73,12 +74,12 @@ import {
     compareOpplysninger,
     createInitialValues,
     editPeriods,
-    editSivilstandPeriods,
     getBarnPerioder,
     getBarnPerioderFromHusstandsListe,
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
+    removeAndEditPeriods,
 } from "./helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "./inntekt/ActionButtons";
@@ -364,7 +365,7 @@ const AddBarnForm = ({
 
         const addedBarn = {
             ident: val === "dnummer" ? ident : "",
-            medISaken: false,
+            medISak: false,
             navn: navn,
             foedselsDato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsDato),
             perioder: [
@@ -372,7 +373,7 @@ const AddBarnForm = ({
                     datoFom: toISODateString(datoFom),
                     datoTom: null,
                     boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                    kilde: "manuelt",
+                    kilde: Kilde.MANUELT,
                 },
             ],
         };
@@ -526,8 +527,8 @@ const BarnPerioder = ({
                                 <div>
                                     <FlexRow className="items-center h-[27px]">
                                         <BodyShort size="small" className="font-bold">
-                                            {item.medISaken && <PersonNavn ident={item.ident}></PersonNavn>}
-                                            {!item.medISaken && item.navn}
+                                            {item.medISak && <PersonNavn ident={item.ident}></PersonNavn>}
+                                            {!item.medISak && item.navn}
                                         </BodyShort>
                                         <BodyShort size="small">{item.ident}</BodyShort>
                                     </FlexRow>
@@ -607,7 +608,7 @@ const Perioder = ({
     });
 
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as BarnPeriode[];
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
         if (perioderValues[index].datoFom === null) {
             setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
@@ -664,7 +665,7 @@ const Perioder = ({
         updatedAndSave(lastPeriodsState);
     };
 
-    const updatedAndSave = (updatedPeriods: BarnPeriode[]) => {
+    const updatedAndSave = (updatedPeriods: HusstandsBarnPeriodeDto[]) => {
         setLastPeriodsState(boforholdFormValues.husstandsBarn[barnIndex].perioder);
         const husstandsBarn = [...boforholdFormValues.husstandsBarn];
         husstandsBarn.splice(barnIndex, 1, {
@@ -700,19 +701,32 @@ const Perioder = ({
     };
 
     const addPeriode = () => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        barnPerioder.append({
-            datoFom: null,
-            datoTom: null,
-            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-            kilde: "manuelt",
-        });
-        setEditableRow(`${barnIndex}.${perioderValues.length}`);
+        const otherRowEdited = checkIfAnotherRowIsEdited();
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
+            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+            barnPerioder.append({
+                datoFom: null,
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.MANUELT,
+            });
+            setEditableRow(`${barnIndex}.${perioderValues.length}`);
+        }
     };
 
-    const onRemovePeriode = (index) => {
-        const updatedPeriods = boforholdFormValues.husstandsBarn[barnIndex].perioder.filter((_, i) => i !== index);
-        updatedAndSave(updatedPeriods);
+    const onRemovePeriode = (index: number) => {
+        const otherRowEdited = checkIfAnotherRowIsEdited(index);
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
+            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
+            const updatedPeriods = removeAndEditPeriods(perioderValues, index);
+            updatedAndSave(updatedPeriods);
+        }
     };
 
     const resetTilDataFraFreg = () => {
@@ -723,18 +737,25 @@ const Perioder = ({
         setShowResetButton(false);
     };
 
-    const onEditRow = (index: number) => {
+    const checkIfAnotherRowIsEdited = (index?: number) => {
         const editableRowIndex = editableRow.split(".")[1];
+        return editableRowIndex && Number(editableRowIndex) !== index;
+    };
 
-        if (editableRowIndex && Number(editableRowIndex) !== index) {
-            setErrorMessage({
-                title: "Fullfør redigering",
-                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
-            });
-            setErrorModalOpen(true);
-        }
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: "Fullfør redigering",
+            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+        });
+        setErrorModalOpen(true);
+    };
 
-        if (!editableRowIndex) {
+    const onEditRow = (index: number) => {
+        const otherRowEdited = checkIfAnotherRowIsEdited(index);
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
             setEditableRow(`${barnIndex}.${index}`);
         }
     };
@@ -932,6 +953,7 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
             datoFom: calculateFraDato(sivilstandPerioderValues, datoFom),
             datoTom: null,
             sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+            kilde: Kilde.MANUELT,
         });
         setEditableRow(sivilstandPerioderValues.length);
     };
@@ -957,7 +979,7 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
         }
         const fieldState = getFieldState(`sivilstand.${index}`);
         if (!fieldState.error) {
-            updatedAndSave(editSivilstandPeriods(perioderValues, index));
+            //updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 

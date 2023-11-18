@@ -37,7 +37,7 @@ const Vedtak = () => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
-    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.aarsak);
+    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.getårsak);
     const { data: beregnetForskudd } = useQuery({
         queryKey: ["beregning"],
         queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
@@ -59,11 +59,11 @@ const Vedtak = () => {
                 );
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
-                    type: behandling.soknadType,
+                    type: behandling.søknadstype,
                     opprettetAv: saksBehandlerId,
                     opprettetAvNavn: saksBehandlerNavn,
                     vedtakTidspunkt: now,
-                    enhetId: behandling.behandlerEnhet,
+                    enhetId: behandling.behandlerenhet,
                     grunnlagListe: [
                         //TODO: Skal inntekter ikke valgt tas med? Må da legge til valgt: true på innhold
                         //TODO: Inntekter må inkludere rolle (BIDRAGSMOTTAKER, BIDRAGSPLIKTIG, BARN)
@@ -72,7 +72,7 @@ const Vedtak = () => {
                         ...mapGrunnlagPersonInfo(behandling, personInfoListe),
                     ],
                     stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({
-                        type: behandling.behandlingType,
+                        type: behandling.behandlingtype,
                         sakId: saksnummer,
                         skyldnerId: "NAV",
                         kravhaverId: resultat.ident,
@@ -212,12 +212,12 @@ const Vedtak = () => {
                                         <Table.Row>
                                             <Table.DataCell>
                                                 {dateToDDMMYYYYString(
-                                                    new Date(behandling.virkningsDato ?? behandling.datoFom)
+                                                    new Date(behandling.virkningsdato ?? behandling.datoFom)
                                                 )}{" "}
                                                 -
                                             </Table.DataCell>
                                             <Table.DataCell>Avslag</Table.DataCell>
-                                            <Table.DataCell>{Avslag[behandling.aarsak]}</Table.DataCell>
+                                            <Table.DataCell>{Avslag[behandling.getårsak]}</Table.DataCell>
                                         </Table.Row>
                                     </Table.Body>
                                 </Table>

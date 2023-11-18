@@ -54,7 +54,7 @@ const Main = ({ initialValues, error }) => {
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
                     <Label size="small">Søknadstype</Label>
-                    <BodyShort size="small">{behandling.soknadType}</BodyShort>
+                    <BodyShort size="small">{behandling.soknadFraType}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Søknad fra</Label>

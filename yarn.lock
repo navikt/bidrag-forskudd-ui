@@ -216,7 +216,7 @@
     strict-event-emitter "^0.2.4"
     web-encoding "^1.1.5"
 
-"@navikt/aksel-icons@5.10.1", "@navikt/aksel-icons@^5.10.1":
+"@navikt/aksel-icons@5.10.1":
   version "5.10.1"
   resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/5.10.1/02483b56f481c1bfd1e9256eac9f8c35f920b742#02483b56f481c1bfd1e9256eac9f8c35f920b742"
   integrity sha512-VOwshZoNAOCrmfWyfTkKHwKdUpF9a77zOAuonM3zkrluo66NRwa1p9rqas6ZrAZjGUjtxQ7dXg+reLdqsxfUWw==
@@ -226,10 +226,15 @@
   resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/3.4.2/fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7#fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7"
   integrity sha512-9fj+Jb4UrX3SDDzqJpKP3fvizdxtACIFNXgDiPaP/N/61pbeY4tZz/zrtWGtExLpDeg7dAyaiFH/hfo7nBg6nw==
 
-"@navikt/bidrag-ui-common@^1.10.5":
-  version "1.10.5"
-  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.10.5/acfabcacb64c5a6d5ad5288b1acd643be5a87d2b#acfabcacb64c5a6d5ad5288b1acd643be5a87d2b"
-  integrity sha512-LWYtZlAHk1KG1Wh4fHYS2jvluYcUu+wf5PRFZNrvEJC4oBGspDxwvSuMEYvdT5oG/Pt5FjDIQySMbkALNdbRWA==
+"@navikt/aksel-icons@^5.10.3":
+  version "5.10.3"
+  resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/5.10.3/6a54b761c0a4b2f7fad7cbd2169f6ad7460ab8d3#6a54b761c0a4b2f7fad7cbd2169f6ad7460ab8d3"
+  integrity sha512-QZ67azgQj1I2WPzj+x+t1ThQZHNu+agn8XSFeqSXk0XV+Oi81NyetLytNZUX7ALl29RHajnxYLmgdXjHdQw7+g==
+
+"@navikt/bidrag-ui-common@^1.10.6":
+  version "1.10.6"
+  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.10.6/19ff4f687a816b311cb62a47b1f458b5a3985bdc#19ff4f687a816b311cb62a47b1f458b5a3985bdc"
+  integrity sha512-aR/HHseSVjNKPU/xCbL1p0ZAR456hRv1ikmFREv2aqP8Zxjr+nDM2n9zgFoO8lA73Wvx/hR7dcckuscZntfLVw==
   dependencies:
     axios "^1.6.0"
     echarts "^5.4.3"
@@ -257,14 +262,14 @@
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@5.10.1":
-  version "5.10.1"
-  resolved "https://npm.pkg.github.com/download/@navikt/ds-react/5.10.1/57cd27a134fac3c2c92aadaa86d4864d1efa2c3d#57cd27a134fac3c2c92aadaa86d4864d1efa2c3d"
-  integrity sha512-60y6aovWVdycRI6WczBnvjzAbRSK0wa6XAwx53NULmBM/KnqLurYlg61P8twx+HE959LDlZ2x/R6+oSYGWBRBA==
+"@navikt/ds-react@5.10.3":
+  version "5.10.3"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-react/5.10.3/51e4b70b2efa3c0075a094d8d771cb0fe03f01d4#51e4b70b2efa3c0075a094d8d771cb0fe03f01d4"
+  integrity sha512-Sa1tZZTXmQA+d4t0PDsW81aHIpjasLr4+2RdTUNLvOj5ymCh0Mr5rRwZMawab0IrprjO0E9rMJrsA6gDvIKl7g==
   dependencies:
     "@floating-ui/react" "0.25.4"
-    "@navikt/aksel-icons" "^5.10.1"
-    "@navikt/ds-tokens" "^5.10.1"
+    "@navikt/aksel-icons" "^5.10.3"
+    "@navikt/ds-tokens" "^5.10.3"
     "@radix-ui/react-tabs" "1.0.0"
     "@radix-ui/react-toggle-group" "1.0.0"
     clsx "^1.2.1"
@@ -294,6 +299,11 @@
   version "5.10.1"
   resolved "https://npm.pkg.github.com/download/@navikt/ds-tokens/5.10.1/e6ad53ab10ea5a6e9e206fe010c5781fdda949c3#e6ad53ab10ea5a6e9e206fe010c5781fdda949c3"
   integrity sha512-7M6sUuuoS4aY/xPbTJNsrer2zFXq7hzkQ5Ccv6WjpLh3wZ51Hy+fqSeyMZrsEo4/IPdVvErndDWMyDKmfoGThQ==
+
+"@navikt/ds-tokens@^5.10.3":
+  version "5.10.3"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-tokens/5.10.3/497030eb19c8405f5f74390f88e96834bbf0ebcf#497030eb19c8405f5f74390f88e96834bbf0ebcf"
+  integrity sha512-2VAIAJKFoqwVt1LrqjQ+JWXGl2Z1zBFcohVr0aJgkUtfGJyv+PVagJAFQKfbiWqy1wNlb1+7Zp5q9TSX6oUdQQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -6039,10 +6049,10 @@ typescript@4.8.4:
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.8.4.tgz"
   integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
 
-typescript@^4.9.4:
-  version "4.9.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
-  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
+typescript@^5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
