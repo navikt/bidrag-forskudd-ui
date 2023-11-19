@@ -153,7 +153,10 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
     }));
 };
 
-export const getBarnPerioder = (perioder: HusstandOpplysningPeriode[], virkningsOrSoktFraDato: Date) => {
+export const getBarnPerioder = (
+    perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
+    virkningsOrSoktFraDato: Date
+) => {
     const perioderEtterVirkningstidspunkt = perioder?.filter(
         ({ tilDato }) => tilDato === null || (tilDato && new Date(tilDato) > virkningsOrSoktFraDato)
     );

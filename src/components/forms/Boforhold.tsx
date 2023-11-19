@@ -577,7 +577,7 @@ const Perioder = ({
 }: {
     barnIndex: number;
     virkningstidspunkt: Date;
-    opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
+    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
@@ -585,15 +585,8 @@ const Perioder = ({
     const [editableRow, setEditableRow] = useState("");
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const saveBoforhold = useOnSaveBoforhold();
-    const {
-        control,
-        getValues,
-        clearErrors,
-        setError,
-        setValue,
-        getFieldState,
-        formState: { errors },
-    } = useFormContext<BoforholdFormValues>();
+    const { control, getValues, clearErrors, setError, setValue, getFieldState } =
+        useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
         name: `husstandsBarn.${barnIndex}.perioder`,
@@ -979,7 +972,7 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
         }
         const fieldState = getFieldState(`sivilstand.${index}`);
         if (!fieldState.error) {
-            //updatedAndSave(editPeriods(perioderValues, index));
+            updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 
