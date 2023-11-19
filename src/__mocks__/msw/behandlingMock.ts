@@ -18,7 +18,8 @@ export function behandlingMock(): RestHandler[] {
         rest.put(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, async (req, res, ctx) => {
             const body = await req.json();
             const behandling = JSON.parse(localStorage.getItem(`behandling-${req.params.behandlingId}`));
-            const updatedBehandling = { ...behandling, ...body };
+            const grunnlagspakkeid = body.grunnlagspakkeId;
+            const updatedBehandling = { ...behandling, grunnlagspakkeid };
 
             const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),

@@ -1,5 +1,5 @@
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
-import { useMutation, useQueries, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback } from "react";
 
@@ -33,14 +33,14 @@ export const MutationKeys = {
     updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
 };
 export const useGetBehandlings = () =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
     });
 
 export const useGetBehandling = (behandlingId: number) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["behandling", behandlingId],
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
@@ -50,7 +50,7 @@ export const useGetBehandling = (behandlingId: number) =>
     });
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["virkningstidspunkt", behandlingId],
         queryFn: async (): Promise<VirkningsTidspunktResponse> => {
             const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
@@ -80,7 +80,7 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
 };
 
 export const useGetBoforhold = (behandlingId: number) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["boforhold", behandlingId],
         queryFn: async (): Promise<BoforholdResponse> => {
             const { data } = await BEHANDLING_API.api.hentBoforhold(behandlingId);
@@ -90,7 +90,7 @@ export const useGetBoforhold = (behandlingId: number) =>
     });
 
 export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["opplysninger", behandlingId, opplysningerType],
         queryFn: async (): Promise<OpplysningerDto> => {
             try {
@@ -146,7 +146,7 @@ export const useUpdateInntekter = (behandlingId: number) => {
 };
 
 export const useHentInntekter = (behandlingId: number) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["inntekter", behandlingId],
         queryFn: async (): Promise<InntekterResponse> => {
             const { data } = await BEHANDLING_API.api.hentInntekter(behandlingId);
@@ -156,14 +156,14 @@ export const useHentInntekter = (behandlingId: number) =>
     });
 
 export const useHentBoforhold = (behandlingId: number) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["boforhold", behandlingId],
         queryFn: (): Promise<AxiosResponse<BoforholdResponse>> => BEHANDLING_API.api.hentBoforhold(behandlingId),
         staleTime: Infinity,
     });
 
 export const useHentPersonData = (ident: string) =>
-    useSuspenseQuery({
+    useQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
             const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
@@ -357,7 +357,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
         await BEHANDLING_API.api.updateBehandling(behandlingId, { grunnlagspakkeId });
-        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeId: grunnlagspakkeId });
+        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeid: grunnlagspakkeId });
     }
 
     const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
