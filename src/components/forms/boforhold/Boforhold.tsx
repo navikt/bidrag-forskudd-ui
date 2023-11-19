@@ -23,16 +23,14 @@ import {
     OpplysningerDto,
     OpplysningerType,
     RolleDtoRolleType,
-    SivilstandDto,
-    SivilstandType,
-} from "../../api/BidragBehandlingApi";
-import { PersonDto } from "../../api/PersonApi";
-import { PERSON_API } from "../../constants/api";
-import { STEPS } from "../../constants/steps";
-import { useForskudd } from "../../context/ForskuddContext";
-import { BoStatusTexts } from "../../enum/BoStatusTexts";
-import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { SivilstandTypeTexts } from "../../enum/SivilstandTypeTexts";
+} from "../../../api/BidragBehandlingApi";
+import { PersonDto } from "../../../api/PersonApi";
+import { PERSON_API } from "../../../constants/api";
+import { STEPS } from "../../../constants/steps";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { BoStatusTexts } from "../../../enum/BoStatusTexts";
+import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { KildeTexts } from "../../../enum/KildeTexts";
 import {
     useAddOpplysningerData,
     useGetBehandling,
@@ -41,9 +39,9 @@ import {
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
     useUpdateBoforhold,
-} from "../../hooks/useApiData";
-import { useDebounce } from "../../hooks/useDebounce";
-import { useOnSaveBoforhold } from "../../hooks/useOnSaveBoforhold";
+} from "../../../hooks/useApiData";
+import { useDebounce } from "../../../hooks/useDebounce";
+import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
@@ -51,26 +49,25 @@ import {
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
-} from "../../types/boforholdFormValues";
+} from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
     DateToDDMMYYYYString,
     ISODateTimeStringToDDMMYYYYString,
     isValidDate,
     toISODateString,
-} from "../../utils/date-utils";
-import { DatePickerInput } from "../date-picker/DatePickerInput";
-import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
-import { FlexRow } from "../layout/grid/FlexRow";
-import { FormLayout } from "../layout/grid/FormLayout";
-import { PersonNavn } from "../PersonNavn";
-import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
-import { RolleTag } from "../RolleTag";
-import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
+} from "../../../utils/date-utils";
+import { DatePickerInput } from "../../date-picker/DatePickerInput";
+import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { FlexRow } from "../../layout/grid/FlexRow";
+import { FormLayout } from "../../layout/grid/FormLayout";
+import { PersonNavn } from "../../PersonNavn";
+import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "../../RolleTag";
+import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
-    calculateFraDato,
     compareOpplysninger,
     createInitialValues,
     editPeriods,
@@ -80,9 +77,10 @@ import {
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
     removeAndEditPeriods,
-} from "./helpers/boforholdFormHelpers";
-import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
-import { ActionButtons } from "./inntekt/ActionButtons";
+} from "../helpers/boforholdFormHelpers";
+import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { ActionButtons } from "../inntekt/ActionButtons";
+import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({
     opplysninger,
@@ -166,10 +164,7 @@ const Main = ({
                 Barn
             </Heading>
             <BarnPerioder datoFom={datoFom} opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />
-            <Heading level="3" size="medium">
-                Sivilstand
-            </Heading>
-            <SivilistandPerioder datoFom={datoFom} />
+            <Sivilstand datoFom={datoFom} />
         </>
     );
 };
@@ -847,7 +842,7 @@ const Perioder = ({
                                     key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
                                     className="capitalize"
                                 >
-                                    {item.kilde}
+                                    {KildeTexts[item.kilde]}
                                 </BodyShort>,
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <Button
@@ -893,210 +888,6 @@ const Perioder = ({
                     + Legg til periode
                 </Button>
             </div>
-        </>
-    );
-};
-
-const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
-    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
-    const saveBoforhold = useOnSaveBoforhold();
-    const [editableRow, setEditableRow] = useState(null);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
-    const {
-        control,
-        getValues,
-        getFieldState,
-        clearErrors,
-        setError,
-        setValue,
-        formState: { errors },
-    } = useFormContext<BoforholdFormValues>();
-    const sivilstandPerioder = useFieldArray({
-        control,
-        name: `sivilstand`,
-    });
-
-    const watchFieldArray = useWatch({ control, name: `sivilstand` });
-    const controlledFields = sivilstandPerioder.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray[index],
-        };
-    });
-
-    const validateFomOgTom = (date, index, field) => {
-        const sivilstandPerioder = getValues("sivilstand");
-        const fomOgTomInvalid =
-            field === "datoFom"
-                ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
-                : sivilstandPerioder[index].datoFom && date < sivilstandPerioder[index].datoFom;
-
-        if (fomOgTomInvalid) {
-            setError(`sivilstand.${index}.datoFom`, {
-                type: "datesNotValid",
-                message: "Fom dato kan ikke være før tom dato",
-            });
-        } else {
-            clearErrors(`sivilstand.${index}.datoFom`);
-        }
-    };
-    const addPeriode = () => {
-        const sivilstandPerioderValues = getValues("sivilstand");
-        sivilstandPerioder.append({
-            datoFom: calculateFraDato(sivilstandPerioderValues, datoFom),
-            datoTom: null,
-            sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
-            kilde: Kilde.MANUELT,
-        });
-        setEditableRow(sivilstandPerioderValues.length);
-    };
-
-    const updatedAndSave = (sivilstand: SivilstandDto[]) => {
-        const updatedValues = {
-            ...boforholdFormValues,
-            sivilstand,
-        };
-        setBoforholdFormValues(updatedValues);
-        setValue(`sivilstand`, sivilstand);
-        saveBoforhold(updatedValues);
-        setEditableRow(null);
-    };
-
-    const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`sivilstand`);
-        if (perioderValues[index].datoFom === null) {
-            setError(`sivilstand.${index}.datoFom`, {
-                type: "notValid",
-                message: "Dato må fylles ut",
-            });
-        }
-        const fieldState = getFieldState(`sivilstand.${index}`);
-        if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index));
-        }
-    };
-
-    const onEditRow = (index: number) => {
-        if (editableRow && Number(editableRow) !== index) {
-            setErrorMessage({
-                title: "Fullfør redigering",
-                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
-            });
-            setErrorModalOpen(true);
-        }
-
-        if (!editableRow) {
-            setEditableRow(index);
-        }
-    };
-
-    return (
-        <>
-            {errors?.root?.sivilstand && (
-                <Alert variant="warning">
-                    <BodyShort>{errors.root.sivilstand.message}</BodyShort>
-                </Alert>
-            )}
-            {controlledFields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "", ""]}>
-                    {controlledFields.map((item, index) => (
-                        <TableRowWrapper
-                            key={item.id}
-                            cells={[
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoFom`}
-                                        name={`sivilstand.${index}.datoFom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoFom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoFom")}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        hideLabel
-                                        required
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoFom.placeholder`}>
-                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoTom`}
-                                        name={`sivilstand.${index}.datoTom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoTom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoTom")}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        lastDayOfMonthPicker
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
-                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledSelectField
-                                        key={`sivilstand.${index}.sivilstandType`}
-                                        name={`sivilstand.${index}.sivilstandType`}
-                                        label="Sivilstand"
-                                        className="w-52"
-                                        options={Object.entries(SivilstandType).map((entry) => ({
-                                            value: entry[0],
-                                            text: SivilstandTypeTexts[entry[0]],
-                                        }))}
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
-                                        {SivilstandTypeTexts[item.sivilstandType]}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <Button
-                                        key={`save-button-${index}`}
-                                        type="button"
-                                        onClick={() => onSaveRow(index)}
-                                        icon={<FloppydiskIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <Button
-                                        key={`edit-button-${index}`}
-                                        type="button"
-                                        onClick={() => onEditRow(index)}
-                                        icon={<PencilIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ),
-                                index ? (
-                                    <Button
-                                        key={`delete-button-${index}`}
-                                        type="button"
-                                        onClick={() => {
-                                            sivilstandPerioder.remove(index);
-                                        }}
-                                        icon={<TrashIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
-                                ),
-                            ]}
-                        />
-                    ))}
-                </TableWrapper>
-            )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
-            </Button>
         </>
     );
 };
