@@ -1,3 +1,4 @@
+import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import React, { lazy, Suspense } from "react";
@@ -27,6 +28,12 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
             <ErrorBoundary
                 onReset={reset}
+                onError={(error, compStack) => {
+                    LoggerService.error(
+                        `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message} - ${compStack.componentStack}`,
+                        error
+                    );
+                }}
                 fallbackRender={({ error, resetErrorBoundary }) => (
                     <Alert variant="error" className="w-8/12 m-auto mt-8">
                         <div>
