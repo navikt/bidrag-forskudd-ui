@@ -1353,4 +1353,94 @@ describe("BoforholdFormHelpers", () => {
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
         );
     });
+
+    it("should edit first period", () => {
+        const testPeriods = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-08-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-08-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.MANUELT,
+            },
+            {
+                datoFom: "2021-09-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.MANUELT,
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 0);
+
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should edit first period and merge", () => {
+        const testPeriods = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+            {
+                datoFom: "2021-08-01",
+                datoTom: "2021-12-31",
+                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+            {
+                datoFom: "2022-01-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.OFFENTLIG,
+            },
+        ];
+
+        const expectedResult = [
+            {
+                datoFom: "2021-04-01",
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.MANUELT,
+            },
+        ];
+
+        const updatedPeriods = editPeriods(testPeriods, 0);
+
+        expect(updatedPeriods.length).equals(expectedResult.length);
+        updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
 });
