@@ -1,5 +1,6 @@
+import { toISODateString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { VirkningsTidspunktResponse } from "../../../api/BidragBehandlingApi";
@@ -9,7 +10,12 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../../hooks/useApiData";
+import {
+    useGetBehandling,
+    useGetBoforhold,
+    useGetVirkningstidspunkt,
+    useUpdateVirkningstidspunkt,
+} from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { DateToDDMMYYYYString } from "../../../utils/date-utils";
@@ -19,7 +25,11 @@ import { FormControlledTextarea } from "../../formFields/FormControlledTextArea"
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
-import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import {
+    aarsakToVirkningstidspunktMapper,
+    getFomAndTomForMonthPicker,
+    getSoktFraOrMottatDato,
+} from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 const createInitialValues = (response: VirkningsTidspunktResponse) =>
@@ -38,18 +48,53 @@ const createPayload = (values: VirkningstidspunktFormValues) => ({
 const Main = ({ initialValues, error }) => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
-    const useFormMethods = useFormContext();
+    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
+    const { data: boforhold } = useGetBoforhold(behandlingId);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningsDato);
+    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
+    const { setValue, clearErrors, getValues } = useFormContext();
+    const virkningsDato = getValues("virkningsDato");
+
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
-
-        useFormMethods.setValue("virkningsDato", date);
-        useFormMethods.clearErrors("virkningsDato");
+        setValue("virkningsDato", toISODateString(date));
+        clearErrors("virkningsDato");
     };
 
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
 
+    useEffect(() => {
+        if (!initialVirkningsdato && virkningstidspunkt && behandling) {
+            setInitialVirkningsdato(
+                virkningstidspunkt.virkningsDato ??
+                    toISODateString(
+                        getSoktFraOrMottatDato(new Date(behandling.datoFom), new Date(behandling.mottatDato))
+                    )
+            );
+        }
+    }, [virkningstidspunkt]);
+
+    useEffect(() => {
+        if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
+            const boforholdPeriodsExist = boforhold.husstandsBarn[0].perioder.length;
+            if (boforholdPeriodsExist) {
+                setShowChangedVirkningsDatoAlert(true);
+            }
+        }
+
+        if (initialVirkningsdato && showChangedVirkningsDatoAlert && initialVirkningsdato === virkningsDato) {
+            setShowChangedVirkningsDatoAlert(false);
+        }
+    }, [virkningsDato]);
+
     return (
         <>
+            {showChangedVirkningsDatoAlert && (
+                <Alert variant="warning">
+                    Virkningstidspunktet er endret. Dette kan påvirke beregningen. Boforhold og inntekt må manuelt
+                    vurderes på nytt
+                </Alert>
+            )}
             {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">

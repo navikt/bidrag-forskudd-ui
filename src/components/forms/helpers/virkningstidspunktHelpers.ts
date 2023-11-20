@@ -3,10 +3,13 @@ import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 import { BehandlingDto, ForskuddAarsakType } from "../../../api/BidragBehandlingApi";
 import { deductMonths, firstDayOfMonth } from "../../../utils/date-utils";
 
+export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
+    return soktFraDato.getTime() > mottatDato.getTime() ? soktFraDato : mottatDato;
+};
 export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | string, behandling: BehandlingDto) => {
     const soktFraDato = new Date(behandling.datoFom);
     const mottatDato = new Date(behandling.mottatDato);
-    const mottatOrSoktFraDato = soktFraDato.getTime() > mottatDato.getTime() ? soktFraDato : mottatDato;
+    const mottatOrSoktFraDato = getSoktFraOrMottatDato(soktFraDato, mottatDato);
     const treMaanederTilbakeFraMottatDato = firstDayOfMonth(deductMonths(mottatDato, 3));
     const treMaanederTilbake =
         soktFraDato.getTime() > treMaanederTilbakeFraMottatDato.getTime()
