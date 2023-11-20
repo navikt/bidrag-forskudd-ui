@@ -643,6 +643,20 @@ const Perioder = ({
             return;
         }
 
+        const firstPeriodIsNotFromVirkningsTidspunkt =
+            new Date(periods[0].datoFom).getTime() > virkningstidspunkt.getTime();
+
+        if (firstPeriodIsNotFromVirkningsTidspunkt) {
+            setErrorMessage({
+                title: "Feil i periodisering",
+                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toISODateString(
+                    virkningstidspunkt
+                )} til ${periods[0].datoFom}`,
+            });
+            setErrorModalOpen(true);
+            return;
+        }
+
         const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}`);
         if (!fieldState.error) {
             updatedAndSave(periods);

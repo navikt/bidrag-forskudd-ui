@@ -323,6 +323,7 @@ export function editPeriods(
     let startIndex = periods.filter(
         (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
     ).length;
+
     const postPeriodIndex = editedPeriod.datoTom
         ? periods.findIndex(
               (period) =>
@@ -338,8 +339,8 @@ export function editPeriods(
     const postPeriod = postPeriodIndex !== -1 ? periods[postPeriodIndex] : undefined;
     const existingPeriodCoversWholeEditedPeriod = prevPeriodIndex === postPeriodIndex;
 
-    if (existingPeriodCoversWholeEditedPeriod) {
-        const sameStatus = prevPeriod[statusField] === editedPeriod[statusField];
+    if (periodeIndex && existingPeriodCoversWholeEditedPeriod) {
+        const sameStatus = prevPeriod && prevPeriod[statusField] === editedPeriod[statusField];
 
         if (sameStatus) {
             return periods;
