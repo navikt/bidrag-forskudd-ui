@@ -22,10 +22,10 @@ export async function mochaGlobalSetup() {
 
     // @ts-ignore
     global.window.logToServer = {
-        info: (message: string) => null,
-        warning: (message: string) => null,
-        debug: (message: string) => null,
-        error: (message: string, err: Error) => null,
+        info: () => null,
+        warning: () => null,
+        debug: () => null,
+        error: () => null,
     };
 
     beforeEach(() => {
