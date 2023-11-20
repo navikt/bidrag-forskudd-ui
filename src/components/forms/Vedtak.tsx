@@ -12,6 +12,7 @@ import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
 import environment from "../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
+import useFeatureToogle from "../../hooks/useFeatureToggle";
 import {
     mapBehandlingReferanseliste,
     mapGrunnlagPersonInfo,
@@ -23,6 +24,7 @@ import { FlexRow } from "../layout/grid/FlexRow";
 import { PersonNavn } from "../PersonNavn";
 import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../RolleTag";
+import UnderArbeidAlert from "../UnderArbeidAlert";
 
 function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
     return {
@@ -33,6 +35,7 @@ function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnl
 }
 
 const Vedtak = () => {
+    const { isFatteVedtakEnabled } = useFeatureToogle();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
@@ -44,6 +47,7 @@ const Vedtak = () => {
         select: (data) => data.data,
         enabled: !isAvslag,
     });
+
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
             if (process.env.DISABLE_FATTE_VEDTAK == "true") return;
@@ -245,7 +249,7 @@ const Vedtak = () => {
                             loading={fatteVedtakFn.isLoading}
                             disabled={
                                 (beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0) ||
-                                process.env.DISABLE_FATTE_VEDTAK == "true"
+                                !isFatteVedtakEnabled
                             }
                             onClick={() => fatteVedtakFn.mutate()}
                             className="w-max"
@@ -274,6 +278,10 @@ const Vedtak = () => {
 };
 
 export default () => {
+    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
+    if (!isVedtakSkjermbildeEnabled) {
+        return <UnderArbeidAlert />;
+    }
     return (
         <QueryErrorWrapper>
             <Vedtak />

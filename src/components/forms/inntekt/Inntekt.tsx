@@ -21,10 +21,12 @@ import {
     useUpdateInntekter,
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { ISODateTimeStringToDDMMYYYYString, toISODateString } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import UnderArbeidAlert from "../../UnderArbeidAlert";
 import {
     compareOpplysninger,
     createInitialValues,
@@ -341,6 +343,11 @@ const InntektForm = () => {
 };
 
 export default () => {
+    const { isInntektSkjermbildeEnabled } = useFeatureToogle();
+
+    if (!isInntektSkjermbildeEnabled) {
+        return <UnderArbeidAlert />;
+    }
     return (
         <QueryErrorWrapper>
             <InntektForm />
