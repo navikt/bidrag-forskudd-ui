@@ -117,7 +117,6 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     const {
         control,
         getValues,
-        setValue,
         setError,
         clearErrors,
         formState: { errors },
@@ -136,6 +135,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     }, [watchFieldArray]);
 
     const handleOnSelect = (value: boolean, index: number) => {
+        console.log(value, index);
         if (isValidDate(virkningstidspunkt)) {
             const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
             if (inntekteneSomLeggesTilGrunn.length) {

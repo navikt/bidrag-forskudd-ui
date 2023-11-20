@@ -1,24 +1,14 @@
-import { BoStatusType } from "../../api/BidragBehandlingApi";
-
-interface Periode {
-    fraDato: string;
-    tilDato: string;
-    boStatus: BoStatusType | "";
-    kilde: string;
-}
+import { HusstandsbarnDto } from "../../api/BidragBehandlingApi";
 
 interface Sivilstand {
     gyldigFraOgMed: string;
     datoTom: string;
     sivilstandType: string;
+    kilde: string;
 }
-interface Barn {
-    medISaken: boolean;
-    ident: string;
-    perioder: Periode[];
-}
+
 export interface BoforholdData {
-    husstandsBarn: Barn[];
+    husstandsBarn: HusstandsbarnDto[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;

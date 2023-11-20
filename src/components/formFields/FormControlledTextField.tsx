@@ -17,11 +17,7 @@ export const FormControlledTextField = ({
     disabled?: boolean;
     min?: string | number;
 }) => {
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
-
+    const { control } = useFormContext();
     const { field } = useController({ name, control });
 
     return (

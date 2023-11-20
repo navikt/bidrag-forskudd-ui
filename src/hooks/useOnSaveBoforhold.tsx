@@ -10,7 +10,6 @@ export const useOnSaveBoforhold = () => {
     const updateBoforhold = useUpdateBoforhold(behandlingId);
     const { reset } = useFormContext<BoforholdFormValues>();
     return (values: BoforholdFormValues) => {
-        console.log("MUTATE ME");
         updateBoforhold.mutation.mutate(createPayload(values), {
             onSuccess: () =>
                 reset(values, {

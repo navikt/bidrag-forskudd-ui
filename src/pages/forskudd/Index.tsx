@@ -39,7 +39,7 @@ export const Index = () => {
                                             </Link>
                                         </Table.DataCell>
                                         <Table.DataCell>{item.saksnummer}</Table.DataCell>
-                                        <Table.DataCell>{item.soknadType}</Table.DataCell>
+                                        <Table.DataCell>{item.soknadFraType}</Table.DataCell>
                                         <Table.DataCell>{SOKNAD_LABELS[item.soknadFraType]}</Table.DataCell>
                                         <Table.DataCell>{item.mottatDato}</Table.DataCell>
                                         <Table.DataCell>{item.datoFom}</Table.DataCell>

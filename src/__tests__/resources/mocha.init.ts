@@ -13,7 +13,7 @@ export async function mochaGlobalSetup() {
         console.log("showErrorPage was called with error=", error);
     };
     // @ts-ignore
-    global.window.logErrorMessage = (message, error) => {
+    global.window.logErrorMessage = (message) => {
         console.log("logErrorMessage was called with message=", message);
     };
     global.window.open = () => null;

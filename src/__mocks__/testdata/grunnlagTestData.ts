@@ -282,39 +282,6 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             .flat()
     );
 
-const createHusstandsmedlemmerListe = (bmIdent, barn, today) => [{}];
-
-const createUbstListe = (bmIdent) => [
-    {
-        personId: bmIdent,
-        type: "string",
-        periodeFra: "2023-02-01",
-        periodeTil: "2023-03-31",
-        aktiv: true,
-        brukFra: "2023-06-05T09:12:12.850Z",
-        brukTil: "2023-06-05T09:12:12.850Z",
-        belop: 12000,
-        manueltBeregnet: true,
-        hentetTidspunkt: "2023-06-05T09:12:12.850Z",
-    },
-];
-
-const createBarnetillegListe = (bmIdent, barn) => [
-    {
-        partPersonId: bmIdent,
-        barnPersonId: barn[0].ident,
-        barnetilleggType: "string",
-        periodeFra: "2023-01-04",
-        periodeTil: "2023-03-31",
-        aktiv: true,
-        brukFra: "2023-06-05T06:43:12.451Z",
-        brukTil: "2023-06-05T06:43:12.451Z",
-        belopBrutto: 22000,
-        barnType: "string",
-        hentetTidspunkt: "2023-06-05T06:43:12.451Z",
-    },
-];
-
 export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrunnlagspakkeDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);

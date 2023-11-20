@@ -3,10 +3,10 @@ import React, { lazy, memo, Suspense } from "react";
 
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-const Boforhold = lazy(() => import("./Boforhold"));
+const Boforhold = lazy(() => import("./boforhold/Boforhold"));
 const Inntekt = lazy(() => import("./inntekt/Inntekt"));
-const Vedtak = lazy(() => import("./Vedtak"));
-const Virkningstidspunkt = lazy(() => import("./Virkningstidspunkt"));
+const Vedtak = lazy(() => import("./vedtak/Vedtak"));
+const Virkningstidspunkt = lazy(() => import("./virkningstidspunkt/Virkningstidspunkt"));
 
 const ForskuddForm = memo(({ activeStep }: { activeStep: string }) => {
     switch (activeStep) {

@@ -1,21 +1,7 @@
-import { BoStatusType, SivilstandDto } from "../api/BidragBehandlingApi";
-
-export interface BarnPeriode {
-    datoFom?: string | null;
-    datoTom?: string | null;
-    boStatus: BoStatusType | "";
-    kilde: string;
-}
-interface Barn {
-    medISaken: boolean;
-    ident?: string;
-    navn?: string;
-    foedselsDato?: string | null;
-    perioder: BarnPeriode[];
-}
+import { BoStatusType, HusstandsbarnDto, SivilstandDto, SivilstandType } from "../api/BidragBehandlingApi";
 
 export interface BoforholdFormValues {
-    husstandsBarn: Barn[];
+    husstandsBarn: HusstandsbarnDto[];
     sivilstand: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
     boforholdBegrunnelseKunINotat?: string;
@@ -47,12 +33,18 @@ export interface SavedHustandOpplysninger {
     perioder: SavedOpplysningFraFolkeRegistrePeriode[];
 }
 
+export interface SivilstandOpplysninger {
+    datoFom: string;
+    datoTom: string;
+    sivilstandType: SivilstandType;
+}
+
 export interface BoforholdOpplysninger {
     husstand: HusstandOpplysningFraFolkeRegistre[];
-    sivilstand: SivilstandDto[];
+    sivilstand: SivilstandOpplysninger[];
 }
 
 export interface ParsedBoforholdOpplysninger {
     husstand: SavedHustandOpplysninger[];
-    sivilstand: SivilstandDto[];
+    sivilstand: SivilstandOpplysninger[];
 }

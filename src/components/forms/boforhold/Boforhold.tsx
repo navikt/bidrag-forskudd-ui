@@ -18,19 +18,19 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     BoStatusType,
+    HusstandsBarnPeriodeDto,
+    Kilde,
     OpplysningerDto,
     OpplysningerType,
     RolleDtoRolleType,
-    SivilstandDto,
-    SivilstandType,
-} from "../../api/BidragBehandlingApi";
-import { PersonDto } from "../../api/PersonApi";
-import { PERSON_API } from "../../constants/api";
-import { STEPS } from "../../constants/steps";
-import { useForskudd } from "../../context/ForskuddContext";
-import { BoStatusTexts } from "../../enum/BoStatusTexts";
-import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { SivilstandTypeTexts } from "../../enum/SivilstandTypeTexts";
+} from "../../../api/BidragBehandlingApi";
+import { PersonDto } from "../../../api/PersonApi";
+import { PERSON_API } from "../../../constants/api";
+import { STEPS } from "../../../constants/steps";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { BoStatusTexts } from "../../../enum/BoStatusTexts";
+import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { KildeTexts } from "../../../enum/KildeTexts";
 import {
     useAddOpplysningerData,
     useGetBehandling,
@@ -39,49 +39,48 @@ import {
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
     useUpdateBoforhold,
-} from "../../hooks/useApiData";
-import { useDebounce } from "../../hooks/useDebounce";
-import { useOnSaveBoforhold } from "../../hooks/useOnSaveBoforhold";
+} from "../../../hooks/useApiData";
+import { useDebounce } from "../../../hooks/useDebounce";
+import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import {
-    BarnPeriode,
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
-} from "../../types/boforholdFormValues";
+} from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
     DateToDDMMYYYYString,
     ISODateTimeStringToDDMMYYYYString,
     isValidDate,
     toISODateString,
-} from "../../utils/date-utils";
-import { DatePickerInput } from "../date-picker/DatePickerInput";
-import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
-import { FlexRow } from "../layout/grid/FlexRow";
-import { FormLayout } from "../layout/grid/FormLayout";
-import { PersonNavn } from "../PersonNavn";
-import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
-import { RolleTag } from "../RolleTag";
-import { TableRowWrapper, TableWrapper } from "../table/TableWrapper";
+} from "../../../utils/date-utils";
+import { DatePickerInput } from "../../date-picker/DatePickerInput";
+import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { FlexRow } from "../../layout/grid/FlexRow";
+import { FormLayout } from "../../layout/grid/FormLayout";
+import { PersonNavn } from "../../PersonNavn";
+import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "../../RolleTag";
+import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
-    calculateFraDato,
     compareOpplysninger,
     createInitialValues,
     editPeriods,
-    editSivilstandPeriods,
     getBarnPerioder,
     getBarnPerioderFromHusstandsListe,
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
-} from "./helpers/boforholdFormHelpers";
-import { getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
-import { ActionButtons } from "./inntekt/ActionButtons";
+    removeAndEditPeriods,
+} from "../helpers/boforholdFormHelpers";
+import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { ActionButtons } from "../inntekt/ActionButtons";
+import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({
     opplysninger,
@@ -165,10 +164,7 @@ const Main = ({
                 Barn
             </Heading>
             <BarnPerioder datoFom={datoFom} opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />
-            <Heading level="3" size="medium">
-                Sivilstand
-            </Heading>
-            <SivilistandPerioder datoFom={datoFom} />
+            <Sivilstand datoFom={datoFom} />
         </>
     );
 };
@@ -364,7 +360,7 @@ const AddBarnForm = ({
 
         const addedBarn = {
             ident: val === "dnummer" ? ident : "",
-            medISaken: false,
+            medISak: false,
             navn: navn,
             foedselsDato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsDato),
             perioder: [
@@ -372,7 +368,7 @@ const AddBarnForm = ({
                     datoFom: toISODateString(datoFom),
                     datoTom: null,
                     boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                    kilde: "manuelt",
+                    kilde: Kilde.MANUELT,
                 },
             ],
         };
@@ -526,8 +522,8 @@ const BarnPerioder = ({
                                 <div>
                                     <FlexRow className="items-center h-[27px]">
                                         <BodyShort size="small" className="font-bold">
-                                            {item.medISaken && <PersonNavn ident={item.ident}></PersonNavn>}
-                                            {!item.medISaken && item.navn}
+                                            {item.medISak && <PersonNavn ident={item.ident}></PersonNavn>}
+                                            {!item.medISak && item.navn}
                                         </BodyShort>
                                         <BodyShort size="small">{item.ident}</BodyShort>
                                     </FlexRow>
@@ -576,7 +572,7 @@ const Perioder = ({
 }: {
     barnIndex: number;
     virkningstidspunkt: Date;
-    opplysningerFraFolkRegistre: { ident: string; navn: string; perioder: any[] }[];
+    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
@@ -584,15 +580,8 @@ const Perioder = ({
     const [editableRow, setEditableRow] = useState("");
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const saveBoforhold = useOnSaveBoforhold();
-    const {
-        control,
-        getValues,
-        clearErrors,
-        setError,
-        setValue,
-        getFieldState,
-        formState: { errors },
-    } = useFormContext<BoforholdFormValues>();
+    const { control, getValues, clearErrors, setError, setValue, getFieldState } =
+        useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
         name: `husstandsBarn.${barnIndex}.perioder`,
@@ -607,7 +596,7 @@ const Perioder = ({
     });
 
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as BarnPeriode[];
+        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
         if (perioderValues[index].datoFom === null) {
             setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
@@ -664,7 +653,7 @@ const Perioder = ({
         updatedAndSave(lastPeriodsState);
     };
 
-    const updatedAndSave = (updatedPeriods: BarnPeriode[]) => {
+    const updatedAndSave = (updatedPeriods: HusstandsBarnPeriodeDto[]) => {
         setLastPeriodsState(boforholdFormValues.husstandsBarn[barnIndex].perioder);
         const husstandsBarn = [...boforholdFormValues.husstandsBarn];
         husstandsBarn.splice(barnIndex, 1, {
@@ -700,19 +689,32 @@ const Perioder = ({
     };
 
     const addPeriode = () => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-        barnPerioder.append({
-            datoFom: null,
-            datoTom: null,
-            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-            kilde: "manuelt",
-        });
-        setEditableRow(`${barnIndex}.${perioderValues.length}`);
+        const otherRowEdited = checkIfAnotherRowIsEdited();
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
+            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+            barnPerioder.append({
+                datoFom: null,
+                datoTom: null,
+                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                kilde: Kilde.MANUELT,
+            });
+            setEditableRow(`${barnIndex}.${perioderValues.length}`);
+        }
     };
 
-    const onRemovePeriode = (index) => {
-        const updatedPeriods = boforholdFormValues.husstandsBarn[barnIndex].perioder.filter((_, i) => i !== index);
-        updatedAndSave(updatedPeriods);
+    const onRemovePeriode = (index: number) => {
+        const otherRowEdited = checkIfAnotherRowIsEdited(index);
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
+            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
+            const updatedPeriods = removeAndEditPeriods(perioderValues, index);
+            updatedAndSave(updatedPeriods);
+        }
     };
 
     const resetTilDataFraFreg = () => {
@@ -723,18 +725,25 @@ const Perioder = ({
         setShowResetButton(false);
     };
 
-    const onEditRow = (index: number) => {
+    const checkIfAnotherRowIsEdited = (index?: number) => {
         const editableRowIndex = editableRow.split(".")[1];
+        return editableRowIndex && Number(editableRowIndex) !== index;
+    };
 
-        if (editableRowIndex && Number(editableRowIndex) !== index) {
-            setErrorMessage({
-                title: "Fullfør redigering",
-                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
-            });
-            setErrorModalOpen(true);
-        }
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: "Fullfør redigering",
+            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+        });
+        setErrorModalOpen(true);
+    };
 
-        if (!editableRowIndex) {
+    const onEditRow = (index: number) => {
+        const otherRowEdited = checkIfAnotherRowIsEdited(index);
+
+        if (otherRowEdited) {
+            showErrorModal();
+        } else {
             setEditableRow(`${barnIndex}.${index}`);
         }
     };
@@ -833,7 +842,7 @@ const Perioder = ({
                                     key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
                                     className="capitalize"
                                 >
-                                    {item.kilde}
+                                    {KildeTexts[item.kilde]}
                                 </BodyShort>,
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <Button
@@ -879,209 +888,6 @@ const Perioder = ({
                     + Legg til periode
                 </Button>
             </div>
-        </>
-    );
-};
-
-const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
-    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
-    const saveBoforhold = useOnSaveBoforhold();
-    const [editableRow, setEditableRow] = useState(null);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
-    const {
-        control,
-        getValues,
-        getFieldState,
-        clearErrors,
-        setError,
-        setValue,
-        formState: { errors },
-    } = useFormContext<BoforholdFormValues>();
-    const sivilstandPerioder = useFieldArray({
-        control,
-        name: `sivilstand`,
-    });
-
-    const watchFieldArray = useWatch({ control, name: `sivilstand` });
-    const controlledFields = sivilstandPerioder.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray[index],
-        };
-    });
-
-    const validateFomOgTom = (date, index, field) => {
-        const sivilstandPerioder = getValues("sivilstand");
-        const fomOgTomInvalid =
-            field === "datoFom"
-                ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
-                : sivilstandPerioder[index].datoFom && date < sivilstandPerioder[index].datoFom;
-
-        if (fomOgTomInvalid) {
-            setError(`sivilstand.${index}.datoFom`, {
-                type: "datesNotValid",
-                message: "Fom dato kan ikke være før tom dato",
-            });
-        } else {
-            clearErrors(`sivilstand.${index}.datoFom`);
-        }
-    };
-    const addPeriode = () => {
-        const sivilstandPerioderValues = getValues("sivilstand");
-        sivilstandPerioder.append({
-            datoFom: calculateFraDato(sivilstandPerioderValues, datoFom),
-            datoTom: null,
-            sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
-        });
-        setEditableRow(sivilstandPerioderValues.length);
-    };
-
-    const updatedAndSave = (sivilstand: SivilstandDto[]) => {
-        const updatedValues = {
-            ...boforholdFormValues,
-            sivilstand,
-        };
-        setBoforholdFormValues(updatedValues);
-        setValue(`sivilstand`, sivilstand);
-        saveBoforhold(updatedValues);
-        setEditableRow(null);
-    };
-
-    const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`sivilstand`);
-        if (perioderValues[index].datoFom === null) {
-            setError(`sivilstand.${index}.datoFom`, {
-                type: "notValid",
-                message: "Dato må fylles ut",
-            });
-        }
-        const fieldState = getFieldState(`sivilstand.${index}`);
-        if (!fieldState.error) {
-            updatedAndSave(editSivilstandPeriods(perioderValues, index));
-        }
-    };
-
-    const onEditRow = (index: number) => {
-        if (editableRow && Number(editableRow) !== index) {
-            setErrorMessage({
-                title: "Fullfør redigering",
-                text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
-            });
-            setErrorModalOpen(true);
-        }
-
-        if (!editableRow) {
-            setEditableRow(index);
-        }
-    };
-
-    return (
-        <>
-            {errors?.root?.sivilstand && (
-                <Alert variant="warning">
-                    <BodyShort>{errors.root.sivilstand.message}</BodyShort>
-                </Alert>
-            )}
-            {controlledFields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "", ""]}>
-                    {controlledFields.map((item, index) => (
-                        <TableRowWrapper
-                            key={item.id}
-                            cells={[
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoFom`}
-                                        name={`sivilstand.${index}.datoFom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoFom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoFom")}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        hideLabel
-                                        required
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoFom.placeholder`}>
-                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoTom`}
-                                        name={`sivilstand.${index}.datoTom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoTom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoTom")}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        lastDayOfMonthPicker
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
-                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledSelectField
-                                        key={`sivilstand.${index}.sivilstandType`}
-                                        name={`sivilstand.${index}.sivilstandType`}
-                                        label="Sivilstand"
-                                        className="w-52"
-                                        options={Object.entries(SivilstandType).map((entry) => ({
-                                            value: entry[0],
-                                            text: SivilstandTypeTexts[entry[0]],
-                                        }))}
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
-                                        {SivilstandTypeTexts[item.sivilstandType]}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <Button
-                                        key={`save-button-${index}`}
-                                        type="button"
-                                        onClick={() => onSaveRow(index)}
-                                        icon={<FloppydiskIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <Button
-                                        key={`edit-button-${index}`}
-                                        type="button"
-                                        onClick={() => onEditRow(index)}
-                                        icon={<PencilIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ),
-                                index ? (
-                                    <Button
-                                        key={`delete-button-${index}`}
-                                        type="button"
-                                        onClick={() => {
-                                            sivilstandPerioder.remove(index);
-                                        }}
-                                        icon={<TrashIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
-                                ),
-                            ]}
-                        />
-                    ))}
-                </TableWrapper>
-            )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
-            </Button>
         </>
     );
 };
