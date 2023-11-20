@@ -28,7 +28,7 @@ const createInitialValues = (response: VirkningsTidspunktResponse) =>
         aarsak: response.aarsak ?? "",
         virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
         virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
-    } as VirkningstidspunktFormValues);
+    }) as VirkningstidspunktFormValues;
 
 const createPayload = (values: VirkningstidspunktFormValues) => ({
     ...values,

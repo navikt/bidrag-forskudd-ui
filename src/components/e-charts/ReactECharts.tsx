@@ -73,8 +73,8 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
                     e.key === "ArrowRight"
                         ? (currentIndex + 1) % dataLen
                         : currentIndex <= 0
-                        ? dataLen - 1
-                        : currentIndex - 1;
+                          ? dataLen - 1
+                          : currentIndex - 1;
                 chart.dispatchAction({
                     type: "highlight",
                     seriesIndex: 0,

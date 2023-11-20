@@ -118,11 +118,7 @@ const Vedtak = () => {
                 <Alert variant="error" className="w-8/12 m-auto mt-8">
                     <div>
                         <BodyShort size="small">
-                            <ul>
-                                {beregnetForskudd.feil?.map((f) => (
-                                    <li>{f}</li>
-                                ))}
-                            </ul>
+                            <ul>{beregnetForskudd.feil?.map((f) => <li>{f}</li>)}</ul>
                         </BodyShort>
                     </div>
                 </Alert>

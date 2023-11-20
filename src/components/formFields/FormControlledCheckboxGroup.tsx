@@ -1,5 +1,5 @@
 import { Checkbox, CheckboxGroup } from "@navikt/ds-react";
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 export const FormControlledCheckboxGroup = ({
@@ -12,14 +12,10 @@ export const FormControlledCheckboxGroup = ({
     name: string;
     legend: string;
     hideLegend?: boolean;
-    options: { text: string; value: any }[];
-    onChange?: (value: any) => void;
+    options: { text: string; value: never }[];
+    onChange?: (value: ChangeEvent) => void;
 }) => {
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
-
+    const { control } = useFormContext();
     const { field } = useController({ name, control });
 
     const handleOnChange = (value) => {

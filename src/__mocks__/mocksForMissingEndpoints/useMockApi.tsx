@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
 
-const fakeFetch = (result, success = true): Promise<any> =>
+const fakeFetch = (result, success = true): Promise<never> =>
     new Promise((resolve, reject) => {
         if (success) {
             setTimeout(() => resolve(result), 1000);

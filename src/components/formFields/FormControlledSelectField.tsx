@@ -25,11 +25,7 @@ export const FormControlledSelectField = ({
     onSelect,
     children,
 }: PropsWithChildren<FormControlledSelectFieldProps>) => {
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
-
+    const { control } = useFormContext();
     const { field, fieldState } = useController({ name, control });
 
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
