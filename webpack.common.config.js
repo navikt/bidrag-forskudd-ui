@@ -35,7 +35,7 @@ module.exports = {
                             env: { mode: "usage" },
                             minify: !isDevelopment,
                             jsc: {
-                                target: "es2022",
+                                target: "esnext",
                                 minify: {
                                     compress: true,
                                     mangle: true,
