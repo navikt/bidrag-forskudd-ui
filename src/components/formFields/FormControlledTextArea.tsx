@@ -11,10 +11,7 @@ export const FormControlledTextarea = ({
     label: string;
     hideLabel?: boolean;
 }) => {
-    const {
-        control,
-        formState: { errors },
-    } = useFormContext();
+    const { control } = useFormContext();
 
     const { field } = useController({ name, control });
 

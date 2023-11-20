@@ -1,4 +1,4 @@
-import { BehandlingDto, BehandlingType, RolleDtoRolleType } from "../api/BidragBehandlingApi";
+import { BehandlingDto, Behandlingstype, RolleDtoRolleType } from "../api/BidragBehandlingApi";
 import { OpprettBehandlingsreferanseRequestDto, OpprettGrunnlagRequestDto } from "../api/BidragVedtakApi";
 import { PersonDto } from "../api/PersonApi";
 import { mapRolle } from "../types/rolle";
@@ -12,7 +12,7 @@ export function mapGrunnlagPersonInfo(behandling: BehandlingDto, rolleInfo: Pers
         RolleDtoRolleType.REELMOTTAKER,
     ];
     const hentPersonInfoForRoller =
-        behandling.behandlingType == BehandlingType.FORSKUDD ? rollerForskudd : rollerSoknad;
+        behandling.behandlingtype == Behandlingstype.FORSKUDD ? rollerForskudd : rollerSoknad;
     return behandling.roller
         .filter((rolle) => hentPersonInfoForRoller.includes(rolle.rolleType))
         .map((rolle) => ({
@@ -37,7 +37,7 @@ export function mapBehandlingReferanseliste(
         },
         {
             kilde: "BISYS_SOKNAD",
-            referanse: behandling.soknadId.toString(),
+            referanse: behandling.soknadsid.toString(),
         },
     ];
     behandling.soknadRefId &&

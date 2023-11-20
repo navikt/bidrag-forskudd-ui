@@ -2,25 +2,25 @@ import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { VirkningsTidspunktResponse } from "../../api/BidragBehandlingApi";
-import { SOKNAD_LABELS } from "../../constants/soknadFraLabels";
-import { STEPS } from "../../constants/steps";
-import { useForskudd } from "../../context/ForskuddContext";
-import { Avslag } from "../../enum/Avslag";
-import { ForskuddBeregningKodeAarsak } from "../../enum/ForskuddBeregningKodeAarsak";
-import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../hooks/useApiData";
-import { useDebounce } from "../../hooks/useDebounce";
-import { VirkningstidspunktFormValues } from "../../types/virkningstidspunktFormValues";
-import { DateToDDMMYYYYString } from "../../utils/date-utils";
-import { FormControlledMonthPicker } from "../formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "../formFields/FormControlledTextArea";
-import { FlexRow } from "../layout/grid/FlexRow";
-import { FormLayout } from "../layout/grid/FormLayout";
-import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
-import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "./helpers/virkningstidspunktHelpers";
-import { ActionButtons } from "./inntekt/ActionButtons";
+import { VirkningsTidspunktResponse } from "../../../api/BidragBehandlingApi";
+import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
+import { STEPS } from "../../../constants/steps";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { Avslag } from "../../../enum/Avslag";
+import { ForskuddBeregningKodeAarsak } from "../../../enum/ForskuddBeregningKodeAarsak";
+import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { useGetBehandling, useGetVirkningstidspunkt, useUpdateVirkningstidspunkt } from "../../../hooks/useApiData";
+import { useDebounce } from "../../../hooks/useDebounce";
+import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
+import { DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { FlexRow } from "../../layout/grid/FlexRow";
+import { FormLayout } from "../../layout/grid/FormLayout";
+import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { ActionButtons } from "../inntekt/ActionButtons";
 
 const createInitialValues = (response: VirkningsTidspunktResponse) =>
     ({
@@ -28,7 +28,7 @@ const createInitialValues = (response: VirkningsTidspunktResponse) =>
         aarsak: response.aarsak ?? "",
         virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
         virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
-    } as VirkningstidspunktFormValues);
+    }) as VirkningstidspunktFormValues;
 
 const createPayload = (values: VirkningstidspunktFormValues) => ({
     ...values,
@@ -54,7 +54,7 @@ const Main = ({ initialValues, error }) => {
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
                     <Label size="small">Søknadstype</Label>
-                    <BodyShort size="small">{behandling.soknadType}</BodyShort>
+                    <BodyShort size="small">{behandling.soknadFraType}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">Søknad fra</Label>

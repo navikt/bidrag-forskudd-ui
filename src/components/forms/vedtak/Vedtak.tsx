@@ -5,26 +5,24 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { Grunnlag, ResultatPeriode, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
-import { OpprettGrunnlagRequestDto } from "../../api/BidragVedtakApi";
-import { BEHANDLING_API, BIDRAG_VEDTAK_API } from "../../constants/api";
-import { useForskudd } from "../../context/ForskuddContext";
-import { Avslag } from "../../enum/Avslag";
-import environment from "../../environment";
-import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
-import useFeatureToogle from "../../hooks/useFeatureToggle";
+import { Grunnlag, ResultatPeriode, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
+import { OpprettGrunnlagRequestDto } from "../../../api/BidragVedtakApi";
+import { BEHANDLING_API, BIDRAG_VEDTAK_API } from "../../../constants/api";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { Avslag } from "../../../enum/Avslag";
+import environment from "../../../environment";
+import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import {
     mapBehandlingReferanseliste,
     mapGrunnlagPersonInfo,
     mapResultatKodeToDisplayValue,
-} from "../../mapper/VedtakBeregningkMapper";
-import { uniqueByKey } from "../../utils/array-utils";
-import { toISODateTimeString } from "../../utils/date-utils";
-import { FlexRow } from "../layout/grid/FlexRow";
-import { PersonNavn } from "../PersonNavn";
-import { QueryErrorWrapper } from "../query-error-boundary/QueryErrorWrapper";
-import { RolleTag } from "../RolleTag";
-import UnderArbeidAlert from "../UnderArbeidAlert";
+} from "../../../mapper/VedtakBeregningkMapper";
+import { uniqueByKey } from "../../../utils/array-utils";
+import { toISODateTimeString } from "../../../utils/date-utils";
+import { FlexRow } from "../../layout/grid/FlexRow";
+import { PersonNavn } from "../../PersonNavn";
+import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "../../RolleTag";
 
 function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
     return {
@@ -35,19 +33,17 @@ function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnl
 }
 
 const Vedtak = () => {
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
-    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.aarsak);
+    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.getårsak);
     const { data: beregnetForskudd } = useQuery({
         queryKey: ["beregning"],
         queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
         select: (data) => data.data,
         enabled: !isAvslag,
     });
-
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
             if (process.env.DISABLE_FATTE_VEDTAK == "true") return;
@@ -63,11 +59,11 @@ const Vedtak = () => {
                 );
                 const { data: vedtakId } = await BIDRAG_VEDTAK_API.vedtak.opprettVedtak({
                     kilde: "MANUELT",
-                    type: behandling.soknadType,
+                    type: behandling.søknadstype,
                     opprettetAv: saksBehandlerId,
                     opprettetAvNavn: saksBehandlerNavn,
                     vedtakTidspunkt: now,
-                    enhetId: behandling.behandlerEnhet,
+                    enhetId: behandling.behandlerenhet,
                     grunnlagListe: [
                         //TODO: Skal inntekter ikke valgt tas med? Må da legge til valgt: true på innhold
                         //TODO: Inntekter må inkludere rolle (BIDRAGSMOTTAKER, BIDRAGSPLIKTIG, BARN)
@@ -76,7 +72,7 @@ const Vedtak = () => {
                         ...mapGrunnlagPersonInfo(behandling, personInfoListe),
                     ],
                     stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({
-                        type: behandling.behandlingType,
+                        type: behandling.behandlingtype,
                         sakId: saksnummer,
                         skyldnerId: "NAV",
                         kravhaverId: resultat.ident,
@@ -122,11 +118,7 @@ const Vedtak = () => {
                 <Alert variant="error" className="w-8/12 m-auto mt-8">
                     <div>
                         <BodyShort size="small">
-                            <ul>
-                                {beregnetForskudd.feil?.map((f) => (
-                                    <li>{f}</li>
-                                ))}
-                            </ul>
+                            <ul>{beregnetForskudd.feil?.map((f) => <li>{f}</li>)}</ul>
                         </BodyShort>
                     </div>
                 </Alert>
@@ -216,12 +208,12 @@ const Vedtak = () => {
                                         <Table.Row>
                                             <Table.DataCell>
                                                 {dateToDDMMYYYYString(
-                                                    new Date(behandling.virkningsDato ?? behandling.datoFom)
+                                                    new Date(behandling.virkningsdato ?? behandling.datoFom)
                                                 )}{" "}
                                                 -
                                             </Table.DataCell>
                                             <Table.DataCell>Avslag</Table.DataCell>
-                                            <Table.DataCell>{Avslag[behandling.aarsak]}</Table.DataCell>
+                                            <Table.DataCell>{Avslag[behandling.getårsak]}</Table.DataCell>
                                         </Table.Row>
                                     </Table.Body>
                                 </Table>
@@ -249,7 +241,7 @@ const Vedtak = () => {
                             loading={fatteVedtakFn.isLoading}
                             disabled={
                                 (beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0) ||
-                                !isFatteVedtakEnabled
+                                process.env.DISABLE_FATTE_VEDTAK == "true"
                             }
                             onClick={() => fatteVedtakFn.mutate()}
                             className="w-max"
@@ -278,10 +270,6 @@ const Vedtak = () => {
 };
 
 export default () => {
-    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
-    if (!isVedtakSkjermbildeEnabled) {
-        return <UnderArbeidAlert />;
-    }
     return (
         <QueryErrorWrapper>
             <Vedtak />

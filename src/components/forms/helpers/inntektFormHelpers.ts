@@ -391,7 +391,7 @@ export const compareOpplysninger = (
             );
         }
 
-        personInntekt.summertAarsinntektListe.forEach((summertAarsinntekt, index) => {
+        personInntekt.summertAarsinntektListe.forEach((summertAarsinntekt) => {
             const summertAarsinntektFraLatestOpplysninger =
                 inntektListeInLatestOpplysninger.summertAarsinntektListe.find(
                     (aarsInntekt) => aarsInntekt.visningsnavn === summertAarsinntekt.visningsnavn

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import "cross-fetch/polyfill";
 
 import { cleanup } from "@testing-library/react";
@@ -13,7 +14,7 @@ export async function mochaGlobalSetup() {
         console.log("showErrorPage was called with error=", error);
     };
     // @ts-ignore
-    global.window.logErrorMessage = (message, error) => {
+    global.window.logErrorMessage = (message) => {
         console.log("logErrorMessage was called with message=", message);
     };
     global.window.open = () => null;
@@ -22,10 +23,10 @@ export async function mochaGlobalSetup() {
 
     // @ts-ignore
     global.window.logToServer = {
-        info: (message: string) => null,
-        warning: (message: string) => null,
-        debug: (message: string) => null,
-        error: (message: string, err: Error) => null,
+        info: (_message: string) => null,
+        warning: (_message: string) => null,
+        debug: (_message: string) => null,
+        error: (_message: string, _err: Error) => null,
     };
 
     beforeEach(() => {

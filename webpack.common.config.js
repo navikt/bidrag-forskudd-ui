@@ -2,10 +2,10 @@ const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 const deps = require("./package.json").dependencies;
 const isDevelopment = process.env.NODE_ENV !== "production";
+const { EsbuildPlugin } = require("esbuild-loader");
 
 module.exports = {
     entry: "./src/index.tsx",
@@ -19,6 +19,22 @@ module.exports = {
     resolve: {
         extensions: [".tsx", ".ts", ".js", "jsx"],
     },
+    optimization: {
+        minimizer: [
+            new EsbuildPlugin({
+                target: "ESNext",
+                minify: false,
+                format: "esm",
+                sourcemap: true,
+                minifyIdentifiers: false,
+                minifyWhitespace: true,
+                minifySyntax: true,
+                globalName: "bidrag_behandling_ui",
+                css: true,
+                keepNames: true,
+            }),
+        ],
+    },
     module: {
         rules: [
             {
@@ -28,34 +44,10 @@ module.exports = {
             {
                 test: /\.([jt]sx?)?$/,
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: "swc-loader",
-                        options: {
-                            env: { mode: "usage" },
-                            minify: !isDevelopment,
-                            jsc: {
-                                target: "es2022",
-                                minify: {
-                                    compress: true,
-                                    mangle: true,
-                                },
-                                parser: {
-                                    syntax: "typescript",
-                                    tsx: true,
-                                    topLevelAwait: true,
-                                    dynamicImport: true,
-                                },
-                                transform: {
-                                    react: {
-                                        runtime: "automatic",
-                                        refresh: isDevelopment,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                ],
+                loader: "esbuild-loader",
+                options: {
+                    target: "ESNext",
+                },
             },
             {
                 test: /\.svg$/,

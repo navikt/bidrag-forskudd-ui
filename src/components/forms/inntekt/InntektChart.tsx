@@ -1,7 +1,7 @@
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React, { memo } from "react";
 
-import { SummertMaanedsinntekt } from "../../../api/BidragInntektApi";
+import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../utils/date-utils";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { capitalize } from "../../../utils/string-utils";
@@ -9,10 +9,10 @@ import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
 
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
-const buildChartOptions = (inntekt: SummertMaanedsinntekt[]): EChartsOption => {
+const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
     const today = new Date();
     const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 12 : 13), 12);
-    const past12Incomes = (inntekt: SummertMaanedsinntekt[]) =>
+    const past12Incomes = (inntekt: SummertManedsinntekt[]) =>
         past12Months.map((date) => {
             const incomeForThatMonth = inntekt.find((periode) =>
                 // @ts-ignore
@@ -22,7 +22,7 @@ const buildChartOptions = (inntekt: SummertMaanedsinntekt[]): EChartsOption => {
             return incomeForThatMonth ?? null;
         });
 
-    const getTotalPerPeriode = (inntekt: SummertMaanedsinntekt[]) =>
+    const getTotalPerPeriode = (inntekt: SummertManedsinntekt[]) =>
         past12Incomes(inntekt).map((incomeForThatMonth) => (incomeForThatMonth ? incomeForThatMonth.sumInntekt : 0));
 
     return {
@@ -84,6 +84,6 @@ const arePropsEqual = (oldProps, newProps) => {
 };
 
 export const InntektChart = memo(
-    ({ inntekt }: { inntekt: SummertMaanedsinntekt[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
+    ({ inntekt }: { inntekt: SummertManedsinntekt[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
     arePropsEqual
 );

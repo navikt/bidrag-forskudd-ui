@@ -300,8 +300,8 @@ const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
 };
 
 export const useGrunnlagspakke = (behandling: BehandlingDto) => {
-    const grunnlagspakkeId = behandling?.grunnlagspakkeId
-        ? behandling.grunnlagspakkeId
+    const grunnlagspakkeId = behandling?.grunnlagspakkeid
+        ? behandling.grunnlagspakkeid
         : useCreateGrunnlagspakke(behandling);
     const grunnlagRequest = createGrunnlagRequest(behandling);
     const { isSuccess: updateIsSuccess } = useQuery({
@@ -343,8 +343,8 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
 
     const behandling: BehandlingDto = queryClient.getQueryData(["behandling", behandlingId]);
 
-    if (behandling?.grunnlagspakkeId) {
-        queryClient.setQueryData(["grunnlagspakkeId"], behandling.grunnlagspakkeId);
+    if (behandling?.grunnlagspakkeid) {
+        queryClient.setQueryData(["grunnlagspakkeId"], behandling.grunnlagspakkeid);
     } else {
         await queryClient.prefetchQuery({
             queryKey: ["grunnlagspakkeId"],
@@ -360,7 +360,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
         await BEHANDLING_API.api.updateBehandling(behandlingId, { grunnlagspakkeId });
-        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeId: grunnlagspakkeId });
+        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeid: grunnlagspakkeId });
     }
 
     const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);

@@ -1,6 +1,6 @@
 import {
     BehandlingDto,
-    BehandlingType,
+    Behandlingstype,
     RolleDtoRolleType,
     SoknadType,
     SoktAvType,
@@ -9,15 +9,15 @@ import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {
     id: 1,
-    soknadId: 1234,
+    soknadsid: 1234,
     erVedtakFattet: false,
-    behandlingType: BehandlingType.FORSKUDD,
-    soknadType: SoknadType.INNKREVING,
+    behandlingtype: Behandlingstype.FORSKUDD,
+    søknadstype: SoknadType.INNKREVING,
     datoFom: "2019-04-01",
     datoTom: "2019-10-03",
     mottatDato: "2019-11-03",
     saksnummer: "2300138",
-    behandlerEnhet: "4806",
+    behandlerenhet: "4806",
     soknadFraType: SoktAvType.BIDRAGSMOTTAKER,
     roller: [
         {
@@ -45,29 +45,29 @@ export const behandlingMockApiData: BehandlingDto = {
             opprettetDato: "2023-06-14T11:33:06.769Z",
         },
     ],
-    husstandsBarn: [
+    husstandsbarn: [
         {
             id: 1,
-            medISaken: true,
+            medISak: true,
             perioder: [],
             ident: "03522150877",
             navn: generateName(),
-            foedselsDato: "2023-05-02",
+            foedselsdato: "2023-05-02",
         },
         {
             id: 4,
-            medISaken: true,
+            medISak: true,
             perioder: [],
             ident: "07512150855",
             navn: generateName(),
-            foedselsDato: "2023-05-02",
+            foedselsdato: "2023-05-02",
         },
     ],
     sivilstand: [],
-    virkningsTidspunktBegrunnelseMedIVedtakNotat: "",
-    virkningsTidspunktBegrunnelseKunINotat: "",
-    boforholdBegrunnelseMedIVedtakNotat: "",
-    boforholdBegrunnelseKunINotat: "",
-    inntektBegrunnelseMedIVedtakNotat: "",
-    inntektBegrunnelseKunINotat: "",
+    virkningstidspunktBegrunnelseMedIVedtaksnotat: "",
+    virkningstidspunktBegrunnelseKunINotat: "",
+    boforholdsbegrunnelseMedIVedtaksnotat: "",
+    boforholdsbegrunnelseKunINotat: "",
+    inntektsbegrunnelseMedIVedtaksnotat: "",
+    inntektsbegrunnelseKunINotat: "",
 };

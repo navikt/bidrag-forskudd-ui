@@ -34,8 +34,8 @@ export const deductMonths = (date: Date, months: number) => {
 
 export const lastDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 export const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-
-export const isValidDate = (date: any): boolean => !!(date && date instanceof Date && isFinite(date.getTime()));
+export const isValidDate = (date: unknown | Date): boolean =>
+    !!(date && date instanceof Date && isFinite(date.getTime()));
 
 export const toDateString = (date: Date) => date.toLocaleDateString("no-NO", { dateStyle: "short" });
 
