@@ -7,11 +7,13 @@ import { useParams } from "react-router-dom";
 
 import { Grunnlag, ResultatPeriode, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
 import { OpprettGrunnlagRequestDto } from "../../../api/BidragVedtakApi";
+import { PersonDto } from "../../../api/PersonApi";
 import { BEHANDLING_API, BIDRAG_VEDTAK_API } from "../../../constants/api";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import environment from "../../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import {
     mapBehandlingReferanseliste,
     mapGrunnlagPersonInfo,
@@ -23,16 +25,19 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
+import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
     return {
         referanse: grunnlag.referanse,
+        // @ts-ignore
         type: grunnlag.type,
         innhold: grunnlag.innhold,
     };
 }
 
 const Vedtak = () => {
+    const { isFatteVedtakEnabled } = useFeatureToogle();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
@@ -44,6 +49,7 @@ const Vedtak = () => {
         select: (data) => data.data,
         enabled: !isAvslag,
     });
+
     const fatteVedtakFn = useMutation({
         mutationFn: async () => {
             if (process.env.DISABLE_FATTE_VEDTAK == "true") return;
@@ -69,13 +75,13 @@ const Vedtak = () => {
                         //TODO: Inntekter må inkludere rolle (BIDRAGSMOTTAKER, BIDRAGSPLIKTIG, BARN)
                         //TODO: Skal barn i samme hustand men ikke i søknaden tas med i grunnlagslisten? (Kan feks i framtiden klage over feil tall på barn i hustand)
                         ...uniqueByKey(grunnlagListe, "referanse").map(grunnlagTilOpprettGrunnlagRequestDto),
-                        ...mapGrunnlagPersonInfo(behandling, personInfoListe),
+                        ...mapGrunnlagPersonInfo(behandling, personInfoListe as PersonDto[]),
                     ],
                     stonadsendringListe: beregnetForskudd.resultat.map((resultat) => ({
                         type: behandling.behandlingtype,
                         sakId: saksnummer,
                         skyldnerId: "NAV",
-                        kravhaverId: resultat.ident,
+                        kravhaverId: resultat.referanseTilBarn,
                         innkreving: "JA",
                         endring: false,
                         mottakerId: bidragsMottaker.ident,
@@ -144,11 +150,12 @@ const Vedtak = () => {
                 {behandling &&
                     beregnetForskudd &&
                     beregnetForskudd.resultat?.map((r, i) => (
-                        <div key={i + r.ident} className="mb-8">
+                        <div key={i + r.referanseTilBarn} className="mb-8">
                             <div className="my-4 flex items-center gap-x-2">
                                 <RolleTag rolleType={RolleDtoRolleType.BARN} />
                                 <BodyShort>
-                                    <PersonNavn ident={r.ident}></PersonNavn> / <span className="ml-1">{r.ident}</span>
+                                    <PersonNavn ident={r.referanseTilBarn}></PersonNavn> /{" "}
+                                    <span className="ml-1">{r.referanseTilBarn}</span>
                                 </BodyShort>
                             </div>
                             <Table>
@@ -238,10 +245,10 @@ const Vedtak = () => {
                     </Alert>
                     <FlexRow>
                         <Button
-                            loading={fatteVedtakFn.isLoading}
+                            loading={fatteVedtakFn.isPending}
                             disabled={
                                 (beregnetForskudd && beregnetForskudd.feil && beregnetForskudd.feil.length > 0) ||
-                                process.env.DISABLE_FATTE_VEDTAK == "true"
+                                !isFatteVedtakEnabled
                             }
                             onClick={() => fatteVedtakFn.mutate()}
                             className="w-max"
@@ -252,7 +259,7 @@ const Vedtak = () => {
                         <Button
                             type="button"
                             loading={false}
-                            disabled={fatteVedtakFn.isLoading}
+                            disabled={fatteVedtakFn.isPending}
                             variant="secondary"
                             onClick={() => {
                                 RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
@@ -270,6 +277,10 @@ const Vedtak = () => {
 };
 
 export default () => {
+    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
+    if (!isVedtakSkjermbildeEnabled) {
+        return <UnderArbeidAlert />;
+    }
     return (
         <QueryErrorWrapper>
             <Vedtak />

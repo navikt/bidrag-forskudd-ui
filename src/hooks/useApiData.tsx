@@ -27,6 +27,7 @@ import { TransformerInntekterRequest, TransformerInntekterResponse } from "../ap
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
+import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
     updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
@@ -328,6 +329,8 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
+    const { isInntektSkjermbildeEnabled } = useFeatureToogle();
+
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
         queryKey: ["behandling", behandlingId],
@@ -383,19 +386,21 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         staleTime: Infinity,
     });
 
-    const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
-    const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
+    if (isInntektSkjermbildeEnabled) {
+        const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
+        const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
 
-    bidragIncomeRequests.forEach((request) => {
-        queryClient.prefetchQuery({
-            queryKey: ["bidraginntekt", request.ident],
-            queryFn: async () => {
-                const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
-                return data;
-            },
-            staleTime: Infinity,
+        bidragIncomeRequests.forEach((request) => {
+            queryClient.prefetchQuery({
+                queryKey: ["bidraginntekt", request.ident],
+                queryFn: async () => {
+                    const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
+                    return data;
+                },
+                staleTime: Infinity,
+            });
         });
-    });
+    }
 };
 
 export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
