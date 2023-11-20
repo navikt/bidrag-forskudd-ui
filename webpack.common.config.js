@@ -22,7 +22,7 @@ module.exports = {
     optimization: {
         minimizer: [
             new EsbuildPlugin({
-                target: "es2022",
+                target: "ESNext",
                 minify: false,
                 format: "esm",
                 sourcemap: true,
@@ -46,7 +46,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "esbuild-loader",
                 options: {
-                    target: "es2022",
+                    target: "ESNext",
                 },
             },
             {
