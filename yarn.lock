@@ -2464,6 +2464,13 @@ esbuild-loader@4.0.2:
     loader-utils "^2.0.4"
     webpack-sources "^1.4.3"
 
+esbuild-register@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/esbuild-register/-/esbuild-register-3.5.0.tgz#449613fb29ab94325c722f560f800dd946dc8ea8"
+  integrity sha512-+4G/XmakeBAsvJuDugJvtyF1x+XJT4FMocynNpxrvEBViirpfUn2PgNpCHedfWhF4WokNsO/OvMKrmJOIJsI5A==
+  dependencies:
+    debug "^4.3.4"
+
 esbuild@^0.19.0:
   version "0.19.6"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.19.6.tgz#baa0e8b6b9e655c54ffd57f1772e44677a7931cc"
