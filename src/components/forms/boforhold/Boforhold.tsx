@@ -608,7 +608,7 @@ const Perioder = ({
 
         if (perioderValues[index].datoTom !== null) {
             const laterPeriodExists = perioderValues
-                .filter((periode, i) => i !== index)
+                .filter((_periode, i) => i !== index)
                 .some(
                     (periode) =>
                         periode.datoTom === null ||
@@ -704,9 +704,7 @@ const Perioder = ({
     };
 
     const addPeriode = () => {
-        const otherRowEdited = checkIfAnotherRowIsEdited();
-
-        if (otherRowEdited) {
+        if (checkIfAnotherRowIsEdited()) {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
@@ -721,9 +719,7 @@ const Perioder = ({
     };
 
     const onRemovePeriode = (index: number) => {
-        const otherRowEdited = checkIfAnotherRowIsEdited(index);
-
-        if (otherRowEdited) {
+        if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
@@ -754,9 +750,7 @@ const Perioder = ({
     };
 
     const onEditRow = (index: number) => {
-        const otherRowEdited = checkIfAnotherRowIsEdited(index);
-
-        if (otherRowEdited) {
+        if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
             setEditableRow(`${barnIndex}.${index}`);
