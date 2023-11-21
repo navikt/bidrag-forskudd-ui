@@ -24,6 +24,7 @@ import {
     deductDays,
     deductMonths,
     firstDayOfMonth,
+    isAfterDate,
     lastDayOfMonth,
     periodCoversMinOneFullCalendarMonth,
     toISODateString,
@@ -158,7 +159,7 @@ export const getBarnPerioder = (
     virkningsOrSoktFraDato: Date
 ) => {
     const perioderEtterVirkningstidspunkt = perioder?.filter(
-        ({ tilDato }) => tilDato === null || (tilDato && new Date(tilDato) > virkningsOrSoktFraDato)
+        ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, virkningsOrSoktFraDato))
     );
 
     const result: {
@@ -225,7 +226,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[],
         .map((periodeA) => {
             if (periodeA.datoTom == null && periodeA.datoFom != null) {
                 const nextPeriode = sivilstandListe.find(
-                    (periodeB) => periodeB.datoTom == null && new Date(periodeA.datoFom) < new Date(periodeB.datoFom)
+                    (periodeB) => periodeB.datoTom == null && isAfterDate(periodeB.datoFom, periodeA.datoFom)
                 );
                 return {
                     ...periodeA,
@@ -238,7 +239,9 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[],
         })
         .filter(
             (periode) =>
-                periode?.datoFom === null || periode?.datoTom === null || new Date(periode.datoTom) > new Date(datoFom)
+                periode?.datoFom === null ||
+                periode?.datoTom === null ||
+                (periode.datoTom && isAfterDate(periode.datoTom, datoFom))
         );
 
     //@ts-ignore
@@ -246,7 +249,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[],
         .map((periode) => {
             const periodDatoFom =
                 periode.datoFom != null
-                    ? new Date(periode.datoFom) < new Date(datoFom)
+                    ? isAfterDate(datoFom, periode.datoFom)
                         ? datoFom
                         : new Date(periode.datoFom)
                     : null;
@@ -258,7 +261,7 @@ export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[],
             };
         })
         .sort((periodeA, periodeB) =>
-            periodeB.datoFom == null ? 1 : new Date(periodeA.datoFom) > new Date(periodeB.datoFom) ? 1 : -1
+            periodeB.datoFom == null ? 1 : isAfterDate(periodeA.datoFom, periodeB.datoFom) ? 1 : -1
         );
 };
 
@@ -293,7 +296,7 @@ export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: 
         for (let j = i + 1; j < perioder.length; j++) {
             if (
                 perioder[i].datoTom === null ||
-                new Date(perioder[i].datoTom).getTime() >= new Date(perioder[j].datoFom).getTime()
+                (perioder[i].datoTom && isAfterDate(perioder[i].datoTom, perioder[j].datoFom))
             ) {
                 overlappingPeriods.push([`${perioder[i].datoTom}`, `${perioder[j].datoFom}`]);
             }
@@ -327,8 +330,7 @@ export function editPeriods(
     const postPeriodIndex = editedPeriod.datoTom
         ? periods.findIndex(
               (period) =>
-                  period.datoTom === null ||
-                  new Date(period.datoTom).getTime() > new Date(editedPeriod.datoTom).getTime()
+                  period.datoTom === null || (period.datoTom && isAfterDate(period.datoTom, editedPeriod.datoTom))
           )
         : -1;
 

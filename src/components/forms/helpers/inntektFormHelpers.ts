@@ -15,7 +15,7 @@ import {
     ytelsePerioder,
 } from "../../../constants/inntektene";
 import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
-import { addDays, deductDays, isValidDate, toISODateString } from "../../../utils/date-utils";
+import { addDays, deductDays, isAfterDate, isValidDate, toISODateString } from "../../../utils/date-utils";
 
 export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
     inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
@@ -69,7 +69,7 @@ const mapInntekterToRolle =
                     inntekt
                 ),
             }))
-            .sort((a, b) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1));
+            .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
 // TODO: Midlertidlig løsning helt til visningsnavn lagres i backend
 const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntekt: InntektDto) =>
@@ -103,7 +103,7 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
                         inntektPostListe: inntekt.inntektPostListe,
                     };
                 })
-                .sort((a: Inntekt, b: Inntekt) => (new Date(a.datoFom) > new Date(b.datoFom) ? 1 : -1)) as Inntekt[],
+                .sort((a: Inntekt, b: Inntekt) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1)) as Inntekt[],
         }),
         {}
     );

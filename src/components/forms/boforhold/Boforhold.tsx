@@ -53,8 +53,10 @@ import {
 import {
     dateOrNull,
     DateToDDMMYYYYString,
+    isAfterDate,
     ISODateTimeStringToDDMMYYYYString,
     isValidDate,
+    toDateString,
     toISODateString,
 } from "../../../utils/date-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
@@ -87,17 +89,17 @@ const Opplysninger = ({
     datoFom,
     ident,
 }: {
-    opplysninger: Array<HusstandOpplysningFraFolkeRegistre | SavedHustandOpplysninger>;
+    opplysninger: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     datoFom: Date | null;
     ident: string;
 }) => {
-    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)?.perioder as Array<
-        HusstandOpplysningPeriode | SavedOpplysningFraFolkeRegistrePeriode
-    >;
+    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)?.perioder as
+        | HusstandOpplysningPeriode[]
+        | SavedOpplysningFraFolkeRegistrePeriode[];
     return (
         <>
             {perioder
-                ?.filter((periode) => periode.tilDato === null || new Date(periode.tilDato) > new Date(datoFom))
+                ?.filter((periode) => periode.tilDato === null || isAfterDate(periode.tilDato, datoFom))
                 .map((periode, index) => (
                     <div
                         key={`${periode.boStatus}-${index}`}
@@ -630,11 +632,11 @@ const Perioder = ({
 
         const periods = editPeriods(perioderValues, index);
         const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
-        const virkningsDatoIsInFuture = virkningstidspunkt > firstDayOfCurrentMonth;
+        const virkningsDatoIsInFuture = isAfterDate(virkningstidspunkt, firstDayOfCurrentMonth);
         const futurePeriodExists = periods.some((periode) =>
             virkningsDatoIsInFuture
-                ? new Date(periode.datoFom).getTime() > virkningstidspunkt.getTime()
-                : new Date(periode.datoFom).getTime() > firstDayOfCurrentMonth.getTime()
+                ? isAfterDate(periode.datoFom, virkningstidspunkt)
+                : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
         );
 
         if (futurePeriodExists) {
@@ -643,15 +645,14 @@ const Perioder = ({
             return;
         }
 
-        const firstPeriodIsNotFromVirkningsTidspunkt =
-            new Date(periods[0].datoFom).getTime() > virkningstidspunkt.getTime();
+        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, virkningstidspunkt);
 
         if (firstPeriodIsNotFromVirkningsTidspunkt) {
             setErrorMessage({
                 title: "Feil i periodisering",
-                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toISODateString(
+                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toDateString(
                     virkningstidspunkt
-                )} til ${periods[0].datoFom}`,
+                )} til ${toDateString(new Date(periods[0].datoFom))}`,
             });
             setErrorModalOpen(true);
             return;
@@ -688,10 +689,10 @@ const Perioder = ({
 
     const validateFomOgTom = (index: number) => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
-
         const fomOgTomInvalid =
             perioderValues[index].datoTom !== null &&
-            new Date(perioderValues[index].datoTom) < new Date(perioderValues[index].datoFom);
+            isAfterDate(perioderValues[index].datoFom, perioderValues[index].datoTom);
+
         if (fomOgTomInvalid) {
             setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
