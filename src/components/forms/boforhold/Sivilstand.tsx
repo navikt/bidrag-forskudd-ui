@@ -9,7 +9,7 @@ import { KildeTexts } from "../../../enum/KildeTexts";
 import { SivilstandTypeTexts } from "../../../enum/SivilstandTypeTexts";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
@@ -52,12 +52,11 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
         };
     });
 
-    const validateFomOgTom = (date, index, field) => {
+    const validateFomOgTom = (index) => {
         const sivilstandPerioder = getValues("sivilstand");
         const fomOgTomInvalid =
-            field === "datoFom"
-                ? sivilstandPerioder[index].datoTom && date > sivilstandPerioder[index].datoTom
-                : sivilstandPerioder[index].datoFom && date < sivilstandPerioder[index].datoFom;
+            sivilstandPerioder[index].datoTom !== null &&
+            isAfterDate(sivilstandPerioder[index].datoFom, sivilstandPerioder[index].datoTom);
 
         if (fomOgTomInvalid) {
             setError(`sivilstand.${index}.datoFom`, {
@@ -138,7 +137,7 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoFom")}
+                                        customValidation={() => validateFomOgTom(index)}
                                         fromDate={fom}
                                         toDate={tom}
                                         hideLabel
@@ -156,7 +155,7 @@ const SivilistandPerioder = ({ datoFom }: { datoFom: Date | null }) => {
                                         label="Periode"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
-                                        customValidation={(date) => validateFomOgTom(date, index, "datoTom")}
+                                        customValidation={() => validateFomOgTom(index)}
                                         fromDate={fom}
                                         toDate={tom}
                                         lastDayOfMonthPicker

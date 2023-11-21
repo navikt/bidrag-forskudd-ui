@@ -1,20 +1,19 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import { BehandlingDto, ForskuddAarsakType } from "../../../api/BidragBehandlingApi";
-import { deductMonths, firstDayOfMonth } from "../../../utils/date-utils";
+import { deductMonths, firstDayOfMonth, isAfterDate } from "../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
-    return soktFraDato.getTime() > mottatDato.getTime() ? soktFraDato : mottatDato;
+    return isAfterDate(soktFraDato, mottatDato) ? soktFraDato : mottatDato;
 };
 export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | string, behandling: BehandlingDto) => {
     const soktFraDato = new Date(behandling.datoFom);
     const mottatDato = new Date(behandling.mottatDato);
     const mottatOrSoktFraDato = getSoktFraOrMottatDato(soktFraDato, mottatDato);
     const treMaanederTilbakeFraMottatDato = firstDayOfMonth(deductMonths(mottatDato, 3));
-    const treMaanederTilbake =
-        soktFraDato.getTime() > treMaanederTilbakeFraMottatDato.getTime()
-            ? firstDayOfMonth(soktFraDato)
-            : treMaanederTilbakeFraMottatDato;
+    const treMaanederTilbake = isAfterDate(soktFraDato, treMaanederTilbakeFraMottatDato)
+        ? firstDayOfMonth(soktFraDato)
+        : treMaanederTilbakeFraMottatDato;
 
     switch (aarsak) {
         // Fra kravfremsettelse
@@ -22,7 +21,7 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | st
             return firstDayOfMonth(mottatOrSoktFraDato);
         // 3 måneder tilbake
         case ForskuddAarsakType.EF:
-            return new Date().getTime() > soktFraDato.getTime() ? treMaanederTilbake : null;
+            return isAfterDate(new Date(), soktFraDato) ? treMaanederTilbake : null;
         // Fra søknadstidspunkt
         case ForskuddAarsakType.HF:
             return firstDayOfMonth(soktFraDato);
@@ -31,8 +30,11 @@ export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | st
     }
 };
 
-export const getFomAndTomForMonthPicker = (virkningstidspunkt) => {
-    const virkningstidspunktIsInFuture = firstDayOfMonth(new Date(virkningstidspunkt)) > firstDayOfMonth(new Date());
+export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
+    const virkningstidspunktIsInFuture = isAfterDate(
+        firstDayOfMonth(new Date(virkningstidspunkt)),
+        firstDayOfMonth(new Date())
+    );
     const fom = virkningstidspunktIsInFuture
         ? firstDayOfMonth(new Date())
         : firstDayOfMonth(new Date(virkningstidspunkt));
