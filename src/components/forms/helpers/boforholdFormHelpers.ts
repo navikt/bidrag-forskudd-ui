@@ -415,10 +415,12 @@ export function editPeriods(
     }
 }
 
-export const removeAndEditPeriods = (
-    periodsList: HusstandsBarnPeriodeDto[],
+export function removeAndEditPeriods(periodsList: HusstandsBarnPeriodeDto[], index: number): HusstandsBarnPeriodeDto[];
+export function removeAndEditPeriods(periodsList: SivilstandDto[], index: number): SivilstandDto[];
+export function removeAndEditPeriods(
+    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[],
     index: number
-): HusstandsBarnPeriodeDto[] => {
+): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
     const periodToRemove = periodsList[index];
     const prevPeriod = periodsList[index - 1];
     const postPeriod = periodsList[index + 1];
@@ -426,8 +428,14 @@ export const removeAndEditPeriods = (
     prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : periodToRemove.datoTom;
     prevPeriod.kilde = Kilde.MANUELT;
 
-    return periodsList.filter((_, i) => i !== index && i !== index + 1);
-};
+    if ("boStatus" in periodToRemove) {
+        return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsBarnPeriodeDto[];
+    }
+
+    if ("sivilstandType" in periodToRemove) {
+        return periodsList.filter((_, i) => i !== index && i !== index + 1) as SivilstandDto[];
+    }
+}
 
 export const compareOpplysninger = (
     savedOpplysninger: ParsedBoforholdOpplysninger,
