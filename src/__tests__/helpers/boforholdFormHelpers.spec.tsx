@@ -837,7 +837,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: null,
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-06-01",
@@ -864,7 +864,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: null,
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -895,13 +895,13 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-03-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -910,7 +910,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-03-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -958,7 +958,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -973,7 +973,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
@@ -1026,7 +1026,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1035,7 +1035,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-04-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1070,7 +1070,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-06-30",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1079,13 +1079,13 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-04-01",
                 datoTom: "2022-06-30",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
@@ -1114,7 +1114,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
@@ -1129,19 +1129,19 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1164,7 +1164,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
@@ -1179,7 +1179,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-04-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1217,19 +1217,19 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1252,7 +1252,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
@@ -1264,7 +1264,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-08-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1273,7 +1273,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-04-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1309,7 +1309,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 
@@ -1324,19 +1324,19 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-08-01",
                 datoTom: "2021-08-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-11-01",
                 datoTom: "2021-12-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
@@ -1381,13 +1381,13 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-04-01",
                 datoTom: "2021-08-31",
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-12-31",
                 boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
@@ -1432,7 +1432,7 @@ describe("BoforholdFormHelpers", () => {
                 datoFom: "2021-04-01",
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             },
         ];
 

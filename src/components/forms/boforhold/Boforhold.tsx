@@ -370,7 +370,7 @@ const AddBarnForm = ({
                     datoFom: toISODateString(datoFom),
                     datoTom: null,
                     boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                    kilde: Kilde.MANUELT,
+                    kilde: Kilde.MANUELL,
                 },
             ],
         };
@@ -712,7 +712,7 @@ const Perioder = ({
                 datoFom: null,
                 datoTom: null,
                 boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             });
             setEditableRow(`${barnIndex}.${perioderValues.length}`);
         }
