@@ -8,6 +8,8 @@ import {
     editPeriods,
     fillInPeriodGaps,
     getBarnPerioderFromHusstandsListe,
+    getSivilstandPerioder,
+    mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
 } from "../../components/forms/helpers/boforholdFormHelpers";
 import { toISODateString } from "../../utils/date-utils";
@@ -1440,6 +1442,262 @@ describe("BoforholdFormHelpers", () => {
 
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should map to a correct type and build sivilstand perioder", () => {
+        const sivilstandListe = [
+            {
+                personId: "10089229435",
+                periodeFra: "2018-04-14",
+                periodeTil: "2023-09-19",
+                sivilstand: "GIFT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2023-09-19",
+                periodeTil: null,
+                sivilstand: "SEPARERT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                sivilstandType: "GIFT",
+                datoFom: "2019-05-01",
+                datoTom: "2023-08-31",
+                kilde: "OFFENTLIG",
+            },
+            {
+                sivilstandType: "BOR_ALENE_MED_BARN",
+                datoFom: "2023-09-01",
+                datoTom: null,
+                kilde: "OFFENTLIG",
+            },
+        ];
+
+        const sivilstandPerioderWithNarrowedStatus = mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe);
+        const sivilstandPerioder = getSivilstandPerioder(sivilstandPerioderWithNarrowedStatus, new Date("2019-05-01"));
+
+        expect(sivilstandPerioder.length).equals(expectedResult.length);
+        sivilstandPerioder.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should map to a correct type and merge sivilstand perioder with same status", () => {
+        const sivilstandListe = [
+            {
+                personId: "10089229435",
+                periodeFra: "2018-04-14",
+                periodeTil: "2021-09-19",
+                sivilstand: "GIFT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2021-09-19",
+                periodeTil: "2021-11-15",
+                sivilstand: "SAMBOER" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2021-11-15",
+                periodeTil: "2022-04-03",
+                sivilstand: "SEPARERT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-04-03",
+                periodeTil: "2022-07-31",
+                sivilstand: "ENKE_ELLER_ENKEMANN" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-04-03",
+                periodeTil: "2022-07-31",
+                sivilstand: "ENSLIG" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-07-31",
+                periodeTil: "2022-09-15",
+                sivilstand: "SEPARERT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-09-15",
+                periodeTil: null,
+                sivilstand: "REGISTRERT_PARTNER" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                sivilstandType: "GIFT",
+                datoFom: "2019-05-01",
+                datoTom: "2021-10-31",
+                kilde: "OFFENTLIG",
+            },
+            {
+                sivilstandType: "BOR_ALENE_MED_BARN",
+                datoFom: "2021-11-01",
+                datoTom: "2022-08-31",
+                kilde: "OFFENTLIG",
+            },
+            {
+                sivilstandType: "GIFT",
+                datoFom: "2022-09-01",
+                datoTom: null,
+                kilde: "OFFENTLIG",
+            },
+        ];
+
+        const sivilstandPerioderWithNarrowedStatus = mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe);
+        const sivilstandPerioder = getSivilstandPerioder(sivilstandPerioderWithNarrowedStatus, new Date("2019-05-01"));
+
+        expect(sivilstandPerioder.length).equals(expectedResult.length);
+        sivilstandPerioder.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
+
+    it("should set virkningsdato if null is set on first sivilstand period periodeFra date", () => {
+        const sivilstandListe = [
+            {
+                personId: "10089229435",
+                periodeFra: null,
+                periodeTil: "2021-09-19",
+                sivilstand: "GIFT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2021-09-19",
+                periodeTil: "2021-11-15",
+                sivilstand: "SAMBOER" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2021-11-15",
+                periodeTil: "2022-04-03",
+                sivilstand: "SEPARERT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-04-03",
+                periodeTil: "2022-07-31",
+                sivilstand: "ENKE_ELLER_ENKEMANN" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-04-03",
+                periodeTil: "2022-07-31",
+                sivilstand: "ENSLIG" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-07-31",
+                periodeTil: "2022-09-15",
+                sivilstand: "SEPARERT" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+            {
+                personId: "10089229435",
+                periodeFra: "2022-09-15",
+                periodeTil: null,
+                sivilstand: "REGISTRERT_PARTNER" as const,
+                aktiv: true,
+                brukFra: "2023-11-22T09:35:10.24192",
+                brukTil: null,
+                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                sivilstandType: "GIFT",
+                datoFom: "2019-05-01",
+                datoTom: "2021-10-31",
+                kilde: "OFFENTLIG",
+            },
+            {
+                sivilstandType: "BOR_ALENE_MED_BARN",
+                datoFom: "2021-11-01",
+                datoTom: "2022-08-31",
+                kilde: "OFFENTLIG",
+            },
+            {
+                sivilstandType: "GIFT",
+                datoFom: "2022-09-01",
+                datoTom: null,
+                kilde: "OFFENTLIG",
+            },
+        ];
+
+        const sivilstandPerioderWithNarrowedStatus = mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe);
+        const sivilstandPerioder = getSivilstandPerioder(sivilstandPerioderWithNarrowedStatus, new Date("2019-05-01"));
+
+        expect(sivilstandPerioder.length).equals(expectedResult.length);
+        sivilstandPerioder.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
         );
     });

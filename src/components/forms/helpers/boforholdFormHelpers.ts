@@ -1,5 +1,3 @@
-import { isLastDayOfMonth } from "@navikt/bidrag-ui-common";
-
 import {
     BoforholdResponse,
     BoStatusType,
@@ -23,7 +21,6 @@ import {
     dateOrNull,
     deductDays,
     deductMonths,
-    firstDayOfMonth,
     isAfterDate,
     lastDayOfMonth,
     periodCoversMinOneFullCalendarMonth,
@@ -164,7 +161,7 @@ export const getBarnPerioder = (
 
     const result: {
         boStatus: BoStatusType;
-        kilde: Kilde.OFFENTLIG;
+        kilde: Kilde;
         datoFom: string;
         datoTom: string | null;
     }[] = [];
@@ -196,14 +193,58 @@ export const getBarnPerioder = (
                 result.push({
                     boStatus,
                     datoFom,
-                    datoTom: tilDato
-                        ? isLastDayOfMonth(new Date(tilDato))
-                            ? toISODateString(new Date(tilDato))
-                            : toISODateString(lastDayOfMonth(deductMonths(new Date(tilDato), 1)))
-                        : null,
+                    datoTom: tilDato ? toISODateString(new Date(tilDato)) : null,
                     kilde: Kilde.OFFENTLIG,
                 });
             }
+        }
+    });
+
+    return result;
+};
+const periodIsAfterVirkningstidspunkt =
+    (virkningsOrSoktFraDato: Date) =>
+    ({ datoTom }: { datoTom: string }) =>
+        datoTom === null || (datoTom && isAfterDate(datoTom, virkningsOrSoktFraDato));
+export const getSivilstandPerioder = (
+    sivilstandListe: SivilstandOpplysninger[],
+    virkningsOrSoktFraDato: Date
+): SivilstandDto[] => {
+    const perioderEtterVirkningstidspunkt = sivilstandListe?.filter(
+        periodIsAfterVirkningstidspunkt(virkningsOrSoktFraDato)
+    );
+
+    const result: {
+        sivilstandType: SivilstandType;
+        kilde: Kilde;
+        datoFom: string;
+        datoTom: string | null;
+    }[] = [];
+    perioderEtterVirkningstidspunkt?.forEach(({ datoTom, sivilstandType }) => {
+        const prevPeriode = result[result.length - 1];
+        const hasSameStatus = prevPeriode?.sivilstandType === sivilstandType;
+        const coversAtLeastOneCalendarMonth = datoTom
+            ? periodCoversMinOneFullCalendarMonth(new Date(datoTom), new Date(datoTom))
+            : true;
+        const tilDato = coversAtLeastOneCalendarMonth
+            ? toISODateString(dateOrNull(datoTom))
+            : toISODateString(lastDayOfMonth(deductMonths(new Date(datoTom), 1)));
+
+        if (hasSameStatus) {
+            prevPeriode.datoTom = tilDato;
+        }
+
+        if (!hasSameStatus) {
+            result.push({
+                sivilstandType,
+                datoFom: toISODateString(
+                    result.length === 0
+                        ? virkningsOrSoktFraDato
+                        : addDays(new Date(result[result.length - 1].datoTom), 1)
+                ),
+                datoTom: tilDato,
+                kilde: Kilde.OFFENTLIG,
+            });
         }
     });
 
@@ -218,51 +259,6 @@ export const getBarnPerioderFromHusstandsListe = (
         medISak: true,
         perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato),
     }));
-};
-
-export const getSivilstandPerioder = (sivilstandListe: SivilstandOpplysninger[], datoFom: Date): SivilstandDto[] => {
-    // Sometimes one person can have multiple running sivisltand with periodeTil = null. Adjust the data to have correct periodeTil
-    const sivilstandListeWithValidPeriodeTil = sivilstandListe
-        .map((periodeA) => {
-            if (periodeA.datoTom == null && periodeA.datoFom != null) {
-                const nextPeriode = sivilstandListe.find(
-                    (periodeB) => periodeB.datoTom == null && isAfterDate(periodeB.datoFom, periodeA.datoFom)
-                );
-                return {
-                    ...periodeA,
-                    periodeTil: nextPeriode?.datoFom
-                        ? lastDayOfMonth(deductMonths(new Date(nextPeriode.datoFom), 1))
-                        : null,
-                };
-            }
-            return periodeA;
-        })
-        .filter(
-            (periode) =>
-                periode?.datoFom === null ||
-                periode?.datoTom === null ||
-                (periode.datoTom && isAfterDate(periode.datoTom, datoFom))
-        );
-
-    //@ts-ignore
-    return sivilstandListeWithValidPeriodeTil
-        .map((periode) => {
-            const periodDatoFom =
-                periode.datoFom != null
-                    ? isAfterDate(datoFom, periode.datoFom)
-                        ? datoFom
-                        : new Date(periode.datoFom)
-                    : null;
-            return {
-                sivilstandType: periode.sivilstandType,
-                datoFom: periodDatoFom != null ? toISODateString(firstDayOfMonth(periodDatoFom)) : null,
-                datoTom: periode.datoTom != null ? toISODateString(new Date(periode.datoTom)) : null,
-                kilde: Kilde.OFFENTLIG,
-            };
-        })
-        .sort((periodeA, periodeB) =>
-            periodeB.datoFom == null ? 1 : isAfterDate(periodeA.datoFom, periodeB.datoFom) ? 1 : -1
-        );
 };
 
 export const createInitialValues = (
