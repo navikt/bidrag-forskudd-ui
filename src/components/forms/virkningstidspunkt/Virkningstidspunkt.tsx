@@ -76,7 +76,7 @@ const Main = ({ initialValues, error }) => {
 
     useEffect(() => {
         if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
-            const boforholdPeriodsExist = boforhold.husstandsBarn[0].perioder.length;
+            const boforholdPeriodsExist = boforhold?.husstandsBarn[0]?.perioder.length;
             if (boforholdPeriodsExist) {
                 setShowChangedVirkningsDatoAlert(true);
             }
