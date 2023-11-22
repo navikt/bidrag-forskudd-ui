@@ -1,4 +1,4 @@
 export enum KildeTexts {
     OFFENTLIG = "Offentlig",
-    MANUELT = "Manuell",
+    MANUELL = "Manuell",
 }

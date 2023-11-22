@@ -66,7 +66,7 @@ export enum ForskuddAarsakType {
 }
 
 export enum Kilde {
-    MANUELT = "MANUELT",
+    MANUELL = "MANUELL",
     OFFENTLIG = "OFFENTLIG",
 }
 

@@ -156,7 +156,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 datoFom: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
                 datoTom: null,
                 sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
-                kilde: Kilde.MANUELT,
+                kilde: Kilde.MANUELL,
             });
             setEditableRow(sivilstandPerioderValues.length);
         }

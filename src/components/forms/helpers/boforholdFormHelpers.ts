@@ -319,7 +319,7 @@ export function editPeriods(
     periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[],
     periodeIndex: number
 ): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
-    const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELT };
+    const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
     const statusField = Object.hasOwn(periodsList[0], "boStatus") ? "boStatus" : "sivilstandType";
 
     const periods = periodsList.toSpliced(periodeIndex, 1);
@@ -352,14 +352,14 @@ export function editPeriods(
                     datoFom: prevPeriod.datoFom,
                     datoTom: toISODateString(deductDays(new Date(editedPeriod.datoFom), 1)),
                     [statusField]: prevPeriod[statusField],
-                    kilde: Kilde.MANUELT,
+                    kilde: Kilde.MANUELL,
                 },
                 editedPeriod,
                 {
                     datoFom: toISODateString(addDays(new Date(editedPeriod.datoTom), 1)),
                     datoTom: prevPeriod.datoTom,
                     [statusField]: prevPeriod[statusField],
-                    kilde: Kilde.MANUELT,
+                    kilde: Kilde.MANUELL,
                 },
             ];
 
@@ -388,7 +388,7 @@ export function editPeriods(
             const editedPeriodDatoFomMinusOneDay = toISODateString(deductDays(new Date(editedPeriod.datoFom), 1));
             const adjacentDates = editedPeriodDatoFomMinusOneDay === prevPeriod.datoTom;
             prevPeriod.datoTom = editedPeriodDatoFomMinusOneDay;
-            prevPeriod.kilde = adjacentDates ? prevPeriod.kilde : Kilde.MANUELT;
+            prevPeriod.kilde = adjacentDates ? prevPeriod.kilde : Kilde.MANUELL;
         }
     }
 
@@ -402,7 +402,7 @@ export function editPeriods(
             const editedPeriodDatoTomPlusOneDay = toISODateString(addDays(new Date(editedPeriod.datoTom), 1));
             const adjacentDates = editedPeriodDatoTomPlusOneDay === postPeriod.datoFom;
             postPeriod.datoFom = editedPeriodDatoTomPlusOneDay;
-            postPeriod.kilde = adjacentDates ? postPeriod.kilde : Kilde.MANUELT;
+            postPeriod.kilde = adjacentDates ? postPeriod.kilde : Kilde.MANUELL;
         }
     }
 
@@ -426,7 +426,7 @@ export function removeAndEditPeriods(
     const postPeriod = periodsList[index + 1];
 
     prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : periodToRemove.datoTom;
-    prevPeriod.kilde = Kilde.MANUELT;
+    prevPeriod.kilde = Kilde.MANUELL;
 
     if ("boStatus" in periodToRemove) {
         return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsBarnPeriodeDto[];
