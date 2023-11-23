@@ -128,7 +128,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         setBoforholdFormValues(updatedValues);
         setValue(`sivilstand`, sivilstand);
         saveBoforhold(updatedValues);
-        setEditableRow(null);
+        setEditableRow(undefined);
     };
 
     const validateFomOgTom = (index) => {
