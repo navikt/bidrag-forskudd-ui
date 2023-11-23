@@ -131,14 +131,14 @@ const barnHusstandsData = [
         ],
     },
     {
-        fodselsdato: "2018-06-05",
+        fodselsdato: "2002-06-05",
         borISammeHusstandDtoListe: [
             {
-                periodeFra: "2018-06-05",
-                periodeTil: null,
+                periodeFra: null,
+                periodeTil: "2017-06-05",
             },
             {
-                periodeFra: null,
+                periodeFra: "2018-06-06",
                 periodeTil: "2020-03-01",
             },
             {
@@ -391,12 +391,20 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 brukFra: "2023-06-12T09:49:13.96137",
                 brukTil: null,
                 hentetTidspunkt: "2023-06-12T09:49:13.96137",
-                periodeFra: "1977-08-02",
+                periodeFra: "2023-08-01",
+                periodeTil: "2023-09-19",
+                personId: "02487731725",
+                sivilstand: "GIFT" as const,
+            },
+            {
+                aktiv: true,
+                brukFra: "2023-06-12T09:49:13.96137",
+                brukTil: null,
+                hentetTidspunkt: "2023-06-12T09:49:13.96137",
+                periodeFra: "2023-09-19",
                 periodeTil: null,
                 personId: "02487731725",
-                // TODO remove that once grunnlag swagger types are fixed
-                // @ts-ignore
-                sivilstand: "UGIFT",
+                sivilstand: "UGIFT" as const,
             },
         ],
         barnetilsynListe: [

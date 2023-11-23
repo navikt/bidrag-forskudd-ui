@@ -13,7 +13,7 @@ import {
     TextField,
     VStack,
 } from "@navikt/ds-react";
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
@@ -207,22 +207,29 @@ const Side = () => {
 
 const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
+    const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.BOFORHOLD);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
-    const opplysningerFraFolkRegistre = {
-        husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
-        sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(grunnlagspakke.sivilstandListe),
-    };
-    const updateBoforhold = useUpdateBoforhold(behandlingId);
-    const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const virkningsOrSoktFraDato =
-        dateOrNull(virkningstidspunktValues?.virkningsDato) ?? dateOrNull(behandling?.datoFom);
-
-    const initialValues = createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato);
+    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.BOFORHOLD);
+    const { mutation: updateBoforhold } = useUpdateBoforhold(behandlingId);
+    const opplysningerFraFolkRegistre = useMemo(
+        () => ({
+            husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
+            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(grunnlagspakke.sivilstandListe),
+        }),
+        [grunnlagspakke.husstandmedlemmerOgEgneBarnListe, grunnlagspakke.sivilstandListe]
+    );
+    const virkningsOrSoktFraDato = useMemo(
+        () => dateOrNull(virkningstidspunktValues?.virkningsDato) ?? dateOrNull(behandling?.datoFom),
+        [virkningstidspunktValues?.virkningsDato, behandling?.datoFom]
+    );
+    const initialValues = useMemo(
+        () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
+        [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato]
+    );
     const savedOpplysninger = boforoholdOpplysninger
         ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
         : undefined;
@@ -276,7 +283,7 @@ const BoforholdsForm = () => {
             sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
         };
         useFormMethods.reset(values);
-        updateBoforhold.mutation.mutate(values);
+        updateBoforhold.mutate(values);
         setBoforholdFormValues(values);
         setOpplysningerChanges([]);
     };
@@ -731,7 +738,7 @@ const Perioder = ({
     const resetTilDataFraFreg = () => {
         const barn = getValues(`husstandsBarn.${barnIndex}`);
         const opplysningFraFreg = opplysningerFraFolkRegistre.find((opplysning) => opplysning.ident === barn.ident);
-        const perioderFraFreg = getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt);
+        const perioderFraFreg = getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt, barn.foedselsdato);
         updatedAndSave(perioderFraFreg);
         setShowResetButton(false);
     };
