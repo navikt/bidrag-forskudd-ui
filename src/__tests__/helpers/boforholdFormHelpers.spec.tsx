@@ -71,6 +71,163 @@ describe("BoforholdFormHelpers", () => {
         });
     });
 
+    it("should fill in a period with status REGISTRERT_PA_ADRESSE if there is a gap between foedselsdato and first period has null for periodeFra in Folkeregistre", () => {
+        const egneBarnIHusstand = {
+            partPersonId: "21470262629",
+            relatertPersonPersonId: "07512150855",
+            navn: "",
+            fodselsdato: "2002-05-05",
+            erBarnAvBmBp: true,
+            aktiv: true,
+            brukFra: "2023-10-03",
+            brukTil: null,
+            hentetTidspunkt: "2023-10-03",
+            borISammeHusstandDtoListe: [
+                {
+                    periodeFra: null,
+                    periodeTil: "2017-07-05",
+                },
+                {
+                    periodeFra: "2018-06-06",
+                    periodeTil: "2020-03-01",
+                },
+                {
+                    periodeFra: "2020-05-01",
+                    periodeTil: "2021-07-07",
+                },
+                {
+                    periodeFra: "2022-01-01",
+                    periodeTil: null,
+                },
+            ],
+        };
+        const expectedResult = [
+            {
+                fraDato: new Date("2002-05-05"),
+                tilDato: new Date("2017-07-05"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2017-07-06"),
+                tilDato: new Date("2018-06-05"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2018-06-06"),
+                tilDato: new Date("2020-03-01"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2020-03-02"),
+                tilDato: new Date("2020-04-30"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2020-05-01"),
+                tilDato: new Date("2021-07-07"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2021-07-08"),
+                tilDato: new Date("2021-12-31"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2022-01-01"),
+                tilDato: null,
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+        ];
+        const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
+        expect(husstandsOpplysningerFraFolkRegistre.length).equals(expectedResult.length);
+        husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
+            expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
+            expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
+            expect(husstandsOpplysning.boStatus).equals(expectedResult[i].boStatus);
+        });
+    });
+
+    it("should add a period with status IKKE_REGISTRERT_PA_ADRESSE if last period has periodeTil dato", () => {
+        const egneBarnIHusstand = {
+            partPersonId: "21470262629",
+            relatertPersonPersonId: "07512150855",
+            navn: "",
+            fodselsdato: "2002-05-05",
+            erBarnAvBmBp: true,
+            aktiv: true,
+            brukFra: "2023-10-03",
+            brukTil: null,
+            hentetTidspunkt: "2023-10-03",
+            borISammeHusstandDtoListe: [
+                {
+                    periodeFra: null,
+                    periodeTil: "2017-07-05",
+                },
+                {
+                    periodeFra: "2018-06-06",
+                    periodeTil: "2020-03-01",
+                },
+                {
+                    periodeFra: "2020-05-01",
+                    periodeTil: "2021-07-07",
+                },
+                {
+                    periodeFra: "2022-01-01",
+                    periodeTil: "2022-04-01",
+                },
+            ],
+        };
+        const expectedResult = [
+            {
+                fraDato: new Date("2002-05-05"),
+                tilDato: new Date("2017-07-05"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2017-07-06"),
+                tilDato: new Date("2018-06-05"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2018-06-06"),
+                tilDato: new Date("2020-03-01"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2020-03-02"),
+                tilDato: new Date("2020-04-30"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2020-05-01"),
+                tilDato: new Date("2021-07-07"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2021-07-08"),
+                tilDato: new Date("2021-12-31"),
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2022-01-01"),
+                tilDato: new Date("2022-04-01"),
+                boStatus: "REGISTRERT_PA_ADRESSE",
+            },
+            {
+                fraDato: new Date("2022-04-02"),
+                tilDato: null,
+                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+            },
+        ];
+        const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
+        expect(husstandsOpplysningerFraFolkRegistre.length).equals(expectedResult.length);
+        husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
+            expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
+            expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
+            expect(husstandsOpplysning.boStatus).equals(expectedResult[i].boStatus);
+        });
+    });
+
     it("should create correct hustands periods from grunnlag husstandmedlemmerOgEgneBarnListe", () => {
         const husstandmedlemmerOgEgneBarnListe = [
             {
