@@ -18,19 +18,26 @@ export enum Behandlingstype {
     OPPFOSTRINGSBIDRAG = "OPPFOSTRINGSBIDRAG",
 }
 
-export enum BoStatusType {
-    IKKE_REGISTRERT_PA_ADRESSE = "IKKE_REGISTRERT_PA_ADRESSE",
-    REGISTRERT_PA_ADRESSE = "REGISTRERT_PA_ADRESSE",
+export enum Bostatuskode {
+    MED_FORELDER = "MED_FORELDER",
+    DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
+    IKKE_MED_FORELDER = "IKKE_MED_FORELDER",
+    MED_VERGE = "MED_VERGE",
+    ALENE = "ALENE",
+    DELT_BOSTED = "DELT_BOSTED",
+    REGNES_IKKE_SOM_BARN = "REGNES_IKKE_SOM_BARN",
 }
 
 export enum Engangsbeloptype {
     DIREKTE_OPPGJOR = "DIREKTE_OPPGJOR",
+    DIREKTEOPPGJOR = "DIREKTE_OPPGJØR",
     ETTERGIVELSE = "ETTERGIVELSE",
     ETTERGIVELSE_TILBAKEKREVING = "ETTERGIVELSE_TILBAKEKREVING",
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
     INNKREVING_GJELD = "INNKREVING_GJELD",
     SAERTILSKUDD = "SAERTILSKUDD",
+    SAeRTILSKUDD = "SÆRTILSKUDD",
     TILBAKEKREVING = "TILBAKEKREVING",
 }
 
@@ -78,9 +85,9 @@ export enum Rolletype {
     RM = "RM",
 }
 
-export enum SivilstandType {
+export enum Sivilstandskode {
+    GIFT_SAMBOER = "GIFT_SAMBOER",
     BOR_ALENE_MED_BARN = "BOR_ALENE_MED_BARN",
-    GIFT = "GIFT",
 }
 
 export enum SoknadType {
@@ -108,7 +115,7 @@ export enum Stonadstype {
 export enum SoktAvType {
     BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
     BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
-    BARN18AAR = "BARN_18_AAR",
+    BARN18AR = "BARN_18_ÅR",
     BM_I_ANNEN_SAK = "BM_I_ANNEN_SAK",
     NAV_BIDRAG = "NAV_BIDRAG",
     FYLKESNEMDA = "FYLKESNEMDA",
@@ -295,7 +302,7 @@ export interface HusstandsBarnPeriodeDto {
      * @example "2025-01-25"
      */
     datoTom?: string;
-    boStatus: BoStatusType;
+    bostatus: Bostatuskode;
     kilde: Kilde;
 }
 
@@ -327,7 +334,7 @@ export interface SivilstandDto {
      * @example "2025-01-25"
      */
     datoTom?: string;
-    sivilstandType: SivilstandType;
+    sivilstandType: Sivilstandskode;
     kilde: Kilde;
 }
 
@@ -379,7 +386,7 @@ export interface InitalizeForsendelseRequest {
      */
     saksnummer: string;
     behandlingInfo: BehandlingInfoDto;
-    enhet: string;
+    enhet?: string;
     tema?: string;
     roller: ForsendelseRolleDto[];
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatus;
@@ -487,8 +494,8 @@ export interface Grunnlag {
 
 /** Grunnlagstype */
 export enum Grunnlagstype {
-    SAERFRADRAG = "SAERFRADRAG",
-    SOKNADSBARN_INFO = "SOKNADSBARN_INFO",
+    SAeRFRADRAG = "SÆRFRADRAG",
+    SOKNADSBARNINFO = "SØKNADSBARN_INFO",
     SKATTEKLASSE = "SKATTEKLASSE",
     BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
     BOSTATUS = "BOSTATUS",
@@ -498,14 +505,14 @@ export enum Grunnlagstype {
     INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
     KAPITALINNTEKT = "KAPITALINNTEKT",
     KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
-    NETTO_SAERTILSKUDD = "NETTO_SAERTILSKUDD",
-    SAMVAERSKLASSE = "SAMVAERSKLASSE",
+    NETTOSAeRTILSKUDD = "NETTO_SÆRTILSKUDD",
+    SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
-    SAMVAERSFRADRAG = "SAMVAERSFRADRAG",
+    SAMVAeRSFRADRAG = "SAMVÆRSFRADRAG",
     SJABLON = "SJABLON",
-    LOPENDE_BIDRAG = "LOPENDE_BIDRAG",
+    LOPENDEBIDRAG = "LØPENDE_BIDRAG",
     FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
-    BARNETILSYN_MED_STONAD = "BARNETILSYN_MED_STONAD",
+    BARNETILSYNMEDSTONAD = "BARNETILSYN_MED_STØNAD",
     FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
     BARN = "BARN",
     SIVILSTAND = "SIVILSTAND",
@@ -517,15 +524,15 @@ export enum Grunnlagstype {
     BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
     TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
     MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
-    BPS_ANDEL_SAERTILSKUDD = "BPS_ANDEL_SAERTILSKUDD",
+    BPSANDELSAeRTILSKUDD = "BPS_ANDEL_SÆRTILSKUDD",
     MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
     GEBYRFRITAK = "GEBYRFRITAK",
-    SOKNAD_INFO = "SOKNAD_INFO",
+    SOKNADINFO = "SØKNAD_INFO",
     BARN_INFO = "BARN_INFO",
     PERSON_INFO = "PERSON_INFO",
     SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
     VEDTAK_INFO = "VEDTAK_INFO",
-    INNBETALT_BELOP = "INNBETALT_BELOP",
+    INNBETALTBELOP = "INNBETALT_BELØP",
     FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
     SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
     KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
@@ -572,7 +579,7 @@ export interface ResultatPeriode {
     resultat: ResultatBeregning;
     /** Beregnet grunnlag innhold */
     grunnlagReferanseListe: string[];
-    sivilstandType?: SivilstandType;
+    sivilstandType?: Sivilstandskode;
 }
 
 export interface BehandlingDto {
@@ -683,10 +690,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -775,7 +779,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1046,6 +1050,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             this.request<ForskuddBeregningRespons, any>({
                 path: `/api/behandling/${behandlingId}/beregn`,
                 method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags visningsnavn-controller
+         * @name HentVisningsnavn
+         * @request GET:/api/visningsnavn
+         * @secure
+         */
+        hentVisningsnavn: (params: RequestParams = {}) =>
+            this.request<Record<string, string>, any>({
+                path: `/api/visningsnavn`,
+                method: "GET",
                 secure: true,
                 format: "json",
                 ...params,

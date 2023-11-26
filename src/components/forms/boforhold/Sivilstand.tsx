@@ -4,11 +4,11 @@ import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, SivilstandDto, SivilstandType } from "../../../api/BidragBehandlingApi";
+import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { SivilstandTypeTexts } from "../../../enum/SivilstandTypeTexts";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -29,6 +29,7 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
+    const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const {
@@ -155,7 +156,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             sivilstandPerioder.append({
                 datoFom: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
                 datoTom: null,
-                sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 kilde: Kilde.MANUELL,
             });
             setEditableRow(sivilstandPerioderValues.length);
@@ -247,15 +248,15 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                         name={`sivilstand.${index}.sivilstandType`}
                                         label="Sivilstand"
                                         className="w-52"
-                                        options={Object.entries(SivilstandType).map((entry) => ({
+                                        options={Object.entries(Sivilstandskode).map((entry) => ({
                                             value: entry[0],
-                                            text: SivilstandTypeTexts[entry[0]],
+                                            text: toVisningsnavn(entry[0]),
                                         }))}
                                         hideLabel
                                     />
                                 ) : (
                                     <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
-                                        {SivilstandTypeTexts[item.sivilstandType]}
+                                        {toVisningsnavn(item.sivilstandType)}
                                     </BodyShort>
                                 ),
                                 <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">

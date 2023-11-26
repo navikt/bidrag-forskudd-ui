@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { BoStatusType, Kilde, SivilstandType } from "../../api/BidragBehandlingApi";
+import { Bostatuskode as BoStatusType, Kilde, Sivilstandskode } from "../../api/BidragBehandlingApi";
 import {
     checkOverlappingPeriods,
     compareOpplysninger,
@@ -15,7 +15,7 @@ import {
 import { toISODateString } from "../../utils/date-utils";
 
 describe("BoforholdFormHelpers", () => {
-    it("should fill in a period with status IKKE IKKE_REGISTRERT_PA_ADRESSE if there is a gap between 2 periods in Folkeregistre", () => {
+    it("should fill in a period with status IKKE IKKE_MED_FORELDER if there is a gap between 2 periods in Folkeregistre", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
             relatertPersonPersonId: "07512150855",
@@ -49,17 +49,17 @@ describe("BoforholdFormHelpers", () => {
             {
                 fraDato: new Date("2018-06-05"),
                 tilDato: new Date("2021-07-07"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2021-07-08"),
                 tilDato: new Date("2021-12-31"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2022-01-01"),
                 tilDato: null,
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
         ];
         const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
@@ -67,11 +67,11 @@ describe("BoforholdFormHelpers", () => {
         husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
             expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
             expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
-            expect(husstandsOpplysning.boStatus).equals(expectedResult[i].boStatus);
+            expect(husstandsOpplysning.bostatus).equals(expectedResult[i].bostatus);
         });
     });
 
-    it("should fill in a period with status REGISTRERT_PA_ADRESSE if there is a gap between foedselsdato and first period has null for periodeFra in Folkeregistre", () => {
+    it("should fill in a period with status MED_FORELDER if there is a gap between foedselsdato and first period has null for periodeFra in Folkeregistre", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
             relatertPersonPersonId: "07512150855",
@@ -105,37 +105,37 @@ describe("BoforholdFormHelpers", () => {
             {
                 fraDato: new Date("2002-05-05"),
                 tilDato: new Date("2017-07-05"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2017-07-06"),
                 tilDato: new Date("2018-06-05"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2018-06-06"),
                 tilDato: new Date("2020-03-01"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2020-03-02"),
                 tilDato: new Date("2020-04-30"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2020-05-01"),
                 tilDato: new Date("2021-07-07"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2021-07-08"),
                 tilDato: new Date("2021-12-31"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2022-01-01"),
                 tilDato: null,
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
         ];
         const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
@@ -143,11 +143,11 @@ describe("BoforholdFormHelpers", () => {
         husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
             expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
             expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
-            expect(husstandsOpplysning.boStatus).equals(expectedResult[i].boStatus);
+            expect(husstandsOpplysning.bostatus).equals(expectedResult[i].bostatus);
         });
     });
 
-    it("should add a period with status IKKE_REGISTRERT_PA_ADRESSE if last period has periodeTil dato", () => {
+    it("should add a period with status IKKE_MED_FORELDER if last period has periodeTil dato", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
             relatertPersonPersonId: "07512150855",
@@ -181,42 +181,42 @@ describe("BoforholdFormHelpers", () => {
             {
                 fraDato: new Date("2002-05-05"),
                 tilDato: new Date("2017-07-05"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2017-07-06"),
                 tilDato: new Date("2018-06-05"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2018-06-06"),
                 tilDato: new Date("2020-03-01"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2020-03-02"),
                 tilDato: new Date("2020-04-30"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2020-05-01"),
                 tilDato: new Date("2021-07-07"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2021-07-08"),
                 tilDato: new Date("2021-12-31"),
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
             {
                 fraDato: new Date("2022-01-01"),
                 tilDato: new Date("2022-04-01"),
-                boStatus: "REGISTRERT_PA_ADRESSE",
+                bostatus: "MED_FORELDER",
             },
             {
                 fraDato: new Date("2022-04-02"),
                 tilDato: null,
-                boStatus: "IKKE_REGISTRERT_PA_ADRESSE",
+                bostatus: "IKKE_MED_FORELDER",
             },
         ];
         const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
@@ -224,7 +224,7 @@ describe("BoforholdFormHelpers", () => {
         husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
             expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
             expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
-            expect(husstandsOpplysning.boStatus).equals(expectedResult[i].boStatus);
+            expect(husstandsOpplysning.bostatus).equals(expectedResult[i].bostatus);
         });
     });
 
@@ -305,15 +305,15 @@ describe("BoforholdFormHelpers", () => {
         expect(husstandsOpplysningerFraFolkRegistre[0].perioder.length).equals(1);
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[0].fraDato)).equals("2022-09-05");
         expect(husstandsOpplysningerFraFolkRegistre[0].perioder[0].tilDato).equals(null);
-        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[0].boStatus).equals("REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[0].bostatus).equals("MED_FORELDER");
         expect(husstandsOpplysningerFraFolkRegistre[1].navn).equals("EKSTRA FAMILIEBARNEHAGE");
         expect(husstandsOpplysningerFraFolkRegistre[1].perioder.length).equals(2);
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[1].perioder[0].fraDato)).equals("2014-01-10");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[1].perioder[0].tilDato)).equals("2022-09-04");
-        expect(husstandsOpplysningerFraFolkRegistre[1].perioder[0].boStatus).equals("IKKE_REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[1].perioder[0].bostatus).equals("IKKE_MED_FORELDER");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[1].perioder[1].fraDato)).equals("2022-09-05");
         expect(husstandsOpplysningerFraFolkRegistre[1].perioder[1].tilDato).equals(null);
-        expect(husstandsOpplysningerFraFolkRegistre[1].perioder[1].boStatus).equals("REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[1].perioder[1].bostatus).equals("MED_FORELDER");
     });
 
     it("should create hustands periods from grunnlag husstandmedlemmerOgEgneBarnListe", () => {
@@ -341,13 +341,13 @@ describe("BoforholdFormHelpers", () => {
         expect(husstandsOpplysningerFraFolkRegistre[0].perioder.length).equals(3);
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[0].fraDato)).equals("2001-11-02");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[0].tilDato)).equals("2016-12-08");
-        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[0].boStatus).equals("IKKE_REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[0].bostatus).equals("IKKE_MED_FORELDER");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[1].fraDato)).equals("2016-12-09");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[1].tilDato)).equals("2023-08-14");
-        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[1].boStatus).equals("REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[1].bostatus).equals("MED_FORELDER");
         expect(toISODateString(husstandsOpplysningerFraFolkRegistre[0].perioder[2].fraDato)).equals("2023-08-15");
         expect(husstandsOpplysningerFraFolkRegistre[0].perioder[2].tilDato).equals(null);
-        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[2].boStatus).equals("IKKE_REGISTRERT_PA_ADRESSE");
+        expect(husstandsOpplysningerFraFolkRegistre[0].perioder[2].bostatus).equals("IKKE_MED_FORELDER");
     });
 
     it("getBarnPerioderFromHusstandsListe should create initial values from grunnlag husstandmedlemmerOgEgneBarnListe", () => {
@@ -377,10 +377,10 @@ describe("BoforholdFormHelpers", () => {
         expect(result[0].perioder.length).equals(2);
         expect(result[0].perioder[0].datoFom).equals("2023-06-01");
         expect(result[0].perioder[0].datoTom).equals("2023-08-31");
-        expect(result[0].perioder[0].boStatus).equals("REGISTRERT_PA_ADRESSE");
+        expect(result[0].perioder[0].bostatus).equals("MED_FORELDER");
         expect(result[0].perioder[1].datoFom).equals("2023-09-01");
         expect(result[0].perioder[1].datoTom).equals(null);
-        expect(result[0].perioder[1].boStatus).equals("IKKE_REGISTRERT_PA_ADRESSE");
+        expect(result[0].perioder[1].bostatus).equals("IKKE_MED_FORELDER");
     });
 
     it("should create husstands periods from the folkeregistre data", () => {
@@ -393,7 +393,7 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: null,
                         tilDato: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                 ],
             },
@@ -404,27 +404,27 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: new Date("2018-06-05"),
                         tilDato: new Date("2020-03-01"),
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-03-02"),
                         tilDato: new Date("2020-03-31"),
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-04-01"),
                         tilDato: new Date("2021-07-07"),
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2021-07-08"),
                         tilDato: new Date("2021-12-31"),
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2022-01-01"),
                         tilDato: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                 ],
             },
@@ -437,7 +437,7 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2020-06-01",
                         datoTom: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -450,19 +450,19 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2020-06-01",
                         datoTom: "2021-07-31",
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2021-08-01",
                         datoTom: "2021-12-31",
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2022-01-01",
                         datoTom: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -474,7 +474,7 @@ describe("BoforholdFormHelpers", () => {
             r.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
                 expect(periode.datoTom).equals(expectedResult[i].perioder[j].datoTom);
-                expect(periode.boStatus).equals(expectedResult[i].perioder[j].boStatus);
+                expect(periode.bostatus).equals(expectedResult[i].perioder[j].bostatus);
             });
         });
     });
@@ -489,27 +489,27 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: new Date("2019-04-01"),
                         tilDato: new Date("2020-03-01"),
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-03-02"),
                         tilDato: new Date("2020-03-31"),
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-04-01"),
                         tilDato: new Date("2021-07-07"),
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2021-07-08"),
                         tilDato: new Date("2021-12-31"),
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2022-01-01"),
                         tilDato: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                     },
                 ],
             },
@@ -522,19 +522,19 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2019-04-01",
                         datoTom: "2021-07-31",
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2021-08-01",
                         datoTom: "2021-12-31",
-                        boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.IKKE_MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2022-01-01",
                         datoTom: null,
-                        boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                        bostatus: BoStatusType.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -547,7 +547,7 @@ describe("BoforholdFormHelpers", () => {
             r.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
                 expect(periode.datoTom).equals(expectedResult[i].perioder[j].datoTom);
-                expect(periode.boStatus).equals(expectedResult[i].perioder[j].boStatus);
+                expect(periode.bostatus).equals(expectedResult[i].perioder[j].bostatus);
             });
         });
     });
@@ -605,7 +605,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -616,12 +616,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -630,12 +630,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -648,7 +648,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -659,12 +659,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -673,12 +673,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -696,7 +696,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -707,12 +707,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -721,12 +721,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -739,12 +739,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -755,12 +755,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -769,12 +769,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -793,7 +793,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -804,12 +804,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -818,17 +818,17 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-05",
                     datoTom: "2023-10-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-10-05",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -841,12 +841,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -857,12 +857,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -871,12 +871,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -896,7 +896,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -907,12 +907,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -921,12 +921,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -939,12 +939,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -955,12 +955,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                            bostatus: BoStatusType.MED_FORELDER,
                         },
                     ],
                 },
@@ -969,12 +969,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: SivilstandType.GIFT,
+                    sivilstandType: Sivilstandskode.GIFT_SAMBOER,
                 },
             ],
         };
@@ -989,25 +989,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: null,
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1016,13 +1016,13 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: null,
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1032,7 +1032,7 @@ describe("BoforholdFormHelpers", () => {
         updatedPeriods.forEach((period, index) => {
             expect(period.datoFom).equals(expectedResult[index].datoFom);
             expect(period.datoTom).equals(expectedResult[index].datoTom);
-            expect(period.boStatus).equals(expectedResult[index].boStatus);
+            expect(period.bostatus).equals(expectedResult[index].bostatus);
         });
     });
 
@@ -1041,25 +1041,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-03-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1068,7 +1068,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-03-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1077,7 +1077,7 @@ describe("BoforholdFormHelpers", () => {
         expect(updatedPeriods.length).equals(1);
         expect(updatedPeriods[0].datoFom).equals(expectedResult[0].datoFom);
         expect(updatedPeriods[0].datoTom).equals(expectedResult[0].datoTom);
-        expect(updatedPeriods[0].boStatus).equals(expectedResult[0].boStatus);
+        expect(updatedPeriods[0].bostatus).equals(expectedResult[0].bostatus);
         expect(updatedPeriods[0].kilde).equals(expectedResult[0].kilde);
     });
 
@@ -1086,37 +1086,37 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1125,19 +1125,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1154,37 +1154,37 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1193,7 +1193,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1210,25 +1210,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-06-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1237,19 +1237,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-06-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1266,19 +1266,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1287,19 +1287,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1316,19 +1316,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1337,7 +1337,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1354,19 +1354,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1375,19 +1375,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1404,25 +1404,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1431,7 +1431,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1449,25 +1449,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1476,31 +1476,31 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-08-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-11-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1518,19 +1518,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-08-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1539,19 +1539,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-08-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1569,19 +1569,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1590,7 +1590,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: BoStatusType.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];

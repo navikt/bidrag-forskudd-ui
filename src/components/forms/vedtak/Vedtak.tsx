@@ -12,11 +12,8 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import environment from "../../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
-import {
-    mapBehandlingReferanseliste,
-    mapGrunnlagPersonInfo,
-    mapResultatKodeToDisplayValue,
-} from "../../../mapper/VedtakBeregningkMapper";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { mapBehandlingReferanseliste, mapGrunnlagPersonInfo } from "../../../mapper/VedtakBeregningkMapper";
 import { uniqueByKey } from "../../../utils/array-utils";
 import { toISODateTimeString } from "../../../utils/date-utils";
 import { FlexRow } from "../../layout/grid/FlexRow";
@@ -35,6 +32,7 @@ function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnl
 const Vedtak = () => {
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const { behandlingId } = useForskudd();
+    const toVisningsnavn = useVisningsnavn();
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
     const isAvslag = behandling && Object.keys(Avslag).includes(behandling.getårsak);
@@ -171,9 +169,7 @@ const Vedtak = () => {
                                                     : ""}
                                             </Table.DataCell>
                                             <Table.DataCell>{getInntektForPeriode(periode)}</Table.DataCell>
-                                            <Table.DataCell>
-                                                {mapResultatKodeToDisplayValue(periode.resultat.kode)}
-                                            </Table.DataCell>
+                                            <Table.DataCell>{toVisningsnavn(periode.resultat.kode)}</Table.DataCell>
                                             <Table.DataCell>{periode.resultat.belop}</Table.DataCell>
                                             <Table.DataCell>{periode.sivilstandType}</Table.DataCell>
                                         </Table.Row>

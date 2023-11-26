@@ -1,4 +1,4 @@
-import { BoStatusType, HusstandsbarnDto, SivilstandDto, SivilstandType } from "../api/BidragBehandlingApi";
+import { Bostatuskode, HusstandsbarnDto, SivilstandDto, Sivilstandskode } from "../api/BidragBehandlingApi";
 
 export interface BoforholdFormValues {
     husstandsBarn: HusstandsbarnDto[];
@@ -10,7 +10,7 @@ export interface BoforholdFormValues {
 export interface HusstandOpplysningPeriode {
     fraDato: Date;
     tilDato: Date;
-    boStatus: BoStatusType;
+    bostatus: Bostatuskode;
 }
 
 export interface HusstandOpplysningFraFolkeRegistre {
@@ -23,7 +23,7 @@ export interface HusstandOpplysningFraFolkeRegistre {
 export interface SavedOpplysningFraFolkeRegistrePeriode {
     fraDato: string;
     tilDato: string;
-    boStatus: BoStatusType;
+    bostatus: Bostatuskode;
 }
 
 export interface SavedHustandOpplysninger {
@@ -36,7 +36,7 @@ export interface SavedHustandOpplysninger {
 export interface SivilstandOpplysninger {
     datoFom: string;
     datoTom: string;
-    sivilstandType: SivilstandType;
+    sivilstandType: Sivilstandskode;
 }
 
 export interface BoforholdOpplysninger {

@@ -1,10 +1,10 @@
 import {
     BoforholdResponse,
-    BoStatusType,
+    Bostatuskode,
     HusstandsBarnPeriodeDto,
     Kilde,
     SivilstandDto,
-    SivilstandType,
+    Sivilstandskode,
 } from "../../../api/BidragBehandlingApi";
 import { RelatertPersonDto, SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
 import {
@@ -27,6 +27,10 @@ import {
     toISODateString,
 } from "../../../utils/date-utils";
 
+export const boforholdForskuddOptions = {
+    under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
+    likEllerOver18År: [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG],
+};
 export const calculateFraDato = (
     fieldArrayValues: HusstandsBarnPeriodeDto[] | SivilstandDto[],
     virkningstidspunkt: Date
@@ -59,7 +63,7 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     let j = 0;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         const prevPeriod = i !== 0 ? perioder[i - (1 + j)] : undefined;
-        const prevPeriodIsRegistrert = prevPeriod?.boStatus === BoStatusType.REGISTRERT_PA_ADRESSE;
+        const prevPeriodIsRegistrert = prevPeriod?.bostatus === Bostatuskode.MED_FORELDER;
         const prevPeriodTilOrCurrentPeriodFraIsNull =
             (prevPeriod && prevPeriod.tilDato === null) || periode.periodeFra === null;
         const prevPeriodTilOrCurrentPeriodFraAreAdjacentDays =
@@ -81,7 +85,7 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
                 perioder.push({
                     fraDato: fodselsdato,
                     tilDato: deductDays(new Date(periode.periodeFra), 1),
-                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 });
             }
 
@@ -89,21 +93,21 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
                 perioder.push({
                     fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
                     tilDato: deductDays(new Date(periode.periodeFra), 1),
-                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 });
             }
 
             perioder.push({
                 fraDato: firstPeriod && !periode.periodeFra ? fodselsdato : dateOrNull(periode.periodeFra),
                 tilDato: dateOrNull(periode.periodeTil),
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: Bostatuskode.MED_FORELDER,
             });
 
             if (lastPeriod && periode.periodeTil) {
                 perioder.push({
                     fraDato: addDays(new Date(periode.periodeTil), 1),
                     tilDato: null,
-                    boStatus: BoStatusType.IKKE_REGISTRERT_PA_ADRESSE,
+                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 });
             }
         }
@@ -137,11 +141,11 @@ const getSivilstandType = (
         | "SEPARERT_PARTNER"
         | "SKILT_PARTNER"
         | "GJENLEVENDE_PARTNER"
-): SivilstandType => {
+): Sivilstandskode => {
     if (["GIFT", "SAMBOER", "REGISTRERT_PARTNER"].includes(sivilstand)) {
-        return SivilstandType.GIFT;
+        return Sivilstandskode.GIFT_SAMBOER;
     }
-    return SivilstandType.BOR_ALENE_MED_BARN;
+    return Sivilstandskode.BOR_ALENE_MED_BARN;
 };
 
 export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
@@ -165,13 +169,13 @@ export const getBarnPerioder = (
 
     console.log("barnsFoedselsDato", barnsFoedselsDato);
     const result: {
-        boStatus: BoStatusType;
+        bostatus: Bostatuskode;
         kilde: Kilde;
         datoFom: string;
         datoTom: string | null;
     }[] = [];
-    perioderEtterVirkningstidspunkt?.forEach(({ fraDato, tilDato, boStatus }) => {
-        const isRegistrertPeriode = boStatus === BoStatusType.REGISTRERT_PA_ADRESSE;
+    perioderEtterVirkningstidspunkt?.forEach(({ fraDato, tilDato, bostatus: bostatus }) => {
+        const isRegistrertPeriode = bostatus === Bostatuskode.MED_FORELDER;
         const prevPeriode = result[result.length - 1];
         const datoFom = toISODateString(
             result.length === 0 ? virkningsOrSoktFraDato : addDays(new Date(result[result.length - 1].datoTom), 1)
@@ -179,13 +183,13 @@ export const getBarnPerioder = (
         const datoTom = tilDato ? toISODateString(lastDayOfMonth(new Date(tilDato))) : null;
 
         if (isRegistrertPeriode) {
-            if (prevPeriode && prevPeriode.boStatus === BoStatusType.REGISTRERT_PA_ADRESSE) {
+            if (prevPeriode && prevPeriode.bostatus === Bostatuskode.MED_FORELDER) {
                 result[result.length - 1].datoTom = datoTom;
             } else {
                 result.push({
                     datoFom,
                     datoTom,
-                    boStatus,
+                    bostatus,
                     kilde: Kilde.OFFENTLIG,
                 });
             }
@@ -196,7 +200,7 @@ export const getBarnPerioder = (
 
             if (coversAtLeastOneCalendarMonth) {
                 result.push({
-                    boStatus,
+                    bostatus,
                     datoFom,
                     datoTom: tilDato ? toISODateString(new Date(tilDato)) : null,
                     kilde: Kilde.OFFENTLIG,
@@ -220,7 +224,7 @@ export const getSivilstandPerioder = (
     );
 
     const result: {
-        sivilstandType: SivilstandType;
+        sivilstandType: Sivilstandskode;
         kilde: Kilde;
         datoFom: string;
         datoTom: string | null;
@@ -323,7 +327,7 @@ export function editPeriods(
     periodeIndex: number
 ): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
     const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
-    const statusField = Object.hasOwn(periodsList[0], "boStatus") ? "boStatus" : "sivilstandType";
+    const statusField = Object.hasOwn(periodsList[0], "bostatus") ? "bostatus" : "sivilstandType";
 
     const periods = periodsList.toSpliced(periodeIndex, 1);
     let startIndex = periods.filter(
@@ -366,7 +370,7 @@ export function editPeriods(
                 },
             ];
 
-            if (statusField === "boStatus") {
+            if (statusField === "bostatus") {
                 return periods.toSpliced(
                     prevPeriodIndex,
                     1,
@@ -409,7 +413,7 @@ export function editPeriods(
         }
     }
 
-    if (statusField === "boStatus") {
+    if (statusField === "bostatus") {
         return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsBarnPeriodeDto);
     }
 
@@ -431,7 +435,7 @@ export function removeAndEditPeriods(
     prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : periodToRemove.datoTom;
     prevPeriod.kilde = Kilde.MANUELL;
 
-    if ("boStatus" in periodToRemove) {
+    if ("bostatus" in periodToRemove) {
         return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsBarnPeriodeDto[];
     }
 
@@ -485,7 +489,7 @@ export const compareOpplysninger = (
                             toISODateString(periodeFraLatestOpplysninger.fraDato) ||
                         toISODateString(dateOrNull(periode.tilDato)) !==
                             toISODateString(periodeFraLatestOpplysninger.tilDato) ||
-                        periode.boStatus !== periodeFraLatestOpplysninger.boStatus
+                        periode.bostatus !== periodeFraLatestOpplysninger.bostatus
                     ) {
                         changed = true;
                     }

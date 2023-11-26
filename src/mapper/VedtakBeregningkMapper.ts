@@ -47,18 +47,3 @@ export function mapBehandlingReferanseliste(
         });
     return behandlingReferanseListe;
 }
-export function mapResultatKodeToDisplayValue(kode: string): string {
-    switch (kode) {
-        case "ORDINAERT_FORSKUDD_75_PROSENT":
-            return "Forskudd";
-        case "REDUSERT_FORSKUDD_50_PROSENT":
-            return "Redusert forskudd";
-        case "FORHOYET_FORSKUDD_100_PROSENT":
-            return "Forhøyet forskudd";
-        case "FORHOYET_FORSKUDD_11_AAR_125_PROSENT":
-            return "Forhøyet forskudd ved 11 år";
-        case "AVSLAG":
-            return "Avslag";
-    }
-    return kode;
-}
