@@ -35,9 +35,7 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) =>
         firstDayOfMonth(new Date(virkningstidspunkt)),
         firstDayOfMonth(new Date())
     );
-    const fom = virkningstidspunktIsInFuture
-        ? firstDayOfMonth(new Date())
-        : firstDayOfMonth(new Date(virkningstidspunkt));
+    const fom = firstDayOfMonth(new Date(virkningstidspunkt));
     const tom = virkningstidspunktIsInFuture
         ? lastDayOfMonth(new Date(virkningstidspunkt))
         : lastDayOfMonth(new Date());

@@ -8,6 +8,7 @@ import personMock from "./personMock";
 import { hentSakMock } from "./sakMock";
 import tokenMock from "./tokenMock";
 import virkningstidspunktMock from "./virkningstidspunktMock";
+import visningsNavnMock from "./visningsNavnMock";
 export const handlers = [
     ...tokenMock(),
     ...logMock(),
@@ -19,4 +20,5 @@ export const handlers = [
     ...boforholdMock(),
     ...inntektMock(),
     ...inntektTransformerMock(),
+    ...visningsNavnMock(),
 ];
