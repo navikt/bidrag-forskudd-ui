@@ -19,7 +19,7 @@
     "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragBehandlingApi.ts -o src/api",
     "api:bidragBehandlingQ2": "swagger-typescript-api -p https://bidrag-behandling.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
     "api:bidragInntekt": "swagger-typescript-api -p https://bidrag-inntekt.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragInntektApi.ts -o src/api",
-    "local:api:bidragBehandling": "swagger-typescript-api -p http://localhost:8990/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
+    "local:api:bidragBehandling": "swagger-typescript-api -p http://localhost:8999/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
     "types:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.dev.intern.nav.no/v3/api-docs -o src/types"
   },
   "dependencies": {
