@@ -61,59 +61,60 @@ export const calculateFraDato = (
 export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     const perioder: HusstandOpplysningPeriode[] = [];
     const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
-    let j = 0;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
-        const prevPeriod = i !== 0 ? perioder[i - (1 + j)] : undefined;
-        const prevPeriodIsRegistrert = prevPeriod?.bostatus === Bostatuskode.MED_FORELDER;
-        const prevPeriodTilOrCurrentPeriodFraIsNull =
-            (prevPeriod && prevPeriod.tilDato === null) || periode.periodeFra === null;
-        const prevPeriodTilOrCurrentPeriodFraAreAdjacentDays =
-            prevPeriod && addDays(prevPeriod.tilDato, 1).toDateString() === new Date(periode.periodeFra).toDateString();
         const firstPeriod = i === 0;
         const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
-        const fodselsDatoIsBeforePeriodeFra = periode.periodeFra
-            ? fodselsdato && isAfterDate(periode.periodeFra, fodselsdato)
-            : false;
+        const fodselsDatoIsBeforePeriodeFra =
+            periode.periodeFra && periode.periodeFra !== egneBarnIHusstanden.fodselsdato
+                ? isAfterDate(periode.periodeFra, fodselsdato)
+                : false;
 
-        if (
-            prevPeriodIsRegistrert &&
-            (prevPeriodTilOrCurrentPeriodFraIsNull || prevPeriodTilOrCurrentPeriodFraAreAdjacentDays)
-        ) {
-            prevPeriod.tilDato = dateOrNull(periode.periodeTil);
-            j += 1;
-        } else {
-            if (firstPeriod && fodselsDatoIsBeforePeriodeFra) {
-                perioder.push({
-                    fraDato: fodselsdato,
-                    tilDato: deductDays(new Date(periode.periodeFra), 1),
-                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
-                });
-            }
-
-            if (!firstPeriod && !prevPeriodTilOrCurrentPeriodFraAreAdjacentDays) {
-                perioder.push({
-                    fraDato: addDays(perioder[perioder.length - 1].tilDato, 1),
-                    tilDato: deductDays(new Date(periode.periodeFra), 1),
-                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
-                });
-            }
-
+        if (firstPeriod && fodselsDatoIsBeforePeriodeFra) {
             perioder.push({
-                fraDato: firstPeriod && !periode.periodeFra ? fodselsdato : dateOrNull(periode.periodeFra),
+                fraDato: fodselsdato,
+                tilDato: deductDays(new Date(periode.periodeFra), 1),
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
+            });
+        }
+
+        const prevPeriod = perioder[perioder.length - 1];
+        const gapBetweenPeriods =
+            periode.periodeFra && prevPeriod?.tilDato
+                ? isAfterDate(periode.periodeFra, addDays(new Date(prevPeriod.tilDato), 1))
+                : false;
+        const prevPeriodIsRegistrert = prevPeriod?.bostatus === Bostatuskode.MED_FORELDER;
+
+        if (gapBetweenPeriods) {
+            perioder.push({
+                fraDato: addDays(new Date(prevPeriod.tilDato), 1),
+                tilDato: deductDays(new Date(periode.periodeFra), 1),
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
+            });
+        }
+
+        if (prevPeriodIsRegistrert && !gapBetweenPeriods) {
+            prevPeriod.tilDato =
+                periode?.periodeTil && prevPeriod.tilDato
+                    ? isAfterDate(periode.periodeTil, prevPeriod.tilDato)
+                        ? new Date(periode.periodeTil)
+                        : new Date(prevPeriod.tilDato)
+                    : null;
+        } else {
+            perioder.push({
+                fraDato: periode.periodeFra ? dateOrNull(periode.periodeFra) : fodselsdato,
                 tilDato: dateOrNull(periode.periodeTil),
                 bostatus: Bostatuskode.MED_FORELDER,
             });
+        }
 
-            if (lastPeriod && periode.periodeTil) {
-                perioder.push({
-                    fraDato: addDays(new Date(periode.periodeTil), 1),
-                    tilDato: null,
-                    bostatus: Bostatuskode.IKKE_MED_FORELDER,
-                });
-            }
+        if (lastPeriod && periode.periodeTil) {
+            perioder.push({
+                fraDato: addDays(new Date(periode.periodeTil), 1),
+                tilDato: null,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
+            });
         }
     });
-
     return perioder.sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
 };
 
@@ -162,13 +163,13 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
 export const getBarnPerioder = (
     perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
     virkningsOrSoktFraDato: Date,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     barnsFoedselsDato: string
 ) => {
     const perioderEtterVirkningstidspunkt = perioder?.filter(
         ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, virkningsOrSoktFraDato))
     );
 
-    console.log("barnsFoedselsDato", barnsFoedselsDato);
     const result: {
         bostatus: Bostatuskode;
         kilde: Kilde;

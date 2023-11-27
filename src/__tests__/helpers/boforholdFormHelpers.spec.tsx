@@ -15,7 +15,7 @@ import {
 import { toISODateString } from "../../utils/date-utils";
 
 describe("BoforholdFormHelpers", () => {
-    it("should fill in a period with status IKKE IKKE_MED_FORELDER if there is a gap between 2 periods in Folkeregistre", () => {
+    it("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
             relatertPersonPersonId: "07512150855",
@@ -29,10 +29,6 @@ describe("BoforholdFormHelpers", () => {
             borISammeHusstandDtoListe: [
                 {
                     periodeFra: "2018-06-05",
-                    periodeTil: null,
-                },
-                {
-                    periodeFra: null,
                     periodeTil: "2020-03-01",
                 },
                 {
@@ -147,6 +143,45 @@ describe("BoforholdFormHelpers", () => {
         });
     });
 
+    it("should fill in a period with status IKKE_MED_FORELDER if there is a gap between foedselsdato and first period in Folkeregistre", () => {
+        const egneBarnIHusstand = {
+            partPersonId: "21470262629",
+            relatertPersonPersonId: "07512150855",
+            navn: "",
+            fodselsdato: "2014-01-10",
+            erBarnAvBmBp: true,
+            aktiv: true,
+            brukFra: "2023-10-03",
+            brukTil: null,
+            hentetTidspunkt: "2023-10-03",
+            borISammeHusstandDtoListe: [
+                {
+                    periodeFra: "2022-09-05",
+                    periodeTil: null,
+                },
+            ],
+        };
+        const expectedResult = [
+            {
+                fraDato: new Date("2014-01-10"),
+                tilDato: new Date("2022-09-04"),
+                bostatus: "IKKE_MED_FORELDER",
+            },
+            {
+                fraDato: new Date("2022-09-05"),
+                tilDato: null,
+                bostatus: "MED_FORELDER",
+            },
+        ];
+        const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
+        expect(husstandsOpplysningerFraFolkRegistre.length).equals(expectedResult.length);
+        husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
+            expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
+            expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
+            expect(husstandsOpplysning.bostatus).equals(expectedResult[i].bostatus);
+        });
+    });
+
     it("should add a period with status IKKE_MED_FORELDER if last period has periodeTil dato", () => {
         const egneBarnIHusstand = {
             partPersonId: "21470262629",
@@ -217,6 +252,49 @@ describe("BoforholdFormHelpers", () => {
                 fraDato: new Date("2022-04-02"),
                 tilDato: null,
                 bostatus: "IKKE_MED_FORELDER",
+            },
+        ];
+        const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);
+        expect(husstandsOpplysningerFraFolkRegistre.length).equals(expectedResult.length);
+        husstandsOpplysningerFraFolkRegistre.forEach((husstandsOpplysning, i) => {
+            expect(husstandsOpplysning.fraDato?.toDateString()).equals(expectedResult[i].fraDato?.toDateString());
+            expect(husstandsOpplysning.tilDato?.toDateString()).equals(expectedResult[i].tilDato?.toDateString());
+            expect(husstandsOpplysning.bostatus).equals(expectedResult[i].bostatus);
+        });
+    });
+
+    it("should deal with invalid data from folkeregistre", () => {
+        const egneBarnIHusstand = {
+            partPersonId: "21470262629",
+            relatertPersonPersonId: "07512150855",
+            navn: "",
+            fodselsdato: "2002-05-05",
+            erBarnAvBmBp: true,
+            aktiv: true,
+            brukFra: "2023-10-03",
+            brukTil: null,
+            hentetTidspunkt: "2023-10-03",
+            borISammeHusstandDtoListe: [
+                {
+                    periodeFra: "2021-01-04",
+                    periodeTil: "2023-06-20",
+                },
+                {
+                    periodeFra: "2023-06-20",
+                    periodeTil: null,
+                },
+            ],
+        };
+        const expectedResult = [
+            {
+                fraDato: new Date("2002-05-05"),
+                tilDato: new Date("2021-01-03"),
+                bostatus: "IKKE_MED_FORELDER",
+            },
+            {
+                fraDato: new Date("2021-01-04"),
+                tilDato: null,
+                bostatus: "MED_FORELDER",
             },
         ];
         const husstandsOpplysningerFraFolkRegistre = fillInPeriodGaps(egneBarnIHusstand);

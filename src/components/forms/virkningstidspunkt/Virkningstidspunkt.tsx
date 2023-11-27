@@ -1,6 +1,6 @@
 import { toISODateString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { VirkningsTidspunktResponse } from "../../../api/BidragBehandlingApi";
@@ -18,7 +18,7 @@ import {
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
-import { DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
@@ -61,7 +61,8 @@ const Main = ({ initialValues, error }) => {
         clearErrors("virkningsDato");
     };
 
-    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const [fom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const tom = useMemo(() => addMonths(new Date(), 50 * 12), [fom]);
 
     useEffect(() => {
         if (!initialVirkningsdato && virkningstidspunkt && behandling) {
