@@ -249,8 +249,8 @@ const InntektForm = () => {
                                 ident: personInntekt.ident,
                                 summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe.map((inntekt) => ({
                                     ...inntekt,
-                                    datoFom: dateToDDMMYYYYString(new Date(inntekt.periodeFra)),
-                                    datoTom: dateToDDMMYYYYString(new Date(inntekt.periodeTom)),
+                                    datoFom: dateToDDMMYYYYString(new Date(inntekt.periode.fom)),
+                                    datoTom: dateToDDMMYYYYString(new Date(inntekt.periode.til)),
                                 })),
                             })),
                             utvidetbarnetrygd: grunnlagspakke.ubstListe,
