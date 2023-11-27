@@ -204,6 +204,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                     rolleType: rolle.rolleType as unknown as RolleTypeFullName,
                     navn: data.navn,
                     kortnavn: data.kortnavn,
+                    visningsnavn: data.visningsnavn,
                 }),
                 []
             ),

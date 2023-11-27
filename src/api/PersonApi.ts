@@ -156,6 +156,7 @@ export interface PersonDto {
      * @deprecated
      */
     kortNavn?: string;
+    visningsnavn: string;
 }
 
 /** Gyldige adressetyper: BOSTEDSADRESSE, KONTAKTADRESSE, eller OPPHOLDSADRESSE */
