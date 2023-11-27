@@ -630,12 +630,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -673,12 +673,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -721,12 +721,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -769,12 +769,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -818,17 +818,17 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-05",
                     datoTom: "2023-10-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-10-05",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -871,12 +871,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -921,12 +921,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
             ],
         };
@@ -969,12 +969,12 @@ describe("BoforholdFormHelpers", () => {
                 {
                     datoFom: "1985-06-20",
                     datoTom: "2023-07-04",
-                    sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                    sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 },
                 {
                     datoFom: "2023-07-04",
                     datoTom: null,
-                    sivilstandType: Sivilstandskode.GIFT_SAMBOER,
+                    sivilstand: Sivilstandskode.GIFT_SAMBOER,
                 },
             ],
         };
@@ -1629,13 +1629,13 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT_SAMBOER",
+                sivilstand: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2023-08-31",
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "BOR_ALENE_MED_BARN",
+                sivilstand: "BOR_ALENE_MED_BARN",
                 datoFom: "2023-09-01",
                 datoTom: null,
                 kilde: "OFFENTLIG",
@@ -1727,19 +1727,19 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT_SAMBOER",
+                sivilstand: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2021-10-31",
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "BOR_ALENE_MED_BARN",
+                sivilstand: "BOR_ALENE_MED_BARN",
                 datoFom: "2021-11-01",
                 datoTom: "2022-08-31",
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "GIFT_SAMBOER",
+                sivilstand: "GIFT_SAMBOER",
                 datoFom: "2022-09-01",
                 datoTom: null,
                 kilde: "OFFENTLIG",
@@ -1831,19 +1831,19 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT_SAMBOER",
+                sivilstand: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2021-10-31",
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "BOR_ALENE_MED_BARN",
+                sivilstand: "BOR_ALENE_MED_BARN",
                 datoFom: "2021-11-01",
                 datoTom: "2022-08-31",
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "GIFT_SAMBOER",
+                sivilstand: "GIFT_SAMBOER",
                 datoFom: "2022-09-01",
                 datoTom: null,
                 kilde: "OFFENTLIG",

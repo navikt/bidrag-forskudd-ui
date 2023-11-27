@@ -171,7 +171,7 @@ const Vedtak = () => {
                                             <Table.DataCell>{getInntektForPeriode(periode)}</Table.DataCell>
                                             <Table.DataCell>{toVisningsnavn(periode.resultat.kode)}</Table.DataCell>
                                             <Table.DataCell>{periode.resultat.belop}</Table.DataCell>
-                                            <Table.DataCell>{periode.sivilstandType}</Table.DataCell>
+                                            <Table.DataCell>{periode.sivilstand}</Table.DataCell>
                                         </Table.Row>
                                     ))}
                                 </Table.Body>

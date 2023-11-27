@@ -36,7 +36,7 @@ export interface SavedHustandOpplysninger {
 export interface SivilstandOpplysninger {
     datoFom: string;
     datoTom: string;
-    sivilstandType: Sivilstandskode;
+    sivilstand: Sivilstandskode;
 }
 
 export interface BoforholdOpplysninger {

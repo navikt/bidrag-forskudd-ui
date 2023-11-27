@@ -155,7 +155,7 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
     return sivilstandListe.map((sivilstand) => ({
         datoFom: sivilstand.periodeFra,
         datoTom: sivilstand.periodeTil,
-        sivilstandType: getSivilstandType(sivilstand.sivilstand),
+        sivilstand: getSivilstandType(sivilstand.sivilstand),
     }));
 };
 
@@ -225,14 +225,14 @@ export const getSivilstandPerioder = (
     );
 
     const result: {
-        sivilstandType: Sivilstandskode;
+        sivilstand: Sivilstandskode;
         kilde: Kilde;
         datoFom: string;
         datoTom: string | null;
     }[] = [];
-    perioderEtterVirkningstidspunkt?.forEach(({ datoTom, sivilstandType }) => {
+    perioderEtterVirkningstidspunkt?.forEach(({ datoTom, sivilstand }) => {
         const prevPeriode = result[result.length - 1];
-        const hasSameStatus = prevPeriode?.sivilstandType === sivilstandType;
+        const hasSameStatus = prevPeriode?.sivilstand === sivilstand;
         const coversAtLeastOneCalendarMonth = datoTom
             ? periodCoversMinOneFullCalendarMonth(new Date(datoTom), new Date(datoTom))
             : true;
@@ -246,7 +246,7 @@ export const getSivilstandPerioder = (
 
         if (!hasSameStatus) {
             result.push({
-                sivilstandType,
+                sivilstand,
                 datoFom: toISODateString(
                     result.length === 0
                         ? virkningsOrSoktFraDato
@@ -328,7 +328,7 @@ export function editPeriods(
     periodeIndex: number
 ): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
     const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
-    const statusField = Object.hasOwn(periodsList[0], "bostatus") ? "bostatus" : "sivilstandType";
+    const statusField = Object.hasOwn(periodsList[0], "bostatus") ? "bostatus" : "sivilstand";
 
     const periods = periodsList.toSpliced(periodeIndex, 1);
     let startIndex = periods.filter(
@@ -379,7 +379,7 @@ export function editPeriods(
                 );
             }
 
-            if (statusField === "sivilstandType") {
+            if (statusField === "sivilstand") {
                 return periods.toSpliced(prevPeriodIndex, 1, ...returnTypedPeriods(periodsToEdit as SivilstandDto[]));
             }
         }
@@ -418,7 +418,7 @@ export function editPeriods(
         return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsBarnPeriodeDto);
     }
 
-    if (statusField === "sivilstandType") {
+    if (statusField === "sivilstand") {
         return periods.toSpliced(startIndex, deleteCount, editedPeriod as SivilstandDto);
     }
 }
@@ -440,7 +440,7 @@ export function removeAndEditPeriods(
         return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsBarnPeriodeDto[];
     }
 
-    if ("sivilstandType" in periodToRemove) {
+    if ("sivilstand" in periodToRemove) {
         return periodsList.filter((_, i) => i !== index && i !== index + 1) as SivilstandDto[];
     }
 }
@@ -512,7 +512,7 @@ export const compareOpplysninger = (
                 if (
                     periode.datoFom !== periodeFraLatestOpplysninger.datoFom ||
                     periode.datoTom !== periodeFraLatestOpplysninger.datoTom ||
-                    periode.sivilstandType !== periodeFraLatestOpplysninger.sivilstandType
+                    periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand
                 ) {
                     changed = true;
                 }

@@ -161,7 +161,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             sivilstandPerioder.append({
                 datoFom: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
                 datoTom: null,
-                sivilstandType: Sivilstandskode.BOR_ALENE_MED_BARN,
+                sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 kilde: Kilde.MANUELL,
             });
             setEditableRow(sivilstandPerioderValues.length);
@@ -249,19 +249,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                 ),
                                 editableRow === index ? (
                                     <FormControlledSelectField
-                                        key={`sivilstand.${index}.sivilstandType`}
-                                        name={`sivilstand.${index}.sivilstandType`}
+                                        key={`sivilstand.${index}.sivilstand`}
+                                        name={`sivilstand.${index}.sivilstand`}
                                         label="Sivilstand"
                                         className="w-52"
-                                        options={Object.entries(sivilstandForskuddOptions).map((entry) => ({
-                                            value: entry[0],
-                                            text: toVisningsnavn(entry[0]),
+                                        options={sivilstandForskuddOptions.map((value) => ({
+                                            value,
+                                            text: toVisningsnavn(value.toString()),
                                         }))}
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
-                                        {toVisningsnavn(item.sivilstandType)}
+                                    <BodyShort key={`sivilstand.${index}.sivilstand.placeholder`}>
+                                        {toVisningsnavn(item.sivilstand)}
                                     </BodyShort>
                                 ),
                                 <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">
