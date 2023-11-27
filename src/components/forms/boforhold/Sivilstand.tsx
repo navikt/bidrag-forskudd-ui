@@ -4,17 +4,22 @@ import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, SivilstandDto, SivilstandType } from "../../../api/BidragBehandlingApi";
+import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { SivilstandTypeTexts } from "../../../enum/SivilstandTypeTexts";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { calculateFraDato, editPeriods, removeAndEditPeriods } from "../helpers/boforholdFormHelpers";
+import {
+    calculateFraDato,
+    editPeriods,
+    removeAndEditPeriods,
+    sivilstandForskuddOptions,
+} from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
@@ -29,6 +34,7 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
+    const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const {
@@ -155,7 +161,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             sivilstandPerioder.append({
                 datoFom: calculateFraDato(sivilstandPerioderValues, virkningstidspunkt),
                 datoTom: null,
-                sivilstandType: SivilstandType.BOR_ALENE_MED_BARN,
+                sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 kilde: Kilde.MANUELL,
             });
             setEditableRow(sivilstandPerioderValues.length);
@@ -243,19 +249,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                 ),
                                 editableRow === index ? (
                                     <FormControlledSelectField
-                                        key={`sivilstand.${index}.sivilstandType`}
-                                        name={`sivilstand.${index}.sivilstandType`}
+                                        key={`sivilstand.${index}.sivilstand`}
+                                        name={`sivilstand.${index}.sivilstand`}
                                         label="Sivilstand"
                                         className="w-52"
-                                        options={Object.entries(SivilstandType).map((entry) => ({
-                                            value: entry[0],
-                                            text: SivilstandTypeTexts[entry[0]],
+                                        options={sivilstandForskuddOptions.map((value) => ({
+                                            value,
+                                            text: toVisningsnavn(value.toString()),
                                         }))}
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort key={`sivilstand.${index}.sivilstandType.placeholder`}>
-                                        {SivilstandTypeTexts[item.sivilstandType]}
+                                    <BodyShort key={`sivilstand.${index}.sivilstand.placeholder`}>
+                                        {toVisningsnavn(item.sivilstand)}
                                     </BodyShort>
                                 ),
                                 <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">

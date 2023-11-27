@@ -55,7 +55,7 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
 });
 
 const mapInntekterToRolle =
-    (inntekter: InntektDto[], inntekterTransformed: InntektTransformed[]) =>
+    (inntekter: InntektDto[]) =>
     (rolle): Inntekt[] =>
         inntekter
             .filter((inntekt) => inntekt.ident === rolle.ident)
@@ -64,23 +64,11 @@ const mapInntekterToRolle =
                 inntektType: inntekt.inntektType ?? "",
                 datoFom: inntekt.datoFom ?? null,
                 datoTom: inntekt.datoTom ?? null,
-                inntektBeskrivelse: mapInntektBeskrivelse(
-                    inntekterTransformed.find((t) => t.ident == inntekt.ident)?.data,
-                    inntekt
-                ),
             }))
             .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
-// TODO: Midlertidlig løsning helt til visningsnavn lagres i backend
-const mapInntektBeskrivelse = (bidragInntekt: TransformerInntekterResponse, inntekt: InntektDto) =>
-    bidragInntekt.summertÅrsinntektListe.find(
-        (v) =>
-            v.visningsnavn == inntekt.inntektType &&
-            new Date(v.periodeFra).getFullYear() == new Date(inntekt.datoFom).getFullYear()
-    )?.visningsnavn;
-
-export const getPerioderFraInntekter = (bmOgBarn, inntekter, inntekterTransformed: InntektTransformed[]) =>
-    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter, inntekterTransformed)), {});
+export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
+    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
 export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[]) =>
     bidragInntekt.reduce(
@@ -94,10 +82,10 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
                         inntektType: inntekt.inntektRapportering,
                         belop: inntekt.sumInntekt,
                         datoTom:
-                            inntekt.periodeTom != null
-                                ? toISODateString(lastDayOfMonth(new Date(inntekt.periodeTom)))
+                            inntekt.periode.til != null
+                                ? toISODateString(lastDayOfMonth(new Date(inntekt.periode.til)))
                                 : null,
-                        datoFom: inntekt.periodeFra,
+                        datoFom: inntekt.periode.fom,
                         ident: curr.ident,
                         fraGrunnlag: true,
                         inntektPostListe: inntekt.inntektPostListe,
@@ -116,7 +104,7 @@ export const createInitialValues = (
 ): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
-            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter, bidragInntekt)
+            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
             : getPerioderFraBidragInntekt(bidragInntekt),
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd

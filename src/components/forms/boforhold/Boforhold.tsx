@@ -17,7 +17,7 @@ import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
-    BoStatusType,
+    Bostatuskode,
     HusstandsBarnPeriodeDto,
     Kilde,
     OpplysningerDto,
@@ -28,7 +28,6 @@ import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { BoStatusTexts } from "../../../enum/BoStatusTexts";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import {
@@ -42,6 +41,7 @@ import {
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
@@ -70,6 +70,7 @@ import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper"
 import { RolleTag } from "../../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
+    boforholdForskuddOptions,
     compareOpplysninger,
     createInitialValues,
     editPeriods,
@@ -93,6 +94,7 @@ const Opplysninger = ({
     datoFom: Date | null;
     ident: string;
 }) => {
+    const toVisningsnavn = useVisningsnavn();
     const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)?.perioder as
         | HusstandOpplysningPeriode[]
         | SavedOpplysningFraFolkeRegistrePeriode[];
@@ -102,7 +104,7 @@ const Opplysninger = ({
                 ?.filter((periode) => periode.tilDato === null || isAfterDate(periode.tilDato, datoFom))
                 .map((periode, index) => (
                     <div
-                        key={`${periode.boStatus}-${index}`}
+                        key={`${periode.bostatus}-${index}`}
                         className="grid grid-cols-[70px,max-content,70px,auto] items-center gap-x-2"
                     >
                         <BodyShort size="small" className="flex justify-end">
@@ -114,7 +116,7 @@ const Opplysninger = ({
                         <BodyShort size="small" className="flex justify-end">
                             {periode.tilDato ? DateToDDMMYYYYString(new Date(periode.tilDato)) : ""}
                         </BodyShort>
-                        <BodyShort size="small">{BoStatusTexts[periode.boStatus]}</BodyShort>
+                        <BodyShort size="small">{toVisningsnavn(periode.bostatus)}</BodyShort>
                     </div>
                 ))}
         </>
@@ -376,7 +378,7 @@ const AddBarnForm = ({
                 {
                     datoFom: toISODateString(datoFom),
                     datoTom: null,
-                    boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                    bostatus: Bostatuskode.MED_FORELDER,
                     kilde: Kilde.MANUELL,
                 },
             ],
@@ -585,6 +587,8 @@ const Perioder = ({
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
+    const toVisningsnavn = useVisningsnavn();
+
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
@@ -718,7 +722,7 @@ const Perioder = ({
             barnPerioder.append({
                 datoFom: null,
                 datoTom: null,
-                boStatus: BoStatusType.REGISTRERT_PA_ADRESSE,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             });
             setEditableRow(`${barnIndex}.${perioderValues.length}`);
@@ -837,21 +841,21 @@ const Perioder = ({
                                 ),
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <FormControlledSelectField
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
-                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus`}
+                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus`}
                                         className="w-fit"
                                         label="Status"
-                                        options={Object.entries(BoStatusType).map(([value, text]) => ({
+                                        options={boforholdForskuddOptions.under18År.map((value) => ({
                                             value,
-                                            text: BoStatusTexts[text],
+                                            text: toVisningsnavn(value.toString()),
                                         }))}
                                         hideLabel
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.boStatus.placeholder`}
+                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
                                     >
-                                        {BoStatusTexts[item.boStatus]}
+                                        {toVisningsnavn(item.bostatus)}
                                     </BodyShort>
                                 ),
                                 <BodyShort

@@ -13,7 +13,10 @@ export const Header = memo(() => {
     return (
         <SakHeader
             saksnummer={behandling.saksnummer}
-            roller={rollerMedPersonNavn}
+            roller={rollerMedPersonNavn.map((person) => ({
+                ...person,
+                navn: person.visningsnavn ?? person.kortnavn,
+            }))}
             skjermbilde={{ navn: "Søknad om forskudd", referanse: `#${behandlingId}` }}
         />
     );

@@ -103,3 +103,9 @@ export const isAfterDate = (date: Date | string, comparedWith: Date | string) =>
 
     return d.getTime() > c.getTime();
 };
+
+export const getYearFromDate = (date?: Date | string): number | undefined => {
+    if (!date) return;
+    if (typeof date == "string") return new Date(date).getFullYear();
+    return date.getFullYear();
+};

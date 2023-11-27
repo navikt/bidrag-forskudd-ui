@@ -3,7 +3,7 @@ import { HusstandsbarnDto } from "../../api/BidragBehandlingApi";
 interface Sivilstand {
     gyldigFraOgMed: string;
     datoTom: string;
-    sivilstandType: string;
+    sivilstand: string;
     kilde: string;
 }
 

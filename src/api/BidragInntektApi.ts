@@ -116,100 +116,11 @@ export interface InntektPost {
     beløp: number;
 }
 
-/** Liste over summerte månedsinntekter (Ainntekt ++)) */
-export interface SummertManedsinntekt {
-    /**
-     * Periode (YYYYMM)
-     * @pattern YYYYMM
-     * @example "2023-01"
-     */
-    periode: string;
-    /**
-     * Summert inntekt for måneden
-     * @example 50000
-     */
-    sumInntekt: number;
-    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
-    inntektPostListe: InntektPost[];
-}
-
-/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-export interface SummertArsinntekt {
-    /**
-     * Type inntektrapportering
-     * @example "AINNTEKT"
-     */
-    inntektRapportering: SummertArsinntektInntektRapportering;
-    /**
-     * Visningsnavn for inntekt
-     * @example "Lønn og trekk 2022"
-     */
-    visningsnavn: string;
-    /**
-     * Referanse
-     * @example "Referanse"
-     */
-    referanse: string;
-    /**
-     * Summert inntekt for perioden, omgjort til årsinntekt
-     * @example 600000
-     */
-    sumInntekt: number;
-    /**
-     * Første måned (YYYYMM) i perioden inntekten gjelder for
-     * @pattern YYYYMM
-     * @example "2023-01"
-     */
-    periodeFra: string;
-    /**
-     * Siste månded (YYYYMM) i perioden inntekten gjelder for
-     * @pattern YYYYMM
-     * @example "2023-12"
-     */
-    periodeTom?: string;
-    /**
-     * Id til barnet kontantstøtten mottas for, brukes kun for kontantstøtte
-     * @example "12345678910"
-     */
-    gjelderBarnPersonId: string;
-    /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
-    inntektPostListe: InntektPost[];
-}
-
-export interface TransformerInntekterResponse {
-    /**
-     * Dato + commit hash
-     * @example "20230705081501_68e71c7"
-     */
-    versjon: string;
-    /** Liste over summerte månedsinntekter (Ainntekt ++)) */
-    summertMånedsinntektListe: SummertManedsinntekt[];
-    /** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-    summertÅrsinntektListe: SummertArsinntekt[];
-}
-
-export interface Beskrivelse {
-    tekst: string;
-    term: string;
-}
-
-export interface Betydning {
-    /** @format date */
-    gyldigFra: string;
-    /** @format date */
-    gyldigTil: string;
-    beskrivelser: Record<string, Beskrivelse>;
-}
-
-export interface GetKodeverkKoderBetydningerResponse {
-    betydninger: Record<string, Betydning[]>;
-}
-
 /**
  * Type inntektrapportering
  * @example "AINNTEKT"
  */
-export enum SummertArsinntektInntektRapportering {
+export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
     AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
@@ -248,6 +159,101 @@ export enum SummertArsinntektInntektRapportering {
     SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
     SYKEPENGER = "SYKEPENGER",
+}
+
+/** Liste over summerte månedsinntekter (Ainntekt ++)) */
+export interface SummertManedsinntekt {
+    /**
+     * Periode (YYYYMM)
+     * @pattern YYYYMM
+     * @example "2023-01"
+     */
+    gjelderÅrMåned: string;
+    /**
+     * Summert inntekt for måneden
+     * @example 50000
+     */
+    sumInntekt: number;
+    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
+    inntektPostListe: InntektPost[];
+}
+
+/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
+export interface SummertArsinntekt {
+    /** Type inntektrapportering */
+    inntektRapportering: Inntektsrapportering;
+    /**
+     * Visningsnavn for inntekt
+     * @example "Lønn og trekk 2022"
+     */
+    visningsnavn: string;
+    /**
+     * Referanse
+     * @example "Referanse"
+     */
+    referanse: string;
+    /**
+     * Summert inntekt for perioden, omgjort til årsinntekt
+     * @example 600000
+     */
+    sumInntekt: number;
+    /** Perioden inntekten gjelder for (fom og til, format YYYYMM) */
+    periode: TypeArManedsperiode;
+    /**
+     * Id til barnet kontantstøtten mottas for, brukes kun for kontantstøtte
+     * @example "12345678910"
+     */
+    gjelderBarnPersonId: string;
+    /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
+    inntektPostListe: InntektPost[];
+}
+
+export interface TransformerInntekterResponse {
+    /**
+     * Dato + commit hash
+     * @example "20230705081501_68e71c7"
+     */
+    versjon: string;
+    /** Liste over summerte månedsinntekter (Ainntekt ++)) */
+    summertMånedsinntektListe: SummertManedsinntekt[];
+    /** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
+    summertÅrsinntektListe: SummertArsinntekt[];
+}
+
+/** Perioden inntekten gjelder for (fom og til, format YYYYMM) */
+export interface TypeArManedsperiode {
+    fom: string;
+    til?: string;
+}
+
+export enum ArManedsperiodeMonth {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+export enum Ainntektspost5 {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -406,30 +412,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
-                ...params,
-            }),
-    };
-    integrasjoner = {
-        /**
-         * No description
-         *
-         * @tags integrasjons-controller
-         * @name HentKodeverk
-         * @summary Kaller Felles Kodeverk og henter verdier
-         * @request GET:/integrasjoner/kodeverk
-         * @secure
-         */
-        hentKodeverk: (
-            query: {
-                kodeverk: string;
-            },
-            params: RequestParams = {}
-        ) =>
-            this.request<GetKodeverkKoderBetydningerResponse, any>({
-                path: `/integrasjoner/kodeverk`,
-                method: "GET",
-                query: query,
-                secure: true,
                 ...params,
             }),
     };

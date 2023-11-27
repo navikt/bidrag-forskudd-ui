@@ -7,8 +7,9 @@ import { RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
-import { InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, isValidDate } from "../../../utils/date-utils";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
+import { dateOrNull, getYearFromDate, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -17,9 +18,12 @@ import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { checkOverlappingPeriods, findDateGaps, getOverlappingInntektPerioder } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
-const Beskrivelse = ({ item, index, ident }) =>
-    item.fraGrunnlag ? (
-        <BodyShort className="min-w-[215px] capitalize">{item.inntektBeskrivelse}</BodyShort>
+const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
+    const toVisningsnavn = useVisningsnavn();
+    return item.fraGrunnlag ? (
+        <BodyShort className="min-w-[215px] capitalize">
+            {toVisningsnavn(item.inntektType, getYearFromDate(item.datoFom))}
+        </BodyShort>
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektType`}
@@ -33,6 +37,7 @@ const Beskrivelse = ({ item, index, ident }) =>
             hideLabel
         />
     );
+};
 
 const Detaljer = ({ totalt }) => {
     const buttonRef = useRef<HTMLButtonElement>(null);

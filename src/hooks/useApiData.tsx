@@ -1,5 +1,5 @@
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback } from "react";
 
@@ -33,6 +33,29 @@ export const MutationKeys = {
     updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
 };
+
+export const QueryKeys = {
+    virkningstidspunkt: (behandlingId: number) => ["virkningstidspunkt", behandlingId],
+    visningsnavn: () => ["visningsnavn"],
+    behandling: (behandlingId: number) => ["behandling", behandlingId],
+    boforhold: (behandlingId: number) => ["boforhold", behandlingId],
+    inntekter: (behandlingId: number) => ["inntekter", behandlingId],
+    grunnlagspakkeUpdate: (grunnlagspakkeId: number) => ["grunnlagspakke", grunnlagspakkeId, "update"],
+    grunnlagspakke: (grunnlagspakkeId: number) => ["grunnlagspakke", grunnlagspakkeId],
+    grunnlagspakkeId: () => ["grunnlagspakkeId"],
+    opplysninger: (behandlingId: number, opplysningerType: OpplysningerType) => [
+        "opplysninger",
+        behandlingId,
+        opplysningerType,
+    ],
+};
+
+export const useGetVisningsnavn = () =>
+    useSuspenseQuery({
+        queryKey: QueryKeys.visningsnavn(),
+        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API.api.hentVisningsnavn(),
+        staleTime: 0,
+    });
 export const useGetBehandlings = () =>
     useQuery({
         queryKey: ["behandlings"],
@@ -42,7 +65,7 @@ export const useGetBehandlings = () =>
 
 export const useGetBehandling = (behandlingId: number) =>
     useQuery({
-        queryKey: ["behandling", behandlingId],
+        queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
             return data;
@@ -52,7 +75,7 @@ export const useGetBehandling = (behandlingId: number) =>
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
     useQuery({
-        queryKey: ["virkningstidspunkt", behandlingId],
+        queryKey: QueryKeys.virkningstidspunkt(behandlingId),
         queryFn: async (): Promise<VirkningsTidspunktResponse> => {
             const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
             return data;
@@ -70,7 +93,7 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
             return data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(["virkningstidspunkt", behandlingId], data);
+            queryClient.setQueryData(QueryKeys.virkningstidspunkt(behandlingId), data);
         },
         onError: (error) => {
             console.log("onError", error);
@@ -82,7 +105,7 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
 
 export const useGetBoforhold = (behandlingId: number) =>
     useQuery({
-        queryKey: ["boforhold", behandlingId],
+        queryKey: QueryKeys.boforhold(behandlingId),
         queryFn: async (): Promise<BoforholdResponse> => {
             const { data } = await BEHANDLING_API.api.hentBoforhold(behandlingId);
             return data;
@@ -92,7 +115,7 @@ export const useGetBoforhold = (behandlingId: number) =>
 
 export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
     useQuery({
-        queryKey: ["opplysninger", behandlingId, opplysningerType],
+        queryKey: QueryKeys.opplysninger(behandlingId, opplysningerType),
         queryFn: async (): Promise<OpplysningerDto> => {
             try {
                 const { data } = await BEHANDLING_API.api.hentAktiv(behandlingId, opplysningerType);
@@ -116,7 +139,7 @@ export const useUpdateBoforhold = (behandlingId: number) => {
         },
         networkMode: "always",
         onSuccess: (data) => {
-            queryClient.setQueryData(["boforhold", behandlingId], data);
+            queryClient.setQueryData(QueryKeys.boforhold(behandlingId), data);
         },
         onError: (error) => {
             console.log("onError", error);
@@ -136,7 +159,7 @@ export const useUpdateInntekter = (behandlingId: number) => {
             return data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(["inntekter", behandlingId], data);
+            queryClient.setQueryData(QueryKeys.inntekter(behandlingId), data);
         },
         onError: (error) => {
             console.log("onError", error);
@@ -148,18 +171,11 @@ export const useUpdateInntekter = (behandlingId: number) => {
 
 export const useHentInntekter = (behandlingId: number) =>
     useQuery({
-        queryKey: ["inntekter", behandlingId],
+        queryKey: QueryKeys.inntekter(behandlingId),
         queryFn: async (): Promise<InntekterResponse> => {
             const { data } = await BEHANDLING_API.api.hentInntekter(behandlingId);
             return data;
         },
-        staleTime: Infinity,
-    });
-
-export const useHentBoforhold = (behandlingId: number) =>
-    useQuery({
-        queryKey: ["boforhold", behandlingId],
-        queryFn: (): Promise<AxiosResponse<BoforholdResponse>> => BEHANDLING_API.api.hentBoforhold(behandlingId),
         staleTime: Infinity,
     });
 
@@ -188,6 +204,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                     rolleType: rolle.rolleType as unknown as RolleTypeFullName,
                     navn: data.navn,
                     kortnavn: data.kortnavn,
+                    visningsnavn: data.visningsnavn,
                 }),
                 []
             ),
@@ -277,7 +294,7 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
 
 const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
     const { data: grunnlagspakkeId } = useQuery({
-        queryKey: ["grunnlagspakkeId"],
+        queryKey: QueryKeys.grunnlagspakkeId(),
         queryFn: async (): Promise<number> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
@@ -305,7 +322,7 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
         : useCreateGrunnlagspakke(behandling);
     const grunnlagRequest = createGrunnlagRequest(behandling);
     const { isSuccess: updateIsSuccess } = useQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
+        queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
                 grunnlagspakkeId,
@@ -318,7 +335,7 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
     });
 
     return useQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId],
+        queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
             return data;
@@ -333,7 +350,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
 
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
-        queryKey: ["behandling", behandlingId],
+        queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
             return data;
@@ -341,13 +358,13 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         staleTime: Infinity,
     });
 
-    const behandling: BehandlingDto = queryClient.getQueryData(["behandling", behandlingId]);
+    const behandling: BehandlingDto = queryClient.getQueryData(QueryKeys.behandling(behandlingId));
 
     if (behandling?.grunnlagspakkeid) {
-        queryClient.setQueryData(["grunnlagspakkeId"], behandling.grunnlagspakkeid);
+        queryClient.setQueryData(QueryKeys.grunnlagspakkeId(), behandling.grunnlagspakkeid);
     } else {
         await queryClient.prefetchQuery({
-            queryKey: ["grunnlagspakkeId"],
+            queryKey: QueryKeys.grunnlagspakkeId(),
             queryFn: async (): Promise<number> => {
                 const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                     formaal: "FORSKUDD",
@@ -358,16 +375,19 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
             staleTime: Infinity,
         });
 
-        const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
+        const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
         await BEHANDLING_API.api.updateBehandling(behandlingId, { grunnlagspakkeId });
-        queryClient.setQueryData(["behandling", behandlingId], { ...behandling, grunnlagspakkeid: grunnlagspakkeId });
+        queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
+            ...behandling,
+            grunnlagspakkeid: grunnlagspakkeId,
+        });
     }
 
-    const grunnlagspakkeId = queryClient.getQueryData<number>(["grunnlagspakkeId"]);
+    const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
     const grunnlagRequest = createGrunnlagRequest(behandling);
 
     await queryClient.prefetchQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId, "update"],
+        queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
                 grunnlagspakkeId,
@@ -378,7 +398,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         staleTime: Infinity,
     });
     await queryClient.prefetchQuery({
-        queryKey: ["grunnlagspakke", grunnlagspakkeId],
+        queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
             return data;
@@ -387,7 +407,9 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     });
 
     if (isInntektSkjermbildeEnabled) {
-        const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(["grunnlagspakke", grunnlagspakkeId]);
+        const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(
+            QueryKeys.grunnlagspakke(grunnlagspakkeId)
+        );
         const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
 
         bidragIncomeRequests.forEach((request) => {
@@ -430,7 +452,7 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
             return data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(["opplysninger", behandlingId, opplysningerType], data);
+            queryClient.setQueryData(QueryKeys.opplysninger(behandlingId, opplysningerType), data);
         },
     });
 

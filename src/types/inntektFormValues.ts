@@ -2,7 +2,6 @@ import { InntektPost } from "../api/BidragBehandlingApi";
 import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
 export interface Inntekt {
-    inntektBeskrivelse: string;
     inntektType: string;
     datoFom: string | null;
     taMed: boolean;
