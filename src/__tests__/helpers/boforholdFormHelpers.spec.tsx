@@ -1629,7 +1629,7 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT",
+                sivilstandType: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2023-08-31",
                 kilde: "OFFENTLIG",
@@ -1727,7 +1727,7 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT",
+                sivilstandType: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2021-10-31",
                 kilde: "OFFENTLIG",
@@ -1739,7 +1739,7 @@ describe("BoforholdFormHelpers", () => {
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "GIFT",
+                sivilstandType: "GIFT_SAMBOER",
                 datoFom: "2022-09-01",
                 datoTom: null,
                 kilde: "OFFENTLIG",
@@ -1831,7 +1831,7 @@ describe("BoforholdFormHelpers", () => {
 
         const expectedResult = [
             {
-                sivilstandType: "GIFT",
+                sivilstandType: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
                 datoTom: "2021-10-31",
                 kilde: "OFFENTLIG",
@@ -1843,7 +1843,7 @@ describe("BoforholdFormHelpers", () => {
                 kilde: "OFFENTLIG",
             },
             {
-                sivilstandType: "GIFT",
+                sivilstandType: "GIFT_SAMBOER",
                 datoFom: "2022-09-01",
                 datoTom: null,
                 kilde: "OFFENTLIG",

@@ -88,6 +88,8 @@ export enum Rolletype {
 export enum Sivilstandskode {
     GIFT_SAMBOER = "GIFT_SAMBOER",
     BOR_ALENE_MED_BARN = "BOR_ALENE_MED_BARN",
+    ENSLIG = "ENSLIG",
+    SAMBOER = "SAMBOER",
 }
 
 export enum SoknadType {
@@ -334,7 +336,7 @@ export interface SivilstandDto {
      * @example "2025-01-25"
      */
     datoTom?: string;
-    sivilstandType: Sivilstandskode;
+    sivilstand: Sivilstandskode;
     kilde: Kilde;
 }
 
@@ -579,7 +581,7 @@ export interface ResultatPeriode {
     resultat: ResultatBeregning;
     /** Beregnet grunnlag innhold */
     grunnlagReferanseListe: string[];
-    sivilstandType?: Sivilstandskode;
+    sivilstand?: Sivilstandskode;
 }
 
 export interface BehandlingDto {

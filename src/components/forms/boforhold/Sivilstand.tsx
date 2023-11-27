@@ -14,7 +14,12 @@ import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { calculateFraDato, editPeriods, removeAndEditPeriods } from "../helpers/boforholdFormHelpers";
+import {
+    calculateFraDato,
+    editPeriods,
+    removeAndEditPeriods,
+    sivilstandForskuddOptions,
+} from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
@@ -248,7 +253,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                         name={`sivilstand.${index}.sivilstandType`}
                                         label="Sivilstand"
                                         className="w-52"
-                                        options={Object.entries(Sivilstandskode).map((entry) => ({
+                                        options={Object.entries(sivilstandForskuddOptions).map((entry) => ({
                                             value: entry[0],
                                             text: toVisningsnavn(entry[0]),
                                         }))}
