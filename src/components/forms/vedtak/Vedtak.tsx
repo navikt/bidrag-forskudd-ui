@@ -12,6 +12,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import environment from "../../../environment";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { mapBehandlingReferanseliste, mapGrunnlagPersonInfo } from "../../../mapper/VedtakBeregningkMapper";
 import { uniqueByKey } from "../../../utils/array-utils";
@@ -20,6 +21,7 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
+import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 function grunnlagTilOpprettGrunnlagRequestDto(grunnlag: Grunnlag): OpprettGrunnlagRequestDto {
     return {
@@ -266,6 +268,11 @@ const Vedtak = () => {
 };
 
 export default () => {
+    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
+
+    if (!isVedtakSkjermbildeEnabled) {
+        return <UnderArbeidAlert />;
+    }
     return (
         <QueryErrorWrapper>
             <Vedtak />
