@@ -338,7 +338,7 @@ export function editPeriods(
 
     const postPeriodIndex = editedPeriod.datoTom
         ? periods.findIndex(
-              (period) =>
+              (period: HusstandsBarnPeriodeDto | SivilstandDto) =>
                   period.datoTom === null || (period.datoTom && isAfterDate(period.datoTom, editedPeriod.datoTom))
           )
         : -1;
@@ -434,7 +434,7 @@ export function removeAndEditPeriods(
     const prevPeriod = periodsList[index - 1];
     const postPeriod = periodsList[index + 1];
 
-    prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : periodToRemove.datoTom;
+    prevPeriod.datoTom = postPeriod ? postPeriod.datoTom : null;
     prevPeriod.kilde = Kilde.MANUELL;
 
     if ("bostatus" in periodToRemove) {
