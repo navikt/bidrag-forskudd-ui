@@ -1,5 +1,6 @@
 import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK == "true";
@@ -22,19 +23,23 @@ export default function useFeatureToogle() {
     }
     const userIdsInntekt = getUserIdsEnabledFor(enableInntektSkjermbilde);
     const userIdsVedtak = getUserIdsEnabledFor(enableVedtakSkjermbilde);
-    console.debug(
-        `enableVedtakSkjermbilde=${enableVedtakSkjermbilde} enableInntektSkjermbilde=${enableInntektSkjermbilde} enableFatteVedtak=${enableFatteVedtak} process.env.ENABLE_INNTEKT_SKJERMBILDE=${process.env.ENABLE_INNTEKT_SKJERMBILDE} process.env.ENABLE_VEDTAK_SKJERMBILDE=${process.env.ENABLE_VEDTAK_SKJERMBILDE}`
-    );
-    console.debug(
-        "UserIds",
-        userId,
-        "vedtak",
-        userIdsVedtak,
-        userIdsVedtak.includes(userId),
-        "inntekt",
-        userIdsInntekt,
-        userIdsInntekt.includes(userId)
-    );
+
+    useEffect(() => {
+        console.debug(
+            `enableVedtakSkjermbilde=${enableVedtakSkjermbilde} enableInntektSkjermbilde=${enableInntektSkjermbilde} enableFatteVedtak=${enableFatteVedtak} process.env.ENABLE_INNTEKT_SKJERMBILDE=${process.env.ENABLE_INNTEKT_SKJERMBILDE} process.env.ENABLE_VEDTAK_SKJERMBILDE=${process.env.ENABLE_VEDTAK_SKJERMBILDE}`
+        );
+        console.debug(
+            "UserIds",
+            userId,
+            "vedtak",
+            userIdsVedtak,
+            userIdsVedtak.includes(userId),
+            "inntekt",
+            userIdsInntekt,
+            userIdsInntekt.includes(userId)
+        );
+    }, [userId]);
+
     return {
         isFatteVedtakEnabled: enableFatteVedtak,
         isInntektSkjermbildeEnabled:
