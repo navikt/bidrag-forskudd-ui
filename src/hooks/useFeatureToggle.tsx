@@ -9,7 +9,6 @@ export default function useFeatureToogle() {
         queryFn: () => SecuritySessionUtils.hentSaksbehandlerId(),
         initialData: () => (isMockEnabled ? "" : undefined),
         staleTime: isMockEnabled ? 0 : Infinity,
-        retry: 3,
     });
     const enableVedtakSkjermbilde = process.env.ENABLE_VEDTAK_SKJERMBILDE;
     const enableInntektSkjermbilde = process.env.ENABLE_INNTEKT_SKJERMBILDE;
