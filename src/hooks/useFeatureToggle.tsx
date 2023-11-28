@@ -10,8 +10,8 @@ export default function useFeatureToogle() {
         initialData: () => (isMockEnabled ? "" : undefined),
         staleTime: isMockEnabled ? 0 : Infinity,
     });
-    const enableVedtakSkjermbilde = process.env.ENABLE_VEDTAK_SKJERMBILDE;
-    const enableInntektSkjermbilde = process.env.ENABLE_INNTEKT_SKJERMBILDE;
+    const enableVedtakSkjermbilde = process.env.ENABLE_VEDTAK_SKJERMBILDE == "true";
+    const enableInntektSkjermbilde = process.env.ENABLE_INNTEKT_SKJERMBILDE == "true";
     const enableFatteVedtak = process.env.ENABLE_FATTE_VEDTAK;
 
     function getUserIdsEnabledFor(value: string): string[] {
@@ -20,12 +20,12 @@ export default function useFeatureToogle() {
         }
         return value?.split(",").map((v) => v.trim()) ?? [];
     }
-    const userIdsInntekt = getUserIdsEnabledFor(enableInntektSkjermbilde);
-    const userIdsVedtak = getUserIdsEnabledFor(enableVedtakSkjermbilde);
+    const userIdsInntekt = getUserIdsEnabledFor(process.env.ENABLE_INNTEKT_SKJERMBILDE);
+    const userIdsVedtak = getUserIdsEnabledFor(process.env.ENABLE_VEDTAK_SKJERMBILDE);
 
     useEffect(() => {
         console.debug(
-            `enableVedtakSkjermbilde=${enableVedtakSkjermbilde} enableInntektSkjermbilde=${enableInntektSkjermbilde} enableFatteVedtak=${enableFatteVedtak} process.env.ENABLE_INNTEKT_SKJERMBILDE=${process.env.ENABLE_INNTEKT_SKJERMBILDE} process.env.ENABLE_VEDTAK_SKJERMBILDE=${process.env.ENABLE_VEDTAK_SKJERMBILDE}`
+            `enableVedtakSkjermbilde=${enableVedtakSkjermbilde} enableInntektSkjermbilde=${enableInntektSkjermbilde} enableFatteVedtak=${enableFatteVedtak}`
         );
         console.debug(
             "UserIds",
@@ -41,11 +41,7 @@ export default function useFeatureToogle() {
 
     return {
         isFatteVedtakEnabled: enableFatteVedtak,
-        isInntektSkjermbildeEnabled:
-            enableInntektSkjermbilde == undefined ||
-            enableInntektSkjermbilde == "true" ||
-            userIdsInntekt.includes(userId),
-        isVedtakSkjermbildeEnabled:
-            enableVedtakSkjermbilde == undefined || enableVedtakSkjermbilde == "true" || userIdsVedtak.includes(userId),
+        isInntektSkjermbildeEnabled: enableInntektSkjermbilde || userIdsInntekt.includes(userId),
+        isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde || userIdsVedtak.includes(userId),
     };
 }
