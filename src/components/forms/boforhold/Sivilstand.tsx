@@ -1,5 +1,5 @@
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
+import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -68,7 +68,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             });
         }
 
-        if (isValidDate(perioderValues[index].datoTom)) {
+        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
             const laterPeriodExists = perioderValues
                 .filter((_periode, i) => i !== index)
                 .some(
