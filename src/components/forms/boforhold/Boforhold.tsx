@@ -1,5 +1,5 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
+import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
 import {
     Alert,
     BodyShort,
@@ -55,7 +55,6 @@ import {
     DateToDDMMYYYYString,
     isAfterDate,
     ISODateTimeStringToDDMMYYYYString,
-    isValidDate,
     toDateString,
     toISODateString,
 } from "../../../utils/date-utils";
@@ -617,11 +616,7 @@ const Perioder = ({
             });
         }
 
-<<<<<<< Updated upstream
-        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
-=======
         if (isValidDate(perioderValues[index].datoTom)) {
->>>>>>> Stashed changes
             const laterPeriodExists = perioderValues
                 .filter((_periode, i) => i !== index)
                 .some(
