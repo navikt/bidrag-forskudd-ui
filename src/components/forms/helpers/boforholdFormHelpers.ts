@@ -1,3 +1,5 @@
+import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
+
 import {
     BoforholdResponse,
     Bostatuskode,
@@ -122,7 +124,7 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
     return husstandmedlemmerOgEgneBarnListe
         .filter((medlem) => medlem.erBarnAvBmBp)
         .map((barn) => ({
-            foedselsDato: barn.fodselsdato,
+            foedselsdato: barn.fodselsdato,
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,
             perioder: fillInPeriodGaps(barn),
@@ -160,14 +162,26 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
     }));
 };
 
+export const getEitherFirstDayOfFoedselsOrVirkingsdatoMonth = (
+    barnsFoedselsDato: Date | string,
+    virkningsOrSoktFraDato: Date
+) => {
+    const date =
+        barnsFoedselsDato && isAfterDate(barnsFoedselsDato, virkningsOrSoktFraDato)
+            ? new Date(barnsFoedselsDato)
+            : virkningsOrSoktFraDato;
+
+    return firstDayOfMonth(date);
+};
+
 export const getBarnPerioder = (
     perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
     virkningsOrSoktFraDato: Date,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     barnsFoedselsDato: string
 ) => {
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barnsFoedselsDato, virkningsOrSoktFraDato);
     const perioderEtterVirkningstidspunkt = perioder?.filter(
-        ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, virkningsOrSoktFraDato))
+        ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, datoFra))
     );
 
     const result: {
@@ -180,7 +194,7 @@ export const getBarnPerioder = (
         const isRegistrertPeriode = bostatus === Bostatuskode.MED_FORELDER;
         const prevPeriode = result[result.length - 1];
         const datoFom = toISODateString(
-            result.length === 0 ? virkningsOrSoktFraDato : addDays(new Date(result[result.length - 1].datoTom), 1)
+            result.length === 0 ? datoFra : addDays(new Date(result[result.length - 1].datoTom), 1)
         );
         const datoTom = tilDato ? toISODateString(lastDayOfMonth(new Date(tilDato))) : null;
 
@@ -268,7 +282,7 @@ export const getBarnPerioderFromHusstandsListe = (
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         medISak: true,
-        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsDato),
+        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
     }));
 };
 
