@@ -617,7 +617,11 @@ const Perioder = ({
             });
         }
 
+<<<<<<< Updated upstream
         if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
+=======
+        if (isValidDate(perioderValues[index].datoTom)) {
+>>>>>>> Stashed changes
             const laterPeriodExists = perioderValues
                 .filter((_periode, i) => i !== index)
                 .some(
