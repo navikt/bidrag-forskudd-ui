@@ -616,7 +616,7 @@ const Perioder = ({
             });
         }
 
-        if (isValidDate(perioderValues[index].datoTom)) {
+        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
             const laterPeriodExists = perioderValues
                 .filter((_periode, i) => i !== index)
                 .some(
