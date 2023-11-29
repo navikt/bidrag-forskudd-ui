@@ -15,9 +15,7 @@ const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
     const past12Incomes = (inntekt: SummertManedsinntekt[]) =>
         past12Months.map((date) => {
             const incomeForThatMonth = inntekt.find((periode) =>
-                // @ts-ignore
-                // TODO fix type in swagger
-                datesAreFromSameMonthAndYear(new Date(periode.periode), date)
+                datesAreFromSameMonthAndYear(new Date(periode.gjelderÅrMåned), date)
             );
             return incomeForThatMonth ?? null;
         });
