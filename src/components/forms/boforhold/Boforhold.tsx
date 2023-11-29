@@ -1,5 +1,6 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
+import ObjectUtils from "@navikt/bidrag-ui-common/esm/utils/ObjectUtils";
 import {
     Alert,
     BodyShort,
@@ -617,7 +618,7 @@ const Perioder = ({
             });
         }
 
-        if (perioderValues[index].datoTom !== null) {
+        if (!ObjectUtils.isEmpty(perioderValues[index].datoTom)) {
             const laterPeriodExists = perioderValues
                 .filter((_periode, i) => i !== index)
                 .some(
