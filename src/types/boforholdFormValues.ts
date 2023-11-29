@@ -27,7 +27,7 @@ export interface SavedOpplysningFraFolkeRegistrePeriode {
 }
 
 export interface SavedHustandOpplysninger {
-    foedselsDato?: string;
+    foedselsdato?: string;
     ident: string;
     navn: string;
     perioder: SavedOpplysningFraFolkeRegistrePeriode[];

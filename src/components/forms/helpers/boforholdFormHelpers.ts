@@ -162,17 +162,24 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
     }));
 };
 
-export const getEitherFoedselsOrVirkingsdato = (barnsFoedselsDato: Date | string, virkningsOrSoktFraDato: Date) =>
-    barnsFoedselsDato && isAfterDate(barnsFoedselsDato, virkningsOrSoktFraDato)
-        ? new Date(barnsFoedselsDato)
-        : virkningsOrSoktFraDato;
+export const getEitherFirstDayOfFoedselsOrVirkingsdatoMonth = (
+    barnsFoedselsDato: Date | string,
+    virkningsOrSoktFraDato: Date
+) => {
+    const date =
+        barnsFoedselsDato && isAfterDate(barnsFoedselsDato, virkningsOrSoktFraDato)
+            ? new Date(barnsFoedselsDato)
+            : virkningsOrSoktFraDato;
+
+    return firstDayOfMonth(date);
+};
 
 export const getBarnPerioder = (
     perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
     virkningsOrSoktFraDato: Date,
     barnsFoedselsDato: string
 ) => {
-    const datoFra = firstDayOfMonth(getEitherFoedselsOrVirkingsdato(barnsFoedselsDato, virkningsOrSoktFraDato));
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barnsFoedselsDato, virkningsOrSoktFraDato);
     const perioderEtterVirkningstidspunkt = perioder?.filter(
         ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, datoFra))
     );

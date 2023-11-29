@@ -75,7 +75,7 @@ import {
     editPeriods,
     getBarnPerioder,
     getBarnPerioderFromHusstandsListe,
-    getEitherFoedselsOrVirkingsdato,
+    getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
@@ -594,13 +594,8 @@ const Perioder = ({
 
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
-    const [fom, tom] = getFomAndTomForMonthPicker(getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt));
-    console.log("fom", fom);
-    console.log("foedselsdato", foedselsdato);
-    console.log(
-        "getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt)",
-        getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt)
-    );
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(foedselsdato, virkningstidspunkt);
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const saveBoforhold = useOnSaveBoforhold();
     const { control, getValues, clearErrors, setError, setValue, getFieldState } =
         useFormContext<BoforholdFormValues>();
@@ -652,10 +647,10 @@ const Perioder = ({
 
         const periods = editPeriods(perioderValues, index);
         const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
-        const virkningsDatoIsInFuture = isAfterDate(virkningstidspunkt, firstDayOfCurrentMonth);
+        const virkningsDatoIsInFuture = isAfterDate(datoFra, firstDayOfCurrentMonth);
         const futurePeriodExists = periods.some((periode) =>
             virkningsDatoIsInFuture
-                ? isAfterDate(periode.datoFom, virkningstidspunkt)
+                ? isAfterDate(periode.datoFom, datoFra)
                 : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
         );
 
@@ -665,13 +660,13 @@ const Perioder = ({
             return;
         }
 
-        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, virkningstidspunkt);
+        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, datoFra);
 
         if (firstPeriodIsNotFromVirkningsTidspunkt) {
             setErrorMessage({
                 title: "Feil i periodisering",
                 text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toDateString(
-                    virkningstidspunkt
+                    datoFra
                 )} til ${toDateString(new Date(periods[0].datoFom))}`,
             });
             setErrorModalOpen(true);
