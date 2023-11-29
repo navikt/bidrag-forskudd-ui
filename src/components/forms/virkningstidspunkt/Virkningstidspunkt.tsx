@@ -57,8 +57,10 @@ const Main = ({ initialValues, error }) => {
 
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
-        setValue("virkningsDato", toISODateString(date));
-        clearErrors("virkningsDato");
+        if (date) {
+            setValue("virkningsDato", toISODateString(date));
+            clearErrors("virkningsDato");
+        }
     };
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));

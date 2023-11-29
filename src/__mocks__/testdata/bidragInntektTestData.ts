@@ -1,8 +1,10 @@
+import { TransformerInntekterResponse } from "../../api/BidragInntektApi";
+
 export const bidragInntektTestData = {
     versjon: "",
-    summertMaanedsinntektListe: [
+    summertMånedsinntektListe: [
         {
-            periode: "2021-11",
+            gjelderÅrMåned: "2021-11",
             sumInntekt: 2000,
             inntektPostListe: [
                 {
@@ -13,7 +15,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2021-12",
+            gjelderÅrMåned: "2021-12",
             sumInntekt: 2000,
             inntektPostListe: [
                 {
@@ -24,7 +26,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-01",
+            gjelderÅrMåned: "2022-01",
             sumInntekt: 2000,
             inntektPostListe: [
                 {
@@ -35,7 +37,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-02",
+            gjelderÅrMåned: "2022-02",
             sumInntekt: 2000,
             inntektPostListe: [
                 {
@@ -46,7 +48,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-03",
+            gjelderÅrMåned: "2022-03",
             sumInntekt: 2000,
             inntektPostListe: [
                 {
@@ -57,7 +59,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-05",
+            gjelderÅrMåned: "2022-05",
             sumInntekt: 65000,
             inntektPostListe: [
                 {
@@ -73,7 +75,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-06",
+            gjelderÅrMåned: "2022-06",
             sumInntekt: 50000,
             inntektPostListe: [
                 {
@@ -84,7 +86,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-07",
+            gjelderÅrMåned: "2022-07",
             sumInntekt: 50000,
             inntektPostListe: [
                 {
@@ -95,7 +97,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-08",
+            gjelderÅrMåned: "2022-08",
             sumInntekt: 55000,
             inntektPostListe: [
                 {
@@ -106,7 +108,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-09",
+            gjelderÅrMåned: "2022-09",
             sumInntekt: 55000,
             inntektPostListe: [
                 {
@@ -117,7 +119,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-10",
+            gjelderÅrMåned: "2022-10",
             sumInntekt: 55000,
             inntektPostListe: [
                 {
@@ -128,7 +130,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-11",
+            gjelderÅrMåned: "2022-11",
             sumInntekt: 55000,
             inntektPostListe: [
                 {
@@ -139,7 +141,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2022-12",
+            gjelderÅrMåned: "2022-12",
             sumInntekt: 55000,
             inntektPostListe: [
                 {
@@ -150,7 +152,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-01",
+            gjelderÅrMåned: "2023-01",
             sumInntekt: 60000,
             inntektPostListe: [
                 {
@@ -161,7 +163,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-02",
+            gjelderÅrMåned: "2023-02",
             sumInntekt: 60000,
             inntektPostListe: [
                 {
@@ -172,7 +174,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-03",
+            gjelderÅrMåned: "2023-03",
             sumInntekt: 60000,
             inntektPostListe: [
                 {
@@ -183,7 +185,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-04",
+            gjelderÅrMåned: "2023-04",
             sumInntekt: 68000,
             inntektPostListe: [
                 {
@@ -199,7 +201,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-05",
+            gjelderÅrMåned: "2023-05",
             sumInntekt: 60000,
             inntektPostListe: [
                 {
@@ -210,7 +212,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-06",
+            gjelderÅrMåned: "2023-06",
             sumInntekt: 75000,
             inntektPostListe: [
                 {
@@ -226,7 +228,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-07",
+            gjelderÅrMåned: "2023-07",
             sumInntekt: 85000,
             inntektPostListe: [
                 {
@@ -237,7 +239,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            periode: "2023-08",
+            gjelderÅrMåned: "2023-08",
             sumInntekt: 30000,
             inntektPostListe: [
                 {
@@ -248,9 +250,9 @@ export const bidragInntektTestData = {
             ],
         },
     ],
-    summertAarsinntektListe: [
+    summertÅrsinntektListe: [
         {
-            inntektBeskrivelse: "AINNTEKT",
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2021",
             referanse: "",
             sumInntekt: 4000,
@@ -265,7 +267,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "AINNTEKT",
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2022",
             referanse: "",
             sumInntekt: 446000,
@@ -290,7 +292,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "AINNTEKT",
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2023",
             referanse: "",
             sumInntekt: 468000,
@@ -320,7 +322,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "AINNTEKT_BEREGNET_12MND",
+            inntektRapportering: "AINNTEKT_BEREGNET_12MND",
             visningsnavn: "Lønn og trekk siste 12 mnd",
             referanse: "",
             sumInntekt: 743000,
@@ -350,7 +352,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "AINNTEKT_BEREGNET_3MND",
+            inntektRapportering: "AINNTEKT_BEREGNET_3MND",
             visningsnavn: "Lønn og trekk siste 3 mnd",
             referanse: "",
             sumInntekt: 220000,
@@ -375,7 +377,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "OVERGANGSSTØNAD",
+            inntektRapportering: "OVERGANGSSTØNAD",
             visningsnavn: "Overgangsstønad 2021",
             referanse: "",
             sumInntekt: 100,
@@ -390,7 +392,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "OVERGANGSSTØNAD",
+            inntektRapportering: "OVERGANGSSTØNAD",
             visningsnavn: "Overgangsstønad 2022",
             referanse: "",
             sumInntekt: 9000,
@@ -460,7 +462,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "OVERGANGSSTØNAD",
+            inntektRapportering: "OVERGANGSSTØNAD",
             visningsnavn: "Overgangsstønad 2023",
             referanse: "",
             sumInntekt: 6200,
@@ -490,7 +492,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "OVERGANGSSTØNAD_BEREGNET_3MND",
+            inntektRapportering: "OVERGANGSSTØNAD_BEREGNET_3MND",
             visningsnavn: "Overgangsstønad beregnet inntekt siste 3 mnd",
             referanse: "",
             sumInntekt: 19200,
@@ -515,7 +517,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "OVERGANGSSTØNAD_BEREGNET_12MND",
+            inntektRapportering: "OVERGANGSSTØNAD_BEREGNET_12MND",
             visningsnavn: "Overgangsstønad beregnet inntekt siste 12 mnd",
             referanse: "",
             sumInntekt: 13800,
@@ -585,7 +587,7 @@ export const bidragInntektTestData = {
             ],
         },
         {
-            inntektBeskrivelse: "LIGNINGSINNTEKT",
+            inntektRapportering: "LIGNINGSINNTEKT",
             visningsnavn: "Sigrun ligningsinntekt (LIGS)",
             referanse: "",
             sumInntekt: 0,
@@ -594,7 +596,7 @@ export const bidragInntektTestData = {
             inntektPostListe: [],
         },
         {
-            inntektBeskrivelse: "KAPITALINNTEKT",
+            inntektRapportering: "KAPITALINNTEKT",
             visningsnavn: "Sigrun kapitalinntekt (KAPS)",
             referanse: "",
             sumInntekt: 400,
@@ -624,4 +626,4 @@ export const bidragInntektTestData = {
             ],
         },
     ],
-};
+} as TransformerInntekterResponse;
