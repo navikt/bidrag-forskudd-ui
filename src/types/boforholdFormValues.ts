@@ -14,7 +14,7 @@ export interface HusstandOpplysningPeriode {
 }
 
 export interface HusstandOpplysningFraFolkeRegistre {
-    foedselsDato?: string;
+    foedselsdato?: string;
     ident: string;
     navn: string;
     perioder: HusstandOpplysningPeriode[];

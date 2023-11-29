@@ -75,6 +75,7 @@ import {
     editPeriods,
     getBarnPerioder,
     getBarnPerioderFromHusstandsListe,
+    getEitherFoedselsOrVirkingsdato,
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
@@ -328,7 +329,7 @@ const AddBarnForm = ({
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
-    const [foedselsDato, setFoedselsDato] = useState(null);
+    const [foedselsdato, setFoedselsdato] = useState(null);
     const [navn, setNavn] = useState("");
     const [person, setPerson] = useState<PersonDto>(null);
     const [error, setError] = useState(null);
@@ -343,10 +344,10 @@ const AddBarnForm = ({
         }
 
         if (val === "fritekst") {
-            if (!isValidDate(foedselsDato)) {
-                formErrors = { ...formErrors, foedselsDato: "Dato er ikke gylid" };
+            if (!isValidDate(foedselsdato)) {
+                formErrors = { ...formErrors, foedselsdato: "Dato er ikke gylid" };
             } else {
-                delete formErrors.foedselsDato;
+                delete formErrors.foedselsdato;
             }
         }
 
@@ -372,7 +373,7 @@ const AddBarnForm = ({
             ident: val === "dnummer" ? ident : "",
             medISak: false,
             navn: navn,
-            foedselsDato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsDato),
+            foedselsdato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato),
             perioder: [
                 {
                     datoFom: toISODateString(datoFom),
@@ -444,7 +445,7 @@ const AddBarnForm = ({
                     onChange={(val) => {
                         setVal(val);
                         setIdent("");
-                        setFoedselsDato(null);
+                        setFoedselsdato(null);
                         setError(null);
                     }}
                 >
@@ -469,10 +470,10 @@ const AddBarnForm = ({
                         <DatePickerInput
                             label="Fødselsdato"
                             placeholder="DD.MM.ÅÅÅÅ"
-                            onChange={(value) => setFoedselsDato(value)}
+                            onChange={(value) => setFoedselsdato(value)}
                             defaultValue={null}
-                            fieldValue={foedselsDato}
-                            error={error?.foedselsDato}
+                            fieldValue={foedselsdato}
+                            error={error?.foedselsdato}
                         />
                     )}
                     <TextField
@@ -553,6 +554,7 @@ const BarnPerioder = ({
                         </div>
                         <Perioder
                             barnIndex={index}
+                            foedselsdato={item.foedselsdato}
                             virkningstidspunkt={datoFom}
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                         />
@@ -577,10 +579,12 @@ const BarnPerioder = ({
 
 const Perioder = ({
     barnIndex,
+    foedselsdato,
     virkningstidspunkt,
     opplysningerFraFolkRegistre,
 }: {
     barnIndex: number;
+    foedselsdato: string;
     virkningstidspunkt: Date;
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
 }) => {
@@ -590,7 +594,13 @@ const Perioder = ({
 
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
+    const [fom, tom] = getFomAndTomForMonthPicker(getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt));
+    console.log("fom", fom);
+    console.log("foedselsdato", foedselsdato);
+    console.log(
+        "getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt)",
+        getEitherFoedselsOrVirkingsdato(foedselsdato, virkningstidspunkt)
+    );
     const saveBoforhold = useOnSaveBoforhold();
     const { control, getValues, clearErrors, setError, setValue, getFieldState } =
         useFormContext<BoforholdFormValues>();
