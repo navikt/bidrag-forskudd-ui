@@ -19,6 +19,7 @@ import {
     VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
 import {
+    GrunnlagRequestType,
     HentGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
@@ -220,32 +221,33 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
     const periodeFra = toISODateString(deductMonths(today, 36));
 
     const skattegrunnlagBarnRequests = barn?.map((b) => ({
-        type: "SKATTEGRUNNLAG",
+        type: GrunnlagRequestType.SKATTEGRUNNLAG,
         personId: b.ident,
         periodeFra,
         periodeTil: toISODateString(today),
     }));
 
     const bmRequests = [
-        "AINNTEKT",
-        "SKATTEGRUNNLAG",
-        "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG",
-        "BARNETILLEGG",
-        "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
-        "SIVILSTAND",
+        GrunnlagRequestType.AINNTEKT,
+        GrunnlagRequestType.SKATTEGRUNNLAG,
+        GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
+        GrunnlagRequestType.BARNETILLEGG,
+        GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
+        GrunnlagRequestType.SIVILSTAND,
     ].map((type) => ({
         type,
         personId: bmIdent,
         periodeFra:
-            type === "AINNTEKT" ? toISODateString(deductMonths(today, today.getDate() > 6 ? 12 : 13)) : periodeFra,
+            type === GrunnlagRequestType.AINNTEKT
+                ? toISODateString(deductMonths(today, today.getDate() > 6 ? 12 : 13))
+                : periodeFra,
         periodeTil:
-            type === "AINNTEKT"
+            type === GrunnlagRequestType.AINNTEKT
                 ? toISODateString(deductMonths(today, today.getDate() > 6 ? 0 : 1))
                 : toISODateString(today),
     }));
 
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
-        // @ts-ignore
         grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
     };
 
