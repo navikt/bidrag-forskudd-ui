@@ -1,5 +1,5 @@
 import { RolleDtoRolleType } from "../../api/BidragBehandlingApi";
-import { HentGrunnlagspakkeDto } from "../../api/BidragGrunnlagApi";
+import { HentGrunnlagspakkeDto, SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { deductMonths, toISODateString } from "../../utils/date-utils";
 
@@ -364,27 +364,7 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 hentetTidspunkt: "2023-06-06T11:42:13.955Z",
             },
         ],
-        husstandmedlemListe: [
-            {
-                partPersonId: "string",
-                relatertPersonPersonId: "string",
-                navn: "string",
-                fodselsdato: "2023-06-06",
-                erBarnAvBmBp: true,
-                aktiv: true,
-                brukFra: "2023-06-06T11:42:13.956Z",
-                brukTil: "2023-06-06T11:42:13.956Z",
-                hentetTidspunkt: "2023-06-06T11:42:13.956Z",
-                borISammeHusstandDtoListe: [
-                    {
-                        periodeFra: "2023-06-06",
-                        periodeTil: "2023-06-06",
-                    },
-                ],
-            },
-        ],
         husstandmedlemmerOgEgneBarnListe: getEgneBarnIHusstandenListe(barn, bmIdent, today, barnHusstandsData),
-        egneBarnIHusstandenListe: getEgneBarnIHusstandenListe(barn, bmIdent, today, barnHusstandsData),
         sivilstandListe: [
             {
                 aktiv: true,
@@ -394,7 +374,7 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 periodeFra: "2023-08-01",
                 periodeTil: "2023-09-19",
                 personId: "02487731725",
-                sivilstand: "GIFT" as const,
+                sivilstand: SivilstandskodePDL.GIFT,
             },
             {
                 aktiv: true,
@@ -404,7 +384,7 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrun
                 periodeFra: "2023-09-19",
                 periodeTil: null,
                 personId: "02487731725",
-                sivilstand: "UGIFT" as const,
+                sivilstand: SivilstandskodePDL.UGIFT,
             },
         ],
         barnetilsynListe: [

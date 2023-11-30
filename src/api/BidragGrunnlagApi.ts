@@ -27,27 +27,34 @@ export interface Skattegrunnlag {
 }
 
 /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
-export interface Sivilstand {
-    type?:
-        | "ENKE_ELLER_ENKEMANN"
-        | "GIFT"
-        | "GJENLEVENDE_PARTNER"
-        | "REGISTRERT_PARTNER"
-        | "SEPARERT"
-        | "SEPARERT_PARTNER"
-        | "SKILT"
-        | "SKILT_PARTNER"
-        | "UGIFT"
-        | "UOPPGITT";
+export interface SivilstandPersonDto {
+    type?: SivilstandskodePDL;
     /** @format date */
     gyldigFraOgMed?: string;
     /** @format date */
     bekreftelsesdato?: string;
+    master?: string;
+    /** @format date-time */
+    registrert?: string;
+    historisk?: boolean;
 }
 
-export interface Sivilstandshistorikk {
+export interface SivilstandshistorikkDto {
     /** Liste over alle hentede forekomster av sivilstand fra bidrag-person */
-    sivilstand: Sivilstand[];
+    sivilstandDto: SivilstandPersonDto[];
+}
+
+export enum SivilstandskodePDL {
+    GIFT = "GIFT",
+    UGIFT = "UGIFT",
+    UOPPGITT = "UOPPGITT",
+    ENKE_ELLER_ENKEMANN = "ENKE_ELLER_ENKEMANN",
+    SKILT = "SKILT",
+    SEPARERT = "SEPARERT",
+    REGISTRERT_PARTNER = "REGISTRERT_PARTNER",
+    SEPARERT_PARTNER = "SEPARERT_PARTNER",
+    SKILT_PARTNER = "SKILT_PARTNER",
+    GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
 }
 
 export interface EksternePerioderRequest {
@@ -419,12 +426,8 @@ export interface BarnetilleggPensjon {
     /** @format date */
     fom: string;
     /** @format date */
-    tom?: string;
+    tom: string;
     erFellesbarn: boolean;
-}
-
-export interface HentBarnetilleggPensjonResponse {
-    barnetilleggPensjonListe?: BarnetilleggPensjon[];
 }
 
 export interface HentArbeidsforholdRequest {
@@ -924,17 +927,7 @@ export interface TilleggsinformasjonDetaljer {
 /** Liste over hvilke typer grunnlag som skal hentes inn. På nivået under er personId og perioder angitt */
 export interface GrunnlagRequestDto {
     /** Hvilken type grunnlag skal hentes */
-    type:
-        | "AINNTEKT"
-        | "SKATTEGRUNNLAG"
-        | "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG"
-        | "BARNETILLEGG"
-        | "HUSSTANDSMEDLEMMER_OG_EGNE_BARN"
-        | "SIVILSTAND"
-        | "KONTANTSTOTTE"
-        | "BARNETILSYN"
-        | "OVERGANGSSTONAD"
-        | "ARBEIDSFORHOLD";
+    type: GrunnlagRequestType;
     /**
      * Angir personId som grunnlag skal hentes for
      * @pattern ^[0-9]{11}$
@@ -950,6 +943,20 @@ export interface GrunnlagRequestDto {
      * @format date
      */
     periodeTil: string;
+}
+
+/** Hvilken type grunnlag skal hentes */
+export enum GrunnlagRequestType {
+    AINNTEKT = "AINNTEKT",
+    SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
+    UTVIDETBARNETRYGDOGSMABARNSTILLEGG = "UTVIDET_BARNETRYGD_OG_SMÅBARNSTILLEGG",
+    BARNETILLEGG = "BARNETILLEGG",
+    HUSSTANDSMEDLEMMER_OG_EGNE_BARN = "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
+    SIVILSTAND = "SIVILSTAND",
+    KONTANTSTOTTE = "KONTANTSTØTTE",
+    BARNETILSYN = "BARNETILSYN",
+    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
+    OVERGANGSSTONAD = "OVERGANGSSTONAD",
 }
 
 export interface HentGrunnlagRequestDto {
@@ -994,7 +1001,7 @@ export interface HentGrunnlagDto {
 /** Request for å opprette ny grunnlagspakke, uten annet innhold */
 export interface OpprettGrunnlagspakkeRequestDto {
     /** Til hvilket formål skal grunnlagspakken benyttes. BIDRAG, FORSKUDD eller SAERTILSKUDD */
-    formaal: "FORSKUDD" | "BIDRAG" | "SAERTILSKUDD";
+    formaal: "FORSKUDD" | "BIDRAG" | "SÆRTILSKUDD";
     /** opprettet av */
     opprettetAv: string;
 }
@@ -1011,18 +1018,8 @@ export interface OppdaterGrunnlagspakkeRequestDto {
 
 /** Liste over grunnlagene som er hentet inn med person-id og status */
 export interface OppdaterGrunnlagDto {
-    /** Hvilken type grunnlag som er hentet */
-    type:
-        | "AINNTEKT"
-        | "SKATTEGRUNNLAG"
-        | "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG"
-        | "BARNETILLEGG"
-        | "HUSSTANDSMEDLEMMER_OG_EGNE_BARN"
-        | "SIVILSTAND"
-        | "KONTANTSTOTTE"
-        | "BARNETILSYN"
-        | "OVERGANGSSTONAD"
-        | "ARBEIDSFORHOLD";
+    /** Hvilken type grunnlag skal hentes */
+    type: GrunnlagRequestType;
     /** Angir personId som grunnlag er hentet for */
     personId: string;
     /** Status for utført kall */
@@ -1230,15 +1227,12 @@ export interface HentGrunnlagspakkeDto {
     barnetilleggListe: BarnetilleggDto[];
     /** Periodisert liste over innhentet kontantstøtte */
     kontantstotteListe: KontantstotteDto[];
-    egneBarnIHusstandenListe: RelatertPersonDto[];
-    husstandmedlemListe: RelatertPersonDto[];
     /** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
     husstandmedlemmerOgEgneBarnListe: RelatertPersonDto[];
     /** Periodisert liste over en persons sivilstand */
     sivilstandListe: SivilstandDto[];
     /** Periodisert liste over innhentet barnetilsyn */
     barnetilsynListe: BarnetilsynDto[];
-    /** Periodisert liste over innhentet overgangsstønad */
     overgangsstonadListe: OvergangsstonadDto[];
 }
 
@@ -1246,7 +1240,7 @@ export interface HentGrunnlagspakkeDto {
 export interface KontantstotteDto {
     /** Id til personen som mottar kontantstøtten */
     partPersonId: string;
-    /** Id til barnet kontantstøtten er for */
+    /** Id til barnet kontantstøtten mottas for */
     barnPersonId: string;
     /**
      * Periode fra-dato
@@ -1282,7 +1276,6 @@ export interface KontantstotteDto {
     hentetTidspunkt: string;
 }
 
-/** Periodisert liste over innhentet overgangsstønad */
 export interface OvergangsstonadDto {
     /** Id til personen som mottar overgangsstønaden */
     partPersonId: string;
@@ -1370,20 +1363,7 @@ export interface SivilstandDto {
      * @format date
      */
     periodeTil?: string;
-    /** Personens sivilstand */
-    sivilstand:
-        | "GIFT"
-        | "UGIFT"
-        | "ENSLIG"
-        | "SAMBOER"
-        | "UOPPGITT"
-        | "ENKE_ELLER_ENKEMANN"
-        | "SKILT"
-        | "SEPARERT"
-        | "REGISTRERT_PARTNER"
-        | "SEPARERT_PARTNER"
-        | "SKILT_PARTNER"
-        | "GJENLEVENDE_PARTNER";
+    sivilstand: SivilstandskodePDL;
     /** Angir om en grunnlagsopplysning er aktiv */
     aktiv: boolean;
     /**
@@ -1533,7 +1513,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag-feature.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -1623,7 +1603,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-grunnlag
  * @version v1
- * @baseUrl https://bidrag-grunnlag-feature.intern.dev.nav.no
+ * @baseUrl https://bidrag-grunnlag.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     integrasjoner = {
@@ -1656,7 +1636,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentSivilstand: (data: string, params: RequestParams = {}) =>
-            this.request<Sivilstandshistorikk, any>({
+            this.request<SivilstandshistorikkDto, any>({
                 path: `/integrasjoner/sivilstand`,
                 method: "POST",
                 body: data,
@@ -1827,7 +1807,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         hentBarnetilleggPensjon: (data: HentBarnetilleggPensjonRequest, params: RequestParams = {}) =>
-            this.request<HentBarnetilleggPensjonResponse, any>({
+            this.request<BarnetilleggPensjon[], any>({
                 path: `/integrasjoner/barnetillegg`,
                 method: "POST",
                 body: data,
