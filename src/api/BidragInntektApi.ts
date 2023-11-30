@@ -164,8 +164,8 @@ export enum Inntektsrapportering {
 /** Liste over summerte månedsinntekter (Ainntekt ++)) */
 export interface SummertManedsinntekt {
     /**
-     * Perioden inntekten gjelder for (format YYYY-MM)
-     * @pattern YYYY-MM
+     * Periode (YYYYMM)
+     * @pattern YYYYMM
      * @example "2023-01"
      */
     gjelderÅrMåned: string;
@@ -197,7 +197,7 @@ export interface SummertArsinntekt {
      * @example 600000
      */
     sumInntekt: number;
-    /** Perioden inntekten gjelder for (fom-til) */
+    /** Perioden inntekten gjelder for (fom og til, format YYYYMM) */
     periode: TypeArManedsperiode;
     /**
      * Id til barnet kontantstøtten mottas for, brukes kun for kontantstøtte
@@ -220,18 +220,40 @@ export interface TransformerInntekterResponse {
     summertÅrsinntektListe: SummertArsinntekt[];
 }
 
-/** Perioden inntekten gjelder for (fom-til) */
+/** Perioden inntekten gjelder for (fom og til, format YYYYMM) */
 export interface TypeArManedsperiode {
-    /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
     fom: string;
-    /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
     til?: string;
+}
+
+export enum ArManedsperiodeMonth {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+export enum Ainntektspost5 {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";

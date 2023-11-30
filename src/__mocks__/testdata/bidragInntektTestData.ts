@@ -1,6 +1,6 @@
-import { Inntektsrapportering, TransformerInntekterResponse } from "../../api/BidragInntektApi";
+import { TransformerInntekterResponse } from "../../api/BidragInntektApi";
 
-export const bidragInntektTestData: TransformerInntekterResponse = {
+export const bidragInntektTestData = {
     versjon: "",
     summertMånedsinntektListe: [
         {
@@ -252,15 +252,12 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
     ],
     summertÅrsinntektListe: [
         {
-            inntektRapportering: Inntektsrapportering.AINNTEKT,
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2021",
             referanse: "",
             sumInntekt: 4000,
-            periode: {
-                fom: "2021-01",
-                til: "2021-12",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2021-01",
+            periodeTil: "2021-12",
             inntektPostListe: [
                 {
                     kode: "overtidsgodtgjoerelse",
@@ -270,15 +267,12 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.AINNTEKT,
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2022",
             referanse: "",
             sumInntekt: 446000,
-            periode: {
-                fom: "2022-01",
-                til: "2022-12",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2022-01",
+            periodeTil: "2022-12",
             inntektPostListe: [
                 {
                     kode: "fastloenn",
@@ -298,15 +292,12 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.AINNTEKT,
+            inntektRapportering: "AINNTEKT",
             visningsnavn: "Lønn og trekk 2023",
             referanse: "",
             sumInntekt: 468000,
-            periode: {
-                fom: "2023-01",
-                til: "2023-12",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2023-01",
+            periodeTil: "2023-12",
             inntektPostListe: [
                 {
                     kode: "fastloenn",
@@ -331,15 +322,12 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.AINNTEKTBEREGNET12MND,
+            inntektRapportering: "AINNTEKT_BEREGNET_12MND",
             visningsnavn: "Lønn og trekk siste 12 mnd",
             referanse: "",
             sumInntekt: 743000,
-            periode: {
-                fom: "2022-08",
-                til: "2023-07",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2022-08",
+            periodeTil: "2023-07",
             inntektPostListe: [
                 {
                     kode: "fastloenn",
@@ -364,15 +352,12 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.AINNTEKTBEREGNET3MND,
+            inntektRapportering: "AINNTEKT_BEREGNET_3MND",
             visningsnavn: "Lønn og trekk siste 3 mnd",
             referanse: "",
             sumInntekt: 220000,
-            periode: {
-                fom: "2023-05",
-                til: "2023-07",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2023-05",
+            periodeTil: "2023-07",
             inntektPostListe: [
                 {
                     kode: "fastloenn",
@@ -392,151 +377,231 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.KONTANTSTOTTE,
-            visningsnavn: "Kontantstøtte 2021",
+            inntektRapportering: "OVERGANGSSTØNAD",
+            visningsnavn: "Overgangsstønad 2021",
             referanse: "",
             sumInntekt: 100,
-            periode: {
-                fom: "2021-12",
-                til: "2022-01",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2021-12",
+            periodeTil: "2022-01",
             inntektPostListe: [
                 {
-                    kode: "Kontantstøtte 2021-12-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2021-12-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 100,
                 },
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.KONTANTSTOTTE,
-            visningsnavn: "Kontantstøtte 2022",
+            inntektRapportering: "OVERGANGSSTØNAD",
+            visningsnavn: "Overgangsstønad 2022",
             referanse: "",
             sumInntekt: 9000,
-            periode: {
-                fom: "2022-01",
-                til: "2023-01",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2022-01",
+            periodeTil: "2023-01",
             inntektPostListe: [
                 {
-                    kode: "Kontantstøtte 2022-01-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-01-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 200,
                 },
                 {
                     kode: "Overgangsstønad 2022-02-01",
-                    visningsnavn: "Kontantstøtte",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 300,
                 },
                 {
-                    kode: "Kontantstøtte 2022-03-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-03-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 400,
                 },
                 {
-                    kode: "Kontantstøtte 2022-04-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-04-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 500,
                 },
                 {
-                    kode: "Kontantstøtte 2022-05-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-05-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 600,
                 },
                 {
-                    kode: "Kontantstøtte 2022-06-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-06-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 700,
                 },
                 {
-                    kode: "Kontantstøtte 2022-07-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-07-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 800,
                 },
                 {
-                    kode: "Kontantstøtte 2022-08-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-08-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 900,
                 },
                 {
-                    kode: "Kontantstøtte 2022-09-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-09-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1000,
                 },
                 {
-                    kode: "Kontantstøtte 2022-10-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-10-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1100,
                 },
                 {
-                    kode: "Kontantstøtte 2022-11-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-11-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1200,
                 },
                 {
-                    kode: "Kontantstøtte 2022-12-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2022-12-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1300,
                 },
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.KONTANTSTOTTE,
-            visningsnavn: "Kontantstøtte 2023",
+            inntektRapportering: "OVERGANGSSTØNAD",
+            visningsnavn: "Overgangsstønad 2023",
             referanse: "",
             sumInntekt: 6200,
-            periode: {
-                fom: "2023-01",
-                til: "2023-08",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2023-01",
+            periodeTil: "2023-08",
             inntektPostListe: [
                 {
-                    kode: "Kontantstøtte 2023-01-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2023-01-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1400,
                 },
                 {
-                    kode: "Kontantstøtte 2023-02-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2023-02-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1500,
                 },
                 {
-                    kode: "Kontantstøtte 2023-03-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2023-03-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1600,
                 },
                 {
-                    kode: "Kontantstøtte 2023-04-01",
-                    visningsnavn: "Kontantstøtte",
+                    kode: "Overgangsstønad 2023-04-01",
+                    visningsnavn: "Overgangsstønad",
                     beløp: 1700,
                 },
             ],
         },
         {
-            inntektRapportering: Inntektsrapportering.LIGNINGSINNTEKT,
+            inntektRapportering: "OVERGANGSSTØNAD_BEREGNET_3MND",
+            visningsnavn: "Overgangsstønad beregnet inntekt siste 3 mnd",
+            referanse: "",
+            sumInntekt: 19200,
+            periodeFra: "2023-02",
+            periodeTil: null,
+            inntektPostListe: [
+                {
+                    kode: "Overgangsstønad 2023-02-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1500,
+                },
+                {
+                    kode: "Overgangsstønad 2023-03-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1600,
+                },
+                {
+                    kode: "Overgangsstønad 2023-04-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1700,
+                },
+            ],
+        },
+        {
+            inntektRapportering: "OVERGANGSSTØNAD_BEREGNET_12MND",
+            visningsnavn: "Overgangsstønad beregnet inntekt siste 12 mnd",
+            referanse: "",
+            sumInntekt: 13800,
+            periodeFra: "2022-05",
+            periodeTil: null,
+            inntektPostListe: [
+                {
+                    kode: "Overgangsstønad 2022-05-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 600,
+                },
+                {
+                    kode: "Overgangsstønad 2022-06-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 700,
+                },
+                {
+                    kode: "Overgangsstønad 2022-07-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 800,
+                },
+                {
+                    kode: "Overgangsstønad 2022-08-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 900,
+                },
+                {
+                    kode: "Overgangsstønad 2022-09-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1000,
+                },
+                {
+                    kode: "Overgangsstønad 2022-10-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1100,
+                },
+                {
+                    kode: "Overgangsstønad 2022-11-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1200,
+                },
+                {
+                    kode: "Overgangsstønad 2022-12-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1300,
+                },
+                {
+                    kode: "Overgangsstønad 2023-01-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1400,
+                },
+                {
+                    kode: "Overgangsstønad 2023-02-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1500,
+                },
+                {
+                    kode: "Overgangsstønad 2023-03-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1600,
+                },
+                {
+                    kode: "Overgangsstønad 2023-04-01",
+                    visningsnavn: "Overgangsstønad",
+                    beløp: 1700,
+                },
+            ],
+        },
+        {
+            inntektRapportering: "LIGNINGSINNTEKT",
             visningsnavn: "Sigrun ligningsinntekt (LIGS)",
             referanse: "",
             sumInntekt: 0,
-            periode: {
-                fom: "2022-01",
-                til: "2023-01",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2022-01",
+            periodeTil: "2023-01",
             inntektPostListe: [],
         },
         {
-            inntektRapportering: Inntektsrapportering.KAPITALINNTEKT,
+            inntektRapportering: "KAPITALINNTEKT",
             visningsnavn: "Sigrun kapitalinntekt (KAPS)",
             referanse: "",
             sumInntekt: 400,
-            periode: {
-                fom: "2022-01",
-                til: "2023-01",
-            },
-            gjelderBarnPersonId: "",
+            periodeFra: "2022-01",
+            periodeTil: "2023-01",
             inntektPostListe: [
                 {
                     kode: "andelIFellesTapVedSalgAvAndelISDF",
@@ -561,4 +626,4 @@ export const bidragInntektTestData: TransformerInntekterResponse = {
             ],
         },
     ],
-};
+} as TransformerInntekterResponse;
