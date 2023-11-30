@@ -215,6 +215,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             datoTom: null,
             belop: 0,
             inntektType: "",
+            inntektBeskrivelse: "",
             taMed: false,
             fraGrunnlag: false,
             inntektPostListe: [],

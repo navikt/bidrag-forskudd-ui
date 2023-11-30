@@ -156,7 +156,6 @@ export interface PersonDto {
      * @deprecated
      */
     kortNavn?: string;
-    /** Navn som benyttes for visning av personavn i skjermbilder og dokumenter */
     visningsnavn: string;
 }
 

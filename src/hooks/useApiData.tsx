@@ -19,7 +19,6 @@ import {
     VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
 import {
-    GrunnlagRequestType,
     HentGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
@@ -200,7 +199,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
             },
             staleTime: Infinity,
             select: useCallback(
-                (data: PersonDto) => ({
+                (data) => ({
                     ...rolle,
                     rolleType: rolle.rolleType as unknown as RolleTypeFullName,
                     navn: data.navn,
@@ -221,33 +220,32 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
     const periodeFra = toISODateString(deductMonths(today, 36));
 
     const skattegrunnlagBarnRequests = barn?.map((b) => ({
-        type: GrunnlagRequestType.SKATTEGRUNNLAG,
+        type: "SKATTEGRUNNLAG",
         personId: b.ident,
         periodeFra,
         periodeTil: toISODateString(today),
     }));
 
     const bmRequests = [
-        GrunnlagRequestType.AINNTEKT,
-        GrunnlagRequestType.SKATTEGRUNNLAG,
-        GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
-        GrunnlagRequestType.BARNETILLEGG,
-        GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
-        GrunnlagRequestType.SIVILSTAND,
+        "AINNTEKT",
+        "SKATTEGRUNNLAG",
+        "UTVIDET_BARNETRYGD_OG_SMAABARNSTILLEGG",
+        "BARNETILLEGG",
+        "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
+        "SIVILSTAND",
     ].map((type) => ({
         type,
         personId: bmIdent,
         periodeFra:
-            type === GrunnlagRequestType.AINNTEKT
-                ? toISODateString(deductMonths(today, today.getDate() > 6 ? 12 : 13))
-                : periodeFra,
+            type === "AINNTEKT" ? toISODateString(deductMonths(today, today.getDate() > 6 ? 12 : 13)) : periodeFra,
         periodeTil:
-            type === GrunnlagRequestType.AINNTEKT
+            type === "AINNTEKT"
                 ? toISODateString(deductMonths(today, today.getDate() > 6 ? 0 : 1))
                 : toISODateString(today),
     }));
 
     const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
+        // @ts-ignore
         grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
     };
 

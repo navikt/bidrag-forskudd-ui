@@ -97,7 +97,7 @@ const server = setupServer(
                     aktørId: "2601080498043",
                     aktoerId: "2601080498043",
                     kortnavn: "Kognitiv Forsikring",
-                    visningsnavn: "Kognitiv Forsikring",
+                    kortNavn: "Kognitiv Forsikring",
                 })
             )
         );
