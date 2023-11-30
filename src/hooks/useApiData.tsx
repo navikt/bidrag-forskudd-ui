@@ -199,7 +199,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
             },
             staleTime: Infinity,
             select: useCallback(
-                (data) => ({
+                (data: PersonDto) => ({
                     ...rolle,
                     rolleType: rolle.rolleType as unknown as RolleTypeFullName,
                     navn: data.navn,
