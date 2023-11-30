@@ -17,13 +17,7 @@ import { ForskuddProvider } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            suspense: true,
-        },
-    },
-});
+const queryClient = new QueryClient();
 
 const renderWithRouter = (ui, { route = "/" } = {}) => {
     window.history.pushState({}, "Test page", route);
