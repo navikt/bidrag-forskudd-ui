@@ -29,7 +29,7 @@ export default function personMock(): RestHandler[] {
                     JSON.stringify({
                         ident: requestBody.ident,
                         navn: name,
-                        visningsnavn: shortName,
+                        kortnavn: shortName,
                     } as PersonDto)
                 )
             );
@@ -102,5 +102,5 @@ export const generateName = () => {
     const middleName = names[sex][Math.floor(Math.random() * names[sex].length)];
     const lastName = names["lastName"][Math.floor(Math.random() * names["lastName"].length)];
 
-    return `${firstName} ${middleName} ${lastName}`;
+    return `${lastName}, ${firstName} ${middleName}`;
 };
