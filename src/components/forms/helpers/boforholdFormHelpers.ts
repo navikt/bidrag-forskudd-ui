@@ -8,7 +8,11 @@ import {
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApi";
-import { RelatertPersonDto, SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
+import {
+    RelatertPersonDto,
+    SivilstandDto as SivilstandDtoGrunnlag,
+    SivilstandskodePDL,
+} from "../../../api/BidragGrunnlagApi";
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,
@@ -131,22 +135,8 @@ export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: Re
         }));
 };
 
-const getSivilstandType = (
-    sivilstand:
-        | "GIFT"
-        | "UGIFT"
-        | "ENSLIG"
-        | "SAMBOER"
-        | "UOPPGITT"
-        | "ENKE_ELLER_ENKEMANN"
-        | "SKILT"
-        | "SEPARERT"
-        | "REGISTRERT_PARTNER"
-        | "SEPARERT_PARTNER"
-        | "SKILT_PARTNER"
-        | "GJENLEVENDE_PARTNER"
-): Sivilstandskode => {
-    if (["GIFT", "SAMBOER", "REGISTRERT_PARTNER"].includes(sivilstand)) {
+const getSivilstandType = (sivilstand: SivilstandskodePDL): Sivilstandskode => {
+    if ([SivilstandskodePDL.GIFT, SivilstandskodePDL.REGISTRERT_PARTNER].includes(sivilstand)) {
         return Sivilstandskode.GIFT_SAMBOER;
     }
     return Sivilstandskode.BOR_ALENE_MED_BARN;
