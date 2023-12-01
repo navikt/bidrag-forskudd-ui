@@ -1002,8 +1002,15 @@ export interface HentGrunnlagDto {
 export interface OpprettGrunnlagspakkeRequestDto {
     /** Til hvilket formål skal grunnlagspakken benyttes. BIDRAG, FORSKUDD eller SAERTILSKUDD */
     formaal: "FORSKUDD" | "BIDRAG" | "SÆRTILSKUDD";
-    /** opprettet av */
-    opprettetAv: string;
+    /**
+     *
+     * Id på hvem som oppretter grunnlagspakken. Kan være NAV-ident til saksbehandler eller Id på batchjobb.
+     *
+     * `opprettetAv` må settes hvis grunnlagspakken opprettes i system kontekst (feks maskin-maskin kommunikasjon). Ellers hentes NAV-ident til sakbehandler fra tokenet
+     *
+     * @example "BATCH_1234/Z99999"
+     */
+    opprettetAv?: string;
 }
 
 export interface OppdaterGrunnlagspakkeRequestDto {
