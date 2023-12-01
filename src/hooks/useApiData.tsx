@@ -369,7 +369,6 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
             queryFn: async (): Promise<number> => {
                 const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                     formaal: "FORSKUDD",
-                    opprettetAv: "saksbehandler",
                 });
                 return data;
             },
