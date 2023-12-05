@@ -399,7 +399,7 @@ const AddBarnForm = ({
         PERSON_API.informasjon
             .hentPersonPost({ ident: value })
             .then(({ data }) => {
-                setNavn(data.navn);
+                setNavn(data.visningsnavn);
                 setPerson(data);
                 const formErrors = { ...error };
                 delete formErrors.ident;
