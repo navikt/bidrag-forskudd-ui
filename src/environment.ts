@@ -14,6 +14,7 @@ const url = {
     bisys: process.env.BISYS_URL,
     bidragBeregnForskudd: process.env.BIDRAG_BEREGN_FORSKUDD_URL,
     bidragInntekt: process.env.BIDRAG_INNTEKT,
+    bidragDokumentProduksjon: process.env.BIDRAG_DOKUMENT_PRODUKSJON,
 };
 
 export default { url, system };

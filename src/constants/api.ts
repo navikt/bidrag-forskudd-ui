@@ -1,6 +1,7 @@
 import { useApi } from "@navikt/bidrag-ui-common";
 
 import { Api as BidragBehandlingApi, BehandlingDto } from "../api/BidragBehandlingApi";
+import { Api as BidragDokumentProduksjonApi } from "../api/BidragDokumentProduksjonApi";
 import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
 import { Api as BidragInntektApi } from "../api/BidragInntektApi";
 import { Api as BidragVedtakApi } from "../api/BidragVedtakApi";
@@ -28,5 +29,10 @@ export const BEHANDLING_API: BidragBehandlingApi<BehandlingDto> = useApi(
 export const BIDRAG_INNTEKT_API = useApi(
     new BidragInntektApi({ baseURL: environment.url.bidragInntekt }),
     "bidrag-inntekt",
+    "gcp"
+);
+export const BIDRAG_DOKUMENT_PRODUKSJON_API = useApi(
+    new BidragDokumentProduksjonApi({ baseURL: environment.url.bidragDokumentProduksjon }),
+    "bidrag-dokument-produksjon",
     "gcp"
 );

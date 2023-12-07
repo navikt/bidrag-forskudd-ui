@@ -1,14 +1,33 @@
-import { BidragCell, BidragGrid, SaveStatusIndicator } from "@navikt/bidrag-ui-common";
+import { BidragCell, BidragGrid, Broadcast, SaveStatusIndicator, useRQMutationState } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useForskudd } from "../../../context/ForskuddContext";
 import { MutationKeys } from "../../../hooks/useApiData";
+import { notatBroadcastName } from "../../../types/notat";
 
 export const FormLayout = ({ title, main, side }) => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
+    const saveState = useRQMutationState(
+        [
+            MutationKeys.updateBoforhold(behandlingId),
+            MutationKeys.updateVirkningstidspunkt(behandlingId),
+            MutationKeys.updateInntekter(behandlingId),
+        ],
+        queryClient
+    );
+    useEffect(() => {
+        console.log(saveState);
+        if (saveState == "success") {
+            console.log("Send broadcat");
+            Broadcast.sendBroadcast(notatBroadcastName, {
+                id: behandlingId.toString(),
+                payload: null,
+            });
+        }
+    }, [saveState]);
     return (
         <>
             <div className="flex flex-row gap-2">

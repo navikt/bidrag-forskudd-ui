@@ -1,3 +1,4 @@
+import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
 import { useMutation, useQueries, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -12,12 +13,14 @@ import {
     OpplysningerType,
     RolleDto,
     RolleDtoRolleType,
+    Rolletype,
     UpdateBehandlingRequest,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
     VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
+import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
     GrunnlagRequestType,
     HentGrunnlagspakkeDto,
@@ -26,7 +29,15 @@ import {
 } from "../api/BidragGrunnlagApi";
 import { TransformerInntekterRequest, TransformerInntekterResponse } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
-import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
+import { InntektOpplysninger } from "../components/forms/helpers/inntektFormHelpers";
+import {
+    BEHANDLING_API,
+    BIDRAG_DOKUMENT_PRODUKSJON_API,
+    BIDRAG_GRUNNLAG_API,
+    BIDRAG_INNTEKT_API,
+    PERSON_API,
+} from "../constants/api";
+import { ParsedBoforholdOpplysninger } from "../types/boforholdFormValues";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
@@ -38,6 +49,7 @@ export const MutationKeys = {
 export const QueryKeys = {
     virkningstidspunkt: (behandlingId: number) => ["virkningstidspunkt", behandlingId],
     visningsnavn: () => ["visningsnavn"],
+    notat: (behandlingId) => ["notat_payload", behandlingId],
     behandling: (behandlingId: number) => ["behandling", behandlingId],
     boforhold: (behandlingId: number) => ["boforhold", behandlingId],
     inntekter: (behandlingId: number) => ["inntekter", behandlingId],
@@ -58,14 +70,14 @@ export const useGetVisningsnavn = () =>
         staleTime: 0,
     });
 export const useGetBehandlings = () =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
     });
 
 export const useGetBehandling = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
@@ -75,7 +87,7 @@ export const useGetBehandling = (behandlingId: number) =>
     });
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.virkningstidspunkt(behandlingId),
         queryFn: async (): Promise<VirkningsTidspunktResponse> => {
             const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
@@ -105,7 +117,7 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
 };
 
 export const useGetBoforhold = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.boforhold(behandlingId),
         queryFn: async (): Promise<BoforholdResponse> => {
             const { data } = await BEHANDLING_API.api.hentBoforhold(behandlingId);
@@ -115,7 +127,7 @@ export const useGetBoforhold = (behandlingId: number) =>
     });
 
 export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.opplysninger(behandlingId, opplysningerType),
         queryFn: async (): Promise<OpplysningerDto> => {
             try {
@@ -171,7 +183,7 @@ export const useUpdateInntekter = (behandlingId: number) => {
 };
 
 export const useHentInntekter = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.inntekter(behandlingId),
         queryFn: async (): Promise<InntekterResponse> => {
             const { data } = await BEHANDLING_API.api.hentInntekter(behandlingId);
@@ -181,7 +193,7 @@ export const useHentInntekter = (behandlingId: number) =>
     });
 
 export const useHentPersonData = (ident: string) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
             const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
@@ -295,7 +307,7 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
 };
 
 const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
-    const { data: grunnlagspakkeId } = useQuery({
+    const { data: grunnlagspakkeId } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeId(),
         queryFn: async (): Promise<number> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
@@ -322,7 +334,7 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
         ? behandling.grunnlagspakkeid
         : useCreateGrunnlagspakke(behandling);
     const grunnlagRequest = createGrunnlagRequest(behandling);
-    const { isSuccess: updateIsSuccess } = useQuery({
+    const { isSuccess: updateIsSuccess } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
@@ -335,7 +347,7 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
         enabled: !!grunnlagspakkeId,
     });
 
-    return useQuery({
+    return useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
@@ -457,4 +469,152 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
     });
 
     return { mutation, error: mutation.isError };
+};
+
+export const useNotat = (behandlingId: number) => {
+    const { data: notatDto } = useQuery({
+        queryKey: QueryKeys.notat(behandlingId),
+        queryFn: () => BEHANDLING_API.api.hentNotatOpplysninger(behandlingId),
+        select: (response) => response.data,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+    });
+
+    return useQuery({
+        queryKey: ["notat_html", behandlingId, notatDto],
+        queryFn: () =>
+            BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml(
+                "forskudd",
+                //@ts-ignore
+                notatDto as NotatPayload
+            ),
+        select: (response) => response.data,
+        enabled: !!notatDto,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+        staleTime: Infinity,
+        placeholderData: (previousData) => previousData,
+    });
+};
+export const useNotatPayload = (behandlingId: number) => {
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
+    const { data: boforhold } = useGetBoforhold(behandlingId);
+    const { data: inntekter } = useHentInntekter(behandlingId);
+    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
+    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const savedOpplysninger = boforoholdOpplysninger
+        ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
+        : undefined;
+    const savedInntektOpplysninger = inntektOpplysninger
+        ? (JSON.parse(inntektOpplysninger.data) as InntektOpplysninger)
+        : undefined;
+
+    return useSuspenseQuery({
+        queryKey: ["notat_html", behandlingId],
+        queryFn: async (): Promise<string> => {
+            const { data } = await BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml("forskudd", {
+                saksnummer: behandling.saksnummer,
+                saksbehandlerNavn: await SecuritySessionUtils.hentSaksbehandlerNavn(),
+                virkningstidspunkt: {
+                    søknadstype: behandling.behandlingtype,
+                    søktAv: behandling.soknadFraType,
+                    mottattDato: behandling.mottatDato,
+                    søktFraDato: behandling.datoFom,
+                    virkningstidspunkt: virkningstidspunkt.virkningsDato,
+                    notat: {
+                        medIVedtaket: virkningstidspunkt.virkningsTidspunktBegrunnelseMedIVedtakNotat,
+                        intern: virkningstidspunkt.virkningsTidspunktBegrunnelseKunINotat,
+                    },
+                },
+                boforhold: {
+                    barn: boforhold.husstandsBarn.map((barn) => ({
+                        navn: barn.navn,
+                        fødselsdato: barn.foedselsdato,
+                        opplysningerFraFolkeregisteret: savedOpplysninger?.husstand
+                            .find((h) => h.ident == barn.ident)
+                            ?.perioder.map((periode) => ({
+                                periode: {
+                                    fom: periode.fraDato,
+                                    til: periode.tilDato,
+                                },
+                                status: periode.bostatus,
+                            })),
+                        opplysningerBruktTilBeregning: barn.perioder.map((periode) => ({
+                            periode: {
+                                fom: periode.datoFom,
+                                til: periode.datoTom,
+                            },
+                            status: periode.bostatus,
+                            kilde: periode.kilde,
+                        })),
+                    })),
+                    sivilstand: boforhold.sivilstand.map((siv) => ({
+                        kode: siv.sivilstand,
+                        status: siv.sivilstand.toString(),
+                        periode: {
+                            fom: siv.datoFom,
+                            tom: siv.datoTom,
+                        },
+                    })),
+
+                    notat: {
+                        medIVedtaket: boforhold.boforholdBegrunnelseMedIVedtakNotat,
+                        intern: boforhold.boforholdBegrunnelseKunINotat,
+                    },
+                },
+
+                parterIsøknad: behandling.roller.map((rolle) => ({
+                    rolle: rolle.rolleType as unknown as Rolletype,
+                    navn: rolle.navn,
+                    personident: rolle.ident,
+                    fødselsdato: rolle.fodtDato,
+                })),
+
+                inntekter: {
+                    inntekterPerRolle: behandling.roller.map((rolle) => ({
+                        rolle: rolle.rolleType as unknown as Rolletype,
+                        arbeidsforhold: [],
+                        inntekterSomLeggesTilGrunn: inntekter.inntekter
+                            .filter((i) => i.ident == rolle.ident)
+                            .map((inntekt) => ({
+                                beskrivelse: inntekt.inntektType,
+                                periode: {
+                                    fom: inntekt.datoFom,
+                                    til: inntekt.datoTom,
+                                },
+                                beløp: inntekt.belop,
+                            })),
+                        barnetillegg: inntekter.barnetillegg
+                            .filter((i) => i.ident == rolle.ident)
+                            .map((inntekt) => ({
+                                periode: {
+                                    fom: inntekt.datoFom,
+                                    til: inntekt.datoTom,
+                                },
+                                beløp: inntekt.barnetillegg,
+                            })),
+                        utvidetBarnetrygd:
+                            rolle.rolleType == RolleDtoRolleType.BIDRAGSMOTTAKER
+                                ? inntekter.utvidetbarnetrygd.map((inntekt) => ({
+                                      periode: {
+                                          fom: inntekt.datoFom,
+                                          til: inntekt.datoTom,
+                                      },
+                                      beløp: inntekt.belop,
+                                      deltBosted: inntekt.deltBoSted,
+                                  }))
+                                : [],
+                    })),
+                    notat: {
+                        medIVedtaket: inntekter.inntektBegrunnelseMedIVedtakNotat,
+                        intern: inntekter.inntektBegrunnelseKunINotat,
+                    },
+                },
+                vedtak: [],
+            });
+            return data;
+        },
+        staleTime: Infinity,
+    });
 };

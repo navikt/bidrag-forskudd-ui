@@ -9,6 +9,70 @@
  * ---------------------------------------------------------------
  */
 
+export interface Barnetillegg {
+    behandling: Behandling;
+    ident: string;
+    barnetillegg: number;
+    /** @format date-time */
+    datoFom?: string;
+    /** @format date-time */
+    datoTom?: string;
+    /** @format int64 */
+    id?: number;
+}
+
+export interface Behandling {
+    behandlingType: Behandlingstype;
+    soknadType: SoknadType;
+    /** @format date-time */
+    datoFom: string;
+    /** @format date-time */
+    datoTom: string;
+    /** @format date-time */
+    mottatDato: string;
+    saksnummer: string;
+    /** @format int64 */
+    soknadId: number;
+    /** @format int64 */
+    soknadRefId?: number;
+    behandlerEnhet: string;
+    opprettetAv: string;
+    opprettetAvNavn?: string;
+    kildeapplikasjon: string;
+    soknadFra: SoktAvType;
+    stonadType?: Stonadstype;
+    engangsbelopType?: Engangsbeloptype;
+    /** @format int64 */
+    vedtakId?: number;
+    /** @format date-time */
+    virkningsDato?: string;
+    aarsak?: ForskuddAarsakType;
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    boforholdBegrunnelseMedIVedtakNotat?: string;
+    boforholdBegrunnelseKunINotat?: string;
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+    /** @format int64 */
+    id?: number;
+    /** @format int64 */
+    grunnlagspakkeId?: number;
+    /** @uniqueItems true */
+    roller: Rolle[];
+    /** @uniqueItems true */
+    husstandsBarn: HusstandsBarn[];
+    /** @uniqueItems true */
+    inntekter: Inntekt[];
+    /** @uniqueItems true */
+    sivilstand: Sivilstand[];
+    /** @uniqueItems true */
+    barnetillegg: Barnetillegg[];
+    /** @uniqueItems true */
+    utvidetbarnetrygd: Utvidetbarnetrygd[];
+    deleted: boolean;
+    søknadsBarn: Rolle[];
+}
+
 export enum Behandlingstype {
     BIDRAG = "BIDRAG",
     FORSKUDD = "FORSKUDD",
@@ -72,14 +136,74 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
+export interface HusstandsBarn {
+    behandling: Behandling;
+    medISaken: boolean;
+    /** @format int64 */
+    id?: number;
+    ident?: string;
+    navn?: string;
+    /** @format date-time */
+    foedselsDato?: string;
+    /** @uniqueItems true */
+    perioder: HusstandsBarnPeriode[];
+}
+
+export interface HusstandsBarnPeriode {
+    husstandsBarn: HusstandsBarn;
+    /** @format date-time */
+    datoFom?: string;
+    /** @format date-time */
+    datoTom?: string;
+    bostatus?: Bostatuskode;
+    kilde: Kilde;
+    /** @format int64 */
+    id?: number;
+}
+
+export interface Inntekt {
+    inntektType?: string;
+    belop: number;
+    /** @format date-time */
+    datoFom?: string;
+    /** @format date-time */
+    datoTom?: string;
+    ident: string;
+    fraGrunnlag: boolean;
+    taMed: boolean;
+    /** @format int64 */
+    id?: number;
+    behandling?: Behandling;
+    /** @uniqueItems true */
+    inntektPostListe: InntektPostDomain[];
+}
+
+export interface InntektPostDomain {
+    beløp: number;
+    kode: string;
+    visningsnavn: string;
+    /** @format int64 */
+    id?: number;
+    inntekt?: Inntekt;
+}
+
 export enum Kilde {
     MANUELL = "MANUELL",
     OFFENTLIG = "OFFENTLIG",
 }
 
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
+export interface Rolle {
+    behandling: Behandling;
+    rolleType: Rolletype;
+    ident?: string;
+    /** @format date-time */
+    fodtDato?: string;
+    /** @format date-time */
+    opprettetDato?: string;
+    /** @format int64 */
+    id?: number;
+    navn?: string;
+    deleted: boolean;
 }
 
 export enum Rolletype {
@@ -88,6 +212,18 @@ export enum Rolletype {
     BP = "BP",
     FR = "FR",
     RM = "RM",
+}
+
+export interface Sivilstand {
+    behandling: Behandling;
+    /** @format date-time */
+    datoFom?: string;
+    /** @format date-time */
+    datoTom?: string;
+    sivilstand: Sivilstandskode;
+    kilde: Kilde;
+    /** @format int64 */
+    id?: number;
 }
 
 export enum Sivilstandskode {
@@ -134,6 +270,23 @@ export enum SoktAvType {
     TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
     KLAGE_ANKE = "KLAGE_ANKE",
     KONVERTERING = "KONVERTERING",
+}
+
+export interface Utvidetbarnetrygd {
+    behandling: Behandling;
+    deltBoSted: boolean;
+    belop: number;
+    /** @format date-time */
+    datoFom?: string;
+    /** @format date-time */
+    datoTom?: string;
+    /** @format int64 */
+    id?: number;
+}
+
+export enum OpplysningerType {
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    BOFORHOLD = "BOFORHOLD",
 }
 
 export interface UpdateBehandlingRequest {
@@ -584,6 +737,193 @@ export interface ResultatPeriode {
     sivilstand?: Sivilstandskode;
 }
 
+export interface Arbeidsforhold {
+    periode: TypeArManedsperiode;
+    arbeidsgiver: string;
+    stillingProsent: string;
+    /** @format date */
+    lønnsendringDato: string;
+}
+
+export interface Boforhold {
+    barn: BoforholdBarn[];
+    sivilstand: SivilstandPeriode[];
+    notat: Notat;
+}
+
+export interface BoforholdBarn {
+    navn: string;
+    /** @format date */
+    fødselsdato?: string;
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteret[];
+    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregning[];
+}
+
+export interface Inntekter {
+    inntekterPerRolle: InntekterPerRolle[];
+    notat: Notat;
+}
+
+export interface InntekterPerRolle {
+    rolle: Rolletype;
+    arbeidsforhold: Arbeidsforhold[];
+    inntekterSomLeggesTilGrunn: InntekterSomLeggesTilGrunn[];
+    barnetillegg: Barnetillegg[];
+    utvidetBarnetrygd: UtvidetBarnetrygd[];
+}
+
+export interface InntekterSomLeggesTilGrunn {
+    inntektType?: Inntektsrapportering;
+    beskrivelse?: string;
+    periode?: TypeArManedsperiode;
+    beløp: number;
+}
+
+export enum Inntektsrapportering {
+    AINNTEKT = "AINNTEKT",
+    AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
+    AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
+    KONTANTSTOTTE = "KONTANTSTØTTE",
+    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
+    PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
+    KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
+    SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
+    LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
+    NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
+    YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
+    AAP = "AAP",
+    AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
+    BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
+    BARNS_SYKDOM = "BARNS_SYKDOM",
+    DAGPENGER = "DAGPENGER",
+    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
+    FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
+    FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
+    FODSELADOPSJON = "FØDSEL_ADOPSJON",
+    INNTEKTSOPPLYSNINGER_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
+    KAPITALINNTEKT_SKE = "KAPITALINNTEKT_SKE",
+    LIGNINGSOPPLYSNINGER_MANGLER = "LIGNINGSOPPLYSNINGER_MANGLER",
+    LIGNING_SKE = "LIGNING_SKE",
+    LONNSKE = "LØNN_SKE",
+    LONNSKEKORRIGERTBARNETILLEGG = "LØNN_SKE_KORRIGERT_BARNETILLEGG",
+    LONNTREKK = "LØNN_TREKK",
+    MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
+    NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
+    PENSJON = "PENSJON",
+    PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
+    REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
+    SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
+    SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
+    SYKEPENGER = "SYKEPENGER",
+}
+
+export interface Notat {
+    medIVedtaket?: string;
+    intern?: string;
+}
+
+export interface NotatDto {
+    saksnummer: string;
+    saksbehandlerNavn?: string;
+    virkningstidspunkt: Virkningstidspunkt;
+    boforhold: Boforhold;
+    parterIsøknad: ParterISoknad[];
+    inntekter: Inntekter;
+    vedtak: Vedtak[];
+}
+
+export interface OpplysningerBruktTilBeregning {
+    periode: TypeArManedsperiode;
+    status: string;
+    kilde: string;
+}
+
+export interface OpplysningerFraFolkeregisteret {
+    periode: TypeArManedsperiode;
+    status?: string;
+}
+
+export interface ParterISoknad {
+    rolle: Rolletype;
+    navn?: string;
+    /** @format date */
+    fødselsdato?: string;
+    personident?: string;
+}
+
+export interface Resultat {
+    type: string;
+    periode: TypeArManedsperiode;
+    inntekt: number;
+    sivilstand: string;
+    /** @format int32 */
+    antallBarn: number;
+    resultat: string;
+}
+
+export interface SivilstandPeriode {
+    periode: TypeArManedsperiode;
+    kode?: Sivilstandskode;
+}
+
+export interface UtvidetBarnetrygd {
+    periode: TypeArManedsperiode;
+    beløp: number;
+}
+
+export interface Vedtak {
+    navn: string;
+    /** @format date */
+    fødselsdato: string;
+    resultat: Resultat[];
+}
+
+export interface Virkningstidspunkt {
+    søknadstype?: string;
+    søktAv?: SoktAvType;
+    mottattDato?: {
+        /** @format int32 */
+        year?: number;
+        month?: VirkningstidspunktMonth;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    søktFraDato?: {
+        /** @format int32 */
+        year?: number;
+        month?: VirkningstidspunktMonth;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** @format date */
+    virkningstidspunkt?: string;
+    notat: Notat;
+}
+
+export interface TypeArManedsperiode {
+    fom: {
+        /** @format int32 */
+        year?: number;
+        month?: ArManedsperiodeMonth;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    til?: {
+        /** @format int32 */
+        year?: number;
+        month?: ArManedsperiodeMonth;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+}
+
 export interface BehandlingDto {
     /** @format int64 */
     id: number;
@@ -640,6 +980,36 @@ export enum InitalizeForsendelseRequestBehandlingStatus {
     FEILREGISTRERT = "FEILREGISTRERT",
 }
 
+export enum VirkningstidspunktMonth {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+export enum ArManedsperiodeMonth {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
 export enum RolleDtoRolleType {
     BARN = "BARN",
     BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
@@ -692,10 +1062,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -784,7 +1151,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1071,6 +1438,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentVisningsnavn: (params: RequestParams = {}) =>
             this.request<Record<string, string>, any>({
                 path: `/api/visningsnavn`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags notat-opplysninger-controller
+         * @name HentNotatOpplysninger
+         * @request GET:/api/notat/{behandlingId}
+         * @secure
+         */
+        hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<NotatDto, any>({
+                path: `/api/notat/${behandlingId}`,
                 method: "GET",
                 secure: true,
                 format: "json",
