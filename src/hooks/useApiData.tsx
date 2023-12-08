@@ -466,27 +466,28 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
 };
 
 export const useNotat = (behandlingId: number) => {
-    const { data: notatDto } = useQuery({
+    const resultPayload = useQuery({
         queryKey: QueryKeys.notat(behandlingId),
-        queryFn: () => BEHANDLING_API.api.hentNotatOpplysninger(behandlingId),
-        select: (response) => response.data,
+        queryFn: async () => (await BEHANDLING_API.api.hentNotatOpplysninger(behandlingId)).data,
         refetchOnWindowFocus: false,
         refetchInterval: 0,
     });
 
-    return useQuery({
-        queryKey: ["notat_html", behandlingId, notatDto],
+    const resultNotatHtml = useQuery({
+        queryKey: ["notat_html", behandlingId, resultPayload.data],
         queryFn: () =>
             BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml(
                 "forskudd",
                 //@ts-ignore
-                notatDto as NotatPayload
+                resultPayload.data as NotatPayload
             ),
         select: (response) => response.data,
-        enabled: !!notatDto,
+        enabled: resultPayload.isFetched,
         refetchOnWindowFocus: false,
         refetchInterval: 0,
         staleTime: Infinity,
         placeholderData: (previousData) => previousData,
     });
+
+    return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatHtml;
 };

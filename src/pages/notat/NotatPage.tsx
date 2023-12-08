@@ -1,5 +1,5 @@
 import { Broadcast } from "@navikt/bidrag-ui-common";
-import { Loader } from "@navikt/ds-react";
+import { Alert, Loader } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Suspense, useEffect } from "react";
 
@@ -23,25 +23,28 @@ export default ({ behandlingId }: { behandlingId: number }) => {
 };
 
 const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
-    const { data: notatHtml } = useNotat(behandlingId);
+    const { data: notatHtml, isLoading, isError } = useNotat(behandlingId);
     const queryClient = useQueryClient();
 
     async function subscribeToChanges() {
         await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
         console.debug("Received broadcast", notatBroadcastName, behandlingId);
         queryClient.refetchQueries({ queryKey: QueryKeys.notat(behandlingId) });
-        setTimeout(() => subscribeToChanges(), 300);
+        setTimeout(() => subscribeToChanges(), 200);
     }
     useEffect(() => {
         subscribeToChanges();
     }, []);
 
-    if (!notatHtml) {
+    if (isLoading) {
         return (
             <div className="flex justify-center">
                 <Loader size="3xlarge" title="venter..." variant="interaction" />
             </div>
         );
+    }
+    if (isError) {
+        return <Alert variant="error">Det skjedde en feil ved henting av notat</Alert>;
     }
     return <notat-view html={notatHtml} />;
 };

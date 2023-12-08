@@ -18,9 +18,8 @@ export const FormLayout = ({ title, main, side }) => {
     const saveState = useRQMutationState(listenToMutations, queryClient);
 
     useEffect(() => {
-        console.log(saveState);
         if (saveState == "success") {
-            console.log("Sending broadcast", notatBroadcastName, behandlingId);
+            console.debug("Sending broadcast", notatBroadcastName, behandlingId);
             Broadcast.sendBroadcast(notatBroadcastName, {
                 id: behandlingId.toString(),
                 payload: null,
