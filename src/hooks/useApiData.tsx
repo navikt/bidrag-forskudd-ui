@@ -28,6 +28,8 @@ import {
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
     GrunnlagRequestType,
+    HentGrunnlagDto,
+    HentGrunnlagRequestDto,
     HentGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeDto,
     OppdaterGrunnlagspakkeRequestDto,
@@ -58,6 +60,7 @@ export const QueryKeys = {
     inntekter: (behandlingId: number) => ["inntekter", behandlingId],
     grunnlagspakkeUpdate: (grunnlagspakkeId: number) => ["grunnlagspakke", grunnlagspakkeId, "update"],
     grunnlagspakke: (grunnlagspakkeId: number) => ["grunnlagspakke", grunnlagspakkeId],
+    arbeidsforhold: (behandlingId: number) => ["arbeidsforhold", behandlingId],
     grunnlagspakkeId: () => ["grunnlagspakkeId"],
     opplysninger: (behandlingId: number, opplysningerType: OpplysningerType) => [
         "opplysninger",
@@ -248,6 +251,7 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
         GrunnlagRequestType.BARNETILLEGG,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
+        GrunnlagRequestType.ARBEIDSFORHOLD,
     ].map((type) => ({
         type,
         personId: bmIdent,
@@ -348,6 +352,32 @@ export const useGrunnlagspakke = (behandling: BehandlingDto): UseSuspenseQueryRe
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
             return data;
         },
+        staleTime: Infinity,
+    });
+};
+
+export const useHentArbeidsforhold = (behandlingId: number): UseSuspenseQueryResult<HentGrunnlagDto | null> => {
+    const { data: behandling } = useGetBehandling(behandlingId);
+    const grunnlagspakkeId = behandling?.grunnlagspakkeid
+        ? behandling.grunnlagspakkeid
+        : useCreateGrunnlagspakke(behandling);
+    const today = new Date();
+    const arbeidsforholdRequest: HentGrunnlagRequestDto = {
+        grunnlagRequestDtoListe: behandling.roller
+            .filter((rolle) =>
+                [RolleDtoRolleType.BIDRAGSMOTTAKER, RolleDtoRolleType.BIDRAGSPLIKTIG].includes(rolle.rolleType)
+            )
+            .map((rolle) => ({
+                type: GrunnlagRequestType.ARBEIDSFORHOLD,
+                personId: rolle.ident,
+                periodeFra: behandling.datoFom,
+                periodeTil: toISODateString(today),
+            })),
+    };
+    return useSuspenseQuery({
+        queryKey: QueryKeys.arbeidsforhold(grunnlagspakkeId),
+        queryFn: async (): Promise<HentGrunnlagDto> =>
+            (await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(arbeidsforholdRequest)).data,
         staleTime: Infinity,
     });
 };

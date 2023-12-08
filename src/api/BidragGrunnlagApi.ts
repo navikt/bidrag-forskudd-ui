@@ -441,18 +441,15 @@ export interface HentArbeidsforholdRequest {
 
 export interface Ansettelsesdetaljer {
     /** @format double */
+    periodeFra?: string;
+    periodeTil?: string;
+    arbeidsforholdType?: string;
+    arbeidstidsordningBeskrivelse?: string;
+    ansettelsesformBeskrivelse?: string;
     antallTimerPrUke?: number;
-    arbeidstidsordning?: Kodeverksentitet;
-    ansettelsesform?: Kodeverksentitet;
-    /** @format double */
     avtaltStillingsprosent?: number;
-    rapporteringsmaaneder?: Rapporteringsmaaneder;
-    type?: string;
-    yrke?: Kodeverksentitet;
-    /** @format date */
-    sisteStillingsprosentendring?: string;
-    /** @format date */
-    sisteLoennsendring?: string;
+    sisteStillingsprosentendringDato?: string;
+    sisteLønnsendringDato?: string;
 }
 
 export interface Ansettelsesperiode {
@@ -1520,7 +1517,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -1610,7 +1607,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-grunnlag
  * @version v1
- * @baseUrl https://bidrag-grunnlag.intern.dev.nav.no
+ * @baseUrl https://bidrag-grunnlag-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     integrasjoner = {
