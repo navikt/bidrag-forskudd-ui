@@ -29,7 +29,6 @@ import {
 } from "../api/BidragGrunnlagApi";
 import { TransformerInntekterRequest, TransformerInntekterResponse } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
-import { InntektOpplysninger } from "../components/forms/helpers/inntektFormHelpers";
 import {
     BEHANDLING_API,
     BIDRAG_DOKUMENT_PRODUKSJON_API,
@@ -502,13 +501,13 @@ export const useNotatPayload = (behandlingId: number) => {
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: inntekter } = useHentInntekter(behandlingId);
     const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
-    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    // const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const savedOpplysninger = boforoholdOpplysninger
         ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
         : undefined;
-    const savedInntektOpplysninger = inntektOpplysninger
-        ? (JSON.parse(inntektOpplysninger.data) as InntektOpplysninger)
-        : undefined;
+    // const savedInntektOpplysninger = inntektOpplysninger
+    //     ? (JSON.parse(inntektOpplysninger.data) as InntektOpplysninger)
+    //     : undefined;
 
     return useSuspenseQuery({
         queryKey: ["notat_html", behandlingId],
