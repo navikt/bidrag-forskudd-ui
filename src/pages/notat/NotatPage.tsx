@@ -26,14 +26,16 @@ const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     const { data: notatHtml } = useNotat(behandlingId);
     const queryClient = useQueryClient();
 
-    async function subscribeToBroadcast() {
+    async function subscribeToChanges() {
         await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
+        console.debug("Received broadcast", notatBroadcastName, behandlingId);
         queryClient.refetchQueries({ queryKey: QueryKeys.notat(behandlingId) });
-        await subscribeToBroadcast();
+        setTimeout(() => subscribeToChanges(), 300);
     }
     useEffect(() => {
-        subscribeToBroadcast();
+        subscribeToChanges();
     }, []);
+
     if (!notatHtml) {
         return (
             <div className="flex justify-center">

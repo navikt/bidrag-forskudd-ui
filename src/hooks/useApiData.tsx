@@ -1,6 +1,13 @@
-import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
-import { useMutation, useQueries, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQueries,
+    useQuery,
+    useQueryClient,
+    useSuspenseQueries,
+    useSuspenseQuery,
+    UseSuspenseQueryResult,
+} from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback } from "react";
 
@@ -13,8 +20,6 @@ import {
     OpplysningerType,
     RolleDto,
     RolleDtoRolleType,
-    Rolletype,
-    UpdateBehandlingRequest,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
@@ -36,7 +41,6 @@ import {
     BIDRAG_INNTEKT_API,
     PERSON_API,
 } from "../constants/api";
-import { ParsedBoforholdOpplysninger } from "../types/boforholdFormValues";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
@@ -202,7 +206,7 @@ export const useHentPersonData = (ident: string) =>
     });
 
 export const usePersonsQueries = (roller: RolleDto[]) =>
-    useQueries({
+    useSuspenseQueries({
         queries: roller.map((rolle) => ({
             queryKey: ["persons", rolle.ident],
             queryFn: async (): Promise<PersonDto> => {
@@ -220,7 +224,6 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                 }),
                 []
             ),
-            suspense: true,
             enabled: !!rolle,
         })),
     });
@@ -309,26 +312,19 @@ const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
     const { data: grunnlagspakkeId } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeId(),
         queryFn: async (): Promise<number> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+            const { data: grunnlagspakkeId } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
             });
-            return data;
+            await BEHANDLING_API.api.updateBehandling(behandling.id, { grunnlagspakkeId });
+            return grunnlagspakkeId;
         },
         staleTime: Infinity,
-        enabled: !!behandling,
     });
-
-    const mutation = useMutation({
-        mutationFn: async (payload: UpdateBehandlingRequest): Promise<void> => {
-            await BEHANDLING_API.api.updateBehandling(behandling.id, payload);
-        },
-    });
-    mutation.mutate({ grunnlagspakkeId });
 
     return grunnlagspakkeId;
 };
 
-export const useGrunnlagspakke = (behandling: BehandlingDto) => {
+export const useGrunnlagspakke = (behandling: BehandlingDto): UseSuspenseQueryResult<HentGrunnlagspakkeDto | null> => {
     const grunnlagspakkeId = behandling?.grunnlagspakkeid
         ? behandling.grunnlagspakkeid
         : useCreateGrunnlagspakke(behandling);
@@ -343,17 +339,16 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
             return data;
         },
         staleTime: Infinity,
-        enabled: !!grunnlagspakkeId,
     });
 
     return useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            if (!updateIsSuccess) return null;
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
             return data;
         },
         staleTime: Infinity,
-        enabled: !!updateIsSuccess,
     });
 };
 
@@ -493,127 +488,5 @@ export const useNotat = (behandlingId: number) => {
         refetchInterval: 0,
         staleTime: Infinity,
         placeholderData: (previousData) => previousData,
-    });
-};
-export const useNotatPayload = (behandlingId: number) => {
-    const { data: behandling } = useGetBehandling(behandlingId);
-    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
-    const { data: boforhold } = useGetBoforhold(behandlingId);
-    const { data: inntekter } = useHentInntekter(behandlingId);
-    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
-    // const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
-    const savedOpplysninger = boforoholdOpplysninger
-        ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
-        : undefined;
-    // const savedInntektOpplysninger = inntektOpplysninger
-    //     ? (JSON.parse(inntektOpplysninger.data) as InntektOpplysninger)
-    //     : undefined;
-
-    return useSuspenseQuery({
-        queryKey: ["notat_html", behandlingId],
-        queryFn: async (): Promise<string> => {
-            const { data } = await BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml("forskudd", {
-                saksnummer: behandling.saksnummer,
-                saksbehandlerNavn: await SecuritySessionUtils.hentSaksbehandlerNavn(),
-                virkningstidspunkt: {
-                    søknadstype: behandling.behandlingtype,
-                    søktAv: behandling.soknadFraType,
-                    mottattDato: behandling.mottatDato,
-                    søktFraDato: behandling.datoFom,
-                    virkningstidspunkt: virkningstidspunkt.virkningsDato,
-                    notat: {
-                        medIVedtaket: virkningstidspunkt.virkningsTidspunktBegrunnelseMedIVedtakNotat,
-                        intern: virkningstidspunkt.virkningsTidspunktBegrunnelseKunINotat,
-                    },
-                },
-                boforhold: {
-                    barn: boforhold.husstandsBarn.map((barn) => ({
-                        navn: barn.navn,
-                        fødselsdato: barn.foedselsdato,
-                        opplysningerFraFolkeregisteret: savedOpplysninger?.husstand
-                            .find((h) => h.ident == barn.ident)
-                            ?.perioder.map((periode) => ({
-                                periode: {
-                                    fom: periode.fraDato,
-                                    til: periode.tilDato,
-                                },
-                                status: periode.bostatus,
-                            })),
-                        opplysningerBruktTilBeregning: barn.perioder.map((periode) => ({
-                            periode: {
-                                fom: periode.datoFom,
-                                til: periode.datoTom,
-                            },
-                            status: periode.bostatus,
-                            kilde: periode.kilde,
-                        })),
-                    })),
-                    sivilstand: boforhold.sivilstand.map((siv) => ({
-                        kode: siv.sivilstand,
-                        status: siv.sivilstand.toString(),
-                        periode: {
-                            fom: siv.datoFom,
-                            tom: siv.datoTom,
-                        },
-                    })),
-
-                    notat: {
-                        medIVedtaket: boforhold.boforholdBegrunnelseMedIVedtakNotat,
-                        intern: boforhold.boforholdBegrunnelseKunINotat,
-                    },
-                },
-
-                parterIsøknad: behandling.roller.map((rolle) => ({
-                    rolle: rolle.rolleType as unknown as Rolletype,
-                    navn: rolle.navn,
-                    personident: rolle.ident,
-                    fødselsdato: rolle.fodtDato,
-                })),
-
-                inntekter: {
-                    inntekterPerRolle: behandling.roller.map((rolle) => ({
-                        rolle: rolle.rolleType as unknown as Rolletype,
-                        arbeidsforhold: [],
-                        inntekterSomLeggesTilGrunn: inntekter.inntekter
-                            .filter((i) => i.ident == rolle.ident)
-                            .map((inntekt) => ({
-                                beskrivelse: inntekt.inntektType,
-                                periode: {
-                                    fom: inntekt.datoFom,
-                                    til: inntekt.datoTom,
-                                },
-                                beløp: inntekt.belop,
-                            })),
-                        barnetillegg: inntekter.barnetillegg
-                            .filter((i) => i.ident == rolle.ident)
-                            .map((inntekt) => ({
-                                periode: {
-                                    fom: inntekt.datoFom,
-                                    til: inntekt.datoTom,
-                                },
-                                beløp: inntekt.barnetillegg,
-                            })),
-                        utvidetBarnetrygd:
-                            rolle.rolleType == RolleDtoRolleType.BIDRAGSMOTTAKER
-                                ? inntekter.utvidetbarnetrygd.map((inntekt) => ({
-                                      periode: {
-                                          fom: inntekt.datoFom,
-                                          til: inntekt.datoTom,
-                                      },
-                                      beløp: inntekt.belop,
-                                      deltBosted: inntekt.deltBoSted,
-                                  }))
-                                : [],
-                    })),
-                    notat: {
-                        medIVedtaket: inntekter.inntektBegrunnelseMedIVedtakNotat,
-                        intern: inntekter.inntektBegrunnelseKunINotat,
-                    },
-                },
-                vedtak: [],
-            });
-            return data;
-        },
-        staleTime: Infinity,
     });
 };
