@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, RedirectTo, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Table } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router-dom";
 
