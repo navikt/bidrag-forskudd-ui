@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, RedirectTo, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Link, Table } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router-dom";
 
@@ -38,7 +38,7 @@ const Vedtak = () => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
     const isAvslag = behandling && Object.keys(Avslag).includes(behandling.getårsak);
-    const { data: beregnetForskudd } = useQuery({
+    const { data: beregnetForskudd } = useSuspenseQuery({
         queryKey: ["beregning"],
         queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
         select: (data) => data.data,

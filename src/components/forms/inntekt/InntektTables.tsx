@@ -561,8 +561,8 @@ export const BarnetilleggTabel = () => {
                                     </option>
                                     {personQueriesSuccess &&
                                         barnMedNavn.map((barn) => (
-                                            <option key={barn.navn} value={barn.ident}>
-                                                {barn.navn}
+                                            <option key={barn.kortnavn} value={barn.ident}>
+                                                {barn.kortnavn}
                                             </option>
                                         ))}
                                 </FormControlledSelectField>,

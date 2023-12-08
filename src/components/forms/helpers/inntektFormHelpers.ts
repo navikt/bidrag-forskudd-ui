@@ -345,7 +345,7 @@ export const getOverlappingInntektPerioder = (perioder) => {
     return overlappingPeriods;
 };
 
-interface InntektOpplysninger {
+export interface InntektOpplysninger {
     inntekt: { ident: string; summertAarsinntektListe: SummertArsinntekt[] }[];
     utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
     barnetillegg: BarnetilleggDto[];

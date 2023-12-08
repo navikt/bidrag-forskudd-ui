@@ -1,5 +1,13 @@
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
-import { useMutation, useQueries, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQueries,
+    useQuery,
+    useQueryClient,
+    useSuspenseQueries,
+    useSuspenseQuery,
+    UseSuspenseQueryResult,
+} from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback } from "react";
 
@@ -12,12 +20,12 @@ import {
     OpplysningerType,
     RolleDto,
     RolleDtoRolleType,
-    UpdateBehandlingRequest,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
     UpdateVirkningsTidspunktRequest,
     VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
+import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
     GrunnlagRequestType,
     HentGrunnlagspakkeDto,
@@ -26,7 +34,13 @@ import {
 } from "../api/BidragGrunnlagApi";
 import { TransformerInntekterRequest, TransformerInntekterResponse } from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
-import { BEHANDLING_API, BIDRAG_GRUNNLAG_API, BIDRAG_INNTEKT_API, PERSON_API } from "../constants/api";
+import {
+    BEHANDLING_API,
+    BIDRAG_DOKUMENT_PRODUKSJON_API,
+    BIDRAG_GRUNNLAG_API,
+    BIDRAG_INNTEKT_API,
+    PERSON_API,
+} from "../constants/api";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
@@ -38,6 +52,7 @@ export const MutationKeys = {
 export const QueryKeys = {
     virkningstidspunkt: (behandlingId: number) => ["virkningstidspunkt", behandlingId],
     visningsnavn: () => ["visningsnavn"],
+    notat: (behandlingId) => ["notat_payload", behandlingId],
     behandling: (behandlingId: number) => ["behandling", behandlingId],
     boforhold: (behandlingId: number) => ["boforhold", behandlingId],
     inntekter: (behandlingId: number) => ["inntekter", behandlingId],
@@ -58,14 +73,14 @@ export const useGetVisningsnavn = () =>
         staleTime: 0,
     });
 export const useGetBehandlings = () =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: ["behandlings"],
         queryFn: (): Promise<AxiosResponse<BehandlingDto[]>> => BEHANDLING_API.api.hentBehandlinger(),
         staleTime: 0,
     });
 
 export const useGetBehandling = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
@@ -75,7 +90,7 @@ export const useGetBehandling = (behandlingId: number) =>
     });
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.virkningstidspunkt(behandlingId),
         queryFn: async (): Promise<VirkningsTidspunktResponse> => {
             const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
@@ -105,7 +120,7 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
 };
 
 export const useGetBoforhold = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.boforhold(behandlingId),
         queryFn: async (): Promise<BoforholdResponse> => {
             const { data } = await BEHANDLING_API.api.hentBoforhold(behandlingId);
@@ -115,7 +130,7 @@ export const useGetBoforhold = (behandlingId: number) =>
     });
 
 export const useGetOpplysninger = (behandlingId: number, opplysningerType: OpplysningerType) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.opplysninger(behandlingId, opplysningerType),
         queryFn: async (): Promise<OpplysningerDto> => {
             try {
@@ -171,7 +186,7 @@ export const useUpdateInntekter = (behandlingId: number) => {
 };
 
 export const useHentInntekter = (behandlingId: number) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: QueryKeys.inntekter(behandlingId),
         queryFn: async (): Promise<InntekterResponse> => {
             const { data } = await BEHANDLING_API.api.hentInntekter(behandlingId);
@@ -181,7 +196,7 @@ export const useHentInntekter = (behandlingId: number) =>
     });
 
 export const useHentPersonData = (ident: string) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
             const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
@@ -191,7 +206,7 @@ export const useHentPersonData = (ident: string) =>
     });
 
 export const usePersonsQueries = (roller: RolleDto[]) =>
-    useQueries({
+    useSuspenseQueries({
         queries: roller.map((rolle) => ({
             queryKey: ["persons", rolle.ident],
             queryFn: async (): Promise<PersonDto> => {
@@ -209,7 +224,6 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                 }),
                 []
             ),
-            suspense: true,
             enabled: !!rolle,
         })),
     });
@@ -295,34 +309,27 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
 };
 
 const useCreateGrunnlagspakke = (behandling: BehandlingDto) => {
-    const { data: grunnlagspakkeId } = useQuery({
+    const { data: grunnlagspakkeId } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeId(),
         queryFn: async (): Promise<number> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
+            const { data: grunnlagspakkeId } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
             });
-            return data;
+            await BEHANDLING_API.api.updateBehandling(behandling.id, { grunnlagspakkeId });
+            return grunnlagspakkeId;
         },
         staleTime: Infinity,
-        enabled: !!behandling,
     });
-
-    const mutation = useMutation({
-        mutationFn: async (payload: UpdateBehandlingRequest): Promise<void> => {
-            await BEHANDLING_API.api.updateBehandling(behandling.id, payload);
-        },
-    });
-    mutation.mutate({ grunnlagspakkeId });
 
     return grunnlagspakkeId;
 };
 
-export const useGrunnlagspakke = (behandling: BehandlingDto) => {
+export const useGrunnlagspakke = (behandling: BehandlingDto): UseSuspenseQueryResult<HentGrunnlagspakkeDto | null> => {
     const grunnlagspakkeId = behandling?.grunnlagspakkeid
         ? behandling.grunnlagspakkeid
         : useCreateGrunnlagspakke(behandling);
     const grunnlagRequest = createGrunnlagRequest(behandling);
-    const { isSuccess: updateIsSuccess } = useQuery({
+    const { isSuccess: updateIsSuccess } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
@@ -332,17 +339,16 @@ export const useGrunnlagspakke = (behandling: BehandlingDto) => {
             return data;
         },
         staleTime: Infinity,
-        enabled: !!grunnlagspakkeId,
     });
 
-    return useQuery({
+    return useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
+            if (!updateIsSuccess) return null;
             const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
             return data;
         },
         staleTime: Infinity,
-        enabled: !!updateIsSuccess,
     });
 };
 
@@ -457,4 +463,31 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
     });
 
     return { mutation, error: mutation.isError };
+};
+
+export const useNotat = (behandlingId: number) => {
+    const resultPayload = useQuery({
+        queryKey: QueryKeys.notat(behandlingId),
+        queryFn: async () => (await BEHANDLING_API.api.hentNotatOpplysninger(behandlingId)).data,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+    });
+
+    const resultNotatHtml = useQuery({
+        queryKey: ["notat_html", behandlingId, resultPayload.data],
+        queryFn: () =>
+            BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml(
+                "forskudd",
+                //@ts-ignore
+                resultPayload.data as NotatPayload
+            ),
+        select: (response) => response.data,
+        enabled: resultPayload.isFetched,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+        staleTime: Infinity,
+        placeholderData: (previousData) => previousData,
+    });
+
+    return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatHtml;
 };

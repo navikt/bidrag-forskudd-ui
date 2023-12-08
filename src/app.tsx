@@ -16,7 +16,7 @@ const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            suspense: true,
+            refetchOnWindowFocus: false,
         },
     },
 });
@@ -84,14 +84,17 @@ function ForskudWrapper() {
     );
 }
 
-const NotatPageWrapper = () => (
-    <Suspense
-        fallback={
-            <div className="flex justify-center">
-                <Loader size="3xlarge" title="venter..." variant="interaction" />
-            </div>
-        }
-    >
-        <NotatPage />
-    </Suspense>
-);
+const NotatPageWrapper = () => {
+    const { behandlingId } = useParams<{ behandlingId?: string }>();
+    return (
+        <Suspense
+            fallback={
+                <div className="flex justify-center">
+                    <Loader size="3xlarge" title="venter..." variant="interaction" />
+                </div>
+            }
+        >
+            <NotatPage behandlingId={Number(behandlingId)} />
+        </Suspense>
+    );
+};

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ArbeidsforholdData } from "../testdata/arbeidsforholdTestData";
 import { InntektData } from "../testdata/inntektTestData";
@@ -27,7 +27,7 @@ export const usePostInntekt = (behandlingId: string) => {
 };
 
 export const useGetArbeidsforhold = (behandlingId: string, success = true) =>
-    useQuery({
+    useSuspenseQuery({
         queryKey: ["arbeidsforhold"],
         queryFn: (): Promise<ArbeidsforholdData[]> =>
             fakeFetch(JSON.parse(localStorage.getItem(`arbeidsforhold`)), success),

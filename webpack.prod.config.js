@@ -15,6 +15,7 @@ module.exports = merge(webpackCommon, {
             BIDRAG_GRUNNLAG_URL: "",
             BIDRAG_INNTEKT: "",
             BISYS_URL: "",
+            BIDRAG_DOKUMENT_PRODUKSJON: "",
             ENABLE_FATTE_VEDTAK: false,
             ENABLE_VEDTAK_SKJERMBILDE: false,
             ENABLE_INNTEKT_SKJERMBILDE: false,
