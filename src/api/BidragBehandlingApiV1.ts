@@ -9,73 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface Barnetillegg {
-    behandling: Behandling;
-    ident: string;
-    barnetillegg: number;
-    /** @format date-time */
-    datoFom?: string;
-    /** @format date-time */
-    datoTom?: string;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Behandling {
-    vedtakstype: Vedtakstype;
-    /** @format date */
-    søktFomDato: string;
-    /** @format date */
-    datoTom?: string;
-    /** @format date */
-    mottattdato: string;
-    saksnummer: string;
-    /** @format int64 */
-    soknadsid: number;
-    /** @format int64 */
-    soknadRefId?: number;
-    behandlerEnhet: string;
-    opprettetAv: string;
-    opprettetAvNavn?: string;
-    kildeapplikasjon: string;
-    soknadFra: SoktAvType;
-    stonadstype?: Stonadstype;
-    engangsbeloptype?: Engangsbeloptype;
-    /** @format int64 */
-    vedtaksid?: number;
-    /** @format date */
-    virkningsdato?: string;
-    aarsak?: ForskuddAarsakType;
-    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
-    virkningstidspunktbegrunnelseKunINotat?: string;
-    boforholdsbegrunnelseIVedtakOgNotat?: string;
-    boforholdsbegrunnelseKunINotat?: string;
-    inntektsbegrunnelseIVedtakOgNotat?: string;
-    inntektsbegrunnelseKunINotat?: string;
-    /** @format int64 */
-    id?: number;
-    /** @format int64 */
-    grunnlagspakkeid?: number;
-    /** @format date-time */
-    grunnlagSistInnhentet?: string;
-    /** @uniqueItems true */
-    roller: Rolle[];
-    /** @uniqueItems true */
-    husstandsbarn: Husstandsbarn[];
-    /** @uniqueItems true */
-    inntekter: Inntekt[];
-    /** @uniqueItems true */
-    sivilstand: Sivilstand[];
-    /** @uniqueItems true */
-    barnetillegg: Barnetillegg[];
-    /** @uniqueItems true */
-    utvidetBarnetrygd: UtvidetBarnetrygd[];
-    deleted: boolean;
-    bidragsmottaker?: Rolle;
-    bidragspliktig?: Rolle;
-    søknadsbarn: Rolle[];
-}
-
 export enum Bostatuskode {
     MED_FORELDER = "MED_FORELDER",
     DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
@@ -131,57 +64,6 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
-export interface Husstandsbarn {
-    behandling: Behandling;
-    medISaken: boolean;
-    /** @format int64 */
-    id?: number;
-    ident?: string;
-    navn?: string;
-    /** @format date */
-    foedselsdato: string;
-    /** @uniqueItems true */
-    perioder: Husstandsbarnperiode[];
-}
-
-export interface Husstandsbarnperiode {
-    husstandsbarn: Husstandsbarn;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    bostatus: Bostatuskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Inntekt {
-    inntektstype: Inntektsrapportering;
-    belop: number;
-    /** @format date */
-    datoFom: string;
-    /** @format date */
-    datoTom?: string;
-    ident: string;
-    fraGrunnlag: boolean;
-    taMed: boolean;
-    /** @format int64 */
-    id?: number;
-    behandling?: Behandling;
-    /** @uniqueItems true */
-    inntektsposter: Inntektspost[];
-}
-
-export interface Inntektspost {
-    beløp: number;
-    kode: string;
-    visningsnavn: string;
-    /** @format int64 */
-    id?: number;
-    inntekt?: Inntekt;
-}
-
 export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -191,17 +73,24 @@ export enum Inntektsrapportering {
     KONTANTSTOTTE = "KONTANTSTØTTE",
     SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
     UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
+    AAP = "AAP",
+    DAGPENGER = "DAGPENGER",
+    FORELDREPENGER = "FORELDREPENGER",
+    INTRODUKSJONSSTONAD = "INTRODUKSJONSSTØNAD",
+    KVALIFISERINGSSTONAD = "KVALIFISERINGSSTØNAD",
+    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
+    PENSJON = "PENSJON",
+    SYKEPENGER = "SYKEPENGER",
+    BARNETILLEGG = "BARNETILLEGG",
     PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
     KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
     SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
     LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
     NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
     YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
-    AAP = "AAP",
     AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
-    DAGPENGER = "DAGPENGER",
     DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
     FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
@@ -215,35 +104,42 @@ export enum Inntektsrapportering {
     LONNTREKK = "LØNN_TREKK",
     MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
-    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
-    PENSJON = "PENSJON",
     PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
     SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
-    SYKEPENGER = "SYKEPENGER",
+}
+
+export enum Inntektstype {
+    AAP = "AAP",
+    DAGPENGER = "DAGPENGER",
     FORELDREPENGER = "FORELDREPENGER",
     INTRODUKSJONSSTONAD = "INTRODUKSJONSSTØNAD",
     KVALIFISERINGSSTONAD = "KVALIFISERINGSSTØNAD",
+    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
+    PENSJON = "PENSJON",
+    SYKEPENGER = "SYKEPENGER",
+    KONTANTSTOTTE = "KONTANTSTØTTE",
+    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    LONNSINNTEKT = "LØNNSINNTEKT",
+    NAeRINGSINNTEKT = "NÆRINGSINNTEKT",
+    BARNETILLEGG_PENSJON = "BARNETILLEGG_PENSJON",
+    BARNETILLEGGUFORETRYGD = "BARNETILLEGG_UFØRETRYGD",
+    BARNETILLEGG_DAGPENGER = "BARNETILLEGG_DAGPENGER",
+    BARNETILLEGGKVALIFISERINGSSTONAD = "BARNETILLEGG_KVALIFISERINGSSTØNAD",
+    BARNETILLEGG_AAP = "BARNETILLEGG_AAP",
+    BARNETILLEGG_DNB = "BARNETILLEGG_DNB",
+    BARNETILLEGG_NORDEA = "BARNETILLEGG_NORDEA",
+    BARNETILLEGG_STOREBRAND = "BARNETILLEGG_STOREBRAND",
+    BARNETILLEGG_KLP = "BARNETILLEGG_KLP",
+    BARNETILLEGG_SPK = "BARNETILLEGG_SPK",
 }
 
 export enum Kilde {
     MANUELL = "MANUELL",
     OFFENTLIG = "OFFENTLIG",
-}
-
-export interface Rolle {
-    behandling: Behandling;
-    rolletype: Rolletype;
-    ident?: string;
-    /** @format date */
-    foedselsdato: string;
-    /** @format date-time */
-    opprettet: string;
-    /** @format int64 */
-    id?: number;
-    navn?: string;
-    deleted: boolean;
 }
 
 export enum Rolletype {
@@ -252,18 +148,6 @@ export enum Rolletype {
     BP = "BP",
     FR = "FR",
     RM = "RM",
-}
-
-export interface Sivilstand {
-    behandling: Behandling;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    sivilstand: Sivilstandskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
 }
 
 export enum Sivilstandskode {
@@ -299,18 +183,6 @@ export enum SoktAvType {
     KONVERTERING = "KONVERTERING",
 }
 
-export interface UtvidetBarnetrygd {
-    behandling: Behandling;
-    deltBosted: boolean;
-    belop: number;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    /** @format int64 */
-    id?: number;
-}
-
 export enum Vedtakstype {
     INDEKSREGULERING = "INDEKSREGULERING",
     ALDERSJUSTERING = "ALDERSJUSTERING",
@@ -333,26 +205,6 @@ export enum OpplysningerType {
     SIVILSTAND = "SIVILSTAND",
     BOFORHOLD = "BOFORHOLD",
     INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-}
-
-export interface BarnetilleggDto {
-    /** @format int64 */
-    id?: number;
-    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
-    ident: string;
-    /** Hvilken barn barnetillegget mottas for */
-    gjelderBarn: string;
-    barnetillegg: number;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoFom?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoTom?: string;
 }
 
 export interface HusstandsbarnDto {
@@ -387,65 +239,49 @@ export interface HusstandsbarnperiodeDto {
     kilde: Kilde;
 }
 
-export interface InntektDto {
+export interface InntektDtoV2 {
     /** @format int64 */
     id?: number;
     taMed: boolean;
-    inntektstype: Inntektsrapportering;
+    rapporteringstype: Inntektsrapportering;
     beløp: number;
     /**
      * @format date
-     * @example "2025-01-25"
+     * @example "2024-01-01"
      */
     datoFom: string;
     /**
      * @format date
-     * @example "2025-01-25"
+     * @example "2024-12-31"
      */
     datoTom?: string;
+    /**
+     * @format date
+     * @example "2024-01-01"
+     */
+    opprinneligFom?: string;
+    /**
+     * @format date
+     * @example "2024-12-31"
+     */
+    opprinneligTom?: string;
     ident: string;
-    fraGrunnlag: boolean;
+    gjelderBarn?: string;
+    kilde: Kilde;
     /** @uniqueItems true */
-    inntektsposter: InntektPost[];
+    inntektsposter: InntektspostDtoV2[];
+    /** @uniqueItems true */
+    inntektstyper: Inntektstype[];
 }
 
-export interface InntektPost {
-    /**
-     * Kode for inntektspost
-     * @example "bonus"
-     */
+export interface InntektspostDtoV2 {
     kode: string;
-    /**
-     * Visningsnavn for kode
-     * @example "Bonus"
-     */
     visningsnavn: string;
-    /**
-     * Beløp som utgør inntektsposten
-     * @example 60000
-     */
-    beløp: number;
+    inntektstype?: Inntektstype;
+    beløp?: number;
 }
 
-export interface KontantstotteDto {
-    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
-    ident: string;
-    /** Hvilken barn barnetillegget mottas for */
-    gjelderBarn: string;
-    kontantstøtte: number;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoFom?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoTom?: string;
-}
-
-export interface OppdaterBehandlingRequest {
+export interface OppdaterBehandlingRequestV2 {
     /** @format int64 */
     grunnlagspakkeId?: number;
     /** @format int64 */
@@ -461,12 +297,12 @@ export interface OppdaterBehandlingRequest {
     boforhold?: OppdaterBoforholdRequest;
     /**
      *
-     * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+     * For `inntekter`,
      * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
      * * Hvis feltet er tom liste vil alt bli slettet
      * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
      */
-    inntekter?: OppdatereInntekterRequest;
+    inntekter?: OppdatereInntekterRequestV2;
 }
 
 /**
@@ -502,22 +338,14 @@ export interface OppdaterVirkningstidspunkt {
 
 /**
  *
- * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+ * For `inntekter`,
  * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
  * * Hvis feltet er tom liste vil alt bli slettet
  * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
  */
-export interface OppdatereInntekterRequest {
+export interface OppdatereInntekterRequestV2 {
     /** @uniqueItems true */
-    inntekter?: InntektDto[];
-    /** @uniqueItems true */
-    kontantstøtte?: KontantstotteDto[];
-    /** @uniqueItems true */
-    småbarnstillegg?: InntektDto[];
-    /** @uniqueItems true */
-    barnetillegg?: BarnetilleggDto[];
-    /** @uniqueItems true */
-    utvidetbarnetrygd?: UtvidetBarnetrygdDto[];
+    inntekter?: InntektDtoV2[];
     notat?: OppdaterNotat;
 }
 
@@ -538,6 +366,205 @@ export interface SivilstandDto {
     kilde: Kilde;
 }
 
+export interface BehandlingDtoV2 {
+    /** @format int64 */
+    id: number;
+    vedtakstype: Vedtakstype;
+    stønadstype?: Stonadstype;
+    engangsbeløptype?: Engangsbeloptype;
+    erVedtakFattet: boolean;
+    /** @format date */
+    søktFomDato: string;
+    /** @format date */
+    mottattdato: string;
+    søktAv: SoktAvType;
+    saksnummer: string;
+    /** @format int64 */
+    søknadsid: number;
+    /** @format int64 */
+    søknadRefId?: number;
+    behandlerenhet: string;
+    /** @uniqueItems true */
+    roller: RolleDto[];
+    /** @format int64 */
+    grunnlagspakkeid?: number;
+    virkningstidspunkt: VirkningstidspunktDto;
+    inntekter: InntekterDtoV2;
+    boforhold: BoforholdDto;
+    opplysninger: GrunnlagsdataDto[];
+}
+
+export interface BehandlingNotatDto {
+    kunINotat?: string;
+    medIVedtaket?: string;
+}
+
+export interface BoforholdDto {
+    /** @uniqueItems true */
+    husstandsbarn: HusstandsbarnDto[];
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
+    notat: BehandlingNotatDto;
+}
+
+export interface GrunnlagsdataDto {
+    /** @format int64 */
+    id: number;
+    /** @format int64 */
+    behandlingsid: number;
+    grunnlagsdatatype: OpplysningerType;
+    data: string;
+    /** @format date-time */
+    innhentet: string;
+}
+
+export interface InntekterDtoV2 {
+    /** @uniqueItems true */
+    inntekter: InntektDtoV2[];
+    notat: BehandlingNotatDto;
+}
+
+export interface RolleDto {
+    /** @format int64 */
+    id: number;
+    rolletype: Rolletype;
+    ident?: string;
+    navn?: string;
+    /** @format date */
+    fødselsdato?: string;
+}
+
+export interface VirkningstidspunktDto {
+    /** @format date */
+    virkningsdato?: string;
+    årsak?: ForskuddAarsakType;
+    notat: BehandlingNotatDto;
+}
+
+export interface BarnetilleggDto {
+    /** @format int64 */
+    id?: number;
+    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
+    ident: string;
+    /** Hvilken barn barnetillegget mottas for */
+    gjelderBarn: string;
+    barnetillegg: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface InntektDto {
+    /** @format int64 */
+    id?: number;
+    taMed: boolean;
+    inntektstype: Inntektsrapportering;
+    beløp: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+    ident: string;
+    fraGrunnlag: boolean;
+    /** @uniqueItems true */
+    inntektsposter: InntektPost[];
+}
+
+export interface InntektPost {
+    /**
+     * Kode for inntektspost
+     * @example "bonus"
+     */
+    kode: string;
+    inntekstype?: Inntektstype;
+    /**
+     * Visningsnavn for kode
+     * @example "Bonus"
+     */
+    visningsnavn: string;
+    /**
+     * Beløp som utgør inntektsposten
+     * @example 60000
+     */
+    beløp: number;
+}
+
+export interface KontantstotteDto {
+    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
+    ident: string;
+    /** Hvilken barn barnetillegget mottas for */
+    gjelderBarn: string;
+    kontantstøtte: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface OppdaterBehandlingRequest {
+    /** @format int64 */
+    grunnlagspakkeId?: number;
+    /** @format int64 */
+    vedtaksid?: number;
+    virkningstidspunkt?: OppdaterVirkningstidspunkt;
+    /**
+     *
+     * For `husstandsbarn` og `sivilstand`
+     * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+     * * Hvis feltet er tom liste vil alt bli slettet
+     * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+     */
+    boforhold?: OppdaterBoforholdRequest;
+    /**
+     *
+     * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+     * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+     * * Hvis feltet er tom liste vil alt bli slettet
+     * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+     */
+    inntekter?: OppdatereInntekterRequest;
+}
+
+/**
+ *
+ * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+ * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+ * * Hvis feltet er tom liste vil alt bli slettet
+ * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+ */
+export interface OppdatereInntekterRequest {
+    /** @uniqueItems true */
+    inntekter?: InntektDto[];
+    /** @uniqueItems true */
+    kontantstøtte?: KontantstotteDto[];
+    /** @uniqueItems true */
+    småbarnstillegg?: InntektDto[];
+    /** @uniqueItems true */
+    barnetillegg?: BarnetilleggDto[];
+    /** @uniqueItems true */
+    utvidetbarnetrygd?: UtvidetBarnetrygdDto[];
+    notat?: OppdaterNotat;
+}
+
 export interface UtvidetBarnetrygdDto {
     /** @format int64 */
     id?: number;
@@ -547,7 +574,7 @@ export interface UtvidetBarnetrygdDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom?: string;
+    datoFom: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -583,30 +610,6 @@ export interface BehandlingDto {
     opplysninger: GrunnlagsdataDto[];
 }
 
-export interface BehandlingNotatDto {
-    kunINotat?: string;
-    medIVedtaket?: string;
-}
-
-export interface BoforholdDto {
-    /** @uniqueItems true */
-    husstandsbarn: HusstandsbarnDto[];
-    /** @uniqueItems true */
-    sivilstand: SivilstandDto[];
-    notat: BehandlingNotatDto;
-}
-
-export interface GrunnlagsdataDto {
-    /** @format int64 */
-    id: number;
-    /** @format int64 */
-    behandlingsid: number;
-    grunnlagsdatatype: OpplysningerType;
-    data: string;
-    /** @format date-time */
-    innhentet: string;
-}
-
 export interface InntekterDto {
     /** @uniqueItems true */
     inntekter: InntektDto[];
@@ -618,23 +621,6 @@ export interface InntekterDto {
     kontantstøtte: KontantstotteDto[];
     /** @uniqueItems true */
     småbarnstillegg: InntektDto[];
-    notat: BehandlingNotatDto;
-}
-
-export interface RolleDto {
-    /** @format int64 */
-    id: number;
-    rolletype: Rolletype;
-    ident?: string;
-    navn?: string;
-    /** @format date */
-    fødselsdato?: string;
-}
-
-export interface VirkningstidspunktDto {
-    /** @format date */
-    virkningsdato?: string;
-    årsak?: ForskuddAarsakType;
     notat: BehandlingNotatDto;
 }
 
@@ -884,6 +870,12 @@ export interface Arbeidsforhold {
     lønnsendringDato?: string;
 }
 
+export interface Barnetillegg {
+    /** Beregnet resultat periode */
+    periode: TypeArManedsperiode;
+    beløp: number;
+}
+
 export interface Boforhold {
     barn: BoforholdBarn[];
     sivilstand: SivilstandNotat;
@@ -982,6 +974,12 @@ export interface Resultat {
 export interface SivilstandNotat {
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretSivilstandskode[];
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
+}
+
+export interface UtvidetBarnetrygd {
+    /** Beregnet resultat periode */
+    periode: TypeArManedsperiode;
+    beløp: number;
 }
 
 export interface Vedtak {
@@ -1105,7 +1103,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1194,10 +1195,46 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
+        /**
+         * @description Hente en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name HentBehandlingV2
+         * @request GET:/api/v2/behandling/{behandlingId}
+         * @secure
+         */
+        hentBehandlingV2: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDtoV2, BehandlingDtoV2>({
+                path: `/api/v2/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name OppdatereBehandlingV2
+         * @request PUT:/api/v2/behandling/{behandlingId}
+         * @secure
+         */
+        oppdatereBehandlingV2: (behandlingId: number, data: OppdaterBehandlingRequestV2, params: RequestParams = {}) =>
+            this.request<BehandlingDtoV2, any>({
+                path: `/api/v2/behandling/${behandlingId}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
         /**
          * @description Hente en behandling
          *

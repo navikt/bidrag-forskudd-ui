@@ -1,28 +1,15 @@
-import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import {
-    BarnetilleggDto,
     InntektDto,
-    InntekterDto,
+    InntekterDtoV2,
     Inntektsrapportering,
     OppdaterBehandlingRequest,
     RolleDto,
 } from "../../../api/BidragBehandlingApiV1";
-import {
-    ArbeidsforholdGrunnlagDto,
-    HentGrunnlagspakkeDto,
-    UtvidetBarnetrygdOgSmaabarnstilleggDto,
-} from "../../../api/BidragGrunnlagApi";
-import { SummertArsinntekt, TransformerInntekterResponse } from "../../../api/BidragInntektApi";
-import {
-    gjennomsnittPerioder,
-    innhentendeTotalsummertInntekter,
-    perioderSomIkkeKanOverlape,
-    perioderSomKanIkkeOverlapeKunMedHverandre,
-    ytelsePerioder,
-} from "../../../constants/inntektene";
+import { perioderSomIkkeKanOverlape, perioderSomKanIkkeOverlapeKunMedHverandre } from "../../../constants/inntektene";
 import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
-import { addDays, deductDays, isAfterDate, isValidDate, toISODateString } from "../../../utils/date-utils";
+import { isAfterDate, toISODateString } from "../../../utils/date-utils";
 
 export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequest => ({
     inntekter: {
@@ -89,6 +76,14 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
         (acc, curr) => ({
             ...acc,
             [curr.ident]: curr.data.summertÅrsinntektListe
+                .filter(
+                    (inntekt) =>
+                        ![
+                            Inntektsrapportering.KONTANTSTOTTE,
+                            Inntektsrapportering.SMABARNSTILLEGG,
+                            Inntektsrapportering.UTVIDET_BARNETRYGD,
+                        ].includes(inntekt.inntektRapportering)
+                )
                 .map((inntekt) => {
                     return {
                         taMed: false,
@@ -110,216 +105,218 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
         {}
     );
 
-export const createInitialValues = (
-    bmOgBarn: RolleDto[],
-    bidragInntekt: { ident: string; data: TransformerInntekterResponse }[],
-    inntekter: InntekterDto,
-    grunnlagspakke: HentGrunnlagspakkeDto
-): InntektFormValues => {
+export const createInitialValues = (bmOgBarn: RolleDto[], inntekter: InntekterDtoV2): InntektFormValues => {
     return {
-        inntekteneSomLeggesTilGrunn: inntekter?.inntekter.length
-            ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
-            : getPerioderFraBidragInntekt(bidragInntekt),
-        utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
-            ? inntekter.utvidetbarnetrygd
-            : grunnlagspakke.ubstListe.map((ubst) => ({
-                  deltBosted: false,
-                  beløp: ubst.belop,
-                  datoFom: ubst.periodeFra,
-                  datoTom: ubst.periodeTil,
-              })),
-        barnetillegg: inntekter?.barnetillegg?.length
-            ? inntekter.barnetillegg
-            : grunnlagspakke.barnetilleggListe.map((periode) => ({
-                  ident: periode.barnPersonId,
-                  barnetillegg: periode.belopBrutto,
-                  datoFom: periode.periodeFra,
-                  datoTom: periode.periodeTil,
-              })),
+        inntekteneSomLeggesTilGrunn: getPerioderFraInntekter(bmOgBarn, inntekter.inntekter),
+        utvidetbarnetrygd: [],
+        barnetillegg: [],
         notat: {
             medIVedtaket: inntekter.notat.medIVedtaket,
             kunINotat: inntekter.notat.kunINotat,
         },
     };
 };
-
-const findPeriodeIndex = (inntekteneSomLeggesTilGrunn, periode) =>
-    inntekteneSomLeggesTilGrunn.findIndex(
-        (inntekt) => inntekt.aar === periode.aar && inntekt.tekniskNavn === periode.tekniskNavn
-    );
-export const syncDates = (
-    selected,
-    inntekteneSomLeggesTilGrunn,
-    ident,
-    index,
-    setValue,
-    virkningstidspunkt,
-    setError,
-    clearErrors
-) => {
-    const fieldValue = inntekteneSomLeggesTilGrunn[index];
-    const selectedFirstDayOfPeriod = new Date(fieldValue.aar, 0, 1);
-    const perioderFraSammeGruppe = inntekteneSomLeggesTilGrunn
-        .filter(
-            (inntekt) =>
-                !(inntekt.tekniskNavn === fieldValue.tekniskNavn && inntekt.aar === fieldValue.aar) &&
-                inntekt.selected &&
-                ytelsePerioder.includes(inntekt.tekniskNavn) &&
-                inntekt.aar
-        )
-        .sort((a, b) => new Date(a.aar).getFullYear() - new Date(b.aar).getFullYear());
-    const preSelectedPerioder = perioderFraSammeGruppe.filter(
-        (periode) => new Date(new Date(periode.aar).getFullYear(), 0, 1) <= selectedFirstDayOfPeriod
-    );
-    const postSelectedPerioder = perioderFraSammeGruppe.filter(
-        (periode) => new Date(new Date(periode.aar).getFullYear(), 0, 1) >= selectedFirstDayOfPeriod
-    );
-    const periodeErFraSammeAarSomVirkningsTidspunkt =
-        new Date(fieldValue.aar).getFullYear() === virkningstidspunkt.getFullYear();
-    const periodeErFoerVirkningsTidspunkt = new Date(fieldValue.aar).getFullYear() < virkningstidspunkt.getFullYear();
-
-    if (!selected) {
-        if (!preSelectedPerioder.length && postSelectedPerioder.length === 1) {
-            const forstePostPeriode = postSelectedPerioder[0];
-            const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
-            setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
-                toISODateString(virkningstidspunkt)
+const getListOfIncomesThatCanRunInParallelWithInntektType = (inntektType: string) => {
+    switch (inntektType) {
+        case Inntektsrapportering.AINNTEKTBEREGNET3MND:
+        case Inntektsrapportering.AINNTEKTBEREGNET12MND:
+        case Inntektsrapportering.AINNTEKT:
+        case Inntektsrapportering.LIGNINGSINNTEKT:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+            ];
+        case Inntektsrapportering.KAPITALINNTEKT:
+        case Inntektsrapportering.NETTO_KAPITALINNTEKT:
+        case Inntektsrapportering.KAPITALINNTEKT_SKE:
+        case Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER:
+            return Object.values(Inntektsrapportering).filter(
+                (value) =>
+                    ![
+                        Inntektsrapportering.KAPITALINNTEKT,
+                        Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                        Inntektsrapportering.KAPITALINNTEKT_SKE,
+                        Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                    ].includes(value)
             );
-        }
-
-        if (!preSelectedPerioder.length && postSelectedPerioder.length > 1) {
-            const forstePostPeriode = postSelectedPerioder[0];
-            const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
-            if (!(new Date(forstePostPeriode.aar).getFullYear() < virkningstidspunkt.getFullYear())) {
-                setValue(
-                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
-                    toISODateString(virkningstidspunkt)
-                );
-            }
-        }
-
-        if (preSelectedPerioder.length === 1 && !postSelectedPerioder.length) {
-            const sistePrePeriode = preSelectedPerioder[0];
-            const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
-            setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`, null);
-            setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoFom`,
-                toISODateString(virkningstidspunkt)
-            );
-        } else if (preSelectedPerioder.length) {
-            const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
-            const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
-            if (postSelectedPerioder.length) {
-                setValue(
-                    `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`,
-                    fieldValue.datoTom
-                );
-                if (!inntekteneSomLeggesTilGrunn[sistePrePeriodeIndex].fraDato) {
-                    setValue(
-                        `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoFom`,
-                        fieldValue.datoFom
-                    );
-                }
-            }
-
-            if (!postSelectedPerioder.length) {
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`, null);
-            }
-        }
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, null);
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, null);
-        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`);
-        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`);
-        return;
-    }
-
-    if (!innhentendeTotalsummertInntekter.includes(fieldValue.tekniskNavn)) {
-        return;
-    }
-
-    if (
-        perioderSomKanIkkeOverlapeKunMedHverandre.includes(fieldValue.tekniskNavn) ||
-        gjennomsnittPerioder.includes(fieldValue.tekniskNavn)
-    ) {
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, toISODateString(virkningstidspunkt));
-    } else {
-        const fraDato =
-            !preSelectedPerioder.length || periodeErFraSammeAarSomVirkningsTidspunkt
-                ? virkningstidspunkt
-                : selectedFirstDayOfPeriod;
-        const tilDato = postSelectedPerioder.length
-            ? deductDays(new Date(new Date(postSelectedPerioder[0].aar).getFullYear(), 0, 1), 1)
-            : null;
-
-        if (periodeErFoerVirkningsTidspunkt && postSelectedPerioder.length) {
-            setError(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, {
-                type: "invalid",
-                message: "Dato må settes manuelt",
-            });
-            return;
-        }
-
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, fraDato);
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, tilDato);
-
-        if (
-            (periodeErFraSammeAarSomVirkningsTidspunkt || periodeErFoerVirkningsTidspunkt) &&
-            preSelectedPerioder.length
-        ) {
-            const preSelectedPerioderIndexes = preSelectedPerioder.map((periode) =>
-                findPeriodeIndex(inntekteneSomLeggesTilGrunn, periode)
-            );
-            preSelectedPerioderIndexes.forEach((index) => {
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.selected`, false);
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, null);
-                setValue(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoTom`, null);
-            });
-        } else if (preSelectedPerioder.length) {
-            const sistePrePeriode = preSelectedPerioder[preSelectedPerioder.length - 1];
-            const sistePrePeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, sistePrePeriode);
-            setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(sistePrePeriodeIndex)}.datoTom`,
-                deductDays(fraDato, 1)
-            );
-        }
-
-        if (postSelectedPerioder.length) {
-            const forstePostPeriode = postSelectedPerioder[0];
-            const forstePostPeriodeIndex = findPeriodeIndex(inntekteneSomLeggesTilGrunn, forstePostPeriode);
-            setValue(
-                `inntekteneSomLeggesTilGrunn.${ident}.${Number(forstePostPeriodeIndex)}.datoFom`,
-                addDays(tilDato, 1)
-            );
-        }
+        case Inntektsrapportering.DAGPENGER:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.SYKEPENGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.AAP:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.SYKEPENGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.BARNS_SYKDOM:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.SYKEPENGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.FODSELADOPSJON:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.SYKEPENGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.PENSJON:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.SYKEPENGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER:
+        case Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+            ];
+        case Inntektsrapportering.SYKEPENGER:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
+        case Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET:
+            return Object.values(Inntektsrapportering);
+        case Inntektsrapportering.LONNTREKK:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.DAGPENGER,
+                Inntektsrapportering.AAP,
+                Inntektsrapportering.BARNS_SYKDOM,
+                Inntektsrapportering.FODSELADOPSJON,
+                Inntektsrapportering.PENSJON,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.SYKEPENGER,
+            ];
+        case Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET:
+            return [
+                Inntektsrapportering.KAPITALINNTEKT,
+                Inntektsrapportering.NETTO_KAPITALINNTEKT,
+                Inntektsrapportering.KAPITALINNTEKT_SKE,
+                Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                Inntektsrapportering.LONNTREKK,
+            ];
     }
 };
+export const editPeriods = (periodsList: Inntekt[], periodeIndex: number): Inntekt[] => {
+    const editedPeriod = periodsList[periodeIndex];
+    const inntektType = editedPeriod.inntektType;
+    const listOfIncomesThatCanRunInParallelWithEditedPeriode =
+        getListOfIncomesThatCanRunInParallelWithInntektType(inntektType);
 
-export const findDateGaps = (perioder, virkningstidspunkt) => {
-    const filteredAndSortedPerioder = perioder
-        .filter((periode) => periode.fraDato && isValidDate(periode.fraDato))
-        .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
+    const periodsThatCannotRunInParallel = periodsList
+        .toSpliced(periodeIndex, 1)
+        .filter(
+            (period) =>
+                !listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.inntektType as Inntektsrapportering)
+        );
+    let startIndex = periodsThatCannotRunInParallel.filter(
+        (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
+    ).length;
+    const postPeriodIndex = editedPeriod.datoTom
+        ? periodsThatCannotRunInParallel.findIndex(
+              (period) =>
+                  period.datoTom === null || (period.datoTom && isAfterDate(period.datoTom, editedPeriod.datoTom))
+          )
+        : -1;
 
-    if (!filteredAndSortedPerioder.length) return;
+    let deleteCount =
+        postPeriodIndex === -1 ? periodsThatCannotRunInParallel.length - startIndex : postPeriodIndex - startIndex;
+    const prevPeriodIndex = startIndex ? startIndex - 1 : 0;
+    const prevPeriod = startIndex ? periodsThatCannotRunInParallel[prevPeriodIndex] : undefined;
+    const postPeriod = postPeriodIndex !== -1 ? periodsThatCannotRunInParallel[postPeriodIndex] : undefined;
+    const existingPeriodCoversWholeEditedPeriod = prevPeriodIndex === postPeriodIndex;
 
-    const gaps = [];
-    const today = new Date();
-
-    filteredAndSortedPerioder.forEach((periode, i) => {
-        const prevTilDato = i === 0 ? virkningstidspunkt : filteredAndSortedPerioder[i - 1].tilDato;
-        const currFraDato = new Date(filteredAndSortedPerioder[i].fraDato);
-        if (prevTilDato !== null && currFraDato.getTime() - new Date(prevTilDato).getTime() > 86400000) {
-            const gapFrom = new Date(prevTilDato.getTime() + 86400000);
-            gaps.push({ fra: gapFrom.toLocaleDateString(), til: currFraDato.toLocaleDateString() });
-        }
-    });
-
-    const lastToDate = filteredAndSortedPerioder[filteredAndSortedPerioder.length - 1].tilDato;
-    if (lastToDate !== null && today.getTime() - new Date(lastToDate).getTime() > 86400000) {
-        const gapFrom = new Date(lastToDate.getTime() + 86400000);
-        gaps.push({ fra: gapFrom.toLocaleDateString(), til: today.toLocaleDateString() });
+    if (periodeIndex && existingPeriodCoversWholeEditedPeriod) {
+        return periodsThatCannotRunInParallel;
     }
-    return gaps;
+
+    if (prevPeriod) {
+        startIndex -= 1;
+        deleteCount += 1;
+        editedPeriod.datoFom = prevPeriod.datoFom;
+    }
+
+    if (postPeriod) {
+        deleteCount += 1;
+        editedPeriod.datoTom = postPeriod.datoTom;
+    }
+
+    const updatedPeriodsOfSameInntektType = periodsThatCannotRunInParallel.toSpliced(
+        startIndex,
+        deleteCount,
+        editedPeriod
+    );
+
+    return periodsList
+        .filter((period) =>
+            listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.inntektType as Inntektsrapportering)
+        )
+        .concat(updatedPeriodsOfSameInntektType)
+        .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 };
 
 export const checkOverlappingPeriods = (perioder) => {
@@ -359,128 +356,4 @@ export const getOverlappingInntektPerioder = (perioder) => {
     });
 
     return overlappingPeriods;
-};
-
-export interface InntektOpplysninger {
-    inntekt: { ident: string; summertAarsinntektListe: SummertArsinntekt[] }[];
-    utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
-    barnetillegg: BarnetilleggDto[];
-}
-
-export const compareArbeidsforholdOpplysninger = (
-    savedArbeidsforhold: ArbeidsforholdGrunnlagDto[],
-    latestArbeidsforhold: ArbeidsforholdGrunnlagDto[]
-) => {
-    const changedLog = [];
-
-    const arbeidsforholdIdenter = Array.from(new Set(savedArbeidsforhold.map((a) => a.partPersonId)));
-    arbeidsforholdIdenter.forEach((ident) => {
-        const saved = savedArbeidsforhold.filter((saved) => saved.partPersonId == ident);
-        const latest = latestArbeidsforhold.filter((af) => af.partPersonId == ident);
-        if (saved?.length !== latest?.length) {
-            changedLog.push(`Antall arbeidsforhold for ${ident} har blitt endret`);
-        } else {
-            saved.forEach((savedArbeidsforhold, index) => {
-                const periodeFraLatestOpplysninger = latest[index];
-                if (periodeFraLatestOpplysninger.sluttdato !== savedArbeidsforhold.sluttdato) {
-                    changedLog.push(
-                        `Sluttdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedArbeidsforhold.sluttdato} til ${periodeFraLatestOpplysninger.sluttdato} `
-                    );
-                }
-                if (periodeFraLatestOpplysninger.startdato !== savedArbeidsforhold.startdato) {
-                    changedLog.push(
-                        `Startdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
-                    );
-                }
-
-                const savedListe = savedArbeidsforhold.ansettelsesdetaljerListe ?? [];
-                if (periodeFraLatestOpplysninger.ansettelsesdetaljerListe.length !== savedListe.length) {
-                    changedLog.push(
-                        `Ansettelsesdetaljer fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
-                    );
-                } else {
-                    periodeFraLatestOpplysninger.ansettelsesdetaljerListe.forEach((detalj, index) => {
-                        const savedAnsettelsesdetaljer = savedListe[index];
-                        if (savedAnsettelsesdetaljer.avtaltStillingsprosent !== detalj.avtaltStillingsprosent) {
-                            changedLog.push(
-                                `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}%`
-                            );
-                        }
-                    });
-                }
-            });
-        }
-    });
-    return changedLog;
-};
-export const compareOpplysninger = (
-    savedOpplysninger: InntektOpplysninger,
-    latestOpplysninger: InntektOpplysninger
-) => {
-    const changedLog = [];
-
-    savedOpplysninger.inntekt.forEach((personInntekt) => {
-        const inntektListeInLatestOpplysninger = latestOpplysninger.inntekt.find(
-            (i) => personInntekt.ident === i.ident
-        );
-
-        if (
-            inntektListeInLatestOpplysninger.summertAarsinntektListe.length >
-            personInntekt.summertAarsinntektListe.length
-        ) {
-            changedLog.push(
-                `En eller flere inntekt perioder har blitt lagt til rolle med ident - ${personInntekt.ident}`
-            );
-        }
-
-        if (
-            inntektListeInLatestOpplysninger.summertAarsinntektListe.length <
-            personInntekt.summertAarsinntektListe.length
-        ) {
-            changedLog.push(
-                `Det er minst en inntekt som legges til grunn mindre for person med ident - ${personInntekt.ident}`
-            );
-        }
-
-        personInntekt.summertAarsinntektListe.forEach((summertAarsinntekt) => {
-            const summertAarsinntektFraLatestOpplysninger =
-                inntektListeInLatestOpplysninger.summertAarsinntektListe.find(
-                    (aarsInntekt) => aarsInntekt.visningsnavn === summertAarsinntekt.visningsnavn
-                );
-            if (summertAarsinntektFraLatestOpplysninger) {
-                if (summertAarsinntektFraLatestOpplysninger.sumInntekt !== summertAarsinntekt.sumInntekt) {
-                    changedLog.push(
-                        `Sum for ${summertAarsinntekt.visningsnavn} har blitt endret for rolle med ident - ${personInntekt.ident} fra ${summertAarsinntekt.sumInntekt} til ${summertAarsinntektFraLatestOpplysninger.sumInntekt}`
-                    );
-                }
-            }
-        });
-    });
-
-    if (savedOpplysninger.utvidetbarnetrygd.length !== latestOpplysninger.utvidetbarnetrygd.length) {
-        changedLog.push(`Antall utvidet barnetrygd perioder har blitt endret`);
-    } else {
-        savedOpplysninger.utvidetbarnetrygd.forEach((utvidetbarnetrygd, index) => {
-            const utvidetbarnetrygdInLatestOpplysninger = latestOpplysninger.utvidetbarnetrygd[index];
-
-            if (utvidetbarnetrygdInLatestOpplysninger) {
-                if (utvidetbarnetrygd.belop !== utvidetbarnetrygdInLatestOpplysninger.belop) {
-                    changedLog.push(`Beløp for en eller flere perioder har blitt endret`);
-                }
-            }
-        });
-    }
-
-    if (savedOpplysninger.barnetillegg.length !== latestOpplysninger.barnetillegg.length) {
-        changedLog.push("Antall barnetillegg perioder har blitt endret");
-    } else {
-        savedOpplysninger.barnetillegg.forEach((periode, index) => {
-            const periodeFraLatestOpplysninger = latestOpplysninger.barnetillegg[index];
-            if (periodeFraLatestOpplysninger.barnetillegg === periode.barnetillegg) {
-                changedLog.push("Belop for en eller flere barnetillegg perioder har blitt endret");
-            }
-        });
-    }
-
-    return changedLog;
 };

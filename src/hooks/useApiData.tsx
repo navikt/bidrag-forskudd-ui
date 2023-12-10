@@ -14,6 +14,7 @@ import { useCallback } from "react";
 import {
     AddOpplysningerRequest,
     BehandlingDto,
+    BehandlingDtoV2,
     GrunnlagsdataDto,
     OppdaterBehandlingRequest,
     OpplysningerType,
@@ -234,6 +235,19 @@ export const useGetBehandling = (): BehandlingDto => {
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
+            return data;
+        },
+        staleTime: Infinity,
+    });
+    return behandling;
+};
+
+export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
+    const { behandlingId } = useForskudd();
+    const { data: behandling } = useSuspenseQuery({
+        queryKey: QueryKeys.behandling(behandlingId),
+        queryFn: async (): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
             return data;
         },
         staleTime: Infinity,

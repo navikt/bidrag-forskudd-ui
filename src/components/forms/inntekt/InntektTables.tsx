@@ -1,20 +1,22 @@
-import { InformationSquareIcon, TrashIcon } from "@navikt/aksel-icons";
+import { FloppydiskIcon, InformationSquareIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, getYearFromDate, isValidDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, getYearFromDate, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { checkOverlappingPeriods, findDateGaps, getOverlappingInntektPerioder } from "../helpers/inntektFormHelpers";
+import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
@@ -104,25 +106,48 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
         />
     );
 
-const Periode = ({ item, index, ident, datepicker }) => {
-    const { control } = useFormContext<InntektFormValues>();
-    const value = useWatch({
-        control,
-        name: `inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`,
-    });
+const EditOrSaveButton = ({ index, editableRow, onEditRow, onSaveRow }) =>
+    editableRow === index ? (
+        <Button
+            type="button"
+            onClick={() => onSaveRow(index)}
+            icon={<FloppydiskIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    ) : (
+        <Button
+            type="button"
+            onClick={() => onEditRow(index)}
+            icon={<PencilIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    );
 
-    return <div className={`${value || !item.fraGrunnlag ? "" : "hidden"} min-w-[160px]`}>{datepicker}</div>;
+const Periode = ({ index, value, editableRow, datepicker }) => {
+    return editableRow === index ? (
+        <div className="min-w-[160px]">{datepicker}</div>
+    ) : (
+        <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
+            {value && DateToDDMMYYYYString(dateOrNull(value))}
+        </BodyShort>
+    );
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const {
         virkningstidspunkt: { virkningsdato },
     } = useGetBehandling();
+    const { setErrorModalOpen, setErrorMessage, inntektFormValues, setInntektFormValues } = useForskudd();
+    const [editableRow, setEditableRow] = useState(undefined);
+    const saveInntekt = useOnSaveInntekt();
     const {
         control,
+        getFieldState,
         getValues,
         setError,
-        clearErrors,
+        setValue,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const inntekteneSomLeggesTilGrunnField = useFieldArray({
@@ -134,71 +159,23 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
-    useEffect(() => {
-        validatePeriods();
-    }, [watchFieldArray]);
-
     const handleOnSelect = (value: boolean, index: number) => {
-        console.log(value, index);
-        if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
-            if (inntekteneSomLeggesTilGrunn.length) {
-                // TODO implement logic ones it is documented with new income types
-                // syncDates(
-                //     value,
-                //     inntekteneSomLeggesTilGrunn,
-                //     ident,
-                //     index,
-                //     setValue,
-                //     virkningstidspunkt,
-                //     setError,
-                //     clearErrors
-                // );
-            }
-        }
+        const periodeValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+        const updatedValues = periodeValues.toSpliced(index, 1, {
+            ...periodeValues[index],
+            taMed: value,
+        });
+        updatedAndSave(updatedValues);
     };
 
-    const validatePeriods = () => {
-        if (isValidDate(virkningstidspunkt)) {
-            const inntekteneSomLeggesTilGrunn = getValues(`inntekteneSomLeggesTilGrunn.${ident}`)?.filter(
-                (inntekt) => inntekt.taMed
-            );
-
-            if (!inntekteneSomLeggesTilGrunn?.length) {
-                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}`);
-                return;
-            }
-            const dateGaps = findDateGaps(inntekteneSomLeggesTilGrunn, virkningstidspunkt);
-            const overlappingPerioder = getOverlappingInntektPerioder(inntekteneSomLeggesTilGrunn);
-            let types = {};
-
-            if (dateGaps?.length) {
-                const message = `Mangler inntekter for ${dateGaps.length > 1 ? "perioder" : "periode"}: ${dateGaps.map(
-                    (gap) => ` ${gap.fra} - ${gap.til}`
-                )}`;
-                types = { ...types, periodGaps: message };
-            }
-
-            if (overlappingPerioder?.length) {
-                types = { ...types, overlappingPerioder: JSON.stringify(overlappingPerioder) };
-            }
-            if (Object.keys(types).length) {
-                setError(`inntekteneSomLeggesTilGrunn.${ident}`, { ...errors.inntekteneSomLeggesTilGrunn, types });
-            }
-            if (!dateGaps?.length) {
-                // @ts-ignore
-                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.types.periodGaps`);
-            }
-            if (!overlappingPerioder?.length) {
-                // @ts-ignore
-                clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.types.overlappingPerioder`);
-            }
+    const handleOnDelete = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            const perioderValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+            // const updatedPeriods = removeAndEditPeriods(perioderValues, index);
+            updatedAndSave(perioderValues);
         }
-    };
-
-    const handleOnDelete = (index) => {
-        clearErrors(`inntekteneSomLeggesTilGrunn.${ident}.${index}`);
-        inntekteneSomLeggesTilGrunnField.remove(index);
     };
 
     const controlledFields = inntekteneSomLeggesTilGrunnField.fields.map((field, index) => {
@@ -209,15 +186,62 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     });
 
     const addPeriode = () => {
-        inntekteneSomLeggesTilGrunnField.append({
-            datoFom: null,
-            datoTom: null,
-            beløp: 0,
-            inntektstype: "",
-            taMed: false,
-            fraGrunnlag: false,
-            inntektsposter: [],
+        if (checkIfAnotherRowIsEdited()) {
+            showErrorModal();
+        } else {
+            const periodeValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+            inntekteneSomLeggesTilGrunnField.append({
+                datoFom: null,
+                datoTom: null,
+                beløp: 0,
+                inntektstype: "",
+                taMed: false,
+                fraGrunnlag: false,
+                inntektsposter: [],
+            });
+            setEditableRow(periodeValues.length);
+        }
+    };
+    const updatedAndSave = (inntekter: Inntekt[]) => {
+        const updatedValues = {
+            ...inntektFormValues,
+            inntekteneSomLeggesTilGrunn: { ...inntektFormValues.inntekteneSomLeggesTilGrunn, [ident]: inntekter },
+        };
+        setInntektFormValues(updatedValues);
+        setValue(`inntekteneSomLeggesTilGrunn.${ident}`, inntekter);
+        saveInntekt(updatedValues);
+        setEditableRow(undefined);
+    };
+    const onSaveRow = (index: number) => {
+        const perioderValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+        if (perioderValues[index].datoFom === null) {
+            setError(`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`, {
+                type: "notValid",
+                message: "Dato må fylles ut",
+            });
+        }
+
+        const fieldState = getFieldState(`inntekteneSomLeggesTilGrunn.${ident}.${index}`);
+        if (!fieldState.error) {
+            updatedAndSave(editPeriods(perioderValues, index));
+        }
+    };
+    const checkIfAnotherRowIsEdited = (index?: number) => {
+        return editableRow !== undefined && Number(editableRow) !== index;
+    };
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: "Fullfør redigering",
+            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
         });
+        setErrorModalOpen(true);
+    };
+    const onEditRow = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            setEditableRow(index);
+        }
     };
 
     return (
@@ -244,7 +268,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
             )}
             {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
+                <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", "", ""]}>
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
@@ -270,9 +294,9 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                 />,
                                 <Periode
                                     key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
-                                    item={item}
+                                    value={item.datoFom}
+                                    editableRow={editableRow}
                                     index={index}
-                                    ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
@@ -288,9 +312,9 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                 />,
                                 <Periode
                                     key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
-                                    item={item}
+                                    editableRow={editableRow}
+                                    value={item.datoTom}
                                     index={index}
-                                    ident={ident}
                                     datepicker={
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
@@ -303,6 +327,13 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                             lastDayOfMonthPicker
                                         />
                                     }
+                                />,
+                                <EditOrSaveButton
+                                    key={`edit-or-save-button-${index}`}
+                                    index={index}
+                                    editableRow={editableRow}
+                                    onEditRow={onEditRow}
+                                    onSaveRow={onSaveRow}
                                 />,
                                 <DeleteButton
                                     key={`delete-button-${index}`}
