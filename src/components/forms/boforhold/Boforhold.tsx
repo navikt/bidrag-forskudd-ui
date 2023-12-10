@@ -241,12 +241,6 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (initialValues) {
-            setBoforholdFormValues(initialValues);
-        }
-    }, [initialValues]);
-
-    useEffect(() => {
         if (savedOpplysninger) {
             const changesInOpplysninger = compareOpplysninger(savedOpplysninger, opplysningerFraFolkRegistre);
 
@@ -264,6 +258,8 @@ const BoforholdsForm = () => {
                 hentetDato: toISODateString(new Date()),
             });
         }
+
+        setBoforholdFormValues(initialValues);
     }, []);
 
     const updateOpplysninger = () => {
@@ -685,8 +681,7 @@ const Perioder = ({
 
     const updatedAndSave = (updatedPeriods: HusstandsBarnPeriodeDto[]) => {
         setLastPeriodsState(boforholdFormValues.husstandsBarn[barnIndex].perioder);
-        const husstandsBarn = [...boforholdFormValues.husstandsBarn];
-        husstandsBarn.splice(barnIndex, 1, {
+        const husstandsBarn = boforholdFormValues.husstandsBarn.toSpliced(barnIndex, 1, {
             ...boforholdFormValues.husstandsBarn[barnIndex],
             perioder: updatedPeriods,
         });
