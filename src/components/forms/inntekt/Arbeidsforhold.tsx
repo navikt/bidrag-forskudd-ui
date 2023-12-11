@@ -26,7 +26,9 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
 
-    const savedOpplysninger = JSON.parse(inntektOpplysninger.data) as InntektOpplysninger;
+    const savedOpplysninger: InntektOpplysninger = inntektOpplysninger?.data
+        ? JSON.parse(inntektOpplysninger.data)
+        : {};
     const arbeidsforholdListe = savedOpplysninger.arbeidsforhold ?? arbeidsforhold.arbeidsforholdListe;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
