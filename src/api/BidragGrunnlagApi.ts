@@ -439,7 +439,7 @@ export interface HentArbeidsforholdRequest {
     sporingsinformasjon: boolean;
 }
 
-export interface Ansettelsesdetaljer {
+export interface AnsettelsesdetaljerAareg {
     /** @format double */
     antallTimerPrUke?: number;
     arbeidstidsordning?: Kodeverksentitet;
@@ -463,7 +463,7 @@ export interface Ansettelsesperiode {
 }
 
 export interface Arbeidsforhold {
-    ansettelsesdetaljer?: Ansettelsesdetaljer[];
+    ansettelsesdetaljer?: AnsettelsesdetaljerAareg[];
     ansettelsesperiode?: Ansettelsesperiode;
     arbeidssted?: Arbeidssted;
     arbeidstaker?: Arbeidstaker;
@@ -962,6 +962,80 @@ export enum GrunnlagRequestType {
 export interface HentGrunnlagRequestDto {
     /** Liste over hvilke typer grunnlag som skal hentes inn. På nivået under er personId og perioder angitt */
     grunnlagRequestDtoListe: GrunnlagRequestDto[];
+}
+
+/** Liste av ansettelsesdetaljer, med eventuell historikk */
+export interface Ansettelsesdetaljer {
+    /** Fradato for ansettelsesdetalj. År + måned */
+    periodeFra?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
+    periodeTil?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Type arbeidsforhold, Ordinaer, Maritim, Forenklet, Frilanser' */
+    arbeidsforholdType?: string;
+    /** Beskrivelse av arbeidstidsordning. Eks: 'Ikke skift' */
+    arbeidstidsordningBeskrivelse?: string;
+    /** Beskrivelse av ansettelsesform. Eks: 'Fast ansettelse' */
+    ansettelsesformBeskrivelse?: string;
+    /** Beskrivelse av yrke. Eks: 'KONTORLEDER' */
+    yrkeBeskrivelse?: string;
+    /**
+     * Avtalt antall timer i uken
+     * @format double
+     */
+    antallTimerPrUke?: number;
+    /**
+     * Avtalt stillingsprosent
+     * @format double
+     */
+    avtaltStillingsprosent?: number;
+    /**
+     * Dato for forrige endring i stillingsprosent
+     * @format date
+     */
+    sisteStillingsprosentendringDato?: string;
+    /**
+     * Dato for forrige lønnsendring
+     * @format date
+     */
+    sisteLønnsendringDato?: string;
 }
 
 export interface ArbeidsforholdDto {
@@ -1520,7 +1594,7 @@ export class HttpClient<SecurityDataType = unknown> {
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
         this.instance = axios.create({
             ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag.intern.dev.nav.no",
+            baseURL: axiosConfig.baseURL || "https://bidrag-grunnlag-feature.intern.dev.nav.no",
         });
         this.secure = secure;
         this.format = format;
@@ -1610,7 +1684,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-grunnlag
  * @version v1
- * @baseUrl https://bidrag-grunnlag.intern.dev.nav.no
+ * @baseUrl https://bidrag-grunnlag-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     integrasjoner = {

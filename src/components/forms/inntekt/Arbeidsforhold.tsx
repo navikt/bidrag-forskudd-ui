@@ -1,52 +1,86 @@
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { BodyShort, Label, Link } from "@navikt/ds-react";
+import { capitalize } from "@navikt/bidrag-ui-common";
+import { Label } from "@navikt/ds-react";
 import React from "react";
 
-import { useGetArbeidsforhold } from "../../../__mocks__/mocksForMissingEndpoints/useMockApi";
+import { OpplysningerType } from "../../../api/BidragBehandlingApi";
+import { ArbeidsforholdDto } from "../../../api/BidragGrunnlagApi";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { DateToDDMMYYYYString } from "../../../utils/date-utils";
-import { FlexRow } from "../../layout/grid/FlexRow";
+import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
+import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
+import { InntektOpplysninger } from "../helpers/inntektFormHelpers";
+import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
-export const Arbeidsforhold = () => {
+interface ArbeidsforholdTabledata {
+    periodeFra: string;
+    periodeTil?: string;
+    arbeidsgivernavn: string;
+    sisteLønnsendring: string;
+    stillingsprosent: string;
+}
+
+type ArbeidsforholdProps = {
+    ident: string;
+};
+export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { behandlingId } = useForskudd();
-    const { data: arbeidsforholder } = useGetArbeidsforhold(behandlingId.toString());
+    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
 
+    const savedOpplysninger: InntektOpplysninger = inntektOpplysninger?.data
+        ? JSON.parse(inntektOpplysninger.data)
+        : {};
+    const arbeidsforholdListe = savedOpplysninger.arbeidsforhold ?? arbeidsforhold.arbeidsforholdListe;
+
+    const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (
         <div className="grid gap-y-2">
             <div className="inline-flex items-center gap-x-4">
                 <Label size="small">Nåværende arbeidsforhold</Label>
-                <Link href="src/components/forms#" onClick={() => {}} className="font-bold">
-                    AA-register <ExternalLinkIcon aria-hidden />
-                </Link>
+                <ArbeidsforholdLink ident={ident} />
             </div>
-            {arbeidsforholder.map((arbeidsforhold) => (
-                <FlexRow
-                    key={`${arbeidsforhold.periode.fraDato}-${arbeidsforhold.periode.tilDato}`}
-                    className="gap-x-12"
-                >
-                    <div>
-                        <Label size="small">Periode</Label>
-                        <BodyShort size="small">
-                            {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.fraDato))} -{" "}
-                            {DateToDDMMYYYYString(new Date(arbeidsforhold.periode.tilDato))}
-                        </BodyShort>
-                    </div>
-                    <div>
-                        <Label size="small">Arbeidsgiver</Label>
-                        <BodyShort size="small">{arbeidsforhold.arbeidsgiverNavn}</BodyShort>
-                    </div>
-                    <div>
-                        <Label size="small">Stilling</Label>
-                        <BodyShort size="small">{arbeidsforhold.stillingsprosent}</BodyShort>
-                    </div>
-                    <div>
-                        <Label size="small">Lønnsendring</Label>
-                        <BodyShort size="small">
-                            {DateToDDMMYYYYString(new Date(arbeidsforhold.sisteLoennsendring))}
-                        </BodyShort>
-                    </div>
-                </FlexRow>
-            ))}
+            <table>
+                <thead>
+                    <td>Periode</td>
+                    <td>Arbeidsgiver</td>
+                    <td>Stilling</td>
+                    <td>Lønnsendring</td>
+                </thead>
+                <tbody>
+                    {arbeidsforholdTableData.map((arbeidsforhold) => (
+                        <tr>
+                            <td>
+                                {arbeidsforhold.periodeFra} - {arbeidsforhold.periodeTil}
+                            </td>
+                            <td>{arbeidsforhold.arbeidsgivernavn}</td>
+                            <td>{arbeidsforhold.stillingsprosent}</td>
+                            <td>{arbeidsforhold.sisteLønnsendring}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
+
+function mapToTabledata(arbeidsforhold: ArbeidsforholdDto): ArbeidsforholdTabledata {
+    const sisteAnsettelsesDetalj =
+        arbeidsforhold.ansettelsesdetaljer.length > 0
+            ? arbeidsforhold.ansettelsesdetaljer.sort((a, b) =>
+                  new Date(a.periodeFra as string) > new Date(b.periodeFra as string) ? 1 : -1
+              )[0]
+            : null;
+    return {
+        periodeFra: ISODateTimeStringToDDMMYYYYString(arbeidsforhold.startdato),
+        periodeTil:
+            arbeidsforhold.sluttdato == null ? null : ISODateTimeStringToDDMMYYYYString(arbeidsforhold.sluttdato),
+        arbeidsgivernavn: capitalize(arbeidsforhold.arbeidsgiverNavn),
+        sisteLønnsendring:
+            sisteAnsettelsesDetalj.sisteLønnsendringDato != null
+                ? ISODateTimeStringToDDMMYYYYString(sisteAnsettelsesDetalj.sisteLønnsendringDato)
+                : "-",
+        stillingsprosent:
+            sisteAnsettelsesDetalj.avtaltStillingsprosent != null
+                ? sisteAnsettelsesDetalj.avtaltStillingsprosent + "%"
+                : "-",
+    };
+}
