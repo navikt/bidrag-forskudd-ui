@@ -10,4 +10,5 @@ export enum ForskuddBeregningKodeAarsak {
     PF = "Tidligere feilaktig avslag",
     EF = "3 måneder tilbake",
     FF = "3 års regelen",
+    PA = "Privat avtale",
 }

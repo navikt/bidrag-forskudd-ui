@@ -137,7 +137,7 @@ const Main = ({
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsdato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
 
     return (
@@ -225,8 +225,8 @@ const BoforholdsForm = () => {
         [grunnlagspakke.husstandmedlemmerOgEgneBarnListe, grunnlagspakke.sivilstandListe]
     );
     const virkningsOrSoktFraDato = useMemo(
-        () => dateOrNull(virkningstidspunktValues?.virkningsDato) ?? dateOrNull(behandling?.datoFom),
-        [virkningstidspunktValues?.virkningsDato, behandling?.datoFom]
+        () => dateOrNull(virkningstidspunktValues?.virkningsdato) ?? dateOrNull(behandling?.datoFom),
+        [virkningstidspunktValues?.virkningsdato, behandling?.datoFom]
     );
     const initialValues = useMemo(
         () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
