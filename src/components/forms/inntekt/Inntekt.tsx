@@ -6,7 +6,6 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { OpplysningerDto, OpplysningerType, RolleDto, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
-import { NOTAT_FIELDS } from "../../../constants/notatFields";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -17,6 +16,7 @@ import {
     useGetBidragInntektQueries,
     useGetOpplysninger,
     useGrunnlagspakke,
+    useHentArbeidsforhold,
     useHentInntekter,
     useUpdateInntekter,
 } from "../../../hooks/useApiData";
@@ -185,12 +185,12 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const channel = new BroadcastChannel("inntekter");
     const { behandlingId } = useForskudd();
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: inntekter } = useHentInntekter(behandlingId);
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
@@ -225,19 +225,9 @@ const InntektForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch((value, { name }) => {
+        const { unsubscribe } = useFormMethods.watch(() => {
             if (useFormMethods.formState.isDirty) {
                 debouncedOnSave();
-
-                const field = name?.split(".")[0];
-                if (NOTAT_FIELDS.includes(field)) {
-                    channel.postMessage(
-                        JSON.stringify({
-                            field,
-                            value: value[field],
-                        })
-                    );
-                }
 
                 if (!inntektOpplysninger) {
                     saveOpplysninger.mutate({
@@ -255,6 +245,7 @@ const InntektForm = () => {
                             })),
                             utvidetbarnetrygd: grunnlagspakke.ubstListe,
                             barnetillegg: grunnlagspakke.barnetilleggListe,
+                            arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
                         }),
                         hentetDato: toISODateString(new Date()),
                     });
@@ -275,6 +266,7 @@ const InntektForm = () => {
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
+                arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
             });
 
             if (changesInOpplysninger.length) {
@@ -295,6 +287,7 @@ const InntektForm = () => {
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
+                arbeidsforhold: arbeidsforhold.arbeidsforholdListe,
             }),
             hentetDato: toISODateString(new Date()),
         });

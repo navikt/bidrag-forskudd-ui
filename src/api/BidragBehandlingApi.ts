@@ -1454,7 +1454,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          */
         hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
             this.request<NotatDto, any>({
-                path: `/api/notat/${behandlingId}`,
+                path: `/api/v1/notat/${behandlingId}`,
                 method: "GET",
                 secure: true,
                 format: "json",

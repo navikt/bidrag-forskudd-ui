@@ -2,6 +2,7 @@ import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import { InntektDto, InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
 import {
+    ArbeidsforholdDto,
     BarnetilleggDto,
     HentGrunnlagspakkeDto,
     UtvidetBarnetrygdOgSmaabarnstilleggDto,
@@ -349,6 +350,7 @@ export interface InntektOpplysninger {
     inntekt: { ident: string; summertAarsinntektListe: SummertArsinntekt[] }[];
     utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
     barnetillegg: BarnetilleggDto[];
+    arbeidsforhold: ArbeidsforholdDto[];
 }
 export const compareOpplysninger = (
     savedOpplysninger: InntektOpplysninger,
@@ -415,6 +417,42 @@ export const compareOpplysninger = (
             const periodeFraLatestOpplysninger = latestOpplysninger.barnetillegg[index];
             if (periodeFraLatestOpplysninger.belopBrutto === periode.belopBrutto) {
                 changedLog.push("Belop for en eller flere barnetillegg perioder har blitt endret");
+            }
+        });
+    }
+
+    if (savedOpplysninger.arbeidsforhold?.length !== latestOpplysninger.arbeidsforhold.length) {
+        changedLog.push("Antall arbeidsforhold har blitt endret");
+    } else {
+        savedOpplysninger.arbeidsforhold.forEach((savedArbeidsforhold, index) => {
+            const periodeFraLatestOpplysninger = latestOpplysninger.arbeidsforhold[index];
+            if (periodeFraLatestOpplysninger.sluttdato !== savedArbeidsforhold.sluttdato) {
+                changedLog.push(
+                    `Sluttdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
+                );
+            }
+            if (periodeFraLatestOpplysninger.startdato !== savedArbeidsforhold.startdato) {
+                changedLog.push(
+                    `Startdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
+                );
+            }
+
+            if (
+                periodeFraLatestOpplysninger.ansettelsesdetaljer.length !==
+                savedArbeidsforhold.ansettelsesdetaljer.length
+            ) {
+                changedLog.push(
+                    `Ansettelsesdetaljer fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
+                );
+            } else {
+                periodeFraLatestOpplysninger.ansettelsesdetaljer.forEach((detalj, index) => {
+                    const savedAnsettelsesdetaljer = savedArbeidsforhold.ansettelsesdetaljer[index];
+                    if (savedAnsettelsesdetaljer.avtaltStillingsprosent !== detalj.avtaltStillingsprosent) {
+                        changedLog.push(
+                            `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}`
+                        );
+                    }
+                });
             }
         });
     }
