@@ -439,17 +439,20 @@ export interface HentArbeidsforholdRequest {
     sporingsinformasjon: boolean;
 }
 
-export interface Ansettelsesdetaljer {
+export interface AnsettelsesdetaljerAareg {
     /** @format double */
-    periodeFra?: string;
-    periodeTil?: string;
-    arbeidsforholdType?: string;
-    arbeidstidsordningBeskrivelse?: string;
-    ansettelsesformBeskrivelse?: string;
     antallTimerPrUke?: number;
+    arbeidstidsordning?: Kodeverksentitet;
+    ansettelsesform?: Kodeverksentitet;
+    /** @format double */
     avtaltStillingsprosent?: number;
-    sisteStillingsprosentendringDato?: string;
-    sisteLønnsendringDato?: string;
+    rapporteringsmaaneder?: Rapporteringsmaaneder;
+    type?: string;
+    yrke?: Kodeverksentitet;
+    /** @format date */
+    sisteStillingsprosentendring?: string;
+    /** @format date */
+    sisteLoennsendring?: string;
 }
 
 export interface Ansettelsesperiode {
@@ -460,7 +463,7 @@ export interface Ansettelsesperiode {
 }
 
 export interface Arbeidsforhold {
-    ansettelsesdetaljer?: Ansettelsesdetaljer[];
+    ansettelsesdetaljer?: AnsettelsesdetaljerAareg[];
     ansettelsesperiode?: Ansettelsesperiode;
     arbeidssted?: Arbeidssted;
     arbeidstaker?: Arbeidstaker;
@@ -959,6 +962,80 @@ export enum GrunnlagRequestType {
 export interface HentGrunnlagRequestDto {
     /** Liste over hvilke typer grunnlag som skal hentes inn. På nivået under er personId og perioder angitt */
     grunnlagRequestDtoListe: GrunnlagRequestDto[];
+}
+
+/** Liste av ansettelsesdetaljer, med eventuell historikk */
+export interface Ansettelsesdetaljer {
+    /** Fradato for ansettelsesdetalj. År + måned */
+    periodeFra?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
+    periodeTil?: {
+        /** @format int32 */
+        year?: number;
+        month?:
+            | "JANUARY"
+            | "FEBRUARY"
+            | "MARCH"
+            | "APRIL"
+            | "MAY"
+            | "JUNE"
+            | "JULY"
+            | "AUGUST"
+            | "SEPTEMBER"
+            | "OCTOBER"
+            | "NOVEMBER"
+            | "DECEMBER";
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Type arbeidsforhold, Ordinaer, Maritim, Forenklet, Frilanser' */
+    arbeidsforholdType?: string;
+    /** Beskrivelse av arbeidstidsordning. Eks: 'Ikke skift' */
+    arbeidstidsordningBeskrivelse?: string;
+    /** Beskrivelse av ansettelsesform. Eks: 'Fast ansettelse' */
+    ansettelsesformBeskrivelse?: string;
+    /** Beskrivelse av yrke. Eks: 'KONTORLEDER' */
+    yrkeBeskrivelse?: string;
+    /**
+     * Avtalt antall timer i uken
+     * @format double
+     */
+    antallTimerPrUke?: number;
+    /**
+     * Avtalt stillingsprosent
+     * @format double
+     */
+    avtaltStillingsprosent?: number;
+    /**
+     * Dato for forrige endring i stillingsprosent
+     * @format date
+     */
+    sisteStillingsprosentendringDato?: string;
+    /**
+     * Dato for forrige lønnsendring
+     * @format date
+     */
+    sisteLønnsendringDato?: string;
 }
 
 export interface ArbeidsforholdDto {

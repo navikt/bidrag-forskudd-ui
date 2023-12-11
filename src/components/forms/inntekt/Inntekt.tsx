@@ -1,6 +1,6 @@
-import { ClockDashedIcon, ExternalLinkIcon } from "@navikt/aksel-icons";
+import { ClockDashedIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ExpansionCard, Heading, Link, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -34,11 +34,12 @@ import {
     getPerioderFraBidragInntekt,
 } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
+import AinntektLink from "./AinntektLink";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { InntektChart } from "./InntektChart";
 import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
 
-const InntektHeader = ({ inntekt }: { inntekt: SummertManedsinntekt[] }) => (
+const InntektHeader = ({ inntekt, ident }: { inntekt: SummertManedsinntekt[]; ident: string }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
         <InntektChart inntekt={inntekt} />
         <ExpansionCard aria-label="default-demo" size="small">
@@ -47,7 +48,7 @@ const InntektHeader = ({ inntekt }: { inntekt: SummertManedsinntekt[] }) => (
             </ExpansionCard.Header>
             <ExpansionCard.Content>
                 <QueryErrorWrapper>
-                    <Arbeidsforhold />
+                    <Arbeidsforhold ident={ident} />
                 </QueryErrorWrapper>
             </ExpansionCard.Content>
         </ExpansionCard>
@@ -116,7 +117,7 @@ const Main = ({
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
                             <div className="mt-12">
                                 {inntekt.length > 0 ? (
-                                    <InntektHeader inntekt={inntekt} />
+                                    <InntektHeader inntekt={inntekt} ident={rolle.ident} />
                                 ) : (
                                     <Alert variant="info">
                                         <BodyShort>Ingen inntekt funnet</BodyShort>
@@ -128,11 +129,7 @@ const Main = ({
                                     <Heading level="3" size="medium">
                                         Inntektene som legges til grunn
                                     </Heading>
-                                    {inntekt.length > 0 && (
-                                        <Link href="" target="_blank" className="font-bold">
-                                            A-inntekt <ExternalLinkIcon aria-hidden />
-                                        </Link>
-                                    )}
+                                    {inntekt.length > 0 && <AinntektLink ident={rolle.ident} />}
                                 </div>
                                 <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
                             </div>

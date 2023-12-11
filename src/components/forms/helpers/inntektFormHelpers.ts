@@ -449,7 +449,7 @@ export const compareOpplysninger = (
                     const savedAnsettelsesdetaljer = savedArbeidsforhold.ansettelsesdetaljer[index];
                     if (savedAnsettelsesdetaljer.avtaltStillingsprosent !== detalj.avtaltStillingsprosent) {
                         changedLog.push(
-                            `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}`
+                            `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}%`
                         );
                     }
                 });

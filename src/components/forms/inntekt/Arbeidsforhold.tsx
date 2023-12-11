@@ -1,6 +1,5 @@
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { capitalize } from "@navikt/bidrag-ui-common";
-import { Label, Link } from "@navikt/ds-react";
+import { Label } from "@navikt/ds-react";
 import React from "react";
 
 import { OpplysningerType } from "../../../api/BidragBehandlingApi";
@@ -9,6 +8,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
 import { InntektOpplysninger } from "../helpers/inntektFormHelpers";
+import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
 interface ArbeidsforholdTabledata {
     periodeFra: string;
@@ -17,7 +17,11 @@ interface ArbeidsforholdTabledata {
     sisteLønnsendring: string;
     stillingsprosent: string;
 }
-export const Arbeidsforhold = () => {
+
+type ArbeidsforholdProps = {
+    ident: string;
+};
+export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { behandlingId } = useForskudd();
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
     const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
@@ -25,14 +29,12 @@ export const Arbeidsforhold = () => {
     const savedOpplysninger = JSON.parse(inntektOpplysninger.data) as InntektOpplysninger;
     const arbeidsforholdListe = savedOpplysninger.arbeidsforhold ?? arbeidsforhold.arbeidsforholdListe;
 
-    const arbeidsforholdTableData = arbeidsforholdListe.map(mapToTabledata);
+    const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (
         <div className="grid gap-y-2">
             <div className="inline-flex items-center gap-x-4">
                 <Label size="small">Nåværende arbeidsforhold</Label>
-                <Link href="src/components/forms#" onClick={() => {}} className="font-bold">
-                    AA-register <ExternalLinkIcon aria-hidden />
-                </Link>
+                <ArbeidsforholdLink ident={ident} />
             </div>
             <table>
                 <thead>
@@ -62,7 +64,7 @@ function mapToTabledata(arbeidsforhold: ArbeidsforholdDto): ArbeidsforholdTabled
     const sisteAnsettelsesDetalj =
         arbeidsforhold.ansettelsesdetaljer.length > 0
             ? arbeidsforhold.ansettelsesdetaljer.sort((a, b) =>
-                  new Date(a.periodeFra) > new Date(b.periodeFra) ? 1 : -1
+                  new Date(a.periodeFra as string) > new Date(b.periodeFra as string) ? 1 : -1
               )[0]
             : null;
     return {

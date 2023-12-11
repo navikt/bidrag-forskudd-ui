@@ -8,7 +8,11 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
-
+export interface ArbeidOgInntektLenkeRequest {
+    /** @format int64 */
+    behandlingId: number;
+    ident: string;
+}
 export interface Barnetillegg {
     behandling: Behandling;
     ident: string;
@@ -1477,5 +1481,43 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 format: "json",
                 ...params,
             }),
+
+              /**
+         * No description
+         *
+         * @tags arbeid-og-inntekt-controller
+         * @name ArbeidsforholdLenke
+         * @request POST:/api/v1/arbeidOgInntekt/arbeidsforhold
+         * @secure
+         */
+        arbeidsforholdLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+        this.request<string, any>({
+            path: `/api/v1/arbeidOgInntekt/arbeidsforhold`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params,
+        }),
+
+    /**
+     * No description
+     *
+     * @tags arbeid-og-inntekt-controller
+     * @name AinntektLenke
+     * @request POST:/api/v1/arbeidOgInntekt/ainntekt
+     * @secure
+     */
+    ainntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+        this.request<string, any>({
+            path: `/api/v1/arbeidOgInntekt/ainntekt`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params,
+        }),
     };
 }
