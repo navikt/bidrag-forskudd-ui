@@ -1482,42 +1482,42 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 ...params,
             }),
 
-              /**
-         * No description
+           /**
+         * @description Generer lenke for ainntekt-søk med filter for behandling og personident oppgitt i forespørsel
          *
          * @tags arbeid-og-inntekt-controller
-         * @name ArbeidsforholdLenke
-         * @request POST:/api/v1/arbeidOgInntekt/arbeidsforhold
+         * @name GenererAinntektLenke
+         * @request POST:/api/v1/arbeidoginntekt/ainntekt
          * @secure
          */
-        arbeidsforholdLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
-        this.request<string, any>({
-            path: `/api/v1/arbeidOgInntekt/arbeidsforhold`,
-            method: "POST",
-            body: data,
-            secure: true,
-            type: ContentType.Json,
-            format: "json",
-            ...params,
-        }),
+           genererAinntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+           this.request<string, any>({
+               path: `/api/v1/arbeidoginntekt/ainntekt`,
+               method: "POST",
+               body: data,
+               secure: true,
+               type: ContentType.Json,
+               format: "json",
+               ...params,
+           }),
 
-    /**
-     * No description
-     *
-     * @tags arbeid-og-inntekt-controller
-     * @name AinntektLenke
-     * @request POST:/api/v1/arbeidOgInntekt/ainntekt
-     * @secure
-     */
-    ainntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
-        this.request<string, any>({
-            path: `/api/v1/arbeidOgInntekt/ainntekt`,
-            method: "POST",
-            body: data,
-            secure: true,
-            type: ContentType.Json,
-            format: "json",
-            ...params,
-        }),
-    };
+       /**
+        * @description Generer lenke for aareg-søk for personident oppgitt i forespørsel
+        *
+        * @tags arbeid-og-inntekt-controller
+        * @name GenererAaregLenke
+        * @request POST:/api/v1/arbeidoginntekt/aareg
+        * @secure
+        */
+       genererAaregLenke: (data: string, params: RequestParams = {}) =>
+           this.request<string, any>({
+               path: `/api/v1/arbeidoginntekt/aareg`,
+               method: "POST",
+               body: data,
+               secure: true,
+               type: ContentType.Json,
+               format: "json",
+               ...params,
+           }),
+        }
 }
