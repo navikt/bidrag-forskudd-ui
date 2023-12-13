@@ -252,6 +252,7 @@ const BoforholdsForm = () => {
 
         if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
             lagreAlleOpplysninger();
+            updateBoforhold.mutate(initialValues);
         }
 
         isSavedInitialOpplysninger.current = true;

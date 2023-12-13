@@ -226,23 +226,26 @@ const InntektForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch(() => {
-            if (useFormMethods.formState.isDirty) {
-                debouncedOnSave();
-            }
-        });
         if (!inntektOpplysninger && !isSavedInitialOpplysninger.current) {
-            lagreAlleOpplysninger();
-            onSave();
+            lagreInntektOpplysninger();
         }
 
-        if (!arbeidsforholdOpplysninger && isSavedInitialArbeidsforholdOpplysninger.current) {
+        if (!arbeidsforholdOpplysninger && !isSavedInitialArbeidsforholdOpplysninger.current) {
             lagreArbeidsforholdOpplysninger();
         }
 
         // Prevent duplicate saving of opplysninger
         isSavedInitialOpplysninger.current = true;
         isSavedInitialArbeidsforholdOpplysninger.current = true;
+    }, []);
+
+    useEffect(() => {
+        const { unsubscribe } = useFormMethods.watch(() => {
+            if (useFormMethods.formState.isDirty) {
+                debouncedOnSave();
+            }
+        });
+
         return () => unsubscribe();
     }, [useFormMethods.watch, useFormMethods.formState.isDirty]);
 
@@ -281,7 +284,7 @@ const InntektForm = () => {
             hentetDato: toISODateString(new Date()),
         });
     };
-    const lagreAlleOpplysninger = () => {
+    const lagreInntektOpplysninger = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
@@ -319,7 +322,7 @@ const InntektForm = () => {
         });
     };
     const updateOpplysninger = () => {
-        lagreAlleOpplysninger();
+        lagreInntektOpplysninger();
         lagreArbeidsforholdOpplysninger();
 
         const fieldValues = useFormMethods.getValues();

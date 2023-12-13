@@ -68,7 +68,7 @@ export const QueryKeys = {
     opplysninger: (behandlingId: number, opplysningerType: OpplysningerType) => [
         "opplysninger",
         behandlingId,
-        opplysningerType.toString(),
+        opplysningerType,
     ],
 };
 
@@ -205,6 +205,7 @@ export const useHentPersonData = (ident: string) =>
     useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
+            if (!ident) return { ident: "", visningsnavn: "Ukjent" };
             const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
             return data;
         },
