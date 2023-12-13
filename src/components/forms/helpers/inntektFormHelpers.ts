@@ -421,7 +421,8 @@ export const compareOpplysninger = (
         });
     }
 
-    const arbeidsforholdIdenter = Array.from(new Set(savedOpplysninger.arbeidsforhold.map((a) => a.partPersonId)));
+    const arbeidsforhold = savedOpplysninger.arbeidsforhold ?? [];
+    const arbeidsforholdIdenter = Array.from(new Set(arbeidsforhold.map((a) => a.partPersonId)));
     arbeidsforholdIdenter.forEach((ident) => {
         const savedArbeidsforhold = savedOpplysninger.arbeidsforhold.filter((saved) => saved.partPersonId == ident);
         const latestArbeidsforhold = latestOpplysninger.arbeidsforhold.filter((af) => af.partPersonId == ident);
