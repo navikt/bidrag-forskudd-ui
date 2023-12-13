@@ -957,7 +957,7 @@ export interface BehandlingDto {
     soknadRefId?: number;
     /** @format int64 */
     grunnlagspakkeid?: number;
-    getårsak?: ForskuddAarsakType;
+    årsak?: ForskuddAarsakType;
     virkningstidspunktBegrunnelseMedIVedtaksnotat?: string;
     virkningstidspunktBegrunnelseKunINotat?: string;
     boforholdsbegrunnelseMedIVedtaksnotat?: string;

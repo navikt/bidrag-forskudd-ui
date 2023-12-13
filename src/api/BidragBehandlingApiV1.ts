@@ -236,11 +236,6 @@ export enum Kilde {
     OFFENTLIG = "OFFENTLIG",
 }
 
-export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-    BOFORHOLD = "BOFORHOLD",
-}
-
 export interface Rolle {
     behandling: Behandling;
     rolletype: Rolletype;
@@ -333,6 +328,17 @@ export interface UtvidetBarnetrygd {
     id?: number;
 }
 
+export enum OpplysningerType {
+    INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
+    BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
+    INNTEKT = "INNTEKT",
+    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
+    HUSSTANDSMEDLEMMER = "HUSSTANDSMEDLEMMER",
+    SIVILSTAND = "SIVILSTAND",
+    BOFORHOLD = "BOFORHOLD",
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+}
+
 export interface UpdateBehandlingRequest {
     /** @format int64 */
     grunnlagspakkeId?: number;
@@ -341,7 +347,7 @@ export interface UpdateBehandlingRequest {
 export interface OppdatereVirkningstidspunktRequest {
     virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
     virkningstidspunktsbegrunnelseKunINotat?: string;
-    getårsak?: ForskuddAarsakType;
+    årsak?: ForskuddAarsakType;
     /**
      * @format date
      * @example "2025-01-25"
@@ -352,7 +358,7 @@ export interface OppdatereVirkningstidspunktRequest {
 export interface VirkningstidspunktResponse {
     virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
     virkningstidspunktsbegrunnelseKunINotat?: string;
-    getårsak?: ForskuddAarsakType;
+    årsak?: ForskuddAarsakType;
     /**
      * @format date
      * @example "2025-01-25"
@@ -970,7 +976,7 @@ export interface Virkningstidspunkt {
     søktFraDato?: {
         /** @format int32 */
         year?: number;
-        month?: Barnetillegg1;
+        month?: VirkningstidspunktMonth;
         /** @format int32 */
         monthValue?: number;
         leapYear?: boolean;
@@ -1009,7 +1015,7 @@ export interface BehandlingDto {
     soknadRefId?: number;
     /** @format int64 */
     grunnlagspakkeid?: number;
-    getårsak?: ForskuddAarsakType;
+    årsak?: ForskuddAarsakType;
     virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
     virkningstidspunktsbegrunnelseKunINotat?: string;
     boforholdsbegrunnelseIVedtakOgNotat?: string;
@@ -1046,21 +1052,6 @@ export enum ResultatBeregningKode {
 }
 
 export enum VirkningstidspunktMonth {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum Barnetillegg1 {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
     MARCH = "MARCH",
@@ -1679,16 +1670,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * No description
+         * @description Generer lenke for ainntekt-søk med filter for behandling og personident oppgitt i forespørsel
          *
          * @tags arbeid-og-inntekt-controller
-         * @name ArbeidsforholdLenke
-         * @request POST:/api/v1/arbeidOgInntekt/arbeidsforhold
+         * @name GenererAinntektLenke
+         * @request POST:/api/v1/arbeidoginntekt/ainntekt
          * @secure
          */
-        arbeidsforholdLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+        genererAinntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
             this.request<string, any>({
-                path: `/api/v1/arbeidOgInntekt/arbeidsforhold`,
+                path: `/api/v1/arbeidoginntekt/ainntekt`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1698,16 +1689,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * No description
+         * @description Generer lenke for aareg-søk for personident oppgitt i forespørsel
          *
          * @tags arbeid-og-inntekt-controller
-         * @name AinntektLenke
-         * @request POST:/api/v1/arbeidOgInntekt/ainntekt
+         * @name GenererAaregLenke
+         * @request POST:/api/v1/arbeidoginntekt/aareg
          * @secure
          */
-        ainntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+        genererAaregLenke: (data: string, params: RequestParams = {}) =>
             this.request<string, any>({
-                path: `/api/v1/arbeidOgInntekt/ainntekt`,
+                path: `/api/v1/arbeidoginntekt/aareg`,
                 method: "POST",
                 body: data,
                 secure: true,

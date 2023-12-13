@@ -13,7 +13,7 @@ import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep, behandlingId } = useForskudd();
     const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
-    const interactive = !Avslag[virkningstidspunkt?.getårsak];
+    const interactive = !Avslag[virkningstidspunkt?.årsak];
 
     return (
         <PageWrapper name="tracking-wide">

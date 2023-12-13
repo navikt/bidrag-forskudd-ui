@@ -35,14 +35,14 @@ import { ActionButtons } from "../inntekt/ActionButtons";
 const createInitialValues = (response: VirkningstidspunktResponseV1) =>
     ({
         virkningsdato: response.virkningsdato,
-        getårsak: response.getårsak ?? "",
+        årsak: response.årsak ?? "",
         virkningstidspunktsbegrunnelseIVedtakOgNotat: response.virkningstidspunktsbegrunnelseIVedtakOgNotat ?? "",
         virkningstidspunktsbegrunnelseKunINotat: response.virkningstidspunktsbegrunnelseKunINotat ?? "",
     }) as VirkningstidspunktFormValues;
 
 const createPayload = (values: VirkningstidspunktFormValues) => ({
     ...values,
-    getårsak: values.getårsak === "" ? null : values.getårsak,
+    årsak: values.årsak === "" ? null : values.årsak,
 });
 
 const Main = ({ initialValues, error }) => {
@@ -118,7 +118,7 @@ const Main = ({ initialValues, error }) => {
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField name="getårsak" label="Årsak" onSelect={onAarsakSelect}>
+                <FormControlledSelectField name="årsak" label="Årsak" onSelect={onAarsakSelect}>
                     <option value="">Velg årsak/avslag</option>
                     <optgroup label="Årsak">
                         {Object.entries(ForskuddBeregningKodeAarsak).map(([value, text]) => (
@@ -152,7 +152,7 @@ const Main = ({ initialValues, error }) => {
 const Side = () => {
     const { setActiveStep } = useForskudd();
     const useFormMethods = useFormContext();
-    const aarsak = useFormMethods.getValues("getårsak");
+    const aarsak = useFormMethods.getValues("årsak");
     const onNext = () =>
         setActiveStep(Avslag[aarsak] ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
 
@@ -189,7 +189,7 @@ const VirkningstidspunktForm = () => {
         control: useFormMethods.control,
         name: [
             "virkningsdato",
-            "getårsak",
+            "årsak",
             "virkningstidspunktsbegrunnelseIVedtakOgNotat",
             "virkningstidspunktsbegrunnelseKunINotat",
         ],

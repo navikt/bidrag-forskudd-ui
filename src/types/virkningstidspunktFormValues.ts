@@ -2,7 +2,7 @@ import { ForskuddAarsakType } from "../api/BidragBehandlingApiV1";
 
 export interface VirkningstidspunktFormValues {
     virkningsdato?: string | null;
-    getårsak: ForskuddAarsakType | "";
+    årsak: ForskuddAarsakType | "";
     virkningstidspunktsbegrunnelseIVedtakOgNotat: string;
     virkningstidspunktsbegrunnelseKunINotat: string;
 }
