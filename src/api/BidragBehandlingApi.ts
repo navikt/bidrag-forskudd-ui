@@ -290,7 +290,13 @@ export interface Utvidetbarnetrygd {
 
 export enum OpplysningerType {
     INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
+    INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
     BOFORHOLD = "BOFORHOLD",
+    INNTEKT = "INNTEKT",
+    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
+    BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
+    HUSSTANDSMEDLEMMER = "HUSSTANDSMEDLEMMER",
+    SIVILSTAND = "SIVILSTAND",
 }
 
 export interface UpdateBehandlingRequest {
@@ -1424,7 +1430,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          */
         beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
             this.request<ForskuddBeregningRespons, any>({
-                path: `/api/behandling/${behandlingId}/beregn`,
+                path: `/api/v1/behandling/${behandlingId}/beregn`,
                 method: "POST",
                 secure: true,
                 format: "json",

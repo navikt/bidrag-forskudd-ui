@@ -13,7 +13,7 @@ import {
     TextField,
     VStack,
 } from "@navikt/ds-react";
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
@@ -209,13 +209,14 @@ const Side = () => {
 
 const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
+    const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD);
+    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD_BEARBEIDET);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.BOFORHOLD);
+    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
     const { mutation: updateBoforhold } = useUpdateBoforhold(behandlingId);
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
@@ -249,27 +250,42 @@ const BoforholdsForm = () => {
             }
         }
 
-        if (!boforoholdOpplysninger) {
-            saveOpplysninger.mutate({
-                behandlingId,
-                aktiv: true,
-                opplysningerType: OpplysningerType.BOFORHOLD,
-                data: JSON.stringify(opplysningerFraFolkRegistre),
-                hentetDato: toISODateString(new Date()),
-            });
+        if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
+            lagreAlleOpplysninger();
+            updateBoforhold.mutate(initialValues);
         }
+
+        isSavedInitialOpplysninger.current = true;
 
         setBoforholdFormValues(initialValues);
     }, []);
 
-    const updateOpplysninger = () => {
+    const lagreAlleOpplysninger = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.BOFORHOLD,
+            opplysningerType: OpplysningerType.BOFORHOLD_BEARBEIDET,
             data: JSON.stringify(opplysningerFraFolkRegistre),
             hentetDato: toISODateString(new Date()),
         });
+
+        saveOpplysninger.mutate({
+            behandlingId,
+            aktiv: true,
+            opplysningerType: OpplysningerType.HUSSTANDSMEDLEMMER,
+            data: JSON.stringify(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
+            hentetDato: toISODateString(new Date()),
+        });
+        saveOpplysninger.mutate({
+            behandlingId,
+            aktiv: true,
+            opplysningerType: OpplysningerType.SIVILSTAND,
+            data: JSON.stringify(grunnlagspakke.sivilstandListe),
+            hentetDato: toISODateString(new Date()),
+        });
+    };
+    const updateOpplysninger = () => {
+        lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
         const values = {

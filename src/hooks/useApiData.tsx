@@ -205,6 +205,7 @@ export const useHentPersonData = (ident: string) =>
     useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
+            if (!ident) return { ident: "", visningsnavn: "Ukjent" };
             const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: ident });
             return data;
         },
@@ -483,7 +484,7 @@ export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagsp
     });
 };
 
-export const useAddOpplysningerData = (behandlingId: number, opplysningerType: OpplysningerType) => {
+export const useAddOpplysningerData = (behandlingId: number) => {
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
@@ -491,7 +492,7 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
             return data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.opplysninger(behandlingId, opplysningerType), data);
+            queryClient.setQueryData(QueryKeys.opplysninger(behandlingId, data.opplysningerType), data);
         },
     });
 
