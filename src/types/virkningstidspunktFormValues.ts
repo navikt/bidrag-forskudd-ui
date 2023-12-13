@@ -1,8 +1,8 @@
-import { ForskuddAarsakType } from "../api/BidragBehandlingApi";
+import { ForskuddAarsakType } from "../api/BidragBehandlingApiV1";
 
 export interface VirkningstidspunktFormValues {
-    virkningsDato?: string | null;
-    aarsak: ForskuddAarsakType | "";
-    virkningsTidspunktBegrunnelseMedIVedtakNotat: string;
-    virkningsTidspunktBegrunnelseKunINotat: string;
+    virkningsdato?: string | null;
+    årsak: ForskuddAarsakType | "";
+    virkningstidspunktsbegrunnelseIVedtakOgNotat: string;
+    virkningstidspunktsbegrunnelseKunINotat: string;
 }

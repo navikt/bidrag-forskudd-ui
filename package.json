@@ -16,7 +16,7 @@
     "api:person": "swagger-typescript-api -p https://bidrag-person-feature.dev.intern.nav.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "swagger-typescript-api -p https://bidrag-grunnlag-feature.intern.dev.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
     "api:bidragVedtak": "swagger-typescript-api -p https://bidrag-vedtak-feature.intern.dev.nav.no/v3/api-docs --axios -n BidragVedtakApi.ts -o src/api",
-    "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragBehandlingApi.ts -o src/api",
+    "api:bidragBehandling": "swagger-typescript-api -p https://bidrag-behandling-feature.intern.dev.nav.no/v3/api-docs --extract-enums --enum-names-as-values --axios -n BidragBehandlingApiV1.ts -o src/api",
     "api:bidragBehandlingQ2": "swagger-typescript-api -p https://bidrag-behandling.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragBehandlingApi.ts -o src/api",
     "api:notat": "swagger-typescript-api -p http://0.0.0.0:8580/v3/api-docs --extract-enums --axios -n BidragDokumentProduksjonApi.ts -o src/api",
     "api:bidragInntekt": "swagger-typescript-api -p https://bidrag-inntekt.intern.dev.nav.no/v3/api-docs --extract-enums --axios -n BidragInntektApi.ts -o src/api",

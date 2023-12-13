@@ -37,7 +37,7 @@ const Vedtak = () => {
     const toVisningsnavn = useVisningsnavn();
     const { data: behandling } = useGetBehandling(behandlingId);
     const personsQueries = usePersonsQueries(behandling.roller);
-    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.getårsak);
+    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.årsak);
     const { data: beregnetForskudd } = useSuspenseQuery({
         queryKey: ["beregning"],
         queryFn: () => BEHANDLING_API.api.beregnForskudd(behandlingId),
@@ -211,7 +211,7 @@ const Vedtak = () => {
                                                 -
                                             </Table.DataCell>
                                             <Table.DataCell>Avslag</Table.DataCell>
-                                            <Table.DataCell>{Avslag[behandling.getårsak]}</Table.DataCell>
+                                            <Table.DataCell>{Avslag[behandling.årsak]}</Table.DataCell>
                                         </Table.Row>
                                     </Table.Body>
                                 </Table>

@@ -130,7 +130,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         control,
         name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
-    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsDato);
+    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsdato);
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
 
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });

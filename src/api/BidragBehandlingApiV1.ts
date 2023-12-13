@@ -8,11 +8,7 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
-export interface ArbeidOgInntektLenkeRequest {
-    /** @format int64 */
-    behandlingId: number;
-    ident: string;
-}
+
 export interface Barnetillegg {
     behandling: Behandling;
     ident: string;
@@ -26,17 +22,17 @@ export interface Barnetillegg {
 }
 
 export interface Behandling {
-    behandlingType: Behandlingstype;
-    soknadType: SoknadType;
-    /** @format date-time */
+    behandlingstype: Behandlingstype;
+    soknadstype: Soknadstype;
+    /** @format date */
     datoFom: string;
-    /** @format date-time */
+    /** @format date */
     datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
+    /** @format date */
+    mottattdato: string;
     saksnummer: string;
     /** @format int64 */
-    soknadId: number;
+    soknadsid: number;
     /** @format int64 */
     soknadRefId?: number;
     behandlerEnhet: string;
@@ -44,27 +40,29 @@ export interface Behandling {
     opprettetAvNavn?: string;
     kildeapplikasjon: string;
     soknadFra: SoktAvType;
-    stonadType?: Stonadstype;
-    engangsbelopType?: Engangsbeloptype;
+    stonadstype?: Stonadstype;
+    engangsbeloptype?: Engangsbeloptype;
     /** @format int64 */
-    vedtakId?: number;
-    /** @format date-time */
-    virkningsDato?: string;
+    vedtaksid?: number;
+    /** @format date */
+    virkningsdato?: string;
     aarsak?: ForskuddAarsakType;
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
+    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
+    virkningstidspunktbegrunnelseKunINotat?: string;
+    boforholdsbegrunnelseIVedtakOgNotat?: string;
+    boforholdsbegrunnelseKunINotat?: string;
+    inntektsbegrunnelseIVedtakOgNotat?: string;
+    inntektsbegrunnelseKunINotat?: string;
     /** @format int64 */
     id?: number;
     /** @format int64 */
-    grunnlagspakkeId?: number;
+    grunnlagspakkeid?: number;
+    /** @format date-time */
+    grunnlagSistInnhentet?: string;
     /** @uniqueItems true */
     roller: Rolle[];
     /** @uniqueItems true */
-    husstandsBarn: HusstandsBarn[];
+    husstandsbarn: Husstandsbarn[];
     /** @uniqueItems true */
     inntekter: Inntekt[];
     /** @uniqueItems true */
@@ -72,9 +70,9 @@ export interface Behandling {
     /** @uniqueItems true */
     barnetillegg: Barnetillegg[];
     /** @uniqueItems true */
-    utvidetbarnetrygd: Utvidetbarnetrygd[];
+    utvidetBarnetrygd: UtvidetBarnetrygd[];
     deleted: boolean;
-    søknadsBarn: Rolle[];
+    søknadsbarn: Rolle[];
 }
 
 export enum Behandlingstype {
@@ -121,6 +119,7 @@ export enum ForskuddAarsakType {
     HF = "HF",
     BF = "BF",
     KF = "KF",
+    PA = "PA",
     QF = "QF",
     MF = "MF",
     PF = "PF",
@@ -140,37 +139,37 @@ export enum ForskuddAarsakType {
     UTENL_YTELSE = "UTENL_YTELSE",
 }
 
-export interface HusstandsBarn {
+export interface Husstandsbarn {
     behandling: Behandling;
     medISaken: boolean;
     /** @format int64 */
     id?: number;
     ident?: string;
     navn?: string;
-    /** @format date-time */
-    foedselsDato?: string;
+    /** @format date */
+    foedselsdato: string;
     /** @uniqueItems true */
-    perioder: HusstandsBarnPeriode[];
+    perioder: Husstandsbarnperiode[];
 }
 
-export interface HusstandsBarnPeriode {
-    husstandsBarn: HusstandsBarn;
-    /** @format date-time */
+export interface Husstandsbarnperiode {
+    husstandsbarn: Husstandsbarn;
+    /** @format date */
     datoFom?: string;
-    /** @format date-time */
+    /** @format date */
     datoTom?: string;
-    bostatus?: Bostatuskode;
+    bostatus: Bostatuskode;
     kilde: Kilde;
     /** @format int64 */
     id?: number;
 }
 
 export interface Inntekt {
-    inntektType?: string;
+    inntektstype: Inntektsrapportering;
     belop: number;
-    /** @format date-time */
-    datoFom?: string;
-    /** @format date-time */
+    /** @format date */
+    datoFom: string;
+    /** @format date */
     datoTom?: string;
     ident: string;
     fraGrunnlag: boolean;
@@ -179,16 +178,57 @@ export interface Inntekt {
     id?: number;
     behandling?: Behandling;
     /** @uniqueItems true */
-    inntektPostListe: InntektPostDomain[];
+    inntektsposter: Inntektspost[];
 }
 
-export interface InntektPostDomain {
+export interface Inntektspost {
     beløp: number;
     kode: string;
     visningsnavn: string;
     /** @format int64 */
     id?: number;
     inntekt?: Inntekt;
+}
+
+export enum Inntektsrapportering {
+    AINNTEKT = "AINNTEKT",
+    AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
+    AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
+    KONTANTSTOTTE = "KONTANTSTØTTE",
+    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
+    PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
+    KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
+    SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
+    LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
+    NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
+    YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
+    AAP = "AAP",
+    AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
+    BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
+    BARNS_SYKDOM = "BARNS_SYKDOM",
+    DAGPENGER = "DAGPENGER",
+    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
+    FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
+    FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
+    FODSELADOPSJON = "FØDSEL_ADOPSJON",
+    INNTEKTSOPPLYSNINGER_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
+    KAPITALINNTEKT_SKE = "KAPITALINNTEKT_SKE",
+    LIGNINGSOPPLYSNINGER_MANGLER = "LIGNINGSOPPLYSNINGER_MANGLER",
+    LIGNING_SKE = "LIGNING_SKE",
+    LONNSKE = "LØNN_SKE",
+    LONNSKEKORRIGERTBARNETILLEGG = "LØNN_SKE_KORRIGERT_BARNETILLEGG",
+    LONNTREKK = "LØNN_TREKK",
+    MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
+    NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
+    PENSJON = "PENSJON",
+    PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
+    REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
+    SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
+    SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
+    SYKEPENGER = "SYKEPENGER",
 }
 
 export enum Kilde {
@@ -198,11 +238,11 @@ export enum Kilde {
 
 export interface Rolle {
     behandling: Behandling;
-    rolleType: Rolletype;
+    rolletype: Rolletype;
     ident?: string;
-    /** @format date-time */
-    fodtDato?: string;
-    /** @format date-time */
+    /** @format date */
+    foedselsdato: string;
+    /** @format date */
     opprettetDato?: string;
     /** @format int64 */
     id?: number;
@@ -220,9 +260,9 @@ export enum Rolletype {
 
 export interface Sivilstand {
     behandling: Behandling;
-    /** @format date-time */
+    /** @format date */
     datoFom?: string;
-    /** @format date-time */
+    /** @format date */
     datoTom?: string;
     sivilstand: Sivilstandskode;
     kilde: Kilde;
@@ -237,7 +277,7 @@ export enum Sivilstandskode {
     SAMBOER = "SAMBOER",
 }
 
-export enum SoknadType {
+export enum Soknadstype {
     INDEKSREGULERING = "INDEKSREGULERING",
     ALDERSJUSTERING = "ALDERSJUSTERING",
     OPPHOR = "OPPHØR",
@@ -276,27 +316,27 @@ export enum SoktAvType {
     KONVERTERING = "KONVERTERING",
 }
 
-export interface Utvidetbarnetrygd {
+export interface UtvidetBarnetrygd {
     behandling: Behandling;
-    deltBoSted: boolean;
+    deltBosted: boolean;
     belop: number;
-    /** @format date-time */
+    /** @format date */
     datoFom?: string;
-    /** @format date-time */
+    /** @format date */
     datoTom?: string;
     /** @format int64 */
     id?: number;
 }
 
 export enum OpplysningerType {
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
     INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
-    BOFORHOLD = "BOFORHOLD",
+    BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
     INNTEKT = "INNTEKT",
     ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
-    BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
     HUSSTANDSMEDLEMMER = "HUSSTANDSMEDLEMMER",
     SIVILSTAND = "SIVILSTAND",
+    BOFORHOLD = "BOFORHOLD",
+    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
 }
 
 export interface UpdateBehandlingRequest {
@@ -304,54 +344,46 @@ export interface UpdateBehandlingRequest {
     grunnlagspakkeId?: number;
 }
 
-export interface UpdateVirkningsTidspunktRequest {
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    aarsak?: ForskuddAarsakType;
+export interface OppdatereVirkningstidspunktRequest {
+    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
+    virkningstidspunktsbegrunnelseKunINotat?: string;
+    årsak?: ForskuddAarsakType;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    virkningsDato?: string;
+    virkningsdato?: string;
 }
 
-export interface VirkningsTidspunktResponse {
-    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
-    virkningsTidspunktBegrunnelseKunINotat?: string;
-    aarsak?: ForskuddAarsakType;
+export interface VirkningstidspunktResponse {
+    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
+    virkningstidspunktsbegrunnelseKunINotat?: string;
+    årsak?: ForskuddAarsakType;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    virkningsDato?: string;
+    virkningsdato?: string;
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
 export interface CreateRolleDto {
-    rolleType: CreateRolleRolleType;
+    rolletype: Rolletype;
     /** F.eks fødselsnummer. Påkrevd for alle rolletyper utenom for barn som ikke inngår i beregning. */
     ident?: string | null;
     /** Navn på rolleinnehaver hvis ident er ukjent. Gjelder kun barn som ikke inngår i beregning */
     navn?: string | null;
     /**
      * F.eks fødselsdato
-     * @format date-time
+     * @format date
      */
-    fodtDato?: string;
+    fødselsdato: string;
     /**
-     * Opprettet dato
-     * @format date-time
+     * Opprettetdato
+     * @format date
      */
-    opprettetDato?: string;
+    opprettetdato?: string;
     erSlettet: boolean;
-}
-
-export enum CreateRolleRolleType {
-    BIDRAGS_PLIKTIG = "BIDRAGS_PLIKTIG",
-    BIDRAGS_MOTTAKER = "BIDRAGS_MOTTAKER",
-    BARN = "BARN",
-    REELL_MOTTAKER = "REELL_MOTTAKER",
-    FEILREGISTRERT = "FEILREGISTRERT",
 }
 
 export interface SyncRollerRequest {
@@ -379,13 +411,13 @@ export interface InntektDto {
     /** @format int64 */
     id?: number;
     taMed: boolean;
-    inntektType?: string;
-    belop: number;
+    inntektstype: Inntektsrapportering;
+    beløp: number;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    datoFom?: string;
+    datoFom: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -394,7 +426,7 @@ export interface InntektDto {
     ident: string;
     fraGrunnlag: boolean;
     /** @uniqueItems true */
-    inntektPostListe: InntektPost[];
+    inntektsposter: InntektPost[];
 }
 
 export interface InntektPost {
@@ -413,6 +445,136 @@ export interface InntektPost {
      * @example 60000
      */
     beløp: number;
+}
+
+export interface OppdatereInntekterRequest {
+    /** @uniqueItems true */
+    inntekter: InntektDto[];
+    /** @uniqueItems true */
+    barnetillegg: BarnetilleggDto[];
+    /** @uniqueItems true */
+    utvidetBarnetrygd: UtvidetBarnetrygdDto[];
+    inntektsbegrunnelseIVedtakOgNotat?: string;
+    inntektsbegrunnelseKunINotat?: string;
+}
+
+export interface UtvidetBarnetrygdDto {
+    /** @format int64 */
+    id?: number;
+    deltBosted: boolean;
+    beløp: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface InntekterResponse {
+    /** @uniqueItems true */
+    inntekter: InntektDto[];
+    /** @uniqueItems true */
+    barnetillegg: BarnetilleggDto[];
+    /** @uniqueItems true */
+    utvidetbarnetrygd: UtvidetBarnetrygdDto[];
+    inntektBegrunnelseMedIVedtakNotat?: string;
+    inntektBegrunnelseKunINotat?: string;
+}
+
+export interface HusstandsbarnDto {
+    /** @format int64 */
+    id?: number;
+    medISak: boolean;
+    /** @uniqueItems true */
+    perioder: HusstandsbarnperiodeDto[];
+    ident?: string;
+    navn?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    fødselsdato: string;
+    /** @format date */
+    foedselsdato: string;
+}
+
+export interface HusstandsbarnperiodeDto {
+    /** @format int64 */
+    id?: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+    bostatus: Bostatuskode;
+    kilde: Kilde;
+}
+
+export interface OppdatereBoforholdRequest {
+    /** @uniqueItems true */
+    husstandsbarn: HusstandsbarnDto[];
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
+    boforholdsbegrunnelseIVedtakOgNotat?: string;
+    boforholdsbegrunnelseKunINotat?: string;
+}
+
+export interface SivilstandDto {
+    /** @format int64 */
+    id?: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+    sivilstand: Sivilstandskode;
+    kilde: Kilde;
+}
+
+export interface BoforholdResponse {
+    /** @uniqueItems true */
+    husstandsbarn: HusstandsbarnDto[];
+    /** @uniqueItems true */
+    sivilstand: SivilstandDto[];
+    boforholdsbegrunnelseIVedtakOgNotat?: string;
+    boforholdsbegrunnelseKunINotat?: string;
+}
+
+export interface UpdateVirkningsTidspunktRequest {
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    aarsak?: ForskuddAarsakType;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    virkningsDato?: string;
+}
+
+export interface VirkningsTidspunktResponse {
+    virkningsTidspunktBegrunnelseMedIVedtakNotat?: string;
+    virkningsTidspunktBegrunnelseKunINotat?: string;
+    aarsak?: ForskuddAarsakType;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    virkningsDato?: string;
 }
 
 export interface UpdateInntekterRequest {
@@ -443,76 +605,7 @@ export interface UtvidetbarnetrygdDto {
     datoTom?: string;
 }
 
-export interface InntekterResponse {
-    /** @uniqueItems true */
-    inntekter: InntektDto[];
-    /** @uniqueItems true */
-    barnetillegg: BarnetilleggDto[];
-    /** @uniqueItems true */
-    utvidetbarnetrygd: UtvidetbarnetrygdDto[];
-    inntektBegrunnelseMedIVedtakNotat?: string;
-    inntektBegrunnelseKunINotat?: string;
-}
-
-export interface HusstandsBarnPeriodeDto {
-    /** @format int64 */
-    id?: number;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoFom?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoTom?: string;
-    bostatus: Bostatuskode;
-    kilde: Kilde;
-}
-
-export interface HusstandsbarnDto {
-    /** @format int64 */
-    id?: number;
-    medISak: boolean;
-    /** @uniqueItems true */
-    perioder: HusstandsBarnPeriodeDto[];
-    ident?: string;
-    navn?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    foedselsdato?: string;
-}
-
-export interface SivilstandDto {
-    /** @format int64 */
-    id?: number;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoFom?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    datoTom?: string;
-    sivilstand: Sivilstandskode;
-    kilde: Kilde;
-}
-
 export interface UpdateBoforholdRequest {
-    /** @uniqueItems true */
-    husstandsBarn: HusstandsbarnDto[];
-    /** @uniqueItems true */
-    sivilstand: SivilstandDto[];
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
-}
-
-export interface BoforholdResponse {
     /** @uniqueItems true */
     husstandsBarn: HusstandsbarnDto[];
     /** @uniqueItems true */
@@ -571,17 +664,17 @@ export enum Vedtakstype {
 }
 
 export interface CreateBehandlingRequest {
-    behandlingType: Behandlingstype;
-    soknadType: SoknadType;
-    /** @format date-time */
+    behandlingstype: Behandlingstype;
+    søknadstype: Soknadstype;
+    /** @format date */
     datoFom: string;
-    /** @format date-time */
+    /** @format date */
     datoTom: string;
-    /** @format date-time */
-    mottatDato: string;
-    soknadFra: SoktAvType;
+    /** @format date */
+    mottattdato: string;
+    søknadFra: SoktAvType;
     /**
-     * @minLength 0
+     * @minLength 7
      * @maxLength 7
      */
     saksnummer: string;
@@ -589,19 +682,19 @@ export interface CreateBehandlingRequest {
      * @minLength 4
      * @maxLength 4
      */
-    behandlerEnhet: string;
+    behandlerenhet: string;
     /**
      * @maxItems 2147483647
      * @minItems 2
      * @uniqueItems true
      */
     roller: CreateRolleDto[];
-    stonadType: Stonadstype;
-    engangsbelopType: Engangsbeloptype;
+    stønadstype: Stonadstype;
+    engangsbeløpstype: Engangsbeloptype;
     /** @format int64 */
-    soknadId: number;
+    søknadsid: number;
     /** @format int64 */
-    soknadRefId?: number;
+    søknadsreferanseid?: number;
 }
 
 export interface CreateBehandlingResponse {
@@ -609,40 +702,16 @@ export interface CreateBehandlingResponse {
     id: number;
 }
 
-export interface AddOpplysningerRequest {
-    /** @format int64 */
-    behandlingId: number;
-    aktiv: boolean;
-    opplysningerType: OpplysningerType;
-    /** data */
-    data: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    hentetDato: string;
-}
-
-export interface OpplysningerDto {
-    /** @format int64 */
-    id: number;
-    /** @format int64 */
-    behandlingId: number;
-    opplysningerType: OpplysningerType;
-    data: string;
-    /** @format date */
-    hentetDato: string;
-}
-
-export interface ForskuddBeregningPerBarn {
-    referanseTilBarn?: string;
+/** Resultatet av en forskuddsberegning */
+export interface BeregnetForskuddResultat {
+    /** Periodisert liste over resultat av forskuddsberegning */
     beregnetForskuddPeriodeListe: ResultatPeriode[];
-    grunnlagListe?: Grunnlag[];
+    /** Liste over grunnlag brukt i beregning */
+    grunnlagListe: Grunnlag[];
 }
 
-export interface ForskuddBeregningRespons {
-    resultat?: ForskuddBeregningPerBarn[];
-    feil?: string[];
+export interface Forskuddsberegningrespons {
+    resultat?: BeregnetForskuddResultat[];
 }
 
 /** Grunnlag */
@@ -712,52 +781,83 @@ export enum Grunnlagstype {
 /** Grunnlagsinnhold (generisk) */
 export type JsonNode = object;
 
-/** Periode (fra-til dato */
-export interface Periode {
-    /**
-     * Fra-og-med-dato
-     * @format date
-     */
-    datoFom?: string;
-    /**
-     * Til-dato
-     * @format date
-     */
-    datoTil?: string;
-}
-
 /** Resultatet av en beregning */
 export interface ResultatBeregning {
     /** Resultat beløp */
     belop: number;
     /** Resultat kode */
-    kode: string;
+    kode: ResultatBeregningKode;
     /** Resultat regel */
     regel: string;
 }
 
 /** Resultatet av en beregning for en gitt periode */
 export interface ResultatPeriode {
-    /** Periode (fra-til dato */
-    periode: Periode;
+    /** Beregnet resultat periode */
+    periode: TypeArManedsperiode;
     /** Resultatet av en beregning */
     resultat: ResultatBeregning;
     /** Beregnet grunnlag innhold */
-    grunnlagReferanseListe: string[];
-    sivilstand?: Sivilstandskode;
+    grunnlagsreferanseListe: string[];
+}
+
+/** Beregnet resultat periode */
+export interface TypeArManedsperiode {
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    fom: string;
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    til?: string;
+}
+
+export interface AddOpplysningerRequest {
+    /** @format int64 */
+    behandlingId: number;
+    aktiv: boolean;
+    opplysningerType: OpplysningerType;
+    /** data */
+    data: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    hentetDato: string;
+}
+
+export interface OpplysningerDto {
+    /** @format int64 */
+    id: number;
+    /** @format int64 */
+    behandlingId: number;
+    opplysningerType: OpplysningerType;
+    data: string;
+    /** @format date */
+    hentetDato: string;
+}
+
+export interface ArbeidOgInntektLenkeRequest {
+    /** @format int64 */
+    behandlingId: number;
+    ident: string;
 }
 
 export interface Arbeidsforhold {
+    /** Beregnet resultat periode */
     periode: TypeArManedsperiode;
     arbeidsgiver: string;
-    stillingProsent: string;
+    stillingProsent?: string;
     /** @format date */
-    lønnsendringDato: string;
+    lønnsendringDato?: string;
 }
 
 export interface Boforhold {
     barn: BoforholdBarn[];
-    sivilstand: SivilstandPeriode[];
+    sivilstand: SivilstandNotat;
     notat: Notat;
 }
 
@@ -765,8 +865,8 @@ export interface BoforholdBarn {
     navn: string;
     /** @format date */
     fødselsdato?: string;
-    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteret[];
-    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregning[];
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretBostatuskode[];
+    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
 
 export interface Inntekter {
@@ -785,49 +885,9 @@ export interface InntekterPerRolle {
 export interface InntekterSomLeggesTilGrunn {
     inntektType?: Inntektsrapportering;
     beskrivelse?: string;
+    /** Beregnet resultat periode */
     periode?: TypeArManedsperiode;
     beløp: number;
-}
-
-export enum Inntektsrapportering {
-    AINNTEKT = "AINNTEKT",
-    AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
-    AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
-    KAPITALINNTEKT = "KAPITALINNTEKT",
-    LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
-    KONTANTSTOTTE = "KONTANTSTØTTE",
-    SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
-    UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
-    PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
-    KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
-    SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
-    LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
-    NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
-    YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
-    AAP = "AAP",
-    AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
-    BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
-    BARNS_SYKDOM = "BARNS_SYKDOM",
-    DAGPENGER = "DAGPENGER",
-    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
-    FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
-    FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
-    FODSELADOPSJON = "FØDSEL_ADOPSJON",
-    INNTEKTSOPPLYSNINGER_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
-    KAPITALINNTEKT_SKE = "KAPITALINNTEKT_SKE",
-    LIGNINGSOPPLYSNINGER_MANGLER = "LIGNINGSOPPLYSNINGER_MANGLER",
-    LIGNING_SKE = "LIGNING_SKE",
-    LONNSKE = "LØNN_SKE",
-    LONNSKEKORRIGERTBARNETILLEGG = "LØNN_SKE_KORRIGERT_BARNETILLEGG",
-    LONNTREKK = "LØNN_TREKK",
-    MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
-    NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
-    PENSJON = "PENSJON",
-    PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
-    REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
-    SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
-    SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
-    SYKEPENGER = "SYKEPENGER",
 }
 
 export interface Notat {
@@ -840,20 +900,35 @@ export interface NotatDto {
     saksbehandlerNavn?: string;
     virkningstidspunkt: Virkningstidspunkt;
     boforhold: Boforhold;
-    parterIsøknad: ParterISoknad[];
+    parterISøknad: ParterISoknad[];
     inntekter: Inntekter;
     vedtak: Vedtak[];
 }
 
-export interface OpplysningerBruktTilBeregning {
+export interface OpplysningerBruktTilBeregningBostatuskode {
+    /** Beregnet resultat periode */
     periode: TypeArManedsperiode;
-    status: string;
+    status: Bostatuskode;
     kilde: string;
 }
 
-export interface OpplysningerFraFolkeregisteret {
+export interface OpplysningerBruktTilBeregningSivilstandskode {
+    /** Beregnet resultat periode */
     periode: TypeArManedsperiode;
-    status?: string;
+    status: Sivilstandskode;
+    kilde: string;
+}
+
+export interface OpplysningerFraFolkeregisteretBostatuskode {
+    /** Beregnet resultat periode */
+    periode: TypeArManedsperiode;
+    status?: Bostatuskode;
+}
+
+export interface OpplysningerFraFolkeregisteretSivilstandskode {
+    /** Beregnet resultat periode */
+    periode: TypeArManedsperiode;
+    status?: Sivilstandskode;
 }
 
 export interface ParterISoknad {
@@ -866,6 +941,7 @@ export interface ParterISoknad {
 
 export interface Resultat {
     type: string;
+    /** Beregnet resultat periode */
     periode: TypeArManedsperiode;
     inntekt: number;
     sivilstand: string;
@@ -874,14 +950,9 @@ export interface Resultat {
     resultat: string;
 }
 
-export interface SivilstandPeriode {
-    periode: TypeArManedsperiode;
-    kode?: Sivilstandskode;
-}
-
-export interface UtvidetBarnetrygd {
-    periode: TypeArManedsperiode;
-    beløp: number;
+export interface SivilstandNotat {
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretSivilstandskode[];
+    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
 }
 
 export interface Vedtak {
@@ -915,37 +986,18 @@ export interface Virkningstidspunkt {
     notat: Notat;
 }
 
-export interface TypeArManedsperiode {
-    fom: {
-        /** @format int32 */
-        year?: number;
-        month?: ArManedsperiodeMonth;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
-    til?: {
-        /** @format int32 */
-        year?: number;
-        month?: ArManedsperiodeMonth;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
-}
-
 export interface BehandlingDto {
     /** @format int64 */
     id: number;
     behandlingtype: Behandlingstype;
-    søknadstype: SoknadType;
+    søknadType: Soknadstype;
     erVedtakFattet: boolean;
     /** @format date */
     datoFom: string;
     /** @format date */
     datoTom: string;
     /** @format date */
-    mottatDato: string;
+    mottattdato: string;
     soknadFraType: SoktAvType;
     saksnummer: string;
     /** @format int64 */
@@ -964,30 +1016,39 @@ export interface BehandlingDto {
     /** @format int64 */
     grunnlagspakkeid?: number;
     årsak?: ForskuddAarsakType;
-    virkningstidspunktBegrunnelseMedIVedtaksnotat?: string;
-    virkningstidspunktBegrunnelseKunINotat?: string;
-    boforholdsbegrunnelseMedIVedtaksnotat?: string;
+    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
+    virkningstidspunktsbegrunnelseKunINotat?: string;
+    boforholdsbegrunnelseIVedtakOgNotat?: string;
     boforholdsbegrunnelseKunINotat?: string;
-    inntektsbegrunnelseMedIVedtaksnotat?: string;
+    inntektsbegrunnelseIVedtakOgNotat?: string;
     inntektsbegrunnelseKunINotat?: string;
 }
 
 export interface RolleDto {
     /** @format int64 */
     id: number;
-    rolleType: RolleDtoRolleType;
+    rolletype: Rolletype;
     ident?: string;
     navn?: string;
-    /** @format date-time */
-    fodtDato?: string;
-    /** @format date-time */
-    opprettetDato?: string;
+    /** @format date */
+    fødselsdato?: string;
+    /** @format date */
+    opprettetdato?: string;
 }
 
 export enum InitalizeForsendelseRequestBehandlingStatus {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
     FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+/** Resultat kode */
+export enum ResultatBeregningKode {
+    AVSLAG = "AVSLAG",
+    REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
+    ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
+    FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
+    FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
 }
 
 export enum VirkningstidspunktMonth {
@@ -1003,29 +1064,6 @@ export enum VirkningstidspunktMonth {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum ArManedsperiodeMonth {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum RolleDtoRolleType {
-    BARN = "BARN",
-    BIDRAGSMOTTAKER = "BIDRAGSMOTTAKER",
-    BIDRAGSPLIKTIG = "BIDRAGSPLIKTIG",
-    FEILREGISTRERT = "FEILREGISTRERT",
-    REELMOTTAKER = "REELMOTTAKER",
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -1072,7 +1110,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1161,7 +1202,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1170,10 +1211,192 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags behandling-controller
          * @name HentBehandling
-         * @request GET:/api/behandling/{behandlingId}
+         * @request GET:/api/v1/behandling/{behandlingId}
          * @secure
          */
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/v1/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere behandling
+         *
+         * @tags behandling-controller
+         * @name OppdatereBehandling
+         * @request PUT:/api/v1/behandling/{behandlingId}
+         * @secure
+         */
+        oppdatereBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v1/behandling/${behandlingId}`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Hente virkningstidspunkt data
+         *
+         * @tags virkningstidspunkt-controller
+         * @name HentVirkningsTidspunkt
+         * @request GET:/api/v1/behandling/{behandlingId}/virkningstidspunkt
+         * @secure
+         */
+        hentVirkningsTidspunkt: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<VirkningstidspunktResponse, VirkningstidspunktResponse>({
+                path: `/api/v1/behandling/${behandlingId}/virkningstidspunkt`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere virkningstidspunkt data
+         *
+         * @tags virkningstidspunkt-controller
+         * @name OppdaterVirkningsTidspunkt
+         * @request PUT:/api/v1/behandling/{behandlingId}/virkningstidspunkt
+         * @secure
+         */
+        oppdaterVirkningsTidspunkt: (
+            behandlingId: number,
+            data: OppdatereVirkningstidspunktRequest,
+            params: RequestParams = {}
+        ) =>
+            this.request<VirkningstidspunktResponse, VirkningstidspunktResponse>({
+                path: `/api/v1/behandling/${behandlingId}/virkningstidspunkt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdaterer vedtak id
+         *
+         * @tags behandling-controller
+         * @name OppdatereVedtaksid
+         * @request PUT:/api/v1/behandling/{behandlingId}/vedtak/{vedtakId}
+         * @secure
+         */
+        oppdatereVedtaksid: (behandlingId: number, vedtakId: number, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/api/v1/behandling/${behandlingId}/vedtak/${vedtakId}`,
+                method: "PUT",
+                secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description Sync fra behandling
+         *
+         * @tags behandling-controller
+         * @name SynkronisereRoller
+         * @request PUT:/api/v1/behandling/{behandlingId}/roller/sync
+         * @secure
+         */
+        synkronisereRoller: (behandlingId: number, data: SyncRollerRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v1/behandling/${behandlingId}/roller/sync`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Hente inntekter data
+         *
+         * @tags inntekter-controller
+         * @name HentInntekter
+         * @request GET:/api/v1/behandling/{behandlingId}/inntekter
+         * @secure
+         */
+        hentInntekter: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<InntekterResponse, InntekterResponse>({
+                path: `/api/v1/behandling/${behandlingId}/inntekter`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere inntekter data
+         *
+         * @tags inntekter-controller
+         * @name OppdaterInntekter
+         * @request PUT:/api/v1/behandling/{behandlingId}/inntekter
+         * @secure
+         */
+        oppdaterInntekter: (behandlingId: number, data: OppdatereInntekterRequest, params: RequestParams = {}) =>
+            this.request<InntekterResponse, InntekterResponse>({
+                path: `/api/v1/behandling/${behandlingId}/inntekter`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente boforhold data
+         *
+         * @tags boforhold-controller
+         * @name HentBoforhold
+         * @request GET:/api/v1/behandling/{behandlingId}/boforhold
+         * @secure
+         */
+        hentBoforhold: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<BoforholdResponse, any>({
+                path: `/api/v1/behandling/${behandlingId}/boforhold`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere boforhold data
+         *
+         * @tags boforhold-controller
+         * @name OppdatereBoforhold
+         * @request PUT:/api/v1/behandling/{behandlingId}/boforhold
+         * @secure
+         */
+        oppdatereBoforhold: (behandlingId: number, data: OppdatereBoforholdRequest, params: RequestParams = {}) =>
+            this.request<BoforholdResponse, any>({
+                path: `/api/v1/behandling/${behandlingId}/boforhold`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente en behandling
+         *
+         * @tags deprecated-behandling-controller
+         * @name HentBehandling1
+         * @request GET:/api/behandling/{behandlingId}
+         * @deprecated
+         * @secure
+         */
+        hentBehandling1: (behandlingId: number, params: RequestParams = {}) =>
             this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/behandling/${behandlingId}`,
                 method: "GET",
@@ -1185,9 +1408,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Oppdatere behandling
          *
-         * @tags behandling-controller
+         * @tags deprecated-behandling-controller
          * @name UpdateBehandling
          * @request PUT:/api/behandling/{behandlingId}
+         * @deprecated
          * @secure
          */
         updateBehandling: (behandlingId: number, data: UpdateBehandlingRequest, params: RequestParams = {}) =>
@@ -1203,12 +1427,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hente virkningstidspunkt data
          *
-         * @tags virknings-tidspunkt-controller
-         * @name HentVirkningsTidspunkt
+         * @tags deprecated-virknings-tidspunkt-controller
+         * @name HentVirkningsTidspunkt1
          * @request GET:/api/behandling/{behandlingId}/virkningstidspunkt
+         * @deprecated
          * @secure
          */
-        hentVirkningsTidspunkt: (behandlingId: number, params: RequestParams = {}) =>
+        hentVirkningsTidspunkt1: (behandlingId: number, params: RequestParams = {}) =>
             this.request<VirkningsTidspunktResponse, VirkningsTidspunktResponse>({
                 path: `/api/behandling/${behandlingId}/virkningstidspunkt`,
                 method: "GET",
@@ -1220,12 +1445,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Oppdatere virkningstidspunkt data
          *
-         * @tags virknings-tidspunkt-controller
-         * @name OppdaterVirkningsTidspunkt
+         * @tags deprecated-virknings-tidspunkt-controller
+         * @name OppdaterVirkningsTidspunkt1
          * @request PUT:/api/behandling/{behandlingId}/virkningstidspunkt
+         * @deprecated
          * @secure
          */
-        oppdaterVirkningsTidspunkt: (
+        oppdaterVirkningsTidspunkt1: (
             behandlingId: number,
             data: UpdateVirkningsTidspunktRequest,
             params: RequestParams = {}
@@ -1243,9 +1469,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Oppdaterer vedtak id
          *
-         * @tags behandling-controller
+         * @tags deprecated-behandling-controller
          * @name OppdaterVedtakId
          * @request PUT:/api/behandling/{behandlingId}/vedtak/{vedtakId}
+         * @deprecated
          * @secure
          */
         oppdaterVedtakId: (behandlingId: number, vedtakId: number, params: RequestParams = {}) =>
@@ -1259,9 +1486,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Sync fra behandling
          *
-         * @tags behandling-controller
+         * @tags deprecated-behandling-controller
          * @name SyncRoller
          * @request PUT:/api/behandling/{behandlingId}/roller/sync
+         * @deprecated
          * @secure
          */
         syncRoller: (behandlingId: number, data: SyncRollerRequest, params: RequestParams = {}) =>
@@ -1277,12 +1505,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hente inntekter data
          *
-         * @tags inntekter-controller
-         * @name HentInntekter
+         * @tags deprecated-inntekter-controller
+         * @name HentInntekter1
          * @request GET:/api/behandling/{behandlingId}/inntekter
+         * @deprecated
          * @secure
          */
-        hentInntekter: (behandlingId: number, params: RequestParams = {}) =>
+        hentInntekter1: (behandlingId: number, params: RequestParams = {}) =>
             this.request<InntekterResponse, InntekterResponse>({
                 path: `/api/behandling/${behandlingId}/inntekter`,
                 method: "GET",
@@ -1294,12 +1523,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Oppdatere inntekter data
          *
-         * @tags inntekter-controller
-         * @name OppdaterInntekter
+         * @tags deprecated-inntekter-controller
+         * @name OppdaterInntekter1
          * @request PUT:/api/behandling/{behandlingId}/inntekter
+         * @deprecated
          * @secure
          */
-        oppdaterInntekter: (behandlingId: number, data: UpdateInntekterRequest, params: RequestParams = {}) =>
+        oppdaterInntekter1: (behandlingId: number, data: UpdateInntekterRequest, params: RequestParams = {}) =>
             this.request<InntekterResponse, InntekterResponse>({
                 path: `/api/behandling/${behandlingId}/inntekter`,
                 method: "PUT",
@@ -1313,12 +1543,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Hente boforhold data
          *
-         * @tags boforhold-controller
-         * @name HentBoforhold
+         * @tags deprecated-boforhold-controller
+         * @name HentBoforhold1
          * @request GET:/api/behandling/{behandlingId}/boforhold
+         * @deprecated
          * @secure
          */
-        hentBoforhold: (behandlingId: number, params: RequestParams = {}) =>
+        hentBoforhold1: (behandlingId: number, params: RequestParams = {}) =>
             this.request<BoforholdResponse, any>({
                 path: `/api/behandling/${behandlingId}/boforhold`,
                 method: "GET",
@@ -1330,12 +1561,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Oppdatere boforhold data
          *
-         * @tags boforhold-controller
-         * @name OppdatereBoforhold
+         * @tags deprecated-boforhold-controller
+         * @name OppdatereBoforhold1
          * @request PUT:/api/behandling/{behandlingId}/boforhold
+         * @deprecated
          * @secure
          */
-        oppdatereBoforhold: (behandlingId: number, data: UpdateBoforholdRequest, params: RequestParams = {}) =>
+        oppdatereBoforhold1: (behandlingId: number, data: UpdateBoforholdRequest, params: RequestParams = {}) =>
             this.request<BoforholdResponse, any>({
                 path: `/api/behandling/${behandlingId}/boforhold`,
                 method: "PUT",
@@ -1351,12 +1583,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags forsendelse-controller
          * @name OpprettForsendelse
-         * @request POST:/api/forsendelse/init
+         * @request POST:/api/v1/forsendelse/init
          * @secure
          */
         opprettForsendelse: (data: InitalizeForsendelseRequest, params: RequestParams = {}) =>
             this.request<string[], any>({
-                path: `/api/forsendelse/init`,
+                path: `/api/v1/forsendelse/init`,
                 method: "POST",
                 body: data,
                 secure: true,
@@ -1370,10 +1602,141 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags behandling-controller
          * @name HentBehandlinger
-         * @request GET:/api/behandling
+         * @request GET:/api/v1/behandling
          * @secure
          */
         hentBehandlinger: (params: RequestParams = {}) =>
+            this.request<BehandlingDto[], BehandlingDto[]>({
+                path: `/api/v1/behandling`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Legge til en ny behandling
+         *
+         * @tags behandling-controller
+         * @name OppretteBehandling
+         * @request POST:/api/v1/behandling
+         * @secure
+         */
+        oppretteBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
+            this.request<CreateBehandlingResponse, CreateBehandlingResponse>({
+                path: `/api/v1/behandling`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-forskudd-controller
+         * @name BeregnForskudd
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn
+         * @secure
+         */
+        beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<Forskuddsberegningrespons, any>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Legge til nye opplysninger til behandling
+         *
+         * @tags opplysninger-controller
+         * @name AddOpplysningerData
+         * @request POST:/api/v1/behandling/{behandlingId}/opplysninger
+         * @secure
+         */
+        addOpplysningerData: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
+            this.request<OpplysningerDto, OpplysningerDto>({
+                path: `/api/v1/behandling/${behandlingId}/opplysninger`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Generer lenke for ainntekt-søk med filter for behandling og personident oppgitt i forespørsel
+         *
+         * @tags arbeid-og-inntekt-controller
+         * @name GenererAinntektLenke
+         * @request POST:/api/v1/arbeidoginntekt/ainntekt
+         * @secure
+         */
+        genererAinntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
+            this.request<string, any>({
+                path: `/api/v1/arbeidoginntekt/ainntekt`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Generer lenke for aareg-søk for personident oppgitt i forespørsel
+         *
+         * @tags arbeid-og-inntekt-controller
+         * @name GenererAaregLenke
+         * @request POST:/api/v1/arbeidoginntekt/aareg
+         * @secure
+         */
+        genererAaregLenke: (data: string, params: RequestParams = {}) =>
+            this.request<string, any>({
+                path: `/api/v1/arbeidoginntekt/aareg`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppretter forsendelse for behandling eller vedtak. Skal bare benyttes hvis vedtakId eller behandlingId mangler for behandling (Søknad som behandles gjennom Bisys)
+         *
+         * @tags deprecated-forsendelse-controller
+         * @name PprettForsendelse
+         * @request POST:/api/forsendelse/init
+         * @deprecated
+         * @secure
+         */
+        pprettForsendelse: (data: InitalizeForsendelseRequest, params: RequestParams = {}) =>
+            this.request<string[], any>({
+                path: `/api/forsendelse/init`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente en liste av alle behandlinger
+         *
+         * @tags deprecated-behandling-controller
+         * @name HentBehandlinger1
+         * @request GET:/api/behandling
+         * @deprecated
+         * @secure
+         */
+        hentBehandlinger1: (params: RequestParams = {}) =>
             this.request<BehandlingDto[], BehandlingDto[]>({
                 path: `/api/behandling`,
                 method: "GET",
@@ -1385,9 +1748,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Legge til en ny behandling
          *
-         * @tags behandling-controller
+         * @tags deprecated-behandling-controller
          * @name CreateBehandling
          * @request POST:/api/behandling
+         * @deprecated
          * @secure
          */
         createBehandling: (data: CreateBehandlingRequest, params: RequestParams = {}) =>
@@ -1404,12 +1768,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Legge til nye opplysninger til behandling
          *
-         * @tags opplysninger-controller
-         * @name AddOpplysningerData
+         * @tags deprecated-opplysninger-controller
+         * @name AddOpplysningerData1
          * @request POST:/api/behandling/{behandlingId}/opplysninger
+         * @deprecated
          * @secure
          */
-        addOpplysningerData: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
+        addOpplysningerData1: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
             this.request<OpplysningerDto, OpplysningerDto>({
                 path: `/api/behandling/${behandlingId}/opplysninger`,
                 method: "POST",
@@ -1421,28 +1786,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Beregn forskudd
-         *
-         * @tags behandling-beregn-forskudd-controller
-         * @name BeregnForskudd
-         * @request POST:/api/behandling/{behandlingId}/beregn
-         * @secure
-         */
-        beregnForskudd: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<ForskuddBeregningRespons, any>({
-                path: `/api/v1/behandling/${behandlingId}/beregn`,
-                method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
          * No description
          *
-         * @tags visningsnavn-controller
+         * @tags deprecated-visningsnavn-controller
          * @name HentVisningsnavn
          * @request GET:/api/visningsnavn
+         * @deprecated
          * @secure
          */
         hentVisningsnavn: (params: RequestParams = {}) =>
@@ -1457,9 +1806,26 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
+         * @tags visningsnavn-controller
+         * @name HentVisningsnavn1
+         * @request GET:/api/v1/visningsnavn
+         * @secure
+         */
+        hentVisningsnavn1: (params: RequestParams = {}) =>
+            this.request<Record<string, string>, any>({
+                path: `/api/v1/visningsnavn`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
          * @tags notat-opplysninger-controller
          * @name HentNotatOpplysninger
-         * @request GET:/api/notat/{behandlingId}
+         * @request GET:/api/v1/notat/{behandlingId}
          * @secure
          */
         hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
@@ -1476,10 +1842,28 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags opplysninger-controller
          * @name HentAktiv
-         * @request GET:/api/behandling/{behandlingId}/opplysninger/{opplysningerType}/aktiv
+         * @request GET:/api/v1/behandling/{behandlingId}/opplysninger/{opplysningerType}/aktiv
          * @secure
          */
         hentAktiv: (behandlingId: number, opplysningerType: OpplysningerType, params: RequestParams = {}) =>
+            this.request<OpplysningerDto, OpplysningerDto>({
+                path: `/api/v1/behandling/${behandlingId}/opplysninger/${opplysningerType}/aktiv`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente aktive opplysninger til behandling
+         *
+         * @tags deprecated-opplysninger-controller
+         * @name HentAktiv1
+         * @request GET:/api/behandling/{behandlingId}/opplysninger/{opplysningerType}/aktiv
+         * @deprecated
+         * @secure
+         */
+        hentAktiv1: (behandlingId: number, opplysningerType: OpplysningerType, params: RequestParams = {}) =>
             this.request<OpplysningerDto, OpplysningerDto>({
                 path: `/api/behandling/${behandlingId}/opplysninger/${opplysningerType}/aktiv`,
                 method: "GET",
@@ -1487,43 +1871,5 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 format: "json",
                 ...params,
             }),
-
-           /**
-         * @description Generer lenke for ainntekt-søk med filter for behandling og personident oppgitt i forespørsel
-         *
-         * @tags arbeid-og-inntekt-controller
-         * @name GenererAinntektLenke
-         * @request POST:/api/v1/arbeidoginntekt/ainntekt
-         * @secure
-         */
-           genererAinntektLenke: (data: ArbeidOgInntektLenkeRequest, params: RequestParams = {}) =>
-           this.request<string, any>({
-               path: `/api/v1/arbeidoginntekt/ainntekt`,
-               method: "POST",
-               body: data,
-               secure: true,
-               type: ContentType.Json,
-               format: "json",
-               ...params,
-           }),
-
-       /**
-        * @description Generer lenke for aareg-søk for personident oppgitt i forespørsel
-        *
-        * @tags arbeid-og-inntekt-controller
-        * @name GenererAaregLenke
-        * @request POST:/api/v1/arbeidoginntekt/aareg
-        * @secure
-        */
-       genererAaregLenke: (data: string, params: RequestParams = {}) =>
-           this.request<string, any>({
-               path: `/api/v1/arbeidoginntekt/aareg`,
-               method: "POST",
-               body: data,
-               secure: true,
-               type: ContentType.Json,
-               format: "json",
-               ...params,
-           }),
-        }
+    };
 }
