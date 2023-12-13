@@ -22,9 +22,11 @@ import {
     RolleDtoRolleType,
     UpdateBoforholdRequest,
     UpdateInntekterRequest,
-    UpdateVirkningsTidspunktRequest,
-    VirkningsTidspunktResponse,
 } from "../api/BidragBehandlingApi";
+import {
+    OppdatereVirkningstidspunktRequest,
+    VirkningstidspunktResponse as VirkningstidspunktResponseV1,
+} from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
     GrunnlagRequestType,
@@ -38,6 +40,7 @@ import { TransformerInntekterRequest, TransformerInntekterResponse } from "../ap
 import { PersonDto } from "../api/PersonApi";
 import {
     BEHANDLING_API,
+    BEHANDLING_API_V1,
     BIDRAG_DOKUMENT_PRODUKSJON_API,
     BIDRAG_GRUNNLAG_API,
     BIDRAG_INNTEKT_API,
@@ -95,8 +98,8 @@ export const useGetBehandling = (behandlingId: number) =>
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
     useSuspenseQuery({
         queryKey: QueryKeys.virkningstidspunkt(behandlingId),
-        queryFn: async (): Promise<VirkningsTidspunktResponse> => {
-            const { data } = await BEHANDLING_API.api.hentVirkningsTidspunkt(behandlingId);
+        queryFn: async (): Promise<VirkningstidspunktResponseV1> => {
+            const { data } = await BEHANDLING_API_V1.api.hentVirkningsTidspunkt(behandlingId);
             return data;
         },
         staleTime: Infinity,
@@ -107,8 +110,8 @@ export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
 
     const mutation = useMutation({
         mutationKey: MutationKeys.updateVirkningstidspunkt(behandlingId),
-        mutationFn: async (payload: UpdateVirkningsTidspunktRequest): Promise<VirkningsTidspunktResponse> => {
-            const { data } = await BEHANDLING_API.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
+        mutationFn: async (payload: OppdatereVirkningstidspunktRequest): Promise<VirkningstidspunktResponseV1> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
             return data;
         },
         onSuccess: (data) => {

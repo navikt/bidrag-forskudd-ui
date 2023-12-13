@@ -3,7 +3,7 @@ import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { VirkningsTidspunktResponse } from "../../../api/BidragBehandlingApi";
+import { VirkningstidspunktResponse as VirkningstidspunktResponseV1 } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -32,17 +32,17 @@ import {
 } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
-const createInitialValues = (response: VirkningsTidspunktResponse) =>
+const createInitialValues = (response: VirkningstidspunktResponseV1) =>
     ({
-        virkningsDato: response.virkningsDato,
-        aarsak: response.aarsak ?? "",
-        virkningsTidspunktBegrunnelseMedIVedtakNotat: response.virkningsTidspunktBegrunnelseMedIVedtakNotat ?? "",
-        virkningsTidspunktBegrunnelseKunINotat: response.virkningsTidspunktBegrunnelseKunINotat ?? "",
+        virkningsdato: response.virkningsdato,
+        årsak: response.årsak ?? "",
+        virkningstidspunktsbegrunnelseIVedtakOgNotat: response.virkningstidspunktsbegrunnelseIVedtakOgNotat ?? "",
+        virkningstidspunktsbegrunnelseKunINotat: response.virkningstidspunktsbegrunnelseKunINotat ?? "",
     }) as VirkningstidspunktFormValues;
 
 const createPayload = (values: VirkningstidspunktFormValues) => ({
     ...values,
-    aarsak: values.aarsak === "" ? null : values.aarsak,
+    årsak: values.årsak === "" ? null : values.årsak,
 });
 
 const Main = ({ initialValues, error }) => {
@@ -50,16 +50,16 @@ const Main = ({ initialValues, error }) => {
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningsDato);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningsdato);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
-    const virkningsDato = getValues("virkningsDato");
+    const virkningsDato = getValues("virkningsdato");
 
     const onAarsakSelect = (value: string) => {
         const date = aarsakToVirkningstidspunktMapper(value, behandling);
         if (date) {
-            setValue("virkningsDato", toISODateString(date));
-            clearErrors("virkningsDato");
+            setValue("virkningsdato", toISODateString(date));
+            clearErrors("virkningsdato");
         }
     };
 
@@ -69,7 +69,7 @@ const Main = ({ initialValues, error }) => {
     useEffect(() => {
         if (!initialVirkningsdato && virkningstidspunkt && behandling) {
             setInitialVirkningsdato(
-                virkningstidspunkt.virkningsDato ??
+                virkningstidspunkt.virkningsdato ??
                     toISODateString(
                         getSoktFraOrMottatDato(new Date(behandling.datoFom), new Date(behandling.mottatDato))
                     )
@@ -118,7 +118,7 @@ const Main = ({ initialValues, error }) => {
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField name="aarsak" label="Årsak" onSelect={onAarsakSelect}>
+                <FormControlledSelectField name="årsak" label="Årsak" onSelect={onAarsakSelect}>
                     <option value="">Velg årsak/avslag</option>
                     <optgroup label="Årsak">
                         {Object.entries(ForskuddBeregningKodeAarsak).map(([value, text]) => (
@@ -136,10 +136,10 @@ const Main = ({ initialValues, error }) => {
                     </optgroup>
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
-                    name="virkningsDato"
+                    name="virkningsdato"
                     label="Virkningstidspunkt"
                     placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.virkningsDato}
+                    defaultValue={initialValues.virkningsdato}
                     fromDate={fom}
                     toDate={tom}
                     required
@@ -152,7 +152,7 @@ const Main = ({ initialValues, error }) => {
 const Side = () => {
     const { setActiveStep } = useForskudd();
     const useFormMethods = useFormContext();
-    const aarsak = useFormMethods.getValues("aarsak");
+    const aarsak = useFormMethods.getValues("årsak");
     const onNext = () =>
         setActiveStep(Avslag[aarsak] ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
 
@@ -162,11 +162,11 @@ const Side = () => {
                 Begrunnelse
             </Heading>
             <FormControlledTextarea
-                name="virkningsTidspunktBegrunnelseMedIVedtakNotat"
+                name="virkningstidspunktsbegrunnelseIVedtakOgNotat"
                 label="Begrunnelse (med i vedtaket og notat)"
             />
             <FormControlledTextarea
-                name="virkningsTidspunktBegrunnelseKunINotat"
+                name="virkningstidspunktsbegrunnelseKunINotat"
                 label="Begrunnelse (kun med i notat)"
             />
             <ActionButtons onNext={onNext} />
@@ -188,10 +188,10 @@ const VirkningstidspunktForm = () => {
     const fieldsForNotat = useWatch({
         control: useFormMethods.control,
         name: [
-            "virkningsDato",
-            "aarsak",
-            "virkningsTidspunktBegrunnelseMedIVedtakNotat",
-            "virkningsTidspunktBegrunnelseKunINotat",
+            "virkningsdato",
+            "årsak",
+            "virkningstidspunktsbegrunnelseIVedtakOgNotat",
+            "virkningstidspunktsbegrunnelseKunINotat",
         ],
     });
 

@@ -6,7 +6,7 @@ import { virkningstidspunktTestData } from "../testdata/virkningstidspunktTestDa
 export default function virkningstidspunktMock(): RestHandler[] {
     return [
         rest.get(
-            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`,
+            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/virkningstidspunkt`,
             (req, res, ctx) => {
                 if (!localStorage.getItem(`behandling-${req.params.behandlingId}-virkningstidspunkt`)) {
                     localStorage.setItem(
@@ -21,7 +21,7 @@ export default function virkningstidspunktMock(): RestHandler[] {
             }
         ),
         rest.put(
-            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/virkningstidspunkt`,
+            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/virkningstidspunkt`,
             async (req, res, ctx) => {
                 const body = await req.json();
                 const virkningstidspunkt = JSON.parse(
