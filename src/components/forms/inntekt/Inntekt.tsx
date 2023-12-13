@@ -1,7 +1,7 @@
 import { ClockDashedIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { OpplysningerDto, OpplysningerType, RolleDto, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
@@ -28,6 +28,7 @@ import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import UnderArbeidAlert from "../../UnderArbeidAlert";
 import {
+    compareArbeidsforholdOpplysninger,
     compareOpplysninger,
     createInitialValues,
     createInntektPayload,
@@ -183,10 +184,13 @@ const Side = () => {
 
 const InntektForm = () => {
     const { behandlingId } = useForskudd();
+    const isSavedInitialOpplysninger = useRef(false);
+    const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
     const { data: behandling } = useGetBehandling(behandlingId);
     const { data: inntekter } = useHentInntekter(behandlingId);
-    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKT_BEARBEIDET);
+    const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
+    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
     const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
@@ -225,69 +229,98 @@ const InntektForm = () => {
         const { unsubscribe } = useFormMethods.watch(() => {
             if (useFormMethods.formState.isDirty) {
                 debouncedOnSave();
-
-                if (!inntektOpplysninger) {
-                    saveOpplysninger.mutate({
-                        behandlingId,
-                        aktiv: true,
-                        opplysningerType: OpplysningerType.INNTEKTSOPPLYSNINGER,
-                        data: JSON.stringify({
-                            inntekt: bidragInntekt.map((personInntekt) => ({
-                                ident: personInntekt.ident,
-                                summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe.map((inntekt) => ({
-                                    ...inntekt,
-                                    datoFom: dateToDDMMYYYYString(new Date(inntekt.periode.fom)),
-                                    datoTom: dateToDDMMYYYYString(new Date(inntekt.periode.til)),
-                                })),
-                            })),
-                            utvidetbarnetrygd: grunnlagspakke.ubstListe,
-                            barnetillegg: grunnlagspakke.barnetilleggListe,
-                            arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
-                        }),
-                        hentetDato: toISODateString(new Date()),
-                    });
-                    onSave();
-                }
             }
         });
+        if (!inntektOpplysninger && !isSavedInitialOpplysninger.current) {
+            lagreAlleOpplysninger();
+            onSave();
+        }
+
+        if (!arbeidsforholdOpplysninger && isSavedInitialArbeidsforholdOpplysninger.current) {
+            lagreArbeidsforholdOpplysninger();
+        }
+
+        // Prevent duplicate saving of opplysninger
+        isSavedInitialOpplysninger.current = true;
+        isSavedInitialArbeidsforholdOpplysninger.current = true;
         return () => unsubscribe();
     }, [useFormMethods.watch, useFormMethods.formState.isDirty]);
 
     useEffect(() => {
         if (inntektOpplysninger) {
             const savedOpplysninger = JSON.parse(inntektOpplysninger.data);
-            const changesInOpplysninger = compareOpplysninger(savedOpplysninger, {
+            const changesInntektOpplysninger = compareOpplysninger(savedOpplysninger, {
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
                     summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
-                arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
             });
 
-            if (changesInOpplysninger.length) {
-                setOpplysningerChanges(changesInOpplysninger);
+            const changesArbeidsforholdOpplysninger = arbeidsforholdOpplysninger
+                ? compareArbeidsforholdOpplysninger(
+                      JSON.parse(arbeidsforholdOpplysninger.data),
+                      arbeidsforhold.arbeidsforholdListe
+                  )
+                : [];
+
+            const allChanges = [...changesArbeidsforholdOpplysninger, ...changesInntektOpplysninger];
+            if (allChanges.length) {
+                setOpplysningerChanges(allChanges);
             }
         }
     }, []);
 
-    const updateOpplysninger = () => {
+    const lagreArbeidsforholdOpplysninger = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.INNTEKTSOPPLYSNINGER,
+            opplysningerType: OpplysningerType.ARBEIDSFORHOLD,
+            data: JSON.stringify(arbeidsforhold.arbeidsforholdListe ?? []),
+            hentetDato: toISODateString(new Date()),
+        });
+    };
+    const lagreAlleOpplysninger = () => {
+        saveOpplysninger.mutate({
+            behandlingId,
+            aktiv: true,
+            opplysningerType: OpplysningerType.INNTEKT_BEARBEIDET,
             data: JSON.stringify({
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
-                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
+                    versjon: personInntekt.data.versjon,
+                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe.map((inntekt) => ({
+                        ...inntekt,
+                        datoFom: dateToDDMMYYYYString(new Date(inntekt.periode.fom)),
+                        datoTom: dateToDDMMYYYYString(new Date(inntekt.periode.til)),
+                    })),
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
-                arbeidsforhold: arbeidsforhold.arbeidsforholdListe,
+                arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
             }),
             hentetDato: toISODateString(new Date()),
         });
+        saveOpplysninger.mutate({
+            behandlingId,
+            aktiv: true,
+            opplysningerType: OpplysningerType.INNTEKT,
+            data: JSON.stringify({
+                ainntektListe: grunnlagspakke.ainntektListe,
+                skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe,
+                barnetilleggListe: grunnlagspakke.barnetilleggListe,
+                barnetilsynListe: grunnlagspakke.barnetilsynListe,
+                kontantstotteListe: grunnlagspakke.kontantstotteListe,
+                ubstListe: grunnlagspakke.ubstListe,
+                overgangsstonadListe: grunnlagspakke.overgangsstonadListe,
+            }),
+            hentetDato: toISODateString(new Date()),
+        });
+    };
+    const updateOpplysninger = () => {
+        lagreAlleOpplysninger();
+        lagreArbeidsforholdOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
         const values = {

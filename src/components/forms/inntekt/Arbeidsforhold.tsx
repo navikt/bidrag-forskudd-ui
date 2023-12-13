@@ -7,7 +7,6 @@ import { ArbeidsforholdDto } from "../../../api/BidragGrunnlagApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
-import { InntektOpplysninger } from "../helpers/inntektFormHelpers";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
 interface ArbeidsforholdTabledata {
@@ -23,13 +22,14 @@ type ArbeidsforholdProps = {
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { behandlingId } = useForskudd();
-    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKTSOPPLYSNINGER);
+    const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
     const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
 
-    const savedOpplysninger: InntektOpplysninger = inntektOpplysninger?.data
-        ? JSON.parse(inntektOpplysninger.data)
-        : {};
-    const arbeidsforholdListe = savedOpplysninger.arbeidsforhold ?? arbeidsforhold.arbeidsforholdListe;
+    const savedOpplysninger: ArbeidsforholdDto[] = arbeidsforholdOpplysninger?.data
+        ? JSON.parse(arbeidsforholdOpplysninger.data)
+        : null;
+
+    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforhold.arbeidsforholdListe;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (

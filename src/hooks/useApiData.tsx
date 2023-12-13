@@ -65,7 +65,7 @@ export const QueryKeys = {
     opplysninger: (behandlingId: number, opplysningerType: OpplysningerType) => [
         "opplysninger",
         behandlingId,
-        opplysningerType,
+        opplysningerType.toString(),
     ],
 };
 
@@ -480,7 +480,7 @@ export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagsp
     });
 };
 
-export const useAddOpplysningerData = (behandlingId: number, opplysningerType: OpplysningerType) => {
+export const useAddOpplysningerData = (behandlingId: number) => {
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
@@ -488,7 +488,7 @@ export const useAddOpplysningerData = (behandlingId: number, opplysningerType: O
             return data;
         },
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.opplysninger(behandlingId, opplysningerType), data);
+            queryClient.setQueryData(QueryKeys.opplysninger(behandlingId, data.opplysningerType), data);
         },
     });
 
