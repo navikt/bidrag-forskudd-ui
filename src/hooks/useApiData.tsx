@@ -8,7 +8,7 @@ import {
     useSuspenseQuery,
     UseSuspenseQueryResult,
 } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 import { useCallback } from "react";
 
 import {
@@ -46,6 +46,8 @@ import {
     BIDRAG_INNTEKT_API,
     PERSON_API,
 } from "../constants/api";
+import { useForskudd } from "../context/ForskuddContext";
+import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
@@ -57,6 +59,7 @@ export const MutationKeys = {
 export const QueryKeys = {
     virkningstidspunkt: (behandlingId: number) => ["virkningstidspunkt", behandlingId],
     visningsnavn: () => ["visningsnavn"],
+    beregningForskudd: () => ["beregning_forskudd"],
     notat: (behandlingId) => ["notat_payload", behandlingId],
     behandling: (behandlingId: number) => ["behandling", behandlingId],
     boforhold: (behandlingId: number) => ["boforhold", behandlingId],
@@ -85,8 +88,9 @@ export const useGetBehandlings = () =>
         staleTime: 0,
     });
 
-export const useGetBehandling = (behandlingId: number) =>
-    useSuspenseQuery({
+export const useGetBehandling = () => {
+    const { behandlingId } = useForskudd();
+    return useSuspenseQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API.api.hentBehandling(behandlingId);
@@ -94,6 +98,7 @@ export const useGetBehandling = (behandlingId: number) =>
         },
         staleTime: Infinity,
     });
+};
 
 export const useGetVirkningstidspunkt = (behandlingId: number) =>
     useSuspenseQuery({
@@ -217,6 +222,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
         queries: roller.map((rolle) => ({
             queryKey: ["persons", rolle.ident],
             queryFn: async (): Promise<PersonDto> => {
+                if (!rolle.ident) return { ident: "", visningsnavn: rolle.navn };
                 const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident });
                 return data;
             },
@@ -360,8 +366,8 @@ export const useGrunnlagspakke = (behandling: BehandlingDto): UseSuspenseQueryRe
     });
 };
 
-export const useHentArbeidsforhold = (behandlingId: number): UseSuspenseQueryResult<HentGrunnlagDto | null> => {
-    const { data: behandling } = useGetBehandling(behandlingId);
+export const useHentArbeidsforhold = (): UseSuspenseQueryResult<HentGrunnlagDto | null> => {
+    const { data: behandling } = useGetBehandling();
     const grunnlagspakkeId = behandling?.grunnlagspakkeid
         ? behandling.grunnlagspakkeid
         : useCreateGrunnlagspakke(behandling);
@@ -524,4 +530,25 @@ export const useNotat = (behandlingId: number) => {
     });
 
     return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatHtml;
+};
+
+export const useGetBeregningForskudd = () => {
+    const { behandlingId } = useForskudd();
+
+    return useSuspenseQuery<VedtakBeregningResult>({
+        queryKey: QueryKeys.beregningForskudd(),
+        queryFn: async () => {
+            try {
+                const response = await BEHANDLING_API_V1.api.beregnForskudd(behandlingId);
+                return { resultat: response.data };
+            } catch (error) {
+                if (error instanceof AxiosError && error.response.status == 400) {
+                    console.log(error.response.headers["warning"]);
+                    return {
+                        feil: error.response.headers["warning"]?.split(",") ?? [],
+                    };
+                }
+            }
+        },
+    });
 };

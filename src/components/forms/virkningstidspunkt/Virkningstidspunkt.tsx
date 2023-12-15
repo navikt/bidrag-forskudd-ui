@@ -47,7 +47,7 @@ const createPayload = (values: VirkningstidspunktFormValues) => ({
 
 const Main = ({ initialValues, error }) => {
     const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningsdato);

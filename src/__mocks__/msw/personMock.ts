@@ -102,5 +102,5 @@ export const generateName = () => {
     const middleName = names[sex][Math.floor(Math.random() * names[sex].length)];
     const lastName = names["lastName"][Math.floor(Math.random() * names["lastName"].length)];
 
-    return `${lastName}, ${firstName} ${middleName}`;
+    return `${firstName} ${middleName} ${lastName}`;
 };

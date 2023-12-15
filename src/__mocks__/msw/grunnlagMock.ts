@@ -2,7 +2,11 @@ import { rest, RestHandler, RestRequest } from "msw";
 
 import environment from "../../environment";
 import { getRandomInt } from "../../utils/number-utils";
-import { createGrunnlagspakkeData, createGrunnlagspakkeOppdaterData } from "../testdata/grunnlagTestData";
+import {
+    createArbeidsforholdData,
+    createGrunnlagspakkeData,
+    createGrunnlagspakkeOppdaterData,
+} from "../testdata/grunnlagTestData";
 
 export default function grunnlagMock(): RestHandler[] {
     const baseUrl = environment.url.bidragGrunnlag;
@@ -12,6 +16,13 @@ export default function grunnlagMock(): RestHandler[] {
                 ctx.set("Content-Type", "application/json"),
                 ctx.status(200),
                 ctx.body(getRandomInt().toString())
+            );
+        }),
+        rest.post(`${baseUrl}/hentgrunnlag`, async (req: RestRequest, res, ctx) => {
+            return res(
+                ctx.set("Content-Type", "application/json"),
+                ctx.status(200),
+                ctx.body(JSON.stringify(createArbeidsforholdData))
             );
         }),
         rest.post(`${baseUrl}/grunnlagspakke/:grunnlagspakkeId/oppdater`, async (req: RestRequest, res, ctx) => {
