@@ -1,4 +1,5 @@
 import { behandlingMock } from "./behandlingMock";
+import { beregningMock } from "./beregningMock";
 import boforholdMock from "./boforholdMock";
 import grunnlagMock from "./grunnlagMock";
 import inntektMock from "./inntekterMock";
@@ -10,6 +11,7 @@ import tokenMock from "./tokenMock";
 import virkningstidspunktMock from "./virkningstidspunktMock";
 import visningsNavnMock from "./visningsNavnMock";
 export const handlers = [
+    ...beregningMock(),
     ...tokenMock(),
     ...logMock(),
     ...personMock(),
