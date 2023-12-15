@@ -7,7 +7,7 @@ import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
 
 export const Header = memo(() => {
     const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const personsQueries = usePersonsQueries(behandling.roller);
     const rollerMedPersonNavn = personsQueries.map(({ data }) => data);
     return (

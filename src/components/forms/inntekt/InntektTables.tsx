@@ -118,7 +118,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const { behandlingId } = useForskudd();
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const {
         control,
         getValues,
@@ -324,8 +324,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 };
 
 export const UtvidetBarnetrygdTabel = () => {
-    const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
     const {
         control,
@@ -461,8 +460,7 @@ export const UtvidetBarnetrygdTabel = () => {
 };
 
 export const BarnetilleggTabel = () => {
-    const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const barna = behandling?.roller.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);

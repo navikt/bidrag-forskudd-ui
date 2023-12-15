@@ -23,7 +23,7 @@ type ArbeidsforholdProps = {
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { behandlingId } = useForskudd();
     const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
-    const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
+    const { data: arbeidsforhold } = useHentArbeidsforhold();
 
     const savedOpplysninger: ArbeidsforholdDto[] = arbeidsforholdOpplysninger?.data
         ? JSON.parse(arbeidsforholdOpplysninger.data)

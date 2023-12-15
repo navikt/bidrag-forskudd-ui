@@ -72,6 +72,8 @@ export interface Behandling {
     /** @uniqueItems true */
     utvidetBarnetrygd: UtvidetBarnetrygd[];
     deleted: boolean;
+    bidragspliktig?: Rolle;
+    bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
 }
 
@@ -377,7 +379,7 @@ export interface CreateRolleDto {
      * F.eks fødselsdato
      * @format date
      */
-    fødselsdato: string;
+    fødselsdato?: string;
     /**
      * Opprettetdato
      * @format date
@@ -522,6 +524,8 @@ export interface HusstandsbarnperiodeDto {
 
 export interface OppdatereBoforholdRequest {
     /** @uniqueItems true */
+    husstandsBarn: HusstandsbarnDto[];
+    /** @uniqueItems true */
     husstandsbarn: HusstandsbarnDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
@@ -603,15 +607,6 @@ export interface UtvidetbarnetrygdDto {
      * @example "2025-01-25"
      */
     datoTom?: string;
-}
-
-export interface UpdateBoforholdRequest {
-    /** @uniqueItems true */
-    husstandsBarn: HusstandsbarnDto[];
-    /** @uniqueItems true */
-    sivilstand: SivilstandDto[];
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
 }
 
 export interface BehandlingInfoDto {
@@ -710,10 +705,6 @@ export interface BeregnetForskuddResultat {
     grunnlagListe: Grunnlag[];
 }
 
-export interface Forskuddsberegningrespons {
-    resultat?: BeregnetForskuddResultat[];
-}
-
 /** Grunnlag */
 export interface Grunnlag {
     /** Referanse (unikt navn på grunnlaget) */
@@ -791,6 +782,16 @@ export interface ResultatBeregning {
     regel: string;
 }
 
+export interface ResultatForskuddsberegning {
+    resultatBarn: ResultatForskuddsberegningBarn[];
+}
+
+export interface ResultatForskuddsberegningBarn {
+    barn: ResultatRolle;
+    /** Resultatet av en forskuddsberegning */
+    resultat: BeregnetForskuddResultat;
+}
+
 /** Resultatet av en beregning for en gitt periode */
 export interface ResultatPeriode {
     /** Beregnet resultat periode */
@@ -799,6 +800,13 @@ export interface ResultatPeriode {
     resultat: ResultatBeregning;
     /** Beregnet grunnlag innhold */
     grunnlagsreferanseListe: string[];
+}
+
+export interface ResultatRolle {
+    ident?: string;
+    navn: string;
+    /** @format date */
+    fødselsdato: string;
 }
 
 /** Beregnet resultat periode */
@@ -1015,7 +1023,7 @@ export interface BehandlingDto {
     soknadRefId?: number;
     /** @format int64 */
     grunnlagspakkeid?: number;
-    årsak?: ForskuddAarsakType;
+    getårsak?: ForskuddAarsakType;
     virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
     virkningstidspunktsbegrunnelseKunINotat?: string;
     boforholdsbegrunnelseIVedtakOgNotat?: string;
@@ -1110,10 +1118,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-feature.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1202,7 +1207,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-feature.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1567,7 +1572,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @deprecated
          * @secure
          */
-        oppdatereBoforhold1: (behandlingId: number, data: UpdateBoforholdRequest, params: RequestParams = {}) =>
+        oppdatereBoforhold1: (behandlingId: number, data: OppdatereBoforholdRequest, params: RequestParams = {}) =>
             this.request<BoforholdResponse, any>({
                 path: `/api/behandling/${behandlingId}/boforhold`,
                 method: "PUT",
@@ -1642,7 +1647,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<Forskuddsberegningrespons, any>({
+            this.request<ResultatForskuddsberegning, any>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,

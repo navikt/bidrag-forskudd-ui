@@ -1,5 +1,5 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
@@ -11,6 +11,7 @@ interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     behandlingId: number;
+    saksnummer?: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
@@ -30,6 +31,7 @@ interface IForskuddContextProps {
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
 function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskuddContextProps>) {
+    const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
@@ -47,6 +49,7 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
             activeStep,
             setActiveStep,
             behandlingId,
+            saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,
             inntektFormValues,
@@ -61,6 +64,7 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
         [
             activeStep,
             behandlingId,
+            saksnummer,
             virkningstidspunktFormValues,
             inntektFormValues,
             boforholdFormValues,

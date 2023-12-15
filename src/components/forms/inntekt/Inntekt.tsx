@@ -186,12 +186,12 @@ const InntektForm = () => {
     const { behandlingId } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const { data: inntekter } = useHentInntekter(behandlingId);
     const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKT_BEARBEIDET);
     const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
-    const { data: arbeidsforhold } = useHentArbeidsforhold(behandlingId);
+    const { data: arbeidsforhold } = useHentArbeidsforhold();
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(

@@ -135,7 +135,7 @@ const Main = ({
     boforoholdOpplysninger: OpplysningerDto;
 }) => {
     const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsdato);
     const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
@@ -211,7 +211,7 @@ const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const { data: behandling } = useGetBehandling(behandlingId);
+    const { data: behandling } = useGetBehandling();
     const { data: boforhold } = useGetBoforhold(behandlingId);
     const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
     const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD_BEARBEIDET);
