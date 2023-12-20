@@ -7,6 +7,7 @@ interface DatePickerInputProps {
     onChange: (selectedDay: Date | undefined) => void;
     label: string;
     fromDate?: Date;
+    toDate?: Date;
     placeholder?: string;
     hideLabel?: boolean;
     className?: string;
@@ -21,6 +22,7 @@ export const DatePickerInput = ({
     label,
     onChange,
     fromDate,
+    toDate,
     placeholder,
     hideLabel,
     className,
@@ -38,6 +40,7 @@ export const DatePickerInput = ({
             if (onValidate) onValidate(val);
         },
         fromDate,
+        toDate,
         defaultSelected: isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null,
     });
     datepickerProps.strategy = strategy;

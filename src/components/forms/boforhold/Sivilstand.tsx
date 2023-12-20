@@ -1,21 +1,23 @@
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useState } from "react";
+import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApi";
+import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     calculateFraDato,
+    checkPeriodizationErrors,
     editPeriods,
     removeAndEditPeriods,
     sivilstandForskuddOptions,
@@ -52,12 +54,40 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     });
 
     const watchFieldArray = useWatch({ control, name: `sivilstand` });
-    const controlledFields = sivilstandPerioder.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray[index],
-        };
-    });
+    const controlledFields = sivilstandPerioder.fields.map((field, index) => ({
+        ...field,
+        ...watchFieldArray[index],
+    }));
+    const sivilistand = getValues(`sivilstand`);
+
+    useEffect(() => {
+        validatePeriods(sivilistand);
+    }, [sivilistand]);
+
+    const validatePeriods = (perioderValues: SivilstandDto[]) => {
+        const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
+
+        if (errorTypes.length) {
+            setError(`root.sivilstand`, {
+                types: errorTypes.reduce(
+                    (acc, errorType) => ({
+                        ...acc,
+                        [errorType]:
+                            errorType === "hullIPerioder"
+                                ? removePlaceholder(
+                                      boforholdPeriodiseringErros[errorType],
+                                      toDateString(virkningstidspunkt),
+                                      toDateString(new Date(perioderValues[0].datoFom))
+                                  )
+                                : boforholdPeriodiseringErros[errorType],
+                    }),
+                    {}
+                ),
+            });
+        } else {
+            clearErrors(`root.sivilstand`);
+        }
+    };
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`sivilstand`);
@@ -66,58 +96,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
-        }
-
-        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
-            const laterPeriodExists = perioderValues
-                .filter((_periode, i) => i !== index)
-                .some(
-                    (periode) =>
-                        periode.datoTom === null ||
-                        new Date(periode.datoTom).getTime() >= new Date(perioderValues[index].datoTom).getTime()
-                );
-
-            if (!laterPeriodExists) {
-                setError(`sivilstand.${index}.datoTom`, {
-                    type: "notValid",
-                    message: "Det er ingen løpende status i beregningen",
-                });
-            }
-
-            if (laterPeriodExists) {
-                const fieldState = getFieldState(`sivilstand.${index}.datoTom`);
-                if (fieldState.error && fieldState.error.message === "Det må være minst en løpende periode") {
-                    clearErrors(`sivilstand.${index}.datoTom`);
-                }
-            }
-        }
-
-        const periods = editPeriods(perioderValues, index);
-        const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
-        const virkningsDatoIsInFuture = isAfterDate(virkningstidspunkt, firstDayOfCurrentMonth);
-        const futurePeriodExists = periods.some((periode) =>
-            virkningsDatoIsInFuture
-                ? isAfterDate(periode.datoFom, virkningstidspunkt)
-                : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
-        );
-
-        if (futurePeriodExists) {
-            setErrorMessage({ title: "Feil i periodisering", text: "Det kan ikke periodiseres fremover i tid." });
-            setErrorModalOpen(true);
-            return;
-        }
-
-        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, virkningstidspunkt);
-
-        if (firstPeriodIsNotFromVirkningsTidspunkt) {
-            setErrorMessage({
-                title: "Feil i periodisering",
-                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toDateString(
-                    virkningstidspunkt
-                )} til ${toDateString(new Date(periods[0].datoFom))}`,
-            });
-            setErrorModalOpen(true);
-            return;
         }
 
         const fieldState = getFieldState(`sivilstand.${index}`);
@@ -132,7 +110,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             sivilstand,
         };
         setBoforholdFormValues(updatedValues);
-        setValue(`sivilstand`, sivilstand);
+        setValue("sivilstand", sivilstand);
         saveBoforhold(updatedValues);
         setEditableRow(undefined);
     };
@@ -199,11 +177,18 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     };
 
     return (
-        <>
-            {errors?.root?.sivilstand && (
-                <Alert variant="warning">
-                    <BodyShort>{errors.root.sivilstand.message}</BodyShort>
-                </Alert>
+        <Box padding="4" background="surface-subtle" className="overflow-hidden">
+            {(errors?.root?.sivilstand as { types: string[] })?.types && (
+                <div className="mb-4">
+                    <Alert variant="warning">
+                        <Heading spacing size="small" level="3">
+                            Feil i periodisering
+                        </Heading>
+                        {Object.values((errors.root.sivilstand as { types: string[] }).types).map((type: string) => (
+                            <p key={type}>{type}</p>
+                        ))}
+                    </Alert>
+                </div>
             )}
             {controlledFields.length > 0 && (
                 <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
@@ -303,9 +288,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     ))}
                 </TableWrapper>
             )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
+            <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
                 + Legg til periode
             </Button>
-        </>
+        </Box>
     );
 };

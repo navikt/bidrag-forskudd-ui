@@ -3,8 +3,10 @@ import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     BoforholdResponse,
     Bostatuskode,
+    HusstandsbarnDto,
     HusstandsBarnPeriodeDto,
     Kilde,
+    RolleDto,
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApi";
@@ -267,11 +269,12 @@ export const getSivilstandPerioder = (
 };
 export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
-    virkningsOrSoktFraDato: Date
+    virkningsOrSoktFraDato: Date,
+    barnMedISaken: RolleDto[]
 ) => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
-        medISak: true,
+        medISak: barnMedISaken.some((b) => b.ident === barn.ident),
         perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
     }));
 };
@@ -282,13 +285,18 @@ export const createInitialValues = (
         husstand: HusstandOpplysningFraFolkeRegistre[];
         sivilstand: SivilstandOpplysninger[];
     },
-    virkningsOrSoktFraDato: Date
+    virkningsOrSoktFraDato: Date,
+    barnMedISaken: RolleDto[]
 ) => {
     return {
         ...boforhold,
         husstandsBarn: boforhold?.husstandsBarn?.length
-            ? boforhold.husstandsBarn
-            : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre.husstand, virkningsOrSoktFraDato),
+            ? boforhold.husstandsBarn.sort(compareHusstandsBarn)
+            : getBarnPerioderFromHusstandsListe(
+                  opplysningerFraFolkRegistre.husstand,
+                  virkningsOrSoktFraDato,
+                  barnMedISaken
+              ).sort(compareHusstandsBarn),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
             : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
@@ -533,4 +541,46 @@ export const compareOpplysninger = (
     }
 
     return changedLog;
+};
+
+export const compareHusstandsBarn = (currentBarn: HusstandsbarnDto, nextBarn: HusstandsbarnDto) => {
+    if ((currentBarn.medISak && nextBarn.medISak) || (!currentBarn.medISak && !nextBarn.medISak)) {
+        return new Date(currentBarn.foedselsdato).getTime() - new Date(nextBarn.foedselsdato).getTime();
+    }
+    if (currentBarn.medISak && !nextBarn.medISak) {
+        return -1;
+    }
+    if (!currentBarn.medISak && nextBarn.medISak) {
+        return 1;
+    }
+};
+
+export const checkPeriodizationErrors = (
+    perioderValues: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    datoFra: Date
+) => {
+    const atLeastOneRunningPeriod = perioderValues.some((periode) => periode.datoTom === null);
+    const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
+    const virkningsDatoIsInFuture = isAfterDate(datoFra, firstDayOfCurrentMonth);
+    const futurePeriodExists = perioderValues.some((periode) =>
+        virkningsDatoIsInFuture
+            ? isAfterDate(periode.datoFom, datoFra)
+            : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
+    );
+    const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(perioderValues[0].datoFom, datoFra);
+    const errorTypes: string[] = [];
+
+    if (!atLeastOneRunningPeriod) {
+        errorTypes.push("ingenLoependePeriode");
+    }
+
+    if (futurePeriodExists) {
+        errorTypes.push("framoverPeriodisering");
+    }
+
+    if (firstPeriodIsNotFromVirkningsTidspunkt) {
+        errorTypes.push("hullIPerioder");
+    }
+
+    return errorTypes;
 };

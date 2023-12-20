@@ -40,14 +40,16 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
             </div>
             <table>
                 <thead>
-                    <td>Periode</td>
-                    <td>Arbeidsgiver</td>
-                    <td>Stilling</td>
-                    <td>Lønnsendring</td>
+                    <tr>
+                        <td>Periode</td>
+                        <td>Arbeidsgiver</td>
+                        <td>Stilling</td>
+                        <td>Lønnsendring</td>
+                    </tr>
                 </thead>
                 <tbody>
-                    {arbeidsforholdTableData.map((arbeidsforhold) => (
-                        <tr>
+                    {arbeidsforholdTableData.map((arbeidsforhold, index) => (
+                        <tr key={`${arbeidsforhold.arbeidsgivernavn}-${index}`}>
                             <td>
                                 {arbeidsforhold.periodeFra} - {arbeidsforhold.periodeTil}
                             </td>

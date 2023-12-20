@@ -26,6 +26,7 @@ import {
 } from "../../../api/BidragBehandlingApi";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
+import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -58,18 +59,22 @@ import {
     toDateString,
     toISODateString,
 } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
+import { ConfirmationModal } from "../../modal/ConfirmationModal";
 import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     boforholdForskuddOptions,
+    checkPeriodizationErrors,
+    compareHusstandsBarn,
     compareOpplysninger,
     createInitialValues,
     editPeriods,
@@ -229,9 +234,13 @@ const BoforholdsForm = () => {
         () => dateOrNull(virkningstidspunktValues?.virkningsdato) ?? dateOrNull(behandling?.datoFom),
         [virkningstidspunktValues?.virkningsdato, behandling?.datoFom]
     );
+    const barnMedISaken = useMemo(
+        () => behandling.roller.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN),
+        [behandling.roller]
+    );
     const initialValues = useMemo(
-        () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
-        [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato]
+        () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken),
+        [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
     );
     const savedOpplysninger = boforoholdOpplysninger
         ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
@@ -239,6 +248,7 @@ const BoforholdsForm = () => {
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
+        criteriaMode: "all",
     });
 
     useEffect(() => {
@@ -292,7 +302,8 @@ const BoforholdsForm = () => {
             ...fieldValues,
             husstandsBarn: getBarnPerioderFromHusstandsListe(
                 opplysningerFraFolkRegistre.husstand,
-                virkningsOrSoktFraDato
+                virkningsOrSoktFraDato,
+                barnMedISaken
             ),
             sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
         };
@@ -338,6 +349,7 @@ const AddBarnForm = ({
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsBarn">;
 }) => {
     const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const { getValues } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -381,22 +393,32 @@ const AddBarnForm = ({
             return;
         }
 
+        console.log("person", person);
+        const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
+
         const addedBarn = {
             ident: val === "dnummer" ? ident : "",
             medISak: false,
             navn: navn,
-            foedselsdato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato),
+            foedselsdato: fd,
             perioder: [
                 {
-                    datoFom: toISODateString(datoFom),
+                    datoFom: isAfterDate(fd, datoFom)
+                        ? toISODateString(firstDayOfMonth(new Date(fd)))
+                        : toISODateString(datoFom),
                     datoTom: null,
                     bostatus: Bostatuskode.MED_FORELDER,
                     kilde: Kilde.MANUELL,
                 },
             ],
         };
-        const husstandsBarn = [...boforholdFormValues.husstandsBarn].concat(addedBarn);
-        barnFieldArray.append(addedBarn);
+        const husstandsBarn = boforholdFormValues.husstandsBarn.concat(addedBarn).sort(compareHusstandsBarn);
+        const indexOfFirstOlderChild = getValues("husstandsBarn").findIndex(
+            (barn) =>
+                !barn.medISak && new Date(barn.foedselsdato).getTime() > new Date(addedBarn.foedselsdato).getTime()
+        );
+        const insertIndex = indexOfFirstOlderChild === -1 ? getValues("husstandsBarn").length : indexOfFirstOlderChild;
+        barnFieldArray.insert(insertIndex, addedBarn);
         const updatedValues = {
             ...boforholdFormValues,
             husstandsBarn,
@@ -411,7 +433,7 @@ const AddBarnForm = ({
         PERSON_API.informasjon
             .hentPersonPost({ ident: value })
             .then(({ data }) => {
-                setNavn(data.visningsnavn);
+                setNavn(data.kortnavn);
                 setPerson(data);
                 const formErrors = { ...error };
                 delete formErrors.ident;
@@ -486,6 +508,7 @@ const AddBarnForm = ({
                             defaultValue={null}
                             fieldValue={foedselsdato}
                             error={error?.foedselsdato}
+                            toDate={new Date()}
                         />
                     )}
                     <TextField
@@ -495,6 +518,7 @@ const AddBarnForm = ({
                         value={navn}
                         onChange={(e) => setNavn(e.target.value)}
                         error={error?.navn}
+                        readOnly={val !== "fritekst"}
                     />
                 </FlexRow>
                 <FlexRow>
@@ -514,6 +538,9 @@ const BarnPerioder = ({
     datoFom: Date;
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
 }) => {
+    const ref = useRef<HTMLDialogElement>(null);
+    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
@@ -532,37 +559,60 @@ const BarnPerioder = ({
         setOpenAddBarnForm(true);
     };
 
+    const onRemoveBarn = (index: number) => {
+        const husstandsBarn = [...boforholdFormValues.husstandsBarn].filter((b, i) => i !== index);
+        barnFieldArray.remove(index);
+        const updatedValues = {
+            ...boforholdFormValues,
+            husstandsBarn,
+        };
+
+        setBoforholdFormValues(updatedValues);
+        saveBoforhold(updatedValues);
+        ref.current?.close();
+    };
+
     return (
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <Box className="p-0">
+                    <Box padding="4" background="surface-subtle" className="overflow-hidden">
                         <div className="mb-4">
-                            <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
-                                <div className="w-max h-max">
-                                    <RolleTag rolleType={RolleDtoRolleType.BARN} />
+                            <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
+                                <div className="w-8 mr-2 h-max">
+                                    {item.medISak && <RolleTag rolleType={RolleDtoRolleType.BARN} />}
                                 </div>
-                                <div>
-                                    <FlexRow className="items-center h-[27px]">
-                                        <BodyShort size="small" className="font-bold">
-                                            {item.medISak && <PersonNavn ident={item.ident}></PersonNavn>}
-                                            {!item.medISak && item.navn}
-                                        </BodyShort>
-                                        <BodyShort size="small">{item.ident}</BodyShort>
-                                    </FlexRow>
+                                <div className="flex items-center gap-4">
+                                    <BodyShort size="small" className="font-bold">
+                                        {item.medISak && <PersonNavn ident={item.ident}></PersonNavn>}
+                                        {!item.medISak && item.navn}
+                                    </BodyShort>
+                                    <BodyShort size="small">{item.ident}</BodyShort>
                                 </div>
-                            </div>
-                            {item.ident !== "" && (
-                                <div>
-                                    <ReadMore header="Opplysninger fra Folkeregistret" size="small">
-                                        <Opplysninger
-                                            opplysninger={opplysningerFraFolkRegistre}
-                                            datoFom={datoFom}
-                                            ident={item.ident}
+                                {!item.medISak && (
+                                    <div className="flex items-center justify-end">
+                                        <Button
+                                            type="button"
+                                            onClick={() => ref.current?.showModal()}
+                                            icon={<TrashIcon aria-hidden />}
+                                            variant="tertiary"
+                                            size="small"
                                         />
-                                    </ReadMore>
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                            </div>
+                            {item.ident !== "" &&
+                                opplysningerFraFolkRegistre.some((opplysning) => opplysning.ident === item.ident) && (
+                                    <div>
+                                        <ReadMore header="Opplysninger fra Folkeregistret" size="small">
+                                            <Opplysninger
+                                                opplysninger={opplysningerFraFolkRegistre}
+                                                datoFom={datoFom}
+                                                ident={item.ident}
+                                            />
+                                        </ReadMore>
+                                    </div>
+                                )}
                         </div>
                         <Perioder
                             barnIndex={index}
@@ -571,6 +621,21 @@ const BarnPerioder = ({
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                         />
                     </Box>
+                    <ConfirmationModal
+                        ref={ref}
+                        description="Ønsker du å slette barnet som er lagt til i beregningen?"
+                        heading="Ønsker du å slette?"
+                        footer={
+                            <>
+                                <Button type="button" onClick={() => onRemoveBarn(index)}>
+                                    Ja, slett
+                                </Button>
+                                <Button type="button" variant="secondary" onClick={() => ref.current?.close()}>
+                                    Avbryt
+                                </Button>
+                            </>
+                        }
+                    />
                 </Fragment>
             ))}
             {openAddBarnForm && (
@@ -603,26 +668,63 @@ const Perioder = ({
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const toVisningsnavn = useVisningsnavn();
-
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(foedselsdato, virkningstidspunkt);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, setError, setValue, getFieldState } =
-        useFormContext<BoforholdFormValues>();
+    const {
+        control,
+        getValues,
+        clearErrors,
+        setError,
+        setValue,
+        getFieldState,
+        formState: { errors },
+    } = useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
         name: `husstandsBarn.${barnIndex}.perioder`,
     });
     const [lastPeriodsState, setLastPeriodsState] = useState([]);
     const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
-    const controlledFields = barnPerioder.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray[index],
-        };
-    });
+    const controlledFields = barnPerioder.fields.map((field, index) => ({
+        ...field,
+        ...watchFieldArray[index],
+    }));
+    const barn = getValues(`husstandsBarn.${barnIndex}`);
+    const hasOpplysningerFraFolkeregistre = opplysningerFraFolkRegistre.some(
+        (opplysning) => opplysning.ident === barn.ident
+    );
+
+    useEffect(() => {
+        validatePeriods(barn.perioder);
+    }, [barn.perioder]);
+
+    const validatePeriods = (perioderValues: HusstandsBarnPeriodeDto[]) => {
+        const errorTypes = checkPeriodizationErrors(perioderValues, datoFra);
+
+        if (errorTypes.length) {
+            setError(`root.husstandsBarn.${barnIndex}`, {
+                types: errorTypes.reduce(
+                    (acc, errorType) => ({
+                        ...acc,
+                        [errorType]:
+                            errorType === "hullIPerioder"
+                                ? removePlaceholder(
+                                      boforholdPeriodiseringErros[errorType],
+                                      toDateString(datoFra),
+                                      toDateString(new Date(perioderValues[0].datoFom))
+                                  )
+                                : boforholdPeriodiseringErros[errorType],
+                    }),
+                    {}
+                ),
+            });
+        } else {
+            clearErrors(`root.husstandsBarn.${barnIndex}`);
+        }
+    };
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
@@ -633,61 +735,9 @@ const Perioder = ({
             });
         }
 
-        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
-            const laterPeriodExists = perioderValues
-                .filter((_periode, i) => i !== index)
-                .some(
-                    (periode) =>
-                        periode.datoTom === null ||
-                        new Date(periode.datoTom).getTime() >= new Date(perioderValues[index].datoTom).getTime()
-                );
-
-            if (!laterPeriodExists) {
-                setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`, {
-                    type: "notValid",
-                    message: "Det er ingen løpende status i beregningen",
-                });
-            }
-
-            if (laterPeriodExists) {
-                const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
-                if (fieldState.error && fieldState.error.message === "Det må være minst en løpende periode") {
-                    clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
-                }
-            }
-        }
-
-        const periods = editPeriods(perioderValues, index);
-        const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
-        const virkningsDatoIsInFuture = isAfterDate(datoFra, firstDayOfCurrentMonth);
-        const futurePeriodExists = periods.some((periode) =>
-            virkningsDatoIsInFuture
-                ? isAfterDate(periode.datoFom, datoFra)
-                : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
-        );
-
-        if (futurePeriodExists) {
-            setErrorMessage({ title: "Feil i periodisering", text: "Det kan ikke periodiseres fremover i tid." });
-            setErrorModalOpen(true);
-            return;
-        }
-
-        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, datoFra);
-
-        if (firstPeriodIsNotFromVirkningsTidspunkt) {
-            setErrorMessage({
-                title: "Feil i periodisering",
-                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toDateString(
-                    datoFra
-                )} til ${toDateString(new Date(periods[0].datoFom))}`,
-            });
-            setErrorModalOpen(true);
-            return;
-        }
-
         const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}`);
         if (!fieldState.error) {
-            updatedAndSave(periods);
+            updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 
@@ -785,21 +835,8 @@ const Perioder = ({
 
     return (
         <>
-            <div className="flex justify-between">
-                {showUndoButton && (
-                    <Button
-                        variant="tertiary"
-                        type="button"
-                        size="small"
-                        className="w-fit"
-                        onClick={undoAction}
-                        iconPosition="right"
-                        icon={<ArrowUndoIcon aria-hidden />}
-                    >
-                        Angre siste steg
-                    </Button>
-                )}
-                {showResetButton && (
+            {hasOpplysningerFraFolkeregistre && showResetButton && (
+                <div className="flex justify-end mb-4">
                     <Button
                         variant="tertiary"
                         type="button"
@@ -809,8 +846,21 @@ const Perioder = ({
                     >
                         Reset til data fra FREG
                     </Button>
-                )}
-            </div>
+                </div>
+            )}
+
+            {errors?.root?.husstandsBarn?.[barnIndex]?.types && (
+                <div className="mb-4">
+                    <Alert variant="warning">
+                        <Heading spacing size="small" level="3">
+                            Feil i periodisering
+                        </Heading>
+                        {Object.values(errors.root.husstandsBarn[barnIndex].types).map((type: string) => (
+                            <p key={type}>{type}</p>
+                        ))}
+                    </Alert>
+                </div>
+            )}
 
             {controlledFields.length > 0 && (
                 <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", "", ""]}>
@@ -918,7 +968,20 @@ const Perioder = ({
                     ))}
                 </TableWrapper>
             )}
-            <div className="my-4 grid gap-4">
+            <div className="mt-4 grid gap-4">
+                {showUndoButton && (
+                    <Button
+                        variant="tertiary"
+                        type="button"
+                        size="small"
+                        className="w-fit"
+                        onClick={undoAction}
+                        iconPosition="right"
+                        icon={<ArrowUndoIcon aria-hidden />}
+                    >
+                        Angre siste steg
+                    </Button>
+                )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                     + Legg til periode
                 </Button>

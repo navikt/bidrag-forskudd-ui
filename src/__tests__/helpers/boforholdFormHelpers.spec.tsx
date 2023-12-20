@@ -1,7 +1,13 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { Bostatuskode as BoStatusType, Kilde, Sivilstandskode } from "../../api/BidragBehandlingApi";
+import {
+    Bostatuskode as BoStatusType,
+    Kilde,
+    RolleDto,
+    RolleDtoRolleType,
+    Sivilstandskode,
+} from "../../api/BidragBehandlingApi";
 import { SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import {
     checkOverlappingPeriods,
@@ -449,10 +455,19 @@ describe("BoforholdFormHelpers", () => {
                 ],
             },
         ];
+        const barnMedISaken: RolleDto[] = [
+            {
+                id: 1,
+                rolleType: RolleDtoRolleType.BARN,
+                ident: "02110180716",
+                navn: "ALI RAHMAN RAHMAN",
+                fodtDato: "2001-11-02",
+            },
+        ];
 
         const datoFom = new Date("2023-06-01");
         const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom);
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
         expect(result[0].perioder.length).equals(2);
         expect(result[0].perioder[0].datoFom).equals("2023-06-01");
         expect(result[0].perioder[0].datoTom).equals("2023-08-31");
@@ -464,6 +479,18 @@ describe("BoforholdFormHelpers", () => {
 
     it("should create husstands periods from the folkeregistre data", () => {
         const datoFom = new Date("2020-06-01");
+        const barnMedISaken: RolleDto[] = [
+            {
+                id: 1,
+                rolleType: RolleDtoRolleType.BARN,
+                ident: "03522150877",
+            },
+            {
+                id: 2,
+                rolleType: RolleDtoRolleType.BARN,
+                ident: "07512150855",
+            },
+        ];
         const husstandsOpplysningerFraFolkRegistre = [
             {
                 ident: "03522150877",
@@ -548,7 +575,7 @@ describe("BoforholdFormHelpers", () => {
                 medISaken: true,
             },
         ];
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom);
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
         result.forEach((r, i) => {
             r.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
@@ -560,6 +587,13 @@ describe("BoforholdFormHelpers", () => {
 
     it("periods should get registrert status if there is 1 or more days with registrert status, only if a whole month is ikke registrert it should get status ikke registrert", () => {
         const datoFom = new Date("2019-04-01");
+        const barnMedISaken: RolleDto[] = [
+            {
+                id: 1,
+                rolleType: RolleDtoRolleType.BARN,
+                ident: "07512150855",
+            },
+        ];
         const husstandsOpplysningerFraFolkRegistre = [
             {
                 ident: "07512150855",
@@ -620,7 +654,7 @@ describe("BoforholdFormHelpers", () => {
                 medISaken: true,
             },
         ];
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom);
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
         expect(result[0].perioder.length).equals(expectedResult[0].perioder.length);
         result.forEach((r, i) => {
             r.perioder.forEach((periode, j) => {
