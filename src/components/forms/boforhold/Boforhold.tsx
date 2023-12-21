@@ -38,7 +38,6 @@ import {
     useGetOpplysninger,
     useGetVirkningstidspunkt,
     useGrunnlagspakke,
-    useUpdateBoforhold,
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
@@ -179,18 +178,17 @@ const Main = ({
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
-    const { getValues, watch } = useFormContext<BoforholdFormValues>();
+    const { setActiveStep, boforholdFormValues } = useForskudd();
+    const { watch } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
-    const onSave = () => saveBoforhold(getValues());
+    const onSave = () => saveBoforhold(boforholdFormValues);
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     const debouncedOnSave = useDebounce(onSave);
-    const textFields = ["boforholdBegrunnelseMedIVedtakNotat", "boforholdBegrunnelseKunINotat"];
 
     useEffect(() => {
         const subscription = watch((_, { name }) => {
-            if (textFields.includes(name)) {
+            if (["boforholdBegrunnelseMedIVedtakNotat", "boforholdBegrunnelseKunINotat"].includes(name)) {
                 debouncedOnSave();
             }
         });
@@ -222,7 +220,7 @@ const BoforholdsForm = () => {
     const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD_BEARBEIDET);
     const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
     const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
-    const { mutation: updateBoforhold } = useUpdateBoforhold(behandlingId);
+    const saveBoforhold = useOnSaveBoforhold();
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
             husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
@@ -262,7 +260,7 @@ const BoforholdsForm = () => {
 
         if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
             lagreAlleOpplysninger();
-            updateBoforhold.mutate(initialValues);
+            saveBoforhold(initialValues);
         }
 
         isSavedInitialOpplysninger.current = true;
@@ -308,7 +306,7 @@ const BoforholdsForm = () => {
             sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
         };
         useFormMethods.reset(values);
-        updateBoforhold.mutate(values);
+        saveBoforhold(values);
         setBoforholdFormValues(values);
         setOpplysningerChanges([]);
     };
