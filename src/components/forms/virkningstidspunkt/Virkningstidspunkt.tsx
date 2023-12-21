@@ -3,7 +3,7 @@ import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { VirkningstidspunktDto } from "../../../api/BidragBehandlingApiV1";
+import { OppdaterVirkningstidspunkt, VirkningstidspunktDto } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -35,9 +35,13 @@ const createInitialValues = (response: VirkningstidspunktDto) =>
         virkningstidspunktsbegrunnelseKunINotat: response.notat?.kunINotat ?? "",
     }) as VirkningstidspunktFormValues;
 
-const createPayload = (values: VirkningstidspunktFormValues) => ({
+const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningstidspunkt => ({
     ...values,
     årsak: values.årsak === "" ? null : values.årsak,
+    notat: {
+        medIVedtaket: values.virkningstidspunktsbegrunnelseIVedtakOgNotat,
+        kunINotat: values.virkningstidspunktsbegrunnelseKunINotat,
+    },
 });
 
 const Main = ({ initialValues, error }) => {

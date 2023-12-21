@@ -6,6 +6,7 @@ import {
     HusstandsbarnDto,
     HusstandsbarnperiodeDto,
     Kilde,
+    OppdaterBehandlingRequest,
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
@@ -297,11 +298,12 @@ export const createInitialValues = (
     };
 };
 
-export const createPayload = (values: BoforholdFormValues) => ({
-    husstandsbarn: values.husstandsbarn,
-    sivilstand: values.sivilstand,
-    boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
-    boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
+export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequest => ({
+    boforhold: {
+        ...values,
+        husstandsbarn: values.husstandsbarn,
+        sivilstand: values.sivilstand,
+    },
 });
 
 export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: string }[]) => {

@@ -181,7 +181,7 @@ const Side = () => {
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     const debouncedOnSave = useDebounce(onSave);
-    const textFields = ["boforholdBegrunnelseMedIVedtakNotat", "boforholdBegrunnelseKunINotat"];
+    const textFields = ["notat.medIVedtaket", "notat.kunINotat"];
 
     useEffect(() => {
         const subscription = watch((_, { name }) => {
@@ -197,11 +197,8 @@ const Side = () => {
             <Heading level="3" size="medium">
                 Begrunnelse
             </Heading>
-            <FormControlledTextarea
-                name="boforholdBegrunnelseMedIVedtakNotat"
-                label="Begrunnelse (med i vedtaket og notat)"
-            />
-            <FormControlledTextarea name="boforholdBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
+            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -291,6 +288,7 @@ const BoforholdsForm = () => {
         lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
+        console.log(fieldValues);
         const values: OppdaterBoforholdRequest = {
             ...fieldValues,
             husstandsbarn:
@@ -396,11 +394,11 @@ const AddBarnForm = ({
                 },
             ],
         };
-        const husstandsBarn = [...boforholdFormValues.husstandsbarn].concat(addedBarn);
+        const husstandsbarn = [...boforholdFormValues.husstandsbarn].concat(addedBarn);
         barnFieldArray.append(addedBarn);
         const updatedValues = {
             ...boforholdFormValues,
-            husstandsBarn,
+            husstandsbarn,
         };
 
         setBoforholdFormValues(updatedValues);
@@ -698,13 +696,13 @@ const Perioder = ({
 
     const updatedAndSave = (updatedPeriods: HusstandsbarnperiodeDto[]) => {
         setLastPeriodsState(boforholdFormValues.husstandsbarn[barnIndex].perioder);
-        const husstandsBarn = boforholdFormValues.husstandsbarn.toSpliced(barnIndex, 1, {
+        const husstandsbarn = boforholdFormValues.husstandsbarn.toSpliced(barnIndex, 1, {
             ...boforholdFormValues.husstandsbarn[barnIndex],
             perioder: updatedPeriods,
         });
         const updatedValues = {
             ...boforholdFormValues,
-            husstandsBarn,
+            husstandsbarn,
         };
         setBoforholdFormValues(updatedValues);
         setValue(`husstandsbarn.${barnIndex}.perioder`, updatedPeriods);
