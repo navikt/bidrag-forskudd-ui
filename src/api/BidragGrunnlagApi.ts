@@ -57,33 +57,6 @@ export enum SivilstandskodePDL {
     GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
 }
 
-export interface EksternePerioderRequest {
-    personIdent: string;
-    /** @format date */
-    fomDato: string;
-    /** @format date */
-    tomDato: string;
-}
-
-export interface EksternPeriodeMedBelop {
-    personIdent: string;
-    /** @format date */
-    fomDato: string;
-    /** @format date */
-    tomDato: string;
-    /** @format int32 */
-    beløp: number;
-    datakilde: string;
-}
-
-export interface EksternePerioderMedBelopResponse {
-    perioder: EksternPeriodeMedBelop[];
-}
-
-export interface Ressurs {
-    data: EksternePerioderMedBelopResponse;
-}
-
 export interface NavnFodselDodDto {
     /** Gir navn, fødselsdato og fødselsår for angitt person. Fødselsår finnes for alle i PDL, mens noen ikke har utfyllt fødselsdato */
     navn: string;
@@ -1719,25 +1692,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentSivilstand: (data: string, params: RequestParams = {}) =>
             this.request<SivilstandshistorikkDto, any>({
                 path: `/integrasjoner/sivilstand`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags integrasjons-controller
-         * @name HentOvergangsstonad
-         * @summary Kaller familie-ef-sak og henter overgangsstønad
-         * @request POST:/integrasjoner/overgangsstonad
-         * @secure
-         */
-        hentOvergangsstonad: (data: EksternePerioderRequest, params: RequestParams = {}) =>
-            this.request<Ressurs, any>({
-                path: `/integrasjoner/overgangsstonad`,
                 method: "POST",
                 body: data,
                 secure: true,

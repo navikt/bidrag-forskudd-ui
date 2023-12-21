@@ -12,7 +12,9 @@ import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
-    const { årsak } = useGetBehandling();
+    const {
+        virkningstidspunkt: { årsak },
+    } = useGetBehandling();
     const interactive = !Avslag[årsak];
 
     return (

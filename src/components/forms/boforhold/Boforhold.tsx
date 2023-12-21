@@ -133,7 +133,10 @@ const Main = ({
     updateOpplysninger: () => void;
     boforoholdOpplysninger: OpplysningerDto;
 }) => {
-    const { virkningsdato, søktFomDato } = useGetBehandling();
+    const {
+        virkningstidspunkt: { virkningsdato },
+        søktFomDato,
+    } = useGetBehandling();
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
@@ -208,18 +211,22 @@ const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const { virkningsdato, boforhold, søktFomDato } = useGetBehandling();
+    const {
+        virkningstidspunkt: { virkningsdato },
+        boforhold,
+        søktFomDato,
+    } = useGetBehandling();
     const boforoholdOpplysninger = useGetOpplysninger(OpplysningerType.BOFORHOLD_BEARBEIDET);
-    const { data: grunnlagspakke } = useGrunnlagspakke();
+    const { husstandmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlagspakke();
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const { mutation: updateBehandling } = useOppdaterBehandling();
 
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
-            husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
-            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(grunnlagspakke.sivilstandListe),
+            husstand: mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe),
+            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe),
         }),
-        [grunnlagspakke.husstandmedlemmerOgEgneBarnListe, grunnlagspakke.sivilstandListe]
+        [husstandmedlemmerOgEgneBarnListe, sivilstandListe]
     );
     const virkningsOrSoktFraDato = useMemo(
         () => dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato),
@@ -241,7 +248,7 @@ const BoforholdsForm = () => {
         if (savedOpplysninger) {
             const changesInOpplysninger = compareOpplysninger(savedOpplysninger, opplysningerFraFolkRegistre);
 
-            if (changesInOpplysninger.length) {
+            if (changesInOpplysninger?.length) {
                 setOpplysningerChanges(changesInOpplysninger);
             }
         }
@@ -269,14 +276,14 @@ const BoforholdsForm = () => {
             behandlingId,
             aktiv: true,
             opplysningerType: OpplysningerType.HUSSTANDSMEDLEMMER,
-            data: JSON.stringify(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
+            data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
             opplysningerType: OpplysningerType.SIVILSTAND,
-            data: JSON.stringify(grunnlagspakke.sivilstandListe),
+            data: JSON.stringify(sivilstandListe),
             hentetDato: toISODateString(new Date()),
         });
     };

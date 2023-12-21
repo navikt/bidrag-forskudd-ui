@@ -190,8 +190,8 @@ const InntektForm = () => {
     const inntektOpplysninger = useGetOpplysninger(OpplysningerType.INNTEKT_BEARBEIDET);
     const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
-    const { data: arbeidsforhold } = useHentArbeidsforhold();
-    const { data: grunnlagspakke } = useGrunnlagspakke();
+    const { arbeidsforholdListe } = useHentArbeidsforhold();
+    const grunnlagspakke = useGrunnlagspakke();
     const { inntekter, roller } = behandling;
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
@@ -265,10 +265,7 @@ const InntektForm = () => {
             });
 
             const changesArbeidsforholdOpplysninger = arbeidsforholdOpplysninger
-                ? compareArbeidsforholdOpplysninger(
-                      JSON.parse(arbeidsforholdOpplysninger.data),
-                      arbeidsforhold.arbeidsforholdListe
-                  )
+                ? compareArbeidsforholdOpplysninger(JSON.parse(arbeidsforholdOpplysninger.data), arbeidsforholdListe)
                 : [];
 
             const allChanges = [...changesArbeidsforholdOpplysninger, ...changesInntektOpplysninger];
@@ -283,7 +280,7 @@ const InntektForm = () => {
             behandlingId,
             aktiv: true,
             opplysningerType: OpplysningerType.ARBEIDSFORHOLD,
-            data: JSON.stringify(arbeidsforhold.arbeidsforholdListe ?? []),
+            data: JSON.stringify(arbeidsforholdListe ?? []),
             hentetDato: toISODateString(new Date()),
         });
     };
@@ -304,7 +301,7 @@ const InntektForm = () => {
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
                 barnetillegg: grunnlagspakke.barnetilleggListe,
-                arbeidsforhold: arbeidsforhold.arbeidsforholdListe ?? [],
+                arbeidsforhold: arbeidsforholdListe ?? [],
             }),
             hentetDato: toISODateString(new Date()),
         });

@@ -10,7 +10,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling, useUpdateVirkningstidspunkt } from "../../../hooks/useApiData";
+import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
@@ -165,9 +165,8 @@ const Side = () => {
 };
 
 const VirkningstidspunktForm = () => {
-    const { behandlingId } = useForskudd();
     const { virkningstidspunkt } = useGetBehandling();
-    const updateVirkningsTidspunkt = useUpdateVirkningstidspunkt(behandlingId);
+    const oppdaterBehandling = useOppdaterBehandling();
     const initialValues = createInitialValues(virkningstidspunkt);
 
     const useFormMethods = useForm({
@@ -176,15 +175,18 @@ const VirkningstidspunktForm = () => {
 
     const onSave = () => {
         const values = useFormMethods.getValues();
-        updateVirkningsTidspunkt.mutation.mutate(createPayload(values), {
-            onSuccess: () => {
-                useFormMethods.reset(values, {
-                    keepValues: true,
-                    keepErrors: true,
-                    keepDefaultValues: true,
-                });
-            },
-        });
+        oppdaterBehandling.mutation.mutate(
+            { virkningstidspunkt: createPayload(values) },
+            {
+                onSuccess: () => {
+                    useFormMethods.reset(values, {
+                        keepValues: true,
+                        keepErrors: true,
+                        keepDefaultValues: true,
+                    });
+                },
+            }
+        );
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -201,7 +203,7 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Virkningstidspunkt"
-                        main={<Main initialValues={initialValues} error={updateVirkningsTidspunkt.error} />}
+                        main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
                         side={<Side />}
                     />
                 </form>

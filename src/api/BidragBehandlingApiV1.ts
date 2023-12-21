@@ -600,7 +600,7 @@ export interface InntekterDto {
     /** @uniqueItems true */
     utvidetbarnetrygd: UtvidetBarnetrygdDto[];
     /** @uniqueItems true */
-    kontantstøtte: InntektDto[];
+    kontantstøtte: KontantstotteDto[];
     /** @uniqueItems true */
     småbarnstillegg: InntektDto[];
     notat: BehandlingNotatDto;

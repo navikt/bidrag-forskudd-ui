@@ -20,14 +20,14 @@ type ArbeidsforholdProps = {
     ident: string;
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
-    const { data: arbeidsforhold } = useHentArbeidsforhold();
+    const { arbeidsforholdListe: arbeidsforholdListeLagret } = useHentArbeidsforhold();
     const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
 
     const savedOpplysninger: ArbeidsforholdDto[] = arbeidsforholdOpplysninger?.data
         ? JSON.parse(arbeidsforholdOpplysninger.data)
         : null;
 
-    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforhold.arbeidsforholdListe;
+    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforholdListeLagret;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (

@@ -115,7 +115,9 @@ const Periode = ({ item, index, ident, datepicker }) => {
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
-    const { virkningsdato } = useGetBehandling();
+    const {
+        virkningstidspunkt: { virkningsdato },
+    } = useGetBehandling();
     const {
         control,
         getValues,

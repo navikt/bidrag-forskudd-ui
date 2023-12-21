@@ -6,7 +6,6 @@ import {
     useQueryClient,
     useSuspenseQueries,
     useSuspenseQuery,
-    UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
@@ -126,7 +125,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         });
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await BEHANDLING_API_V1.api.updateBehandling(behandlingId, { grunnlagspakkeId });
+        await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
         queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
             ...behandling,
             grunnlagspakkeid: grunnlagspakkeId,
@@ -208,7 +207,7 @@ export const useAddOpplysningerData = () => {
 export const useGetVisningsnavn = () =>
     useSuspenseQuery({
         queryKey: QueryKeys.visningsnavn(),
-        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn(),
+        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn1(),
         staleTime: 0,
     });
 
@@ -220,6 +219,7 @@ export const useGetBehandling = (): BehandlingDto => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
             return data;
         },
+        retry: 3,
         staleTime: Infinity,
     });
     return behandling;
@@ -332,6 +332,7 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
         .map((ident) => ({
             ident,
             request: {
+                ainntektHentetDato: toISODateString(new Date()),
                 ainntektsposter: grunnlagspakke.ainntektListe
                     .filter((ainntekt) => ainntekt.personId === ident)
                     .flatMap((ainntekt) =>
@@ -361,11 +362,15 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
     return requests;
 };
 
-const useCreateGrunnlagspakke = () => {
+const useGetGrunnlagspakkeId = () => {
     const { behandlingId } = useForskudd();
+    const { grunnlagspakkeid } = useGetBehandling();
     const { data: grunnlagspakkeId } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeId(),
         queryFn: async (): Promise<number> => {
+            if (grunnlagspakkeid) {
+                return grunnlagspakkeid;
+            }
             const { data: grunnlagspakkeId } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
                 formaal: "FORSKUDD",
             });
@@ -378,10 +383,10 @@ const useCreateGrunnlagspakke = () => {
     return grunnlagspakkeId;
 };
 
-export const useGrunnlagspakke = (): UseSuspenseQueryResult<HentGrunnlagspakkeDto | null> => {
+export const useGrunnlagspakke = (): HentGrunnlagspakkeDto | null => {
     const behandling = useGetBehandling();
-    const grunnlagspakkeId = behandling?.grunnlagspakkeid ? behandling.grunnlagspakkeid : useCreateGrunnlagspakke();
     const grunnlagRequest = createGrunnlagRequest(behandling);
+    const grunnlagspakkeId = useGetGrunnlagspakkeId();
     const { isSuccess: updateIsSuccess } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
         queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
@@ -394,7 +399,7 @@ export const useGrunnlagspakke = (): UseSuspenseQueryResult<HentGrunnlagspakkeDt
         staleTime: Infinity,
     });
 
-    return useSuspenseQuery({
+    const { data: grunnlagspakke } = useSuspenseQuery({
         queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
             if (!updateIsSuccess) return null;
@@ -403,11 +408,12 @@ export const useGrunnlagspakke = (): UseSuspenseQueryResult<HentGrunnlagspakkeDt
         },
         staleTime: Infinity,
     });
+    return grunnlagspakke;
 };
 
-export const useHentArbeidsforhold = (): UseSuspenseQueryResult<HentGrunnlagDto | null> => {
+export const useHentArbeidsforhold = (): HentGrunnlagDto | null => {
     const behandling = useGetBehandling();
-    const grunnlagspakkeId = behandling?.grunnlagspakkeid ? behandling.grunnlagspakkeid : useCreateGrunnlagspakke();
+    const grunnlagspakkeId = useGetGrunnlagspakkeId();
     const today = new Date();
     const arbeidsforholdRequest: HentGrunnlagRequestDto = {
         grunnlagRequestDtoListe: behandling.roller
@@ -419,12 +425,13 @@ export const useHentArbeidsforhold = (): UseSuspenseQueryResult<HentGrunnlagDto 
                 periodeTil: toISODateString(today),
             })),
     };
-    return useSuspenseQuery({
+    const { data: arbeidsforhold } = useSuspenseQuery({
         queryKey: QueryKeys.arbeidsforhold(grunnlagspakkeId),
         queryFn: async (): Promise<HentGrunnlagDto> =>
             (await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(arbeidsforholdRequest)).data,
         staleTime: Infinity,
     });
+    return arbeidsforhold;
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke2 = async (behandlingId) => {
@@ -457,7 +464,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke2 = async (behandlingId) => {
         });
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await BEHANDLING_API_V1.api.updateBehandling(behandlingId, { grunnlagspakkeId });
+        await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
         queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
             ...behandling,
             grunnlagspakkeid: grunnlagspakkeId,
