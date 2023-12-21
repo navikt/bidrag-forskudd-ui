@@ -559,7 +559,7 @@ export const checkPeriodizationErrors = (
     perioderValues: HusstandsBarnPeriodeDto[] | SivilstandDto[],
     datoFra: Date
 ) => {
-    const atLeastOneRunningPeriod = perioderValues.some((periode) => periode.datoTom === null);
+    const atLeastOneRunningPeriod = perioderValues.some((periode) => !periode?.datoTom);
     const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
     const virkningsDatoIsInFuture = isAfterDate(datoFra, firstDayOfCurrentMonth);
     const futurePeriodExists = perioderValues.some((periode) =>
