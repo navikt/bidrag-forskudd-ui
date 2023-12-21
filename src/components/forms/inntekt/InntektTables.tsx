@@ -3,10 +3,9 @@ import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
-import { useForskudd } from "../../../context/ForskuddContext";
+import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
-import { useGetBehandling, useGetVirkningstidspunkt, usePersonsQueries } from "../../../hooks/useApiData";
+import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, getYearFromDate, isValidDate } from "../../../utils/date-utils";
@@ -22,11 +21,11 @@ const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ide
     const toVisningsnavn = useVisningsnavn();
     return item.fraGrunnlag ? (
         <BodyShort className="min-w-[215px] capitalize">
-            {toVisningsnavn(item.inntektType, getYearFromDate(item.datoFom))}
+            {toVisningsnavn(item.inntektstype, getYearFromDate(item.datoFom))}
         </BodyShort>
     ) : (
         <FormControlledSelectField
-            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektType`}
+            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektstype`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 Object.entries(GrunnlagInntektType).map(([value, text]) => ({
@@ -116,9 +115,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
 };
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
-    const { behandlingId } = useForskudd();
-    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const { data: behandling } = useGetBehandling();
+    const { virkningsdato } = useGetBehandling();
     const {
         control,
         getValues,
@@ -130,8 +127,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         control,
         name: `inntekteneSomLeggesTilGrunn.${ident}`,
     });
-    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(virkningsdato));
 
     const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
 
@@ -213,11 +210,11 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         inntekteneSomLeggesTilGrunnField.append({
             datoFom: null,
             datoTom: null,
-            belop: 0,
-            inntektType: "",
+            beløp: 0,
+            inntektstype: "",
             taMed: false,
             fraGrunnlag: false,
-            inntektPostListe: [],
+            inntektsposter: [],
         });
     };
 
@@ -324,8 +321,8 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 };
 
 export const UtvidetBarnetrygdTabel = () => {
-    const { data: behandling } = useGetBehandling();
-    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const { søktFomDato } = useGetBehandling();
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));
     const {
         control,
         getValues,
@@ -416,8 +413,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                     legend=""
                                 />,
                                 <FormControlledTextField
-                                    key={`utvidetbarnetrygd.${index}.belop`}
-                                    name={`utvidetbarnetrygd.${index}.belop`}
+                                    key={`utvidetbarnetrygd.${index}.beløp`}
+                                    name={`utvidetbarnetrygd.${index}.beløp`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -448,8 +445,8 @@ export const UtvidetBarnetrygdTabel = () => {
                     fieldArray.append({
                         datoFom: null,
                         datoTom: null,
-                        deltBoSted: false,
-                        belop: 0,
+                        deltBosted: false,
+                        beløp: 0,
                     })
                 }
             >
@@ -460,12 +457,12 @@ export const UtvidetBarnetrygdTabel = () => {
 };
 
 export const BarnetilleggTabel = () => {
-    const { data: behandling } = useGetBehandling();
-    const barna = behandling?.roller.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);
+    const { roller, søktFomDato } = useGetBehandling();
+    const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
     const barnMedNavn = personsQueries.map(({ data }) => data);
-    const [fom, tom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));
 
     const {
         control,

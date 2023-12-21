@@ -2,13 +2,13 @@ import { InntektPost } from "../api/BidragBehandlingApi";
 import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
 export interface Inntekt {
-    inntektType: string;
+    inntektstype: string;
     datoFom: string | null;
     taMed: boolean;
     fraGrunnlag: boolean;
     datoTom: string | null;
-    belop: number;
-    inntektPostListe: InntektPost[];
+    beløp: number;
+    inntektsposter: InntektPost[];
 }
 
 export interface BarneTillegFormValues {
@@ -21,8 +21,8 @@ export interface BarneTillegFormValues {
 export interface UtvidetBarnetrygdFormValues {
     datoFom?: string;
     datoTom?: string;
-    deltBoSted: boolean;
-    belop: number;
+    deltBosted: boolean;
+    beløp: number;
 }
 export interface InntektFormValues {
     inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };

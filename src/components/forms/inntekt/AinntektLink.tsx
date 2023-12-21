@@ -2,7 +2,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { BEHANDLING_API } from "../../../constants/api";
+import { BEHANDLING_API_V1 } from "../../../constants/api";
 import { useForskudd } from "../../../context/ForskuddContext";
 
 type AinntektButtonProps = {
@@ -15,7 +15,7 @@ export default function AinntektLink({ ident }: AinntektButtonProps) {
     const ainntektLenke = useQuery({
         queryKey: queryKey,
         queryFn: async () => {
-            const response = await BEHANDLING_API.api.genererAinntektLenke({
+            const response = await BEHANDLING_API_V1.api.genererAinntektLenke({
                 behandlingId: behandlingId,
                 ident,
             });

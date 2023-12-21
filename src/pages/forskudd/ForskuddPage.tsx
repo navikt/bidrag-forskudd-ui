@@ -7,13 +7,13 @@ import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { Avslag } from "../../enum/Avslag";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetVirkningstidspunkt } from "../../hooks/useApiData";
+import { useGetBehandling } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
-    const { activeStep, setActiveStep, behandlingId } = useForskudd();
-    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
-    const interactive = !Avslag[virkningstidspunkt?.årsak];
+    const { activeStep, setActiveStep } = useForskudd();
+    const { årsak } = useGetBehandling();
+    const interactive = !Avslag[årsak];
 
     return (
         <PageWrapper name="tracking-wide">

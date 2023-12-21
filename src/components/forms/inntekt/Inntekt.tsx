@@ -4,7 +4,7 @@ import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/
 import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { OpplysningerDto, OpplysningerType, RolleDto, RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
+import { OpplysningerDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -16,12 +16,12 @@ import {
     useGetBidragInntektQueries,
     useGetOpplysninger,
     useGrunnlagspakke,
-    useHentArbeidsforhold,
-    useHentInntekter,
-    useUpdateInntekter,
+    useOppdaterBehandling,
 } from "../../../hooks/useApiData";
+import { useHentArbeidsforhold } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
+import { InntektFormValues } from "../../../types/inntektFormValues";
 import { ISODateTimeStringToDDMMYYYYString, toISODateString } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
@@ -70,10 +70,10 @@ const Main = ({
     inntektOpplysninger: OpplysningerDto;
 }) => {
     const roller = behandlingRoller
-        .filter((rolle) => rolle.rolleType !== RolleDtoRolleType.BIDRAGSPLIKTIG)
+        .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
-            if (a.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER || b.rolleType === RolleDtoRolleType.BARN) return -1;
-            if (b.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER || a.rolleType === RolleDtoRolleType.BARN) return 1;
+            if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
+            if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
             return 0;
         });
 
@@ -100,14 +100,14 @@ const Main = ({
                     ))}
                 </Alert>
             )}
-            <Tabs defaultValue={roller.find((rolle) => rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER).ident}>
+            <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
                 <Tabs.List>
                     {roller.map((rolle) => (
                         <Tabs.Tab
                             key={rolle.ident}
                             value={rolle.ident}
-                            label={`${ROLE_FORKORTELSER[rolle.rolleType]} ${
-                                rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER ? "" : rolle.ident
+                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
+                                rolle.rolletype === Rolletype.BM ? "" : rolle.ident
                             }`}
                         />
                     ))}
@@ -134,7 +134,7 @@ const Main = ({
                                 </div>
                                 <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
                             </div>
-                            {rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER && (
+                            {rolle.rolletype === Rolletype.BM && (
                                 <>
                                     <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
@@ -186,23 +186,21 @@ const InntektForm = () => {
     const { behandlingId } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
-    const { data: behandling } = useGetBehandling();
-    const { data: inntekter } = useHentInntekter(behandlingId);
-    const { data: inntektOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.INNTEKT_BEARBEIDET);
-    const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
+    const behandling = useGetBehandling();
+    const inntektOpplysninger = useGetOpplysninger(OpplysningerType.INNTEKT_BEARBEIDET);
+    const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
+    const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const { data: arbeidsforhold } = useHentArbeidsforhold();
-    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
+    const { data: grunnlagspakke } = useGrunnlagspakke();
+    const { inntekter, roller } = behandling;
     const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
         (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMånedsinntektListe }),
         {}
     );
-    const updateInntekter = useUpdateInntekter(behandlingId);
+    const oppdaterBehandlingFn = useOppdaterBehandling();
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const bmOgBarn = behandling.roller.filter(
-        (rolle) => rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER || rolle.rolleType === RolleDtoRolleType.BARN
-    );
+    const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
 
     const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagspakke);
 
@@ -217,7 +215,7 @@ const InntektForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
 
-        updateInntekter.mutation.mutate(createInntektPayload(values), {
+        oppdaterBehandlingFn.mutation.mutate(createInntektPayload(values), {
             onSuccess: () =>
                 useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
         });
@@ -258,7 +256,12 @@ const InntektForm = () => {
                     summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
                 })),
                 utvidetbarnetrygd: grunnlagspakke.ubstListe,
-                barnetillegg: grunnlagspakke.barnetilleggListe,
+                barnetillegg: grunnlagspakke.barnetilleggListe.map((bt) => ({
+                    ...bt,
+                    ident: bt.partPersonId,
+                    gjelderBarn: bt.barnPersonId,
+                    barnetillegg: bt.belopBrutto,
+                })),
             });
 
             const changesArbeidsforholdOpplysninger = arbeidsforholdOpplysninger
@@ -326,12 +329,12 @@ const InntektForm = () => {
         lagreArbeidsforholdOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
-        const values = {
+        const values: InntektFormValues = {
             ...fieldValues,
             inntekteneSomLeggesTilGrunn: getPerioderFraBidragInntekt(bidragInntekt),
             utvidetbarnetrygd: grunnlagspakke.ubstListe.map((ubst) => ({
-                deltBoSted: false,
-                belop: ubst.belop,
+                deltBosted: false,
+                beløp: ubst.belop,
                 datoFom: ubst.periodeFra,
                 datoTom: ubst.periodeTil,
             })),
@@ -343,7 +346,7 @@ const InntektForm = () => {
             })),
         };
         useFormMethods.reset(values);
-        updateInntekter.mutation.mutate(createInntektPayload(values));
+        oppdaterBehandlingFn.mutation.mutate(createInntektPayload(values));
         setOpplysningerChanges([]);
     };
 
