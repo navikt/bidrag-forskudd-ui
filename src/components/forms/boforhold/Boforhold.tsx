@@ -18,12 +18,13 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     Bostatuskode,
-    HusstandsBarnPeriodeDto,
+    HusstandsbarnperiodeDto,
     Kilde,
+    OppdaterBoforholdRequest,
     OpplysningerDto,
     OpplysningerType,
-    RolleDtoRolleType,
-} from "../../../api/BidragBehandlingApi";
+    Rolletype,
+} from "../../../api/BidragBehandlingApiV1";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
 import { STEPS } from "../../../constants/steps";
@@ -33,11 +34,9 @@ import { KildeTexts } from "../../../enum/KildeTexts";
 import {
     useAddOpplysningerData,
     useGetBehandling,
-    useGetBoforhold,
     useGetOpplysninger,
-    useGetVirkningstidspunkt,
     useGrunnlagspakke,
-    useUpdateBoforhold,
+    useOppdaterBehandling,
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
@@ -134,11 +133,12 @@ const Main = ({
     updateOpplysninger: () => void;
     boforoholdOpplysninger: OpplysningerDto;
 }) => {
-    const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling();
-    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const virkningstidspunkt = dateOrNull(virkningstidspunktValues.virkningsdato);
-    const datoFom = virkningstidspunkt ?? dateOrNull(behandling.datoFom);
+    const {
+        virkningstidspunkt: { virkningsdato },
+        søktFomDato,
+    } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
     return (
         <>
@@ -181,7 +181,7 @@ const Side = () => {
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     const debouncedOnSave = useDebounce(onSave);
-    const textFields = ["boforholdBegrunnelseMedIVedtakNotat", "boforholdBegrunnelseKunINotat"];
+    const textFields = ["notat.medIVedtaket", "notat.kunINotat"];
 
     useEffect(() => {
         const subscription = watch((_, { name }) => {
@@ -197,11 +197,8 @@ const Side = () => {
             <Heading level="3" size="medium">
                 Begrunnelse
             </Heading>
-            <FormControlledTextarea
-                name="boforholdBegrunnelseMedIVedtakNotat"
-                label="Begrunnelse (med i vedtaket og notat)"
-            />
-            <FormControlledTextarea name="boforholdBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
+            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -211,23 +208,26 @@ const BoforholdsForm = () => {
     const { behandlingId, setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const { data: behandling } = useGetBehandling();
-    const { data: boforhold } = useGetBoforhold(behandlingId);
-    const { data: virkningstidspunktValues } = useGetVirkningstidspunkt(behandlingId);
-    const { data: boforoholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.BOFORHOLD_BEARBEIDET);
-    const { data: grunnlagspakke } = useGrunnlagspakke(behandling);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData(behandlingId);
-    const { mutation: updateBoforhold } = useUpdateBoforhold(behandlingId);
+    const {
+        virkningstidspunkt: { virkningsdato },
+        boforhold,
+        søktFomDato,
+    } = useGetBehandling();
+    const boforoholdOpplysninger = useGetOpplysninger(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    const { husstandmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlagspakke();
+    const { mutation: saveOpplysninger } = useAddOpplysningerData();
+    const { mutation: updateBehandling } = useOppdaterBehandling();
+
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
-            husstand: mapHusstandsMedlemmerToBarn(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
-            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(grunnlagspakke.sivilstandListe),
+            husstand: mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe),
+            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe),
         }),
-        [grunnlagspakke.husstandmedlemmerOgEgneBarnListe, grunnlagspakke.sivilstandListe]
+        [husstandmedlemmerOgEgneBarnListe, sivilstandListe]
     );
     const virkningsOrSoktFraDato = useMemo(
-        () => dateOrNull(virkningstidspunktValues?.virkningsdato) ?? dateOrNull(behandling?.datoFom),
-        [virkningstidspunktValues?.virkningsdato, behandling?.datoFom]
+        () => dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato),
+        [virkningsdato, søktFomDato]
     );
     const initialValues = useMemo(
         () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato),
@@ -245,14 +245,14 @@ const BoforholdsForm = () => {
         if (savedOpplysninger) {
             const changesInOpplysninger = compareOpplysninger(savedOpplysninger, opplysningerFraFolkRegistre);
 
-            if (changesInOpplysninger.length) {
+            if (changesInOpplysninger?.length) {
                 setOpplysningerChanges(changesInOpplysninger);
             }
         }
 
         if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
             lagreAlleOpplysninger();
-            updateBoforhold.mutate(initialValues);
+            updateBehandling.mutate({ boforhold: initialValues });
         }
 
         isSavedInitialOpplysninger.current = true;
@@ -273,14 +273,14 @@ const BoforholdsForm = () => {
             behandlingId,
             aktiv: true,
             opplysningerType: OpplysningerType.HUSSTANDSMEDLEMMER,
-            data: JSON.stringify(grunnlagspakke.husstandmedlemmerOgEgneBarnListe),
+            data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
             opplysningerType: OpplysningerType.SIVILSTAND,
-            data: JSON.stringify(grunnlagspakke.sivilstandListe),
+            data: JSON.stringify(sivilstandListe),
             hentetDato: toISODateString(new Date()),
         });
     };
@@ -288,16 +288,15 @@ const BoforholdsForm = () => {
         lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
-        const values = {
+        console.log(fieldValues);
+        const values: OppdaterBoforholdRequest = {
             ...fieldValues,
-            husstandsBarn: getBarnPerioderFromHusstandsListe(
-                opplysningerFraFolkRegistre.husstand,
-                virkningsOrSoktFraDato
-            ),
-            sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
+            husstandsbarn:
+                getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre.husstand, virkningsOrSoktFraDato) ?? [],
+            sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato) ?? [],
         };
         useFormMethods.reset(values);
-        updateBoforhold.mutate(values);
+        updateBehandling.mutate({ boforhold: values });
         setBoforholdFormValues(values);
         setOpplysningerChanges([]);
     };
@@ -335,7 +334,7 @@ const AddBarnForm = ({
 }: {
     datoFom: Date;
     setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
-    barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsBarn">;
+    barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
@@ -385,7 +384,7 @@ const AddBarnForm = ({
             ident: val === "dnummer" ? ident : "",
             medISak: false,
             navn: navn,
-            foedselsdato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato),
+            fødselsdato: val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato),
             perioder: [
                 {
                     datoFom: toISODateString(datoFom),
@@ -395,11 +394,11 @@ const AddBarnForm = ({
                 },
             ],
         };
-        const husstandsBarn = [...boforholdFormValues.husstandsBarn].concat(addedBarn);
+        const husstandsbarn = [...boforholdFormValues.husstandsbarn].concat(addedBarn);
         barnFieldArray.append(addedBarn);
         const updatedValues = {
             ...boforholdFormValues,
-            husstandsBarn,
+            husstandsbarn,
         };
 
         setBoforholdFormValues(updatedValues);
@@ -518,9 +517,9 @@ const BarnPerioder = ({
     const { control } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
-        name: "husstandsBarn",
+        name: "husstandsbarn",
     });
-    const watchFieldArray = useWatch({ control, name: "husstandsBarn" });
+    const watchFieldArray = useWatch({ control, name: "husstandsbarn" });
     const controlledFields = barnFieldArray.fields.map((field, index) => {
         return {
             ...field,
@@ -540,7 +539,7 @@ const BarnPerioder = ({
                         <div className="mb-4">
                             <div className="grid grid-cols-[max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                 <div className="w-max h-max">
-                                    <RolleTag rolleType={RolleDtoRolleType.BARN} />
+                                    <RolleTag rolleType={Rolletype.BA} />
                                 </div>
                                 <div>
                                     <FlexRow className="items-center h-[27px]">
@@ -566,7 +565,7 @@ const BarnPerioder = ({
                         </div>
                         <Perioder
                             barnIndex={index}
-                            foedselsdato={item.foedselsdato}
+                            foedselsdato={item.fødselsdato}
                             virkningstidspunkt={datoFom}
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                         />
@@ -613,10 +612,10 @@ const Perioder = ({
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
-        name: `husstandsBarn.${barnIndex}.perioder`,
+        name: `husstandsbarn.${barnIndex}.perioder`,
     });
     const [lastPeriodsState, setLastPeriodsState] = useState([]);
-    const watchFieldArray = useWatch({ control, name: `husstandsBarn.${barnIndex}.perioder` });
+    const watchFieldArray = useWatch({ control, name: `husstandsbarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => {
         return {
             ...field,
@@ -625,9 +624,9 @@ const Perioder = ({
     });
 
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
+        const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
         if (perioderValues[index].datoFom === null) {
-            setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
+            setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
@@ -643,16 +642,16 @@ const Perioder = ({
                 );
 
             if (!laterPeriodExists) {
-                setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`, {
+                setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`, {
                     type: "notValid",
                     message: "Det er ingen løpende status i beregningen",
                 });
             }
 
             if (laterPeriodExists) {
-                const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
+                const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`);
                 if (fieldState.error && fieldState.error.message === "Det må være minst en løpende periode") {
-                    clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`);
+                    clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`);
                 }
             }
         }
@@ -685,7 +684,7 @@ const Perioder = ({
             return;
         }
 
-        const fieldState = getFieldState(`husstandsBarn.${barnIndex}.perioder.${index}`);
+        const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
         if (!fieldState.error) {
             updatedAndSave(periods);
         }
@@ -695,18 +694,18 @@ const Perioder = ({
         updatedAndSave(lastPeriodsState);
     };
 
-    const updatedAndSave = (updatedPeriods: HusstandsBarnPeriodeDto[]) => {
-        setLastPeriodsState(boforholdFormValues.husstandsBarn[barnIndex].perioder);
-        const husstandsBarn = boforholdFormValues.husstandsBarn.toSpliced(barnIndex, 1, {
-            ...boforholdFormValues.husstandsBarn[barnIndex],
+    const updatedAndSave = (updatedPeriods: HusstandsbarnperiodeDto[]) => {
+        setLastPeriodsState(boforholdFormValues.husstandsbarn[barnIndex].perioder);
+        const husstandsbarn = boforholdFormValues.husstandsbarn.toSpliced(barnIndex, 1, {
+            ...boforholdFormValues.husstandsbarn[barnIndex],
             perioder: updatedPeriods,
         });
         const updatedValues = {
             ...boforholdFormValues,
-            husstandsBarn,
+            husstandsbarn,
         };
         setBoforholdFormValues(updatedValues);
-        setValue(`husstandsBarn.${barnIndex}.perioder`, updatedPeriods);
+        setValue(`husstandsbarn.${barnIndex}.perioder`, updatedPeriods);
         saveBoforhold(updatedValues);
         setShowUndoButton(true);
         setShowResetButton(true);
@@ -714,18 +713,18 @@ const Perioder = ({
     };
 
     const validateFomOgTom = (index: number) => {
-        const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+        const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
         const fomOgTomInvalid =
             perioderValues[index].datoTom !== null &&
             isAfterDate(perioderValues[index].datoFom, perioderValues[index].datoTom);
 
         if (fomOgTomInvalid) {
-            setError(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`, {
+            setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
                 message: "Tom dato kan ikke være før fom dato",
             });
         } else {
-            clearErrors(`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`);
+            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`);
         }
     };
 
@@ -733,7 +732,7 @@ const Perioder = ({
         if (checkIfAnotherRowIsEdited()) {
             showErrorModal();
         } else {
-            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`);
+            const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
             barnPerioder.append({
                 datoFom: null,
                 datoTom: null,
@@ -748,16 +747,16 @@ const Perioder = ({
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            const perioderValues = getValues(`husstandsBarn.${barnIndex}.perioder`) as HusstandsBarnPeriodeDto[];
+            const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
             const updatedPeriods = removeAndEditPeriods(perioderValues, index);
             updatedAndSave(updatedPeriods);
         }
     };
 
     const resetTilDataFraFreg = () => {
-        const barn = getValues(`husstandsBarn.${barnIndex}`);
+        const barn = getValues(`husstandsbarn.${barnIndex}`);
         const opplysningFraFreg = opplysningerFraFolkRegistre.find((opplysning) => opplysning.ident === barn.ident);
-        const perioderFraFreg = getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt, barn.foedselsdato);
+        const perioderFraFreg = getBarnPerioder(opplysningFraFreg.perioder, virkningstidspunkt, barn.fødselsdato);
         updatedAndSave(perioderFraFreg);
         setShowResetButton(false);
     };
@@ -820,8 +819,8 @@ const Perioder = ({
                             cells={[
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <FormControlledMonthPicker
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`}
-                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom`}
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
                                         label="Fra og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
@@ -832,14 +831,14 @@ const Perioder = ({
                                         required
                                     />
                                 ) : (
-                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}>
+                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}>
                                         {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
                                     </BodyShort>
                                 ),
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <FormControlledMonthPicker
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`}
-                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom`}
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
                                         label="Til og med"
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
@@ -850,14 +849,14 @@ const Perioder = ({
                                         hideLabel
                                     />
                                 ) : (
-                                    <BodyShort key={`husstandsBarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}>
+                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}>
                                         {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
                                     </BodyShort>
                                 ),
                                 editableRow === `${barnIndex}.${index}` ? (
                                     <FormControlledSelectField
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus`}
-                                        name={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus`}
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
                                         className="w-fit"
                                         label="Status"
                                         options={boforholdForskuddOptions.under18År.map((value) => ({
@@ -868,13 +867,13 @@ const Perioder = ({
                                     />
                                 ) : (
                                     <BodyShort
-                                        key={`husstandsBarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
                                     >
                                         {toVisningsnavn(item.bostatus)}
                                     </BodyShort>
                                 ),
                                 <BodyShort
-                                    key={`husstandsBarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                    key={`husstandsbarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
                                     className="capitalize"
                                 >
                                     {KildeTexts[item.kilde]}

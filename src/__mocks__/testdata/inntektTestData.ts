@@ -1,4 +1,4 @@
-import { InntekterResponse, RolleDto, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { InntekterResponse, RolleDto, Rolletype } from "../../api/BidragBehandlingApiV1";
 
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];
@@ -188,7 +188,7 @@ export const createInntektSomLeggesTilGrunn = (roller: RolleDto[]) => {
 
     return roller.map((rolle, index) => ({
         ident: rolle.ident,
-        inntekt: rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER ? inntekt : index % 2 === 0 ? barnInntekt : [],
+        inntekt: rolle.rolletype === Rolletype.BM ? inntekt : index % 2 === 0 ? barnInntekt : [],
     }));
 };
 

@@ -1,8 +1,8 @@
-import { Bostatuskode, HusstandsbarnDto, SivilstandDto, Sivilstandskode } from "../api/BidragBehandlingApi";
+import { Bostatuskode, HusstandsbarnDto, SivilstandDto, Sivilstandskode } from "../api/BidragBehandlingApiV1";
 
 export interface BoforholdFormValues {
-    husstandsBarn: HusstandsbarnDto[];
-    sivilstand: SivilstandDto[];
+    husstandsbarn?: HusstandsbarnDto[];
+    sivilstand?: SivilstandDto[];
     boforholdBegrunnelseMedIVedtakNotat?: string;
     boforholdBegrunnelseKunINotat?: string;
 }

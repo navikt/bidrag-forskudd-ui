@@ -7,14 +7,15 @@ import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
 
 export const Header = memo(() => {
     const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling();
-    const personsQueries = usePersonsQueries(behandling.roller);
+    const { roller, saksnummer } = useGetBehandling();
+    const personsQueries = usePersonsQueries(roller);
     const rollerMedPersonNavn = personsQueries.map(({ data }) => data);
     return (
         <SakHeader
-            saksnummer={behandling.saksnummer}
+            saksnummer={saksnummer}
             roller={rollerMedPersonNavn.map((person) => ({
                 ...person,
+                ident: person.ident!,
                 navn: person.visningsnavn ?? person.kortnavn,
             }))}
             skjermbilde={{ navn: "Søknad om forskudd", referanse: `#${behandlingId}` }}

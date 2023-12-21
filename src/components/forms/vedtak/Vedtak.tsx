@@ -4,8 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { RolleDtoRolleType } from "../../../api/BidragBehandlingApi";
-import { ResultatForskuddsberegningBarn, ResultatRolle } from "../../../api/BidragBehandlingApiV1";
+import { ResultatForskuddsberegningBarn, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import environment from "../../../environment";
@@ -22,9 +21,9 @@ import { mapToAntallBarnIHusstand, mapToInntekt, mapToSivilstand } from "../help
 
 const Vedtak = () => {
     const { behandlingId, activeStep } = useForskudd();
-    const { data: behandling } = useGetBehandling();
+    const { erVedtakFattet, årsak } = useGetBehandling();
     const queryClient = useQueryClient();
-    const isAvslag = behandling && Object.keys(Avslag).includes(behandling.årsak);
+    const isAvslag = Object.keys(Avslag).includes(årsak);
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
 
     useEffect(() => {
@@ -34,7 +33,7 @@ const Vedtak = () => {
 
     return (
         <div className="grid gap-y-8">
-            {behandling.erVedtakFattet && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+            {erVedtakFattet && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="xlarge">
                     Vedtak
@@ -47,7 +46,7 @@ const Vedtak = () => {
 
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
             </div>
-            {!behandling.erVedtakFattet && !beregnetForskudd?.feil && (
+            {!erVedtakFattet && !beregnetForskudd?.feil && (
                 <>
                     <Alert variant="info">
                         <div className="grid gap-y-4">
@@ -122,18 +121,18 @@ const FatteVedtakButtons = () => {
 };
 
 const VedtakAvslag = () => {
-    const { data: behandling } = useGetBehandling();
+    const { roller, virkningsdato, søktFomDato, årsak } = useGetBehandling();
     return (
         <>
-            {behandling.roller
-                .filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN)
+            {roller
+                .filter((rolle) => rolle.rolletype === Rolletype.BA)
                 .map((barn, i) => (
                     <div key={i + barn.ident} className="mb-8">
                         <div className="my-4 flex items-center gap-x-2">
-                            <RolleTag rolleType={RolleDtoRolleType.BARN} />
+                            <RolleTag rolleType={Rolletype.BA} />
                             <BodyShort>
                                 {barn.navn} / <span className="ml-1">{barn.ident}</span> /{" "}
-                                <span className="ml-1">{dateToDDMMYYYYString(new Date(barn.fodtDato))}</span>
+                                <span className="ml-1">{dateToDDMMYYYYString(new Date(barn.fødselsdato))}</span>
                             </BodyShort>
                         </div>
                         <Table>
@@ -147,11 +146,10 @@ const VedtakAvslag = () => {
                             <Table.Body>
                                 <Table.Row>
                                     <Table.DataCell>
-                                        {dateToDDMMYYYYString(new Date(behandling.virkningsdato ?? behandling.datoFom))}{" "}
-                                        -
+                                        {dateToDDMMYYYYString(new Date(virkningsdato ?? søktFomDato))} -
                                     </Table.DataCell>
                                     <Table.DataCell>Avslag</Table.DataCell>
-                                    <Table.DataCell>{Avslag[behandling.årsak]}</Table.DataCell>
+                                    <Table.DataCell>{Avslag[årsak]}</Table.DataCell>
                                 </Table.Row>
                             </Table.Body>
                         </Table>
@@ -221,7 +219,7 @@ const VedtakTableBody = ({ resultatBarn }: { resultatBarn: ResultatForskuddsbere
 
 const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
-        <RolleTag rolleType={RolleDtoRolleType.BARN} />
+        <RolleTag rolleType={Rolletype.BA} />
         <BodyShort>
             {barn.navn} / <span className="ml-1">{barn.ident}</span> /{" "}
             <span className="ml-1">{dateToDDMMYYYYString(new Date(barn.fødselsdato))}</span>

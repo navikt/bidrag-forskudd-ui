@@ -1,9 +1,15 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
-import { InntektDto, InntekterResponse, RolleDto, UpdateInntekterRequest } from "../../../api/BidragBehandlingApi";
+import {
+    BarnetilleggDto,
+    InntektDto,
+    InntekterDto,
+    Inntektsrapportering,
+    OppdaterBehandlingRequest,
+    RolleDto,
+} from "../../../api/BidragBehandlingApiV1";
 import {
     ArbeidsforholdDto,
-    BarnetilleggDto,
     HentGrunnlagspakkeDto,
     UtvidetBarnetrygdOgSmaabarnstilleggDto,
 } from "../../../api/BidragGrunnlagApi";
@@ -18,36 +24,43 @@ import {
 import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
 import { addDays, deductDays, isAfterDate, isValidDate, toISODateString } from "../../../utils/date-utils";
 
-export const createInntektPayload = (values: InntektFormValues): UpdateInntekterRequest => ({
-    inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
-        .map(([key, value]) =>
-            value.map((inntekt) => {
-                return {
-                    ...inntekt,
-                    inntektType: inntekt.inntektType === "" ? null : inntekt.inntektType,
-                    ident: key,
-                    belop: Number(inntekt.belop),
-                    inntektPostListe: inntekt.inntektPostListe,
-                    datoFom: toISODateString(new Date(inntekt.datoFom)),
-                    datoTom: inntekt.datoTom ? toISODateString(new Date(inntekt.datoTom)) : null,
-                };
-            })
-        )
-        .flat(),
-    utvidetbarnetrygd: values.utvidetbarnetrygd.length
-        ? values.utvidetbarnetrygd.map((utvidetbarnetrygd) => ({
-              ...utvidetbarnetrygd,
-              belop: Number(utvidetbarnetrygd.belop),
-          }))
-        : [],
-    barnetillegg: values.barnetillegg.length
-        ? values.barnetillegg.map((barnetillegg) => ({
-              ...barnetillegg,
-              barnetillegg: Number(barnetillegg.barnetillegg),
-          }))
-        : [],
-    inntektBegrunnelseKunINotat: values.inntektBegrunnelseKunINotat,
-    inntektBegrunnelseMedIVedtakNotat: values.inntektBegrunnelseMedIVedtakNotat,
+export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequest => ({
+    inntekter: {
+        inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
+            .map(([key, value]) =>
+                value.map((inntekt) => {
+                    return {
+                        ...inntekt,
+                        inntektstype:
+                            inntekt.inntektstype === "" ? null : (inntekt.inntektstype as Inntektsrapportering),
+                        ident: key,
+                        beløp: Number(inntekt.beløp),
+                        inntektPostListe: inntekt.inntektsposter,
+                        datoFom: toISODateString(new Date(inntekt.datoFom)),
+                        datoTom: inntekt.datoTom ? toISODateString(new Date(inntekt.datoTom)) : null,
+                    };
+                })
+            )
+            .flat(),
+        utvidetbarnetrygd: values.utvidetbarnetrygd.length
+            ? values.utvidetbarnetrygd.map((utvidetbarnetrygd) => ({
+                  ...utvidetbarnetrygd,
+                  beløp: Number(utvidetbarnetrygd.beløp),
+              }))
+            : [],
+        barnetillegg: values.barnetillegg.length
+            ? values.barnetillegg.map((barnetillegg) => ({
+                  ...barnetillegg,
+                  ident: barnetillegg.ident,
+                  gjelderBarn: barnetillegg.ident,
+                  barnetillegg: Number(barnetillegg.barnetillegg),
+              }))
+            : [],
+        notat: {
+            medIVedtaket: values.inntektBegrunnelseMedIVedtakNotat,
+            kunINotat: values.inntektBegrunnelseKunINotat,
+        },
+    },
 });
 
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
@@ -62,13 +75,13 @@ const mapInntekterToRolle =
             .filter((inntekt) => inntekt.ident === rolle.ident)
             .map((inntekt) => ({
                 ...inntekt,
-                inntektType: inntekt.inntektType ?? "",
+                inntektstype: inntekt.inntektstype ?? "",
                 datoFom: inntekt.datoFom ?? null,
                 datoTom: inntekt.datoTom ?? null,
             }))
             .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
-export const getPerioderFraInntekter = (bmOgBarn, inntekter) =>
+export const getPerioderFraInntekter = (bmOgBarn: RolleDto[], inntekter: InntektDto[]) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
 
 export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[]) =>
@@ -80,8 +93,8 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
                     return {
                         taMed: false,
                         inntektBeskrivelse: inntekt.visningsnavn,
-                        inntektType: inntekt.inntektRapportering,
-                        belop: inntekt.sumInntekt,
+                        inntektstype: inntekt.inntektRapportering,
+                        beløp: inntekt.sumInntekt,
                         datoTom:
                             inntekt.periode.til != null
                                 ? toISODateString(lastDayOfMonth(new Date(inntekt.periode.til)))
@@ -89,7 +102,7 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
                         datoFom: inntekt.periode.fom,
                         ident: curr.ident,
                         fraGrunnlag: true,
-                        inntektPostListe: inntekt.inntektPostListe,
+                        inntektsposter: inntekt.inntektPostListe,
                     };
                 })
                 .sort((a: Inntekt, b: Inntekt) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1)) as Inntekt[],
@@ -100,18 +113,18 @@ export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[])
 export const createInitialValues = (
     bmOgBarn: RolleDto[],
     bidragInntekt: { ident: string; data: TransformerInntekterResponse }[],
-    inntekter: InntekterResponse,
+    inntekter: InntekterDto,
     grunnlagspakke: HentGrunnlagspakkeDto
 ): InntektFormValues => {
     return {
-        inntekteneSomLeggesTilGrunn: inntekter?.inntekter?.length
+        inntekteneSomLeggesTilGrunn: inntekter?.inntekter.length
             ? getPerioderFraInntekter(bmOgBarn, inntekter.inntekter)
             : getPerioderFraBidragInntekt(bidragInntekt),
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd
             : grunnlagspakke.ubstListe.map((ubst) => ({
-                  deltBoSted: false,
-                  belop: ubst.belop,
+                  deltBosted: false,
+                  beløp: ubst.belop,
                   datoFom: ubst.periodeFra,
                   datoTom: ubst.periodeTil,
               })),
@@ -123,8 +136,8 @@ export const createInitialValues = (
                   datoFom: periode.periodeFra,
                   datoTom: periode.periodeTil,
               })),
-        inntektBegrunnelseMedIVedtakNotat: inntekter.inntektBegrunnelseMedIVedtakNotat,
-        inntektBegrunnelseKunINotat: inntekter.inntektBegrunnelseKunINotat,
+        inntektBegrunnelseMedIVedtakNotat: inntekter.notat.medIVedtaket,
+        inntektBegrunnelseKunINotat: inntekter.notat.kunINotat,
     };
 };
 
@@ -463,7 +476,7 @@ export const compareOpplysninger = (
     } else {
         savedOpplysninger.barnetillegg.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.barnetillegg[index];
-            if (periodeFraLatestOpplysninger.belopBrutto === periode.belopBrutto) {
+            if (periodeFraLatestOpplysninger.barnetillegg === periode.barnetillegg) {
                 changedLog.push("Belop for en eller flere barnetillegg perioder har blitt endret");
             }
         });

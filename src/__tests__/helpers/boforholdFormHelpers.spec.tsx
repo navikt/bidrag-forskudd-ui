@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { Bostatuskode as BoStatusType, Kilde, Sivilstandskode } from "../../api/BidragBehandlingApi";
+import { Bostatuskode as BoStatusType, Kilde, Sivilstandskode } from "../../api/BidragBehandlingApiV1";
 import { SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import {
     checkOverlappingPeriods,

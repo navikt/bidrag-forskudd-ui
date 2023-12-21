@@ -1,13 +1,15 @@
 import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import {
-    BoforholdResponse,
+    BoforholdDto,
     Bostatuskode,
-    HusstandsBarnPeriodeDto,
+    HusstandsbarnDto,
+    HusstandsbarnperiodeDto,
     Kilde,
+    OppdaterBehandlingRequest,
     SivilstandDto,
     Sivilstandskode,
-} from "../../../api/BidragBehandlingApi";
+} from "../../../api/BidragBehandlingApiV1";
 import {
     RelatertPersonDto,
     SivilstandDto as SivilstandDtoGrunnlag,
@@ -39,15 +41,15 @@ export const boforholdForskuddOptions = {
 };
 export const sivilstandForskuddOptions = [Sivilstandskode.GIFT_SAMBOER, Sivilstandskode.BOR_ALENE_MED_BARN];
 export const calculateFraDato = (
-    fieldArrayValues: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    fieldArrayValues: HusstandsbarnperiodeDto[] | SivilstandDto[],
     virkningstidspunkt: Date
 ) => {
     if (
         fieldArrayValues.length &&
-        !fieldArrayValues.some((periode: HusstandsBarnPeriodeDto | SivilstandDto) => periode.datoTom === null)
+        !fieldArrayValues.some((periode: HusstandsbarnperiodeDto | SivilstandDto) => periode.datoTom === null)
     ) {
         const filtrertOgSorterListe = fieldArrayValues.sort(
-            (a: HusstandsBarnPeriodeDto | SivilstandDto, b: HusstandsBarnPeriodeDto | SivilstandDto) => {
+            (a: HusstandsbarnperiodeDto | SivilstandDto, b: HusstandsbarnperiodeDto | SivilstandDto) => {
                 if (a.datoTom == null || b.datoTom == null) {
                     return a.datoTom == null ? 1 : -1;
                 }
@@ -268,16 +270,17 @@ export const getSivilstandPerioder = (
 export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
     virkningsOrSoktFraDato: Date
-) => {
+): HusstandsbarnDto[] => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
+        fødselsdato: barn.foedselsdato,
         medISak: true,
         perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
     }));
 };
 
 export const createInitialValues = (
-    boforhold: BoforholdResponse,
+    boforhold: BoforholdDto,
     opplysningerFraFolkRegistre: {
         husstand: HusstandOpplysningFraFolkeRegistre[];
         sivilstand: SivilstandOpplysninger[];
@@ -286,8 +289,8 @@ export const createInitialValues = (
 ) => {
     return {
         ...boforhold,
-        husstandsBarn: boforhold?.husstandsBarn?.length
-            ? boforhold.husstandsBarn
+        husstandsbarn: boforhold?.husstandsbarn?.length
+            ? boforhold.husstandsbarn
             : getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre.husstand, virkningsOrSoktFraDato),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
@@ -295,11 +298,12 @@ export const createInitialValues = (
     };
 };
 
-export const createPayload = (values: BoforholdFormValues) => ({
-    husstandsBarn: values.husstandsBarn,
-    sivilstand: values.sivilstand,
-    boforholdBegrunnelseMedIVedtakNotat: values.boforholdBegrunnelseMedIVedtakNotat,
-    boforholdBegrunnelseKunINotat: values.boforholdBegrunnelseKunINotat,
+export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequest => ({
+    boforhold: {
+        ...values,
+        husstandsbarn: values.husstandsbarn,
+        sivilstand: values.sivilstand,
+    },
 });
 
 export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: string }[]) => {
@@ -319,19 +323,19 @@ export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: 
     return overlappingPeriods;
 };
 
-function returnTypedPeriods(periodsList: HusstandsBarnPeriodeDto[]): HusstandsBarnPeriodeDto[];
+function returnTypedPeriods(periodsList: HusstandsbarnperiodeDto[]): HusstandsbarnperiodeDto[];
 function returnTypedPeriods(periodsList: SivilstandDto[]): SivilstandDto[];
 function returnTypedPeriods(
-    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[]
-): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
+    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[]
+): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     return periodsList;
 }
-export function editPeriods(periodsList: HusstandsBarnPeriodeDto[], periodeIndex: number): HusstandsBarnPeriodeDto[];
+export function editPeriods(periodsList: HusstandsbarnperiodeDto[], periodeIndex: number): HusstandsbarnperiodeDto[];
 export function editPeriods(periodsList: SivilstandDto[], periodeIndex: number): SivilstandDto[];
 export function editPeriods(
-    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[],
     periodeIndex: number
-): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
+): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
     const statusField = Object.hasOwn(periodsList[0], "bostatus") ? "bostatus" : "sivilstand";
 
@@ -342,7 +346,7 @@ export function editPeriods(
 
     const postPeriodIndex = editedPeriod.datoTom
         ? periods.findIndex(
-              (period: HusstandsBarnPeriodeDto | SivilstandDto) =>
+              (period: HusstandsbarnperiodeDto | SivilstandDto) =>
                   period.datoTom === null || (period.datoTom && isAfterDate(period.datoTom, editedPeriod.datoTom))
           )
         : -1;
@@ -380,7 +384,7 @@ export function editPeriods(
                 return periods.toSpliced(
                     prevPeriodIndex,
                     1,
-                    ...returnTypedPeriods(periodsToEdit as HusstandsBarnPeriodeDto[])
+                    ...returnTypedPeriods(periodsToEdit as HusstandsbarnperiodeDto[])
                 );
             }
 
@@ -420,7 +424,7 @@ export function editPeriods(
     }
 
     if (statusField === "bostatus") {
-        return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsBarnPeriodeDto);
+        return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsbarnperiodeDto);
     }
 
     if (statusField === "sivilstand") {
@@ -428,12 +432,12 @@ export function editPeriods(
     }
 }
 
-export function removeAndEditPeriods(periodsList: HusstandsBarnPeriodeDto[], index: number): HusstandsBarnPeriodeDto[];
+export function removeAndEditPeriods(periodsList: HusstandsbarnperiodeDto[], index: number): HusstandsbarnperiodeDto[];
 export function removeAndEditPeriods(periodsList: SivilstandDto[], index: number): SivilstandDto[];
 export function removeAndEditPeriods(
-    periodsList: HusstandsBarnPeriodeDto[] | SivilstandDto[],
+    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[],
     index: number
-): HusstandsBarnPeriodeDto[] | SivilstandDto[] {
+): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     const periodToRemove = periodsList[index];
     const prevPeriod = periodsList[index - 1];
     const postPeriod = periodsList[index + 1];
@@ -442,7 +446,7 @@ export function removeAndEditPeriods(
     prevPeriod.kilde = Kilde.MANUELL;
 
     if ("bostatus" in periodToRemove) {
-        return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsBarnPeriodeDto[];
+        return periodsList.filter((_, i) => i !== index && i !== index + 1) as HusstandsbarnperiodeDto[];
     }
 
     if ("sivilstand" in periodToRemove) {

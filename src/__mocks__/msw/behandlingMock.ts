@@ -1,11 +1,12 @@
 import { rest, RestHandler } from "msw";
 
+import { BehandlingDto, OppdaterBehandlingRequest } from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 
 export function behandlingMock(): RestHandler[] {
     return [
-        rest.get(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, (req, res, ctx) => {
+        rest.get(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, (req, res, ctx) => {
             if (!localStorage.getItem(`behandling-${req.params.behandlingId}`)) {
                 localStorage.setItem(`behandlingId`, req.params.behandlingId.toString());
                 localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(behandlingMockApiData));
@@ -15,11 +16,28 @@ export function behandlingMock(): RestHandler[] {
                 ctx.body(localStorage.getItem(`behandling-${req.params.behandlingId}`))
             );
         }),
-        rest.put(`${environment.url.bidragBehandling}/api/behandling/:behandlingId`, async (req, res, ctx) => {
+        rest.put(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, async (req, res, ctx) => {
             const body = await req.json();
-            const behandling = JSON.parse(localStorage.getItem(`behandling-${req.params.behandlingId}`));
-            const grunnlagspakkeid = body.grunnlagspakkeId;
-            const updatedBehandling = { ...behandling, grunnlagspakkeid };
+            const behandling = JSON.parse(
+                localStorage.getItem(`behandling-${req.params.behandlingId}`)
+            ) as BehandlingDto;
+            const oppdater = body as OppdaterBehandlingRequest;
+            const updatedBehandling: BehandlingDto = {
+                ...behandling,
+                ...oppdater,
+                inntekter: {
+                    ...behandling?.inntekter,
+                    ...oppdater?.inntekter,
+                },
+                boforhold: {
+                    ...behandling?.boforhold,
+                    ...oppdater?.boforhold,
+                },
+                virkningstidspunkt: {
+                    ...behandling?.virkningstidspunkt,
+                    ...oppdater?.virkningstidspunkt,
+                },
+            };
 
             const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),
@@ -43,7 +61,7 @@ export function behandlingMock(): RestHandler[] {
             return res(...response[index]);
         }),
         rest.get(
-            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/opplysninger/:opplysninger/aktiv`,
+            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/opplysninger/:opplysninger/aktiv`,
             (req, res, ctx) => {
                 const key = `behandling-${req.params.behandlingId}-opplysninger-${req.params.opplysninger}`;
 
@@ -54,7 +72,7 @@ export function behandlingMock(): RestHandler[] {
             }
         ),
         rest.post(
-            `${environment.url.bidragBehandling}/api/behandling/:behandlingId/opplysninger`,
+            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/opplysninger`,
             async (req, res, ctx) => {
                 const body = await req.json();
                 const key = `behandling-${req.params.behandlingId}-opplysninger-${body.opplysningerType}`;
