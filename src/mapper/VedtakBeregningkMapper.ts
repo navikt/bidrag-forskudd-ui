@@ -1,4 +1,4 @@
-import { BehandlingDto, Behandlingstype, RolleDtoRolleType } from "../api/BidragBehandlingApi";
+import { BehandlingDto, Behandlingstype, RolleDtoRolleType } from "../api/BidragBehandlingApiV1";
 import { OpprettBehandlingsreferanseRequestDto, OpprettGrunnlagRequestDto } from "../api/BidragVedtakApi";
 import { PersonDto } from "../api/PersonApi";
 import { mapRolle } from "../types/rolle";

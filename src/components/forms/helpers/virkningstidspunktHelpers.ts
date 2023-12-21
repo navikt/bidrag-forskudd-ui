@@ -1,19 +1,12 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
-import { ForskuddAarsakType } from "../../../api/BidragBehandlingApi";
-import {
-    BehandlingDto as BehandlingDtoV1,
-    ForskuddAarsakType as ForskuddAarsakTypeV1,
-} from "../../../api/BidragBehandlingApiV1";
+import { BehandlingDto, ForskuddAarsakType } from "../../../api/BidragBehandlingApiV1";
 import { deductMonths, firstDayOfMonth, isAfterDate } from "../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
     return isAfterDate(soktFraDato, mottatDato) ? soktFraDato : mottatDato;
 };
-export const aarsakToVirkningstidspunktMapper = (
-    aarsak: ForskuddAarsakTypeV1 | string,
-    behandling: BehandlingDtoV1
-) => {
+export const aarsakToVirkningstidspunktMapper = (aarsak: ForskuddAarsakType | string, behandling: BehandlingDto) => {
     const soktFraDato = new Date(behandling.søktFomDato);
     const mottatDato = new Date(behandling.mottattdato);
     const mottatOrSoktFraDato = getSoktFraOrMottatDato(soktFraDato, mottatDato);

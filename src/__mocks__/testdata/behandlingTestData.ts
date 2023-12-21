@@ -1,5 +1,4 @@
-import { Vedtakstype } from "../../api/BidragBehandlingApi";
-import { BehandlingDto, Rolletype, SoktAvType, Stonadstype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDto, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {

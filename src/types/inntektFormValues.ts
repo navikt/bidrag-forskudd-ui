@@ -1,4 +1,4 @@
-import { InntektPost } from "../api/BidragBehandlingApi";
+import { InntektPost } from "../api/BidragBehandlingApiV1";
 import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
 export interface Inntekt {

@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { describe } from "mocha";
 
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
-import { ForskuddAarsakType } from "../../api/BidragBehandlingApi";
+import { ForskuddAarsakType } from "../../api/BidragBehandlingApiV1";
 import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,

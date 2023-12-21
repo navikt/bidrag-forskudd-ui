@@ -4,7 +4,7 @@ import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApi";
+import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";

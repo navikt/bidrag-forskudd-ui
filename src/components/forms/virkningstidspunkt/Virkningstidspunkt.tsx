@@ -1,4 +1,4 @@
-import { toISODateString } from "@navikt/bidrag-ui-common";
+import { capitalize, toISODateString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -95,19 +95,21 @@ const Main = ({ initialValues, error }) => {
             {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknadstype</Label>
-                    <BodyShort size="small">{behandling.søktAv}</BodyShort>
+                    <Label size="small">Søknadstype:</Label>
+                    <BodyShort size="small">
+                        {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
+                    </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknad fra</Label>
+                    <Label size="small">Søknad fra:</Label>
                     <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Mottat dato</Label>
+                    <Label size="small">Mottat dato:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søkt fra dato</Label>
+                    <Label size="small">Søkt fra dato:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
             </FlexRow>
