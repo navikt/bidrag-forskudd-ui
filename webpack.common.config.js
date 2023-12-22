@@ -16,7 +16,7 @@ module.exports = {
         topLevelAwait: true,
     },
     resolve: {
-        extensions: [".tsx", ".ts", ".js", "jsx"],
+        extensions: [".tsx", ".ts", ".js", ".jsx"],
     },
     optimization: {
         minimizer: [
