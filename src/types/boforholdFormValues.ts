@@ -1,10 +1,15 @@
-import { Bostatuskode, HusstandsbarnDto, SivilstandDto, Sivilstandskode } from "../api/BidragBehandlingApi";
+import {
+    BehandlingNotatDto,
+    Bostatuskode,
+    HusstandsbarnDto,
+    SivilstandDto,
+    Sivilstandskode,
+} from "../api/BidragBehandlingApiV1";
 
 export interface BoforholdFormValues {
-    husstandsBarn: HusstandsbarnDto[];
-    sivilstand: SivilstandDto[];
-    boforholdBegrunnelseMedIVedtakNotat?: string;
-    boforholdBegrunnelseKunINotat?: string;
+    husstandsbarn?: HusstandsbarnDto[];
+    sivilstand?: SivilstandDto[];
+    notat?: BehandlingNotatDto;
 }
 
 export interface HusstandOpplysningPeriode {

@@ -1,4 +1,4 @@
-import { InntekterResponse, RolleDto, RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { BehandlingNotatDto, InntekterResponse, RolleDto, Rolletype } from "../../api/BidragBehandlingApiV1";
 
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];
@@ -50,8 +50,7 @@ export interface InntektData {
     inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunn[];
     barnetillegg: MaybeList<BarneTilleg>;
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
-    inntektBegrunnelseMedIVedtakNotat: string;
-    inntektBegrunnelseKunINotat: string;
+    notat: BehandlingNotatDto;
 }
 
 const randomSalary = (max = 1.5e6) => {
@@ -188,7 +187,7 @@ export const createInntektSomLeggesTilGrunn = (roller: RolleDto[]) => {
 
     return roller.map((rolle, index) => ({
         ident: rolle.ident,
-        inntekt: rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER ? inntekt : index % 2 === 0 ? barnInntekt : [],
+        inntekt: rolle.rolletype === Rolletype.BM ? inntekt : index % 2 === 0 ? barnInntekt : [],
     }));
 };
 
@@ -196,8 +195,10 @@ export const inntektData = (roller: RolleDto[]) => ({
     inntekteneSomLeggesTilGrunn: createInntektSomLeggesTilGrunn(roller),
     barnetillegg: [],
     utvidetBarnetrygd: [],
-    inntektBegrunnelseMedIVedtakNotat: "",
-    inntektBegrunnelseKunINotat: "",
+    notat: {
+        medIVedtaket: "",
+        kunINotat: "",
+    },
 });
 
 export const inntektTestData: InntekterResponse = {

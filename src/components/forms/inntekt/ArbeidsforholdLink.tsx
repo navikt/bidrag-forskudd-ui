@@ -2,7 +2,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { BEHANDLING_API } from "../../../constants/api";
+import { BEHANDLING_API_V1 } from "../../../constants/api";
 
 type AinntektButtonProps = {
     ident: string;
@@ -13,7 +13,7 @@ export default function ArbeidsforholdLink({ ident }: AinntektButtonProps) {
     const ainntektLenke = useQuery({
         queryKey: queryKey,
         queryFn: async () => {
-            const response = await BEHANDLING_API.api.genererAaregLenke(JSON.stringify(ident));
+            const response = await BEHANDLING_API_V1.api.genererAaregLenke(JSON.stringify(ident));
             return response.data;
         },
         enabled: false,

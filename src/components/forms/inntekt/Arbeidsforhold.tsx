@@ -2,9 +2,8 @@ import { capitalize } from "@navikt/bidrag-ui-common";
 import { Label } from "@navikt/ds-react";
 import React from "react";
 
-import { OpplysningerType } from "../../../api/BidragBehandlingApi";
+import { OpplysningerType } from "../../../api/BidragBehandlingApiV1";
 import { ArbeidsforholdDto } from "../../../api/BidragGrunnlagApi";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
@@ -21,15 +20,14 @@ type ArbeidsforholdProps = {
     ident: string;
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
-    const { behandlingId } = useForskudd();
-    const { data: arbeidsforholdOpplysninger } = useGetOpplysninger(behandlingId, OpplysningerType.ARBEIDSFORHOLD);
-    const { data: arbeidsforhold } = useHentArbeidsforhold();
+    const { arbeidsforholdListe: arbeidsforholdListeLagret } = useHentArbeidsforhold();
+    const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
 
     const savedOpplysninger: ArbeidsforholdDto[] = arbeidsforholdOpplysninger?.data
         ? JSON.parse(arbeidsforholdOpplysninger.data)
         : null;
 
-    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforhold.arbeidsforholdListe;
+    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforholdListeLagret;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (

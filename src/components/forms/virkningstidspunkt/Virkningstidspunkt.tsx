@@ -1,21 +1,16 @@
-import { toISODateString } from "@navikt/bidrag-ui-common";
+import { capitalize, toISODateString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { VirkningstidspunktResponse as VirkningstidspunktResponseV1 } from "../../../api/BidragBehandlingApiV1";
+import { OppdaterVirkningstidspunkt, VirkningstidspunktDto } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import { ForskuddBeregningKodeAarsak } from "../../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import {
-    useGetBehandling,
-    useGetBoforhold,
-    useGetVirkningstidspunkt,
-    useUpdateVirkningstidspunkt,
-} from "../../../hooks/useApiData";
+import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
@@ -32,25 +27,28 @@ import {
 } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
-const createInitialValues = (response: VirkningstidspunktResponseV1) =>
+const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues =>
     ({
         virkningsdato: response.virkningsdato,
         årsak: response.årsak ?? "",
-        virkningstidspunktsbegrunnelseIVedtakOgNotat: response.virkningstidspunktsbegrunnelseIVedtakOgNotat ?? "",
-        virkningstidspunktsbegrunnelseKunINotat: response.virkningstidspunktsbegrunnelseKunINotat ?? "",
+        notat: {
+            medIVedtaket: response.notat?.medIVedtaket,
+            kunINotat: response.notat?.kunINotat,
+        },
     }) as VirkningstidspunktFormValues;
 
-const createPayload = (values: VirkningstidspunktFormValues) => ({
+const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningstidspunkt => ({
     ...values,
     årsak: values.årsak === "" ? null : values.årsak,
+    notat: {
+        medIVedtaket: values.notat?.medIVedtaket,
+        kunINotat: values.notat?.kunINotat,
+    },
 });
 
 const Main = ({ initialValues, error }) => {
-    const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetBehandling();
-    const { data: virkningstidspunkt } = useGetVirkningstidspunkt(behandlingId);
-    const { data: boforhold } = useGetBoforhold(behandlingId);
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningsdato);
+    const behandling = useGetBehandling();
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningsdato);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
     const virkningsDato = getValues("virkningsdato");
@@ -61,23 +59,23 @@ const Main = ({ initialValues, error }) => {
         clearErrors("virkningsdato");
     };
 
-    const [fom] = getFomAndTomForMonthPicker(new Date(behandling.datoFom));
+    const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), [fom]);
 
     useEffect(() => {
-        if (!initialVirkningsdato && virkningstidspunkt && behandling) {
+        if (!initialVirkningsdato && behandling) {
             setInitialVirkningsdato(
-                virkningstidspunkt.virkningsdato ??
+                behandling.virkningstidspunkt.virkningsdato ??
                     toISODateString(
-                        getSoktFraOrMottatDato(new Date(behandling.datoFom), new Date(behandling.mottatDato))
+                        getSoktFraOrMottatDato(new Date(behandling.søktFomDato), new Date(behandling.mottattdato))
                     )
             );
         }
-    }, [virkningstidspunkt]);
+    }, [behandling]);
 
     useEffect(() => {
         if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
-            const boforholdPeriodsExist = boforhold?.husstandsBarn[0]?.perioder.length;
+            const boforholdPeriodsExist = behandling.boforhold?.husstandsbarn[0]?.perioder.length;
             if (boforholdPeriodsExist) {
                 setShowChangedVirkningsDatoAlert(true);
             }
@@ -99,20 +97,22 @@ const Main = ({ initialValues, error }) => {
             {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknadstype</Label>
-                    <BodyShort size="small">{behandling.soknadFraType}</BodyShort>
+                    <Label size="small">Søknadstype:</Label>
+                    <BodyShort size="small">
+                        {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
+                    </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknad fra</Label>
-                    <BodyShort size="small">{SOKNAD_LABELS[behandling.soknadFraType]}</BodyShort>
+                    <Label size="small">Søknad fra:</Label>
+                    <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Mottat dato</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottatDato))}</BodyShort>
+                    <Label size="small">Mottat dato:</Label>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søkt fra dato</Label>
-                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.datoFom))}</BodyShort>
+                    <Label size="small">Søkt fra dato:</Label>
+                    <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
@@ -159,55 +159,36 @@ const Side = () => {
             <Heading level="3" size="medium">
                 Begrunnelse
             </Heading>
-            <FormControlledTextarea
-                name="virkningstidspunktsbegrunnelseIVedtakOgNotat"
-                label="Begrunnelse (med i vedtaket og notat)"
-            />
-            <FormControlledTextarea
-                name="virkningstidspunktsbegrunnelseKunINotat"
-                label="Begrunnelse (kun med i notat)"
-            />
+            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
+            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
             <ActionButtons onNext={onNext} />
         </>
     );
 };
 
 const VirkningstidspunktForm = () => {
-    const { behandlingId } = useForskudd();
-    const { data: behandling } = useGetVirkningstidspunkt(behandlingId);
-    const updateVirkningsTidspunkt = useUpdateVirkningstidspunkt(behandlingId);
-    const initialValues = createInitialValues(behandling);
-    const channel = new BroadcastChannel("virkningstidspunkt");
+    const { virkningstidspunkt } = useGetBehandling();
+    const oppdaterBehandling = useOppdaterBehandling();
+    const initialValues = createInitialValues(virkningstidspunkt);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
 
-    const fieldsForNotat = useWatch({
-        control: useFormMethods.control,
-        name: [
-            "virkningsdato",
-            "årsak",
-            "virkningstidspunktsbegrunnelseIVedtakOgNotat",
-            "virkningstidspunktsbegrunnelseKunINotat",
-        ],
-    });
-
-    useEffect(() => {
-        channel.postMessage(JSON.stringify(fieldsForNotat));
-    }, [fieldsForNotat]);
-
     const onSave = () => {
         const values = useFormMethods.getValues();
-        updateVirkningsTidspunkt.mutation.mutate(createPayload(values), {
-            onSuccess: () => {
-                useFormMethods.reset(values, {
-                    keepValues: true,
-                    keepErrors: true,
-                    keepDefaultValues: true,
-                });
-            },
-        });
+        oppdaterBehandling.mutation.mutate(
+            { virkningstidspunkt: createPayload(values) },
+            {
+                onSuccess: () => {
+                    useFormMethods.reset(values, {
+                        keepValues: true,
+                        keepErrors: true,
+                        keepDefaultValues: true,
+                    });
+                },
+            }
+        );
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -224,7 +205,7 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title="Virkningstidspunkt"
-                        main={<Main initialValues={initialValues} error={updateVirkningsTidspunkt.error} />}
+                        main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
                         side={<Side />}
                     />
                 </form>

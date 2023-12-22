@@ -4,7 +4,6 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 const deps = require("./package.json").dependencies;
-const isDevelopment = process.env.NODE_ENV !== "production";
 const { EsbuildPlugin } = require("esbuild-loader");
 
 module.exports = {

@@ -1,4 +1,4 @@
-import { HusstandsbarnDto } from "../../api/BidragBehandlingApi";
+import { HusstandsbarnDto } from "../../api/BidragBehandlingApiV1";
 
 interface Sivilstand {
     gyldigFraOgMed: string;

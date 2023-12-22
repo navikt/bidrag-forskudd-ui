@@ -1,13 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import {
-    Bostatuskode as BoStatusType,
-    Kilde,
-    RolleDto,
-    RolleDtoRolleType,
-    Sivilstandskode,
-} from "../../api/BidragBehandlingApi";
+import { Bostatuskode, Kilde, RolleDto, Rolletype, Sivilstandskode } from "../../api/BidragBehandlingApiV1";
 import { SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import {
     checkOverlappingPeriods,
@@ -458,10 +452,10 @@ describe("BoforholdFormHelpers", () => {
         const barnMedISaken: RolleDto[] = [
             {
                 id: 1,
-                rolleType: RolleDtoRolleType.BARN,
+                rolletype: Rolletype.BA,
                 ident: "02110180716",
                 navn: "ALI RAHMAN RAHMAN",
-                fodtDato: "2001-11-02",
+                fødselsdato: "2001-11-02",
             },
         ];
 
@@ -482,12 +476,12 @@ describe("BoforholdFormHelpers", () => {
         const barnMedISaken: RolleDto[] = [
             {
                 id: 1,
-                rolleType: RolleDtoRolleType.BARN,
+                rolletype: Rolletype.BA,
                 ident: "03522150877",
             },
             {
                 id: 2,
-                rolleType: RolleDtoRolleType.BARN,
+                rolletype: Rolletype.BA,
                 ident: "07512150855",
             },
         ];
@@ -499,7 +493,7 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: null,
                         tilDato: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                 ],
             },
@@ -510,27 +504,27 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: new Date("2018-06-05"),
                         tilDato: new Date("2020-03-01"),
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-03-02"),
                         tilDato: new Date("2020-03-31"),
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-04-01"),
                         tilDato: new Date("2021-07-07"),
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2021-07-08"),
                         tilDato: new Date("2021-12-31"),
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2022-01-01"),
                         tilDato: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                 ],
             },
@@ -543,7 +537,7 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2020-06-01",
                         datoTom: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -556,19 +550,19 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2020-06-01",
                         datoTom: "2021-07-31",
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2021-08-01",
                         datoTom: "2021-12-31",
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2022-01-01",
                         datoTom: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -590,7 +584,7 @@ describe("BoforholdFormHelpers", () => {
         const barnMedISaken: RolleDto[] = [
             {
                 id: 1,
-                rolleType: RolleDtoRolleType.BARN,
+                rolletype: Rolletype.BA,
                 ident: "07512150855",
             },
         ];
@@ -602,27 +596,27 @@ describe("BoforholdFormHelpers", () => {
                     {
                         fraDato: new Date("2019-04-01"),
                         tilDato: new Date("2020-03-01"),
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-03-02"),
                         tilDato: new Date("2020-03-31"),
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2020-04-01"),
                         tilDato: new Date("2021-07-07"),
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2021-07-08"),
                         tilDato: new Date("2021-12-31"),
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                     },
                     {
                         fraDato: new Date("2022-01-01"),
                         tilDato: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                     },
                 ],
             },
@@ -635,19 +629,19 @@ describe("BoforholdFormHelpers", () => {
                     {
                         datoFom: "2019-04-01",
                         datoTom: "2021-07-31",
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2021-08-01",
                         datoTom: "2021-12-31",
-                        bostatus: BoStatusType.IKKE_MED_FORELDER,
+                        bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         kilde: "offentlig",
                     },
                     {
                         datoFom: "2022-01-01",
                         datoTom: null,
-                        bostatus: BoStatusType.MED_FORELDER,
+                        bostatus: Bostatuskode.MED_FORELDER,
                         kilde: "offentlig",
                     },
                 ],
@@ -718,7 +712,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -729,12 +723,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -761,7 +755,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -772,12 +766,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -809,7 +803,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -820,12 +814,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -852,12 +846,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -868,12 +862,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -906,7 +900,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -917,12 +911,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -954,12 +948,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -970,12 +964,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -1009,7 +1003,7 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -1020,12 +1014,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: "2014-01-10T00:00:00.000Z",
                             tilDato: "2022-09-04T00:00:00.000Z",
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: "2022-09-05T00:00:00.000Z",
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -1052,12 +1046,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: new Date("2022-10-07T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-10-08T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -1068,12 +1062,12 @@ describe("BoforholdFormHelpers", () => {
                         {
                             fraDato: new Date("2014-01-10T00:00:00.000Z"),
                             tilDato: new Date("2022-09-04T00:00:00.000Z"),
-                            bostatus: BoStatusType.IKKE_MED_FORELDER,
+                            bostatus: Bostatuskode.IKKE_MED_FORELDER,
                         },
                         {
                             fraDato: new Date("2022-09-05T00:00:00.000Z"),
                             tilDato: null,
-                            bostatus: BoStatusType.MED_FORELDER,
+                            bostatus: Bostatuskode.MED_FORELDER,
                         },
                     ],
                 },
@@ -1102,25 +1096,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: null,
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1129,13 +1123,13 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: null,
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1154,25 +1148,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-03-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1181,7 +1175,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-03-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1199,37 +1193,37 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1238,19 +1232,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1267,37 +1261,37 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-06-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1306,7 +1300,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1323,25 +1317,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-06-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-06-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1350,19 +1344,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-06-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-07-01",
                 datoTom: "2022-07-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1379,19 +1373,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1400,19 +1394,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1429,19 +1423,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1450,7 +1444,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1467,19 +1461,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-05-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1488,19 +1482,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2022-04-01",
                 datoTom: "2022-04-30",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-05-01",
                 datoTom: "2022-08-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-09-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1517,25 +1511,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1544,7 +1538,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1562,25 +1556,25 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];
@@ -1589,31 +1583,31 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-07-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-08-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-10-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-11-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1631,19 +1625,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-08-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1652,19 +1646,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-08-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2021-09-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1682,19 +1676,19 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2021-08-01",
                 datoTom: "2021-12-31",
-                bostatus: BoStatusType.IKKE_MED_FORELDER,
+                bostatus: Bostatuskode.IKKE_MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
             {
                 datoFom: "2022-01-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.OFFENTLIG,
             },
         ];
@@ -1703,7 +1697,7 @@ describe("BoforholdFormHelpers", () => {
             {
                 datoFom: "2021-04-01",
                 datoTom: null,
-                bostatus: BoStatusType.MED_FORELDER,
+                bostatus: Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             },
         ];

@@ -46,6 +46,7 @@ const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     if (isError) {
         return <Alert variant="error">Det skjedde en feil ved henting av notat</Alert>;
     }
+    //@ts-ignore
     return <notat-view html={notatHtml} />;
 };
 

@@ -1,4 +1,4 @@
-import { RolleDtoRolleType } from "../../api/BidragBehandlingApi";
+import { BehandlingDto, Rolletype } from "../../api/BidragBehandlingApiV1";
 import { HentGrunnlagspakkeDto, SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { deductMonths, toISODateString } from "../../utils/date-utils";
@@ -85,9 +85,9 @@ export const createHustandsmedlemmer = () => {
     };
 };
 
-export const createGrunnlagspakkeOppdaterData = (behandling) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER).ident;
-    const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);
+export const createGrunnlagspakkeOppdaterData = (behandling: BehandlingDto) => {
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
+    const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const periodeFra = toISODateString(deductMonths(new Date(), 36));
     const periodeTil = toISODateString(new Date());
 
@@ -282,9 +282,9 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             .flat()
     );
 
-export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling): HentGrunnlagspakkeDto => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolleType === RolleDtoRolleType.BIDRAGSMOTTAKER).ident;
-    const barn = behandling?.roller?.filter((rolle) => rolle.rolleType === RolleDtoRolleType.BARN);
+export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: BehandlingDto): HentGrunnlagspakkeDto => {
+    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
+    const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = toISODateString(new Date());
     let year = new Date();
     let month = new Date().getMonth() + 1;

@@ -69,6 +69,11 @@ export interface SkattegrunnlagspostDto {
 }
 
 export interface TransformerInntekterRequest {
+    /**
+     * Dato ainntektene er hentet i bidrag-grunnlag, kommer fra hentetTidspunkti responsen fra bidrag-grunnlag
+     * @format date
+     */
+    ainntektHentetDato: string;
     /** Periodisert liste over inntekter fra Ainntekt */
     ainntektsposter: Ainntektspost[];
     /** Periodisert liste over inntekter fra Sigrun */
@@ -153,12 +158,16 @@ export enum Inntektsrapportering {
     LONNTREKK = "LØNN_TREKK",
     MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
+    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
     PENSJON = "PENSJON",
     PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
     SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
     SYKEPENGER = "SYKEPENGER",
+    FORELDREPENGER = "FORELDREPENGER",
+    INTRODUKSJONSSTONAD = "INTRODUKSJONSSTØNAD",
+    KVALIFISERINGSSTONAD = "KVALIFISERINGSSTØNAD",
 }
 
 /** Liste over summerte månedsinntekter (Ainntekt ++)) */
