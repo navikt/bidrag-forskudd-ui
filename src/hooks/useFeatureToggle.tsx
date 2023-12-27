@@ -12,22 +12,19 @@ export default function useFeatureToogle() {
     const client = useUnleashClient();
     const { data: userId } = useSuspenseQuery({
         queryKey: ["user"],
-        queryFn: async () => {
-            const userId = await SecuritySessionUtils.hentSaksbehandlerId();
-            updateContext({
-                userId,
-                properties: {
-                    inforingsgruppen: userId,
-                    testbrukere: userId,
-                },
-            });
-            return userId;
-        },
+        queryFn: () => SecuritySessionUtils.hentSaksbehandlerId(),
         initialData: () => (isMockEnabled ? "" : undefined),
         staleTime: isMockEnabled ? 0 : Infinity,
     });
 
     useEffect(() => {
+        updateContext({
+            userId,
+            properties: {
+                inforingsgruppen: userId,
+                testbrukere: userId,
+            },
+        });
         console.log(client.getAllToggles(), client.getContext());
     }, [userId]);
 
