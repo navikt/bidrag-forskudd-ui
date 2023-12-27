@@ -21,7 +21,10 @@ import { mapToAntallBarnIHusstand, mapToInntekt, mapToSivilstand } from "../help
 
 const Vedtak = () => {
     const { behandlingId, activeStep } = useForskudd();
-    const { erVedtakFattet, årsak } = useGetBehandling();
+    const {
+        erVedtakFattet,
+        virkningstidspunkt: { årsak },
+    } = useGetBehandling();
     const queryClient = useQueryClient();
     const isAvslag = Object.keys(Avslag).includes(årsak);
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
@@ -68,6 +71,7 @@ const Vedtak = () => {
 };
 
 const FatteVedtakButtons = () => {
+    const { isFatteVedtakEnabled } = useFeatureToogle();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const queryClient = useQueryClient();
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status == "error";
@@ -95,7 +99,7 @@ const FatteVedtakButtons = () => {
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || process.env.DISABLE_FATTE_VEDTAK == "true"}
+                    disabled={isBeregningError || !isFatteVedtakEnabled}
                     onClick={() => fatteVedtakFn.mutate()}
                     className="w-max"
                     size="small"
@@ -121,7 +125,11 @@ const FatteVedtakButtons = () => {
 };
 
 const VedtakAvslag = () => {
-    const { roller, virkningsdato, søktFomDato, årsak } = useGetBehandling();
+    const {
+        roller,
+        virkningstidspunkt: { virkningsdato, årsak },
+        søktFomDato,
+    } = useGetBehandling();
     return (
         <>
             {roller

@@ -16,9 +16,8 @@ module.exports = merge(webpackCommon, {
             BIDRAG_INNTEKT: "",
             BISYS_URL: "",
             BIDRAG_DOKUMENT_PRODUKSJON: "",
-            ENABLE_FATTE_VEDTAK: false,
-            ENABLE_VEDTAK_SKJERMBILDE: false,
-            ENABLE_INNTEKT_SKJERMBILDE: false,
+            UNLEASH_FRONTEND_TOKEN: "",
+            UNLEASH_API_URL: "",
         }),
     ],
 });

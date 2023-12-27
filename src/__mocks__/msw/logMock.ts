@@ -12,5 +12,10 @@ export default function logMock(): RestHandler[] {
             console.log("Logging", requestBody);
             return res(ctx.status(200), ctx.body("some token"));
         }),
+        rest.post(`/log/secure`, async (req: RestRequest, res, ctx) => {
+            const requestBody = await req.json();
+            console.log("Logging", requestBody);
+            return res(ctx.status(200), ctx.body("some token"));
+        }),
     ];
 }

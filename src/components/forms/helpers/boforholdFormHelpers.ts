@@ -571,7 +571,7 @@ export const checkPeriodizationErrors = (
             ? isAfterDate(periode.datoFom, datoFra)
             : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
     );
-    const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(perioderValues[0].datoFom, datoFra);
+    const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(perioderValues[0]?.datoFom, datoFra);
     const errorTypes: string[] = [];
 
     if (!atLeastOneRunningPeriod) {
