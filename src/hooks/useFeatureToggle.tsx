@@ -1,5 +1,5 @@
 import { SecuritySessionUtils } from "@navikt/bidrag-ui-common";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useFlag, useUnleashClient } from "@unleash/proxy-client-react";
 import { useEffect } from "react";
 
@@ -9,7 +9,7 @@ export default function useFeatureToogle() {
     const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const client = useUnleashClient();
-    const { data: userId } = useSuspenseQuery({
+    const { data: userId } = useQuery({
         queryKey: ["user"],
         queryFn: async () => SecuritySessionUtils.hentSaksbehandlerId(),
         initialData: () => (isMockEnabled ? "" : undefined),

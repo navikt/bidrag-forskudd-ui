@@ -1,7 +1,7 @@
 import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { FlagProvider, IConfig } from "@unleash/proxy-client-react";
+import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
@@ -79,8 +79,16 @@ export default function App() {
 
 function ForskudWrapper() {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    usePrefetchBehandlingAndGrunnlagspakke(Number(behandlingId));
+    const { flagsReady } = useFlagsStatus();
 
+    usePrefetchBehandlingAndGrunnlagspakke(Number(behandlingId));
+    if (!flagsReady) {
+        return (
+            <div className="flex justify-center">
+                <Loader size="3xlarge" title="venter..." variant="interaction" />
+            </div>
+        );
+    }
     return (
         <>
             <ForskuddProvider behandlingId={Number(behandlingId)}>
