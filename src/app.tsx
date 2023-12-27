@@ -79,10 +79,10 @@ export default function App() {
 
 function ForskudWrapper() {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { flagsReady } = useFlagsStatus();
+    const { flagsReady, flagsError } = useFlagsStatus();
 
     usePrefetchBehandlingAndGrunnlagspakke(Number(behandlingId));
-    if (!flagsReady) {
+    if (!flagsReady && flagsError == false) {
         return (
             <div className="flex justify-center">
                 <Loader size="3xlarge" title="venter..." variant="interaction" />
