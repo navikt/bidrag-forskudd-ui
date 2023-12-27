@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { FlagProvider, IConfig } from "@unleash/proxy-client-react";
 import { expect } from "chai";
 import { describe } from "mocha";
 import { rest } from "msw";
 import { setupServer } from "msw/node";
 import origFetch from "node-fetch";
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { BrowserRouter } from "react-router-dom";
 import sinon from "sinon";
 
@@ -18,19 +19,69 @@ import environment from "../../environment";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
 
 const queryClient = new QueryClient();
-
+const config: IConfig = {
+    url: "http://localhost/unleash",
+    clientKey: "sasdsad",
+    refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
+    appName: "bidrag-behandling-ui",
+};
+const RouterWrapper = ({ children }: PropsWithChildren<unknown>) => {
+    return (
+        <FlagProvider config={config}>
+            <BrowserRouter>{children}</BrowserRouter>
+        </FlagProvider>
+    );
+};
 const renderWithRouter = (ui, { route = "/" } = {}) => {
     window.history.pushState({}, "Test page", route);
 
     return {
         user: userEvent.setup(),
-        ...render(ui, { wrapper: BrowserRouter }),
+        ...render(ui, { wrapper: RouterWrapper }),
     };
 };
 
 const server = setupServer(
     rest.post(`http://localhost/token`, (req, res, ctx) => {
         return res(ctx.text("123334343"));
+    }),
+    rest.get(`http://localhost/unleash`, (req, res, ctx) => {
+        return res(
+            ctx.set("Content-Type", "application/json"),
+            ctx.body(
+                JSON.stringify({
+                    toggles: [
+                        {
+                            name: "behandling.fattevedtak",
+                            enabled: false,
+                            variant: {
+                                name: "disabled",
+                                enabled: false,
+                            },
+                            impressionData: true,
+                        },
+                        {
+                            name: "behandling.skjermbilde.vedtak",
+                            enabled: true,
+                            variant: {
+                                name: "disabled",
+                                enabled: false,
+                            },
+                            impressionData: true,
+                        },
+                        {
+                            name: "behandling.skjermbilde.inntekter",
+                            enabled: true,
+                            variant: {
+                                name: "disabled",
+                                enabled: false,
+                            },
+                            impressionData: true,
+                        },
+                    ],
+                })
+            )
+        );
     }),
     rest.options(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, (req, res, ctx) => {
         return res(ctx.set({ "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }));

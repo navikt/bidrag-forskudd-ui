@@ -295,6 +295,7 @@ const BoforholdsForm = () => {
                 getBarnPerioderFromHusstandsListe(opplysningerFraFolkRegistre.husstand, virkningsOrSoktFraDato) ?? [],
             sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato) ?? [],
         };
+
         useFormMethods.reset(values);
         updateBehandling.mutate({ boforhold: values });
         setBoforholdFormValues(values);
@@ -625,7 +626,7 @@ const Perioder = ({
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
-        if (perioderValues[index].datoFom === null) {
+        if (perioderValues[index]?.datoFom === null) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
                 message: "Dato må fylles ut",
@@ -716,7 +717,7 @@ const Perioder = ({
         const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
         const fomOgTomInvalid =
             perioderValues[index].datoTom !== null &&
-            isAfterDate(perioderValues[index].datoFom, perioderValues[index].datoTom);
+            isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
 
         if (fomOgTomInvalid) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
@@ -781,7 +782,7 @@ const Perioder = ({
             setEditableRow(`${barnIndex}.${index}`);
         }
     };
-
+    console.log(controlledFields);
     return (
         <>
             <div className="flex justify-between">
