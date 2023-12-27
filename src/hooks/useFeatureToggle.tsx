@@ -20,6 +20,7 @@ export default function useFeatureToogle() {
         client.updateContext({
             userId,
             properties: {
+                Bidragteamet: userId,
                 inforingsgruppen: userId,
                 testbrukere: userId,
             },
