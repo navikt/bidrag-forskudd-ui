@@ -5,6 +5,11 @@ import { useEffect } from "react";
 
 export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK == "true";
+    const enableInntektSkjermbilde = useFlag("behandling.skjermbilde.inntekter");
+    const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
+    const enableFatteVedtak = useFlag("behandling.fattevedtak");
+    const updateContext = useUnleashContext();
+    const client = useUnleashClient();
     const { data: userId } = useSuspenseQuery({
         queryKey: ["user"],
         queryFn: async () => {
@@ -21,11 +26,6 @@ export default function useFeatureToogle() {
         initialData: () => (isMockEnabled ? "" : undefined),
         staleTime: isMockEnabled ? 0 : Infinity,
     });
-    const enableInntektSkjermbilde = useFlag("behandling.skjermbilde.inntekter");
-    const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
-    const enableFatteVedtak = useFlag("behandling.fattevedtak");
-    const updateContext = useUnleashContext();
-    const client = useUnleashClient();
 
     useEffect(() => {
         console.log(client.getAllToggles(), client.getContext());
