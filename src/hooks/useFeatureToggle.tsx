@@ -7,7 +7,17 @@ export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK == "true";
     const { data: userId } = useSuspenseQuery({
         queryKey: ["user"],
-        queryFn: () => SecuritySessionUtils.hentSaksbehandlerId(),
+        queryFn: async () => {
+            const userId = await SecuritySessionUtils.hentSaksbehandlerId();
+            updateContext({
+                userId,
+                properties: {
+                    inforingsgruppen: userId,
+                    testbrukere: userId,
+                },
+            });
+            return userId;
+        },
         initialData: () => (isMockEnabled ? "" : undefined),
         staleTime: isMockEnabled ? 0 : Infinity,
     });
@@ -18,13 +28,6 @@ export default function useFeatureToogle() {
     const client = useUnleashClient();
 
     useEffect(() => {
-        updateContext({
-            userId,
-            properties: {
-                inforingsgruppen: userId,
-                testbrukere: userId,
-            },
-        });
         console.log(client.getAllToggles(), client.getContext());
     }, [userId]);
 
