@@ -1,3 +1,5 @@
+import { Loader } from "@navikt/ds-react";
+import { useFlagsStatus } from "@unleash/proxy-client-react";
 import React, { createContext, PropsWithChildren, useCallback, useContext, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
@@ -31,6 +33,7 @@ interface IForskuddContextProps {
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
 function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskuddContextProps>) {
+    const { flagsReady } = useFlagsStatus();
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
@@ -72,6 +75,14 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
             errorModalOpen,
         ]
     );
+
+    if (!flagsReady) {
+        return (
+            <div className="flex justify-center">
+                <Loader size="3xlarge" title="venter..." variant="interaction" />
+            </div>
+        );
+    }
 
     return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
 }

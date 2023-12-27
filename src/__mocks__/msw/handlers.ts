@@ -6,8 +6,10 @@ import logMock from "./logMock";
 import personMock from "./personMock";
 import { hentSakMock } from "./sakMock";
 import tokenMock from "./tokenMock";
+import unleashMock from "./unleashMock";
 import visningsNavnMock from "./visningsNavnMock";
 export const handlers = [
+    ...unleashMock(),
     ...beregningMock(),
     ...tokenMock(),
     ...logMock(),

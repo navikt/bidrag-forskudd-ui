@@ -1,6 +1,7 @@
 import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { FlagProvider, IConfig } from "@unleash/proxy-client-react";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
@@ -20,52 +21,59 @@ const queryClient = new QueryClient({
         },
     },
 });
-
+const config: IConfig = {
+    url: process.env.UNLEASH_API_URL as string,
+    clientKey: process.env.UNLEASH_FRONTEND_TOKEN,
+    refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
+    appName: "bidrag-behandling-ui",
+};
 initMockData();
 export default function App() {
     const { reset } = useQueryErrorResetBoundary();
     return (
-        <QueryClientProvider client={queryClient}>
-            <ErrorBoundary
-                onReset={reset}
-                onError={(error, compStack) => {
-                    LoggerService.error(
-                        `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message} - ${compStack.componentStack}`,
-                        error
-                    );
-                }}
-                fallbackRender={({ error, resetErrorBoundary }) => (
-                    <Alert variant="error" className="w-8/12 m-auto mt-8">
-                        <div>
-                            <Heading spacing size="small" level="3">
-                                Det har skjedd en feil
-                            </Heading>
-                            <BodyShort size="small">Feilmelding: {error.message}</BodyShort>
-                            <Button size="small" className="w-max mt-4" onClick={() => resetErrorBoundary()}>
-                                Last på nytt
-                            </Button>
-                        </div>
-                    </Alert>
-                )}
-            >
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/sak/:saksnummer/behandling/:behandlingId">
-                            <Route index element={<ForskudWrapper />} />
-                            <Route path="notat" element={<NotatPageWrapper />} />
-                        </Route>
-                        <Route path="/behandling/:behandlingId">
-                            <Route index element={<ForskudWrapper />} />
-                            <Route path="notat" element={<NotatPageWrapper />} />
-                        </Route>
-                        <Route path="/forskudd/:behandlingId">
-                            <Route index element={<ForskudWrapper />} />
-                            <Route path="notat" element={<NotatPageWrapper />} />
-                        </Route>
-                    </Routes>
-                </BrowserRouter>
-            </ErrorBoundary>
-        </QueryClientProvider>
+        <FlagProvider config={config}>
+            <QueryClientProvider client={queryClient}>
+                <ErrorBoundary
+                    onReset={reset}
+                    onError={(error, compStack) => {
+                        LoggerService.error(
+                            `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message} - ${compStack.componentStack}`,
+                            error
+                        );
+                    }}
+                    fallbackRender={({ error, resetErrorBoundary }) => (
+                        <Alert variant="error" className="w-8/12 m-auto mt-8">
+                            <div>
+                                <Heading spacing size="small" level="3">
+                                    Det har skjedd en feil
+                                </Heading>
+                                <BodyShort size="small">Feilmelding: {error.message}</BodyShort>
+                                <Button size="small" className="w-max mt-4" onClick={() => resetErrorBoundary()}>
+                                    Last på nytt
+                                </Button>
+                            </div>
+                        </Alert>
+                    )}
+                >
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/sak/:saksnummer/behandling/:behandlingId">
+                                <Route index element={<ForskudWrapper />} />
+                                <Route path="notat" element={<NotatPageWrapper />} />
+                            </Route>
+                            <Route path="/behandling/:behandlingId">
+                                <Route index element={<ForskudWrapper />} />
+                                <Route path="notat" element={<NotatPageWrapper />} />
+                            </Route>
+                            <Route path="/forskudd/:behandlingId">
+                                <Route index element={<ForskudWrapper />} />
+                                <Route path="notat" element={<NotatPageWrapper />} />
+                            </Route>
+                        </Routes>
+                    </BrowserRouter>
+                </ErrorBoundary>
+            </QueryClientProvider>
+        </FlagProvider>
     );
 }
 
