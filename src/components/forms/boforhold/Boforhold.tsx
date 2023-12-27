@@ -22,7 +22,6 @@ import {
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBoforholdRequest,
-    OpplysningerDto,
     OpplysningerType,
 } from "../../../api/BidragBehandlingApiV1";
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
@@ -37,6 +36,7 @@ import {
     useAddOpplysningerData,
     useGetBehandling,
     useGetOpplysninger,
+    useGetOpplysningerHentetdato,
     useGrunnlagspakke,
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -131,12 +131,10 @@ const Main = ({
     opplysningerFraFolkRegistre,
     opplysningerChanges,
     updateOpplysninger,
-    boforoholdOpplysninger,
 }: {
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    boforoholdOpplysninger: OpplysningerDto;
 }) => {
     const {
         virkningstidspunkt: { virkningsdato },
@@ -145,13 +143,14 @@ const Main = ({
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
+    const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
     return (
         <>
             {opplysningerChanges.length > 0 && (
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
                         Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysninger.hentetDato)}
+                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysningerHentetdato)}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -222,7 +221,9 @@ const BoforholdsForm = () => {
         søktFomDato,
         roller,
     } = useGetBehandling();
-    const boforoholdOpplysninger = useGetOpplysninger(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
+        OpplysningerType.BOFORHOLD_BEARBEIDET
+    );
     const { husstandmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlagspakke();
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
@@ -242,9 +243,6 @@ const BoforholdsForm = () => {
         () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken),
         [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
     );
-    const savedOpplysninger = boforoholdOpplysninger
-        ? (JSON.parse(boforoholdOpplysninger.data) as ParsedBoforholdOpplysninger)
-        : undefined;
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -252,8 +250,8 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (savedOpplysninger) {
-            const changesInOpplysninger = compareOpplysninger(savedOpplysninger, opplysningerFraFolkRegistre);
+        if (boforoholdOpplysninger) {
+            const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
 
             if (changesInOpplysninger?.length) {
                 setOpplysningerChanges(changesInOpplysninger);
@@ -298,7 +296,7 @@ const BoforholdsForm = () => {
         lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
-        console.log(fieldValues);
+
         const values: OppdaterBoforholdRequest = {
             ...fieldValues,
             husstandsbarn: getBarnPerioderFromHusstandsListe(
@@ -324,13 +322,12 @@ const BoforholdsForm = () => {
                         main={
                             <Main
                                 opplysningerFraFolkRegistre={
-                                    savedOpplysninger
-                                        ? savedOpplysninger.husstand
+                                    boforoholdOpplysninger
+                                        ? boforoholdOpplysninger.husstand
                                         : opplysningerFraFolkRegistre.husstand
                                 }
                                 opplysningerChanges={opplysningerChanges}
                                 updateOpplysninger={updateOpplysninger}
-                                boforoholdOpplysninger={boforoholdOpplysninger}
                             />
                         }
                         side={<Side />}
@@ -434,7 +431,7 @@ const AddBarnForm = ({
         PERSON_API.informasjon
             .hentPersonPost({ ident: value })
             .then(({ data }) => {
-                setNavn(data.kortnavn);
+                setNavn(data.visningsnavn);
                 setPerson(data);
                 const formErrors = { ...error };
                 delete formErrors.ident;
@@ -833,7 +830,7 @@ const Perioder = ({
             setEditableRow(`${barnIndex}.${index}`);
         }
     };
-    console.log(controlledFields);
+
     return (
         <>
             {hasOpplysningerFraFolkeregistre && showResetButton && (

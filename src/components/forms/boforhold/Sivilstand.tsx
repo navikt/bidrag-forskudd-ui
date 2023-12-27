@@ -1,12 +1,15 @@
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
+import { capitalize } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Box, Button, Heading, ReadMore } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import { Kilde, OpplysningerType, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import { SivilstandDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
+import { useGetBehandling, useGetOpplysninger } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -35,6 +38,7 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+
     const saveBoforhold = useOnSaveBoforhold();
     const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
@@ -178,6 +182,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     return (
         <Box padding="4" background="surface-subtle" className="overflow-hidden">
+            <Opplysninger />
+
             {(errors?.root?.sivilstand as { types: string[] })?.types && (
                 <div className="mb-4">
                     <Alert variant="warning">
@@ -292,5 +298,42 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 + Legg til periode
             </Button>
         </Box>
+    );
+};
+
+const Opplysninger = () => {
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandDto[]>(OpplysningerType.SIVILSTAND);
+    const {
+        virkningstidspunkt: { virkningsdato },
+        søktFomDato,
+    } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
+    if (!sivilstandOpplysninger) {
+        return null;
+    }
+    console.log(sivilstandOpplysninger);
+    return (
+        <ReadMore header="Opplysninger fra Folkeregistret" size="small">
+            {sivilstandOpplysninger
+                ?.filter((periode) => periode.periodeTil === null || isAfterDate(periode.periodeTil, datoFom))
+                .map((periode, index) => (
+                    <div
+                        key={`${periode.sivilstand}-${index}`}
+                        className="grid grid-cols-[70px,max-content,70px,auto] items-center gap-x-2"
+                    >
+                        <BodyShort size="small" className="flex justify-end">
+                            {datoFom && new Date(periode.periodeFra) < new Date(datoFom)
+                                ? DateToDDMMYYYYString(datoFom)
+                                : DateToDDMMYYYYString(new Date(periode.periodeFra))}
+                        </BodyShort>
+                        <div>{"-"}</div>
+                        <BodyShort size="small" className="flex justify-end">
+                            {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
+                        </BodyShort>
+                        <BodyShort size="small">{capitalize(periode.sivilstand)}</BodyShort>
+                    </div>
+                ))}
+        </ReadMore>
     );
 };

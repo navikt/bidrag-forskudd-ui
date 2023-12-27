@@ -21,13 +21,9 @@ type ArbeidsforholdProps = {
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { arbeidsforholdListe: arbeidsforholdListeLagret } = useHentArbeidsforhold();
-    const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
+    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdDto[]>(OpplysningerType.ARBEIDSFORHOLD);
 
-    const savedOpplysninger: ArbeidsforholdDto[] = arbeidsforholdOpplysninger?.data
-        ? JSON.parse(arbeidsforholdOpplysninger.data)
-        : null;
-
-    const arbeidsforholdListe = savedOpplysninger ?? arbeidsforholdListeLagret;
+    const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeLagret;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (

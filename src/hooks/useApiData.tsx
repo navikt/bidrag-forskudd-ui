@@ -71,9 +71,16 @@ export const QueryKeys = {
     personMulti: (ident: string) => ["persons", ident],
 };
 
-export const useGetOpplysninger = (opplysningerType: OpplysningerType) => {
+export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
+    return opplysninger != null ? JSON.parse(opplysninger.data) : null;
+};
+
+export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
+    const behandling = useGetBehandling();
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
+    return opplysninger?.hentetDato;
 };
 
 export const useOppdaterBehandling = () => {
