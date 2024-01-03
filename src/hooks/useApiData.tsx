@@ -94,8 +94,6 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
             return data;
         },
         networkMode: "always",
-        retry: 3,
-        retryDelay: 2000,
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
         },
