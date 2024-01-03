@@ -78,9 +78,16 @@ export const useGetOpplysninger = (opplysningerType: OpplysningerType) => {
 
 export const useOppdaterBehandling = () => {
     const { behandlingId } = useForskudd();
+
+    const mutation = oppdaterBehandlingMutation(behandlingId);
+
+    return { mutation, error: mutation.isError };
+};
+
+export const oppdaterBehandlingMutation = (behandlingId: number) => {
     const queryClient = useQueryClient();
 
-    const mutation = useMutation({
+    return useMutation({
         mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, payload);
@@ -94,13 +101,11 @@ export const useOppdaterBehandling = () => {
             console.log("onError", error);
         },
     });
-
-    return { mutation, error: mutation.isError };
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     const { isInntektSkjermbildeEnabled } = useFeatureToogle();
-
+    const oppdaterBehandlingFn = oppdaterBehandlingMutation(behandlingId);
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
@@ -125,7 +130,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         });
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
+        await oppdaterBehandlingFn.mutate({ grunnlagspakkeId });
         queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
             ...behandling,
             grunnlagspakkeid: grunnlagspakkeId,
@@ -432,85 +437,6 @@ export const useHentArbeidsforhold = (): HentGrunnlagDto | null => {
         staleTime: Infinity,
     });
     return arbeidsforhold;
-};
-
-export const usePrefetchBehandlingAndGrunnlagspakke2 = async (behandlingId) => {
-    const { isInntektSkjermbildeEnabled } = useFeatureToogle();
-
-    const queryClient = useQueryClient();
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.behandling(behandlingId),
-        queryFn: async (): Promise<BehandlingDto> => {
-            const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
-            return data;
-        },
-        staleTime: Infinity,
-    });
-
-    const behandling: BehandlingDto = queryClient.getQueryData(QueryKeys.behandling(behandlingId));
-
-    if (behandling?.grunnlagspakkeid) {
-        queryClient.setQueryData(QueryKeys.grunnlagspakkeId(), behandling.grunnlagspakkeid);
-    } else {
-        await queryClient.prefetchQuery({
-            queryKey: QueryKeys.grunnlagspakkeId(),
-            queryFn: async (): Promise<number> => {
-                const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
-                    formaal: "FORSKUDD",
-                });
-                return data;
-            },
-            staleTime: Infinity,
-        });
-
-        const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
-        queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
-            ...behandling,
-            grunnlagspakkeid: grunnlagspakkeId,
-        });
-    }
-
-    const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-    const grunnlagRequest = createGrunnlagRequest(behandling);
-
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
-        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
-            return data;
-        },
-        staleTime: Infinity,
-    });
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
-            return data;
-        },
-        staleTime: Infinity,
-    });
-
-    if (isInntektSkjermbildeEnabled) {
-        const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(
-            QueryKeys.grunnlagspakke(grunnlagspakkeId)
-        );
-        const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
-
-        bidragIncomeRequests.forEach((request) => {
-            queryClient.prefetchQuery({
-                queryKey: ["bidraginntekt", request.ident],
-                queryFn: async () => {
-                    const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
-                    return data;
-                },
-                staleTime: Infinity,
-            });
-        });
-    }
 };
 
 export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
