@@ -1,5 +1,4 @@
 import { BehandlingDto, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
-import { generateName } from "../msw/personMock";
 
 export const behandlingMockApiData: BehandlingDto = {
     id: 1,
@@ -35,24 +34,7 @@ export const behandlingMockApiData: BehandlingDto = {
         },
     ],
     boforhold: {
-        husstandsbarn: [
-            {
-                id: 1,
-                medISak: true,
-                perioder: [],
-                ident: "03522150877",
-                navn: generateName(),
-                fødselsdato: "2023-05-02",
-            },
-            {
-                id: 4,
-                medISak: true,
-                perioder: [],
-                ident: "07512150855",
-                navn: generateName(),
-                fødselsdato: "2023-05-02",
-            },
-        ],
+        husstandsbarn: [],
         sivilstand: [],
         notat: {
             kunINotat: "",
