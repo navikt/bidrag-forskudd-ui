@@ -83,10 +83,10 @@ export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType)
     return opplysninger?.hentetDato;
 };
 
-export const useOppdaterBehandling = () => {
-    const { behandlingId } = useForskudd();
+export const useOppdaterBehandling = (_behandlingId?: number) => {
+    const behandlingDetaljer = useForskudd();
     const queryClient = useQueryClient();
-
+    const behandlingId = behandlingDetaljer?.behandlingId ?? _behandlingId;
     const mutation = useMutation({
         mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
@@ -94,6 +94,8 @@ export const useOppdaterBehandling = () => {
             return data;
         },
         networkMode: "always",
+        retry: 3,
+        retryDelay: 2000,
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
         },
@@ -107,11 +109,13 @@ export const useOppdaterBehandling = () => {
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     const { isInntektSkjermbildeEnabled } = useFeatureToogle();
+    const oppdaterBehandling = useOppdaterBehandling(behandlingId);
 
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => (await BEHANDLING_API_V1.api.hentBehandling(behandlingId)).data,
+        retry: 1,
         staleTime: Infinity,
     });
 
@@ -132,7 +136,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         });
 
         const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
+        await oppdaterBehandling.mutation.mutate({ grunnlagspakkeId });
         queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
             ...behandling,
             grunnlagspakkeid: grunnlagspakkeId,
@@ -226,7 +230,6 @@ export const useGetBehandling = (): BehandlingDto => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
             return data;
         },
-        retry: 3,
         staleTime: Infinity,
     });
     return behandling;
@@ -451,6 +454,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke2 = async (behandlingId) => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
             return data;
         },
+        retry: 1,
         staleTime: Infinity,
     });
 

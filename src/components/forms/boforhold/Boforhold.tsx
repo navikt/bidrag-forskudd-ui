@@ -45,7 +45,6 @@ import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
-    HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
@@ -81,6 +80,7 @@ import {
     getBarnPerioderFromHusstandsListe,
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getSivilstandPerioder,
+    isOver18YearsOld,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
     removeAndEditPeriods,
@@ -94,14 +94,13 @@ const Opplysninger = ({
     datoFom,
     ident,
 }: {
-    opplysninger: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
+    opplysninger: SavedHustandOpplysninger[];
     datoFom: Date | null;
     ident: string;
 }) => {
     const toVisningsnavn = useVisningsnavn();
-    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)?.perioder as
-        | HusstandOpplysningPeriode[]
-        | SavedOpplysningFraFolkeRegistrePeriode[];
+    const perioder = opplysninger.find((opplysning) => opplysning.ident === ident)
+        ?.perioder as SavedOpplysningFraFolkeRegistrePeriode[];
     return (
         <>
             {perioder
@@ -128,11 +127,9 @@ const Opplysninger = ({
 };
 
 const Main = ({
-    opplysningerFraFolkRegistre,
     opplysningerChanges,
     updateOpplysninger,
 }: {
-    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
 }) => {
@@ -171,7 +168,7 @@ const Main = ({
             <Heading level="3" size="medium">
                 Barn
             </Heading>
-            <BarnPerioder datoFom={datoFom} opplysningerFraFolkRegistre={opplysningerFraFolkRegistre} />
+            <BarnPerioder datoFom={datoFom} />
             <Sivilstand datoFom={datoFom} />
         </>
     );
@@ -320,15 +317,7 @@ const BoforholdsForm = () => {
                     <FormLayout
                         title="Boforhold"
                         main={
-                            <Main
-                                opplysningerFraFolkRegistre={
-                                    boforoholdOpplysninger
-                                        ? boforoholdOpplysninger.husstand
-                                        : opplysningerFraFolkRegistre.husstand
-                                }
-                                opplysningerChanges={opplysningerChanges}
-                                updateOpplysninger={updateOpplysninger}
-                            />
+                            <Main opplysningerChanges={opplysningerChanges} updateOpplysninger={updateOpplysninger} />
                         }
                         side={<Side />}
                     />
@@ -392,7 +381,6 @@ const AddBarnForm = ({
             return;
         }
 
-        console.log("person", person);
         const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
 
         const addedBarn: HusstandsbarnDto = {
@@ -529,18 +517,14 @@ const AddBarnForm = ({
     );
 };
 
-const BarnPerioder = ({
-    datoFom,
-    opplysningerFraFolkRegistre,
-}: {
-    datoFom: Date;
-    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
-}) => {
+const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
     const ref = useRef<HTMLDialogElement>(null);
     const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
+    const opplysinger = useGetOpplysninger<ParsedBoforholdOpplysninger>(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    const opplysningerFraFolkRegistre = opplysinger?.husstand ?? [];
     const barnFieldArray = useFieldArray({
         control,
         name: "husstandsbarn",
@@ -785,7 +769,9 @@ const Perioder = ({
             barnPerioder.append({
                 datoFom: null,
                 datoTom: null,
-                bostatus: Bostatuskode.MED_FORELDER,
+                bostatus: isOver18YearsOld(barn.fødselsdato)
+                    ? Bostatuskode.REGNES_IKKE_SOM_BARN
+                    : Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             });
             setEditableRow(`${barnIndex}.${perioderValues.length}`);
@@ -830,6 +816,10 @@ const Perioder = ({
             setEditableRow(`${barnIndex}.${index}`);
         }
     };
+
+    const boforholdOptions = isOver18YearsOld(barn.fødselsdato)
+        ? boforholdForskuddOptions.likEllerOver18År
+        : boforholdForskuddOptions.under18År;
 
     return (
         <>
@@ -908,7 +898,7 @@ const Perioder = ({
                                         name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
                                         className="w-fit"
                                         label="Status"
-                                        options={boforholdForskuddOptions.under18År.map((value) => ({
+                                        options={boforholdOptions.map((value) => ({
                                             value,
                                             text: toVisningsnavn(value.toString()),
                                         }))}

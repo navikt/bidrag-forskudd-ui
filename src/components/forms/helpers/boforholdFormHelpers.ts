@@ -38,7 +38,12 @@ import {
 
 export const boforholdForskuddOptions = {
     under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
-    likEllerOver18År: [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG],
+    likEllerOver18År: [
+        Bostatuskode.REGNES_IKKE_SOM_BARN,
+        Bostatuskode.DOKUMENTERT_SKOLEGANG,
+        Bostatuskode.MED_FORELDER,
+        Bostatuskode.IKKE_MED_FORELDER,
+    ],
 };
 export const sivilstandForskuddOptions = [Sivilstandskode.GIFT_SAMBOER, Sivilstandskode.BOR_ALENE_MED_BARN];
 export const calculateFraDato = (
@@ -66,10 +71,39 @@ export const calculateFraDato = (
     }
     return null;
 };
+function calculateAge(dateOfBirth: Date | string): number {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
 
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    // Check if the birthday has occurred this year
+    const hasBirthdayOccurred =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+    // If the birthday hasn't occurred yet, subtract 1 from the age
+    if (!hasBirthdayOccurred) {
+        age--;
+    }
+
+    return age;
+}
+function getFirstDayOfMonthAfterEighteenYears(dateOfBirth: Date): Date {
+    const eighteenYearsLater = new Date(dateOfBirth);
+    eighteenYearsLater.setFullYear(eighteenYearsLater.getFullYear() + 18);
+
+    // Set the date to the first day of the month
+    eighteenYearsLater.setDate(1);
+
+    return eighteenYearsLater;
+}
+export const isOver18YearsOld = (dateOfBirth: Date | string): boolean => calculateAge(dateOfBirth) >= 18;
 export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
     const perioder: HusstandOpplysningPeriode[] = [];
     const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
+    const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(fodselsdato);
+    const isDateAfter18 = (date: Date) => date && new Date(date) >= monthAfter18;
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         const firstPeriod = i === 0;
         const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
@@ -91,7 +125,9 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             periode.periodeFra && prevPeriod?.tilDato
                 ? isAfterDate(periode.periodeFra, addDays(new Date(prevPeriod.tilDato), 1))
                 : false;
-        const prevPeriodIsRegistrert = prevPeriod?.bostatus === Bostatuskode.MED_FORELDER;
+        const prevPeriodIsRegistrert =
+            prevPeriod?.bostatus === Bostatuskode.MED_FORELDER ||
+            prevPeriod?.bostatus == Bostatuskode.REGNES_IKKE_SOM_BARN;
 
         if (gapBetweenPeriods) {
             perioder.push({
@@ -109,21 +145,39 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
                         : new Date(prevPeriod.tilDato)
                     : null;
         } else {
-            perioder.push({
-                fraDato: periode.periodeFra ? dateOrNull(periode.periodeFra) : fodselsdato,
-                tilDato: dateOrNull(periode.periodeTil),
-                bostatus: Bostatuskode.MED_FORELDER,
-            });
+            const fraDato = periode.periodeFra ? dateOrNull(periode.periodeFra) : fodselsdato;
+            const is18BetweenPeriod =
+                !isDateAfter18(fraDato) && periode.periodeTil && isDateAfter18(new Date(periode.periodeTil));
+            if (is18BetweenPeriod) {
+                perioder.push({
+                    fraDato: fraDato,
+                    tilDato: lastDayOfMonth(fodselsdato),
+                    bostatus: Bostatuskode.MED_FORELDER,
+                });
+                perioder.push({
+                    fraDato: monthAfter18,
+                    tilDato: null,
+                    bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                });
+            } else {
+                perioder.push({
+                    fraDato: fraDato,
+                    tilDato: dateOrNull(periode.periodeTil),
+                    bostatus: isDateAfter18(fraDato) ? Bostatuskode.REGNES_IKKE_SOM_BARN : Bostatuskode.MED_FORELDER,
+                });
+            }
         }
 
         if (lastPeriod && periode.periodeTil) {
+            const fraDato = addDays(new Date(periode.periodeTil), 1);
             perioder.push({
                 fraDato: addDays(new Date(periode.periodeTil), 1),
                 tilDato: null,
-                bostatus: Bostatuskode.IKKE_MED_FORELDER,
+                bostatus: fraDato ? Bostatuskode.REGNES_IKKE_SOM_BARN : Bostatuskode.MED_FORELDER,
             });
         }
     });
+    console.log("HERER", perioder, egneBarnIHusstanden.borISammeHusstandDtoListe);
     return perioder.sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
 };
 
@@ -177,6 +231,7 @@ export const getBarnPerioder = (
         ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, datoFra))
     );
 
+    console.log(perioderEtterVirkningstidspunkt, perioder);
     const result: {
         bostatus: Bostatuskode;
         kilde: Kilde;
@@ -293,13 +348,11 @@ export const createInitialValues = (
     console.log(boforhold);
     return {
         ...boforhold,
-        husstandsbarn: boforhold?.husstandsbarn?.length
-            ? boforhold.husstandsbarn.sort(compareHusstandsBarn)
-            : getBarnPerioderFromHusstandsListe(
-                  opplysningerFraFolkRegistre.husstand,
-                  virkningsOrSoktFraDato,
-                  barnMedISaken
-              ).sort(compareHusstandsBarn),
+        husstandsbarn: getBarnPerioderFromHusstandsListe(
+            opplysningerFraFolkRegistre.husstand,
+            virkningsOrSoktFraDato,
+            barnMedISaken
+        ).sort(compareHusstandsBarn),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
             : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
