@@ -21,8 +21,10 @@ import { createInitialValues, createInntektPayload } from "../helpers/inntektFor
 import { ActionButtons } from "./ActionButtons";
 import AinntektLink from "./AinntektLink";
 import { Arbeidsforhold } from "./Arbeidsforhold";
+import { BarnetilleggTabel } from "./BarnetilleggTabel";
 import { InntektChart } from "./InntektChart";
-import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
+import { InntekteneSomLeggesTilGrunnTabel } from "./InntekteneSomLeggesTilGrunnTabel";
+import { UtvidetBarnetrygdTabel } from "./UtvidetBarnetrygdTabel";
 
 const InntektHeader = ({ inntekt, ident }: { inntekt: SummertManedsinntekt[]; ident: string }) => (
     <div className="grid w-full max-w-[65ch] gap-y-8">
