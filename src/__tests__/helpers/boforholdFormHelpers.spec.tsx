@@ -435,7 +435,7 @@ describe("BoforholdFormHelpers", () => {
                 partPersonId: "02038417846",
                 relatertPersonPersonId: "02110180716",
                 navn: "ALI RAHMAN RAHMAN",
-                fodselsdato: "2001-11-02",
+                fodselsdato: "2020-11-02",
                 erBarnAvBmBp: true,
                 aktiv: true,
                 brukFra: "2023-10-10T15:16:11.417149",
@@ -455,7 +455,7 @@ describe("BoforholdFormHelpers", () => {
                 rolletype: Rolletype.BA,
                 ident: "02110180716",
                 navn: "ALI RAHMAN RAHMAN",
-                fødselsdato: "2001-11-02",
+                fødselsdato: "2020-11-02",
             },
         ];
 
