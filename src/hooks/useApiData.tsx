@@ -14,7 +14,7 @@ import { useCallback } from "react";
 import {
     AddOpplysningerRequest,
     BehandlingDto,
-    GrunnlagDto,
+    GrunnlagsdataDto,
     OppdaterBehandlingRequest,
     OpplysningerType,
     RolleDto,
@@ -71,7 +71,7 @@ export const QueryKeys = {
 
 export const useGetOpplysninger = (opplysningerType: OpplysningerType) => {
     const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
+    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType);
 };
 
 export const useOppdaterBehandling = () => {
@@ -181,7 +181,7 @@ export const useAddOpplysningerData = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagDto> => {
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> => {
             const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
             return data;
         },
@@ -189,7 +189,7 @@ export const useAddOpplysningerData = () => {
             queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
                 ...prevData,
                 opplysninger: prevData.opplysninger.map((saved) => {
-                    if (saved.grunnlagstype == data.grunnlagstype) {
+                    if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
                         return data;
                     }
                     return saved;

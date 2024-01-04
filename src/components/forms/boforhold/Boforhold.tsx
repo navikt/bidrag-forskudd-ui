@@ -18,7 +18,7 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     Bostatuskode,
-    GrunnlagDto,
+    GrunnlagsdataDto,
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBoforholdRequest,
@@ -131,7 +131,7 @@ const Main = ({
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    boforoholdOpplysninger: GrunnlagDto;
+    boforoholdOpplysninger: GrunnlagsdataDto;
 }) => {
     const {
         virkningstidspunkt: { virkningsdato },

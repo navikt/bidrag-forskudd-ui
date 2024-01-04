@@ -580,7 +580,7 @@ export interface BehandlingDto {
     virkningstidspunkt: VirkningstidspunktDto;
     inntekter: InntekterDto;
     boforhold: BoforholdDto;
-    opplysninger: GrunnlagDto[];
+    opplysninger: GrunnlagsdataDto[];
 }
 
 export interface BehandlingNotatDto {
@@ -596,12 +596,12 @@ export interface BoforholdDto {
     notat: BehandlingNotatDto;
 }
 
-export interface GrunnlagDto {
+export interface GrunnlagsdataDto {
     /** @format int64 */
     id: number;
     /** @format int64 */
     behandlingsid: number;
-    grunnlagstype: OpplysningerType;
+    grunnlagsdatatype: OpplysningerType;
     data: string;
     /** @format date-time */
     innhentet: string;
@@ -1317,7 +1317,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         leggTilOpplysninger: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
-            this.request<GrunnlagDto, GrunnlagDto>({
+            this.request<GrunnlagsdataDto, GrunnlagsdataDto>({
                 path: `/api/v1/behandling/${behandlingId}/opplysninger`,
                 method: "POST",
                 body: data,

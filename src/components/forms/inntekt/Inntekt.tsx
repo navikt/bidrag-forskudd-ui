@@ -4,7 +4,7 @@ import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/
 import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { GrunnlagDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { GrunnlagsdataDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -67,7 +67,7 @@ const Main = ({
     ainntekt: { [ident: string]: SummertManedsinntekt[] };
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    inntektOpplysninger: GrunnlagDto;
+    inntektOpplysninger: GrunnlagsdataDto;
 }) => {
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
