@@ -1965,4 +1965,46 @@ describe("BoforholdFormHelpers", () => {
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
         );
     });
+
+    it("should merge sivilstand perioder with same status", () => {
+        const sivilstandListe = [
+            {
+                personId: "27486620604",
+                periodeFra: "1966-08-27",
+                periodeTil: "2023-06-21",
+                sivilstand: SivilstandskodePDL.UGIFT,
+                aktiv: true,
+                brukFra: "2024-01-03T09:50:39.901495",
+                brukTil: null,
+                hentetTidspunkt: "2024-01-03T09:50:39.901495",
+            },
+            {
+                personId: "27486620604",
+                periodeFra: "2023-06-21",
+                periodeTil: null,
+                sivilstand: SivilstandskodePDL.UGIFT,
+                aktiv: true,
+                brukFra: "2024-01-03T09:50:39.901495",
+                brukTil: null,
+                hentetTidspunkt: "2024-01-03T09:50:39.901495",
+            },
+        ];
+
+        const expectedResult = [
+            {
+                sivilstand: "BOR_ALENE_MED_BARN",
+                datoFom: "2022-01-12",
+                datoTom: null,
+                kilde: "OFFENTLIG",
+            },
+        ];
+
+        const sivilstandPerioderWithNarrowedStatus = mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe);
+        const sivilstandPerioder = getSivilstandPerioder(sivilstandPerioderWithNarrowedStatus, new Date("2022-01-12"));
+
+        expect(sivilstandPerioder.length).equals(expectedResult.length);
+        sivilstandPerioder.forEach((period, index) =>
+            expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
+        );
+    });
 });

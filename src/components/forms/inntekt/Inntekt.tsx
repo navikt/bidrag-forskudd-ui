@@ -277,7 +277,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.ARBEIDSFORHOLD,
+            grunnlagstype: OpplysningerType.ARBEIDSFORHOLD,
             data: JSON.stringify(arbeidsforholdListe ?? []),
             hentetDato: toISODateString(new Date()),
         });
@@ -286,7 +286,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.INNTEKT_BEARBEIDET,
+            grunnlagstype: OpplysningerType.INNTEKT_BEARBEIDET,
             data: JSON.stringify({
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
@@ -306,7 +306,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.INNTEKT,
+            grunnlagstype: OpplysningerType.INNTEKT,
             data: JSON.stringify({
                 ainntektListe: grunnlagspakke.ainntektListe,
                 skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe,

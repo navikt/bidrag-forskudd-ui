@@ -191,23 +191,17 @@ export enum Inntektsrapportering {
     KONTANTSTOTTE = "KONTANTSTØTTE",
     SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
     UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
-    AAP = "AAP",
-    DAGPENGER = "DAGPENGER",
-    FORELDREPENGER = "FORELDREPENGER",
-    INTRODUKSJONSSTONAD = "INTRODUKSJONSSTØNAD",
-    KVALIFISERINGSSTONAD = "KVALIFISERINGSSTØNAD",
-    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
-    PENSJON = "PENSJON",
-    SYKEPENGER = "SYKEPENGER",
     PERSONINNTEKT_EGNE_OPPLYSNINGER = "PERSONINNTEKT_EGNE_OPPLYSNINGER",
     KAPITALINNTEKT_EGNE_OPPLYSNINGER = "KAPITALINNTEKT_EGNE_OPPLYSNINGER",
     SAKSBEHANDLER_BEREGNET_INNTEKT = "SAKSBEHANDLER_BEREGNET_INNTEKT",
     LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
     NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
     YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
+    AAP = "AAP",
     AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
+    DAGPENGER = "DAGPENGER",
     DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
     FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
@@ -221,10 +215,16 @@ export enum Inntektsrapportering {
     LONNTREKK = "LØNN_TREKK",
     MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
+    OVERGANGSSTONAD = "OVERGANGSSTØNAD",
+    PENSJON = "PENSJON",
     PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
     SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
+    SYKEPENGER = "SYKEPENGER",
+    FORELDREPENGER = "FORELDREPENGER",
+    INTRODUKSJONSSTONAD = "INTRODUKSJONSSTØNAD",
+    KVALIFISERINGSSTONAD = "KVALIFISERINGSSTØNAD",
 }
 
 export enum Kilde {
@@ -324,17 +324,7 @@ export enum Vedtakstype {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface Grunnlag {
-    behandling: Behandling;
-    type: Grunnlagstype;
-    data: string;
-    /** @format date-time */
-    innhentet: string;
-    /** @format int64 */
-    id?: number;
-}
-
-export enum Grunnlagstype {
+export enum OpplysningerType {
     INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
     BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
     INNTEKT = "INNTEKT",
@@ -590,7 +580,7 @@ export interface BehandlingDto {
     virkningstidspunkt: VirkningstidspunktDto;
     inntekter: InntekterDto;
     boforhold: BoforholdDto;
-    opplysninger: GrunnlagDto[];
+    opplysninger: GrunnlagsdataDto[];
 }
 
 export interface BehandlingNotatDto {
@@ -606,12 +596,12 @@ export interface BoforholdDto {
     notat: BehandlingNotatDto;
 }
 
-export interface GrunnlagDto {
+export interface GrunnlagsdataDto {
     /** @format int64 */
     id: number;
     /** @format int64 */
     behandlingsid: number;
-    grunnlagstype: Grunnlagstype;
+    grunnlagsdatatype: OpplysningerType;
     data: string;
     /** @format date-time */
     innhentet: string;
@@ -747,6 +737,73 @@ export interface BeregnetForskuddResultat {
     grunnlagListe: Grunnlag[];
 }
 
+/** Grunnlag */
+export interface Grunnlag {
+    /** Referanse (unikt navn på grunnlaget) */
+    referanse?: string;
+    /** Grunnlagstype */
+    type?: Grunnlagstype;
+    /** Liste over grunnlagsreferanser */
+    grunnlagsreferanseListe?: string[];
+    /** Grunnlagsinnhold (generisk) */
+    innhold?: JsonNode;
+}
+
+/** Grunnlagstype */
+export enum Grunnlagstype {
+    SAeRFRADRAG = "SÆRFRADRAG",
+    SOKNADSBARNINFO = "SØKNADSBARN_INFO",
+    SKATTEKLASSE = "SKATTEKLASSE",
+    BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
+    BOSTATUS = "BOSTATUS",
+    BOSTATUS_BP = "BOSTATUS_BP",
+    INNTEKT = "INNTEKT",
+    INNTEKT_BARN = "INNTEKT_BARN",
+    INNTEKT_UTVIDET_BARNETRYGD = "INNTEKT_UTVIDET_BARNETRYGD",
+    KAPITALINNTEKT = "KAPITALINNTEKT",
+    KAPITALINNTEKT_BARN = "KAPITALINNTEKT_BARN",
+    NETTOSAeRTILSKUDD = "NETTO_SÆRTILSKUDD",
+    SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
+    BIDRAGSEVNE = "BIDRAGSEVNE",
+    SAMVAeRSFRADRAG = "SAMVÆRSFRADRAG",
+    SJABLON = "SJABLON",
+    LOPENDEBIDRAG = "LØPENDE_BIDRAG",
+    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
+    BARNETILSYNMEDSTONAD = "BARNETILSYN_MED_STØNAD",
+    FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
+    BARN = "BARN",
+    SIVILSTAND = "SIVILSTAND",
+    BARNETILLEGG = "BARNETILLEGG",
+    BARNETILLEGG_FORSVARET = "BARNETILLEGG_FORSVARET",
+    DELT_BOSTED = "DELT_BOSTED",
+    NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
+    UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
+    BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
+    TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
+    MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
+    BPSANDELSAeRTILSKUDD = "BPS_ANDEL_SÆRTILSKUDD",
+    MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
+    GEBYRFRITAK = "GEBYRFRITAK",
+    SOKNADINFO = "SØKNAD_INFO",
+    BARN_INFO = "BARN_INFO",
+    PERSON_INFO = "PERSON_INFO",
+    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
+    VEDTAK_INFO = "VEDTAK_INFO",
+    INNBETALTBELOP = "INNBETALT_BELØP",
+    FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
+    SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
+    KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+    PERSON = "PERSON",
+    BOSTATUS_PERIODE = "BOSTATUS_PERIODE",
+    BEREGNING_INNTEKT_RAPPORTERING_PERIODE = "BEREGNING_INNTEKT_RAPPORTERING_PERIODE",
+    SIVILSTAND_PERIODE = "SIVILSTAND_PERIODE",
+    VIRKNINGSDATO = "VIRKNINGSDATO",
+    NOTAT = "NOTAT",
+}
+
+/** Grunnlagsinnhold (generisk) */
+export type JsonNode = object;
+
 /** Resultatet av en beregning */
 export interface ResultatBeregning {
     /** Resultat beløp */
@@ -802,35 +859,13 @@ export interface AddOpplysningerRequest {
     /** @format int64 */
     behandlingId: number;
     aktiv: boolean;
-    opplysningerType: OpplysningerType;
+    grunnlagstype: OpplysningerType;
     /** data */
     data: string;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    hentetDato: string;
-}
-
-export enum OpplysningerType {
-    INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
-    BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
-    INNTEKT = "INNTEKT",
-    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
-    HUSSTANDSMEDLEMMER = "HUSSTANDSMEDLEMMER",
-    SIVILSTAND = "SIVILSTAND",
-    BOFORHOLD = "BOFORHOLD",
-    INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
-}
-
-export interface OpplysningerDto {
-    /** @format int64 */
-    id: number;
-    /** @format int64 */
-    behandlingId: number;
-    type: OpplysningerType;
-    data: string;
-    /** @format date */
     hentetDato: string;
 }
 
@@ -1282,7 +1317,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         leggTilOpplysninger: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
-            this.request<OpplysningerDto, OpplysningerDto>({
+            this.request<GrunnlagsdataDto, GrunnlagsdataDto>({
                 path: `/api/v1/behandling/${behandlingId}/opplysninger`,
                 method: "POST",
                 body: data,
@@ -1358,24 +1393,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
             this.request<NotatDto, any>({
                 path: `/api/v1/notat/${behandlingId}`,
-                method: "GET",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Hente aktive opplysninger til behandling
-         *
-         * @tags opplysninger-controller
-         * @name HentAktiv
-         * @request GET:/api/v1/behandling/{behandlingId}/opplysninger/{opplysningerType}/aktiv
-         * @deprecated
-         * @secure
-         */
-        hentAktiv: (behandlingId: number, opplysningerType: OpplysningerType, params: RequestParams = {}) =>
-            this.request<OpplysningerDto, OpplysningerDto>({
-                path: `/api/v1/behandling/${behandlingId}/opplysninger/${opplysningerType}/aktiv`,
                 method: "GET",
                 secure: true,
                 format: "json",

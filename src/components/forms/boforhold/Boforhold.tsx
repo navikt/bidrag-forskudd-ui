@@ -19,7 +19,6 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     Bostatuskode,
-    Grunnlagstype,
     HusstandsbarnDto,
     HusstandsbarnperiodeDto,
     Kilde,
@@ -228,7 +227,9 @@ const BoforholdsForm = () => {
         søktFomDato,
         roller,
     } = useGetBehandling();
-    const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(Grunnlagstype.BOFORHOLD_BEARBEIDET);
+    const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
+        OpplysningerType.BOFORHOLD_BEARBEIDET
+    );
     const { husstandmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlagspakke();
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
@@ -277,7 +278,7 @@ const BoforholdsForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.BOFORHOLD_BEARBEIDET,
+            grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
             data: JSON.stringify(opplysningerFraFolkRegistre),
             hentetDato: toISODateString(new Date()),
         });
@@ -285,14 +286,14 @@ const BoforholdsForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.HUSSTANDSMEDLEMMER,
+            grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
             data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.SIVILSTAND,
+            grunnlagstype: OpplysningerType.SIVILSTAND,
             data: JSON.stringify(sivilstandListe),
             hentetDato: toISODateString(new Date()),
         });
@@ -301,7 +302,6 @@ const BoforholdsForm = () => {
         lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
-
         const values: OppdaterBoforholdRequest = {
             ...fieldValues,
             husstandsbarn: getBarnPerioderFromHusstandsListe(

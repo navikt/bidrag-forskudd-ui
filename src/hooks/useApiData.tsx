@@ -14,9 +14,8 @@ import { useCallback } from "react";
 import {
     AddOpplysningerRequest,
     BehandlingDto,
-    Grunnlagstype,
+    GrunnlagsdataDto,
     OppdaterBehandlingRequest,
-    OpplysningerDto,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -70,18 +69,15 @@ export const QueryKeys = {
     personMulti: (ident: string) => ["persons", ident],
 };
 
-export const useGetOpplysninger = <T extends object>(opplysningerType: Grunnlagstype | OpplysningerType): T | null => {
+export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType);
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
-export const useGetOpplysningerHentetdato = (
-    opplysningerType: Grunnlagstype | OpplysningerType
-): string | undefined => {
+export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
     const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
-    return opplysninger?.innhentet;
+    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
 };
 
 export const useOppdaterBehandling = () => {
@@ -194,7 +190,7 @@ export const useAddOpplysningerData = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> => {
             const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
             return data;
         },
@@ -202,21 +198,10 @@ export const useAddOpplysningerData = () => {
             queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
                 ...prevData,
                 opplysninger: prevData.opplysninger.map((saved) => {
-                    //@ts-ignore
-                    if (saved.grunnlagstype == data.type) {
-                        return {
-                            ...data,
-                            innhentet: data.hentetDato,
-                            grunnlagstype: data.type as unknown as Grunnlagstype,
-                            behandlingsid: data.behandlingId,
-                        };
+                    if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
+                        return data;
                     }
-                    return {
-                        ...saved,
-                        innhentet: saved.innhentet,
-                        grunnlagstype: saved.grunnlagstype,
-                        behandlingsid: data.behandlingId,
-                    };
+                    return saved;
                 }),
             }));
         },
