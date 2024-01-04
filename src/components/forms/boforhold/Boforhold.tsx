@@ -18,11 +18,11 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     Bostatuskode,
+    GrunnlagsdataDto,
     HusstandsbarnDto,
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBoforholdRequest,
-    OpplysningerDto,
     OpplysningerType,
 } from "../../../api/BidragBehandlingApiV1";
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
@@ -136,7 +136,7 @@ const Main = ({
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    boforoholdOpplysninger: OpplysningerDto;
+    boforoholdOpplysninger: GrunnlagsdataDto;
 }) => {
     const {
         virkningstidspunkt: { virkningsdato },
@@ -151,7 +151,7 @@ const Main = ({
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
                         Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysninger.hentetDato)}
+                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysninger.innhentet)}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -274,7 +274,7 @@ const BoforholdsForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.BOFORHOLD_BEARBEIDET,
+            grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
             data: JSON.stringify(opplysningerFraFolkRegistre),
             hentetDato: toISODateString(new Date()),
         });
@@ -282,14 +282,14 @@ const BoforholdsForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.HUSSTANDSMEDLEMMER,
+            grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
             data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.SIVILSTAND,
+            grunnlagstype: OpplysningerType.SIVILSTAND,
             data: JSON.stringify(sivilstandListe),
             hentetDato: toISODateString(new Date()),
         });
@@ -298,7 +298,6 @@ const BoforholdsForm = () => {
         lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
-        console.log(fieldValues);
         const values: OppdaterBoforholdRequest = {
             ...fieldValues,
             husstandsbarn: getBarnPerioderFromHusstandsListe(
