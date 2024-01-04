@@ -4,7 +4,7 @@ import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/
 import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { OpplysningerDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { GrunnlagDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -67,7 +67,7 @@ const Main = ({
     ainntekt: { [ident: string]: SummertManedsinntekt[] };
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    inntektOpplysninger: OpplysningerDto;
+    inntektOpplysninger: GrunnlagDto;
 }) => {
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -83,7 +83,7 @@ const Main = ({
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
                         Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(inntektOpplysninger.hentetDato)}
+                        {ISODateTimeStringToDDMMYYYYString(inntektOpplysninger.innhentet)}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -279,7 +279,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.ARBEIDSFORHOLD,
+            grunnlagstype: OpplysningerType.ARBEIDSFORHOLD,
             data: JSON.stringify(arbeidsforholdListe ?? []),
             hentetDato: toISODateString(new Date()),
         });
@@ -288,7 +288,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.INNTEKT_BEARBEIDET,
+            grunnlagstype: OpplysningerType.INNTEKT_BEARBEIDET,
             data: JSON.stringify({
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
@@ -308,7 +308,7 @@ const InntektForm = () => {
         saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
-            opplysningerType: OpplysningerType.INNTEKT,
+            grunnlagstype: OpplysningerType.INNTEKT,
             data: JSON.stringify({
                 ainntektListe: grunnlagspakke.ainntektListe,
                 skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe,

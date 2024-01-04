@@ -14,13 +14,11 @@ import { useCallback } from "react";
 import {
     AddOpplysningerRequest,
     BehandlingDto,
+    GrunnlagDto,
     OppdaterBehandlingRequest,
-    OppdatereVirkningstidspunktRequest,
-    OpplysningerDto,
     OpplysningerType,
     RolleDto,
     Rolletype,
-    VirkningstidspunktResponse as VirkningstidspunktResponseV1,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
@@ -73,7 +71,7 @@ export const QueryKeys = {
 
 export const useGetOpplysninger = (opplysningerType: OpplysningerType) => {
     const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
+    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
 };
 
 export const useOppdaterBehandling = () => {
@@ -183,15 +181,15 @@ export const useAddOpplysningerData = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
-            const { data } = await BEHANDLING_API_V1.api.addOpplysningerData(behandlingId, payload);
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagDto> => {
+            const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
             return data;
         },
         onSuccess: (data) => {
             queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
                 ...prevData,
                 opplysninger: prevData.opplysninger.map((saved) => {
-                    if (saved.type == data.type) {
+                    if (saved.grunnlagstype == data.grunnlagstype) {
                         return data;
                     }
                     return saved;
@@ -212,7 +210,7 @@ export const useAddOpplysningerData = () => {
 export const useGetVisningsnavn = () =>
     useSuspenseQuery({
         queryKey: QueryKeys.visningsnavn(),
-        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn1(),
+        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn(),
         staleTime: 0,
     });
 
@@ -228,26 +226,6 @@ export const useGetBehandling = (): BehandlingDto => {
         staleTime: Infinity,
     });
     return behandling;
-};
-
-export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
-    const queryClient = useQueryClient();
-
-    const mutation = useMutation({
-        mutationKey: MutationKeys.updateVirkningstidspunkt(behandlingId),
-        mutationFn: async (payload: OppdatereVirkningstidspunktRequest): Promise<VirkningstidspunktResponseV1> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
-            return data;
-        },
-        onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.virkningstidspunkt(behandlingId), data);
-        },
-        onError: (error) => {
-            console.log("onError", error);
-        },
-    });
-
-    return { mutation, error: mutation.isError };
 };
 
 export const useHentPersonData = (ident: string) =>
