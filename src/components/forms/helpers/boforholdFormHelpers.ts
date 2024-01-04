@@ -340,11 +340,13 @@ export const createInitialValues = (
 ): BoforholdFormValues => {
     return {
         ...boforhold,
-        husstandsbarn: getBarnPerioderFromHusstandsListe(
-            opplysningerFraFolkRegistre.husstand,
-            virkningsOrSoktFraDato,
-            barnMedISaken
-        ).sort(compareHusstandsBarn),
+        husstandsbarn: boforhold?.husstandsbarn?.length
+            ? boforhold.husstandsbarn.sort(compareHusstandsBarn)
+            : getBarnPerioderFromHusstandsListe(
+                  opplysningerFraFolkRegistre.husstand,
+                  virkningsOrSoktFraDato,
+                  barnMedISaken
+              ).sort(compareHusstandsBarn),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
             : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
