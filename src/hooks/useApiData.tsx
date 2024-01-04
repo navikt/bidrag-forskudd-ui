@@ -14,13 +14,12 @@ import { useCallback } from "react";
 import {
     AddOpplysningerRequest,
     BehandlingDto,
+    Grunnlagstype,
     OppdaterBehandlingRequest,
-    OppdatereVirkningstidspunktRequest,
     OpplysningerDto,
     OpplysningerType,
     RolleDto,
     Rolletype,
-    VirkningstidspunktResponse as VirkningstidspunktResponseV1,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
@@ -71,16 +70,18 @@ export const QueryKeys = {
     personMulti: (ident: string) => ["persons", ident],
 };
 
-export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
+export const useGetOpplysninger = <T extends object>(opplysningerType: Grunnlagstype | OpplysningerType): T | null => {
     const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
-export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
+export const useGetOpplysningerHentetdato = (
+    opplysningerType: Grunnlagstype | OpplysningerType
+): string | undefined => {
     const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.type == opplysningerType);
-    return opplysninger?.hentetDato;
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagstype == opplysningerType);
+    return opplysninger?.innhentet;
 };
 
 export const useOppdaterBehandling = () => {
@@ -194,17 +195,28 @@ export const useAddOpplysningerData = () => {
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: async (payload: AddOpplysningerRequest): Promise<OpplysningerDto> => {
-            const { data } = await BEHANDLING_API_V1.api.addOpplysningerData(behandlingId, payload);
+            const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
             return data;
         },
         onSuccess: (data) => {
             queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
                 ...prevData,
                 opplysninger: prevData.opplysninger.map((saved) => {
-                    if (saved.type == data.type) {
-                        return data;
+                    //@ts-ignore
+                    if (saved.grunnlagstype == data.type) {
+                        return {
+                            ...data,
+                            innhentet: data.hentetDato,
+                            grunnlagstype: data.type as unknown as Grunnlagstype,
+                            behandlingsid: data.behandlingId,
+                        };
                     }
-                    return saved;
+                    return {
+                        ...saved,
+                        innhentet: saved.innhentet,
+                        grunnlagstype: saved.grunnlagstype,
+                        behandlingsid: data.behandlingId,
+                    };
                 }),
             }));
         },
@@ -222,7 +234,7 @@ export const useAddOpplysningerData = () => {
 export const useGetVisningsnavn = () =>
     useSuspenseQuery({
         queryKey: QueryKeys.visningsnavn(),
-        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn1(),
+        queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn(),
         staleTime: 0,
     });
 
@@ -237,26 +249,6 @@ export const useGetBehandling = (): BehandlingDto => {
         staleTime: Infinity,
     });
     return behandling;
-};
-
-export const useUpdateVirkningstidspunkt = (behandlingId: number) => {
-    const queryClient = useQueryClient();
-
-    const mutation = useMutation({
-        mutationKey: MutationKeys.updateVirkningstidspunkt(behandlingId),
-        mutationFn: async (payload: OppdatereVirkningstidspunktRequest): Promise<VirkningstidspunktResponseV1> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdaterVirkningsTidspunkt(behandlingId, payload);
-            return data;
-        },
-        onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.virkningstidspunkt(behandlingId), data);
-        },
-        onError: (error) => {
-            console.log("onError", error);
-        },
-    });
-
-    return { mutation, error: mutation.isError };
 };
 
 export const useHentPersonData = (ident: string) =>

@@ -341,9 +341,7 @@ const Opplysninger = () => {
                                         {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
                                     </>
                                 </Table.DataCell>
-                                <Table.DataCell>
-                                    <BodyShort size="small">{capitalize(periode.sivilstand)}</BodyShort>
-                                </Table.DataCell>
+                                <Table.DataCell>{capitalize(periode.sivilstand)}</Table.DataCell>
                             </Table.Row>
                         ))}
                 </Table.Body>

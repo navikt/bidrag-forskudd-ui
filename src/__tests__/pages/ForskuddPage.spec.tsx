@@ -13,7 +13,6 @@ import sinon from "sinon";
 
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
 import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
-import { virkningstidspunktTestData } from "../../__mocks__/testdata/virkningstidspunktTestData";
 import { ForskuddProvider } from "../../context/ForskuddContext";
 import environment from "../../environment";
 import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
@@ -105,19 +104,6 @@ const server = setupServer(
             ctx.body(JSON.stringify(boforholdData))
         );
     }),
-    rest.get(
-        `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/virkningstidspunkt`,
-        (req, res, ctx) => {
-            return res(
-                ctx.set({
-                    "Access-Control-Allow-Headers": "*",
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "application/json",
-                }),
-                ctx.body(JSON.stringify(virkningstidspunktTestData))
-            );
-        }
-    ),
     rest.get(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, (req, res, ctx) => {
         return res(
             ctx.set({
