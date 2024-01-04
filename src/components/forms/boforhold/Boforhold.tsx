@@ -839,6 +839,14 @@ const Perioder = ({
         }
     };
 
+    function bosstatusToVisningsnavn(bostsatus: Bostatuskode): string {
+        const visningsnavn = toVisningsnavn(bostsatus);
+        if (boststatusOver18År.includes(bostsatus)) {
+            return `18 år: ${visningsnavn}`;
+        }
+        return visningsnavn;
+    }
+
     const boforholdOptions = isOver18YearsOld(barn.fødselsdato)
         ? boforholdForskuddOptions.likEllerOver18År
         : boforholdForskuddOptions.under18År;
@@ -940,7 +948,7 @@ const Perioder = ({
                                             label="Status"
                                             options={boforholdOptions.map((value) => ({
                                                 value,
-                                                text: toVisningsnavn(value.toString()),
+                                                text: bosstatusToVisningsnavn(value),
                                             }))}
                                             hideLabel
                                         />
@@ -948,7 +956,7 @@ const Perioder = ({
                                         <BodyShort
                                             key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
                                         >
-                                            {toVisningsnavn(item.bostatus)}
+                                            {bosstatusToVisningsnavn(item.bostatus)}
                                         </BodyShort>
                                     ),
                                     <BodyShort
