@@ -11,7 +11,7 @@ export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: IRolleUI; w
                 withBorder && "border-[var(--a-border-divider)] border-solid border-b"
             } flex items-center`}
         >
-            <RolleTag rolleType={rolle.rolleType} />
+            <RolleTag rolleType={rolle.rolletype} />
             <span>{rolle.navn}</span>
             <span className="mx-4">/</span> {rolle.ident}
             <CopyButton size="small" copyText={rolle.ident} title={`Kopier ${rolle.ident}`} />
