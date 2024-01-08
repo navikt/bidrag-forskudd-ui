@@ -806,6 +806,7 @@ const Perioder = ({
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
             const updatedPeriods = removeAndEditPeriods(perioderValues, index);
+            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
             updatedAndSave(updatedPeriods);
         }
     };
