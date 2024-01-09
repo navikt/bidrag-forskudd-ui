@@ -952,6 +952,9 @@ const Perioder = ({
                                                 text: bosstatusToVisningsnavn(value),
                                             }))}
                                             hideLabel
+                                            onSelect={() =>
+                                                clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`)
+                                            }
                                         />
                                     ) : (
                                         <BodyShort
