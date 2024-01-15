@@ -3,7 +3,7 @@ import { Label } from "@navikt/ds-react";
 import React from "react";
 
 import { OpplysningerType } from "../../../api/BidragBehandlingApiV1";
-import { ArbeidsforholdDto } from "../../../api/BidragGrunnlagApi";
+import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
@@ -21,7 +21,7 @@ type ArbeidsforholdProps = {
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const { arbeidsforholdListe: arbeidsforholdListeLagret } = useHentArbeidsforhold();
-    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdDto[]>(OpplysningerType.ARBEIDSFORHOLD);
+    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
 
     const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeLagret;
 
@@ -58,10 +58,10 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     );
 };
 
-function mapToTabledata(arbeidsforhold: ArbeidsforholdDto): ArbeidsforholdTabledata {
+function mapToTabledata(arbeidsforhold: ArbeidsforholdGrunnlagDto): ArbeidsforholdTabledata {
     const sisteAnsettelsesDetalj =
-        arbeidsforhold.ansettelsesdetaljer.length > 0
-            ? arbeidsforhold.ansettelsesdetaljer.sort((a, b) =>
+        arbeidsforhold.ansettelsesdetaljerListe?.length > 0
+            ? arbeidsforhold.ansettelsesdetaljerListe.sort((a, b) =>
                   new Date(a.periodeFra as string) > new Date(b.periodeFra as string) ? 1 : -1
               )[0]
             : null;
@@ -71,11 +71,11 @@ function mapToTabledata(arbeidsforhold: ArbeidsforholdDto): ArbeidsforholdTabled
             arbeidsforhold.sluttdato == null ? null : ISODateTimeStringToDDMMYYYYString(arbeidsforhold.sluttdato),
         arbeidsgivernavn: capitalize(arbeidsforhold.arbeidsgiverNavn),
         sisteLønnsendring:
-            sisteAnsettelsesDetalj.sisteLønnsendringDato != null
+            sisteAnsettelsesDetalj?.sisteLønnsendringDato != null
                 ? ISODateTimeStringToDDMMYYYYString(sisteAnsettelsesDetalj.sisteLønnsendringDato)
                 : "-",
         stillingsprosent:
-            sisteAnsettelsesDetalj.avtaltStillingsprosent != null
+            sisteAnsettelsesDetalj?.avtaltStillingsprosent != null
                 ? sisteAnsettelsesDetalj.avtaltStillingsprosent + "%"
                 : "-",
     };

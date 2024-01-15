@@ -338,9 +338,6 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
                         skattegrunnlagsposter: skattegrunnlag.skattegrunnlagListe,
                         ligningsår: new Date(Date.parse(skattegrunnlag.periodeFra)).getFullYear(),
                     })),
-                overgangsstonadsliste: grunnlagspakke.overgangsstonadListe.filter(
-                    (overgangsstonad) => overgangsstonad.partPersonId === ident
-                ),
                 kontantstøtteliste: grunnlagspakke.kontantstotteListe
                     .filter((kontantstotte) => kontantstotte.barnPersonId === ident)
                     .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.belop })),
@@ -407,6 +404,7 @@ export const useHentArbeidsforhold = (): HentGrunnlagDto | null => {
     const grunnlagspakkeId = useGetGrunnlagspakkeId();
     const today = new Date();
     const arbeidsforholdRequest: HentGrunnlagRequestDto = {
+        formaal: "FORSKUDD",
         grunnlagRequestDtoListe: behandling.roller
             .filter((rolle) => [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype))
             .map((rolle) => ({

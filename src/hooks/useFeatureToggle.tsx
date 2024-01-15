@@ -19,11 +19,6 @@ export default function useFeatureToogle() {
     useEffect(() => {
         client.updateContext({
             userId,
-            properties: {
-                Bidragteamet: userId,
-                inforingsgruppen: userId,
-                testbrukere: userId,
-            },
         });
         console.log(client.getAllToggles(), client.getContext());
     }, [userId]);

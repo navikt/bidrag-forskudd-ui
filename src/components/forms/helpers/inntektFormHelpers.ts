@@ -9,7 +9,7 @@ import {
     RolleDto,
 } from "../../../api/BidragBehandlingApiV1";
 import {
-    ArbeidsforholdDto,
+    ArbeidsforholdGrunnlagDto,
     HentGrunnlagspakkeDto,
     UtvidetBarnetrygdOgSmaabarnstilleggDto,
 } from "../../../api/BidragGrunnlagApi";
@@ -368,8 +368,8 @@ export interface InntektOpplysninger {
 }
 
 export const compareArbeidsforholdOpplysninger = (
-    savedArbeidsforhold: ArbeidsforholdDto[],
-    latestArbeidsforhold: ArbeidsforholdDto[]
+    savedArbeidsforhold: ArbeidsforholdGrunnlagDto[],
+    latestArbeidsforhold: ArbeidsforholdGrunnlagDto[]
 ) => {
     const changedLog = [];
 
@@ -393,16 +393,14 @@ export const compareArbeidsforholdOpplysninger = (
                     );
                 }
 
-                if (
-                    periodeFraLatestOpplysninger.ansettelsesdetaljer.length !==
-                    savedArbeidsforhold.ansettelsesdetaljer.length
-                ) {
+                const savedListe = savedArbeidsforhold.ansettelsesdetaljerListe ?? [];
+                if (periodeFraLatestOpplysninger.ansettelsesdetaljerListe.length !== savedListe.length) {
                     changedLog.push(
                         `Ansettelsesdetaljer fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
                     );
                 } else {
-                    periodeFraLatestOpplysninger.ansettelsesdetaljer.forEach((detalj, index) => {
-                        const savedAnsettelsesdetaljer = savedArbeidsforhold.ansettelsesdetaljer[index];
+                    periodeFraLatestOpplysninger.ansettelsesdetaljerListe.forEach((detalj, index) => {
+                        const savedAnsettelsesdetaljer = savedListe[index];
                         if (savedAnsettelsesdetaljer.avtaltStillingsprosent !== detalj.avtaltStillingsprosent) {
                             changedLog.push(
                                 `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}%`

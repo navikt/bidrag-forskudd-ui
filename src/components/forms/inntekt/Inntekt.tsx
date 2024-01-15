@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { ArbeidsforholdDto } from "../../../api/BidragGrunnlagApi";
+import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -187,7 +187,7 @@ const InntektForm = () => {
     const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
     const behandling = useGetBehandling();
     const inntektOpplysninger = useGetOpplysninger<InntektOpplysninger>(OpplysningerType.INNTEKT_BEARBEIDET);
-    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdDto[]>(OpplysningerType.ARBEIDSFORHOLD);
+    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const { arbeidsforholdListe } = useHentArbeidsforhold();
     const grunnlagspakke = useGrunnlagspakke();
@@ -314,7 +314,6 @@ const InntektForm = () => {
                 barnetilsynListe: grunnlagspakke.barnetilsynListe,
                 kontantstotteListe: grunnlagspakke.kontantstotteListe,
                 ubstListe: grunnlagspakke.ubstListe,
-                overgangsstonadListe: grunnlagspakke.overgangsstonadListe,
             }),
             hentetDato: toISODateString(new Date()),
         });
