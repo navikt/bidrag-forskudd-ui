@@ -1,5 +1,5 @@
 import { TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -13,6 +13,14 @@ import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { checkOverlappingPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
+export const UtvidetBarnetrygd = () => (
+    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+        <Heading level="3" size="medium">
+            Utvidet barnetrygd
+        </Heading>
+        <UtvidetBarnetrygdTabel />
+    </Box>
+);
 export const UtvidetBarnetrygdTabel = () => {
     const { søktFomDato } = useGetBehandling();
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));

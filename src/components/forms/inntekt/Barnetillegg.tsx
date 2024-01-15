@@ -1,5 +1,5 @@
 import { TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -14,6 +14,14 @@ import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { checkOverlappingPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
+export const Barnetillegg = () => (
+    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+        <Heading level="3" size="medium">
+            Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
+        </Heading>
+        <BarnetilleggTabel />
+    </Box>
+);
 export const BarnetilleggTabel = () => {
     const { roller, søktFomDato } = useGetBehandling();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);

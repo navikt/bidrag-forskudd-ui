@@ -1,8 +1,11 @@
 import { FloppydiskIcon, InformationSquareIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Box, Button, Heading, Popover } from "@navikt/ds-react";
 import React, { useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { RolleDto } from "../../../api/BidragBehandlingApiV1";
+import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling } from "../../../hooks/useApiData";
@@ -14,9 +17,10 @@ import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox"
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
+import { TableExpandableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import AinntektLink from "./AinntektLink";
 
 const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
     const toVisningsnavn = useVisningsnavn();
@@ -74,11 +78,11 @@ const Detaljer = ({ totalt }) => {
         </>
     );
 };
-const Totalt = ({ item, index, ident }) =>
+const Totalt = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) =>
     item.fraGrunnlag ? (
         <div className="flex items-center gap-x-4">
-            <BodyShort className="min-w-[80px] flex justify-end">{item.belop}</BodyShort>
-            <Detaljer totalt={item.belop} />
+            <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
+            <Detaljer totalt={item.beløp} />
         </div>
     ) : (
         <div className="w-[120px]">
@@ -133,6 +137,40 @@ const Periode = ({ index, value, editableRow, datepicker }) => {
         </BodyShort>
     );
 };
+
+const ExpandableContent = ({ item }: { item: Inntekt }) => {
+    return (
+        <>
+            <BodyShort size="small">
+                Periode: {dateToDDMMYYYYString(new Date(item.datoFom))} - {dateToDDMMYYYYString(new Date(item.datoTom))}
+            </BodyShort>
+            {item.inntektsposter.map((inntektpost) => (
+                <BodyShort size="small" key={inntektpost.kode}>
+                    {inntektpost.visningsnavn}: {inntektpost.beløp}
+                </BodyShort>
+            ))}
+        </>
+    );
+};
+
+export const InntekteneSomLeggesTilGrunn = ({
+    inntekt,
+    rolle,
+}: {
+    inntekt: SummertManedsinntekt[];
+    rolle: RolleDto;
+}) => (
+    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+        <div className="flex gap-x-4">
+            <Heading level="3" size="medium">
+                Skattepliktige og pensjonsgivende inntekt
+            </Heading>
+            {inntekt.length > 0 && <AinntektLink ident={rolle.ident} />}
+        </div>
+        <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
+    </Box>
+);
+
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const { inntektFormValues, setErrorMessage, setErrorModalOpen, setInntektFormValues } = useForskudd();
     const [editableRow, setEditableRow] = useState(undefined);
@@ -244,12 +282,13 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 
     return (
         <>
-            {errors?.inntekteneSomLeggesTilGrunn?.[ident]?.types && (
-                <Alert variant="warning">
-                    {errors.inntekteneSomLeggesTilGrunn[ident].types?.periodGaps && (
+            {(errors?.inntekteneSomLeggesTilGrunn?.[ident]?.types || !isValidDate(virkningstidspunkt)) && (
+                <Alert variant="warning" className="mb-4">
+                    {!isValidDate(virkningstidspunkt) && <BodyShort>Mangler virkningstidspunkt</BodyShort>}
+                    {errors.inntekteneSomLeggesTilGrunn?.[ident].types?.periodGaps && (
                         <BodyShort>{errors.inntekteneSomLeggesTilGrunn[ident].types.periodGaps}</BodyShort>
                     )}
-                    {errors.inntekteneSomLeggesTilGrunn[ident].types?.overlappingPerioder && (
+                    {errors.inntekteneSomLeggesTilGrunn?.[ident].types?.overlappingPerioder && (
                         <>
                             <BodyShort>Du har overlappende perioder:</BodyShort>
                             {JSON.parse(
@@ -264,18 +303,17 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                     )}
                 </Alert>
             )}
-            {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", "", ""]}>
+                <TableWrapper heading={["", "Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", "", ""]}>
                     {controlledFields.map((item, index) => (
-                        <TableRowWrapper
+                        <TableExpandableRowWrapper
+                            content={<ExpandableContent item={item} />}
                             key={item.id}
                             cells={[
                                 <FormControlledCheckbox
                                     key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
                                     name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
                                     onChange={(value) => handleOnSelect(value.target.checked, index)}
-                                    className="m-auto"
                                     legend=""
                                 />,
                                 <Beskrivelse
