@@ -402,18 +402,6 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
                 hentetTidspunkt: "2023-06-06T11:42:13.956Z",
             },
         ],
-        overgangsstonadListe: [
-            {
-                partPersonId: "string",
-                periodeFra: "2023-06-06",
-                periodeTil: "2023-06-06",
-                aktiv: true,
-                brukFra: "2023-06-06T11:42:13.956Z",
-                brukTil: "2023-06-06T11:42:13.956Z",
-                belop: 0,
-                hentetTidspunkt: "2023-06-06T11:42:13.956Z",
-            },
-        ],
     };
 };
 

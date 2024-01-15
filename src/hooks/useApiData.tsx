@@ -98,8 +98,6 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
             return data;
         },
         networkMode: "always",
-        retry: 3,
-        retryDelay: 2000,
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
         },
@@ -190,20 +188,27 @@ export const useAddOpplysningerData = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> => {
-            const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
-            return data;
-        },
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> =>
+            (await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload))?.data,
         onSuccess: (data) => {
-            queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
-                ...prevData,
-                opplysninger: prevData.opplysninger.map((saved) => {
-                    if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
-                        return data;
-                    }
-                    return saved;
-                }),
-            }));
+            queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => {
+                const prevDataExists = prevData.opplysninger.some(
+                    (opplysning) => opplysning.grunnlagsdatatype == data.grunnlagsdatatype
+                );
+
+                const opplysninger = prevDataExists
+                    ? prevData.opplysninger.map((saved) => {
+                          if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
+                              return data;
+                          }
+                          return saved;
+                      })
+                    : [...prevData.opplysninger, data];
+                return {
+                    ...prevData,
+                    opplysninger,
+                };
+            });
         },
     });
 

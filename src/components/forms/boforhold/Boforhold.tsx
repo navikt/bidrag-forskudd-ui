@@ -274,8 +274,8 @@ const BoforholdsForm = () => {
         setBoforholdFormValues(initialValues);
     }, []);
 
-    const lagreAlleOpplysninger = () => {
-        saveOpplysninger.mutate({
+    const lagreAlleOpplysninger = async () => {
+        await saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
@@ -283,14 +283,14 @@ const BoforholdsForm = () => {
             hentetDato: toISODateString(new Date()),
         });
 
-        saveOpplysninger.mutate({
+        await saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
             data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
-        saveOpplysninger.mutate({
+        await saveOpplysninger.mutate({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.SIVILSTAND,
