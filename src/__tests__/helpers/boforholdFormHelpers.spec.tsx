@@ -1,7 +1,14 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { Bostatuskode, Kilde, RolleDto, Rolletype, Sivilstandskode } from "../../api/BidragBehandlingApiV1";
+import {
+    Bostatuskode,
+    HusstandsbarnperiodeDto,
+    Kilde,
+    RolleDto,
+    Rolletype,
+    Sivilstandskode,
+} from "../../api/BidragBehandlingApiV1";
 import { SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
 import {
     checkOverlappingPeriods,
@@ -469,6 +476,76 @@ describe("BoforholdFormHelpers", () => {
         expect(result[0].perioder[1].datoFom).equals("2023-09-01");
         expect(result[0].perioder[1].datoTom).equals(null);
         expect(result[0].perioder[1].bostatus).equals("IKKE_MED_FORELDER");
+    });
+
+    it("should set a default period - regnes_ikke som barn, after a kid has turned 18", () => {
+        const husstandmedlemmerOgEgneBarnListe = [
+            {
+                partPersonId: "21470262629",
+                relatertPersonPersonId: "02110180716",
+                navn: "",
+                fodselsdato: "2002-06-05",
+                erBarnAvBmBp: true,
+                aktiv: true,
+                brukFra: "2024-01-16",
+                brukTil: null,
+                hentetTidspunkt: "2024-01-16",
+                borISammeHusstandDtoListe: [
+                    {
+                        periodeFra: null,
+                        periodeTil: "2017-06-05",
+                    },
+                    {
+                        periodeFra: "2018-06-06",
+                        periodeTil: "2020-03-01",
+                    },
+                    {
+                        periodeFra: "2020-04-01",
+                        periodeTil: "2021-07-07",
+                    },
+                    {
+                        periodeFra: "2022-01-01",
+                        periodeTil: null,
+                    },
+                ],
+            },
+        ];
+
+        const barnMedISaken: RolleDto[] = [
+            {
+                id: 1,
+                rolletype: Rolletype.BA,
+                ident: "02110180716",
+                navn: "ALI RAHMAN RAHMAN",
+                fødselsdato: "2002-06-05",
+            },
+        ];
+        const expectedResult: HusstandsbarnperiodeDto[] = [
+            {
+                datoFom: "2019-04-01",
+                datoTom: "2020-06-30",
+                bostatus: Bostatuskode.MED_FORELDER,
+                kilde: Kilde.OFFENTLIG,
+            },
+            {
+                datoFom: "2020-07-01",
+                datoTom: null,
+                bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                kilde: Kilde.MANUELL,
+            },
+        ];
+
+        const datoFom = new Date("2019-04-01");
+        const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        console.log(result[0].perioder);
+        result.forEach((barn) => {
+            barn.perioder.forEach((periode, j) => {
+                expect(periode.datoFom).equals(expectedResult[j].datoFom);
+                expect(periode.datoTom).equals(expectedResult[j].datoTom);
+                expect(periode.bostatus).equals(expectedResult[j].bostatus);
+            });
+        });
     });
 
     it("should create husstands periods from the folkeregistre data", () => {

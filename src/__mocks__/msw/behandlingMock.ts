@@ -44,6 +44,8 @@ export function behandlingMock(): RestHandler[] {
                     ...oppdater?.virkningstidspunkt,
                 },
             };
+            // @ts-ignore
+            delete updatedBehandling.grunnlagspakkeId;
 
             const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),

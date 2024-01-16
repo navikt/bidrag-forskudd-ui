@@ -1,5 +1,5 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
+import { firstDayOfMonth, isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     Alert,
     BodyShort,
@@ -53,6 +53,7 @@ import {
 import {
     dateOrNull,
     DateToDDMMYYYYString,
+    deductMonths,
     isAfterDate,
     isAfterEqualsDate,
     isBeforeDate,
@@ -275,22 +276,21 @@ const BoforholdsForm = () => {
     }, []);
 
     const lagreAlleOpplysninger = async () => {
-        await saveOpplysninger.mutate({
+        await saveOpplysninger.mutateAsync({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
             data: JSON.stringify(opplysningerFraFolkRegistre),
             hentetDato: toISODateString(new Date()),
         });
-
-        await saveOpplysninger.mutate({
+        await saveOpplysninger.mutateAsync({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
             data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
-        await saveOpplysninger.mutate({
+        await saveOpplysninger.mutateAsync({
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.SIVILSTAND,
@@ -897,115 +897,109 @@ const Perioder = ({
             {controlledFields.length > 0 && (
                 <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", "", ""]}>
                     {controlledFields.map((item, index) => (
-                        <>
-                            <TableRowWrapper
-                                key={item.id}
-                                cells={[
-                                    editableRow === `${barnIndex}.${index}` ? (
-                                        <FormControlledMonthPicker
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
-                                            name={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
-                                            label="Fra og med"
-                                            placeholder="DD.MM.ÅÅÅÅ"
-                                            defaultValue={item.datoFom}
-                                            customValidation={() => validateFomOgTom(index)}
-                                            fromDate={fom}
-                                            toDate={tom}
-                                            hideLabel
-                                            required
-                                        />
-                                    ) : (
-                                        <BodyShort
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}
-                                        >
-                                            {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
-                                        </BodyShort>
-                                    ),
-                                    editableRow === `${barnIndex}.${index}` ? (
-                                        <FormControlledMonthPicker
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
-                                            name={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
-                                            label="Til og med"
-                                            placeholder="DD.MM.ÅÅÅÅ"
-                                            defaultValue={item.datoTom}
-                                            customValidation={() => validateFomOgTom(index)}
-                                            fromDate={fom}
-                                            toDate={tom}
-                                            lastDayOfMonthPicker
-                                            hideLabel
-                                        />
-                                    ) : (
-                                        <BodyShort
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}
-                                        >
-                                            {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
-                                        </BodyShort>
-                                    ),
-                                    editableRow === `${barnIndex}.${index}` ? (
-                                        <FormControlledSelectField
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
-                                            name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
-                                            className="w-fit"
-                                            label="Status"
-                                            options={boforholdOptions.map((value) => ({
-                                                value,
-                                                text: bosstatusToVisningsnavn(value),
-                                            }))}
-                                            hideLabel
-                                            onSelect={() =>
-                                                clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`)
-                                            }
-                                        />
-                                    ) : (
-                                        <BodyShort
-                                            key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
-                                        >
-                                            {bosstatusToVisningsnavn(item.bostatus)}
-                                        </BodyShort>
-                                    ),
+                        <TableRowWrapper
+                            key={item.id}
+                            cells={[
+                                editableRow === `${barnIndex}.${index}` ? (
+                                    <FormControlledMonthPicker
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
+                                        label="Fra og med"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item.datoFom}
+                                        customValidation={() => validateFomOgTom(index)}
+                                        fromDate={fom}
+                                        toDate={tom}
+                                        hideLabel
+                                        required
+                                    />
+                                ) : (
+                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}>
+                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
+                                    </BodyShort>
+                                ),
+                                editableRow === `${barnIndex}.${index}` ? (
+                                    <FormControlledMonthPicker
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
+                                        label="Til og med"
+                                        placeholder="DD.MM.ÅÅÅÅ"
+                                        defaultValue={item.datoTom}
+                                        customValidation={() => validateFomOgTom(index)}
+                                        fromDate={fom}
+                                        toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                        lastDayOfMonthPicker
+                                        hideLabel
+                                    />
+                                ) : (
+                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}>
+                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
+                                    </BodyShort>
+                                ),
+                                editableRow === `${barnIndex}.${index}` ? (
+                                    <FormControlledSelectField
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
+                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
+                                        className="w-fit"
+                                        label="Status"
+                                        options={boforholdOptions.map((value) => ({
+                                            value,
+                                            text: bosstatusToVisningsnavn(value),
+                                        }))}
+                                        hideLabel
+                                        onSelect={() =>
+                                            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`)
+                                        }
+                                    />
+                                ) : (
                                     <BodyShort
-                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
-                                        className="capitalize"
+                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
                                     >
-                                        {KildeTexts[item.kilde]}
-                                    </BodyShort>,
-                                    editableRow === `${barnIndex}.${index}` ? (
-                                        <Button
-                                            key={`save-button-${barnIndex}-${index}`}
-                                            type="button"
-                                            onClick={() => onSaveRow(index)}
-                                            icon={<FloppydiskIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        <Button
-                                            key={`edit-button-${barnIndex}-${index}`}
-                                            type="button"
-                                            onClick={() => onEditRow(index)}
-                                            icon={<PencilIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ),
-                                    index ? (
-                                        <Button
-                                            key={`delete-button-${barnIndex}-${index}`}
-                                            type="button"
-                                            onClick={() => onRemovePeriode(index)}
-                                            icon={<TrashIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        <div
-                                            key={`delete-button-${barnIndex}-${index}.placeholder`}
-                                            className="min-w-[40px]"
-                                        ></div>
-                                    ),
-                                ]}
-                            />
-                        </>
+                                        {bosstatusToVisningsnavn(item.bostatus)}
+                                    </BodyShort>
+                                ),
+                                <BodyShort
+                                    key={`husstandsbarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
+                                    className="capitalize"
+                                >
+                                    {KildeTexts[item.kilde]}
+                                </BodyShort>,
+                                editableRow === `${barnIndex}.${index}` ? (
+                                    <Button
+                                        key={`save-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => onSaveRow(index)}
+                                        icon={<FloppydiskIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Button
+                                        key={`edit-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => onEditRow(index)}
+                                        icon={<PencilIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ),
+                                index ? (
+                                    <Button
+                                        key={`delete-button-${barnIndex}-${index}`}
+                                        type="button"
+                                        onClick={() => onRemovePeriode(index)}
+                                        icon={<TrashIcon aria-hidden />}
+                                        variant="tertiary"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <div
+                                        key={`delete-button-${barnIndex}-${index}.placeholder`}
+                                        className="min-w-[40px]"
+                                    ></div>
+                                ),
+                            ]}
+                        />
                     ))}
                 </TableWrapper>
             )}

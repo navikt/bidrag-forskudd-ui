@@ -27,6 +27,7 @@ import {
 } from "../../../types/boforholdFormValues";
 import {
     addDays,
+    addMonths,
     dateOrNull,
     deductDays,
     deductMonths,
@@ -203,12 +204,12 @@ export const getBarnPerioder = (
     const perioderEtterVirkningstidspunkt = perioder?.filter(
         ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, datoFra))
     );
-    const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato));
+    const monthAfter18 = addMonths(getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato)), 1);
     const isOver18 = isOver18YearsOld(barnsFoedselsDato);
     const isDateAfter18 = (date: Date) => date && new Date(date) >= monthAfter18;
     const result: HusstandsbarnperiodeDto[] = [];
     perioderEtterVirkningstidspunkt?.forEach(({ fraDato, tilDato, bostatus }) => {
-        const isRegistrertPeriode = bostatus === Bostatuskode.MED_FORELDER;
+        const isRegistrertPeriode = (bostatus: Bostatuskode) => bostatus === Bostatuskode.MED_FORELDER;
         const prevPeriode = result[result.length - 1];
         const datoFom = toISODateString(
             result.length === 0 ? datoFra : addDays(new Date(result[result.length - 1].datoTom), 1)
@@ -216,31 +217,30 @@ export const getBarnPerioder = (
         const datoTom = tilDato ? toISODateString(lastDayOfMonth(new Date(tilDato))) : null;
         const isPeriodAfter18YearOld =
             isDateAfter18(new Date(datoFom)) || datoTom == null || isDateAfter18(new Date(datoTom));
+
+        if (boststatusOver18År.includes(prevPeriode?.bostatus)) {
+            return;
+        }
+
         if (isPeriodAfter18YearOld && isOver18) {
-            if (!isDateAfter18(new Date(datoFom))) {
+            if (prevPeriode?.bostatus === bostatus) {
+                prevPeriode.datoTom = toISODateString(deductDays(new Date(monthAfter18), 1));
+            } else {
                 result.push({
                     datoFom,
                     datoTom: toISODateString(deductDays(new Date(monthAfter18), 1)),
                     bostatus,
                     kilde: Kilde.OFFENTLIG,
                 });
-                result.push({
-                    datoFom: toISODateString(monthAfter18),
-                    datoTom: null,
-                    bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
-                    kilde: Kilde.MANUELL,
-                });
-            } else if (prevPeriode && prevPeriode.bostatus !== Bostatuskode.REGNES_IKKE_SOM_BARN) {
-                prevPeriode.datoTom = toISODateString(deductDays(new Date(monthAfter18), 1));
-                result.push({
-                    datoFom: toISODateString(monthAfter18),
-                    datoTom: null,
-                    bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
-                    kilde: Kilde.MANUELL,
-                });
             }
-        } else if (isRegistrertPeriode) {
-            if (prevPeriode && prevPeriode.bostatus === Bostatuskode.MED_FORELDER) {
+            result.push({
+                datoFom: toISODateString(monthAfter18),
+                datoTom: null,
+                bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                kilde: Kilde.MANUELL,
+            });
+        } else if (isRegistrertPeriode(bostatus)) {
+            if (prevPeriode && isRegistrertPeriode(prevPeriode.bostatus)) {
                 result[result.length - 1].datoTom = datoTom;
             } else {
                 result.push({

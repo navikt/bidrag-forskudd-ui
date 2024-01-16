@@ -184,9 +184,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     return (
         <div>
-            <Opplysninger />
-
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
+                <Opplysninger />
                 {(errors?.root?.sivilstand as { types: string[] })?.types && (
                     <div className="mb-4">
                         <Alert variant="warning">
