@@ -538,7 +538,6 @@ describe("BoforholdFormHelpers", () => {
         const datoFom = new Date("2019-04-01");
         const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
         const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
-        console.log(result[0].perioder);
         result.forEach((barn) => {
             barn.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[j].datoFom);
