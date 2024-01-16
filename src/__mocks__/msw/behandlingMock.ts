@@ -30,6 +30,7 @@ export function behandlingMock(): RestHandler[] {
             const updatedBehandling: BehandlingDto = {
                 ...behandling,
                 ...oppdater,
+                grunnlagspakkeid: oppdater.grunnlagspakkeId,
                 inntekter: {
                     ...behandling?.inntekter,
                     ...oppdater?.inntekter,
