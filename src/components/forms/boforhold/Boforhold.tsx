@@ -409,7 +409,7 @@ const AddBarnForm = ({
         };
         const husstandsbarn = boforholdFormValues.husstandsbarn.concat(addedBarn).sort(compareHusstandsBarn);
         const indexOfFirstOlderChild = getValues("husstandsbarn").findIndex(
-            (barn) => !barn.medISak && new Date(barn.fødselsdato).getTime() > new Date(addedBarn.fødselsdato).getTime()
+            (barn) => !barn.medISak && new Date(barn.fødselsdato).getTime() < new Date(addedBarn.fødselsdato).getTime()
         );
         const insertIndex = indexOfFirstOlderChild === -1 ? getValues("husstandsbarn").length : indexOfFirstOlderChild;
         barnFieldArray.insert(insertIndex, addedBarn);
