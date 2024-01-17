@@ -421,6 +421,27 @@ function addPeriodIfThereIsNoRunningPeriod(
 
     return periodsList;
 }
+function spliceAndInsertPeriods(
+    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[],
+    startIndex: number,
+    deleteCount: number,
+    periodsToInsert: HusstandsbarnperiodeDto[] | SivilstandDto[],
+    statusField: "bostatus" | "sivilstand"
+): HusstandsbarnperiodeDto[] | SivilstandDto[] {
+    if (statusField === "bostatus") {
+        const editedPeriods = periodsList.toSpliced(
+            startIndex,
+            deleteCount,
+            ...(periodsToInsert as HusstandsbarnperiodeDto[])
+        );
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as HusstandsbarnperiodeDto[]);
+    }
+
+    if (statusField === "sivilstand") {
+        const editedPeriods = periodsList.toSpliced(startIndex, deleteCount, ...(periodsToInsert as SivilstandDto[]));
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as SivilstandDto[]);
+    }
+}
 export function editPeriods(periodsList: HusstandsbarnperiodeDto[], periodeIndex: number): HusstandsbarnperiodeDto[];
 export function editPeriods(periodsList: SivilstandDto[], periodeIndex: number): SivilstandDto[];
 export function editPeriods(
@@ -470,25 +491,13 @@ export function editPeriods(
                 },
             ];
 
-            if (statusField === "bostatus") {
-                const editedPeriods = periods.toSpliced(
-                    prevPeriodIndex,
-                    1,
-                    ...(periodsToEdit as HusstandsbarnperiodeDto[])
-                ) as HusstandsbarnperiodeDto[];
-
-                return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
-            }
-
-            if (statusField === "sivilstand") {
-                const editedPeriods = periods.toSpliced(
-                    prevPeriodIndex,
-                    1,
-                    ...(periodsToEdit as SivilstandDto[])
-                ) as SivilstandDto[];
-
-                return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
-            }
+            return spliceAndInsertPeriods(
+                periods,
+                prevPeriodIndex,
+                1,
+                periodsToEdit as HusstandsbarnperiodeDto[] | SivilstandDto[],
+                statusField
+            );
         }
     }
 
@@ -521,25 +530,13 @@ export function editPeriods(
         }
     }
 
-    if (statusField === "bostatus") {
-        const editedPeriods = periods.toSpliced(
-            startIndex,
-            deleteCount,
-            editedPeriod as HusstandsbarnperiodeDto
-        ) as HusstandsbarnperiodeDto[];
-
-        return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
-    }
-
-    if (statusField === "sivilstand") {
-        const editedPeriods = periods.toSpliced(
-            startIndex,
-            deleteCount,
-            editedPeriod as SivilstandDto
-        ) as SivilstandDto[];
-
-        return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
-    }
+    return spliceAndInsertPeriods(
+        periods,
+        startIndex,
+        deleteCount,
+        [editedPeriod] as HusstandsbarnperiodeDto[] | SivilstandDto[],
+        statusField
+    );
 }
 
 export function removeAndEditPeriods(periodsList: HusstandsbarnperiodeDto[], index: number): HusstandsbarnperiodeDto[];
