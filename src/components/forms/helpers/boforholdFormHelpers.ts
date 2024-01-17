@@ -378,11 +378,47 @@ export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: 
     return overlappingPeriods;
 };
 
-function returnTypedPeriods(periodsList: HusstandsbarnperiodeDto[]): HusstandsbarnperiodeDto[];
-function returnTypedPeriods(periodsList: SivilstandDto[]): SivilstandDto[];
-function returnTypedPeriods(
+const getOppositeBostatus = (bostatus: Bostatuskode): Bostatuskode => {
+    switch (bostatus) {
+        case Bostatuskode.MED_FORELDER:
+            return Bostatuskode.IKKE_MED_FORELDER;
+        case Bostatuskode.IKKE_MED_FORELDER:
+            return Bostatuskode.MED_FORELDER;
+        case Bostatuskode.REGNES_IKKE_SOM_BARN:
+            return Bostatuskode.DOKUMENTERT_SKOLEGANG;
+        case Bostatuskode.DOKUMENTERT_SKOLEGANG:
+            return Bostatuskode.REGNES_IKKE_SOM_BARN;
+    }
+};
+function addPeriodIfThereIsNoRunningPeriod(periodsList: HusstandsbarnperiodeDto[]): HusstandsbarnperiodeDto[];
+function addPeriodIfThereIsNoRunningPeriod(periodsList: SivilstandDto[]): SivilstandDto[];
+function addPeriodIfThereIsNoRunningPeriod(
     periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[]
 ): HusstandsbarnperiodeDto[] | SivilstandDto[] {
+    const lastPeriod = periodsList[periodsList.length - 1];
+    if (lastPeriod.datoTom) {
+        if (Object.hasOwn(lastPeriod, "bostatus")) {
+            (periodsList as HusstandsbarnperiodeDto[]).push({
+                datoFom: toISODateString(addDays(new Date(lastPeriod.datoTom), 1)),
+                datoTom: null,
+                bostatus: getOppositeBostatus((lastPeriod as HusstandsbarnperiodeDto).bostatus),
+                kilde: Kilde.MANUELL,
+            });
+        }
+
+        if (Object.hasOwn(lastPeriod, "sivilstand")) {
+            (periodsList as SivilstandDto[]).push({
+                datoFom: toISODateString(addDays(new Date(lastPeriod.datoTom), 1)),
+                datoTom: null,
+                sivilstand:
+                    (lastPeriod as SivilstandDto).sivilstand === Sivilstandskode.BOR_ALENE_MED_BARN
+                        ? Sivilstandskode.GIFT_SAMBOER
+                        : Sivilstandskode.BOR_ALENE_MED_BARN,
+                kilde: Kilde.MANUELL,
+            });
+        }
+    }
+
     return periodsList;
 }
 export function editPeriods(periodsList: HusstandsbarnperiodeDto[], periodeIndex: number): HusstandsbarnperiodeDto[];
@@ -392,8 +428,7 @@ export function editPeriods(
     periodeIndex: number
 ): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
-    const statusField = Object.hasOwn(periodsList[0], "bostatus") ? "bostatus" : "sivilstand";
-
+    const statusField = Object.hasOwn(editedPeriod, "bostatus") ? "bostatus" : "sivilstand";
     const periods = periodsList.toSpliced(periodeIndex, 1);
     let startIndex = periods.filter(
         (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
@@ -436,15 +471,23 @@ export function editPeriods(
             ];
 
             if (statusField === "bostatus") {
-                return periods.toSpliced(
+                const editedPeriods = periods.toSpliced(
                     prevPeriodIndex,
                     1,
-                    ...returnTypedPeriods(periodsToEdit as HusstandsbarnperiodeDto[])
-                );
+                    ...(periodsToEdit as HusstandsbarnperiodeDto[])
+                ) as HusstandsbarnperiodeDto[];
+
+                return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
             }
 
             if (statusField === "sivilstand") {
-                return periods.toSpliced(prevPeriodIndex, 1, ...returnTypedPeriods(periodsToEdit as SivilstandDto[]));
+                const editedPeriods = periods.toSpliced(
+                    prevPeriodIndex,
+                    1,
+                    ...(periodsToEdit as SivilstandDto[])
+                ) as SivilstandDto[];
+
+                return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
             }
         }
     }
@@ -479,11 +522,23 @@ export function editPeriods(
     }
 
     if (statusField === "bostatus") {
-        return periods.toSpliced(startIndex, deleteCount, editedPeriod as HusstandsbarnperiodeDto);
+        const editedPeriods = periods.toSpliced(
+            startIndex,
+            deleteCount,
+            editedPeriod as HusstandsbarnperiodeDto
+        ) as HusstandsbarnperiodeDto[];
+
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
     }
 
     if (statusField === "sivilstand") {
-        return periods.toSpliced(startIndex, deleteCount, editedPeriod as SivilstandDto);
+        const editedPeriods = periods.toSpliced(
+            startIndex,
+            deleteCount,
+            editedPeriod as SivilstandDto
+        ) as SivilstandDto[];
+
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods);
     }
 }
 

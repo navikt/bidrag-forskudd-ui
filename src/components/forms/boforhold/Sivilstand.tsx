@@ -1,7 +1,7 @@
 import "./Opplysninger.css";
 
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize } from "@navikt/bidrag-ui-common";
+import { capitalize, lastDayOfMonth } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -15,7 +15,7 @@ import { useGetBehandling, useGetOpplysninger } from "../../../hooks/useApiData"
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -233,7 +233,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                             defaultValue={item.datoTom}
                                             customValidation={() => validateFomOgTom(index)}
                                             fromDate={fom}
-                                            toDate={tom}
+                                            toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
                                             lastDayOfMonthPicker
                                             hideLabel
                                         />
