@@ -525,8 +525,43 @@ const AddBarnForm = ({
     );
 };
 
-const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
+const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (index: number) => void }) => {
     const ref = useRef<HTMLDialogElement>(null);
+    const onConfirm = () => {
+        ref.current?.close();
+        onRemoveBarn(index);
+    };
+
+    return (
+        <>
+            <div className="flex items-center justify-end">
+                <Button
+                    type="button"
+                    onClick={() => ref.current?.showModal()}
+                    icon={<TrashIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            </div>
+            <ConfirmationModal
+                ref={ref}
+                description="Ønsker du å slette barnet som er lagt til i beregningen?"
+                heading="Ønsker du å slette?"
+                footer={
+                    <>
+                        <Button type="button" onClick={onConfirm}>
+                            Ja, slett
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={() => ref.current?.close()}>
+                            Avbryt
+                        </Button>
+                    </>
+                }
+            />
+        </>
+    );
+};
+const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
@@ -559,7 +594,6 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
 
         setBoforholdFormValues(updatedValues);
         saveBoforhold(updatedValues);
-        ref.current?.close();
     };
 
     return (
@@ -579,17 +613,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                     </BodyShort>
                                     <BodyShort size="small">{item.ident}</BodyShort>
                                 </div>
-                                {!item.medISak && (
-                                    <div className="flex items-center justify-end">
-                                        <Button
-                                            type="button"
-                                            onClick={() => ref.current?.showModal()}
-                                            icon={<TrashIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    </div>
-                                )}
+                                {!item.medISak && <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />}
                             </div>
                             <Opplysninger datoFom={datoFom} ident={item.ident} />
                         </div>
@@ -600,21 +624,6 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                         />
                     </Box>
-                    <ConfirmationModal
-                        ref={ref}
-                        description="Ønsker du å slette barnet som er lagt til i beregningen?"
-                        heading="Ønsker du å slette?"
-                        footer={
-                            <>
-                                <Button type="button" onClick={() => onRemoveBarn(index)}>
-                                    Ja, slett
-                                </Button>
-                                <Button type="button" variant="secondary" onClick={() => ref.current?.close()}>
-                                    Avbryt
-                                </Button>
-                            </>
-                        }
-                    />
                 </Fragment>
             ))}
             {openAddBarnForm && (
