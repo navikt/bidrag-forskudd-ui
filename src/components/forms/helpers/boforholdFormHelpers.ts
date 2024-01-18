@@ -27,7 +27,6 @@ import {
 } from "../../../types/boforholdFormValues";
 import {
     addDays,
-    addMonths,
     dateOrNull,
     deductDays,
     deductMonths,
@@ -88,10 +87,7 @@ function calculateAge(dateOfBirth: Date | string): number {
 }
 export function getFirstDayOfMonthAfterEighteenYears(dateOfBirth: Date): Date {
     const eighteenYearsLater = new Date(dateOfBirth);
-    eighteenYearsLater.setFullYear(eighteenYearsLater.getFullYear() + 18);
-
-    // Set the date to the first day of the month
-    eighteenYearsLater.setDate(1);
+    eighteenYearsLater.setFullYear(eighteenYearsLater.getFullYear() + 18, eighteenYearsLater.getMonth() + 1, 1);
 
     return eighteenYearsLater;
 }
@@ -204,7 +200,7 @@ export const getBarnPerioder = (
     const perioderEtterVirkningstidspunkt = perioder?.filter(
         ({ tilDato }) => tilDato === null || (tilDato && isAfterDate(tilDato, datoFra))
     );
-    const monthAfter18 = addMonths(getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato)), 1);
+    const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato));
     const isOver18 = isOver18YearsOld(barnsFoedselsDato);
     const isDateAfter18 = (date: Date) => date && new Date(date) >= monthAfter18;
     const result: HusstandsbarnperiodeDto[] = [];

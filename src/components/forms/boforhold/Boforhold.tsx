@@ -619,7 +619,6 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                         </div>
                         <Perioder
                             barnIndex={index}
-                            foedselsdato={item.fødselsdato}
                             virkningstidspunkt={datoFom}
                             opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
                         />
@@ -644,12 +643,10 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
 
 const Perioder = ({
     barnIndex,
-    foedselsdato,
     virkningstidspunkt,
     opplysningerFraFolkRegistre,
 }: {
     barnIndex: number;
-    foedselsdato: string;
     virkningstidspunkt: Date;
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[] | SavedHustandOpplysninger[];
 }) => {
@@ -659,8 +656,6 @@ const Perioder = ({
     const toVisningsnavn = useVisningsnavn();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
-    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(foedselsdato, virkningstidspunkt);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const saveBoforhold = useOnSaveBoforhold();
     const {
         control,
@@ -682,6 +677,9 @@ const Perioder = ({
         ...watchFieldArray[index],
     }));
     const barn = getValues(`husstandsbarn.${barnIndex}`);
+    const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningstidspunkt);
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const hasOpplysningerFraFolkeregistre = opplysningerFraFolkRegistre.some(
         (opplysning) => opplysning.ident === barn.ident
     );
@@ -725,18 +723,16 @@ const Perioder = ({
         }
 
         const selectedStatus = perioderValues[index].bostatus;
-        const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(foedselsdato));
+        const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
         const selectedDatoFom = perioderValues[index]?.datoFom;
         const selectedDatoTom = perioderValues[index]?.datoTom;
         const isInvalidStatusForAfter18 =
-            isOver18YearsOld(foedselsdato) &&
+            barnIsOver18 &&
             !boststatusOver18År.includes(selectedStatus) &&
             (isAfterEqualsDate(selectedDatoFom, monthAfter18) ||
                 (selectedDatoTom && isAfterEqualsDate(selectedDatoTom, monthAfter18)));
         const isInvalidStatusForBefore18 =
-            isOver18YearsOld(foedselsdato) &&
-            boststatusOver18År.includes(selectedStatus) &&
-            isBeforeDate(selectedDatoFom, monthAfter18);
+            barnIsOver18 && boststatusOver18År.includes(selectedStatus) && isBeforeDate(selectedDatoFom, monthAfter18);
         if (isInvalidStatusForAfter18) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
                 message: `Ugyldig boststatus for periode etter barnet har fylt 18 år.`,
@@ -746,10 +742,13 @@ const Perioder = ({
                 message: `Ugyldig bosstatus for periode før barnet har fylt 18 år.`,
             });
         } else {
-            const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
-            if (!fieldState.error) {
-                updatedAndSave(editPeriods(perioderValues, index));
-            }
+            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`);
+        }
+
+        const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
+
+        if (!fieldState.error) {
+            updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 
@@ -861,9 +860,19 @@ const Perioder = ({
         ? boforholdForskuddOptions.likEllerOver18År
         : boforholdForskuddOptions.under18År;
 
+    const showDeleteButton = (index: number) => {
+        const firstOver18PeriodIndex = controlledFields.findIndex((period) =>
+            boststatusOver18År.includes(period.bostatus)
+        );
+        if (barnIsOver18 && index === firstOver18PeriodIndex) {
+            return false;
+        }
+        return !!index;
+    };
+
     return (
         <>
-            {isOver18YearsOld(barn.fødselsdato) && (
+            {barnIsOver18 && (
                 <div className="mb-4">
                     <StatefulAlert
                         variant="info"
@@ -992,7 +1001,7 @@ const Perioder = ({
                                         size="small"
                                     />
                                 ),
-                                index ? (
+                                showDeleteButton(index) ? (
                                     <Button
                                         key={`delete-button-${barnIndex}-${index}`}
                                         type="button"
