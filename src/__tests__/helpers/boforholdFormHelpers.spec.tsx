@@ -547,6 +547,69 @@ describe("BoforholdFormHelpers", () => {
         });
     });
 
+    it("should set only one periode - regnes_ikke som barn, if virkningstidspunkt is after a kid has turned 18", () => {
+        const husstandmedlemmerOgEgneBarnListe = [
+            {
+                partPersonId: "21470262629",
+                relatertPersonPersonId: "02110180716",
+                navn: "",
+                fodselsdato: "2002-06-05",
+                erBarnAvBmBp: true,
+                aktiv: true,
+                brukFra: "2024-01-16",
+                brukTil: null,
+                hentetTidspunkt: "2024-01-16",
+                borISammeHusstandDtoListe: [
+                    {
+                        periodeFra: null,
+                        periodeTil: "2017-06-05",
+                    },
+                    {
+                        periodeFra: "2018-06-06",
+                        periodeTil: "2020-03-01",
+                    },
+                    {
+                        periodeFra: "2020-04-01",
+                        periodeTil: "2021-07-07",
+                    },
+                    {
+                        periodeFra: "2022-01-01",
+                        periodeTil: null,
+                    },
+                ],
+            },
+        ];
+
+        const barnMedISaken: RolleDto[] = [
+            {
+                id: 1,
+                rolletype: Rolletype.BA,
+                ident: "02110180716",
+                navn: "ALI RAHMAN RAHMAN",
+                fødselsdato: "2002-06-05",
+            },
+        ];
+        const expectedResult: HusstandsbarnperiodeDto[] = [
+            {
+                datoFom: "2020-08-01",
+                datoTom: null,
+                bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                kilde: Kilde.MANUELL,
+            },
+        ];
+
+        const datoFom = new Date("2020-08-01");
+        const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
+        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        result.forEach((barn) => {
+            barn.perioder.forEach((periode, j) => {
+                expect(periode.datoFom).equals(expectedResult[j].datoFom);
+                expect(periode.datoTom).equals(expectedResult[j].datoTom);
+                expect(periode.bostatus).equals(expectedResult[j].bostatus);
+            });
+        });
+    });
+
     it("should create husstands periods from the folkeregistre data", () => {
         const datoFom = new Date("2020-06-01");
         const barnMedISaken: RolleDto[] = [

@@ -56,7 +56,6 @@ import {
     deductMonths,
     isAfterDate,
     isAfterEqualsDate,
-    isBeforeDate,
     ISODateTimeStringToDDMMYYYYString,
     toDateString,
     toISODateString,
@@ -678,6 +677,7 @@ const Perioder = ({
     }));
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
+    const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningstidspunkt);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const hasOpplysningerFraFolkeregistre = opplysningerFraFolkRegistre.some(
@@ -723,32 +723,36 @@ const Perioder = ({
         }
 
         const selectedStatus = perioderValues[index].bostatus;
-        const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
         const selectedDatoFom = perioderValues[index]?.datoFom;
         const selectedDatoTom = perioderValues[index]?.datoTom;
-        const isInvalidStatusForAfter18 =
-            barnIsOver18 &&
-            !boststatusOver18År.includes(selectedStatus) &&
-            (isAfterEqualsDate(selectedDatoFom, monthAfter18) ||
-                (selectedDatoTom && isAfterEqualsDate(selectedDatoTom, monthAfter18)));
-        const isInvalidStatusForBefore18 =
-            barnIsOver18 && boststatusOver18År.includes(selectedStatus) && isBeforeDate(selectedDatoFom, monthAfter18);
-        if (isInvalidStatusForAfter18) {
-            setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
-                message: `Ugyldig boststatus for periode etter barnet har fylt 18 år.`,
-            });
-        } else if (isInvalidStatusForBefore18) {
-            setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
-                message: `Ugyldig bosstatus for periode før barnet har fylt 18 år.`,
-            });
-        } else {
-            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`);
+
+        if (barnIsOver18) {
+            const selectedStatusIsOver18 = boststatusOver18År.includes(selectedStatus);
+            const selectedDatoFomIsAfterOrSameAsMonthOver18 = isAfterEqualsDate(selectedDatoFom, monthAfter18);
+            const isInvalidStatusOver18 =
+                !selectedStatusIsOver18 &&
+                (selectedDatoFomIsAfterOrSameAsMonthOver18 ||
+                    selectedDatoTom === null ||
+                    isAfterEqualsDate(selectedDatoTom, monthAfter18));
+            const isInvalidStatusUnder18 = selectedStatusIsOver18 && !selectedDatoFomIsAfterOrSameAsMonthOver18;
+
+            if (isInvalidStatusOver18) {
+                setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
+                    message: `Ugyldig boststatus for periode etter barnet har fylt 18 år.`,
+                });
+            } else if (isInvalidStatusUnder18) {
+                setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
+                    message: `Ugyldig bosstatus for periode før barnet har fylt 18 år.`,
+                });
+            } else {
+                clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`);
+            }
         }
 
         const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
 
         if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index));
+            updatedAndSave(editPeriods(perioderValues, index, monthAfter18));
         }
     };
 
@@ -813,7 +817,7 @@ const Perioder = ({
             showErrorModal();
         } else {
             const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
-            const updatedPeriods = removeAndEditPeriods(perioderValues, index);
+            const updatedPeriods = removeAndEditPeriods(perioderValues, index, monthAfter18);
             clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
             updatedAndSave(updatedPeriods);
         }
