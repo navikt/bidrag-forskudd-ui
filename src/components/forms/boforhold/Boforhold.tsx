@@ -865,7 +865,7 @@ const Perioder = ({
         : boforholdForskuddOptions.under18År;
 
     const showDeleteButton = (index: number) => {
-        const firstOver18PeriodIndex = controlledFields.findIndex((period) =>
+        const firstOver18PeriodIndex = boforholdFormValues?.husstandsbarn[barnIndex].perioder.findIndex((period) =>
             boststatusOver18År.includes(period.bostatus)
         );
         if (barnIsOver18 && index === firstOver18PeriodIndex) {

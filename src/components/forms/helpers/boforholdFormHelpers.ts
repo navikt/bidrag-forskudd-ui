@@ -401,18 +401,29 @@ const getOppositeBostatus = (bostatus: Bostatuskode): Bostatuskode => {
             return Bostatuskode.REGNES_IKKE_SOM_BARN;
     }
 };
-function addPeriodIfThereIsNoRunningPeriod(periodsList: HusstandsbarnperiodeDto[]): HusstandsbarnperiodeDto[];
-function addPeriodIfThereIsNoRunningPeriod(periodsList: SivilstandDto[]): SivilstandDto[];
 function addPeriodIfThereIsNoRunningPeriod(
-    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[]
+    periodsList: HusstandsbarnperiodeDto[],
+    monthAfter18?: Date
+): HusstandsbarnperiodeDto[];
+function addPeriodIfThereIsNoRunningPeriod(periodsList: SivilstandDto[], monthAfter18?: Date): SivilstandDto[];
+function addPeriodIfThereIsNoRunningPeriod(
+    periodsList: HusstandsbarnperiodeDto[] | SivilstandDto[],
+    monthAfter18?: Date
 ): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     const lastPeriod = periodsList[periodsList.length - 1];
     if (lastPeriod.datoTom) {
         if (Object.hasOwn(lastPeriod, "bostatus")) {
+            const lastPeriodBostatus = (lastPeriod as HusstandsbarnperiodeDto).bostatus;
+            const firstDayOfNextPeriod = toISODateString(addDays(new Date(lastPeriod.datoTom), 1));
+            const firstDayOfNextPeriodIsAfterOrEqualToMonthOf18 = isAfterEqualsDate(firstDayOfNextPeriod, monthAfter18);
+
             (periodsList as HusstandsbarnperiodeDto[]).push({
-                datoFom: toISODateString(addDays(new Date(lastPeriod.datoTom), 1)),
+                datoFom: firstDayOfNextPeriod,
                 datoTom: null,
-                bostatus: getOppositeBostatus((lastPeriod as HusstandsbarnperiodeDto).bostatus),
+                bostatus:
+                    firstDayOfNextPeriodIsAfterOrEqualToMonthOf18 && !boststatusOver18År.includes(lastPeriodBostatus)
+                        ? Bostatuskode.REGNES_IKKE_SOM_BARN
+                        : getOppositeBostatus(lastPeriodBostatus),
                 kilde: Kilde.MANUELL,
             });
         }
@@ -437,7 +448,8 @@ function spliceAndInsertPeriods(
     startIndex: number,
     deleteCount: number,
     periodsToInsert: HusstandsbarnperiodeDto[] | SivilstandDto[],
-    statusField: "bostatus" | "sivilstand"
+    statusField: "bostatus" | "sivilstand",
+    monthAfter18?: Date
 ): HusstandsbarnperiodeDto[] | SivilstandDto[] {
     if (statusField === "bostatus") {
         const editedPeriods = periodsList.toSpliced(
@@ -445,7 +457,7 @@ function spliceAndInsertPeriods(
             deleteCount,
             ...(periodsToInsert as HusstandsbarnperiodeDto[])
         );
-        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as HusstandsbarnperiodeDto[]);
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as HusstandsbarnperiodeDto[], monthAfter18);
     }
 
     if (statusField === "sivilstand") {
@@ -513,7 +525,8 @@ export function editPeriods(
                 prevPeriodIndex,
                 1,
                 periodsToInsert as HusstandsbarnperiodeDto[] | SivilstandDto[],
-                statusField
+                statusField,
+                monthAfter18
             );
         }
     }
@@ -587,7 +600,8 @@ export function editPeriods(
         startIndex,
         deleteCount,
         periodsToInsert as HusstandsbarnperiodeDto[] | SivilstandDto[],
-        statusField
+        statusField,
+        monthAfter18
     );
 }
 
