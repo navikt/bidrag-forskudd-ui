@@ -3,7 +3,12 @@ import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { OppdaterVirkningstidspunkt, VirkningstidspunktDto } from "../../../api/BidragBehandlingApiV1";
+import {
+    ForskuddAarsakType,
+    OppdaterVirkningstidspunkt,
+    Rolletype,
+    VirkningstidspunktDto,
+} from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -52,9 +57,13 @@ const Main = ({ initialValues, error }) => {
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
     const virkningsDato = getValues("virkningsdato");
+    const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
     const onAarsakSelect = (value: string) => {
-        const date = aarsakToVirkningstidspunktMapper(value, behandling);
+        const barnsFødselsdato = kunEtBarnIBehandlingen
+            ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
+            : undefined;
+        const date = aarsakToVirkningstidspunktMapper(value, behandling, barnsFødselsdato);
         setValue("virkningsdato", date ? toISODateString(date) : null);
         clearErrors("virkningsdato");
     };
@@ -119,11 +128,16 @@ const Main = ({ initialValues, error }) => {
                 <FormControlledSelectField name="årsak" label="Årsak" onSelect={onAarsakSelect}>
                     <option value="">Velg årsak/avslag</option>
                     <optgroup label="Årsak">
-                        {Object.entries(ForskuddBeregningKodeAarsak).map(([value, text]) => (
-                            <option key={value} value={value}>
-                                {text}
-                            </option>
-                        ))}
+                        {Object.entries(ForskuddBeregningKodeAarsak)
+                            .filter(([value]) => {
+                                if (kunEtBarnIBehandlingen) return true;
+                                return value !== ForskuddAarsakType.AF;
+                            })
+                            .map(([value, text]) => (
+                                <option key={value} value={value}>
+                                    {text}
+                                </option>
+                            ))}
                     </optgroup>
                     <optgroup label="Avslag">
                         {Object.entries(Avslag).map(([value, text]) => (
