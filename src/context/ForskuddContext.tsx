@@ -1,4 +1,12 @@
-import React, { createContext, PropsWithChildren, useCallback, useContext, useState } from "react";
+import React, {
+    createContext,
+    Dispatch,
+    PropsWithChildren,
+    SetStateAction,
+    useCallback,
+    useContext,
+    useState,
+} from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
@@ -17,7 +25,7 @@ interface IForskuddContext {
     inntektFormValues: InntektFormValues;
     setInntektFormValues: (values: InntektFormValues) => void;
     boforholdFormValues: BoforholdFormValues;
-    setBoforholdFormValues: (values: BoforholdFormValues) => void;
+    setBoforholdFormValues: Dispatch<SetStateAction<BoforholdFormValues>>;
     errorMessage: { title: string; text: string };
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
@@ -35,7 +43,7 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
-    const [boforholdFormValues, setBoforholdFormValues] = useState(undefined);
+    const [boforholdFormValues, setBoforholdFormValues] = useState<BoforholdFormValues>(undefined);
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;

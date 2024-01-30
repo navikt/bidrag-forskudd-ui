@@ -41,5 +41,8 @@ export default function unleashMock(): RestHandler[] {
                 )
             );
         }),
+        rest.post(`${process.env.UNLEASH_API_URL}/client/metrics`, async (req: RestRequest, res, ctx) => {
+            return res(ctx.status(200), ctx.set("Content-Type", "application/json"));
+        }),
     ];
 }

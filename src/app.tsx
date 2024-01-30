@@ -6,7 +6,6 @@ import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
-import { initMockData } from "./__mocks__/mocksForMissingEndpoints/mockData";
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ErrorModal } from "./components/modal/ErrorModal";
 import { ForskuddProvider } from "./context/ForskuddContext";
@@ -29,7 +28,6 @@ const config: IConfig = {
     refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
     appName: "bidrag-behandling-ui",
 };
-initMockData();
 export default function App() {
     const { reset } = useQueryErrorResetBoundary();
     return (

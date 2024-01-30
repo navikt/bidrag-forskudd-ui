@@ -1,4 +1,4 @@
-import { InntektPost } from "../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, InntektPost } from "../api/BidragBehandlingApiV1";
 import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
 export interface Inntekt {
@@ -28,8 +28,7 @@ export interface InntektFormValues {
     inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };
     barnetillegg: BarneTillegFormValues[];
     utvidetbarnetrygd: UtvidetBarnetrygdFormValues[];
-    inntektBegrunnelseMedIVedtakNotat: string;
-    inntektBegrunnelseKunINotat: string;
+    notat?: BehandlingNotatDto;
 }
 
 export interface InntektTransformed {

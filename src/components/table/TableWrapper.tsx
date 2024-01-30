@@ -2,7 +2,7 @@ import { Table } from "@navikt/ds-react";
 import React, { ReactElement, ReactNode } from "react";
 
 export const TableWrapper = ({ heading, children }: { heading: string[]; children: ReactNode }) => (
-    <div className="overflow-x-scroll">
+    <div className="overflow-x-auto whitespace-nowrap">
         <Table size="small" zebraStripes>
             <Table.Header>
                 <Table.Row className="align-baseline">

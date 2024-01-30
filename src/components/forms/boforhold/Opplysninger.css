@@ -1,0 +1,11 @@
+.opplysninger td.navds-table__data-cell {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.opplysninger .navds-label {
+    font-size: 16px;
+}
+
+.opplysninger .navds-body-short {
+    font-size: 14px;
+}

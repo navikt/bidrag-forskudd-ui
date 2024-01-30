@@ -7,18 +7,105 @@ export interface ArbeidsforholdData {
     sisteLoennsendring: string;
 }
 
-export const arbeidsforholdData = () => {
-    const initialData = [
+export const arbeidsforholdData = {
+    arbeidsforholdListe: [
         {
-            periode: {
-                fraDato: "2021-11-05",
-                tilDato: "2022-10-05",
-            },
-            arbeidsgiverNavn: "Arbeidsgiver 1",
-            stillingsprosent: 90,
-            sisteLoennsendring: "2022-10-05",
+            partPersonId: "string",
+            startdato: "2023-12-14",
+            sluttdato: "2023-12-14",
+            arbeidsgiverNavn: "string",
+            arbeidsgiverOrgnummer: "string",
+            ansettelsesdetaljer: [
+                {
+                    periodeFra: {
+                        year: 0,
+                        month: "JANUARY",
+                        monthValue: 0,
+                        leapYear: true,
+                    },
+                    periodeTil: {
+                        year: 0,
+                        month: "JANUARY",
+                        monthValue: 0,
+                        leapYear: true,
+                    },
+                    arbeidsforholdType: "string",
+                    arbeidstidsordningBeskrivelse: "string",
+                    ansettelsesformBeskrivelse: "string",
+                    yrkeBeskrivelse: "string",
+                    antallTimerPrUke: 0,
+                    avtaltStillingsprosent: 0,
+                    sisteStillingsprosentendringDato: "2023-12-14",
+                    sisteLønnsendringDato: "2023-12-14",
+                },
+            ],
+            permisjoner: [
+                {
+                    startdato: "2023-12-14",
+                    sluttdato: "2023-12-14",
+                    id: "string",
+                    type: {
+                        beskrivelse: "string",
+                        kode: "string",
+                    },
+                    prosent: 0,
+                    varsling: {
+                        beskrivelse: "string",
+                        kode: "string",
+                    },
+                    idHistorikk: [
+                        {
+                            id: "string",
+                            fom: "2023-12-14",
+                            tom: "2023-12-14",
+                        },
+                    ],
+                    sporingsinformasjon: {
+                        opprettetTidspunkt: "2023-12-14T13:24:52.695Z",
+                        opprettetAv: "string",
+                        opprettetKilde: "string",
+                        opprettetKildereferanse: "string",
+                        endretTidspunkt: "2023-12-14T13:24:52.695Z",
+                        endretAv: "string",
+                        endretKilde: "string",
+                        endretKildereferanse: "string",
+                    },
+                },
+            ],
+            permitteringer: [
+                {
+                    startdato: "2023-12-14",
+                    sluttdato: "2023-12-14",
+                    id: "string",
+                    type: {
+                        beskrivelse: "string",
+                        kode: "string",
+                    },
+                    prosent: 0,
+                    varsling: {
+                        beskrivelse: "string",
+                        kode: "string",
+                    },
+                    idHistorikk: [
+                        {
+                            id: "string",
+                            fom: "2023-12-14",
+                            tom: "2023-12-14",
+                        },
+                    ],
+                    sporingsinformasjon: {
+                        opprettetTidspunkt: "2023-12-14T13:24:52.695Z",
+                        opprettetAv: "string",
+                        opprettetKilde: "string",
+                        opprettetKildereferanse: "string",
+                        endretTidspunkt: "2023-12-14T13:24:52.695Z",
+                        endretAv: "string",
+                        endretKilde: "string",
+                        endretKildereferanse: "string",
+                    },
+                },
+            ],
+            hentetTidspunkt: "2023-12-14T13:24:52.695Z",
         },
-    ] as ArbeidsforholdData[];
-
-    return initialData;
+    ],
 };

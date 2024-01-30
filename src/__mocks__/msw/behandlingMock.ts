@@ -1,6 +1,11 @@
 import { rest, RestHandler } from "msw";
 
-import { BehandlingDto, OppdaterBehandlingRequest } from "../../api/BidragBehandlingApiV1";
+import {
+    AddOpplysningerRequest,
+    BehandlingDto,
+    GrunnlagsdataDto,
+    OppdaterBehandlingRequest,
+} from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 
@@ -25,6 +30,7 @@ export function behandlingMock(): RestHandler[] {
             const updatedBehandling: BehandlingDto = {
                 ...behandling,
                 ...oppdater,
+                grunnlagspakkeid: oppdater.grunnlagspakkeId,
                 inntekter: {
                     ...behandling?.inntekter,
                     ...oppdater?.inntekter,
@@ -38,6 +44,8 @@ export function behandlingMock(): RestHandler[] {
                     ...oppdater?.virkningstidspunkt,
                 },
             };
+            // @ts-ignore
+            delete updatedBehandling.grunnlagspakkeId;
 
             const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),
@@ -60,28 +68,42 @@ export function behandlingMock(): RestHandler[] {
 
             return res(...response[index]);
         }),
-        rest.get(
-            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/opplysninger/:opplysninger/aktiv`,
-            (req, res, ctx) => {
-                const key = `behandling-${req.params.behandlingId}-opplysninger-${req.params.opplysninger}`;
 
-                if (!localStorage.getItem(key)) {
-                    return res(ctx.set("Content-Type", "application/json"), ctx.status(404));
-                }
-                return res(ctx.set("Content-Type", "application/json"), ctx.body(localStorage.getItem(key)));
-            }
-        ),
         rest.post(
             `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/opplysninger`,
             async (req, res, ctx) => {
-                const body = await req.json();
-                const key = `behandling-${req.params.behandlingId}-opplysninger-${body.opplysningerType}`;
-                localStorage.setItem(key, JSON.stringify(body));
+                const data = (await req.json()) as AddOpplysningerRequest;
+                const response: GrunnlagsdataDto = {
+                    ...data,
+                    id: 1,
+                    grunnlagsdatatype: data.grunnlagstype,
+                    innhentet: data.hentetDato,
+                    behandlingsid: req.params.behandlingId as unknown as number,
+                };
+                const behandling = JSON.parse(
+                    localStorage.getItem(`behandling-${req.params.behandlingId}`)
+                ) as BehandlingDto;
+                const opplysningerExists = behandling.opplysninger.some(
+                    (opplysning) => opplysning.grunnlagsdatatype == data.grunnlagstype
+                );
+                const opplysninger = opplysningerExists
+                    ? behandling.opplysninger.map((saved) => {
+                          if (saved.grunnlagsdatatype == response.grunnlagsdatatype) {
+                              return response;
+                          }
+                          return saved;
+                      })
+                    : [...behandling.opplysninger, response];
+                const updatedBehandling: BehandlingDto = {
+                    ...behandling,
+                    opplysninger,
+                };
+                localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(updatedBehandling));
 
                 return res(
                     ctx.set("Content-Type", "application/json"),
                     ctx.status(200),
-                    ctx.body(localStorage.getItem(key))
+                    ctx.body(JSON.stringify(response))
                 );
             }
         ),

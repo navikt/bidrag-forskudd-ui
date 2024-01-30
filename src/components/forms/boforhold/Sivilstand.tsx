@@ -1,21 +1,28 @@
+import "./Opplysninger.css";
+
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useState } from "react";
+import { capitalize, lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import { Kilde, OpplysningerType, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import { SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
+import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
+import { useGetBehandling, useGetOpplysninger } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     calculateFraDato,
+    checkPeriodizationErrors,
     editPeriods,
     removeAndEditPeriods,
     sivilstandForskuddOptions,
@@ -33,6 +40,7 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+
     const saveBoforhold = useOnSaveBoforhold();
     const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
@@ -52,12 +60,40 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     });
 
     const watchFieldArray = useWatch({ control, name: `sivilstand` });
-    const controlledFields = sivilstandPerioder.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray[index],
-        };
-    });
+    const controlledFields = sivilstandPerioder.fields.map((field, index) => ({
+        ...field,
+        ...watchFieldArray[index],
+    }));
+    const sivilistand = getValues(`sivilstand`);
+
+    useEffect(() => {
+        validatePeriods(sivilistand);
+    }, [sivilistand]);
+
+    const validatePeriods = (perioderValues: SivilstandDto[]) => {
+        const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
+
+        if (errorTypes.length) {
+            setError(`root.sivilstand`, {
+                types: errorTypes.reduce(
+                    (acc, errorType) => ({
+                        ...acc,
+                        [errorType]:
+                            errorType === "hullIPerioder"
+                                ? removePlaceholder(
+                                      boforholdPeriodiseringErros[errorType],
+                                      toDateString(virkningstidspunkt),
+                                      toDateString(new Date(perioderValues[0].datoFom))
+                                  )
+                                : boforholdPeriodiseringErros[errorType],
+                    }),
+                    {}
+                ),
+            });
+        } else {
+            clearErrors(`root.sivilstand`);
+        }
+    };
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`sivilstand`);
@@ -66,58 +102,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
-        }
-
-        if (perioderValues[index].datoTom !== undefined && perioderValues[index].datoTom !== null) {
-            const laterPeriodExists = perioderValues
-                .filter((_periode, i) => i !== index)
-                .some(
-                    (periode) =>
-                        periode.datoTom === null ||
-                        new Date(periode.datoTom).getTime() >= new Date(perioderValues[index].datoTom).getTime()
-                );
-
-            if (!laterPeriodExists) {
-                setError(`sivilstand.${index}.datoTom`, {
-                    type: "notValid",
-                    message: "Det er ingen løpende status i beregningen",
-                });
-            }
-
-            if (laterPeriodExists) {
-                const fieldState = getFieldState(`sivilstand.${index}.datoTom`);
-                if (fieldState.error && fieldState.error.message === "Det må være minst en løpende periode") {
-                    clearErrors(`sivilstand.${index}.datoTom`);
-                }
-            }
-        }
-
-        const periods = editPeriods(perioderValues, index);
-        const firstDayOfCurrentMonth = firstDayOfMonth(new Date());
-        const virkningsDatoIsInFuture = isAfterDate(virkningstidspunkt, firstDayOfCurrentMonth);
-        const futurePeriodExists = periods.some((periode) =>
-            virkningsDatoIsInFuture
-                ? isAfterDate(periode.datoFom, virkningstidspunkt)
-                : isAfterDate(periode.datoFom, firstDayOfCurrentMonth)
-        );
-
-        if (futurePeriodExists) {
-            setErrorMessage({ title: "Feil i periodisering", text: "Det kan ikke periodiseres fremover i tid." });
-            setErrorModalOpen(true);
-            return;
-        }
-
-        const firstPeriodIsNotFromVirkningsTidspunkt = isAfterDate(periods[0].datoFom, virkningstidspunkt);
-
-        if (firstPeriodIsNotFromVirkningsTidspunkt) {
-            setErrorMessage({
-                title: "Feil i periodisering",
-                text: `Det er perioder i beregningen uten status. Legg til en eller flere perioder som dekker periode fra ${toDateString(
-                    virkningstidspunkt
-                )} til ${toDateString(new Date(periods[0].datoFom))}`,
-            });
-            setErrorModalOpen(true);
-            return;
         }
 
         const fieldState = getFieldState(`sivilstand.${index}`);
@@ -132,7 +116,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             sivilstand,
         };
         setBoforholdFormValues(updatedValues);
-        setValue(`sivilstand`, sivilstand);
+        setValue("sivilstand", sivilstand);
         saveBoforhold(updatedValues);
         setEditableRow(undefined);
     };
@@ -199,113 +183,168 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     };
 
     return (
-        <>
-            {errors?.root?.sivilstand && (
-                <Alert variant="warning">
-                    <BodyShort>{errors.root.sivilstand.message}</BodyShort>
-                </Alert>
-            )}
-            {controlledFields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
-                    {controlledFields.map((item, index) => (
-                        <TableRowWrapper
-                            key={item.id}
-                            cells={[
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoFom`}
-                                        name={`sivilstand.${index}.datoFom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoFom}
-                                        customValidation={() => validateFomOgTom(index)}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        hideLabel
-                                        required
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoFom.placeholder`}>
-                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledMonthPicker
-                                        key={`sivilstand.${index}.datoTom`}
-                                        name={`sivilstand.${index}.datoTom`}
-                                        label="Periode"
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoTom}
-                                        customValidation={() => validateFomOgTom(index)}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        lastDayOfMonthPicker
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
-                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === index ? (
-                                    <FormControlledSelectField
-                                        key={`sivilstand.${index}.sivilstand`}
-                                        name={`sivilstand.${index}.sivilstand`}
-                                        label="Sivilstand"
-                                        className="w-52"
-                                        options={sivilstandForskuddOptions.map((value) => ({
-                                            value,
-                                            text: toVisningsnavn(value.toString()),
-                                        }))}
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`sivilstand.${index}.sivilstand.placeholder`}>
-                                        {toVisningsnavn(item.sivilstand)}
-                                    </BodyShort>
-                                ),
-                                <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">
-                                    {KildeTexts[item.kilde]}
-                                </BodyShort>,
-                                editableRow === index ? (
-                                    <Button
-                                        key={`save-button-${index}`}
-                                        type="button"
-                                        onClick={() => onSaveRow(index)}
-                                        icon={<FloppydiskIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <Button
-                                        key={`edit-button-${index}`}
-                                        type="button"
-                                        onClick={() => onEditRow(index)}
-                                        icon={<PencilIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ),
-                                index ? (
-                                    <Button
-                                        key={`delete-button-${index}`}
-                                        type="button"
-                                        onClick={() => onRemovePeriode(index)}
-                                        icon={<TrashIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
-                                ),
-                            ]}
-                        />
-                    ))}
-                </TableWrapper>
-            )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
-            </Button>
-        </>
+        <div>
+            <Box padding="4" background="surface-subtle" className="overflow-hidden">
+                <Opplysninger />
+                {(errors?.root?.sivilstand as { types: string[] })?.types && (
+                    <div className="mb-4">
+                        <Alert variant="warning">
+                            <Heading spacing size="small" level="3">
+                                Feil i periodisering
+                            </Heading>
+                            {Object.values((errors.root.sivilstand as { types: string[] }).types).map(
+                                (type: string) => (
+                                    <p key={type}>{type}</p>
+                                )
+                            )}
+                        </Alert>
+                    </div>
+                )}
+                {controlledFields.length > 0 && (
+                    <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
+                        {controlledFields.map((item, index) => (
+                            <TableRowWrapper
+                                key={item.id}
+                                cells={[
+                                    editableRow === index ? (
+                                        <FormControlledMonthPicker
+                                            key={`sivilstand.${index}.datoFom`}
+                                            name={`sivilstand.${index}.datoFom`}
+                                            label="Periode"
+                                            placeholder="DD.MM.ÅÅÅÅ"
+                                            defaultValue={item.datoFom}
+                                            customValidation={() => validateFomOgTom(index)}
+                                            fromDate={fom}
+                                            toDate={tom}
+                                            hideLabel
+                                            required
+                                        />
+                                    ) : (
+                                        <BodyShort key={`sivilstand.${index}.datoFom.placeholder`}>
+                                            {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
+                                        </BodyShort>
+                                    ),
+                                    editableRow === index ? (
+                                        <FormControlledMonthPicker
+                                            key={`sivilstand.${index}.datoTom`}
+                                            name={`sivilstand.${index}.datoTom`}
+                                            label="Periode"
+                                            placeholder="DD.MM.ÅÅÅÅ"
+                                            defaultValue={item.datoTom}
+                                            customValidation={() => validateFomOgTom(index)}
+                                            fromDate={fom}
+                                            toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                            lastDayOfMonthPicker
+                                            hideLabel
+                                        />
+                                    ) : (
+                                        <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
+                                            {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
+                                        </BodyShort>
+                                    ),
+                                    editableRow === index ? (
+                                        <FormControlledSelectField
+                                            key={`sivilstand.${index}.sivilstand`}
+                                            name={`sivilstand.${index}.sivilstand`}
+                                            label="Sivilstand"
+                                            className="w-52"
+                                            options={sivilstandForskuddOptions.map((value) => ({
+                                                value,
+                                                text: toVisningsnavn(value.toString()),
+                                            }))}
+                                            hideLabel
+                                        />
+                                    ) : (
+                                        <BodyShort key={`sivilstand.${index}.sivilstand.placeholder`}>
+                                            {toVisningsnavn(item.sivilstand)}
+                                        </BodyShort>
+                                    ),
+                                    <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">
+                                        {KildeTexts[item.kilde]}
+                                    </BodyShort>,
+                                    editableRow === index ? (
+                                        <Button
+                                            key={`save-button-${index}`}
+                                            type="button"
+                                            onClick={() => onSaveRow(index)}
+                                            icon={<FloppydiskIcon aria-hidden />}
+                                            variant="tertiary"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        <Button
+                                            key={`edit-button-${index}`}
+                                            type="button"
+                                            onClick={() => onEditRow(index)}
+                                            icon={<PencilIcon aria-hidden />}
+                                            variant="tertiary"
+                                            size="small"
+                                        />
+                                    ),
+                                    index ? (
+                                        <Button
+                                            key={`delete-button-${index}`}
+                                            type="button"
+                                            onClick={() => onRemovePeriode(index)}
+                                            icon={<TrashIcon aria-hidden />}
+                                            variant="tertiary"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
+                                    ),
+                                ]}
+                            />
+                        ))}
+                    </TableWrapper>
+                )}
+                <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
+                    + Legg til periode
+                </Button>
+            </Box>
+        </div>
+    );
+};
+
+const Opplysninger = () => {
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandDtoGrunnlag[]>(OpplysningerType.SIVILSTAND);
+    const {
+        virkningstidspunkt: { virkningsdato },
+        søktFomDato,
+    } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
+    if (!sivilstandOpplysninger) {
+        return null;
+    }
+    return (
+        <ReadMore header="Opplysninger fra Folkeregistret" size="small" className="pb-4">
+            <Table className="w-[300px] opplysninger" size="small">
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell>Periode</Table.HeaderCell>
+                        <Table.HeaderCell>Status</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {sivilstandOpplysninger
+                        ?.filter((periode) => periode.periodeTil === null || isAfterDate(periode.periodeTil, datoFom))
+                        .map((periode, index) => (
+                            <Table.Row key={`${periode.sivilstand}-${index}`}>
+                                <Table.DataCell className="flex justify-start gap-2">
+                                    <>
+                                        {datoFom && new Date(periode.periodeFra) < new Date(datoFom)
+                                            ? DateToDDMMYYYYString(datoFom)
+                                            : DateToDDMMYYYYString(new Date(periode.periodeFra))}
+                                        <div>{"-"}</div>
+                                        {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
+                                    </>
+                                </Table.DataCell>
+                                <Table.DataCell>{capitalize(periode.sivilstand)}</Table.DataCell>
+                            </Table.Row>
+                        ))}
+                </Table.Body>
+            </Table>
+        </ReadMore>
     );
 };

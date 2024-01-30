@@ -69,9 +69,15 @@ export const QueryKeys = {
     personMulti: (ident: string) => ["persons", ident],
 };
 
-export const useGetOpplysninger = (opplysningerType: OpplysningerType) => {
+export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType);
+    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType);
+    return opplysninger != null ? JSON.parse(opplysninger.data) : null;
+};
+
+export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
+    const behandling = useGetBehandling();
+    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
 };
 
 export const useOppdaterBehandling = () => {
@@ -108,6 +114,7 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => (await BEHANDLING_API_V1.api.hentBehandling(behandlingId)).data,
+        retry: 1,
         staleTime: Infinity,
     });
 
@@ -181,20 +188,27 @@ export const useAddOpplysningerData = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> => {
-            const { data } = await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload);
-            return data;
-        },
+        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> =>
+            (await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload))?.data,
         onSuccess: (data) => {
-            queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => ({
-                ...prevData,
-                opplysninger: prevData.opplysninger.map((saved) => {
-                    if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
-                        return data;
-                    }
-                    return saved;
-                }),
-            }));
+            queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => {
+                const prevDataExists = prevData.opplysninger.some(
+                    (opplysning) => opplysning.grunnlagsdatatype == data.grunnlagsdatatype
+                );
+
+                const opplysninger = prevDataExists
+                    ? prevData.opplysninger.map((saved) => {
+                          if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
+                              return data;
+                          }
+                          return saved;
+                      })
+                    : [...prevData.opplysninger, data];
+                return {
+                    ...prevData,
+                    opplysninger,
+                };
+            });
         },
     });
 
@@ -222,7 +236,6 @@ export const useGetBehandling = (): BehandlingDto => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
             return data;
         },
-        retry: 3,
         staleTime: Infinity,
     });
     return behandling;
@@ -330,9 +343,6 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
                         skattegrunnlagsposter: skattegrunnlag.skattegrunnlagListe,
                         ligningsår: new Date(Date.parse(skattegrunnlag.periodeFra)).getFullYear(),
                     })),
-                overgangsstonadsliste: grunnlagspakke.overgangsstonadListe.filter(
-                    (overgangsstonad) => overgangsstonad.partPersonId === ident
-                ),
                 kontantstøtteliste: grunnlagspakke.kontantstotteListe
                     .filter((kontantstotte) => kontantstotte.barnPersonId === ident)
                     .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.belop })),
@@ -399,6 +409,7 @@ export const useHentArbeidsforhold = (): HentGrunnlagDto | null => {
     const grunnlagspakkeId = useGetGrunnlagspakkeId();
     const today = new Date();
     const arbeidsforholdRequest: HentGrunnlagRequestDto = {
+        formaal: "FORSKUDD",
         grunnlagRequestDtoListe: behandling.roller
             .filter((rolle) => [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype))
             .map((rolle) => ({

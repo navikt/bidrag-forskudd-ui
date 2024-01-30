@@ -4,7 +4,8 @@ import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/
 import React, { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { GrunnlagsdataDto, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
@@ -15,6 +16,7 @@ import {
     useGetBehandling,
     useGetBidragInntektQueries,
     useGetOpplysninger,
+    useGetOpplysningerHentetdato,
     useGrunnlagspakke,
     useOppdaterBehandling,
 } from "../../../hooks/useApiData";
@@ -33,6 +35,7 @@ import {
     createInitialValues,
     createInntektPayload,
     getPerioderFraBidragInntekt,
+    InntektOpplysninger,
 } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import AinntektLink from "./AinntektLink";
@@ -61,13 +64,11 @@ const Main = ({
     ainntekt,
     opplysningerChanges,
     updateOpplysninger,
-    inntektOpplysninger,
 }: {
     behandlingRoller: RolleDto[];
     ainntekt: { [ident: string]: SummertManedsinntekt[] };
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
-    inntektOpplysninger: GrunnlagsdataDto;
 }) => {
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -77,13 +78,14 @@ const Main = ({
             return 0;
         });
 
+    const opplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.INNTEKT_BEARBEIDET);
     return (
         <div className="grid gap-y-12">
             {opplysningerChanges.length > 0 && (
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
                         Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(inntektOpplysninger.innhentet)}
+                        {ISODateTimeStringToDDMMYYYYString(opplysningerHentetdato)}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -168,13 +170,10 @@ const Side = () => {
                     Begrunnelse
                 </Heading>
                 <div>
-                    <FormControlledTextarea
-                        name="inntektBegrunnelseMedIVedtakNotat"
-                        label="Begrunnelse (med i vedtaket og notat)"
-                    />
+                    <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
                 </div>
                 <div>
-                    <FormControlledTextarea name="inntektBegrunnelseKunINotat" label="Begrunnelse (kun med i notat)" />
+                    <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
                 </div>
             </div>
             <ActionButtons onNext={onNext} />
@@ -187,8 +186,8 @@ const InntektForm = () => {
     const isSavedInitialOpplysninger = useRef(false);
     const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
     const behandling = useGetBehandling();
-    const inntektOpplysninger = useGetOpplysninger(OpplysningerType.INNTEKT_BEARBEIDET);
-    const arbeidsforholdOpplysninger = useGetOpplysninger(OpplysningerType.ARBEIDSFORHOLD);
+    const inntektOpplysninger = useGetOpplysninger<InntektOpplysninger>(OpplysningerType.INNTEKT_BEARBEIDET);
+    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const { arbeidsforholdListe } = useHentArbeidsforhold();
     const grunnlagspakke = useGrunnlagspakke();
@@ -249,8 +248,7 @@ const InntektForm = () => {
 
     useEffect(() => {
         if (inntektOpplysninger) {
-            const savedOpplysninger = JSON.parse(inntektOpplysninger.data);
-            const changesInntektOpplysninger = compareOpplysninger(savedOpplysninger, {
+            const changesInntektOpplysninger = compareOpplysninger(inntektOpplysninger, {
                 inntekt: bidragInntekt.map((personInntekt) => ({
                     ident: personInntekt.ident,
                     summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
@@ -265,7 +263,7 @@ const InntektForm = () => {
             });
 
             const changesArbeidsforholdOpplysninger = arbeidsforholdOpplysninger
-                ? compareArbeidsforholdOpplysninger(JSON.parse(arbeidsforholdOpplysninger.data), arbeidsforholdListe)
+                ? compareArbeidsforholdOpplysninger(arbeidsforholdOpplysninger, arbeidsforholdListe)
                 : [];
 
             const allChanges = [...changesArbeidsforholdOpplysninger, ...changesInntektOpplysninger];
@@ -316,7 +314,6 @@ const InntektForm = () => {
                 barnetilsynListe: grunnlagspakke.barnetilsynListe,
                 kontantstotteListe: grunnlagspakke.kontantstotteListe,
                 ubstListe: grunnlagspakke.ubstListe,
-                overgangsstonadListe: grunnlagspakke.overgangsstonadListe,
             }),
             hentetDato: toISODateString(new Date()),
         });
@@ -358,7 +355,6 @@ const InntektForm = () => {
                             ainntekt={ainntekt}
                             opplysningerChanges={opplysningerChanges}
                             updateOpplysninger={updateOpplysninger}
-                            inntektOpplysninger={inntektOpplysninger}
                         />
                     }
                     side={<Side />}
