@@ -127,7 +127,7 @@ const FatteVedtakButtons = () => {
 const VedtakAvslag = () => {
     const {
         roller,
-        virkningstidspunkt: { virkningsdato, årsak },
+        virkningstidspunkt: { virkningstidspunkt, årsak },
         søktFomDato,
     } = useGetBehandling();
     return (
@@ -154,7 +154,7 @@ const VedtakAvslag = () => {
                             <Table.Body>
                                 <Table.Row>
                                     <Table.DataCell>
-                                        {dateToDDMMYYYYString(new Date(virkningsdato ?? søktFomDato))} -
+                                        {dateToDDMMYYYYString(new Date(virkningstidspunkt ?? søktFomDato))} -
                                     </Table.DataCell>
                                     <Table.DataCell>Avslag</Table.DataCell>
                                     <Table.DataCell>{Avslag[årsak]}</Table.DataCell>

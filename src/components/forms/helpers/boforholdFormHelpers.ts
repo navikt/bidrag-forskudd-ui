@@ -11,11 +11,7 @@ import {
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
-import {
-    RelatertPersonDto,
-    SivilstandDto as SivilstandDtoGrunnlag,
-    SivilstandskodePDL,
-} from "../../../api/BidragGrunnlagApi";
+import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "../../../api/BidragGrunnlagApi";
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,
@@ -94,14 +90,14 @@ export function getFirstDayOfMonthAfterEighteenYears(dateOfBirth: Date): Date {
     return eighteenYearsLater;
 }
 export const isOver18YearsOld = (dateOfBirth: Date | string): boolean => calculateAge(dateOfBirth) >= 18;
-export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
+export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonGrunnlagDto) => {
     const perioder: HusstandOpplysningPeriode[] = [];
-    const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
+    const fodselsdato = dateOrNull(egneBarnIHusstanden.fødselsdato);
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         const firstPeriod = i === 0;
         const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
         const fodselsDatoIsBeforePeriodeFra =
-            periode.periodeFra && periode.periodeFra !== egneBarnIHusstanden.fodselsdato
+            periode.periodeFra && periode.periodeFra !== egneBarnIHusstanden.fødselsdato
                 ? isAfterDate(periode.periodeFra, fodselsdato)
                 : false;
 
@@ -150,14 +146,14 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             });
         }
     });
-    return perioder.sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+    return perioder.sort((a, b) => a.fraDato?.getTime() - b.fraDato?.getTime());
 };
 
-export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: RelatertPersonDto[]) => {
+export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: RelatertPersonGrunnlagDto[]) => {
     return husstandmedlemmerOgEgneBarnListe
         .filter((medlem) => medlem.erBarnAvBmBp)
         .map((barn) => ({
-            foedselsdato: barn.fodselsdato,
+            foedselsdato: barn.fødselsdato,
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,
             perioder: fillInPeriodGaps(barn),
@@ -172,12 +168,12 @@ const getSivilstandType = (sivilstand: SivilstandskodePDL): Sivilstandskode => {
 };
 
 export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
-    sivilstandListe: SivilstandDtoGrunnlag[]
+    sivilstandListe: SivilstandGrunnlagDto[]
 ): SivilstandOpplysninger[] => {
     return sivilstandListe.map((sivilstand) => ({
-        datoFom: sivilstand.periodeFra,
-        datoTom: sivilstand.periodeTil,
-        sivilstand: getSivilstandType(sivilstand.sivilstand),
+        datoFom: sivilstand.gyldigFom,
+        datoTom: null,
+        sivilstand: getSivilstandType(sivilstand.type),
     }));
 };
 

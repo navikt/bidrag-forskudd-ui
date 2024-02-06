@@ -1,7 +1,7 @@
-import { BehandlingNotatDto, ForskuddAarsakType } from "../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto } from "../api/BidragBehandlingApiV1";
 
 export interface VirkningstidspunktFormValues {
-    virkningsdato?: string | null;
-    årsak: ForskuddAarsakType | "";
+    virkningstidspunkt?: string | null;
+    årsakAvslag: string | null;
     notat?: BehandlingNotatDto;
 }

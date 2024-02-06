@@ -17,7 +17,7 @@ import {
     useGetBidragInntektQueries,
     useGetOpplysninger,
     useGetOpplysningerHentetdato,
-    useGrunnlagspakke,
+    useGrunnlag,
     useOppdaterBehandling,
 } from "../../../hooks/useApiData";
 import { useHentArbeidsforhold } from "../../../hooks/useApiData";
@@ -189,10 +189,10 @@ const InntektForm = () => {
     const inntektOpplysninger = useGetOpplysninger<InntektOpplysninger>(OpplysningerType.INNTEKT_BEARBEIDET);
     const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
-    const { arbeidsforholdListe } = useHentArbeidsforhold();
-    const grunnlagspakke = useGrunnlagspakke();
+    const arbeidsforholdListe = useHentArbeidsforhold();
+    const grunnlagsdata = useGrunnlag();
     const { inntekter, roller } = behandling;
-    const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagspakke).map(({ data }) => data);
+    const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagsdata).map(({ data }) => data);
     const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
         (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMånedsinntektListe }),
         {}
@@ -201,7 +201,7 @@ const InntektForm = () => {
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
 
-    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagspakke);
+    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagsdata);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -214,6 +214,7 @@ const InntektForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
 
+        console.log(values);
         oppdaterBehandlingFn.mutation.mutate(createInntektPayload(values), {
             onSuccess: () =>
                 useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
@@ -253,12 +254,13 @@ const InntektForm = () => {
                     ident: personInntekt.ident,
                     summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
                 })),
-                utvidetbarnetrygd: grunnlagspakke.ubstListe,
-                barnetillegg: grunnlagspakke.barnetilleggListe.map((bt) => ({
+                utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe,
+                barnetillegg: grunnlagsdata.barnetilleggListe.map((bt) => ({
                     ...bt,
+                    datoFom: bt.periodeFra!,
                     ident: bt.partPersonId,
                     gjelderBarn: bt.barnPersonId,
-                    barnetillegg: bt.belopBrutto,
+                    barnetillegg: bt.beløpBrutto,
                 })),
             });
 
@@ -296,9 +298,10 @@ const InntektForm = () => {
                         datoFom: dateToDDMMYYYYString(new Date(inntekt.periode.fom)),
                         datoTom: dateToDDMMYYYYString(new Date(inntekt.periode.til)),
                     })),
+                    summertMånedsinntektListe: personInntekt.data.summertMånedsinntektListe,
                 })),
-                utvidetbarnetrygd: grunnlagspakke.ubstListe,
-                barnetillegg: grunnlagspakke.barnetilleggListe,
+                utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe,
+                barnetillegg: grunnlagsdata.barnetilleggListe,
                 arbeidsforhold: arbeidsforholdListe ?? [],
             }),
             hentetDato: toISODateString(new Date()),
@@ -308,12 +311,13 @@ const InntektForm = () => {
             aktiv: true,
             grunnlagstype: OpplysningerType.INNTEKT,
             data: JSON.stringify({
-                ainntektListe: grunnlagspakke.ainntektListe,
-                skattegrunnlagListe: grunnlagspakke.skattegrunnlagListe,
-                barnetilleggListe: grunnlagspakke.barnetilleggListe,
-                barnetilsynListe: grunnlagspakke.barnetilsynListe,
-                kontantstotteListe: grunnlagspakke.kontantstotteListe,
-                ubstListe: grunnlagspakke.ubstListe,
+                ainntektListe: grunnlagsdata.ainntektListe,
+                skattegrunnlagListe: grunnlagsdata.skattegrunnlagListe,
+                barnetilleggListe: grunnlagsdata.barnetilleggListe,
+                barnetilsynListe: grunnlagsdata.barnetilsynListe,
+                kontantstotteListe: grunnlagsdata.kontantstøtteListe,
+                småbarnstilleggListe: grunnlagsdata.småbarnstilleggListe,
+                utvidetBarnetrygdListe: grunnlagsdata.utvidetBarnetrygdListe,
             }),
             hentetDato: toISODateString(new Date()),
         });
@@ -326,15 +330,15 @@ const InntektForm = () => {
         const values: InntektFormValues = {
             ...fieldValues,
             inntekteneSomLeggesTilGrunn: getPerioderFraBidragInntekt(bidragInntekt),
-            utvidetbarnetrygd: grunnlagspakke.ubstListe.map((ubst) => ({
+            utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe.map((ubst) => ({
                 deltBosted: false,
-                beløp: ubst.belop,
+                beløp: ubst.beløp,
                 datoFom: ubst.periodeFra,
                 datoTom: ubst.periodeTil,
             })),
-            barnetillegg: grunnlagspakke.barnetilleggListe.map((periode) => ({
+            barnetillegg: grunnlagsdata.barnetilleggListe.map((periode) => ({
                 ident: periode.barnPersonId,
-                barnetillegg: periode.belopBrutto,
+                barnetillegg: periode.beløpBrutto,
                 datoFom: periode.periodeFra,
                 datoTom: periode.periodeTil,
             })),

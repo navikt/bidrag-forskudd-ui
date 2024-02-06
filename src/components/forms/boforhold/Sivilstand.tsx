@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { Kilde, OpplysningerType, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
-import { SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
+import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
@@ -307,9 +307,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    const sivilstandOpplysninger = useGetOpplysninger<SivilstandDtoGrunnlag[]>(OpplysningerType.SIVILSTAND);
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const {
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
         søktFomDato,
     } = useGetBehandling();
     const virkningstidspunkt = dateOrNull(virkningsdato);
@@ -328,19 +328,17 @@ const Opplysninger = () => {
                 </Table.Header>
                 <Table.Body>
                     {sivilstandOpplysninger
-                        ?.filter((periode) => periode.periodeTil === null || isAfterDate(periode.periodeTil, datoFom))
+                        ?.filter((periode) => periode.gyldigFom === null || isAfterDate(periode.gyldigFom, datoFom))
                         .map((periode, index) => (
-                            <Table.Row key={`${periode.sivilstand}-${index}`}>
+                            <Table.Row key={`${periode.type}-${index}`}>
                                 <Table.DataCell className="flex justify-start gap-2">
                                     <>
-                                        {datoFom && new Date(periode.periodeFra) < new Date(datoFom)
+                                        {datoFom && new Date(periode.gyldigFom) < new Date(datoFom)
                                             ? DateToDDMMYYYYString(datoFom)
-                                            : DateToDDMMYYYYString(new Date(periode.periodeFra))}
-                                        <div>{"-"}</div>
-                                        {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
+                                            : DateToDDMMYYYYString(new Date(periode.gyldigFom))}
                                     </>
                                 </Table.DataCell>
-                                <Table.DataCell>{capitalize(periode.sivilstand)}</Table.DataCell>
+                                <Table.DataCell>{capitalize(periode.type)}</Table.DataCell>
                             </Table.Row>
                         ))}
                 </Table.Body>

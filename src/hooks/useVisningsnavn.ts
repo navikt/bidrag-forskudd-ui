@@ -10,7 +10,10 @@ const allInntektskoder = Object.values(Inntektsrapportering).map((entry) => entr
 export default function useVisningsnavn() {
     const { data: visningsnavnMap } = useGetVisningsnavn();
 
-    const toVisningsnavn = (kode: string) => visningsnavnMap.data[kode] ?? "MANGLER_VISNINGSNAVN";
+    const toVisningsnavn = (kode: string) => {
+        console.log("KODE", kode);
+        return visningsnavnMap.data[kode] ?? "MANGLER_VISNINGSNAVN";
+    };
     const toVisningsnavnInntekt = (kode: string, årstall?: number) => {
         if (inntekskodeMedÅrstall.includes(kode)) return `${toVisningsnavn(kode)} ${årstall ?? ""}`.trim();
         return toVisningsnavn(kode);

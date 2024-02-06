@@ -1,5 +1,10 @@
 import { BehandlingDto, Rolletype } from "../../api/BidragBehandlingApiV1";
-import { HentGrunnlagspakkeDto, SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
+import {
+    ArbeidsforholdGrunnlagDto,
+    HentGrunnlagDto,
+    SivilstandskodePDL,
+    SkattegrunnlagGrunnlagDto,
+} from "../../api/BidragGrunnlagApi";
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
 import { deductMonths, toISODateString } from "../../utils/date-utils";
 
@@ -167,26 +172,26 @@ const getEgneBarnIHusstandenListe = (barn, bmIdent, today, barnHusstandsData) =>
         borISammeHusstandDtoListe: barnHusstandsData[i].borISammeHusstandDtoListe,
     }));
 
-const createSkattegrunnlagListe = (bmIdent, barn, today) =>
+const createSkattegrunnlagListe = (bmIdent, barn): SkattegrunnlagGrunnlagDto[] =>
     [
         {
             personId: bmIdent,
             periodeFra: "2022-01-01",
             periodeTil: "2022-12-31",
-            aktiv: true,
-            brukFra: today,
-            brukTil: today,
-            hentetTidspunkt: today,
-            skattegrunnlagListe: [
+            skattegrunnlagspostListe: [
                 {
                     skattegrunnlagType: "ordinær",
+                    kode: "",
                     inntektType: "LOENNSINNTEKT",
                     belop: 600000,
+                    beløp: 600000,
                 },
                 {
                     skattegrunnlagType: "ordinær",
+                    kode: "",
                     inntektType: "YTELSE_FRA_OFFENTLIGE",
                     belop: 120000,
+                    beløp: 120000,
                 },
             ],
         },
@@ -194,15 +199,13 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             personId: bmIdent,
             periodeFra: "2021-01-01",
             periodeTil: "2021-12-31",
-            aktiv: true,
-            brukFra: today,
-            brukTil: today,
-            hentetTidspunkt: today,
-            skattegrunnlagListe: [
+            skattegrunnlagspostListe: [
                 {
                     skattegrunnlagType: "ordinær",
+                    kode: "",
                     inntektType: "LOENNSINNTEKT",
                     belop: 550000,
+                    beløp: 550000,
                 },
             ],
         },
@@ -210,15 +213,13 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             personId: bmIdent,
             periodeFra: "2020-01-01",
             periodeTil: "2020-12-31",
-            aktiv: true,
-            brukFra: today,
-            brukTil: today,
-            hentetTidspunkt: today,
-            skattegrunnlagListe: [
+            skattegrunnlagspostListe: [
                 {
                     skattegrunnlagType: "ordinær",
+                    kode: "",
                     inntektType: "LOENNSINNTEKT",
                     belop: 500000,
+                    beløp: 500000,
                 },
             ],
         },
@@ -232,13 +233,10 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
                             personId: b.ident,
                             periodeFra: "2022-01-01",
                             periodeTil: "2022-12-31",
-                            aktiv: true,
-                            brukFra: today,
-                            brukTil: today,
-                            hentetTidspunkt: today,
-                            skattegrunnlagListe: [
+                            skattegrunnlagspostListe: [
                                 {
                                     skattegrunnlagType: "ordinær",
+                                    kode: "",
                                     inntektType: "LOENNSINNTEKT",
                                     belop: 200000,
                                 },
@@ -248,15 +246,13 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
                             personId: b.ident,
                             periodeFra: "2021-01-01",
                             periodeTil: "2021-12-31",
-                            aktiv: true,
-                            brukFra: today,
-                            brukTil: today,
-                            hentetTidspunkt: today,
-                            skattegrunnlagListe: [
+                            skattegrunnlagspostListe: [
                                 {
                                     skattegrunnlagType: "ordinær",
+                                    kode: "",
                                     inntektType: "LOENNSINNTEKT",
                                     belop: 180000,
+                                    beløp: 180000,
                                 },
                             ],
                         },
@@ -264,15 +260,13 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
                             personId: b.ident,
                             periodeFra: "2020-01-01",
                             periodeTil: "2020-12-31",
-                            aktiv: true,
-                            brukFra: today,
-                            brukTil: today,
-                            hentetTidspunkt: today,
-                            skattegrunnlagListe: [
+                            skattegrunnlagspostListe: [
                                 {
                                     skattegrunnlagType: "ordinær",
+                                    kode: "",
                                     inntektType: "LOENNSINNTEKT",
                                     belop: 140000,
+                                    beløp: 140000,
                                 },
                             ],
                         },
@@ -282,7 +276,7 @@ const createSkattegrunnlagListe = (bmIdent, barn, today) =>
             .flat()
     );
 
-export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: BehandlingDto): HentGrunnlagspakkeDto => {
+export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: BehandlingDto): HentGrunnlagDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = toISODateString(new Date());
@@ -310,15 +304,13 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
     }
 
     return {
-        grunnlagspakkeId,
+        arbeidsforholdListe: createArbeidsforholdData,
+        feilrapporteringListe: [],
+        hentetTidspunkt: today,
         ainntektListe: tolvMaaneder.map((periode) => ({
             personId: bmIdent,
             periodeFra: periode.fra,
             periodeTil: periode.til,
-            aktiv: true,
-            brukFra: "",
-            brukTil: "",
-            hentetTidspunkt: today,
             ainntektspostListe: [
                 {
                     utbetalingsperiode: "202303",
@@ -327,9 +319,11 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
                     opplysningspliktigId: "string",
                     virksomhetId: "string",
                     inntektType: "LOENNSINNTEKT",
+                    kategori: "LOENNSINNTEKT",
                     fordelType: "string",
                     beskrivelse: "string",
-                    belop: Math.round(20000 + Math.random() * (80000 - 20000)),
+                    beløp: Math.round(20000 + Math.random() * (80000 - 20000)),
+                    belop: 0,
                     etterbetalingsperiodeFra: periode.fra,
                     etterbetalingsperiodeTil: periode.til,
                 },
@@ -340,51 +334,40 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
                     opplysningspliktigId: "string",
                     virksomhetId: "string",
                     inntektType: "NAERINGSINNTEKT",
+                    kategori: "NAERINGSINNTEKT",
                     fordelType: "string",
                     beskrivelse: "string",
-                    belop: Math.round(20000 + Math.random() * (80000 - 20000)),
+                    belop: 0,
+                    beløp: Math.round(20000 + Math.random() * (80000 - 20000)),
                     etterbetalingsperiodeFra: periode.fra,
                     etterbetalingsperiodeTil: periode.til,
                 },
             ],
         })),
-        skattegrunnlagListe: createSkattegrunnlagListe(bmIdent, barn, today),
-        ubstListe: [],
+        skattegrunnlagListe: createSkattegrunnlagListe(bmIdent, barn),
+        utvidetBarnetrygdListe: [],
+        småbarnstilleggListe: [],
         barnetilleggListe: [],
-        kontantstotteListe: [
+        kontantstøtteListe: [
             {
                 partPersonId: "string",
                 barnPersonId: "string",
                 periodeFra: "2023-06-06",
                 periodeTil: "2023-06-06",
-                aktiv: true,
-                brukFra: "2023-06-06T11:42:13.955Z",
-                brukTil: "2023-06-06T11:42:13.955Z",
-                belop: 0,
-                hentetTidspunkt: "2023-06-06T11:42:13.955Z",
+                beløp: 0,
             },
         ],
-        husstandmedlemmerOgEgneBarnListe: getEgneBarnIHusstandenListe(barn, bmIdent, today, barnHusstandsData),
+        husstandsmedlemmerOgEgneBarnListe: getEgneBarnIHusstandenListe(barn, bmIdent, today, barnHusstandsData),
         sivilstandListe: [
             {
                 personId: "02487731725",
-                periodeFra: "1966-08-27",
-                periodeTil: "2023-06-21",
-                sivilstand: SivilstandskodePDL.UGIFT,
-                aktiv: true,
-                brukFra: "2024-01-03T12:54:12.170234",
-                brukTil: null,
-                hentetTidspunkt: "2024-01-03T12:54:12.170234",
+                gyldigFom: "1966-08-27",
+                type: SivilstandskodePDL.UGIFT,
             },
             {
                 personId: "02487731725",
-                periodeFra: "2023-06-21",
-                periodeTil: null,
-                sivilstand: SivilstandskodePDL.UGIFT,
-                aktiv: true,
-                brukFra: "2024-01-03T12:54:12.170234",
-                brukTil: null,
-                hentetTidspunkt: "2024-01-03T12:54:12.170234",
+                gyldigFom: "2023-06-21",
+                type: SivilstandskodePDL.UGIFT,
             },
         ],
         barnetilsynListe: [
@@ -393,115 +376,109 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
                 barnPersonId: "string",
                 periodeFra: "2023-06-06",
                 periodeTil: "2023-06-06",
-                aktiv: true,
-                brukFra: "2023-06-06T11:42:13.956Z",
-                brukTil: "2023-06-06T11:42:13.956Z",
-                belop: 0,
+                beløp: 0,
                 tilsynstype: "HELTID",
                 skolealder: "OVER",
-                hentetTidspunkt: "2023-06-06T11:42:13.956Z",
             },
         ],
     };
 };
 
-export const createArbeidsforholdData = {
-    arbeidsforholdListe: [
-        {
-            partPersonId: "21470262629",
-            startdato: "2002-11-03",
-            sluttdato: null,
-            arbeidsgiverNavn: "SAUEFABRIKK",
-            arbeidsgiverOrgnummer: "896929119",
-            ansettelsesdetaljer: [
-                {
-                    periodeFra: "2002-11",
-                    periodeTil: null,
-                    arbeidsforholdType: "Forenklet",
-                    arbeidstidsordningBeskrivelse: null,
-                    ansettelsesformBeskrivelse: null,
-                    yrkeBeskrivelse: "ALLMENNLÆRER",
-                    antallTimerPrUke: null,
-                    avtaltStillingsprosent: null,
-                    sisteStillingsprosentendringDato: null,
-                    sisteLønnsendringDato: null,
-                },
-            ],
-            permisjoner: [],
-            permitteringer: [],
-            hentetTidspunkt: "2023-12-15T14:40:23.746210502",
-        },
-        {
-            partPersonId: "21470262629",
-            startdato: "2022-12-07",
-            sluttdato: null,
-            arbeidsgiverNavn: "SAUEFABRIKK",
-            arbeidsgiverOrgnummer: "896929119",
-            ansettelsesdetaljer: [
-                {
-                    periodeFra: "2022-12",
-                    periodeTil: null,
-                    arbeidsforholdType: "Forenklet",
-                    arbeidstidsordningBeskrivelse: null,
-                    ansettelsesformBeskrivelse: null,
-                    yrkeBeskrivelse: "BYGNINGSSNEKKER",
-                    antallTimerPrUke: null,
-                    avtaltStillingsprosent: null,
-                    sisteStillingsprosentendringDato: null,
-                    sisteLønnsendringDato: null,
-                },
-            ],
-            permisjoner: [],
-            permitteringer: [],
-            hentetTidspunkt: "2023-12-15T14:40:23.78493279",
-        },
-        {
-            partPersonId: "21470262629",
-            startdato: "2023-04-01",
-            sluttdato: "2023-12-23",
-            arbeidsgiverNavn: "KLONELABBEN",
-            arbeidsgiverOrgnummer: "907670201",
-            ansettelsesdetaljer: [
-                {
-                    periodeFra: "2023-12",
-                    periodeTil: null,
-                    arbeidsforholdType: "Forenklet",
-                    arbeidstidsordningBeskrivelse: null,
-                    ansettelsesformBeskrivelse: null,
-                    yrkeBeskrivelse: "ACCOUNT MANAGER",
-                    antallTimerPrUke: null,
-                    avtaltStillingsprosent: null,
-                    sisteStillingsprosentendringDato: null,
-                    sisteLønnsendringDato: null,
-                },
-            ],
-            permisjoner: [],
-            permitteringer: [],
-            hentetTidspunkt: "2023-12-15T14:40:23.818226329",
-        },
-        {
-            partPersonId: "21470262629",
-            startdato: "2003-12-08",
-            sluttdato: null,
-            arbeidsgiverNavn: "SJOKKERENDE ELEKTRIKER",
-            arbeidsgiverOrgnummer: "947064649",
-            ansettelsesdetaljer: [
-                {
-                    periodeFra: "2023-12",
-                    periodeTil: null,
-                    arbeidsforholdType: "Ordinaer",
-                    arbeidstidsordningBeskrivelse: "Ikke skift",
-                    ansettelsesformBeskrivelse: "Fast ansettelse",
-                    yrkeBeskrivelse: "ALLMENNLÆRER",
-                    antallTimerPrUke: 37.5,
-                    avtaltStillingsprosent: 88.0,
-                    sisteStillingsprosentendringDato: null,
-                    sisteLønnsendringDato: null,
-                },
-            ],
-            permisjoner: [],
-            permitteringer: [],
-            hentetTidspunkt: "2023-12-15T14:40:23.855258822",
-        },
-    ],
-};
+export const createArbeidsforholdData: ArbeidsforholdGrunnlagDto[] = [
+    {
+        partPersonId: "21470262629",
+        startdato: "2002-11-03",
+        sluttdato: null,
+        arbeidsgiverNavn: "SAUEFABRIKK",
+        arbeidsgiverOrgnummer: "896929119",
+        ansettelsesdetaljerListe: [
+            {
+                periodeFra: "2002-11",
+                periodeTil: null,
+                arbeidsforholdType: "Forenklet",
+                arbeidstidsordningBeskrivelse: null,
+                ansettelsesformBeskrivelse: null,
+                yrkeBeskrivelse: "ALLMENNLÆRER",
+                antallTimerPrUke: null,
+                avtaltStillingsprosent: null,
+                sisteStillingsprosentendringDato: null,
+                sisteLønnsendringDato: null,
+            },
+        ],
+        permisjoner: [],
+        permitteringer: [],
+        hentetTidspunkt: "2023-12-15T14:40:23.746210502",
+    },
+    {
+        partPersonId: "21470262629",
+        startdato: "2022-12-07",
+        sluttdato: null,
+        arbeidsgiverNavn: "SAUEFABRIKK",
+        arbeidsgiverOrgnummer: "896929119",
+        ansettelsesdetaljerListe: [
+            {
+                periodeFra: "2022-12",
+                periodeTil: null,
+                arbeidsforholdType: "Forenklet",
+                arbeidstidsordningBeskrivelse: null,
+                ansettelsesformBeskrivelse: null,
+                yrkeBeskrivelse: "BYGNINGSSNEKKER",
+                antallTimerPrUke: null,
+                avtaltStillingsprosent: null,
+                sisteStillingsprosentendringDato: null,
+                sisteLønnsendringDato: null,
+            },
+        ],
+        permisjoner: [],
+        permitteringer: [],
+        hentetTidspunkt: "2023-12-15T14:40:23.78493279",
+    },
+    {
+        partPersonId: "21470262629",
+        startdato: "2023-04-01",
+        sluttdato: "2023-12-23",
+        arbeidsgiverNavn: "KLONELABBEN",
+        arbeidsgiverOrgnummer: "907670201",
+        ansettelsesdetaljerListe: [
+            {
+                periodeFra: "2023-12",
+                periodeTil: null,
+                arbeidsforholdType: "Forenklet",
+                arbeidstidsordningBeskrivelse: null,
+                ansettelsesformBeskrivelse: null,
+                yrkeBeskrivelse: "ACCOUNT MANAGER",
+                antallTimerPrUke: null,
+                avtaltStillingsprosent: null,
+                sisteStillingsprosentendringDato: null,
+                sisteLønnsendringDato: null,
+            },
+        ],
+        permisjoner: [],
+        permitteringer: [],
+        hentetTidspunkt: "2023-12-15T14:40:23.818226329",
+    },
+    {
+        partPersonId: "21470262629",
+        startdato: "2003-12-08",
+        sluttdato: null,
+        arbeidsgiverNavn: "SJOKKERENDE ELEKTRIKER",
+        arbeidsgiverOrgnummer: "947064649",
+        ansettelsesdetaljerListe: [
+            {
+                periodeFra: "2023-12",
+                periodeTil: null,
+                arbeidsforholdType: "Ordinaer",
+                arbeidstidsordningBeskrivelse: "Ikke skift",
+                ansettelsesformBeskrivelse: "Fast ansettelse",
+                yrkeBeskrivelse: "ALLMENNLÆRER",
+                antallTimerPrUke: 37.5,
+                avtaltStillingsprosent: 88.0,
+                sisteStillingsprosentendringDato: null,
+                sisteLønnsendringDato: null,
+            },
+        ],
+        permisjoner: [],
+        permitteringer: [],
+        hentetTidspunkt: "2023-12-15T14:40:23.855258822",
+    },
+];

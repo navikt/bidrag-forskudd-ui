@@ -42,6 +42,8 @@ export function behandlingMock(): RestHandler[] {
                 virkningstidspunkt: {
                     ...behandling?.virkningstidspunkt,
                     ...oppdater?.virkningstidspunkt,
+                    årsak: oppdater?.virkningstidspunkt?.årsak,
+                    avslag: oppdater?.virkningstidspunkt?.avslag,
                 },
             };
             // @ts-ignore

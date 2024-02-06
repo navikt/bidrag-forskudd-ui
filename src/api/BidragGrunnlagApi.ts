@@ -975,14 +975,10 @@ export interface AinntektspostDto {
     opplysningspliktigId?: string;
     /** Id til virksomheten som rapporterer inn inntekten */
     virksomhetId?: string;
-    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-    inntektType: string;
     /** Type fordel: Kontantytelse, Naturalytelse, Utgiftsgodtgjorelse */
     fordelType?: string;
     /** Beskrivelse av inntekt */
     beskrivelse?: string;
-    /** Beløp */
-    belop: number;
     /**
      * Fra-dato etterbetaling
      * @format date
@@ -993,6 +989,14 @@ export interface AinntektspostDto {
      * @format date
      */
     etterbetalingsperiodeTil?: string;
+    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+    inntektType: string;
+    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+    kategori: "LOENNSINNTEKT" | "NAERINGSINNTEKT" | "PENSJON_ELLER_TRYGD" | "YTELSE_FRA_OFFENTLIGE";
+    /** Beløp */
+    belop: number;
+    /** Beløp */
+    beløp: number;
 }
 
 /** Liste av ansettelsesdetaljer, med eventuell historikk */
@@ -1160,13 +1164,29 @@ export interface BorISammeHusstandDto {
     periodeTil?: string;
 }
 
+/** Liste over evt. feil rapportert under henting av grunnlag */
+export interface FeilrapporteringDto {
+    /** Hvilken type grunnlag skal hentes */
+    grunnlagstype: GrunnlagRequestType;
+    /** Id til personen grunnlaget er forsøkt hentet for */
+    personId?: string;
+    /** @format date */
+    periodeFra?: string;
+    /** @format date */
+    periodeTil?: string;
+    feiltype: "TEKNISK_FEIL" | "FUNKSJONELL_FEIL" | "UKJENT_FEIL";
+    feilmelding?: string;
+}
+
 export interface HentGrunnlagDto {
     /** Periodisert liste over innhentede inntekter fra a-inntekt og underliggende poster */
     ainntektListe: AinntektGrunnlagDto[];
-    /** Periodisert liste over innhentede fra skatt og underliggende poster */
+    /** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
     skattegrunnlagListe: SkattegrunnlagGrunnlagDto[];
-    /** Periodisert liste over innhentet utvidet barnetrygd og småbarnstillegg */
-    ubstListe: UtvidetBarnetrygdOgSmaabarnstilleggGrunnlagDto[];
+    /** Periodisert liste over innhentet utvidet barnetrygd */
+    utvidetBarnetrygdListe: UtvidetBarnetrygdGrunnlagDto[];
+    /** Periodisert liste over innhentet småbarnstillegg */
+    småbarnstilleggListe: SmabarnstilleggGrunnlagDto[];
     /** Periodisert liste over innhentet barnetillegg */
     barnetilleggListe: BarnetilleggGrunnlagDto[];
     /** Periodisert liste over innhentet kontantstøtte */
@@ -1179,10 +1199,9 @@ export interface HentGrunnlagDto {
     barnetilsynListe: BarnetilsynGrunnlagDto[];
     /** Periodisert liste over arbeidsforhold */
     arbeidsforholdListe: ArbeidsforholdGrunnlagDto[];
-    /**
-     * Hentet tidspunkt
-     * @format date-time
-     */
+    /** Liste over evt. feil rapportert under henting av grunnlag */
+    feilrapporteringListe: FeilrapporteringDto[];
+    /** @format date-time */
     hentetTidspunkt: string;
 }
 
@@ -1254,7 +1273,7 @@ export interface SivilstandGrunnlagDto {
     historisk?: boolean;
 }
 
-/** Periodisert liste over innhentede fra skatt og underliggende poster */
+/** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
 export interface SkattegrunnlagGrunnlagDto {
     /** Id til personen inntekten er rapportert for */
     personId: string;
@@ -1280,14 +1299,36 @@ export interface SkattegrunnlagspostDto {
     inntektType: string;
     /** Beløp */
     belop: number;
+    /** Beløp på skattegrunnlagposten */
+    beløp: number;
+    /** Tekniske navnet på inntektsposten. Er samme verdi som "Summert skattegrunnlag" fra NAV kodeverk ( https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Summert%20skattegrunnlag ) */
+    kode: string;
 }
 
-/** Periodisert liste over innhentet utvidet barnetrygd og småbarnstillegg */
-export interface UtvidetBarnetrygdOgSmaabarnstilleggGrunnlagDto {
-    /** Id til personen ubst er rapportert for */
+/** Periodisert liste over innhentet småbarnstillegg */
+export interface SmabarnstilleggGrunnlagDto {
+    /** Id til personen småbarnstillegg er rapportert for */
     personId: string;
-    /** Type stønad, utvidet barnetrygd eller småbarnstillegg */
-    type: string;
+    /**
+     * Periode fra- og med måned
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+    /** Beløp */
+    beløp: number;
+    /** Angir om stønaden er manuelt beregnet */
+    manueltBeregnet: boolean;
+}
+
+/** Periodisert liste over innhentet utvidet barnetrygd */
+export interface UtvidetBarnetrygdGrunnlagDto {
+    /** Id til personen utvidet barnetrygd er rapportert for */
+    personId: string;
     /**
      * Periode fra- og med måned
      * @format date
@@ -2074,7 +2115,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags grunnlag-controller
          * @name HentGrunnlag
-         * @summary Trigger innhenting av grunnlag for personer angitt i requesten
+         * @summary Trigger asynkron innhenting av grunnlag for personer angitt i requesten
          * @request POST:/hentgrunnlag
          * @secure
          */
