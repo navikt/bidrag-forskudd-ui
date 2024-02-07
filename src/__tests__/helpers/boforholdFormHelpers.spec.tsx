@@ -1067,7 +1067,7 @@ describe("BoforholdFormHelpers", () => {
         expect(result[1]).equals("Antall sivilstandsperioder har blitt endret i Folkeregisteret");
     });
 
-    it.skip("compareOpplysninger should return an array with changes for sivilstand status when there are changes in the latest opplysninger", () => {
+    it("compareOpplysninger should return an array with changes for sivilstand status when there are changes in the latest opplysninger", () => {
         const savedOpplysninger = {
             husstand: [
                 {
@@ -1780,7 +1780,7 @@ describe("BoforholdFormHelpers", () => {
         );
     });
 
-    it.skip("should map to a correct type and build sivilstand perioder", () => {
+    it("should map to a correct type and build sivilstand perioder", () => {
         const sivilstandListe: SivilstandGrunnlagDto[] = [
             {
                 personId: "10089229435",
@@ -1861,13 +1861,13 @@ describe("BoforholdFormHelpers", () => {
             {
                 sivilstand: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
-                datoTom: "2021-10-31",
+                datoTom: null,
                 kilde: "OFFENTLIG",
             },
             {
                 sivilstand: "BOR_ALENE_MED_BARN",
                 datoFom: "2021-11-01",
-                datoTom: "2022-08-31",
+                datoTom: null,
                 kilde: "OFFENTLIG",
             },
             {
@@ -1930,13 +1930,13 @@ describe("BoforholdFormHelpers", () => {
             {
                 sivilstand: "GIFT_SAMBOER",
                 datoFom: "2019-05-01",
-                datoTom: "2021-10-31",
+                datoTom: null,
                 kilde: "OFFENTLIG",
             },
             {
                 sivilstand: "BOR_ALENE_MED_BARN",
                 datoFom: "2021-11-01",
-                datoTom: "2022-08-31",
+                datoTom: null,
                 kilde: "OFFENTLIG",
             },
             {
@@ -1956,7 +1956,7 @@ describe("BoforholdFormHelpers", () => {
         );
     });
 
-    it.skip("should merge sivilstand perioder with same status", () => {
+    it("should merge sivilstand perioder with same status", () => {
         const sivilstandListe: SivilstandGrunnlagDto[] = [
             {
                 personId: "27486620604",

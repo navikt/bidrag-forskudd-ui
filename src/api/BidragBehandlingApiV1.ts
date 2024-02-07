@@ -858,7 +858,7 @@ export enum SivilstandskodePDL {
 
 export interface SivilstandBeregnet {
     status: SivilstandBeregnetStatusEnum;
-    sivilstandListe: Sivilstand[];
+    sivilstandListe: SivilstandBeregnetInnhold[];
 }
 
 export interface BehandlingInfoDto {
@@ -1362,6 +1362,7 @@ export enum VirkningstidspunktMonthEnum1 {
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 import axios from "axios";
+import { SivilstandBeregnetInnhold } from "../types/boforholdFormValues";
 
 export type QueryParamsType = Record<string | number, any>;
 

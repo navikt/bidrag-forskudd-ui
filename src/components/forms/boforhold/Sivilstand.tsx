@@ -17,7 +17,7 @@ import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -30,6 +30,7 @@ import {
     calculateFraDato,
     checkPeriodizationErrors,
     editPeriods,
+    mapSivilstandProsessert,
     removeAndEditPeriods,
     sivilstandForskuddOptions,
 } from "../helpers/boforholdFormHelpers";
@@ -47,10 +48,12 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
+    const [showResetButton, setShowResetButton] = useState(false);
 
     const saveBoforhold = useOnSaveBoforhold();
     const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const {
         control,
@@ -128,6 +131,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         setBoforholdFormValues(updatedValues);
         setValue("sivilstand", sivilstand);
         saveBoforhold(updatedValues);
+        setShowResetButton(true);
+
         setEditableRow(undefined);
     };
 
@@ -192,6 +197,10 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         }
     };
 
+    const resetTilDataFraFreg = () => {
+        updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
+        setShowResetButton(false);
+    };
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
@@ -210,7 +219,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Alert>
                     </div>
                 )}
-
+                {sivilstandOpplysninger != null && showResetButton && (
+                    <div className="flex justify-end mb-4">
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit"
+                            onClick={resetTilDataFraFreg}
+                        >
+                            Reset til data fra FREG
+                        </Button>
+                    </div>
+                )}
                 {controlledFields.length > 0 && (
                     <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
                         {controlledFields.map((item, index) => (
@@ -319,9 +340,33 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
 const Opplysninger = () => {
     const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
+    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
+
+    const behandling = useGetBehandling();
     if (!sivilstandOpplysninger) {
         return null;
     }
+
+    const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
+
+    const sivilstandsOpplysningerFiltrert = () => {
+        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
+            return sivilstandOpplysninger;
+        }
+        const opplysningerSortert = sivilstandOpplysninger.sort((a, b) => {
+            if (a.gyldigFom == null) return -1;
+            if (b.gyldigFom == null) return 1;
+            return new Date(a.gyldigFom) > new Date(b.gyldigFom) ? 1 : -1;
+        });
+        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
+            virkingstidspunkt == null || new Date(sivilstand.gyldigFom) <= virkingstidspunkt;
+        });
+
+        if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
+            return [opplysningerSortert[opplysningerSortert.length - 1]];
+        }
+        return opplysningerFiltrert;
+    };
     return (
         <ReadMore header="Opplysninger fra Folkeregistret" size="small" className="pb-4">
             <Table className="w-[300px] opplysninger" size="small">
@@ -332,7 +377,7 @@ const Opplysninger = () => {
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandOpplysninger.map((periode, index) => (
+                    {sivilstandsOpplysningerFiltrert().map((periode, index) => (
                         <Table.Row key={`${periode.type}-${index}`}>
                             <Table.DataCell className="flex justify-start gap-2">
                                 <>{DateToDDMMYYYYString(new Date(periode.gyldigFom))}</>
