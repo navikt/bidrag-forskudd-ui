@@ -50,7 +50,7 @@ import {
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
-    SivilstandOpplysninger,
+    SivilstandBeregnetInnhold,
 } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
@@ -87,7 +87,6 @@ import {
     getBarnPerioderFromHusstandsListe,
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
-    getSivilstandPerioder,
     isOver18YearsOld,
     mapHusstandsMedlemmerToBarn,
     removeAndEditPeriods,
@@ -238,8 +237,8 @@ const BoforholdsForm = () => {
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
             husstand: mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe),
-            sivilstand: sivilstandProssesert as SivilstandOpplysninger[],
-            // sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe),
+            //sivilstand: sivilstandProssesert as SivilstandOpplysninger[],
+            sivilstand: sivilstandListe,
         }),
         [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
     );
@@ -249,8 +248,15 @@ const BoforholdsForm = () => {
     );
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
-        () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken),
-        [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
+        () =>
+            createInitialValues(
+                boforhold,
+                sivilstandProssesert.sivilstandListe as unknown as SivilstandBeregnetInnhold[],
+                opplysningerFraFolkRegistre,
+                virkningsOrSoktFraDato,
+                barnMedISaken
+            ),
+        [boforhold, sivilstandProssesert, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
     );
 
     const useFormMethods = useForm({
@@ -311,7 +317,15 @@ const BoforholdsForm = () => {
                 virkningsOrSoktFraDato,
                 barnMedISaken
             ),
-            sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
+            sivilstand: sivilstandProssesert.sivilstandListe.map((v) => ({
+                kilde: Kilde.OFFENTLIG,
+                // @ts-ignore
+                datoFom: v.periodeFom,
+                // @ts-ignore
+                datoTom: v.periodeTom,
+                // @ts-ignore
+                sivilstand: v.sivilstandskode,
+            })),
         };
 
         useFormMethods.reset(values);

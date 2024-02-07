@@ -1799,26 +1799,16 @@ describe("BoforholdFormHelpers", () => {
     });
 
     it.skip("should map to a correct type and build sivilstand perioder", () => {
-        const sivilstandListe = [
+        const sivilstandListe: SivilstandGrunnlagDto[] = [
             {
                 personId: "10089229435",
-                periodeFra: "2018-04-14",
-                periodeTil: "2023-09-19",
-                sivilstand: SivilstandskodePDL.GIFT,
-                aktiv: true,
-                brukFra: "2023-11-22T09:35:10.24192",
-                brukTil: null,
-                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+                gyldigFom: "2018-04-14",
+                type: SivilstandskodePDL.GIFT,
             },
             {
                 personId: "10089229435",
-                periodeFra: "2023-09-19",
-                periodeTil: null,
-                sivilstand: SivilstandskodePDL.SEPARERT,
-                aktiv: true,
-                brukFra: "2023-11-22T09:35:10.24192",
-                brukTil: null,
-                hentetTidspunkt: "2023-11-22T09:35:10.24192",
+                gyldigFom: "2023-09-19",
+                type: SivilstandskodePDL.SEPARERT,
             },
         ];
 

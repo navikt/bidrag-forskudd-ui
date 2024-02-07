@@ -1002,26 +1002,7 @@ export interface AinntektspostDto {
 /** Liste av ansettelsesdetaljer, med eventuell historikk */
 export interface Ansettelsesdetaljer {
     /** Fradato for ansettelsesdetalj. År + måned */
-    periodeFra?: {
-        /** @format int32 */
-        year?: number;
-        month?:
-            | "JANUARY"
-            | "FEBRUARY"
-            | "MARCH"
-            | "APRIL"
-            | "MAY"
-            | "JUNE"
-            | "JULY"
-            | "AUGUST"
-            | "SEPTEMBER"
-            | "OCTOBER"
-            | "NOVEMBER"
-            | "DECEMBER";
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    periodeFra?: string;
     /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
     periodeTil?: {
         /** @format int32 */

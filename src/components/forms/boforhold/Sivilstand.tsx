@@ -6,12 +6,18 @@ import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, OpplysningerType, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import {
+    Kilde,
+    OpplysningerType,
+    SivilstandBeregnetStatusEnum,
+    SivilstandDto,
+    Sivilstandskode,
+} from "../../../api/BidragBehandlingApiV1";
 import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetBehandling, useGetOpplysninger } from "../../../hooks/useApiData";
+import { useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -40,6 +46,7 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
 
     const saveBoforhold = useOnSaveBoforhold();
     const toVisningsnavn = useVisningsnavn();
@@ -73,6 +80,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const validatePeriods = (perioderValues: SivilstandDto[]) => {
         const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
 
+        if (sivilstandProssesert.status != SivilstandBeregnetStatusEnum.OK && controlledFields.length == 0) {
+            errorTypes.push("kunneIkkeBeregneSivilstandPerioder");
+        }
         if (errorTypes.length) {
             setError(`root.sivilstand`, {
                 types: errorTypes.reduce(
@@ -200,6 +210,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Alert>
                     </div>
                 )}
+
                 {controlledFields.length > 0 && (
                     <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
                         {controlledFields.map((item, index) => (
@@ -308,12 +319,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
 const Opplysninger = () => {
     const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
-    const {
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-        søktFomDato,
-    } = useGetBehandling();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
     if (!sivilstandOpplysninger) {
         return null;
     }
@@ -322,25 +327,19 @@ const Opplysninger = () => {
             <Table className="w-[300px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Periode</Table.HeaderCell>
+                        <Table.HeaderCell>Fra dato</Table.HeaderCell>
                         <Table.HeaderCell>Status</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandOpplysninger
-                        ?.filter((periode) => periode.gyldigFom === null || isAfterDate(periode.gyldigFom, datoFom))
-                        .map((periode, index) => (
-                            <Table.Row key={`${periode.type}-${index}`}>
-                                <Table.DataCell className="flex justify-start gap-2">
-                                    <>
-                                        {datoFom && new Date(periode.gyldigFom) < new Date(datoFom)
-                                            ? DateToDDMMYYYYString(datoFom)
-                                            : DateToDDMMYYYYString(new Date(periode.gyldigFom))}
-                                    </>
-                                </Table.DataCell>
-                                <Table.DataCell>{capitalize(periode.type)}</Table.DataCell>
-                            </Table.Row>
-                        ))}
+                    {sivilstandOpplysninger.map((periode, index) => (
+                        <Table.Row key={`${periode.type}-${index}`}>
+                            <Table.DataCell className="flex justify-start gap-2">
+                                <>{DateToDDMMYYYYString(new Date(periode.gyldigFom))}</>
+                            </Table.DataCell>
+                            <Table.DataCell>{capitalize(periode.type)}</Table.DataCell>
+                        </Table.Row>
+                    ))}
                 </Table.Body>
             </Table>
         </ReadMore>

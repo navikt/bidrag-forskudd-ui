@@ -19,7 +19,8 @@ import {
     OpplysningerType,
     RolleDto,
     Rolletype,
-    Sivilstand,
+    SivilstandBeregnet,
+    SivilstandBeregnetStatusEnum,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
@@ -59,11 +60,12 @@ export const QueryKeys = {
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     behandling: (behandlingId: number) => ["behandling", QueryKeys.behandlingVersion, behandlingId],
-    sivilstandBeregning: (behandlingId: number) => [
+    sivilstandBeregning: (behandlingId: number, virkningstidspunkt: string) => [
         "behandling",
         QueryKeys.behandlingVersion,
         behandlingId,
         "sivilstandBeregning",
+        virkningstidspunkt,
     ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: number) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
@@ -324,18 +326,16 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
     return requests;
 };
 
-export const useSivilstandOpplysningerProssesert = (): Sivilstand[] | null => {
+export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
     const behandling = useGetBehandling();
     const { sivilstandListe } = useGrunnlag();
 
-    const { data: beregnet } = useQuery({
-        queryKey: QueryKeys.sivilstandBeregning(behandling.id),
-        queryFn: async () =>
-            (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data.sivilstandListe,
+    const { data: beregnet } = useSuspenseQuery({
+        queryKey: QueryKeys.sivilstandBeregning(behandling.id, behandling.virkningstidspunkt.virkningstidspunkt),
+        queryFn: async () => (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data,
         staleTime: Infinity,
-        enabled: !!behandling && !!sivilstandListe,
     });
-    return beregnet ?? [];
+    return beregnet ?? { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
 };
 
 export const useGrunnlag = (): HentGrunnlagDto | null => {

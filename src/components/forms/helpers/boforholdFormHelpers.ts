@@ -19,6 +19,7 @@ import {
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
+    SivilstandBeregnetInnhold,
     SivilstandOpplysninger,
 } from "../../../types/boforholdFormValues";
 import {
@@ -338,9 +339,10 @@ export const getBarnPerioderFromHusstandsListe = (
 
 export const createInitialValues = (
     boforhold: BoforholdDto,
+    sivilstandBeregnet: SivilstandBeregnetInnhold[],
     opplysningerFraFolkRegistre: {
         husstand: HusstandOpplysningFraFolkeRegistre[];
-        sivilstand: SivilstandOpplysninger[];
+        sivilstand: SivilstandGrunnlagDto[];
     },
     virkningsOrSoktFraDato: Date,
     barnMedISaken: RolleDto[]
@@ -356,7 +358,12 @@ export const createInitialValues = (
               ).sort(compareHusstandsBarn),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
-            : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
+            : sivilstandBeregnet.map((v) => ({
+                  kilde: Kilde.OFFENTLIG,
+                  datoFom: v.periodeFom,
+                  datoTom: v.periodeTom,
+                  sivilstand: v.sivilstandskode,
+              })),
     };
 };
 
@@ -697,15 +704,14 @@ export const compareOpplysninger = (
         }
     });
 
-    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandOpplysninger[]) => {
+    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandGrunnlagDto[]) => {
         let changed = false;
         sivilstandPerioder.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];
             if (periodeFraLatestOpplysninger) {
                 if (
-                    periode.datoFom !== periodeFraLatestOpplysninger.datoFom ||
-                    periode.datoTom !== periodeFraLatestOpplysninger.datoTom ||
-                    periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand
+                    periode.gyldigFom !== periodeFraLatestOpplysninger.gyldigFom ||
+                    periode.type !== periodeFraLatestOpplysninger.type
                 ) {
                     changed = true;
                 }

@@ -3,8 +3,15 @@ import {
     Bostatuskode,
     HusstandsbarnDto,
     SivilstandDto,
+    SivilstandGrunnlagDto,
     Sivilstandskode,
 } from "../api/BidragBehandlingApiV1";
+
+export interface SivilstandBeregnetInnhold {
+    periodeFom?: string;
+    periodeTom?: string;
+    sivilstandskode: Sivilstandskode;
+}
 
 export interface BoforholdFormValues {
     husstandsbarn?: HusstandsbarnDto[];
@@ -46,10 +53,10 @@ export interface SivilstandOpplysninger {
 
 export interface BoforholdOpplysninger {
     husstand: HusstandOpplysningFraFolkeRegistre[];
-    sivilstand: SivilstandOpplysninger[];
+    sivilstand: SivilstandGrunnlagDto[];
 }
 
 export interface ParsedBoforholdOpplysninger {
     husstand: SavedHustandOpplysninger[];
-    sivilstand: SivilstandOpplysninger[];
+    sivilstand: SivilstandGrunnlagDto[];
 }
