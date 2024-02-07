@@ -20,10 +20,11 @@ type ArbeidsforholdProps = {
     ident: string;
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
-    const { arbeidsforholdListe: arbeidsforholdListeLagret } = useHentArbeidsforhold();
+    const arbeidsforholdListeGrunnlag = useHentArbeidsforhold();
     const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
 
-    const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeLagret;
+    console.log(arbeidsforholdListeGrunnlag, arbeidsforholdOpplysninger);
+    const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeGrunnlag;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
     return (

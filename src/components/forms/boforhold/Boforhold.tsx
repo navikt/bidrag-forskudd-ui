@@ -38,7 +38,8 @@ import {
     useGetBehandling,
     useGetOpplysninger,
     useGetOpplysningerHentetdato,
-    useGrunnlagspakke,
+    useGrunnlag,
+    useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
@@ -49,6 +50,7 @@ import {
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
+    SivilstandBeregnetInnhold,
 } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
@@ -85,9 +87,7 @@ import {
     getBarnPerioderFromHusstandsListe,
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
-    getSivilstandPerioder,
     isOver18YearsOld,
-    mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
     removeAndEditPeriods,
 } from "../helpers/boforholdFormHelpers";
@@ -143,10 +143,10 @@ const Main = ({
     updateOpplysninger: () => void;
 }) => {
     const {
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
         søktFomDato,
     } = useGetBehandling();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
     const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
     const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
@@ -223,31 +223,40 @@ const BoforholdsForm = () => {
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const {
         boforhold,
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt },
         søktFomDato,
         roller,
     } = useGetBehandling();
     const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
         OpplysningerType.BOFORHOLD_BEARBEIDET
     );
-    const { husstandmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlagspakke();
+    const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
     const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
+    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
-            husstand: mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe),
-            sivilstand: mapGrunnlagSivilstandToBehandlingSivilstandType(sivilstandListe),
+            husstand: mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe),
+            //sivilstand: sivilstandProssesert as SivilstandOpplysninger[],
+            sivilstand: sivilstandListe,
         }),
-        [husstandmedlemmerOgEgneBarnListe, sivilstandListe]
+        [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
     );
     const virkningsOrSoktFraDato = useMemo(
-        () => dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato),
-        [virkningsdato, søktFomDato]
+        () => dateOrNull(virkningstidspunkt) ?? dateOrNull(søktFomDato),
+        [virkningstidspunkt, søktFomDato]
     );
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
-        () => createInitialValues(boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken),
-        [boforhold, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
+        () =>
+            createInitialValues(
+                boforhold,
+                sivilstandProssesert.sivilstandListe as unknown as SivilstandBeregnetInnhold[],
+                opplysningerFraFolkRegistre,
+                virkningsOrSoktFraDato,
+                barnMedISaken
+            ),
+        [boforhold, sivilstandProssesert, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
     );
 
     const useFormMethods = useForm({
@@ -286,7 +295,7 @@ const BoforholdsForm = () => {
             behandlingId,
             aktiv: true,
             grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
-            data: JSON.stringify(husstandmedlemmerOgEgneBarnListe),
+            data: JSON.stringify(husstandsmedlemmerOgEgneBarnListe),
             hentetDato: toISODateString(new Date()),
         });
         await saveOpplysninger.mutateAsync({
@@ -308,7 +317,15 @@ const BoforholdsForm = () => {
                 virkningsOrSoktFraDato,
                 barnMedISaken
             ),
-            sivilstand: getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
+            sivilstand: sivilstandProssesert.sivilstandListe.map((v) => ({
+                kilde: Kilde.OFFENTLIG,
+                // @ts-ignore
+                datoFom: v.periodeFom,
+                // @ts-ignore
+                datoTom: v.periodeTom,
+                // @ts-ignore
+                sivilstand: v.sivilstandskode,
+            })),
         };
 
         useFormMethods.reset(values);

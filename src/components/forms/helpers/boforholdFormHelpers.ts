@@ -11,11 +11,7 @@ import {
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
-import {
-    RelatertPersonDto,
-    SivilstandDto as SivilstandDtoGrunnlag,
-    SivilstandskodePDL,
-} from "../../../api/BidragGrunnlagApi";
+import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "../../../api/BidragGrunnlagApi";
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,
@@ -23,6 +19,7 @@ import {
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
+    SivilstandBeregnetInnhold,
     SivilstandOpplysninger,
 } from "../../../types/boforholdFormValues";
 import {
@@ -94,14 +91,14 @@ export function getFirstDayOfMonthAfterEighteenYears(dateOfBirth: Date): Date {
     return eighteenYearsLater;
 }
 export const isOver18YearsOld = (dateOfBirth: Date | string): boolean => calculateAge(dateOfBirth) >= 18;
-export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
+export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonGrunnlagDto) => {
     const perioder: HusstandOpplysningPeriode[] = [];
-    const fodselsdato = dateOrNull(egneBarnIHusstanden.fodselsdato);
+    const fodselsdato = dateOrNull(egneBarnIHusstanden.fødselsdato);
     egneBarnIHusstanden.borISammeHusstandDtoListe.forEach((periode, i) => {
         const firstPeriod = i === 0;
         const lastPeriod = i === egneBarnIHusstanden.borISammeHusstandDtoListe.length - 1;
         const fodselsDatoIsBeforePeriodeFra =
-            periode.periodeFra && periode.periodeFra !== egneBarnIHusstanden.fodselsdato
+            periode.periodeFra && periode.periodeFra !== egneBarnIHusstanden.fødselsdato
                 ? isAfterDate(periode.periodeFra, fodselsdato)
                 : false;
 
@@ -150,14 +147,14 @@ export const fillInPeriodGaps = (egneBarnIHusstanden: RelatertPersonDto) => {
             });
         }
     });
-    return perioder.sort((a, b) => a.fraDato.getTime() - b.fraDato.getTime());
+    return perioder.sort((a, b) => a.fraDato?.getTime() - b.fraDato?.getTime());
 };
 
-export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: RelatertPersonDto[]) => {
+export const mapHusstandsMedlemmerToBarn = (husstandmedlemmerOgEgneBarnListe: RelatertPersonGrunnlagDto[]) => {
     return husstandmedlemmerOgEgneBarnListe
         .filter((medlem) => medlem.erBarnAvBmBp)
         .map((barn) => ({
-            foedselsdato: barn.fodselsdato,
+            foedselsdato: barn.fødselsdato,
             ident: barn.relatertPersonPersonId,
             navn: barn.navn,
             perioder: fillInPeriodGaps(barn),
@@ -172,12 +169,12 @@ const getSivilstandType = (sivilstand: SivilstandskodePDL): Sivilstandskode => {
 };
 
 export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
-    sivilstandListe: SivilstandDtoGrunnlag[]
+    sivilstandListe: SivilstandGrunnlagDto[]
 ): SivilstandOpplysninger[] => {
     return sivilstandListe.map((sivilstand) => ({
-        datoFom: sivilstand.periodeFra,
-        datoTom: sivilstand.periodeTil,
-        sivilstand: getSivilstandType(sivilstand.sivilstand),
+        datoFom: sivilstand.gyldigFom,
+        datoTom: null,
+        sivilstand: getSivilstandType(sivilstand.type),
     }));
 };
 
@@ -342,9 +339,10 @@ export const getBarnPerioderFromHusstandsListe = (
 
 export const createInitialValues = (
     boforhold: BoforholdDto,
+    sivilstandBeregnet: SivilstandBeregnetInnhold[],
     opplysningerFraFolkRegistre: {
         husstand: HusstandOpplysningFraFolkeRegistre[];
-        sivilstand: SivilstandOpplysninger[];
+        sivilstand: SivilstandGrunnlagDto[];
     },
     virkningsOrSoktFraDato: Date,
     barnMedISaken: RolleDto[]
@@ -360,7 +358,12 @@ export const createInitialValues = (
               ).sort(compareHusstandsBarn),
         sivilstand: boforhold?.sivilstand?.length
             ? boforhold.sivilstand
-            : getSivilstandPerioder(opplysningerFraFolkRegistre.sivilstand, virkningsOrSoktFraDato),
+            : sivilstandBeregnet.map((v) => ({
+                  kilde: Kilde.OFFENTLIG,
+                  datoFom: v.periodeFom,
+                  datoTom: v.periodeTom,
+                  sivilstand: v.sivilstandskode,
+              })),
     };
 };
 
@@ -701,15 +704,14 @@ export const compareOpplysninger = (
         }
     });
 
-    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandOpplysninger[]) => {
+    const oneOrMoreSivilstandPeriodsChanged = (sivilstandPerioder: SivilstandGrunnlagDto[]) => {
         let changed = false;
         sivilstandPerioder.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.sivilstand[index];
             if (periodeFraLatestOpplysninger) {
                 if (
-                    periode.datoFom !== periodeFraLatestOpplysninger.datoFom ||
-                    periode.datoTom !== periodeFraLatestOpplysninger.datoTom ||
-                    periode.sivilstand !== periodeFraLatestOpplysninger.sivilstand
+                    periode.gyldigFom !== periodeFraLatestOpplysninger.gyldigFom ||
+                    periode.type !== periodeFraLatestOpplysninger.type
                 ) {
                     changed = true;
                 }

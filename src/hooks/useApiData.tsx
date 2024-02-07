@@ -19,17 +19,21 @@ import {
     OpplysningerType,
     RolleDto,
     Rolletype,
+    SivilstandBeregnet,
+    SivilstandBeregnetStatusEnum,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import {
+    ArbeidsforholdGrunnlagDto,
     GrunnlagRequestType,
     HentGrunnlagDto,
     HentGrunnlagRequestDto,
-    HentGrunnlagspakkeDto,
-    OppdaterGrunnlagspakkeDto,
-    OppdaterGrunnlagspakkeRequestDto,
 } from "../api/BidragGrunnlagApi";
-import { TransformerInntekterRequest, TransformerInntekterResponse } from "../api/BidragInntektApi";
+import {
+    TransformerInntekterRequest,
+    TransformerInntekterResponse,
+    UtvidetBarnetrygdOgSmabarnstillegg,
+} from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
 import {
     BEHANDLING_API_V1,
@@ -56,15 +60,15 @@ export const QueryKeys = {
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     behandling: (behandlingId: number) => ["behandling", QueryKeys.behandlingVersion, behandlingId],
-    grunnlagspakkeUpdate: (grunnlagspakkeId: number) => [
-        "grunnlagspakke",
-        grunnlagspakkeId,
-        "update",
+    sivilstandBeregning: (behandlingId: number, virkningstidspunkt: string) => [
+        "behandling",
         QueryKeys.behandlingVersion,
+        behandlingId,
+        "sivilstandBeregning",
+        virkningstidspunkt,
     ],
-    grunnlagspakke: (grunnlagspakkeId: number) => ["grunnlagspakke", grunnlagspakkeId, QueryKeys.behandlingVersion],
+    grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: number) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
-    grunnlagspakkeId: () => ["grunnlagspakkeId", QueryKeys.behandlingVersion],
     person: (ident: string) => ["person", ident],
     personMulti: (ident: string) => ["persons", ident],
 };
@@ -109,7 +113,6 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     const { isInntektSkjermbildeEnabled } = useFeatureToogle();
-    const oppdaterBehandlingFn = oppdaterBehandlingMutation(behandlingId);
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
@@ -119,57 +122,20 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     });
 
     const behandling: BehandlingDto = queryClient.getQueryData(QueryKeys.behandling(behandlingId));
-
-    if (behandling?.grunnlagspakkeid) {
-        queryClient.setQueryData(QueryKeys.grunnlagspakkeId(), behandling.grunnlagspakkeid);
-    } else {
-        await queryClient.prefetchQuery({
-            queryKey: QueryKeys.grunnlagspakkeId(),
-            queryFn: async (): Promise<number> => {
-                const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
-                    formaal: "FORSKUDD",
-                });
-                return data;
-            },
-            staleTime: Infinity,
-        });
-
-        const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
-        await oppdaterBehandlingFn.mutate({ grunnlagspakkeId });
-        queryClient.setQueryData(QueryKeys.behandling(behandlingId), {
-            ...behandling,
-            grunnlagspakkeid: grunnlagspakkeId,
-        });
-    }
-
-    const grunnlagspakkeId = queryClient.getQueryData<number>(QueryKeys.grunnlagspakkeId());
     const grunnlagRequest = createGrunnlagRequest(behandling);
 
     await queryClient.prefetchQuery({
-        queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
-        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
-            return data;
-        },
-        staleTime: Infinity,
-    });
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+        queryKey: QueryKeys.grunnlag(),
+        queryFn: async (): Promise<HentGrunnlagDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(grunnlagRequest);
             return data;
         },
         staleTime: Infinity,
     });
 
     if (isInntektSkjermbildeEnabled) {
-        const grunnlagspakke: HentGrunnlagspakkeDto = queryClient.getQueryData(
-            QueryKeys.grunnlagspakke(grunnlagspakkeId)
-        );
-        const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlagspakke);
+        const grunnlag: HentGrunnlagDto = queryClient.getQueryData(QueryKeys.grunnlag());
+        const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlag);
 
         bidragIncomeRequests.forEach((request) => {
             queryClient.prefetchQuery({
@@ -276,7 +242,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
         })),
     });
 
-const createGrunnlagRequest = (behandling: BehandlingDto) => {
+const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = new Date();
@@ -310,14 +276,15 @@ const createGrunnlagRequest = (behandling: BehandlingDto) => {
                 : toISODateString(today),
     }));
 
-    const grunnlagRequest: OppdaterGrunnlagspakkeRequestDto = {
+    const grunnlagRequest: HentGrunnlagRequestDto = {
+        formaal: "FORSKUDD",
         grunnlagRequestDtoListe: bmRequests.concat(skattegrunnlagBarnRequests),
     };
 
     return grunnlagRequest;
 };
 
-const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
+const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagDto) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barnIdenter = behandling?.roller
         ?.filter((rolle) => rolle.rolletype === Rolletype.BA)
@@ -340,63 +307,45 @@ const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: He
                 skattegrunnlagsliste: grunnlagspakke.skattegrunnlagListe
                     .filter((skattegrunnlag) => skattegrunnlag.personId === ident)
                     .map((skattegrunnlag) => ({
-                        skattegrunnlagsposter: skattegrunnlag.skattegrunnlagListe,
+                        skattegrunnlagsposter: skattegrunnlag.skattegrunnlagspostListe,
                         ligningsår: new Date(Date.parse(skattegrunnlag.periodeFra)).getFullYear(),
                     })),
-                kontantstøtteliste: grunnlagspakke.kontantstotteListe
+                kontantstøtteliste: grunnlagspakke.kontantstøtteListe
                     .filter((kontantstotte) => kontantstotte.barnPersonId === ident)
-                    .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.belop })),
-                utvidetBarnetrygdOgSmåbarnstilleggliste: grunnlagspakke.ubstListe
+                    .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.beløp })),
+                utvidetBarnetrygdOgSmåbarnstilleggliste: grunnlagspakke.utvidetBarnetrygdListe
                     .filter((ubst) => ubst.personId === ident)
-                    .map((ubst) => ({ ...ubst, beløp: ubst.belop })),
+                    .map((ubst) => ({
+                        ...ubst,
+                        beløp: ubst.beløp,
+                        type: "UTVIDET",
+                    })) as UtvidetBarnetrygdOgSmabarnstillegg[],
             } as TransformerInntekterRequest,
         }));
 
     return requests;
 };
 
-const useGetGrunnlagspakkeId = () => {
-    const { behandlingId } = useForskudd();
-    const { grunnlagspakkeid } = useGetBehandling();
-    const { data: grunnlagspakkeId } = useSuspenseQuery({
-        queryKey: QueryKeys.grunnlagspakkeId(),
-        queryFn: async (): Promise<number> => {
-            if (grunnlagspakkeid) {
-                return grunnlagspakkeid;
-            }
-            const { data: grunnlagspakkeId } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.opprettNyGrunnlagspakke({
-                formaal: "FORSKUDD",
-            });
-            await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, { grunnlagspakkeId });
-            return grunnlagspakkeId;
-        },
+export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
+    const behandling = useGetBehandling();
+    const { sivilstandListe } = useGrunnlag();
+
+    const { data: beregnet } = useSuspenseQuery({
+        queryKey: QueryKeys.sivilstandBeregning(behandling.id, behandling.virkningstidspunkt.virkningstidspunkt),
+        queryFn: async () => (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data,
         staleTime: Infinity,
     });
-
-    return grunnlagspakkeId;
+    return beregnet ?? { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
 };
 
-export const useGrunnlagspakke = (): HentGrunnlagspakkeDto | null => {
+export const useGrunnlag = (): HentGrunnlagDto | null => {
     const behandling = useGetBehandling();
     const grunnlagRequest = createGrunnlagRequest(behandling);
-    const grunnlagspakkeId = useGetGrunnlagspakkeId();
-    const { isSuccess: updateIsSuccess } = useSuspenseQuery({
-        queryKey: QueryKeys.grunnlagspakkeUpdate(grunnlagspakkeId),
-        queryFn: async (): Promise<OppdaterGrunnlagspakkeDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.oppdaterGrunnlagspakke(
-                grunnlagspakkeId,
-                grunnlagRequest
-            );
-            return data;
-        },
-        staleTime: Infinity,
-    });
 
     const { data: grunnlagspakke } = useSuspenseQuery({
-        queryKey: QueryKeys.grunnlagspakke(grunnlagspakkeId),
-        queryFn: async (): Promise<HentGrunnlagspakkeDto> => {
-            if (!updateIsSuccess) return null;
-            const { data } = await BIDRAG_GRUNNLAG_API.grunnlagspakke.hentGrunnlagspakke(grunnlagspakkeId);
+        queryKey: QueryKeys.grunnlag(),
+        queryFn: async (): Promise<HentGrunnlagDto> => {
+            const { data } = await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(grunnlagRequest);
             return data;
         },
         staleTime: Infinity,
@@ -404,31 +353,12 @@ export const useGrunnlagspakke = (): HentGrunnlagspakkeDto | null => {
     return grunnlagspakke;
 };
 
-export const useHentArbeidsforhold = (): HentGrunnlagDto | null => {
-    const behandling = useGetBehandling();
-    const grunnlagspakkeId = useGetGrunnlagspakkeId();
-    const today = new Date();
-    const arbeidsforholdRequest: HentGrunnlagRequestDto = {
-        formaal: "FORSKUDD",
-        grunnlagRequestDtoListe: behandling.roller
-            .filter((rolle) => [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype))
-            .map((rolle) => ({
-                type: GrunnlagRequestType.ARBEIDSFORHOLD,
-                personId: rolle.ident,
-                periodeFra: behandling.søktFomDato,
-                periodeTil: toISODateString(today),
-            })),
-    };
-    const { data: arbeidsforhold } = useSuspenseQuery({
-        queryKey: QueryKeys.arbeidsforhold(grunnlagspakkeId),
-        queryFn: async (): Promise<HentGrunnlagDto> =>
-            (await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(arbeidsforholdRequest)).data,
-        staleTime: Infinity,
-    });
-    return arbeidsforhold;
+export const useHentArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
+    const grunnlag = useGrunnlag();
+    return grunnlag?.arbeidsforholdListe ?? [];
 };
 
-export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagspakkeDto) => {
+export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagDto) => {
     const requests = createBidragIncomeRequest(behandling, grunnlagspakke);
 
     return useQueries({

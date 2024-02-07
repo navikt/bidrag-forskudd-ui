@@ -10,8 +10,8 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import {
     ArbeidsforholdGrunnlagDto,
-    HentGrunnlagspakkeDto,
-    UtvidetBarnetrygdOgSmaabarnstilleggDto,
+    HentGrunnlagDto,
+    UtvidetBarnetrygdGrunnlagDto,
 } from "../../../api/BidragGrunnlagApi";
 import { SummertArsinntekt, TransformerInntekterResponse } from "../../../api/BidragInntektApi";
 import {
@@ -45,12 +45,14 @@ export const createInntektPayload = (values: InntektFormValues): OppdaterBehandl
         utvidetbarnetrygd: values.utvidetbarnetrygd.length
             ? values.utvidetbarnetrygd.map((utvidetbarnetrygd) => ({
                   ...utvidetbarnetrygd,
+                  datoFom: utvidetbarnetrygd.datoFom!,
                   beløp: Number(utvidetbarnetrygd.beløp),
               }))
             : [],
         barnetillegg: values.barnetillegg.length
             ? values.barnetillegg.map((barnetillegg) => ({
                   ...barnetillegg,
+                  datoFom: barnetillegg.datoFom!,
                   ident: barnetillegg.ident,
                   gjelderBarn: barnetillegg.ident,
                   barnetillegg: Number(barnetillegg.barnetillegg),
@@ -114,7 +116,7 @@ export const createInitialValues = (
     bmOgBarn: RolleDto[],
     bidragInntekt: { ident: string; data: TransformerInntekterResponse }[],
     inntekter: InntekterDto,
-    grunnlagspakke: HentGrunnlagspakkeDto
+    grunnlag: HentGrunnlagDto
 ): InntektFormValues => {
     return {
         inntekteneSomLeggesTilGrunn: inntekter?.inntekter.length
@@ -122,17 +124,17 @@ export const createInitialValues = (
             : getPerioderFraBidragInntekt(bidragInntekt),
         utvidetbarnetrygd: inntekter?.utvidetbarnetrygd?.length
             ? inntekter.utvidetbarnetrygd
-            : grunnlagspakke.ubstListe.map((ubst) => ({
+            : grunnlag.utvidetBarnetrygdListe.map((ubst) => ({
                   deltBosted: false,
-                  beløp: ubst.belop,
+                  beløp: ubst.beløp,
                   datoFom: ubst.periodeFra,
                   datoTom: ubst.periodeTil,
               })),
         barnetillegg: inntekter?.barnetillegg?.length
             ? inntekter.barnetillegg
-            : grunnlagspakke.barnetilleggListe.map((periode) => ({
+            : grunnlag.barnetilleggListe.map((periode) => ({
                   ident: periode.barnPersonId,
-                  barnetillegg: periode.belopBrutto,
+                  barnetillegg: periode.beløpBrutto,
                   datoFom: periode.periodeFra,
                   datoTom: periode.periodeTil,
               })),
@@ -363,7 +365,7 @@ export const getOverlappingInntektPerioder = (perioder) => {
 
 export interface InntektOpplysninger {
     inntekt: { ident: string; summertAarsinntektListe: SummertArsinntekt[] }[];
-    utvidetbarnetrygd: UtvidetBarnetrygdOgSmaabarnstilleggDto[];
+    utvidetbarnetrygd: UtvidetBarnetrygdGrunnlagDto[];
     barnetillegg: BarnetilleggDto[];
 }
 
@@ -464,7 +466,7 @@ export const compareOpplysninger = (
             const utvidetbarnetrygdInLatestOpplysninger = latestOpplysninger.utvidetbarnetrygd[index];
 
             if (utvidetbarnetrygdInLatestOpplysninger) {
-                if (utvidetbarnetrygd.belop !== utvidetbarnetrygdInLatestOpplysninger.belop) {
+                if (utvidetbarnetrygd.beløp !== utvidetbarnetrygdInLatestOpplysninger.beløp) {
                     changedLog.push(`Beløp for en eller flere perioder har blitt endret`);
                 }
             }

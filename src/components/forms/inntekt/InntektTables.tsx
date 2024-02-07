@@ -76,13 +76,13 @@ const Detaljer = ({ totalt }) => {
 const Totalt = ({ item, index, ident }) =>
     item.fraGrunnlag ? (
         <div className="flex items-center gap-x-4">
-            <BodyShort className="min-w-[80px] flex justify-end">{item.belop}</BodyShort>
-            <Detaljer totalt={item.belop} />
+            <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
+            <Detaljer totalt={item.beløp} />
         </div>
     ) : (
         <div className="w-[120px]">
             <FormControlledTextField
-                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
+                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beløp`}
                 label="Totalt"
                 type="number"
                 min="1"
@@ -116,7 +116,7 @@ const Periode = ({ item, index, ident, datepicker }) => {
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const {
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandling();
     const {
         control,
@@ -263,7 +263,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     ident={ident}
                                 />,
                                 <Totalt
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
+                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beløp`}
                                     item={item}
                                     index={index}
                                     ident={ident}
