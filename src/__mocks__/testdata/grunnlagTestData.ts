@@ -361,6 +361,11 @@ export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: Behandlin
         sivilstandListe: [
             {
                 personId: "02487731725",
+                gyldigFom: "2001-08-27",
+                type: SivilstandskodePDL.ENKE_ELLER_ENKEMANN,
+            },
+            {
+                personId: "02487731725",
                 gyldigFom: "1966-08-27",
                 type: SivilstandskodePDL.UGIFT,
             },

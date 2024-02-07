@@ -350,14 +350,15 @@ const Opplysninger = () => {
     const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
 
     const sivilstandsOpplysningerFiltrert = () => {
-        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
-            return sivilstandOpplysninger;
-        }
         const opplysningerSortert = sivilstandOpplysninger.sort((a, b) => {
             if (a.gyldigFom == null) return -1;
             if (b.gyldigFom == null) return 1;
-            return new Date(a.gyldigFom) > new Date(b.gyldigFom) ? 1 : -1;
+            return dateOrNull(a.gyldigFom) > dateOrNull(b.gyldigFom) ? 1 : -1;
         });
+        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
+            return opplysningerSortert;
+        }
+
         const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
             virkingstidspunkt == null || new Date(sivilstand.gyldigFom) <= virkingstidspunkt;
         });
@@ -382,7 +383,7 @@ const Opplysninger = () => {
                             <Table.DataCell className="flex justify-start gap-2">
                                 <>{DateToDDMMYYYYString(new Date(periode.gyldigFom))}</>
                             </Table.DataCell>
-                            <Table.DataCell>{capitalize(periode.type)}</Table.DataCell>
+                            <Table.DataCell>{capitalize(periode.type)?.replaceAll("_", " ")}</Table.DataCell>
                         </Table.Row>
                     ))}
                 </Table.Body>
