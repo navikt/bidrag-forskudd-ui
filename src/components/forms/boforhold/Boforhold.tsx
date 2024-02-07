@@ -89,6 +89,7 @@ import {
     getFirstDayOfMonthAfterEighteenYears,
     isOver18YearsOld,
     mapHusstandsMedlemmerToBarn,
+    mapSivilstandProsessert,
     removeAndEditPeriods,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
@@ -317,15 +318,7 @@ const BoforholdsForm = () => {
                 virkningsOrSoktFraDato,
                 barnMedISaken
             ),
-            sivilstand: sivilstandProssesert.sivilstandListe.map((v) => ({
-                kilde: Kilde.OFFENTLIG,
-                // @ts-ignore
-                datoFom: v.periodeFom,
-                // @ts-ignore
-                datoTom: v.periodeTom,
-                // @ts-ignore
-                sivilstand: v.sivilstandskode,
-            })),
+            sivilstand: mapSivilstandProsessert(sivilstandProssesert.sivilstandListe),
         };
 
         useFormMethods.reset(values);

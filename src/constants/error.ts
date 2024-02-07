@@ -3,8 +3,7 @@ export const PERSON_IKKE_FINNES = "Kunne ikke hente person med ident: {}";
 export const GRUNNLAG_BRUKT = "{} fra {} er allerede lagt til grunn.";
 
 export const boforholdPeriodiseringErros = {
-    kunneIkkeBeregneSivilstandPerioder:
-        "Kunne ikke beregne sivilstand perioder på grunn av logisk feil i data fra folkeregisteret.",
+    kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
     ingenLoependePeriode: "Det er ingen løpende status i beregningen.",
     framoverPeriodisering: "Det kan ikke periodiseres fremover i tid.",
     hullIPerioder:
