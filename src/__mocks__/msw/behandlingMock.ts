@@ -18,11 +18,15 @@ export function behandlingMock(): RestHandler[] {
         rest.post(
             `${environment.url.bidragBehandling}/api/v2/databehandler/v2/sivilstand/:behandlingId`,
             (req, res, ctx) => {
+                const behandling = JSON.parse(
+                    localStorage.getItem(`behandling-${req.params.behandlingId}`)
+                ) as BehandlingDto;
+                const virkningstidspunkt = behandling?.virkningstidspunkt?.virkningstidspunkt;
                 const data: SivilstandBeregnet = {
                     status: SivilstandBeregnetStatusEnum.OK,
                     sivilstandListe: [
                         {
-                            periodeFom: "2022-01-01",
+                            periodeFom: virkningstidspunkt?.length > 0 ? virkningstidspunkt : "2022-01-01",
                             sivilstandskode: Sivilstandskode.BOR_ALENE_MED_BARN,
                         },
                     ] as SivilstandBeregnetInnhold[],
@@ -33,7 +37,13 @@ export function behandlingMock(): RestHandler[] {
         rest.get(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, (req, res, ctx) => {
             if (!localStorage.getItem(`behandling-${req.params.behandlingId}`)) {
                 localStorage.setItem(`behandlingId`, req.params.behandlingId.toString());
-                localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(behandlingMockApiData));
+                localStorage.setItem(
+                    `behandling-${req.params.behandlingId}`,
+                    JSON.stringify({
+                        ...behandlingMockApiData,
+                        id: req.params.behandlingId,
+                    })
+                );
             }
             return res(
                 ctx.set("Content-Type", "application/json"),
@@ -64,6 +74,7 @@ export function behandlingMock(): RestHandler[] {
                     årsak: oppdater?.virkningstidspunkt?.årsak,
                     avslag: oppdater?.virkningstidspunkt?.avslag,
                 },
+                id: req.params.behandlingId,
             };
             // @ts-ignore
             delete updatedBehandling.grunnlagspakkeId;
