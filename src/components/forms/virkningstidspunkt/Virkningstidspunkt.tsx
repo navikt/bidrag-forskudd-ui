@@ -13,7 +13,6 @@ import {
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { Avslag } from "../../../enum/Avslag";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -34,7 +33,6 @@ import {
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 const årsakListe = [
-    TypeArsakstype.ANNET,
     TypeArsakstype.ENDRING3MANEDERTILBAKE,
     TypeArsakstype.ENDRING3ARSREGELEN,
     TypeArsakstype.FRABARNETSFODSEL,
@@ -205,9 +203,11 @@ const Main = ({ initialValues, error }) => {
 const Side = () => {
     const { setActiveStep } = useForskudd();
     const useFormMethods = useFormContext();
-    const aarsak = useFormMethods.getValues("årsak");
+    const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
-        setActiveStep(Avslag[aarsak] ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
+        setActiveStep(
+            avslagsListe.includes(årsakAvslag) ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]
+        );
 
     return (
         <>

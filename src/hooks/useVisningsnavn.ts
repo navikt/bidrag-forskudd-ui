@@ -11,7 +11,6 @@ export default function useVisningsnavn() {
     const { data: visningsnavnMap } = useGetVisningsnavn();
 
     const toVisningsnavn = (kode: string) => {
-        console.log("KODE", kode);
         return visningsnavnMap.data[kode] ?? "MANGLER_VISNINGSNAVN";
     };
     const toVisningsnavnInntekt = (kode: string, årstall?: number) => {
