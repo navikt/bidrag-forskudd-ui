@@ -23,7 +23,7 @@ export function behandlingMock(): RestHandler[] {
                 ) as BehandlingDto;
                 const virkningstidspunkt = behandling?.virkningstidspunkt?.virkningstidspunkt;
                 const data: SivilstandBeregnet = {
-                    status: SivilstandBeregnetStatusEnum.ALLE_FOREKOMSTER_ER_HISTORISKE,
+                    status: SivilstandBeregnetStatusEnum.OK,
                     sivilstandListe: [
                         {
                             periodeFom: virkningstidspunkt?.length > 0 ? virkningstidspunkt : "2022-01-01",
