@@ -20,7 +20,7 @@ import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
-import { BoforholdFormValues } from "../../../types/boforholdFormValues";
+import { BoforholdFormValues, resetTilOpplysningerTekst } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -228,7 +228,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             className="w-fit"
                             onClick={resetTilDataFraFreg}
                         >
-                            Reset til data fra FREG
+                            {resetTilOpplysningerTekst}
                         </Button>
                     </div>
                 )}
@@ -360,7 +360,7 @@ const Opplysninger = () => {
         }
 
         const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
-            virkingstidspunkt == null || new Date(sivilstand.gyldigFom) <= virkingstidspunkt;
+            return virkingstidspunkt == null || dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt;
         });
 
         if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
@@ -381,7 +381,7 @@ const Opplysninger = () => {
                     {sivilstandsOpplysningerFiltrert().map((periode, index) => (
                         <Table.Row key={`${periode.type}-${index}`}>
                             <Table.DataCell className="flex justify-start gap-2">
-                                <>{DateToDDMMYYYYString(new Date(periode.gyldigFom))}</>
+                                <>{periode.gyldigFom ? DateToDDMMYYYYString(new Date(periode.gyldigFom)) : "\u00A0"}</>
                             </Table.DataCell>
                             <Table.DataCell>{capitalize(periode.type)?.replaceAll("_", " ")}</Table.DataCell>
                         </Table.Row>

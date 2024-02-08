@@ -48,6 +48,7 @@ import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
     ParsedBoforholdOpplysninger,
+    resetTilOpplysningerTekst,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
     SivilstandBeregnetInnhold,
@@ -922,7 +923,7 @@ const Perioder = ({
                         className="w-fit"
                         onClick={resetTilDataFraFreg}
                     >
-                        Reset til data fra FREG
+                        {resetTilOpplysningerTekst}
                     </Button>
                 </div>
             )}

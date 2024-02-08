@@ -276,7 +276,7 @@ const createSkattegrunnlagListe = (bmIdent, barn): SkattegrunnlagGrunnlagDto[] =
             .flat()
     );
 
-export const createGrunnlagspakkeData = (grunnlagspakkeId, behandling: BehandlingDto): HentGrunnlagDto => {
+export const createGrunnlagsdata = (behandling: BehandlingDto): HentGrunnlagDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = toISODateString(new Date());

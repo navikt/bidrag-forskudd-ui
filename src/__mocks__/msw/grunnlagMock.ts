@@ -1,7 +1,7 @@
 import { rest, RestHandler, RestRequest } from "msw";
 
 import environment from "../../environment";
-import { createGrunnlagspakkeData } from "../testdata/grunnlagTestData";
+import { createGrunnlagsdata } from "../testdata/grunnlagTestData";
 
 export default function grunnlagMock(): RestHandler[] {
     const baseUrl = environment.url.bidragGrunnlag;
@@ -10,10 +10,7 @@ export default function grunnlagMock(): RestHandler[] {
             if (!localStorage.getItem(`behandling-grunnlag`)) {
                 const behandlingId = localStorage.getItem("behandlingId");
                 const behandling = JSON.parse(localStorage.getItem(`behandling-${behandlingId}`));
-                localStorage.setItem(
-                    `behandling-grunnlag`,
-                    JSON.stringify(createGrunnlagspakkeData(req.params.grunnlagspakkeId, behandling))
-                );
+                localStorage.setItem(`behandling-grunnlag`, JSON.stringify(createGrunnlagsdata(behandling)));
             }
             return res(
                 ctx.set("Content-Type", "application/json"),
