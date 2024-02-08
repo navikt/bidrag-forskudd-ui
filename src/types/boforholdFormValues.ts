@@ -7,6 +7,7 @@ import {
     Sivilstandskode,
 } from "../api/BidragBehandlingApiV1";
 
+export const resetTilOpplysningerTekst = "Reset til opplysninger fra offentlig register";
 export interface SivilstandBeregnetInnhold {
     periodeFom?: string;
     periodeTom?: string;
