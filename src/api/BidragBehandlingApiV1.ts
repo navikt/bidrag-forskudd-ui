@@ -32,38 +32,6 @@ export enum Engangsbeloptype {
     TILBAKEKREVING = "TILBAKEKREVING",
 }
 
-export enum ForskuddAarsakType {
-    SF = "SF",
-    NF = "NF",
-    OF = "OF",
-    AF = "AF",
-    CF = "CF",
-    DF = "DF",
-    LF = "LF",
-    GF = "GF",
-    HF = "HF",
-    BF = "BF",
-    KF = "KF",
-    PA = "PA",
-    QF = "QF",
-    MF = "MF",
-    PF = "PF",
-    EF = "EF",
-    FF = "FF",
-    ANNET_AVSLAG = "ANNET_AVSLAG",
-    PGA_BARNEPENSJ = "PGA_BARNEPENSJ",
-    BARNS_EKTESKAP = "BARNS_EKTESKAP",
-    BARNS_INNTEKT = "BARNS_INNTEKT",
-    PGA_YTELSE_FTRL = "PGA_YTELSE_FTRL",
-    FULLT_UNDERH_OFF = "FULLT_UNDERH_OFF",
-    IKKE_OMSORG = "IKKE_OMSORG",
-    IKKE_OPPH_I_RIKET = "IKKE_OPPH_I_RIKET",
-    MANGL_DOK = "MANGL_DOK",
-    PGA_SAMMENFL = "PGA_SAMMENFL",
-    OPPH_UTLAND = "OPPH_UTLAND",
-    UTENL_YTELSE = "UTENL_YTELSE",
-}
-
 export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -196,6 +164,26 @@ export enum Vedtakstype {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
+export enum TypeArsakstype {
+    ANNET = "ANNET",
+    ENDRING3MANEDERTILBAKE = "ENDRING_3_MÅNEDER_TILBAKE",
+    ENDRING3ARSREGELEN = "ENDRING_3_ÅRS_REGELEN",
+    FRABARNETSFODSEL = "FRA_BARNETS_FØDSEL",
+    FRABARNETSFLYTTEMANED = "FRA_BARNETS_FLYTTEMÅNED",
+    FRA_KRAVFREMSETTELSE = "FRA_KRAVFREMSETTELSE",
+    FRAMANEDETTERINNTEKTENOKTE = "FRA_MÅNED_ETTER_INNTEKTEN_ØKTE",
+    FRA_OPPHOLDSTILLATELSE = "FRA_OPPHOLDSTILLATELSE",
+    FRASOKNADSTIDSPUNKT = "FRA_SØKNADSTIDSPUNKT",
+    FRA_SAMLIVSBRUDD = "FRA_SAMLIVSBRUDD",
+    FRASAMMEMANEDSOMINNTEKTENBLEREDUSERT = "FRA_SAMME_MÅNED_SOM_INNTEKTEN_BLE_REDUSERT",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    REVURDERINGMANEDENETTER = "REVURDERING_MÅNEDEN_ETTER",
+    SOKNADSTIDSPUNKTENDRING = "SØKNADSTIDSPUNKT_ENDRING",
+    TIDLIGERE_FEILAKTIG_AVSLAG = "TIDLIGERE_FEILAKTIG_AVSLAG",
+    TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
+    TREARSREGELEN = "TRE_ÅRS_REGELEN",
+}
+
 export enum OpplysningerType {
     INNTEKT_BEARBEIDET = "INNTEKT_BEARBEIDET",
     BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
@@ -284,7 +272,7 @@ export interface InntektspostDtoV2 {
 export interface OppdaterBehandlingRequestV2 {
     /** @format int64 */
     grunnlagspakkeId?: number;
-    /** @format int64 */
+    /** @format int32 */
     vedtaksid?: number;
     virkningstidspunkt?: OppdaterVirkningstidspunkt;
     /**
@@ -326,7 +314,7 @@ export interface OppdaterNotat {
 }
 
 export interface OppdaterVirkningstidspunkt {
-    årsak?: ForskuddAarsakType;
+    årsak?: TypeArsakstype;
     /**
      * Oppdater virkningsdato. Hvis verdien er satt til null vil virkningsdato bli slettet. Hvis verdien er satt til tom verdi eller ikke er satt vil det ikke bli gjort noe endringer
      * @format date
@@ -420,6 +408,18 @@ export interface GrunnlagsdataDto {
 
 export interface InntekterDtoV2 {
     /** @uniqueItems true */
+    barnetillegg: InntektDtoV2[];
+    /** @uniqueItems true */
+    barnetilsyn: InntektDtoV2[];
+    /** @uniqueItems true */
+    kontantstøtte: InntektDtoV2[];
+    /** @uniqueItems true */
+    månedsinntekter: InntektDtoV2[];
+    /** @uniqueItems true */
+    småbarnstillegg: InntektDtoV2[];
+    /** @uniqueItems true */
+    årsinntekter: InntektDtoV2[];
+    /** @uniqueItems true */
     inntekter: InntektDtoV2[];
     notat: BehandlingNotatDto;
 }
@@ -437,7 +437,7 @@ export interface RolleDto {
 export interface VirkningstidspunktDto {
     /** @format date */
     virkningsdato?: string;
-    årsak?: ForskuddAarsakType;
+    årsak?: TypeArsakstype;
     notat: BehandlingNotatDto;
 }
 
@@ -496,7 +496,7 @@ export interface InntektPost {
      */
     visningsnavn: string;
     /**
-     * Beløp som utgør inntektsposten
+     * Beløp som utgjør inntektsposten
      * @example 60000
      */
     beløp: number;
@@ -720,25 +720,24 @@ export interface BeregnetForskuddResultat {
     /** Periodisert liste over resultat av forskuddsberegning */
     beregnetForskuddPeriodeListe: ResultatPeriode[];
     /** Liste over grunnlag brukt i beregning */
-    grunnlagListe: Grunnlag[];
+    grunnlagListe: GrunnlagDto[];
 }
 
 /** Grunnlag */
-export interface Grunnlag {
+export interface GrunnlagDto {
     /** Referanse (unikt navn på grunnlaget) */
-    referanse?: string;
+    referanse: string;
     /** Grunnlagstype */
-    type?: Grunnlagstype;
-    /** Liste over grunnlagsreferanser */
-    grunnlagsreferanseListe?: string[];
+    type: Grunnlagstype;
     /** Grunnlagsinnhold (generisk) */
-    innhold?: JsonNode;
+    innhold: JsonNode;
+    /** Liste over grunnlagsreferanser */
+    grunnlagsreferanseListe: string[];
 }
 
 /** Grunnlagstype */
 export enum Grunnlagstype {
     SAeRFRADRAG = "SÆRFRADRAG",
-    SOKNADSBARNINFO = "SØKNADSBARN_INFO",
     SKATTEKLASSE = "SKATTEKLASSE",
     BARN_I_HUSSTAND = "BARN_I_HUSSTAND",
     BOSTATUS = "BOSTATUS",
@@ -770,21 +769,34 @@ export enum Grunnlagstype {
     BPSANDELSAeRTILSKUDD = "BPS_ANDEL_SÆRTILSKUDD",
     MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
     GEBYRFRITAK = "GEBYRFRITAK",
-    SOKNADINFO = "SØKNAD_INFO",
-    BARN_INFO = "BARN_INFO",
-    PERSON_INFO = "PERSON_INFO",
-    SAKSBEHANDLER_INFO = "SAKSBEHANDLER_INFO",
-    VEDTAK_INFO = "VEDTAK_INFO",
     INNBETALTBELOP = "INNBETALT_BELØP",
     FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
     SLUTTBEREGNING_BBM = "SLUTTBEREGNING_BBM",
     KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
-    PERSON = "PERSON",
     BOSTATUS_PERIODE = "BOSTATUS_PERIODE",
-    BEREGNING_INNTEKT_RAPPORTERING_PERIODE = "BEREGNING_INNTEKT_RAPPORTERING_PERIODE",
+    SOKNAD = "SØKNAD",
     SIVILSTAND_PERIODE = "SIVILSTAND_PERIODE",
-    VIRKNINGSDATO = "VIRKNINGSDATO",
+    VIRKNINGSTIDSPUNKT = "VIRKNINGSTIDSPUNKT",
     NOTAT = "NOTAT",
+    PERSON = "PERSON",
+    PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
+    PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
+    PERSON_REELL_MOTTAKER = "PERSON_REELL_MOTTAKER",
+    PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
+    PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
+    INNTEKT_RAPPORTERING_PERIODE = "INNTEKT_RAPPORTERING_PERIODE",
+    BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
+    INNHENTET_HUSSTANDSMEDLEM_PERIODE = "INNHENTET_HUSSTANDSMEDLEM_PERIODE",
+    INNHENTET_SIVILSTAND_PERIODE = "INNHENTET_SIVILSTAND_PERIODE",
+    INNHENTET_ARBEIDSFORHOLD_PERIODE = "INNHENTET_ARBEIDSFORHOLD_PERIODE",
+    INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
+    INNHENTET_INNTEKT_AORDNING_PERIODE = "INNHENTET_INNTEKT_AORDNING_PERIODE",
+    INNHENTET_INNTEKT_BARNETILLEGG_PERIODE = "INNHENTET_INNTEKT_BARNETILLEGG_PERIODE",
+    INNHENTETINNTEKTKONTANTSTOTTEPERIODE = "INNHENTET_INNTEKT_KONTANTSTØTTE_PERIODE",
+    INNHENTET_INNTEKT_AINNTEKT_PERIODE = "INNHENTET_INNTEKT_AINNTEKT_PERIODE",
+    INNHENTET_INNTEKT_BARNETILSYN_PERIODE = "INNHENTET_INNTEKT_BARNETILSYN_PERIODE",
+    INNHENTETINNTEKTSMABARNSTILLEGGPERIODE = "INNHENTET_INNTEKT_SMÅBARNSTILLEGG_PERIODE",
+    INNHENTET_INNTEKT_UTVIDETBARNETRYGD_PERIODE = "INNHENTET_INNTEKT_UTVIDETBARNETRYGD_PERIODE",
 }
 
 /** Grunnlagsinnhold (generisk) */
@@ -1021,11 +1033,39 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
 
 /** Resultat kode */
 export enum ResultatBeregningKodeEnum {
-    AVSLAG = "AVSLAG",
+    BARNETERSELVFORSORGET = "BARNET_ER_SELVFORSØRGET",
+    BEGRENSETEVNEFLERESAKERUTFORFORHOLDSMESSIGFORDELING = "BEGRENSET_EVNE_FLERE_SAKER_UTFØR_FORHOLDSMESSIG_FORDELING",
+    BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
+    BIDRAG_IKKE_BEREGNET_DELT_BOSTED = "BIDRAG_IKKE_BEREGNET_DELT_BOSTED",
+    BIDRAG_REDUSERT_AV_EVNE = "BIDRAG_REDUSERT_AV_EVNE",
+    BIDRAGREDUSERTTIL25PROSENTAVINNTEKT = "BIDRAG_REDUSERT_TIL_25_PROSENT_AV_INNTEKT",
+    BIDRAG_SATT_TIL_BARNETILLEGG_BP = "BIDRAG_SATT_TIL_BARNETILLEGG_BP",
+    BIDRAG_SATT_TIL_BARNETILLEGG_FORSVARET = "BIDRAG_SATT_TIL_BARNETILLEGG_FORSVARET",
+    BIDRAG_SATT_TIL_UNDERHOLDSKOSTNAD_MINUS_BARNETILLEGG_BM = "BIDRAG_SATT_TIL_UNDERHOLDSKOSTNAD_MINUS_BARNETILLEGG_BM",
+    DELT_BOSTED = "DELT_BOSTED",
+    FORHOLDSMESSIGFORDELINGBIDRAGSBELOPENDRET = "FORHOLDSMESSIG_FORDELING_BIDRAGSBELØP_ENDRET",
+    FORHOLDSMESSIG_FORDELING_INGEN_ENDRING = "FORHOLDSMESSIG_FORDELING_INGEN_ENDRING",
+    INGEN_EVNE = "INGEN_EVNE",
+    KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
     REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
+    SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
+    SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
+    AVSLAG = "AVSLAG",
+    AVSLAG2 = "AVSLAG2",
+    PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
+    BARNETS_EKTESKAP = "BARNETS_EKTESKAP",
+    BARNETS_INNTEKT = "BARNETS_INNTEKT",
+    PAGRUNNAVYTELSEFRAFOLKETRYGDEN = "PÅ_GRUNN_AV_YTELSE_FRA_FOLKETRYGDEN",
+    FULLT_UNDERHOLDT_AV_OFFENTLIG = "FULLT_UNDERHOLDT_AV_OFFENTLIG",
+    IKKE_OMSORG = "IKKE_OMSORG",
+    IKKE_OPPHOLD_I_RIKET = "IKKE_OPPHOLD_I_RIKET",
+    MANGLENDE_DOKUMENTASJON = "MANGLENDE_DOKUMENTASJON",
+    PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
+    OPPHOLD_I_UTLANDET = "OPPHOLD_I_UTLANDET",
+    UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
 }
 
 export enum VirkningstidspunktMonthEnum {
@@ -1330,6 +1370,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Beregn forskudd
          *
+         * @tags vedtak-controller
+         * @name FatteVedtak
+         * @request POST:/api/v1/behandling/{behandlingsid}/vedtak
+         * @secure
+         */
+        fatteVedtak: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<number, any>({
+                path: `/api/v1/behandling/${behandlingsid}/vedtak`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
          * @tags behandling-beregn-forskudd-controller
          * @name BeregnForskudd
          * @request POST:/api/v1/behandling/{behandlingsid}/beregn
@@ -1398,6 +1455,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Omgjør vedtak til en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name OmgjorVedtakTilBehandling
+         * @request GET:/api/v2/behandling/vedtak/{vedtakId}
+         * @secure
+         */
+        omgjorVedtakTilBehandling: (vedtakId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDtoV2, BehandlingDtoV2>({
+                path: `/api/v2/behandling/vedtak/${vedtakId}`,
+                method: "GET",
+                secure: true,
                 format: "json",
                 ...params,
             }),

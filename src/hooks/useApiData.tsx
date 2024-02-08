@@ -17,6 +17,7 @@ import {
     BehandlingDtoV2,
     GrunnlagsdataDto,
     OppdaterBehandlingRequest,
+    OppdaterBehandlingRequestV2,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -45,6 +46,7 @@ import { deductMonths, toISODateString } from "../utils/date-utils";
 import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
+    oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
     updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
@@ -89,6 +91,14 @@ export const useOppdaterBehandling = () => {
     return { mutation, error: mutation.isError };
 };
 
+export const useOppdaterBehandlingV2 = () => {
+    const { behandlingId } = useForskudd();
+
+    const mutation = oppdaterBehandlingMutationV2(behandlingId);
+
+    return { mutation, error: mutation.isError };
+};
+
 export const oppdaterBehandlingMutation = (behandlingId: number) => {
     const queryClient = useQueryClient();
 
@@ -96,6 +106,25 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
         mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onSuccess: (data) => {
+            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
+        },
+        onError: (error) => {
+            console.log("onError", error);
+        },
+    });
+};
+
+export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterBehandlingV2(behandlingId),
+        mutationFn: async (payload: OppdaterBehandlingRequestV2): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, payload);
             return data;
         },
         networkMode: "always",

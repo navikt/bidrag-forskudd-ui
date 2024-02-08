@@ -1,13 +1,11 @@
 import { useFormContext } from "react-hook-form";
 
 import { createInntektPayload } from "../components/forms/helpers/inntektFormHelpers";
-import { useForskudd } from "../context/ForskuddContext";
 import { InntektFormValues } from "../types/inntektFormValues";
-import { useUpdateInntekter } from "./useApiData";
+import { useOppdaterBehandling } from "./useApiData";
 
 export const useOnSaveInntekt = () => {
-    const { behandlingId } = useForskudd();
-    const updateInntekter = useUpdateInntekter(behandlingId);
+    const updateInntekter = useOppdaterBehandling();
     const { reset } = useFormContext<InntektFormValues>();
     return (values: InntektFormValues) => {
         updateInntekter.mutation.mutate(createInntektPayload(values), {

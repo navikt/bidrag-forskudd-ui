@@ -1,48 +1,27 @@
-import { isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { isValidDate } from "@navikt/bidrag-ui-common";
 
 import {
-    InntektDto,
+    InntektDtoV2,
     InntekterDtoV2,
     Inntektsrapportering,
-    OppdaterBehandlingRequest,
+    OppdaterBehandlingRequestV2,
     RolleDto,
 } from "../../../api/BidragBehandlingApiV1";
 import { perioderSomIkkeKanOverlape, perioderSomKanIkkeOverlapeKunMedHverandre } from "../../../constants/inntektene";
-import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
-import { isAfterDate, toISODateString } from "../../../utils/date-utils";
+import { InntektFormValues } from "../../../types/inntektFormValues";
+import { isAfterDate } from "../../../utils/date-utils";
 
-export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequest => ({
+const mapToConvertedDates = (inntekt) => ({
+    ...inntekt,
+    datoTom: inntekt.datoTom ?? null,
+});
+export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequestV2 => ({
     inntekter: {
-        inntekter: Object.entries(values.inntekteneSomLeggesTilGrunn)
-            .map(([key, value]) =>
-                value.map((inntekt) => {
-                    return {
-                        ...inntekt,
-                        inntektstype:
-                            inntekt.inntektstype === "" ? null : (inntekt.inntektstype as Inntektsrapportering),
-                        ident: key,
-                        beløp: Number(inntekt.beløp),
-                        inntektPostListe: inntekt.inntektsposter,
-                        datoFom: toISODateString(new Date(inntekt.datoFom)),
-                        datoTom: inntekt.datoTom ? toISODateString(new Date(inntekt.datoTom)) : null,
-                    };
-                })
-            )
-            .flat(),
-        utvidetbarnetrygd: values.utvidetbarnetrygd.length
-            ? values.utvidetbarnetrygd.map((utvidetbarnetrygd) => ({
-                  ...utvidetbarnetrygd,
-                  beløp: Number(utvidetbarnetrygd.beløp),
-              }))
-            : [],
-        barnetillegg: values.barnetillegg.length
-            ? values.barnetillegg.map((barnetillegg) => ({
-                  ...barnetillegg,
-                  ident: barnetillegg.ident,
-                  gjelderBarn: barnetillegg.ident,
-                  barnetillegg: Number(barnetillegg.barnetillegg),
-              }))
-            : [],
+        inntekter: Object.entries(values.årsinntekter)
+            .map(([, value]) => value.map(mapToConvertedDates))
+            .flat()
+            .concat(values.barnetilsyn.length ? values.barnetilsyn.map(mapToConvertedDates) : [])
+            .concat(values.barnetillegg.length ? values.barnetillegg.map(mapToConvertedDates) : []),
         notat: {
             medIVedtaket: values.notat?.medIVedtaket,
             kunINotat: values.notat?.kunINotat,
@@ -56,60 +35,23 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
 });
 
 const mapInntekterToRolle =
-    (inntekter: InntektDto[]) =>
-    (rolle): Inntekt[] =>
+    (inntekter: InntektDtoV2[]) =>
+    (rolle): InntektDtoV2[] =>
         inntekter
-            .filter((inntekt) => inntekt.ident === rolle.ident)
-            .map((inntekt) => ({
-                ...inntekt,
-                inntektstype: inntekt.inntektstype ?? "",
-                datoFom: inntekt.datoFom ?? null,
-                datoTom: inntekt.datoTom ?? null,
-            }))
+            ?.filter((inntekt) => inntekt.ident === rolle.ident)
+            .map(mapToConvertedDates)
             .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
-export const getPerioderFraInntekter = (bmOgBarn: RolleDto[], inntekter: InntektDto[]) =>
+export const getPerioderFraInntekter = (bmOgBarn: RolleDto[], inntekter: InntektDtoV2[]) =>
     bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
-
-export const getPerioderFraBidragInntekt = (bidragInntekt: InntektTransformed[]) =>
-    bidragInntekt.reduce(
-        (acc, curr) => ({
-            ...acc,
-            [curr.ident]: curr.data.summertÅrsinntektListe
-                .filter(
-                    (inntekt) =>
-                        ![
-                            Inntektsrapportering.KONTANTSTOTTE,
-                            Inntektsrapportering.SMABARNSTILLEGG,
-                            Inntektsrapportering.UTVIDET_BARNETRYGD,
-                        ].includes(inntekt.inntektRapportering)
-                )
-                .map((inntekt) => {
-                    return {
-                        taMed: false,
-                        inntektBeskrivelse: inntekt.visningsnavn,
-                        inntektstype: inntekt.inntektRapportering,
-                        beløp: inntekt.sumInntekt,
-                        datoTom:
-                            inntekt.periode.til != null
-                                ? toISODateString(lastDayOfMonth(new Date(inntekt.periode.til)))
-                                : null,
-                        datoFom: inntekt.periode.fom,
-                        ident: curr.ident,
-                        fraGrunnlag: true,
-                        inntektsposter: inntekt.inntektPostListe,
-                    };
-                })
-                .sort((a: Inntekt, b: Inntekt) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1)) as Inntekt[],
-        }),
-        {}
-    );
 
 export const createInitialValues = (bmOgBarn: RolleDto[], inntekter: InntekterDtoV2): InntektFormValues => {
     return {
-        inntekteneSomLeggesTilGrunn: getPerioderFraInntekter(bmOgBarn, inntekter.inntekter),
-        utvidetbarnetrygd: [],
-        barnetillegg: [],
+        årsinntekter: getPerioderFraInntekter(bmOgBarn, inntekter.årsinntekter),
+        barnetillegg: inntekter.barnetillegg?.map(mapToConvertedDates),
+        småbarnstillegg: inntekter.småbarnstillegg?.map(mapToConvertedDates),
+        kontantstøtte: inntekter.kontantstøtte?.map(mapToConvertedDates),
+        barnetilsyn: inntekter.barnetilsyn?.map(mapToConvertedDates),
         notat: {
             medIVedtaket: inntekter.notat.medIVedtaket,
             kunINotat: inntekter.notat.kunINotat,
@@ -261,18 +203,15 @@ const getListOfIncomesThatCanRunInParallelWithInntektType = (inntektType: string
             ];
     }
 };
-export const editPeriods = (periodsList: Inntekt[], periodeIndex: number): Inntekt[] => {
+export const editPeriods = (periodsList: InntektDtoV2[], periodeIndex: number): InntektDtoV2[] => {
     const editedPeriod = periodsList[periodeIndex];
-    const inntektType = editedPeriod.inntektType;
+    const inntektType = editedPeriod.rapporteringstype;
     const listOfIncomesThatCanRunInParallelWithEditedPeriode =
         getListOfIncomesThatCanRunInParallelWithInntektType(inntektType);
 
     const periodsThatCannotRunInParallel = periodsList
         .toSpliced(periodeIndex, 1)
-        .filter(
-            (period) =>
-                !listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.inntektType as Inntektsrapportering)
-        );
+        .filter((period) => !listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.rapporteringstype));
     let startIndex = periodsThatCannotRunInParallel.filter(
         (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
     ).length;
@@ -312,9 +251,7 @@ export const editPeriods = (periodsList: Inntekt[], periodeIndex: number): Innte
     );
 
     return periodsList
-        .filter((period) =>
-            listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.inntektType as Inntektsrapportering)
-        )
+        .filter((period) => listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.rapporteringstype))
         .concat(updatedPeriodsOfSameInntektType)
         .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 };

@@ -4,9 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
-    ForskuddAarsakType,
     OppdaterVirkningstidspunkt,
     Rolletype,
+    TypeArsakstype,
     VirkningstidspunktDto,
 } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
@@ -131,7 +131,7 @@ const Main = ({ initialValues, error }) => {
                         {Object.entries(ForskuddBeregningKodeAarsak)
                             .filter(([value]) => {
                                 if (kunEtBarnIBehandlingen) return true;
-                                return value !== ForskuddAarsakType.AF;
+                                return value !== TypeArsakstype.FRABARNETSFODSEL;
                             })
                             .map(([value, text]) => (
                                 <option key={value} value={value}>

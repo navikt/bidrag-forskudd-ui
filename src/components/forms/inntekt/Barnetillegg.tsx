@@ -3,7 +3,7 @@ import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
@@ -158,10 +158,15 @@ export const BarnetilleggTabel = () => {
                 className="w-fit"
                 onClick={() =>
                     fieldArray.append({
+                        taMed: false,
+                        ident: roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident,
+                        kilde: Kilde.MANUELL,
                         datoFom: null,
                         datoTom: null,
-                        ident: "",
-                        barnetillegg: 0,
+                        beløp: 0,
+                        rapporteringstype: Inntektsrapportering.BARNETILLEGG,
+                        inntektsposter: [],
+                        inntektstyper: [],
                     })
                 }
             >

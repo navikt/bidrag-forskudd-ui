@@ -3,13 +3,12 @@ import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/
 import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Inntektsrapportering, OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
+import { OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useGetOpplysningerHentetdato, useOppdaterBehandling } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useGetOpplysningerHentetdato, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
@@ -19,37 +18,41 @@ import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper"
 import UnderArbeidAlert from "../../UnderArbeidAlert";
 import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
-import AinntektLink from "./AinntektLink";
 import { Arbeidsforhold } from "./Arbeidsforhold";
-import { BarnetilleggTabel } from "./BarnetilleggTabel";
+import { Barnetillegg } from "./Barnetillegg";
 import { InntektChart } from "./InntektChart";
-import { InntekteneSomLeggesTilGrunnTabel } from "./InntekteneSomLeggesTilGrunnTabel";
-import { UtvidetBarnetrygdTabel } from "./UtvidetBarnetrygdTabel";
+import { SkattepliktigeOgPensjonsgivendeInntekt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
-const InntektHeader = ({ inntekt, ident }: { inntekt: SummertManedsinntekt[]; ident: string }) => (
-    <div className="grid w-full max-w-[65ch] gap-y-8">
-        <InntektChart inntekt={inntekt} />
-        <ExpansionCard aria-label="default-demo" size="small">
-            <ExpansionCard.Header>
-                <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
-            </ExpansionCard.Header>
-            <ExpansionCard.Content>
-                <QueryErrorWrapper>
-                    <Arbeidsforhold ident={ident} />
-                </QueryErrorWrapper>
-            </ExpansionCard.Content>
-        </ExpansionCard>
-    </div>
-);
-
+const InntektHeader = ({ ident }: { ident: string }) => {
+    const { inntekter } = useGetBehandlingV2();
+    const inntekt = inntekter.månedsinntekter?.filter((inntekt) => inntekt.ident === ident);
+    return inntekt?.length > 0 ? (
+        <div className="grid w-full max-w-[65ch] gap-y-8">
+            <InntektChart inntekt={inntekt} />
+            <ExpansionCard aria-label="default-demo" size="small">
+                <ExpansionCard.Header>
+                    <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
+                </ExpansionCard.Header>
+                <ExpansionCard.Content>
+                    <QueryErrorWrapper>
+                        <Arbeidsforhold ident={ident} />
+                    </QueryErrorWrapper>
+                </ExpansionCard.Content>
+            </ExpansionCard>
+        </div>
+    ) : (
+        <Alert variant="info">
+            <BodyShort>Ingen inntekt funnet</BodyShort>
+        </Alert>
+    );
+};
 const Main = ({
     behandlingRoller,
-    ainntekt,
     opplysningerChanges,
     updateOpplysninger,
 }: {
     behandlingRoller: RolleDto[];
-    ainntekt: { [ident: string]: SummertManedsinntekt[] };
     opplysningerChanges: string[];
     updateOpplysninger: () => void;
 }) => {
@@ -98,41 +101,16 @@ const Main = ({
                     ))}
                 </Tabs.List>
                 {roller.map((rolle) => {
-                    const inntekt = ainntekt[rolle.ident];
                     return (
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
                             <div className="mt-12">
-                                {inntekt.length > 0 ? (
-                                    <InntektHeader inntekt={inntekt} ident={rolle.ident} />
-                                ) : (
-                                    <Alert variant="info">
-                                        <BodyShort>Ingen inntekt funnet</BodyShort>
-                                    </Alert>
-                                )}
+                                <InntektHeader ident={rolle.ident} />
                             </div>
-                            <div className="grid gap-y-4">
-                                <div className="flex gap-x-4">
-                                    <Heading level="3" size="medium">
-                                        Inntektene som legges til grunn
-                                    </Heading>
-                                    {inntekt.length > 0 && <AinntektLink ident={rolle.ident} />}
-                                </div>
-                                <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
-                            </div>
+                            <SkattepliktigeOgPensjonsgivendeInntekt ident={rolle.ident} />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>
-                                    <div className="grid gap-y-4">
-                                        <Heading level="3" size="medium">
-                                            Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
-                                        </Heading>
-                                        <BarnetilleggTabel />
-                                    </div>
-                                    <div className="grid gap-y-4">
-                                        <Heading level="3" size="medium">
-                                            Utvidet barnetrygd
-                                        </Heading>
-                                        <UtvidetBarnetrygdTabel />
-                                    </div>
+                                    <Barnetillegg />
+                                    <UtvidetBarnetrygd />
                                 </>
                             )}
                         </Tabs.Panel>
@@ -166,20 +144,9 @@ const Side = () => {
 
 const InntektForm = () => {
     const { inntektFormValues, setInntektFormValues } = useForskudd();
-    const behandling = useGetBehandlingV2();
-    const { inntekter, roller } = behandling;
-    const { mutation: oppdaterBehandling } = useOppdaterBehandling();
+    const { inntekter, roller } = useGetBehandlingV2();
+    const { mutation: oppdaterBehandling } = useOppdaterBehandlingV2();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
-    const ainntekt: { [ident: string]: SummertManedsinntekt[] } = inntekter.inntekter.reduce(
-        (acc, curr) => ({
-            ...acc,
-            [curr.ident]: inntekter.inntekter.filter(
-                (inntekt) => inntekt.ident === curr.ident && inntekt.rapporteringstype === Inntektsrapportering.AINNTEKT
-            ),
-        }),
-        {}
-    );
-
     const initialValues = createInitialValues(bmOgBarn, inntekter);
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -220,8 +187,7 @@ const InntektForm = () => {
                     title="Inntekt"
                     main={
                         <Main
-                            behandlingRoller={behandling.roller}
-                            ainntekt={ainntekt}
+                            behandlingRoller={roller}
                             opplysningerChanges={[]}
                             updateOpplysninger={updateOpplysninger}
                         />

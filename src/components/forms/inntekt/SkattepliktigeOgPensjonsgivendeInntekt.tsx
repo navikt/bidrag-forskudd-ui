@@ -4,14 +4,13 @@ import { Alert, BodyShort, Box, Button, Heading, Popover } from "@navikt/ds-reac
 import React, { useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { RolleDto } from "../../../api/BidragBehandlingApiV1";
-import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
+import { InntektDtoV2, Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
-import { useGetBehandling } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
-import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
+import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, getYearFromDate, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -22,15 +21,15 @@ import { editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import AinntektLink from "./AinntektLink";
 
-const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
+const Beskrivelse = ({ item, index, ident }: { item: InntektDtoV2; index: number; ident: string }) => {
     const toVisningsnavn = useVisningsnavn();
-    return item.fraGrunnlag ? (
+    return item.kilde === Kilde.OFFENTLIG ? (
         <BodyShort className="min-w-[215px] capitalize">
-            {toVisningsnavn(item.inntektstype, getYearFromDate(item.datoFom))}
+            {toVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
         </BodyShort>
     ) : (
         <FormControlledSelectField
-            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektstype`}
+            name={`årsinntekter.${ident}.${index}.inntektstype`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 Object.entries(GrunnlagInntektType).map(([value, text]) => ({
@@ -78,8 +77,8 @@ const Detaljer = ({ totalt }) => {
         </>
     );
 };
-const Totalt = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) =>
-    item.fraGrunnlag ? (
+const Totalt = ({ item, index, ident }: { item: InntektDtoV2; index: number; ident: string }) =>
+    item.kilde === Kilde.OFFENTLIG ? (
         <div className="flex items-center gap-x-4">
             <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
             <Detaljer totalt={item.beløp} />
@@ -87,7 +86,7 @@ const Totalt = ({ item, index, ident }: { item: Inntekt; index: number; ident: s
     ) : (
         <div className="w-[120px]">
             <FormControlledTextField
-                name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
+                name={`årsinntekter.${ident}.${index}.beløp`}
                 label="Totalt"
                 type="number"
                 min="1"
@@ -97,7 +96,7 @@ const Totalt = ({ item, index, ident }: { item: Inntekt; index: number; ident: s
     );
 
 const DeleteButton = ({ item, index, handleOnDelete }) =>
-    item.fraGrunnlag ? (
+    item.kilde === Kilde.OFFENTLIG ? (
         <div className="min-w-[40px]"></div>
     ) : (
         <Button
@@ -132,13 +131,13 @@ const Periode = ({ index, value, editableRow, datepicker }) => {
     return editableRow === index ? (
         <div className="min-w-[160px]">{datepicker}</div>
     ) : (
-        <BodyShort key={`sivilstand.${index}.datoTom.placeholder`}>
+        <BodyShort key={`årsinntekter.${index}.datoTom.placeholder`}>
             {value && DateToDDMMYYYYString(dateOrNull(value))}
         </BodyShort>
     );
 };
 
-const ExpandableContent = ({ item }: { item: Inntekt }) => {
+const ExpandableContent = ({ item }: { item: InntektDtoV2 }) => {
     return (
         <>
             <BodyShort size="small">
@@ -153,25 +152,23 @@ const ExpandableContent = ({ item }: { item: Inntekt }) => {
     );
 };
 
-export const InntekteneSomLeggesTilGrunn = ({
-    inntekt,
-    rolle,
-}: {
-    inntekt: SummertManedsinntekt[];
-    rolle: RolleDto;
-}) => (
-    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
-        <div className="flex gap-x-4">
-            <Heading level="3" size="medium">
-                Skattepliktige og pensjonsgivende inntekt
-            </Heading>
-            {inntekt.length > 0 && <AinntektLink ident={rolle.ident} />}
-        </div>
-        <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
-    </Box>
-);
+export const SkattepliktigeOgPensjonsgivendeInntekt = ({ ident }: { ident: string }) => {
+    const { inntekter } = useGetBehandlingV2();
+    const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
+    return (
+        <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+            <div className="flex gap-x-4">
+                <Heading level="3" size="medium">
+                    Skattepliktige og pensjonsgivende inntekt
+                </Heading>
+                {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+            </div>
+            <SkattepliktigeOgPensjonsgivendeInntektTabel ident={ident} />
+        </Box>
+    );
+};
 
-export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
+export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: string }) => {
     const { inntektFormValues, setErrorMessage, setErrorModalOpen, setInntektFormValues } = useForskudd();
     const [editableRow, setEditableRow] = useState(undefined);
     const saveInntekt = useOnSaveInntekt();
@@ -188,15 +185,15 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     } = useFormContext<InntektFormValues>();
     const inntekteneSomLeggesTilGrunnField = useFieldArray({
         control,
-        name: `inntekteneSomLeggesTilGrunn.${ident}`,
+        name: `årsinntekter.${ident}`,
     });
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(virkningsdato));
 
-    const watchFieldArray = useWatch({ control, name: `inntekteneSomLeggesTilGrunn.${ident}` });
+    const watchFieldArray = useWatch({ control, name: `årsinntekter.${ident}` });
 
     const handleOnSelect = (value: boolean, index: number) => {
-        const periodeValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+        const periodeValues = getValues(`årsinntekter.${ident}`);
         const updatedValues = periodeValues.toSpliced(index, 1, {
             ...periodeValues[index],
             taMed: value,
@@ -208,7 +205,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            const perioderValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+            const perioderValues = getValues(`årsinntekter.${ident}`);
             // const updatedPeriods = removeAndEditPeriods(perioderValues, index);
             updatedAndSave(perioderValues);
         }
@@ -217,7 +214,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
     const controlledFields = inntekteneSomLeggesTilGrunnField.fields.map((field, index) => {
         return {
             ...field,
-            ...watchFieldArray[index],
+            ...watchFieldArray?.[index],
         };
     });
 
@@ -225,39 +222,41 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
         if (checkIfAnotherRowIsEdited()) {
             showErrorModal();
         } else {
-            const periodeValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+            const periodeValues = getValues(`årsinntekter.${ident}`);
             inntekteneSomLeggesTilGrunnField.append({
                 datoFom: null,
                 datoTom: null,
+                ident: ident,
                 beløp: 0,
-                inntektstype: "",
+                rapporteringstype: Inntektsrapportering.SKATTEGRUNNLAG_SKE,
                 taMed: false,
-                fraGrunnlag: false,
+                kilde: Kilde.MANUELL,
                 inntektsposter: [],
+                inntektstyper: [],
             });
             setEditableRow(periodeValues.length);
         }
     };
-    const updatedAndSave = (inntekter: Inntekt[]) => {
+    const updatedAndSave = (inntekter: InntektDtoV2[]) => {
         const updatedValues = {
             ...inntektFormValues,
-            inntekteneSomLeggesTilGrunn: { ...inntektFormValues.inntekteneSomLeggesTilGrunn, [ident]: inntekter },
+            årsinntekter: { ...inntektFormValues.årsinntekter, [ident]: inntekter },
         };
         setInntektFormValues(updatedValues);
-        setValue(`inntekteneSomLeggesTilGrunn.${ident}`, inntekter);
+        setValue(`årsinntekter.${ident}`, inntekter);
         saveInntekt(updatedValues);
         setEditableRow(undefined);
     };
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`inntekteneSomLeggesTilGrunn.${ident}`);
+        const perioderValues = getValues(`årsinntekter.${ident}`);
         if (perioderValues[index].datoFom === null) {
-            setError(`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`, {
+            setError(`årsinntekter.${ident}.${index}.datoFom`, {
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
         }
 
-        const fieldState = getFieldState(`inntekteneSomLeggesTilGrunn.${ident}.${index}`);
+        const fieldState = getFieldState(`årsinntekter.${ident}.${index}`);
         if (!fieldState.error) {
             updatedAndSave(editPeriods(perioderValues, index));
         }
@@ -282,23 +281,23 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
 
     return (
         <>
-            {(errors?.inntekteneSomLeggesTilGrunn?.[ident]?.types || !isValidDate(virkningstidspunkt)) && (
+            {(errors?.årsinntekter?.[ident]?.types || !isValidDate(virkningstidspunkt)) && (
                 <Alert variant="warning" className="mb-4">
                     {!isValidDate(virkningstidspunkt) && <BodyShort>Mangler virkningstidspunkt</BodyShort>}
-                    {errors.inntekteneSomLeggesTilGrunn?.[ident].types?.periodGaps && (
-                        <BodyShort>{errors.inntekteneSomLeggesTilGrunn[ident].types.periodGaps}</BodyShort>
+                    {errors.årsinntekter?.[ident].types?.periodGaps && (
+                        <BodyShort>{errors.årsinntekter[ident].types.periodGaps}</BodyShort>
                     )}
-                    {errors.inntekteneSomLeggesTilGrunn?.[ident].types?.overlappingPerioder && (
+                    {errors.årsinntekter?.[ident].types?.overlappingPerioder && (
                         <>
                             <BodyShort>Du har overlappende perioder:</BodyShort>
-                            {JSON.parse(
-                                errors.inntekteneSomLeggesTilGrunn[ident].types.overlappingPerioder as string
-                            ).map((perioder) => (
-                                <BodyShort key={perioder}>
-                                    <span className="capitalize">{perioder[0]}</span> og{" "}
-                                    <span className="capitalize">{perioder[1]}</span>
-                                </BodyShort>
-                            ))}
+                            {JSON.parse(errors.årsinntekter[ident].types.overlappingPerioder as string).map(
+                                (perioder) => (
+                                    <BodyShort key={perioder}>
+                                        <span className="capitalize">{perioder[0]}</span> og{" "}
+                                        <span className="capitalize">{perioder[1]}</span>
+                                    </BodyShort>
+                                )
+                            )}
                         </>
                     )}
                 </Alert>
@@ -311,31 +310,31 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                             key={item.id}
                             cells={[
                                 <FormControlledCheckbox
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
-                                    name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.taMed`}
+                                    key={`årsinntekter.${ident}.${index}.taMed`}
+                                    name={`årsinntekter.${ident}.${index}.taMed`}
                                     onChange={(value) => handleOnSelect(value.target.checked, index)}
                                     legend=""
                                 />,
                                 <Beskrivelse
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektBeskrivelse`}
+                                    key={`årsinntekter.${ident}.${index}.inntektBeskrivelse`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                 />,
                                 <Totalt
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.belop`}
+                                    key={`årsinntekter.${ident}.${index}.belop`}
                                     item={item}
                                     index={index}
                                     ident={ident}
                                 />,
                                 <Periode
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
+                                    key={`årsinntekter.${ident}.${index}.datoFom`}
                                     value={item.datoFom}
                                     editableRow={editableRow}
                                     index={index}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
+                                            name={`årsinntekter.${ident}.${index}.datoFom`}
                                             label="Fra og med"
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoFom}
@@ -347,13 +346,13 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     }
                                 />,
                                 <Periode
-                                    key={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
+                                    key={`årsinntekter.${ident}.${index}.datoTom`}
                                     editableRow={editableRow}
                                     value={item.datoTom}
                                     index={index}
                                     datepicker={
                                         <FormControlledMonthPicker
-                                            name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
+                                            name={`årsinntekter.${ident}.${index}.datoTom`}
                                             label="Til og med"
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoTom}

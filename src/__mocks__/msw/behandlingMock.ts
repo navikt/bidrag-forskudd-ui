@@ -8,6 +8,7 @@ import {
 } from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
+import { behandlingMockApiDataV2 } from "../testdata/behandlingTestDataV2";
 
 export function behandlingMock(): RestHandler[] {
     return [
@@ -19,6 +20,19 @@ export function behandlingMock(): RestHandler[] {
             return res(
                 ctx.set("Content-Type", "application/json"),
                 ctx.body(localStorage.getItem(`behandling-${req.params.behandlingId}`))
+            );
+        }),
+        rest.get(`${environment.url.bidragBehandling}/api/v2/behandling/:behandlingId`, (req, res, ctx) => {
+            if (!localStorage.getItem(`behandling-${req.params.behandlingId}-V2`)) {
+                localStorage.setItem(`behandlingId`, req.params.behandlingId.toString());
+                localStorage.setItem(
+                    `behandling-${req.params.behandlingId}-V2`,
+                    JSON.stringify(behandlingMockApiDataV2)
+                );
+            }
+            return res(
+                ctx.set("Content-Type", "application/json"),
+                ctx.body(localStorage.getItem(`behandling-${req.params.behandlingId}-V2`))
             );
         }),
         rest.put(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, async (req, res, ctx) => {

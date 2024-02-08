@@ -1,33 +1,12 @@
-import { BehandlingNotatDto, InntektPost } from "../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, InntektDtoV2 } from "../api/BidragBehandlingApiV1";
 import { TransformerInntekterResponse } from "../api/BidragInntektApi";
 
-export interface Inntekt {
-    inntektstype: string;
-    datoFom: string | null;
-    taMed: boolean;
-    fraGrunnlag: boolean;
-    datoTom: string | null;
-    beløp: number;
-    inntektsposter: InntektPost[];
-}
-
-export interface BarneTillegFormValues {
-    datoFom?: string | null;
-    datoTom?: string | null;
-    ident: string;
-    barnetillegg: number;
-}
-
-export interface UtvidetBarnetrygdFormValues {
-    datoFom?: string;
-    datoTom?: string;
-    deltBosted: boolean;
-    beløp: number;
-}
 export interface InntektFormValues {
-    inntekteneSomLeggesTilGrunn: { [key: string]: Inntekt[] };
-    barnetillegg: BarneTillegFormValues[];
-    utvidetbarnetrygd: UtvidetBarnetrygdFormValues[];
+    årsinntekter: { [key: string]: InntektDtoV2[] };
+    barnetillegg: InntektDtoV2[];
+    småbarnstillegg: InntektDtoV2[];
+    kontantstøtte: InntektDtoV2[];
+    barnetilsyn: InntektDtoV2[];
     notat?: BehandlingNotatDto;
 }
 
