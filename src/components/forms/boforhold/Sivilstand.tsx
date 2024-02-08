@@ -360,7 +360,7 @@ const Opplysninger = () => {
         }
 
         const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
-            virkingstidspunkt == null || new Date(sivilstand.gyldigFom) <= virkingstidspunkt;
+            return virkingstidspunkt == null || dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt;
         });
 
         if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
