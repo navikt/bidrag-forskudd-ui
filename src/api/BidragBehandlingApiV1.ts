@@ -1600,7 +1600,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          */
         konverterSivilstand: (behandlingId: number, data: SivilstandGrunnlagDto[], params: RequestParams = {}) =>
             this.request<SivilstandBeregnet, any>({
-                path: `/api/v2/databehandler/v2/sivilstand/${behandlingId}`,
+                path: `/api/v2/databehandler/sivilstand/${behandlingId}`,
                 method: "POST",
                 body: data,
                 secure: true,
