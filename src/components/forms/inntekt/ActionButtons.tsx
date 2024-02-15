@@ -3,6 +3,7 @@ import { Button, Link } from "@navikt/ds-react";
 import React from "react";
 import { useParams } from "react-router-dom";
 
+import text from "../../../constants/texts";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const ActionButtons = ({ onNext }) => {
@@ -19,10 +20,10 @@ export const ActionButtons = ({ onNext }) => {
                 className="w-max"
                 size="small"
             >
-                Gå videre
+                {text.label.gåVidere}
             </Button>
             <Link href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl} target="_blank" className="font-bold">
-                Vis notat <ExternalLinkIcon aria-hidden />
+                {text.label.notatButton} <ExternalLinkIcon aria-hidden />
             </Link>
         </FlexRow>
     );

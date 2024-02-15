@@ -9,6 +9,7 @@ import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import {
@@ -25,6 +26,7 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { ISODateTimeStringToDDMMYYYYString, toISODateString } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -48,7 +50,7 @@ const InntektHeader = ({ inntekt, ident }: { inntekt: SummertManedsinntekt[]; id
         <InntektChart inntekt={inntekt} />
         <ExpansionCard aria-label="default-demo" size="small">
             <ExpansionCard.Header>
-                <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
+                <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
             </ExpansionCard.Header>
             <ExpansionCard.Content>
                 <QueryErrorWrapper>
@@ -84,8 +86,10 @@ const Main = ({
             {opplysningerChanges.length > 0 && (
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
-                        Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(opplysningerHentetdato)}
+                        {removePlaceholder(
+                            text.alert.nyeOpplysninger,
+                            ISODateTimeStringToDDMMYYYYString(opplysningerHentetdato)
+                        )}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -93,10 +97,10 @@ const Main = ({
                             icon={<ClockDashedIcon aria-hidden />}
                             onClick={updateOpplysninger}
                         >
-                            Oppdater
+                            {text.label.oppdater}
                         </Button>
                     </div>
-                    <p>Følgende endringer har blitt utført:</p>
+                    <p>{text.alert.endringer}</p>
                     {opplysningerChanges.map((change, index) => (
                         <p key={`${change}-${index}`}>{change}</p>
                     ))}
@@ -123,7 +127,7 @@ const Main = ({
                                     <InntektHeader inntekt={inntekt} ident={rolle.ident} />
                                 ) : (
                                     <Alert variant="info">
-                                        <BodyShort>Ingen inntekt funnet</BodyShort>
+                                        <BodyShort>{text.alert.ingenInntekt}</BodyShort>
                                     </Alert>
                                 )}
                             </div>
@@ -140,13 +144,13 @@ const Main = ({
                                 <>
                                     <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
-                                            Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
+                                            {text.title.barnetillegg}
                                         </Heading>
                                         <BarnetilleggTabel />
                                     </div>
                                     <div className="grid gap-y-4">
                                         <Heading level="3" size="medium">
-                                            Utvidet barnetrygd
+                                            {text.title.utvidetBarnetrygd}
                                         </Heading>
                                         <UtvidetBarnetrygdTabel />
                                     </div>
@@ -167,13 +171,13 @@ const Side = () => {
         <>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
-                    Begrunnelse
+                    {text.title.begrunnelse}
                 </Heading>
                 <div>
-                    <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
+                    <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
                 </div>
                 <div>
-                    <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
+                    <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
                 </div>
             </div>
             <ActionButtons onNext={onNext} />

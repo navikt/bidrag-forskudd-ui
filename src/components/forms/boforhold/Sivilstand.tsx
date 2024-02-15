@@ -15,12 +15,13 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
-import { BoforholdFormValues, resetTilOpplysningerTekst } from "../../../types/boforholdFormValues";
+import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -39,7 +40,7 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
     <>
         <Heading level="3" size="medium">
-            Sivilstand
+            {text.label.sivilstand}
         </Heading>
         <SivilistandPerioder virkningstidspunkt={datoFom} />
     </>
@@ -113,7 +114,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         if (perioderValues[index].datoFom === null) {
             setError(`sivilstand.${index}.datoFom`, {
                 type: "notValid",
-                message: "Dato må fylles ut",
+                message: text.error.datoMåFyllesUt,
             });
         }
 
@@ -183,8 +184,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     const showErrorModal = () => {
         setErrorMessage({
-            title: "Fullfør redigering",
-            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
         });
         setErrorModalOpen(true);
     };
@@ -209,7 +210,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     <div className="mb-4">
                         <Alert variant="warning">
                             <Heading spacing size="small" level="3">
-                                Feil i periodisering
+                                {text.alert.feilIPeriodisering}
                             </Heading>
                             {Object.values((errors.root.sivilstand as { types: string[] }).types).map(
                                 (type: string) => (
@@ -228,12 +229,21 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             className="w-fit"
                             onClick={resetTilDataFraFreg}
                         >
-                            {resetTilOpplysningerTekst}
+                            {text.resetTilOpplysninger}
                         </Button>
                     </div>
                 )}
                 {controlledFields.length > 0 && (
-                    <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
+                    <TableWrapper
+                        heading={[
+                            text.label.fraOgMed,
+                            text.label.tilOgMed,
+                            text.label.sivilstand,
+                            text.label.kilde,
+                            "",
+                            "",
+                        ]}
+                    >
                         {controlledFields.map((item, index) => (
                             <TableRowWrapper
                                 key={item.id}
@@ -331,7 +341,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     </TableWrapper>
                 )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
-                    + Legg til periode
+                    {text.label.leggTilPeriode}
                 </Button>
             </Box>
         </div>
@@ -369,12 +379,12 @@ const Opplysninger = () => {
         return opplysningerFiltrert;
     };
     return (
-        <ReadMore header="Opplysninger fra Folkeregistret" size="small" className="pb-4">
+        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
             <Table className="w-[300px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Fra dato</Table.HeaderCell>
-                        <Table.HeaderCell>Status</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.fraDato}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>

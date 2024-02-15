@@ -1,6 +1,7 @@
 import { Loader } from "@navikt/ds-react";
 import React, { lazy, memo, Suspense } from "react";
 
+import text from "../../constants/texts";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 const Boforhold = lazy(() => import("./boforhold/Boforhold"));
@@ -30,7 +31,7 @@ export default function FormWrapper() {
         <Suspense
             fallback={
                 <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
+                    <Loader size="3xlarge" title={text.loading} variant="interaction" />
                 </div>
             }
         >

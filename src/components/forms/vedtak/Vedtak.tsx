@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { ResultatForskuddsberegningBarn, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { Avslag } from "../../../enum/Avslag";
 import environment from "../../../environment";
@@ -39,12 +40,12 @@ const Vedtak = () => {
             {erVedtakFattet && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="xlarge">
-                    Vedtak
+                    {text.title.vedtak}
                 </Heading>
             </div>
             <div className="grid gap-y-2">
                 <Heading level="3" size="medium">
-                    Oppsummering
+                    {text.title.oppsummering}
                 </Heading>
 
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
@@ -54,11 +55,10 @@ const Vedtak = () => {
                     <Alert variant="info">
                         <div className="grid gap-y-4">
                             <Heading level="3" size="medium">
-                                Sjekk notat
+                                {text.title.sjekkNotat}
                             </Heading>
                             <div>
-                                Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorikk. Notatet blir generert
-                                automatisk basert på opplysningene oppgitt.
+                                {text.varsel.vedtakNotat}
                                 <NotatButton />
                             </div>
                         </div>
@@ -92,7 +92,7 @@ const FatteVedtakButtons = () => {
             {fatteVedtakFn.isError && (
                 <Alert variant="error" className="w-8/12 m-auto mt-8">
                     <div>
-                        <BodyShort size="small">Det skjedde en feil ved fatte vedtak</BodyShort>
+                        <BodyShort size="small">{text.error.fatteVedtak}</BodyShort>
                     </div>
                 </Alert>
             )}
@@ -104,7 +104,7 @@ const FatteVedtakButtons = () => {
                     className="w-max"
                     size="small"
                 >
-                    Fatte vedtak og gå til sakshistorikk
+                    {text.label.fatteVedtakButton}
                 </Button>
                 <Button
                     type="button"
@@ -117,7 +117,7 @@ const FatteVedtakButtons = () => {
                     className="w-max"
                     size="small"
                 >
-                    Avbryt
+                    {text.label.avbryt}
                 </Button>
             </FlexRow>
         </div>
@@ -146,9 +146,9 @@ const VedtakAvslag = () => {
                         <Table>
                             <Table.Header>
                                 <Table.Row>
-                                    <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
+                                    <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
+                                    <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
+                                    <Table.HeaderCell scope="col">{text.label.årsak}</Table.HeaderCell>
                                 </Table.Row>
                             </Table.Header>
                             <Table.Body>
@@ -156,7 +156,7 @@ const VedtakAvslag = () => {
                                     <Table.DataCell>
                                         {dateToDDMMYYYYString(new Date(virkningstidspunkt ?? søktFomDato))} -
                                     </Table.DataCell>
-                                    <Table.DataCell>Avslag</Table.DataCell>
+                                    <Table.DataCell>{text.label.avslag}</Table.DataCell>
                                     <Table.DataCell>{Avslag[årsak]}</Table.DataCell>
                                 </Table.Row>
                             </Table.Body>
@@ -173,7 +173,7 @@ const VedtakResultat = () => {
             <Alert variant="warning" className="w-8/12 m-auto mt-8">
                 <div>
                     <Heading spacing size="small" level="3">
-                        Kunne ikke beregne forskudd
+                        {text.varsel.beregneFeil}
                     </Heading>
                     <BodyShort size="small">
                         <ul>{beregnetForskudd.feil?.map((feil) => <li>{feil}</li>)}</ul>
@@ -237,12 +237,12 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
 const VedtakTableHeader = () => (
     <Table.Header>
         <Table.Row>
-            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Inntekt</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Sivilstand til BM</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Antall barn i husstand</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Forskudd</Table.HeaderCell>
-            <Table.HeaderCell scope="col">Resultat</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.inntekt}</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.sivilstandBM}</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.antallBarn}</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.forskudd}</Table.HeaderCell>
+            <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
         </Table.Row>
     </Table.Header>
 );

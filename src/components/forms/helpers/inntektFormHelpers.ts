@@ -21,8 +21,10 @@ import {
     perioderSomKanIkkeOverlapeKunMedHverandre,
     ytelsePerioder,
 } from "../../../constants/inntektene";
+import text from "../../../constants/texts";
 import { Inntekt, InntektFormValues, InntektTransformed } from "../../../types/inntektFormValues";
 import { addDays, deductDays, isAfterDate, isValidDate, toISODateString } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 
 export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequest => ({
     inntekter: {
@@ -257,7 +259,7 @@ export const syncDates = (
         if (periodeErFoerVirkningsTidspunkt && postSelectedPerioder.length) {
             setError(`inntekteneSomLeggesTilGrunn.${ident}.${Number(index)}.datoFom`, {
                 type: "invalid",
-                message: "Dato må settes manuelt",
+                message: text.error.datoMåSettesManuelt,
             });
             return;
         }
@@ -380,32 +382,48 @@ export const compareArbeidsforholdOpplysninger = (
         const saved = savedArbeidsforhold.filter((saved) => saved.partPersonId == ident);
         const latest = latestArbeidsforhold.filter((af) => af.partPersonId == ident);
         if (saved?.length !== latest?.length) {
-            changedLog.push(`Antall arbeidsforhold for ${ident} har blitt endret`);
+            changedLog.push(removePlaceholder(text.alert.antallArbeidsforholdEndret, ident));
         } else {
             saved.forEach((savedArbeidsforhold, index) => {
                 const periodeFraLatestOpplysninger = latest[index];
                 if (periodeFraLatestOpplysninger.sluttdato !== savedArbeidsforhold.sluttdato) {
                     changedLog.push(
-                        `Sluttdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedArbeidsforhold.sluttdato} til ${periodeFraLatestOpplysninger.sluttdato} `
+                        removePlaceholder(
+                            text.alert.sluttdatoForArbeidsforholdEndret,
+                            periodeFraLatestOpplysninger.arbeidsgiverNavn,
+                            savedArbeidsforhold.sluttdato,
+                            periodeFraLatestOpplysninger.sluttdato
+                        )
                     );
                 }
                 if (periodeFraLatestOpplysninger.startdato !== savedArbeidsforhold.startdato) {
                     changedLog.push(
-                        `Startdato for arbeidsforhold ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
+                        removePlaceholder(
+                            text.alert.startdatoForArbeidsforholdEndret,
+                            periodeFraLatestOpplysninger.arbeidsgiverNavn
+                        )
                     );
                 }
 
                 const savedListe = savedArbeidsforhold.ansettelsesdetaljerListe ?? [];
                 if (periodeFraLatestOpplysninger.ansettelsesdetaljerListe.length !== savedListe.length) {
                     changedLog.push(
-                        `Ansettelsesdetaljer fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret `
+                        removePlaceholder(
+                            text.alert.ansettelsesdetaljerEndret,
+                            periodeFraLatestOpplysninger.arbeidsgiverNavn
+                        )
                     );
                 } else {
                     periodeFraLatestOpplysninger.ansettelsesdetaljerListe.forEach((detalj, index) => {
                         const savedAnsettelsesdetaljer = savedListe[index];
                         if (savedAnsettelsesdetaljer.avtaltStillingsprosent !== detalj.avtaltStillingsprosent) {
                             changedLog.push(
-                                `Stillingprosent fra arbeidsgiver ${periodeFraLatestOpplysninger.arbeidsgiverNavn} er endret fra ${savedAnsettelsesdetaljer.avtaltStillingsprosent}% til ${detalj.avtaltStillingsprosent}%`
+                                removePlaceholder(
+                                    text.alert.stillingprosentEndret,
+                                    periodeFraLatestOpplysninger.arbeidsgiverNavn,
+                                    savedAnsettelsesdetaljer.avtaltStillingsprosent?.toString(),
+                                    detalj.avtaltStillingsprosent?.toString()
+                                )
                             );
                         }
                     });
@@ -430,18 +448,14 @@ export const compareOpplysninger = (
             inntektListeInLatestOpplysninger.summertAarsinntektListe.length >
             personInntekt.summertAarsinntektListe.length
         ) {
-            changedLog.push(
-                `En eller flere inntekt perioder har blitt lagt til rolle med ident - ${personInntekt.ident}`
-            );
+            changedLog.push(removePlaceholder(text.alert.enEllerFlereInntektPerioderLagtTil, personInntekt.ident));
         }
 
         if (
             inntektListeInLatestOpplysninger.summertAarsinntektListe.length <
             personInntekt.summertAarsinntektListe.length
         ) {
-            changedLog.push(
-                `Det er minst en inntekt som legges til grunn mindre for person med ident - ${personInntekt.ident}`
-            );
+            changedLog.push(removePlaceholder(text.alert.minstEnInntektMindre, personInntekt.ident));
         }
 
         personInntekt.summertAarsinntektListe.forEach((summertAarsinntekt) => {
@@ -452,7 +466,13 @@ export const compareOpplysninger = (
             if (summertAarsinntektFraLatestOpplysninger) {
                 if (summertAarsinntektFraLatestOpplysninger.sumInntekt !== summertAarsinntekt.sumInntekt) {
                     changedLog.push(
-                        `Sum for ${summertAarsinntekt.visningsnavn} har blitt endret for rolle med ident - ${personInntekt.ident} fra ${summertAarsinntekt.sumInntekt} til ${summertAarsinntektFraLatestOpplysninger.sumInntekt}`
+                        removePlaceholder(
+                            text.alert.sumEndret,
+                            summertAarsinntekt.visningsnavn,
+                            personInntekt.ident,
+                            summertAarsinntekt.sumInntekt.toString(),
+                            summertAarsinntektFraLatestOpplysninger.sumInntekt.toString()
+                        )
                     );
                 }
             }
@@ -460,26 +480,26 @@ export const compareOpplysninger = (
     });
 
     if (savedOpplysninger.utvidetbarnetrygd.length !== latestOpplysninger.utvidetbarnetrygd.length) {
-        changedLog.push(`Antall utvidet barnetrygd perioder har blitt endret`);
+        changedLog.push(text.alert.antallUtvidetBarnetrygdPerioderEndret);
     } else {
         savedOpplysninger.utvidetbarnetrygd.forEach((utvidetbarnetrygd, index) => {
             const utvidetbarnetrygdInLatestOpplysninger = latestOpplysninger.utvidetbarnetrygd[index];
 
             if (utvidetbarnetrygdInLatestOpplysninger) {
                 if (utvidetbarnetrygd.beløp !== utvidetbarnetrygdInLatestOpplysninger.beløp) {
-                    changedLog.push(`Beløp for en eller flere perioder har blitt endret`);
+                    changedLog.push(text.alert.beløpEndret);
                 }
             }
         });
     }
 
     if (savedOpplysninger.barnetillegg.length !== latestOpplysninger.barnetillegg.length) {
-        changedLog.push("Antall barnetillegg perioder har blitt endret");
+        changedLog.push(text.alert.antallBarnetilleggPerioderEndret);
     } else {
         savedOpplysninger.barnetillegg.forEach((periode, index) => {
             const periodeFraLatestOpplysninger = latestOpplysninger.barnetillegg[index];
             if (periodeFraLatestOpplysninger.barnetillegg === periode.barnetillegg) {
-                changedLog.push("Belop for en eller flere barnetillegg perioder har blitt endret");
+                changedLog.push(text.alert.beløpEndret);
             }
         });
     }

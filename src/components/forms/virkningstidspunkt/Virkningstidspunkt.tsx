@@ -12,6 +12,7 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
@@ -136,37 +137,37 @@ const Main = ({ initialValues, error }) => {
 
     return (
         <>
-            {showChangedVirkningsDatoAlert && (
-                <Alert variant="warning">
-                    Virkningstidspunktet er endret. Dette kan påvirke beregningen. Boforhold og inntekt må manuelt
-                    vurderes på nytt
-                </Alert>
-            )}
+            {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
             {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknadstype:</Label>
+                    <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">
                         {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
                     </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknad fra:</Label>
+                    <Label size="small">{text.label.søknadfra}:</Label>
                     <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Mottat dato:</Label>
+                    <Label size="small">{text.label.mottattdato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søkt fra dato:</Label>
+                    <Label size="small">{text.label.søktfradato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField name="årsakAvslag" label="Årsak" onSelect={onAarsakSelect} className="w-max">
-                    <option value="">Velg årsak/avslag</option>
-                    <optgroup label="Årsak">
+                <FormControlledSelectField
+                    name="årsakAvslag"
+                    label={text.label.årsak}
+                    onSelect={onAarsakSelect}
+                    className="w-max"
+                >
+                    <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                    <optgroup label={text.label.årsak}>
                         {årsakListe
                             .filter((value) => {
                                 if (kunEtBarnIBehandlingen) return true;
@@ -178,7 +179,7 @@ const Main = ({ initialValues, error }) => {
                                 </option>
                             ))}
                     </optgroup>
-                    <optgroup label="Avslag">
+                    <optgroup label={text.label.avslag}>
                         {avslagsListe.map((value) => (
                             <option key={value} value={value}>
                                 {tilVisningsnavn(value)}
@@ -188,7 +189,7 @@ const Main = ({ initialValues, error }) => {
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
                     name="virkningstidspunkt"
-                    label="Virkningstidspunkt"
+                    label={text.label.virkningstidspunkt}
                     placeholder="DD.MM.ÅÅÅÅ"
                     defaultValue={initialValues.virkningstidspunkt}
                     fromDate={fom}
@@ -212,10 +213,10 @@ const Side = () => {
     return (
         <>
             <Heading level="3" size="medium">
-                Begrunnelse
+                {text.title.begrunnelse}
             </Heading>
-            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
-            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
+            <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
+            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -259,7 +260,7 @@ const VirkningstidspunktForm = () => {
             <FormProvider {...useFormMethods}>
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
-                        title="Virkningstidspunkt"
+                        title={text.label.virkningstidspunkt}
                         main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
                         side={<Side />}
                     />

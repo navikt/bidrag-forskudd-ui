@@ -2,9 +2,9 @@ import { DateValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
+import text from "../../constants/texts";
 import { toISODateString } from "../../utils/date-utils";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
-
 interface FormControlledDatePickerProps {
     name: string;
     label: string;
@@ -46,7 +46,7 @@ export const FormControlledDatePicker = ({
 
     const onValidate = (dateValidation: DateValidationT) => {
         if (!dateValidation.isValidDate && !dateValidation.isEmpty) {
-            setError(name, { type: "notValid", message: "Dato er ikke gylid" });
+            setError(name, { type: "notValid", message: text.error.datoIkkeGyldig });
             return;
         }
         clearErrors(name);

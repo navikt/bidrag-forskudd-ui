@@ -2,11 +2,11 @@ import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/Too
 import React, { memo } from "react";
 
 import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
+import text from "../../../constants/texts";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../utils/date-utils";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { capitalize } from "../../../utils/string-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
-
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
 const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
@@ -41,7 +41,7 @@ const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
                                   ).toLocaleString()}</p>`
                           )
                           .join("")
-                    : "Ingen inntekt funnet";
+                    : text.alert.ingenInntekt;
             },
             backgroundColor: "rgb(230,240,255)",
             borderColor: "rgb(230,240,255)",

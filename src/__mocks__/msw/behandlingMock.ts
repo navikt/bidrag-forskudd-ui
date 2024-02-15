@@ -74,7 +74,7 @@ export function behandlingMock(): RestHandler[] {
                     årsak: oppdater?.virkningstidspunkt?.årsak,
                     avslag: oppdater?.virkningstidspunkt?.avslag,
                 },
-                id: req.params.behandlingId,
+                id: Number(req.params.behandlingId),
             };
             // @ts-ignore
             delete updatedBehandling.grunnlagspakkeId;

@@ -4,6 +4,8 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import React, { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
+import text from "../../constants/texts";
+
 export const QueryErrorWrapper = ({ children }) => {
     return (
         <QueryErrorResetBoundary>
@@ -23,7 +25,7 @@ export const QueryErrorWrapper = ({ children }) => {
                                 </Heading>
                                 <BodyShort size="small">Feilmelding: {error.message}</BodyShort>
                                 <Button size="small" className="w-max mt-4" onClick={() => resetErrorBoundary()}>
-                                    Last på nytt
+                                    {text.refresh}
                                 </Button>
                             </div>
                         </Alert>
@@ -33,7 +35,7 @@ export const QueryErrorWrapper = ({ children }) => {
                     <Suspense
                         fallback={
                             <div className="flex justify-center">
-                                <Loader size="3xlarge" title="venter..." variant="interaction" />
+                                <Loader size="3xlarge" title={text.loading} variant="interaction" />
                             </div>
                         }
                     >
