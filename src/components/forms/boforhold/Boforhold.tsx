@@ -30,6 +30,7 @@ import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { STEPS } from "../../../constants/steps";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { KildeTexts } from "../../../enum/KildeTexts";
@@ -48,7 +49,6 @@ import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
     ParsedBoforholdOpplysninger,
-    resetTilOpplysningerTekst,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
     SivilstandBeregnetInnhold,
@@ -106,12 +106,12 @@ const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string 
         return null;
     }
     return (
-        <ReadMore header="Opplysninger fra Folkeregistret" size="small" className="pb-4">
+        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
             <Table className="w-[350px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Periode</Table.HeaderCell>
-                        <Table.HeaderCell>Status</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.periode}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -157,8 +157,10 @@ const Main = ({
             {opplysningerChanges.length > 0 && (
                 <Alert variant="info">
                     <div className="flex items-center mb-4">
-                        Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(boforoholdOpplysningerHentetdato)}
+                        {removePlaceholder(
+                            text.alert.nyeOpplysninger,
+                            ISODateTimeStringToDDMMYYYYString(boforoholdOpplysningerHentetdato)
+                        )}
                         <Button
                             variant="tertiary"
                             size="small"
@@ -166,18 +168,20 @@ const Main = ({
                             icon={<ClockDashedIcon aria-hidden />}
                             onClick={updateOpplysninger}
                         >
-                            Oppdater
+                            {text.label.oppdater}
                         </Button>
                     </div>
-                    <p>Følgende endringer har blitt utført:</p>
+                    <p>{text.alert.endringer}</p>
                     {opplysningerChanges.map((change, i) => (
                         <p key={change + i}>{change}</p>
                     ))}
                 </Alert>
             )}
-            {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
+            {!isValidDate(virkningstidspunkt) && (
+                <Alert variant="warning">{text.alert.manglerVirkningstidspunkt}</Alert>
+            )}
             <Heading level="3" size="medium">
-                Barn
+                {text.label.barn}
             </Heading>
             <BarnPerioder datoFom={datoFom} />
             <Sivilstand datoFom={datoFom} />
@@ -210,10 +214,10 @@ const Side = () => {
     return (
         <>
             <Heading level="3" size="medium">
-                Begrunnelse
+                {text.title.begrunnelse}
             </Heading>
-            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
-            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
+            <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
+            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -333,7 +337,7 @@ const BoforholdsForm = () => {
             <FormProvider {...useFormMethods}>
                 <form onSubmit={(e) => e.preventDefault()}>
                     <FormLayout
-                        title="Boforhold"
+                        title={text.title.boforhold}
                         main={
                             <Main opplysningerChanges={opplysningerChanges} updateOpplysninger={updateOpplysninger} />
                         }
@@ -368,14 +372,14 @@ const AddBarnForm = ({
         let formErrors = { ...error };
 
         if (navn === "") {
-            formErrors = { ...formErrors, navn: "Navn må fylles ut" };
+            formErrors = { ...formErrors, navn: text.error.navnMåFyllesUt };
         } else {
             delete formErrors.navn;
         }
 
         if (val === "fritekst") {
             if (!isValidDate(foedselsdato)) {
-                formErrors = { ...formErrors, foedselsdato: "Dato er ikke gylid" };
+                formErrors = { ...formErrors, foedselsdato: text.error.datoIkkeGyldig };
             } else {
                 delete formErrors.foedselsdato;
             }
@@ -383,7 +387,7 @@ const AddBarnForm = ({
 
         if (val === "dnummer") {
             if (ident === "") {
-                formErrors = { ...formErrors, ident: "Ident må fylles ut" };
+                formErrors = { ...formErrors, ident: text.error.identMåFyllesUt };
             } else {
                 delete formErrors.ident;
             }
@@ -445,7 +449,7 @@ const AddBarnForm = ({
                 setError(formErrors);
             })
             .catch(() => {
-                setError({ ...error, ident: `Finner ikke person med ident: ${value}` });
+                setError({ ...error, ident: removePlaceholder(text.error.personFinnesIkke, value) });
             });
     };
 
@@ -487,14 +491,14 @@ const AddBarnForm = ({
                         setError(null);
                     }}
                 >
-                    <Radio value="dnummer">Fødselsnummer/d-nummer</Radio>
+                    <Radio value="dnummer">{text.label.fødselsnummerDnummer}</Radio>
                     <Radio value="fritekst">Fritekst</Radio>
                 </RadioGroup>
                 <FlexRow>
                     {val === "dnummer" && (
                         <Search
                             className="w-fit"
-                            label="Fødselsnummer/ d-nummer"
+                            label={text.label.fødselsnummerDnummer}
                             variant="secondary"
                             size="small"
                             hideLabel={false}
@@ -506,7 +510,7 @@ const AddBarnForm = ({
                     )}
                     {val === "fritekst" && (
                         <DatePickerInput
-                            label="Fødselsdato"
+                            label={text.label.fødselsdato}
                             placeholder="DD.MM.ÅÅÅÅ"
                             onChange={(value) => setFoedselsdato(value)}
                             defaultValue={null}
@@ -517,7 +521,7 @@ const AddBarnForm = ({
                     )}
                     <TextField
                         name="navn"
-                        label="Navn"
+                        label={text.label.navn}
                         size="small"
                         value={navn}
                         onChange={(e) => setNavn(e.target.value)}
@@ -555,15 +559,15 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
             </div>
             <ConfirmationModal
                 ref={ref}
-                description="Ønsker du å slette barnet som er lagt til i beregningen?"
-                heading="Ønsker du å slette?"
+                description={text.varsel.ønskerDuÅSletteBarnet}
+                heading={text.varsel.ønskerDuÅSlette}
                 footer={
                     <>
                         <Button type="button" onClick={onConfirm}>
-                            Ja, slett
+                            {text.label.jaSlett}
                         </Button>
                         <Button type="button" variant="secondary" onClick={() => ref.current?.close()}>
-                            Avbryt
+                            {text.label.avbryt}
                         </Button>
                     </>
                 }
@@ -729,7 +733,7 @@ const Perioder = ({
         if (perioderValues[index]?.datoFom === null) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
-                message: "Dato må fylles ut",
+                message: text.error.datoMåFyllesUt,
             });
         }
 
@@ -749,11 +753,11 @@ const Perioder = ({
 
             if (isInvalidStatusOver18) {
                 setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
-                    message: `Ugyldig boststatus for periode etter barnet har fylt 18 år.`,
+                    message: text.error.ugyldigBoststatusEtter18,
                 });
             } else if (isInvalidStatusUnder18) {
                 setError(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`, {
-                    message: `Ugyldig bosstatus for periode før barnet har fylt 18 år.`,
+                    message: text.error.ugyldigBoststatusFør18,
                 });
             } else {
                 clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`);
@@ -799,7 +803,7 @@ const Perioder = ({
         if (fomOgTomInvalid) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
-                message: "Tom dato kan ikke være før fom dato",
+                message: text.error.tomDatoKanIkkeVæreFørFomDato,
             });
         } else {
             clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`);
@@ -849,8 +853,8 @@ const Perioder = ({
 
     const showErrorModal = () => {
         setErrorMessage({
-            title: "Fullfør redigering",
-            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
         });
         setErrorModalOpen(true);
     };
@@ -866,7 +870,7 @@ const Perioder = ({
     function bosstatusToVisningsnavn(bostsatus: Bostatuskode): string {
         const visningsnavn = toVisningsnavn(bostsatus);
         if (boststatusOver18År.includes(bostsatus)) {
-            return `18 år: ${visningsnavn}`;
+            return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
     }
@@ -896,9 +900,9 @@ const Perioder = ({
                         className="w-fit"
                     >
                         <Heading spacing size="small" level="3">
-                            Barn over 18 år
+                            {text.title.barnOver18}
                         </Heading>
-                        Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig
+                        {text.barnetHarFylt18SjekkBostatus}
                     </StatefulAlert>
                 </div>
             )}
@@ -906,7 +910,7 @@ const Perioder = ({
                 <div className="mb-4">
                     <Alert variant="warning">
                         <Heading spacing size="small" level="3">
-                            Feil i periodisering
+                            {text.alert.feilIPeriodisering}
                         </Heading>
                         {Object.values(errors.root.husstandsbarn[barnIndex].types).map((type: string) => (
                             <p key={type}>{type}</p>
@@ -923,12 +927,14 @@ const Perioder = ({
                         className="w-fit"
                         onClick={resetTilDataFraFreg}
                     >
-                        {resetTilOpplysningerTekst}
+                        {text.resetTilOpplysninger}
                     </Button>
                 </div>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Status", "Kilde", "", ""]}>
+                <TableWrapper
+                    heading={[text.label.fraOgMed, text.label.tilOgMed, text.label.status, text.label.kilde, "", ""]}
+                >
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
@@ -937,7 +943,7 @@ const Perioder = ({
                                     <FormControlledMonthPicker
                                         key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
                                         name={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
-                                        label="Fra og med"
+                                        label={text.label.fraOgMed}
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
                                         customValidation={() => validateFomOgTom(index)}
@@ -955,7 +961,7 @@ const Perioder = ({
                                     <FormControlledMonthPicker
                                         key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
                                         name={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
-                                        label="Til og med"
+                                        label={text.label.tilOgMed}
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
                                         customValidation={() => validateFomOgTom(index)}
@@ -974,7 +980,7 @@ const Perioder = ({
                                         key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
                                         name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
                                         className="w-fit"
-                                        label="Status"
+                                        label={text.label.status}
                                         options={boforholdOptions.map((value) => ({
                                             value,
                                             text: bosstatusToVisningsnavn(value),
@@ -1047,11 +1053,11 @@ const Perioder = ({
                         iconPosition="right"
                         icon={<ArrowUndoIcon aria-hidden />}
                     >
-                        Angre siste steg
+                        {text.label.angreSisteSteg}
                     </Button>
                 )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                    + Legg til periode
+                    {text.label.leggTilPeriode}
                 </Button>
             </div>
         </>

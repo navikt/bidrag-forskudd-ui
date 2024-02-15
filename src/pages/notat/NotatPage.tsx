@@ -3,6 +3,7 @@ import { Alert, Loader } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Suspense, useEffect } from "react";
 
+import text from "../../constants/texts";
 import { QueryKeys, useNotat } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
 
@@ -12,7 +13,7 @@ export default ({ behandlingId }: { behandlingId: number }) => {
             <Suspense
                 fallback={
                     <div className="flex justify-center">
-                        <Loader size="3xlarge" title="venter..." variant="interaction" />
+                        <Loader size="3xlarge" title={text.loading} variant="interaction" />
                     </div>
                 }
             >
@@ -39,12 +40,12 @@ const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     if (isLoading) {
         return (
             <div className="flex justify-center">
-                <Loader size="3xlarge" title="venter..." variant="interaction" />
+                <Loader size="3xlarge" title={text.loading} variant="interaction" />
             </div>
         );
     }
     if (isError) {
-        return <Alert variant="error">Det skjedde en feil ved henting av notat</Alert>;
+        return <Alert variant="error">{text.error.hentingAvNotat}</Alert>;
     }
     //@ts-ignore
     return <notat-view html={notatHtml} />;

@@ -1,7 +1,9 @@
 import { CopyButton } from "@navikt/ds-react";
 import React from "react";
 
+import text from "../constants/texts";
 import { IRolleUI } from "../types/rolle";
+import { removePlaceholder } from "../utils/string-utils";
 import { RolleTag } from "./RolleTag";
 
 export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: IRolleUI; withBorder?: boolean }) => {
@@ -14,7 +16,11 @@ export const RolleDetaljer = ({ rolle, withBorder = true }: { rolle: IRolleUI; w
             <RolleTag rolleType={rolle.rolletype} />
             <span>{rolle.navn}</span>
             <span className="mx-4">/</span> {rolle.ident}
-            <CopyButton size="small" copyText={rolle.ident} title={`Kopier ${rolle.ident}`} />
+            <CopyButton
+                size="small"
+                copyText={rolle.ident}
+                title={removePlaceholder(text.title.copyButton, rolle.ident)}
+            />
         </div>
     );
 };

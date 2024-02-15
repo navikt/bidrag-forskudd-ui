@@ -1,7 +1,7 @@
 export default {
     alert: {
         ansettelsesdetaljerEndret: "Ansettelsesdetaljer fra arbeidsgiver {} er endret",
-        antallArbeidsforhold: "Antall arbeidsforhold for {} har blitt endret",
+        antallArbeidsforholdEndret: "Antall arbeidsforhold for {} har blitt endret",
         antallBarnetilleggPerioderEndret: "Antall barnetillegg perioder har blitt endret",
         antallSivilstandsperioderEndret: "Antall sivilstandsperioder har blitt endret i Folkeregisteret",
         antallUtvidetBarnetrygdPerioderEndret: "Antall utvidet barnetrygd perioder har blitt endret",
@@ -10,7 +10,7 @@ export default {
         beløpEndret: "Beløp for en eller flere perioder har blitt endret",
         endretVirkningstidspunkt:
             "Virkningstidspunktet er endret. Dette kan påvirke beregningen. Boforhold og inntekt må manuelt vurderes på nytt",
-        endringer: "Følgende endringer har blitt utført",
+        endringer: "Følgende endringer har blitt utført:",
         enEllerFlereBoforholdPerioderEndret: "En eller flere perioder har blitt endret for barn med ident - {}",
         enEllerFlereInntektPerioderLagtTil: "En eller flere inntekt perioder har blitt lagt til rolle med ident - {}",
         enEllerFlereSivilstandPerioderEndret: "En eller flere sivilstandsperioder har blitt endret",
@@ -32,8 +32,9 @@ export default {
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
     error: {
-        datoIkkeGylid: "Dato er ikke gylid",
+        datoIkkeGyldig: "Dato er ikke gyldig",
         datoMåFyllesUt: "Dato må fylles ut",
+        datoMåSettesManuelt: "Dato må settes manuelt",
         datoMåVæreDenSisteIMåneden: "Dato må være den siste i måneden",
         datoMåVæreDenFørsteIMåneden: "Dato må være den første i måneden",
         framoverPeriodisering: "Det kan ikke periodiseres fremover i tid.",
@@ -47,7 +48,7 @@ export default {
         navnMåFyllesUt: "Navn må fylles ut",
         kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
         personFinnesIkke: "Finner ikke person med ident: {}",
-        tomDatoKanIkkeVæreFørFomDato: "Tom dato kan ikke være før Fom dato",
+        tomDatoKanIkkeVæreFørFomDato: "Tom dato kan ikke være før fom dato",
         ugyldigBoststatusFør18: "Ugyldig boststatus for periode etter barnet har fylt 18 år.",
         ugyldigBoststatusEtter18: "Ugyldig bosstatus for periode før barnet har fylt 18 år.",
     },
@@ -83,6 +84,7 @@ export default {
         oppdater: "Oppdater",
         periode: "Periode",
         resultat: "Resultat",
+        sivilstand: "Sivilstand",
         sivilstandBM: "Sivilstand til BM",
         stilling: "Stilling",
         sum: "Sum",
@@ -94,7 +96,6 @@ export default {
         søknadfra: "Søknad fra",
         søktfradato: "Søkt fra dato",
         virkningstidspunkt: "Virkningstidspunkt",
-        visNotat: "Vis notat",
         årsak: "Årsak",
     },
     loading: "venter...",

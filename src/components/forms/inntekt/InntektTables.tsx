@@ -4,11 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
+import text from "../../../constants/texts";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, getYearFromDate, isValidDate } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -16,7 +18,6 @@ import { FormControlledTextField } from "../../formFields/FormControlledTextFiel
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { checkOverlappingPeriods, findDateGaps, getOverlappingInntektPerioder } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-
 const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
     const toVisningsnavn = useVisningsnavn();
     return item.fraGrunnlag ? (
@@ -26,8 +27,8 @@ const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ide
     ) : (
         <FormControlledSelectField
             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.inntektstype`}
-            label="Beskrivelse"
-            options={[{ value: "", text: "Velg type inntekt" }].concat(
+            label={text.label.beskrivelse}
+            options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
                 Object.entries(GrunnlagInntektType).map(([value, text]) => ({
                     value,
                     text,
@@ -55,10 +56,14 @@ const Detaljer = ({ totalt }) => {
             <Popover open={openState} onClose={() => setOpenState(false)} anchorEl={buttonRef.current}>
                 <Popover.Content className="grid gap-y-4">
                     <Heading level="4" size="small">
-                        Detaljer
+                        {text.title.detaljer}
                     </Heading>
-                    <BodyShort size="small">Lønnsinntekt med trygdeavgiftsplikt og med trekkplikt: {totalt}</BodyShort>
-                    <BodyShort size="small">Sum: {totalt}</BodyShort>
+                    <BodyShort size="small">
+                        {removePlaceholder(text.label.lønnsinntektMedTrygdeavgiftspliktOgMedTrekkplikt, totalt)}
+                    </BodyShort>
+                    <BodyShort size="small">
+                        {text.label.sum}: {totalt}
+                    </BodyShort>
                     <Button
                         type="button"
                         size="small"
@@ -66,7 +71,7 @@ const Detaljer = ({ totalt }) => {
                         className="w-max"
                         onClick={() => setOpenState(false)}
                     >
-                        Lukk
+                        {text.label.lukk}
                     </Button>
                 </Popover.Content>
             </Popover>
@@ -83,7 +88,7 @@ const Totalt = ({ item, index, ident }) =>
         <div className="w-[120px]">
             <FormControlledTextField
                 name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.beløp`}
-                label="Totalt"
+                label={text.label.totalt}
                 type="number"
                 min="1"
                 hideLabel
@@ -229,7 +234,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                     )}
                     {errors.inntekteneSomLeggesTilGrunn[ident].types?.overlappingPerioder && (
                         <>
-                            <BodyShort>Du har overlappende perioder:</BodyShort>
+                            <BodyShort>{text.alert.overlappendePerioder}:</BodyShort>
                             {JSON.parse(
                                 errors.inntekteneSomLeggesTilGrunn[ident].types.overlappingPerioder as string
                             ).map((perioder) => (
@@ -242,9 +247,20 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                     )}
                 </Alert>
             )}
-            {!isValidDate(virkningstidspunkt) && <Alert variant="warning">Mangler virkningstidspunkt</Alert>}
+            {!isValidDate(virkningstidspunkt) && (
+                <Alert variant="warning">{text.alert.manglerVirkningstidspunkt}</Alert>
+            )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", ""]}>
+                <TableWrapper
+                    heading={[
+                        text.label.taMed,
+                        text.label.beskrivelse,
+                        text.label.beløp,
+                        text.label.fraOgMed,
+                        text.label.tilOgMed,
+                        "",
+                    ]}
+                >
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
@@ -276,7 +292,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     datepicker={
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoFom`}
-                                            label="Fra og med"
+                                            label={text.label.fraOgMed}
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoFom}
                                             required={item.taMed}
@@ -294,7 +310,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                                     datepicker={
                                         <FormControlledMonthPicker
                                             name={`inntekteneSomLeggesTilGrunn.${ident}.${index}.datoTom`}
-                                            label="Til og med"
+                                            label={text.label.tilOgMed}
                                             placeholder="DD.MM.ÅÅÅÅ"
                                             defaultValue={item.datoTom}
                                             fromDate={fom}
@@ -316,7 +332,7 @@ export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) =
                 </TableWrapper>
             )}
             <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
+                {text.label.leggTilPeriode}
             </Button>
         </>
     );
@@ -360,7 +376,7 @@ export const UtvidetBarnetrygdTabel = () => {
             setError("utvidetbarnetrygd", {
                 ...errors.utvidetbarnetrygd,
                 types: {
-                    overlappingPerioder: "Du har overlappende perioder",
+                    overlappingPerioder: text.alert.overlappendePerioder,
                 },
             });
         }
@@ -379,7 +395,7 @@ export const UtvidetBarnetrygdTabel = () => {
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
-                <TableWrapper heading={["Periode", "Delt bosted", "Beløp", ""]}>
+                <TableWrapper heading={["Periode", "Delt bosted", text.label.beløp, ""]}>
                     {fieldArray.fields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
@@ -388,7 +404,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                     <FormControlledMonthPicker
                                         key={`utvidetbarnetrygd.${index}.datoFom`}
                                         name={`utvidetbarnetrygd.${index}.datoFom`}
-                                        label="Fra og med"
+                                        label={text.label.fraOgMed}
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoFom}
                                         fromDate={fom}
@@ -399,7 +415,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                     <FormControlledMonthPicker
                                         key={`utvidetbarnetrygd.${index}.datoTom`}
                                         name={`utvidetbarnetrygd.${index}.datoTom`}
-                                        label="Til og med"
+                                        label={text.label.tilOgMed}
                                         placeholder="DD.MM.ÅÅÅÅ"
                                         defaultValue={item.datoTom}
                                         fromDate={fom}
@@ -417,7 +433,7 @@ export const UtvidetBarnetrygdTabel = () => {
                                 <FormControlledTextField
                                     key={`utvidetbarnetrygd.${index}.beløp`}
                                     name={`utvidetbarnetrygd.${index}.beløp`}
-                                    label="Beløp"
+                                    label={text.label.beløp}
                                     type="number"
                                     min="0"
                                     hideLabel
@@ -452,7 +468,7 @@ export const UtvidetBarnetrygdTabel = () => {
                     })
                 }
             >
-                + Legg til periode
+                {text.label.leggTilPeriode}
             </Button>
         </>
     );
@@ -501,7 +517,7 @@ export const BarnetilleggTabel = () => {
             setError("barnetillegg", {
                 ...errors.barnetillegg,
                 types: {
-                    overlappingPerioder: "Du har overlappende perioder",
+                    overlappingPerioder: text.alert.overlappendePerioder,
                 },
             });
         }
@@ -520,7 +536,9 @@ export const BarnetilleggTabel = () => {
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Barn", "Beløp", ""]}>
+                <TableWrapper
+                    heading={[text.label.fraOgMed, text.label.tilOgMed, text.label.barn, text.label.beløp, ""]}
+                >
                     {fieldArray.fields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
@@ -528,7 +546,7 @@ export const BarnetilleggTabel = () => {
                                 <FormControlledMonthPicker
                                     key={`barnetillegg.${index}.datoFom`}
                                     name={`barnetillegg.${index}.datoFom`}
-                                    label="Fra og med"
+                                    label={text.label.fraOgMed}
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoFom}
                                     fromDate={fom}
@@ -539,7 +557,7 @@ export const BarnetilleggTabel = () => {
                                 <FormControlledMonthPicker
                                     key={`barnetillegg.${index}.datoTom`}
                                     name={`barnetillegg.${index}.datoTom`}
-                                    label="Til og med"
+                                    label={text.label.tilOgMed}
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoTom}
                                     fromDate={fom}
@@ -553,8 +571,8 @@ export const BarnetilleggTabel = () => {
                                     label="Barn"
                                     hideLabel
                                 >
-                                    <option key={"Velg barn"} value={""}>
-                                        Velg barn
+                                    <option key={text.select.barnPlaceholder} value={""}>
+                                        {text.select.barnPlaceholder}
                                     </option>
                                     {personQueriesSuccess &&
                                         barnMedNavn.map((barn) => (
@@ -566,7 +584,7 @@ export const BarnetilleggTabel = () => {
                                 <FormControlledTextField
                                     key={`barnetillegg.${index}.barnetillegg`}
                                     name={`barnetillegg.${index}.barnetillegg`}
-                                    label="Beløp"
+                                    label={text.label.beløp}
                                     type="number"
                                     min="0"
                                     hideLabel
@@ -601,7 +619,7 @@ export const BarnetilleggTabel = () => {
                     })
                 }
             >
-                + Legg til periode
+                {text.label.leggTilPeriode}
             </Button>
         </>
     );

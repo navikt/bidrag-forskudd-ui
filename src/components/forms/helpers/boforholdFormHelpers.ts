@@ -12,6 +12,7 @@ import {
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "../../../api/BidragGrunnlagApi";
+import text from "../../../constants/texts";
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,
@@ -34,7 +35,7 @@ import {
     periodCoversMinOneFullCalendarMonth,
     toISODateString,
 } from "../../../utils/date-utils";
-
+import { removePlaceholder } from "../../../utils/string-utils";
 export const boststatusOver18År = [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG];
 export const boforholdForskuddOptions = {
     under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
@@ -653,10 +654,10 @@ export const compareOpplysninger = (
     const changedLog = [];
 
     if (savedOpplysninger.husstand.length < latestOpplysninger.husstand.length) {
-        changedLog.push("Det er flere barn registret på samme adresse i Folkeregisteret.");
+        changedLog.push(text.alert.flereBarnRegistrertPåAdresse);
     }
     if (savedOpplysninger.husstand.length > latestOpplysninger.husstand.length) {
-        changedLog.push("Det er færre barn registrert på samme adresse i Folkeregisteret.");
+        changedLog.push(text.alert.færreBarnRegistrertPåAdresse);
     }
 
     const removed = savedOpplysninger.husstand?.filter(
@@ -668,12 +669,12 @@ export const compareOpplysninger = (
     );
 
     if (added.length) {
-        changedLog.push("Barn som har blitt lagt inn i nye opplysninger fra Folkeregisteret:");
+        changedLog.push(text.alert.barnSomHarBlittLagtInn);
         added.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
     if (removed.length) {
-        changedLog.push("Barn som ikke finnes i nye opplysninger fra Folkeregisteret:");
+        changedLog.push(text.alert.barnSomIkkeFinnes);
         removed.forEach((barn) => changedLog.push(`${barn.navn} / ${barn.ident}`));
     }
 
@@ -701,7 +702,7 @@ export const compareOpplysninger = (
             return changed;
         };
         if (notTheSameNumberOfPeriods || statusOrDatesChangedForSomePeriods(barn.perioder)) {
-            changedLog.push(`En eller flere perioder har blitt endret for barn med ident - ${barn.ident}`);
+            changedLog.push(removePlaceholder(text.alert.enEllerFlereBoforholdPerioderEndret, barn.ident));
         }
     });
 
@@ -722,9 +723,9 @@ export const compareOpplysninger = (
     };
 
     if (savedOpplysninger.sivilstand.length !== latestOpplysninger.sivilstand.length) {
-        changedLog.push("Antall sivilstandsperioder har blitt endret i Folkeregisteret");
+        changedLog.push(text.alert.antallSivilstandsperioderEndret);
     } else if (oneOrMoreSivilstandPeriodsChanged(savedOpplysninger.sivilstand)) {
-        changedLog.push("En eller flere sivilstandsperioder har blitt endret");
+        changedLog.push(text.alert.enEllerFlereSivilstandPerioderEndret);
     }
 
     return changedLog;

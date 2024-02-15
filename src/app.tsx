@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ErrorModal } from "./components/modal/ErrorModal";
+import text from "./constants/texts";
 import { ForskuddProvider } from "./context/ForskuddContext";
 import { usePrefetchBehandlingAndGrunnlagspakke } from "./hooks/useApiData";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
@@ -45,11 +46,11 @@ export default function App() {
                         <Alert variant="error" className="w-8/12 m-auto mt-8">
                             <div>
                                 <Heading spacing size="small" level="3">
-                                    Det har skjedd en feil
+                                    {text.error.feilmelding}
                                 </Heading>
                                 <BodyShort size="small">Feilmelding: {error.message}</BodyShort>
                                 <Button size="small" className="w-max mt-4" onClick={() => resetErrorBoundary()}>
-                                    Last på nytt
+                                    {text.refresh}
                                 </Button>
                             </div>
                         </Alert>
@@ -85,7 +86,7 @@ function ForskudWrapper() {
     if (!flagsReady && flagsError == false) {
         return (
             <div className="flex justify-center">
-                <Loader size="3xlarge" title="venter..." variant="interaction" />
+                <Loader size="3xlarge" title={text.loading} variant="interaction" />
             </div>
         );
     }
@@ -106,7 +107,7 @@ const NotatPageWrapper = () => {
         <Suspense
             fallback={
                 <div className="flex justify-center">
-                    <Loader size="3xlarge" title="venter..." variant="interaction" />
+                    <Loader size="3xlarge" title={text.loading} variant="interaction" />
                 </div>
             }
         >
