@@ -5,17 +5,46 @@ import {
     BehandlingDto,
     GrunnlagsdataDto,
     OppdaterBehandlingRequest,
+    SivilstandBeregnet,
+    SivilstandBeregnetStatusEnum,
+    Sivilstandskode,
 } from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
+import { SivilstandBeregnetInnhold } from "../../types/boforholdFormValues";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 import { behandlingMockApiDataV2 } from "../testdata/behandlingTestDataV2";
 
 export function behandlingMock(): RestHandler[] {
     return [
+        rest.post(
+            `${environment.url.bidragBehandling}/api/v2/databehandler/v2/sivilstand/:behandlingId`,
+            (req, res, ctx) => {
+                const behandling = JSON.parse(
+                    localStorage.getItem(`behandling-${req.params.behandlingId}`)
+                ) as BehandlingDto;
+                const virkningstidspunkt = behandling?.virkningstidspunkt?.virkningstidspunkt;
+                const data: SivilstandBeregnet = {
+                    status: SivilstandBeregnetStatusEnum.OK,
+                    sivilstandListe: [
+                        {
+                            periodeFom: virkningstidspunkt?.length > 0 ? virkningstidspunkt : "2022-01-01",
+                            sivilstandskode: Sivilstandskode.BOR_ALENE_MED_BARN,
+                        },
+                    ] as SivilstandBeregnetInnhold[],
+                };
+                return res(ctx.set("Content-Type", "application/json"), ctx.json(data));
+            }
+        ),
         rest.get(`${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId`, (req, res, ctx) => {
             if (!localStorage.getItem(`behandling-${req.params.behandlingId}`)) {
                 localStorage.setItem(`behandlingId`, req.params.behandlingId.toString());
-                localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(behandlingMockApiData));
+                localStorage.setItem(
+                    `behandling-${req.params.behandlingId}`,
+                    JSON.stringify({
+                        ...behandlingMockApiData,
+                        id: req.params.behandlingId,
+                    })
+                );
             }
             return res(
                 ctx.set("Content-Type", "application/json"),
@@ -56,7 +85,10 @@ export function behandlingMock(): RestHandler[] {
                 virkningstidspunkt: {
                     ...behandling?.virkningstidspunkt,
                     ...oppdater?.virkningstidspunkt,
+                    årsak: oppdater?.virkningstidspunkt?.årsak,
+                    avslag: oppdater?.virkningstidspunkt?.avslag,
                 },
+                id: Number(req.params.behandlingId),
             };
             // @ts-ignore
             delete updatedBehandling.grunnlagspakkeId;

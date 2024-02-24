@@ -47,20 +47,20 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         barnetillegg: [],
         småbarnstillegg: [],
         kontantstøtte: [],
-        barnetilsyn: [],
-        inntekter: [],
+        utvidetBarnetrygd: [],
         notat: {
             kunINotat: "",
             medIVedtaket: "",
         },
     },
     virkningstidspunkt: {
-        virkningsdato: "",
+        virkningstidspunkt: "",
         årsak: null,
         notat: {
             kunINotat: "",
             medIVedtaket: "",
         },
     },
-    opplysninger: [],
+    aktiveGrunnlagsdata: [],
+    ikkeAktiverteEndringerIGrunnlagsdata: [],
 };

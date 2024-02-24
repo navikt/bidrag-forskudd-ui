@@ -1,17 +1,18 @@
-import { ClockDashedIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
+import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useGetOpplysningerHentetdato, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
-import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
+import { InntektFormValues } from "../../../types/inntektFormValues";
+import { dateOrNull, isValidDate } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -21,7 +22,9 @@ import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
 import { InntektChart } from "./InntektChart";
+import { Kontantstøtte } from "./Kontantstøtte";
 import { SkattepliktigeOgPensjonsgivendeInntekt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { Småbarnstillegg } from "./Småbarnstilleg";
 import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
 const InntektHeader = ({ ident }: { ident: string }) => {
@@ -32,7 +35,7 @@ const InntektHeader = ({ ident }: { ident: string }) => {
             <InntektChart inntekt={inntekt} />
             <ExpansionCard aria-label="default-demo" size="small">
                 <ExpansionCard.Header>
-                    <ExpansionCard.Title>Arbeidsforhold</ExpansionCard.Title>
+                    <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
                 </ExpansionCard.Header>
                 <ExpansionCard.Content>
                     <QueryErrorWrapper>
@@ -47,15 +50,12 @@ const InntektHeader = ({ ident }: { ident: string }) => {
         </Alert>
     );
 };
-const Main = ({
-    behandlingRoller,
-    opplysningerChanges,
-    updateOpplysninger,
-}: {
-    behandlingRoller: RolleDto[];
-    opplysningerChanges: string[];
-    updateOpplysninger: () => void;
-}) => {
+const Main = () => {
+    const {
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
+        roller: behandlingRoller,
+    } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
@@ -64,28 +64,11 @@ const Main = ({
             return 0;
         });
 
-    const opplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.INNTEKT_BEARBEIDET);
     return (
         <div className="grid gap-y-12">
-            {opplysningerChanges.length > 0 && (
-                <Alert variant="info">
-                    <div className="flex items-center mb-4">
-                        Nye opplysninger tilgjengelig. Sist hentet{" "}
-                        {ISODateTimeStringToDDMMYYYYString(opplysningerHentetdato)}
-                        <Button
-                            variant="tertiary"
-                            size="small"
-                            className="ml-8"
-                            icon={<ClockDashedIcon aria-hidden />}
-                            onClick={updateOpplysninger}
-                        >
-                            Oppdater
-                        </Button>
-                    </div>
-                    <p>Følgende endringer har blitt utført:</p>
-                    {opplysningerChanges.map((change, index) => (
-                        <p key={`${change}-${index}`}>{change}</p>
-                    ))}
+            {!isValidDate(virkningstidspunkt) && (
+                <Alert variant="warning">
+                    <BodyShort>Mangler virkningstidspunkt</BodyShort>
                 </Alert>
             )}
             <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
@@ -111,6 +94,8 @@ const Main = ({
                                 <>
                                     <Barnetillegg />
                                     <UtvidetBarnetrygd />
+                                    <Småbarnstillegg />
+                                    <Kontantstøtte />
                                 </>
                             )}
                         </Tabs.Panel>
@@ -122,8 +107,29 @@ const Main = ({
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { setActiveStep, inntektFormValues, setInntektFormValues } = useForskudd();
+    const { mutation: oppdaterBehandling } = useOppdaterBehandlingV2();
+    const { watch } = useFormContext<InntektFormValues>();
+    const onSave = () => {
+        oppdaterBehandling.mutate(createInntektPayload(inntektFormValues));
+    };
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+
+    const debouncedOnSave = useDebounce(onSave);
+
+    useEffect(() => {
+        const subscription = watch(({ notat }, { name }) => {
+            if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
+                setInntektFormValues((prev) => ({
+                    ...prev,
+                    notat,
+                }));
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, []);
+
     return (
         <>
             <div className="grid gap-y-4">
@@ -143,57 +149,20 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { inntektFormValues, setInntektFormValues } = useForskudd();
     const { inntekter, roller } = useGetBehandlingV2();
-    const { mutation: oppdaterBehandling } = useOppdaterBehandlingV2();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = createInitialValues(bmOgBarn, inntekter);
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
 
-    const onSave = () => {
-        const values = useFormMethods.getValues();
-
-        oppdaterBehandling.mutate(createInntektPayload(values), {
-            onSuccess: () =>
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
-        });
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
-
-    useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch(() => {
-            if (useFormMethods.formState.isDirty) {
-                debouncedOnSave();
-            }
-        });
-
-        return () => unsubscribe();
-    }, [useFormMethods.watch, useFormMethods.formState.isDirty]);
-
-    const updateOpplysninger = () => {
-        // TODO update opplysninger && fetch new calculated values
-        // useFormMethods.reset(values);
-        // oppdaterBehandling.mutate(createInntektPayload(values));
-        setInntektFormValues(inntektFormValues);
-    };
+    // TODO update opplysninger && fetch new calculated values
+    // const updateOpplysninger = () => {};
 
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout
-                    title="Inntekt"
-                    main={
-                        <Main
-                            behandlingRoller={roller}
-                            opplysningerChanges={[]}
-                            updateOpplysninger={updateOpplysninger}
-                        />
-                    }
-                    side={<Side />}
-                />
+                <FormLayout title="Inntekt" main={<Main />} side={<Side />} />
             </form>
         </FormProvider>
     );

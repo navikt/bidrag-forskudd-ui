@@ -5,18 +5,19 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
     OppdaterVirkningstidspunkt,
+    Resultatkode,
     Rolletype,
     TypeArsakstype,
     VirkningstidspunktDto,
 } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
 import { STEPS } from "../../../constants/steps";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { Avslag } from "../../../enum/Avslag";
-import { ForskuddBeregningKodeAarsak } from "../../../enum/ForskuddBeregningKodeAarsak";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -32,40 +33,79 @@ import {
 } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
+const årsakListe = [
+    TypeArsakstype.ENDRING3MANEDERTILBAKE,
+    TypeArsakstype.ENDRING3ARSREGELEN,
+    TypeArsakstype.FRABARNETSFODSEL,
+    TypeArsakstype.FRABARNETSFLYTTEMANED,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+    TypeArsakstype.FRA_OPPHOLDSTILLATELSE,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.FRA_SAMLIVSBRUDD,
+    TypeArsakstype.PRIVAT_AVTALE,
+    TypeArsakstype.REVURDERINGMANEDENETTER,
+    TypeArsakstype.SOKNADSTIDSPUNKTENDRING,
+    TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
+    TypeArsakstype.TREMANEDERTILBAKE,
+    TypeArsakstype.TREARSREGELEN,
+];
+
+console.log("Kode", årsakListe);
+
+const avslagsListe = [
+    Resultatkode.PAGRUNNAVBARNEPENSJON,
+    Resultatkode.BARNETS_EKTESKAP,
+    Resultatkode.BARNETS_INNTEKT,
+    Resultatkode.PAGRUNNAVYTELSEFRAFOLKETRYGDEN,
+    Resultatkode.FULLT_UNDERHOLDT_AV_OFFENTLIG,
+    Resultatkode.IKKE_OMSORG,
+    Resultatkode.IKKE_OPPHOLD_I_RIKET,
+    Resultatkode.MANGLENDE_DOKUMENTASJON,
+    Resultatkode.PAGRUNNAVSAMMENFLYTTING,
+    Resultatkode.OPPHOLD_I_UTLANDET,
+    Resultatkode.UTENLANDSK_YTELSE,
+];
+
 const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues =>
     ({
-        virkningsdato: response.virkningsdato,
-        årsak: response.årsak ?? "",
+        virkningstidspunkt: response.virkningstidspunkt,
+        årsakAvslag: response.årsak ?? response.avslag ?? "",
         notat: {
             medIVedtaket: response.notat?.medIVedtaket,
             kunINotat: response.notat?.kunINotat,
         },
     }) as VirkningstidspunktFormValues;
 
-const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningstidspunkt => ({
-    ...values,
-    årsak: values.årsak === "" ? null : values.årsak,
-    notat: {
-        medIVedtaket: values.notat?.medIVedtaket,
-        kunINotat: values.notat?.kunINotat,
-    },
-});
+const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningstidspunkt => {
+    const årsak = Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag);
+    const avslag = Object.values(Resultatkode).find((value) => value === values.årsakAvslag);
+    return {
+        virkningstidspunkt: values.virkningstidspunkt,
+        årsak,
+        avslag,
+        notat: {
+            medIVedtaket: values.notat?.medIVedtaket,
+            kunINotat: values.notat?.kunINotat,
+        },
+    };
+};
 
 const Main = ({ initialValues, error }) => {
     const behandling = useGetBehandling();
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningsdato);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
-    const virkningsDato = getValues("virkningsdato");
+    const virkningsDato = getValues("virkningstidspunkt");
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
+    const tilVisningsnavn = useVisningsnavn();
     const onAarsakSelect = (value: string) => {
         const barnsFødselsdato = kunEtBarnIBehandlingen
             ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
             : undefined;
         const date = aarsakToVirkningstidspunktMapper(value, behandling, barnsFødselsdato);
-        setValue("virkningsdato", date ? toISODateString(date) : null);
-        clearErrors("virkningsdato");
+        setValue("virkningstidspunkt", date ? toISODateString(date) : null);
+        clearErrors("virkningstidspunkt");
     };
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
@@ -74,7 +114,7 @@ const Main = ({ initialValues, error }) => {
     useEffect(() => {
         if (!initialVirkningsdato && behandling) {
             setInitialVirkningsdato(
-                behandling.virkningstidspunkt.virkningsdato ??
+                behandling.virkningstidspunkt.virkningstidspunkt ??
                     toISODateString(
                         getSoktFraOrMottatDato(new Date(behandling.søktFomDato), new Date(behandling.mottattdato))
                     )
@@ -97,61 +137,61 @@ const Main = ({ initialValues, error }) => {
 
     return (
         <>
-            {showChangedVirkningsDatoAlert && (
-                <Alert variant="warning">
-                    Virkningstidspunktet er endret. Dette kan påvirke beregningen. Boforhold og inntekt må manuelt
-                    vurderes på nytt
-                </Alert>
-            )}
+            {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
             {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknadstype:</Label>
+                    <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">
                         {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
                     </BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søknad fra:</Label>
+                    <Label size="small">{text.label.søknadfra}:</Label>
                     <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Mottat dato:</Label>
+                    <Label size="small">{text.label.mottattdato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
-                    <Label size="small">Søkt fra dato:</Label>
+                    <Label size="small">{text.label.søktfradato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.søktFomDato))}</BodyShort>
                 </div>
             </FlexRow>
             <FlexRow className="gap-x-8">
-                <FormControlledSelectField name="årsak" label="Årsak" onSelect={onAarsakSelect}>
-                    <option value="">Velg årsak/avslag</option>
-                    <optgroup label="Årsak">
-                        {Object.entries(ForskuddBeregningKodeAarsak)
-                            .filter(([value]) => {
+                <FormControlledSelectField
+                    name="årsakAvslag"
+                    label={text.label.årsak}
+                    onSelect={onAarsakSelect}
+                    className="w-max"
+                >
+                    <option value="">{text.select.årsakAvslagPlaceholder}</option>
+                    <optgroup label={text.label.årsak}>
+                        {årsakListe
+                            .filter((value) => {
                                 if (kunEtBarnIBehandlingen) return true;
                                 return value !== TypeArsakstype.FRABARNETSFODSEL;
                             })
-                            .map(([value, text]) => (
+                            .map((value) => (
                                 <option key={value} value={value}>
-                                    {text}
+                                    {tilVisningsnavn(value)}
                                 </option>
                             ))}
                     </optgroup>
-                    <optgroup label="Avslag">
-                        {Object.entries(Avslag).map(([value, text]) => (
+                    <optgroup label={text.label.avslag}>
+                        {avslagsListe.map((value) => (
                             <option key={value} value={value}>
-                                {text}
+                                {tilVisningsnavn(value)}
                             </option>
                         ))}
                     </optgroup>
                 </FormControlledSelectField>
                 <FormControlledMonthPicker
-                    name="virkningsdato"
-                    label="Virkningstidspunkt"
+                    name="virkningstidspunkt"
+                    label={text.label.virkningstidspunkt}
                     placeholder="DD.MM.ÅÅÅÅ"
-                    defaultValue={initialValues.virkningsdato}
+                    defaultValue={initialValues.virkningstidspunkt}
                     fromDate={fom}
                     toDate={tom}
                     required
@@ -164,17 +204,19 @@ const Main = ({ initialValues, error }) => {
 const Side = () => {
     const { setActiveStep } = useForskudd();
     const useFormMethods = useFormContext();
-    const aarsak = useFormMethods.getValues("årsak");
+    const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
-        setActiveStep(Avslag[aarsak] ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]);
+        setActiveStep(
+            avslagsListe.includes(årsakAvslag) ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]
+        );
 
     return (
         <>
             <Heading level="3" size="medium">
-                Begrunnelse
+                {text.title.begrunnelse}
             </Heading>
-            <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
-            <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
+            <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
+            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -218,7 +260,7 @@ const VirkningstidspunktForm = () => {
             <FormProvider {...useFormMethods}>
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
-                        title="Virkningstidspunkt"
+                        title={text.label.virkningstidspunkt}
                         main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
                         side={<Side />}
                     />

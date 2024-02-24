@@ -11,7 +11,7 @@ import { useGetBehandling, useGetBehandlingV2 } from "../../../hooks/useApiData"
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYString, getYearFromDate, isValidDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -108,7 +108,7 @@ const DeleteButton = ({ item, index, handleOnDelete }) =>
         />
     );
 
-const EditOrSaveButton = ({ index, editableRow, onEditRow, onSaveRow }) =>
+export const EditOrSaveButton = ({ index, editableRow, onEditRow, onSaveRow }) =>
     editableRow === index ? (
         <Button
             type="button"
@@ -173,7 +173,7 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
     const [editableRow, setEditableRow] = useState(undefined);
     const saveInntekt = useOnSaveInntekt();
     const {
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandling();
     const {
         control,
@@ -188,7 +188,7 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
         name: `årsinntekter.${ident}`,
     });
     const virkningstidspunkt = dateOrNull(virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(new Date(virkningsdato));
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
 
     const watchFieldArray = useWatch({ control, name: `årsinntekter.${ident}` });
 
@@ -281,9 +281,8 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
 
     return (
         <>
-            {(errors?.årsinntekter?.[ident]?.types || !isValidDate(virkningstidspunkt)) && (
+            {errors?.årsinntekter?.[ident]?.types && (
                 <Alert variant="warning" className="mb-4">
-                    {!isValidDate(virkningstidspunkt) && <BodyShort>Mangler virkningstidspunkt</BodyShort>}
                     {errors.årsinntekter?.[ident].types?.periodGaps && (
                         <BodyShort>{errors.årsinntekter[ident].types.periodGaps}</BodyShort>
                     )}
@@ -303,7 +302,7 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                 </Alert>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["", "Ta med", "Beskrivelse", "Beløp", "Fra og med", "Til og med", "", ""]}>
+                <TableWrapper heading={["Ta med", "Fra og med", "Til og med", "Beskrivelse", "Beløp", "", "", ""]}>
                     {controlledFields.map((item, index) => (
                         <TableExpandableRowWrapper
                             content={<ExpandableContent item={item} />}
@@ -314,18 +313,6 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                                     name={`årsinntekter.${ident}.${index}.taMed`}
                                     onChange={(value) => handleOnSelect(value.target.checked, index)}
                                     legend=""
-                                />,
-                                <Beskrivelse
-                                    key={`årsinntekter.${ident}.${index}.inntektBeskrivelse`}
-                                    item={item}
-                                    index={index}
-                                    ident={ident}
-                                />,
-                                <Totalt
-                                    key={`årsinntekter.${ident}.${index}.belop`}
-                                    item={item}
-                                    index={index}
-                                    ident={ident}
                                 />,
                                 <Periode
                                     key={`årsinntekter.${ident}.${index}.datoFom`}
@@ -362,6 +349,18 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                                             lastDayOfMonthPicker
                                         />
                                     }
+                                />,
+                                <Beskrivelse
+                                    key={`årsinntekter.${ident}.${index}.inntektBeskrivelse`}
+                                    item={item}
+                                    index={index}
+                                    ident={ident}
+                                />,
+                                <Totalt
+                                    key={`årsinntekter.${ident}.${index}.belop`}
+                                    item={item}
+                                    index={index}
+                                    ident={ident}
                                 />,
                                 <EditOrSaveButton
                                     key={`edit-or-save-button-${index}`}

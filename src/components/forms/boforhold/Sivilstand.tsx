@@ -6,12 +6,19 @@ import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, OpplysningerType, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
-import { SivilstandDto as SivilstandDtoGrunnlag } from "../../../api/BidragGrunnlagApi";
+import {
+    Kilde,
+    OpplysningerType,
+    SivilstandBeregnetStatusEnum,
+    SivilstandDto,
+    Sivilstandskode,
+} from "../../../api/BidragBehandlingApiV1";
+import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetBehandling, useGetOpplysninger } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -24,6 +31,7 @@ import {
     calculateFraDato,
     checkPeriodizationErrors,
     editPeriods,
+    mapSivilstandProsessert,
     removeAndEditPeriods,
     sivilstandForskuddOptions,
 } from "../helpers/boforholdFormHelpers";
@@ -32,7 +40,7 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
     <>
         <Heading level="3" size="medium">
-            Sivilstand
+            {text.label.sivilstand}
         </Heading>
         <SivilistandPerioder virkningstidspunkt={datoFom} />
     </>
@@ -40,10 +48,13 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
+    const [showResetButton, setShowResetButton] = useState(false);
 
     const saveBoforhold = useOnSaveBoforhold();
     const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const {
         control,
@@ -73,6 +84,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const validatePeriods = (perioderValues: SivilstandDto[]) => {
         const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
 
+        if (sivilstandProssesert.status != SivilstandBeregnetStatusEnum.OK && controlledFields.length == 0) {
+            errorTypes.push("kunneIkkeBeregneSivilstandPerioder");
+        }
         if (errorTypes.length) {
             setError(`root.sivilstand`, {
                 types: errorTypes.reduce(
@@ -100,7 +114,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         if (perioderValues[index].datoFom === null) {
             setError(`sivilstand.${index}.datoFom`, {
                 type: "notValid",
-                message: "Dato må fylles ut",
+                message: text.error.datoMåFyllesUt,
             });
         }
 
@@ -118,6 +132,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         setBoforholdFormValues(updatedValues);
         setValue("sivilstand", sivilstand);
         saveBoforhold(updatedValues);
+        setShowResetButton(true);
+
         setEditableRow(undefined);
     };
 
@@ -168,8 +184,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     const showErrorModal = () => {
         setErrorMessage({
-            title: "Fullfør redigering",
-            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
         });
         setErrorModalOpen(true);
     };
@@ -182,6 +198,10 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         }
     };
 
+    const resetTilDataFraFreg = () => {
+        updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
+        setShowResetButton(false);
+    };
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
@@ -190,7 +210,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     <div className="mb-4">
                         <Alert variant="warning">
                             <Heading spacing size="small" level="3">
-                                Feil i periodisering
+                                {text.alert.feilIPeriodisering}
                             </Heading>
                             {Object.values((errors.root.sivilstand as { types: string[] }).types).map(
                                 (type: string) => (
@@ -200,8 +220,30 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Alert>
                     </div>
                 )}
+                {sivilstandOpplysninger != null && showResetButton && (
+                    <div className="flex justify-end mb-4">
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit"
+                            onClick={resetTilDataFraFreg}
+                        >
+                            {text.resetTilOpplysninger}
+                        </Button>
+                    </div>
+                )}
                 {controlledFields.length > 0 && (
-                    <TableWrapper heading={["Fra og med", "Til og med", "Sivilstand", "Kilde", "", ""]}>
+                    <TableWrapper
+                        heading={[
+                            text.label.fraOgMed,
+                            text.label.tilOgMed,
+                            text.label.sivilstand,
+                            text.label.kilde,
+                            "",
+                            "",
+                        ]}
+                    >
                         {controlledFields.map((item, index) => (
                             <TableRowWrapper
                                 key={item.id}
@@ -299,7 +341,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     </TableWrapper>
                 )}
                 <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
-                    + Legg til periode
+                    {text.label.leggTilPeriode}
                 </Button>
             </Box>
         </div>
@@ -307,42 +349,53 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    const sivilstandOpplysninger = useGetOpplysninger<SivilstandDtoGrunnlag[]>(OpplysningerType.SIVILSTAND);
-    const {
-        virkningstidspunkt: { virkningsdato },
-        søktFomDato,
-    } = useGetBehandling();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
+    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
+    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
+
+    const behandling = useGetBehandling();
     if (!sivilstandOpplysninger) {
         return null;
     }
+
+    const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
+
+    const sivilstandsOpplysningerFiltrert = () => {
+        const opplysningerSortert = sivilstandOpplysninger.sort((a, b) => {
+            if (a.gyldigFom == null) return -1;
+            if (b.gyldigFom == null) return 1;
+            return dateOrNull(a.gyldigFom) > dateOrNull(b.gyldigFom) ? 1 : -1;
+        });
+        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
+            return opplysningerSortert;
+        }
+
+        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
+            return virkingstidspunkt == null || dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt;
+        });
+
+        if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
+            return [opplysningerSortert[opplysningerSortert.length - 1]];
+        }
+        return opplysningerFiltrert;
+    };
     return (
-        <ReadMore header="Opplysninger fra Folkeregistret" size="small" className="pb-4">
+        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
             <Table className="w-[300px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Periode</Table.HeaderCell>
-                        <Table.HeaderCell>Status</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.fraDato}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandOpplysninger
-                        ?.filter((periode) => periode.periodeTil === null || isAfterDate(periode.periodeTil, datoFom))
-                        .map((periode, index) => (
-                            <Table.Row key={`${periode.sivilstand}-${index}`}>
-                                <Table.DataCell className="flex justify-start gap-2">
-                                    <>
-                                        {datoFom && new Date(periode.periodeFra) < new Date(datoFom)
-                                            ? DateToDDMMYYYYString(datoFom)
-                                            : DateToDDMMYYYYString(new Date(periode.periodeFra))}
-                                        <div>{"-"}</div>
-                                        {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
-                                    </>
-                                </Table.DataCell>
-                                <Table.DataCell>{capitalize(periode.sivilstand)}</Table.DataCell>
-                            </Table.Row>
-                        ))}
+                    {sivilstandsOpplysningerFiltrert().map((periode, index) => (
+                        <Table.Row key={`${periode.type}-${index}`}>
+                            <Table.DataCell className="flex justify-start gap-2">
+                                <>{periode.gyldigFom ? DateToDDMMYYYYString(new Date(periode.gyldigFom)) : "\u00A0"}</>
+                            </Table.DataCell>
+                            <Table.DataCell>{capitalize(periode.type)?.replaceAll("_", " ")}</Table.DataCell>
+                        </Table.Row>
+                    ))}
                 </Table.Body>
             </Table>
         </ReadMore>

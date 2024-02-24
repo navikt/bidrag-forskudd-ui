@@ -1,58 +1,95 @@
 import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import {
+    InntektDtoV2,
+    Inntektsrapportering,
+    Inntektstype,
+    Kilde,
+    RolleDto,
+    Rolletype,
+} from "../../../api/BidragBehandlingApiV1";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { KildeTexts } from "../../../enum/KildeTexts";
+import { useGetBehandling } from "../../../hooks/useApiData";
+import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
+import useVisningsnavn from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
+import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import { PersonNavn } from "../../PersonNavn";
+import { RolleTag } from "../../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { checkOverlappingPeriods } from "../helpers/inntektFormHelpers";
+import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { EditOrSaveButton } from "./SkattepliktigeOgPensjonsgivendeInntekt";
 
-export const Barnetillegg = () => (
-    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
-        <Heading level="3" size="medium">
-            Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)
-        </Heading>
-        <BarnetilleggTabel />
-    </Box>
-);
-export const BarnetilleggTabel = () => {
-    const { roller, søktFomDato } = useGetBehandling();
+export const Barnetillegg = () => {
+    const { roller } = useGetBehandling();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const personsQueries = usePersonsQueries(barna);
-    const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
-    const barnMedNavn = personsQueries.map(({ data }) => data);
+    return (
+        <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+            <Heading level="3" size="medium">
+                Barnetillegg
+            </Heading>
+            {barna.map((barn) => (
+                <>
+                    <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
+                        <div className="w-8 mr-2 h-max">
+                            <RolleTag rolleType={Rolletype.BA} />
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <BodyShort size="small" className="font-bold">
+                                <PersonNavn ident={barn.ident}></PersonNavn>
+                            </BodyShort>
+                            <BodyShort size="small">{barn.ident}</BodyShort>
+                        </div>
+                    </div>
+                    <BarnetilleggTabel barn={barn} />
+                </>
+            ))}
+        </Box>
+    );
+};
+export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
+    const { inntektFormValues, setInntektFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+    const { roller, søktFomDato } = useGetBehandling();
+    const toVisningsnavn = useVisningsnavn();
+    const [editableRow, setEditableRow] = useState(undefined);
+    const saveInntekt = useOnSaveInntekt();
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));
+    const fieldName = `barnetillegg.${barn.ident}` as const;
 
     const {
         control,
+        getFieldState,
         getValues,
         clearErrors,
         setError,
+        setValue,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
-        name: "barnetillegg",
+        name: fieldName,
     });
 
-    const watchFieldArray = useWatch({ control, name: "barnetillegg" });
+    const watchFieldArray = useWatch({ control, name: fieldName });
 
     useEffect(() => {
         validatePeriods();
     }, [watchFieldArray]);
 
     const validatePeriods = () => {
-        const barnetilleggList = getValues("barnetillegg");
+        const barnetilleggList = getValues(fieldName);
 
         if (!barnetilleggList.length) {
-            clearErrors("barnetillegg");
+            clearErrors(fieldName);
             return;
         }
         const filtrertOgSorterListe = barnetilleggList
@@ -62,7 +99,7 @@ export const BarnetilleggTabel = () => {
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
-            setError("barnetillegg", {
+            setError(fieldName, {
                 ...errors.barnetillegg,
                 types: {
                     overlappingPerioder: "Du har overlappende perioder",
@@ -76,19 +113,92 @@ export const BarnetilleggTabel = () => {
         }
     };
 
+    const updatedAndSave = (inntekter: InntektDtoV2[]) => {
+        const updatedValues = {
+            ...inntektFormValues,
+            barnetillegg: { ...inntektFormValues.barnetillegg },
+        };
+        setInntektFormValues(updatedValues);
+        setValue(fieldName, inntekter);
+        saveInntekt(updatedValues);
+        setEditableRow(undefined);
+    };
+
+    const onSaveRow = (index: number) => {
+        const perioderValues = getValues(fieldName);
+        if (perioderValues[index].datoFom === null) {
+            setError(`${fieldName}.${index}.datoFom`, {
+                type: "notValid",
+                message: "Dato må fylles ut",
+            });
+        }
+
+        const fieldState = getFieldState(`${fieldName}.${index}`);
+        if (!fieldState.error) {
+            updatedAndSave(editPeriods(perioderValues, index));
+        }
+    };
+
+    const checkIfAnotherRowIsEdited = (index?: number) => {
+        return editableRow !== undefined && Number(editableRow) !== index;
+    };
+
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: "Fullfør redigering",
+            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+        });
+        setErrorModalOpen(true);
+    };
+    const onEditRow = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            setEditableRow(index);
+        }
+    };
+
+    const handleOnSelect = (value: boolean, index: number) => {
+        const periodeValues = getValues(fieldName);
+        const updatedValues = periodeValues.toSpliced(index, 1, {
+            ...periodeValues[index],
+            taMed: value,
+        });
+        updatedAndSave(updatedValues);
+    };
+
     return (
         <>
-            {errors?.barnetillegg?.types?.overlappingPerioder && (
+            {errors?.barnetillegg?.[barn.ident].types?.overlappingPerioder && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.barnetillegg.types.overlappingPerioder}</BodyShort>
+                    <BodyShort>{errors.barnetillegg?.[barn.ident].types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
             {fieldArray.fields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Barn", "Beløp", ""]}>
+                <TableWrapper
+                    heading={[
+                        "Ta med",
+                        "Fra og med",
+                        "Til og med",
+                        "Kilde",
+                        "Type",
+                        "Beløp (mnd)",
+                        "Beløp (12 mnd)",
+                        "",
+                        "",
+                        "",
+                    ]}
+                >
                     {fieldArray.fields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
+                                <FormControlledCheckbox
+                                    key={`barnetillegg.${index}.taMed`}
+                                    name={`barnetillegg.${index}.taMed`}
+                                    onChange={(value) => handleOnSelect(value.target.checked, index)}
+                                    legend=""
+                                />,
                                 <FormControlledMonthPicker
                                     key={`barnetillegg.${index}.datoFom`}
                                     name={`barnetillegg.${index}.datoFom`}
@@ -111,29 +221,45 @@ export const BarnetilleggTabel = () => {
                                     hideLabel
                                     lastDayOfMonthPicker
                                 />,
-                                <FormControlledSelectField
-                                    key={`barnetillegg.${index}.ident`}
-                                    name={`barnetillegg.${index}.ident`}
-                                    label="Barn"
-                                    hideLabel
-                                >
-                                    <option key={"Velg barn"} value={""}>
-                                        Velg barn
-                                    </option>
-                                    {personQueriesSuccess &&
-                                        barnMedNavn.map((barn) => (
-                                            <option key={barn.kortnavn} value={barn.ident}>
-                                                {barn.kortnavn}
-                                            </option>
-                                        ))}
-                                </FormControlledSelectField>,
-                                <FormControlledTextField
-                                    key={`barnetillegg.${index}.barnetillegg`}
-                                    name={`barnetillegg.${index}.barnetillegg`}
-                                    label="Beløp"
-                                    type="number"
-                                    min="0"
-                                    hideLabel
+                                <BodyShort key={`barnetillegg.${index}.kilde`}>{KildeTexts[item.kilde]}</BodyShort>,
+                                item.kilde === Kilde.OFFENTLIG ? (
+                                    <BodyShort key={`barnetillegg.${index}.rapporteringstype`}>
+                                        {toVisningsnavn(item.rapporteringstype)}
+                                    </BodyShort>
+                                ) : (
+                                    <FormControlledSelectField
+                                        name={`barnetillegg.${index}.${index}.rapporteringstype`}
+                                        label="Type"
+                                        options={[{ value: "", text: "Velg type" }].concat(
+                                            Object.entries(Inntektstype)
+                                                .filter(([, text]) => text.includes("BARNETILLEGG"))
+                                                .map(([value, text]) => ({
+                                                    value,
+                                                    text: toVisningsnavn(text),
+                                                }))
+                                        )}
+                                        hideLabel
+                                    />
+                                ),
+                                item.kilde === Kilde.OFFENTLIG ? (
+                                    <BodyShort key={`barnetillegg.${index}.beløp`}>{item.beløp}</BodyShort>
+                                ) : (
+                                    <FormControlledTextField
+                                        key={`barnetillegg.${index}.beløp`}
+                                        name={`barnetillegg.${index}.beløp`}
+                                        label="Beløp"
+                                        type="number"
+                                        min="0"
+                                        hideLabel
+                                    />
+                                ),
+                                <BodyShort key={`barnetillegg.${index}.beløp12mnd`}>{item.beløp * 12}</BodyShort>,
+                                <EditOrSaveButton
+                                    key={`edit-or-save-button-${index}`}
+                                    index={index}
+                                    editableRow={editableRow}
+                                    onEditRow={onEditRow}
+                                    onSaveRow={onSaveRow}
                                 />,
                                 <Button
                                     key={`delete-button-${index}`}

@@ -2,9 +2,9 @@ import { MonthValidationT } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
+import text from "../../constants/texts";
 import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "../../utils/date-utils";
 import { MonthPicker } from "../date-picker/MonthPicker";
-
 interface FormControlledDatePickerProps {
     name: string;
     label: string;
@@ -58,13 +58,13 @@ export const FormControlledMonthPicker = ({
             : isFirstDayOfMonth(new Date(date));
 
         const invalidDate =
-            !monthValidation.isValidMonth && !monthValidation.isEmpty ? "Dato er ikke gyldig" : undefined;
-        const emptyField = required && monthValidation.isEmpty ? "Dato må fylles ut" : undefined;
+            !monthValidation.isValidMonth && !monthValidation.isEmpty ? text.error.datoIkkeGyldig : undefined;
+        const emptyField = required && monthValidation.isEmpty ? text.error.datoMåFyllesUt : undefined;
         const isNotFirstOrLastDayOfMonth = date && !isFirstOrLastDayOfMonth;
         const notFirstDayOrLastDayOfMonthError = isNotFirstOrLastDayOfMonth
             ? lastDayOfMonthPicker
-                ? "Dato må være den siste i måneden"
-                : "Dato må være den første i måneden"
+                ? text.error.datoMåVæreDenSisteIMåneden
+                : text.error.datoMåVæreDenFørsteIMåneden
             : undefined;
         const error = invalidDate || emptyField || notFirstDayOrLastDayOfMonthError;
 

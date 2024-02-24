@@ -53,7 +53,7 @@ export const behandlingMockApiData: BehandlingDto = {
         },
     },
     virkningstidspunkt: {
-        virkningsdato: "",
+        virkningstidspunkt: "",
         årsak: null,
         notat: {
             kunINotat: "",

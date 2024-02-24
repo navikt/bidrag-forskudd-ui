@@ -37,7 +37,7 @@ export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
 );
 
 export const TableExpandableRowWrapper = ({ cells, content }: { cells: ReactElement[]; content: ReactNode }) => (
-    <Table.ExpandableRow className="align-baseline" content={content} togglePlacement="left">
+    <Table.ExpandableRow className="align-baseline" content={content} togglePlacement="right">
         {cells.map((cell) => {
             return (
                 <Table.DataCell key={cell.key} className="align-middle">

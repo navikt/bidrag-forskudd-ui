@@ -2,6 +2,7 @@ import { SakHeader } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
+import text from "../../constants/texts";
 import { useForskudd } from "../../context/ForskuddContext";
 import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
 
@@ -16,9 +17,9 @@ export const Header = memo(() => {
             roller={rollerMedPersonNavn.map((person) => ({
                 ...person,
                 ident: person.ident!,
-                navn: person.visningsnavn ?? person.kortnavn,
+                navn: person.visningsnavn,
             }))}
-            skjermbilde={{ navn: "Søknad om forskudd", referanse: `#${behandlingId}` }}
+            skjermbilde={{ navn: text.skjermbildeNavn, referanse: `#${behandlingId}` }}
         />
     );
 });
@@ -27,7 +28,7 @@ export const ForskuddHeader = () => (
     <Suspense
         fallback={
             <div className="flex justify-center">
-                <Loader size="3xlarge" title="venter..." variant="interaction" />
+                <Loader size="3xlarge" title={text.loading} variant="interaction" />
             </div>
         }
     >
