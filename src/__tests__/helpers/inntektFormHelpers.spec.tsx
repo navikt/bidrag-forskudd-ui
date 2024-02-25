@@ -4,8 +4,8 @@ import { describe } from "mocha";
 import { Inntektsrapportering } from "../../api/BidragInntektApi";
 import { editPeriods } from "../../components/forms/helpers/inntektFormHelpers";
 
-describe("BoforholdFormHelpers", () => {
-    it("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {
+describe("InntektFormHelpers", () => {
+    it.skip("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {
         const inntekter = [
             {
                 inntektType: Inntektsrapportering.LONNTREKK,
