@@ -1,21 +1,25 @@
-import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { InntektDtoV2, Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { useForskudd } from "../../../context/ForskuddContext";
+import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
+import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
+import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { checkOverlappingPeriods } from "../helpers/inntektFormHelpers";
+import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { DeleteButton, EditOrSaveButton } from "./SkattepliktigeOgPensjonsgivendeInntekt";
 
 export const Kontantstøtte = () => (
-    <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+    <Box padding="4" background="surface-subtle" className="grid gap-y-4">
         <Heading level="3" size="medium">
             Kontantstøtte
         </Heading>
@@ -23,7 +27,10 @@ export const Kontantstøtte = () => (
     </Box>
 );
 export const KontantstøtteTabel = () => {
+    const { inntektFormValues, setInntektFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const { roller, søktFomDato } = useGetBehandling();
+    const [editableRow, setEditableRow] = useState(undefined);
+    const saveInntekt = useOnSaveInntekt();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const personsQueries = usePersonsQueries(barna);
     const personQueriesSuccess = personsQueries.every((query) => query.isSuccess);
@@ -35,13 +42,14 @@ export const KontantstøtteTabel = () => {
         getValues,
         clearErrors,
         setError,
+        setValue,
+        getFieldState,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
         name: "kontantstøtte",
     });
-
     const watchFieldArray = useWatch({ control, name: "kontantstøtte" });
 
     useEffect(() => {
@@ -76,6 +84,80 @@ export const KontantstøtteTabel = () => {
         }
     };
 
+    const updatedAndSave = (inntekter: InntektDtoV2[]) => {
+        const updatedValues = {
+            ...inntektFormValues,
+            kontantstøtte: { ...inntektFormValues.kontantstøtte },
+        };
+        setInntektFormValues(updatedValues);
+        setValue("kontantstøtte", inntekter);
+        saveInntekt(updatedValues);
+        setEditableRow(undefined);
+    };
+
+    const checkIfAnotherRowIsEdited = (index?: number) => {
+        return editableRow !== undefined && Number(editableRow) !== index;
+    };
+
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: "Fullfør redigering",
+            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+        });
+        setErrorModalOpen(true);
+    };
+
+    const handleOnDelete = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            clearErrors(`kontantstøtte.${index}`);
+            fieldArray.remove(index);
+            if (editableRow === index) {
+                setEditableRow(undefined);
+            }
+        }
+    };
+
+    const onEditRow = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            setEditableRow(index);
+        }
+    };
+
+    const onSaveRow = (index: number) => {
+        const perioderValues = getValues("kontantstøtte");
+        if (perioderValues[index].datoFom === null) {
+            setError(`kontantstøtte.${index}.datoFom`, {
+                type: "notValid",
+                message: "Dato må fylles ut",
+            });
+        }
+
+        const fieldState = getFieldState(`kontantstøtte.${index}`);
+        if (!fieldState.error) {
+            updatedAndSave(editPeriods(perioderValues, index));
+        }
+    };
+
+    const handleOnSelect = (value: boolean, index: number) => {
+        const periods = getValues("kontantstøtte");
+        const updatedValues = periods.toSpliced(index, 1, {
+            ...periods[index],
+            taMed: value,
+        });
+        updatedAndSave(updatedValues);
+    };
+
+    const controlledFields = fieldArray.fields.map((field, index) => {
+        return {
+            ...field,
+            ...watchFieldArray?.[index],
+        };
+    });
+
     return (
         <>
             {errors?.kontantstøtte?.types?.overlappingPerioder && (
@@ -83,12 +165,18 @@ export const KontantstøtteTabel = () => {
                     <BodyShort>{errors.kontantstøtte.types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
-            {fieldArray.fields.length > 0 && (
-                <TableWrapper heading={["Fra og med", "Til og med", "Barn", "Beløp", ""]}>
-                    {fieldArray.fields.map((item, index) => (
+            {controlledFields.length > 0 && (
+                <TableWrapper heading={["Ta med", "Fra og med", "Til og med", "Kilde", "Barn", "Beløp", "", ""]}>
+                    {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
+                                <FormControlledCheckbox
+                                    key={`kontantstøtte.${index}.taMed`}
+                                    name={`kontantstøtte.${index}.taMed`}
+                                    onChange={(value) => handleOnSelect(value.target.checked, index)}
+                                    legend=""
+                                />,
                                 <FormControlledMonthPicker
                                     key={`kontantstøtte.${index}.datoFom`}
                                     name={`kontantstøtte.${index}.datoFom`}
@@ -111,6 +199,7 @@ export const KontantstøtteTabel = () => {
                                     hideLabel
                                     lastDayOfMonthPicker
                                 />,
+                                <BodyShort key={`kontantstøtte.${index}.kilde`}>{KildeTexts[item.kilde]}</BodyShort>,
                                 <FormControlledSelectField
                                     key={`kontantstøtte.${index}.ident`}
                                     name={`kontantstøtte.${index}.ident`}
@@ -135,16 +224,18 @@ export const KontantstøtteTabel = () => {
                                     min="0"
                                     hideLabel
                                 />,
-                                <Button
+                                <EditOrSaveButton
+                                    key={`edit-or-save-button-${index}`}
+                                    index={index}
+                                    editableRow={editableRow}
+                                    onEditRow={onEditRow}
+                                    onSaveRow={onSaveRow}
+                                />,
+                                <DeleteButton
                                     key={`delete-button-${index}`}
-                                    type="button"
-                                    onClick={() => {
-                                        clearErrors(`kontantstøtte.${index}`);
-                                        fieldArray.remove(index);
-                                    }}
-                                    icon={<TrashIcon aria-hidden />}
-                                    variant="tertiary"
-                                    size="small"
+                                    item={item}
+                                    index={index}
+                                    handleOnDelete={handleOnDelete}
                                 />,
                             ]}
                         />
@@ -164,7 +255,7 @@ export const KontantstøtteTabel = () => {
                         datoFom: null,
                         datoTom: null,
                         beløp: 0,
-                        rapporteringstype: Inntektsrapportering.BARNETILLEGG,
+                        rapporteringstype: Inntektsrapportering.KONTANTSTOTTE,
                         inntektsposter: [],
                         inntektstyper: [],
                     })

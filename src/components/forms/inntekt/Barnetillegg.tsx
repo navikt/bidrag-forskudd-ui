@@ -1,4 +1,3 @@
-import { TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -27,13 +26,13 @@ import { RolleTag } from "../../RolleTag";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { EditOrSaveButton } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { DeleteButton, EditOrSaveButton } from "./SkattepliktigeOgPensjonsgivendeInntekt";
 
 export const Barnetillegg = () => {
     const { roller } = useGetBehandling();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     return (
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <Heading level="3" size="medium">
                 Barnetillegg
             </Heading>
@@ -78,7 +77,6 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
         control: control,
         name: fieldName,
     });
-
     const watchFieldArray = useWatch({ control, name: fieldName });
 
     useEffect(() => {
@@ -150,6 +148,18 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
         });
         setErrorModalOpen(true);
     };
+
+    const handleOnDelete = (index: number) => {
+        if (checkIfAnotherRowIsEdited(index)) {
+            showErrorModal();
+        } else {
+            clearErrors(fieldName);
+            fieldArray.remove(index);
+            if (editableRow === index) {
+                setEditableRow(undefined);
+            }
+        }
+    };
     const onEditRow = (index: number) => {
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
@@ -167,6 +177,13 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
         updatedAndSave(updatedValues);
     };
 
+    const controlledFields = fieldArray.fields.map((field, index) => {
+        return {
+            ...field,
+            ...watchFieldArray?.[index],
+        };
+    });
+
     return (
         <>
             {errors?.barnetillegg?.[barn.ident].types?.overlappingPerioder && (
@@ -174,7 +191,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                     <BodyShort>{errors.barnetillegg?.[barn.ident].types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
-            {fieldArray.fields.length > 0 && (
+            {controlledFields.length > 0 && (
                 <TableWrapper
                     heading={[
                         "Ta med",
@@ -186,10 +203,9 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                         "Beløp (12 mnd)",
                         "",
                         "",
-                        "",
                     ]}
                 >
-                    {fieldArray.fields.map((item, index) => (
+                    {controlledFields.map((item, index) => (
                         <TableRowWrapper
                             key={item.id}
                             cells={[
@@ -261,16 +277,11 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                                     onEditRow={onEditRow}
                                     onSaveRow={onSaveRow}
                                 />,
-                                <Button
+                                <DeleteButton
                                     key={`delete-button-${index}`}
-                                    type="button"
-                                    onClick={() => {
-                                        clearErrors(`barnetillegg.${index}`);
-                                        fieldArray.remove(index);
-                                    }}
-                                    icon={<TrashIcon aria-hidden />}
-                                    variant="tertiary"
-                                    size="small"
+                                    item={item}
+                                    index={index}
+                                    handleOnDelete={handleOnDelete}
                                 />,
                             ]}
                         />

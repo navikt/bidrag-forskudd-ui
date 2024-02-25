@@ -95,7 +95,7 @@ const Totalt = ({ item, index, ident }: { item: InntektDtoV2; index: number; ide
         </div>
     );
 
-const DeleteButton = ({ item, index, handleOnDelete }) =>
+export const DeleteButton = ({ item, index, handleOnDelete }) =>
     item.kilde === Kilde.OFFENTLIG ? (
         <div className="min-w-[40px]"></div>
     ) : (
@@ -156,7 +156,7 @@ export const SkattepliktigeOgPensjonsgivendeInntekt = ({ ident }: { ident: strin
     const { inntekter } = useGetBehandlingV2();
     const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
     return (
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4 overflow-hidden">
+        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <div className="flex gap-x-4">
                 <Heading level="3" size="medium">
                     Skattepliktige og pensjonsgivende inntekt
@@ -179,18 +179,18 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
         control,
         getFieldState,
         getValues,
+        clearErrors,
         setError,
         setValue,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
-    const inntekteneSomLeggesTilGrunnField = useFieldArray({
+    const fieldArray = useFieldArray({
         control,
         name: `årsinntekter.${ident}`,
     });
+    const watchFieldArray = useWatch({ control, name: `årsinntekter.${ident}` });
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
-
-    const watchFieldArray = useWatch({ control, name: `årsinntekter.${ident}` });
 
     const handleOnSelect = (value: boolean, index: number) => {
         const periodeValues = getValues(`årsinntekter.${ident}`);
@@ -205,25 +205,20 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            const perioderValues = getValues(`årsinntekter.${ident}`);
-            // const updatedPeriods = removeAndEditPeriods(perioderValues, index);
-            updatedAndSave(perioderValues);
+            clearErrors(`årsinntekter.${index}`);
+            fieldArray.remove(index);
+            if (editableRow === index) {
+                setEditableRow(undefined);
+            }
         }
     };
-
-    const controlledFields = inntekteneSomLeggesTilGrunnField.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray?.[index],
-        };
-    });
 
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {
             showErrorModal();
         } else {
             const periodeValues = getValues(`årsinntekter.${ident}`);
-            inntekteneSomLeggesTilGrunnField.append({
+            fieldArray.append({
                 datoFom: null,
                 datoTom: null,
                 ident: ident,
@@ -278,6 +273,13 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
             setEditableRow(index);
         }
     };
+
+    const controlledFields = fieldArray.fields.map((field, index) => {
+        return {
+            ...field,
+            ...watchFieldArray?.[index],
+        };
+    });
 
     return (
         <>

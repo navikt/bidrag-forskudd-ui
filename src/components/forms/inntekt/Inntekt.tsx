@@ -22,9 +22,9 @@ import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
 import { InntektChart } from "./InntektChart";
-import { Kontantstøtte } from "./Kontantstøtte";
+import { Kontantstøtte } from "./Kontantstoette";
 import { SkattepliktigeOgPensjonsgivendeInntekt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
-import { Småbarnstillegg } from "./Småbarnstilleg";
+import { Småbarnstillegg } from "./Smaabarnstilleg";
 import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
 const InntektHeader = ({ ident }: { ident: string }) => {
@@ -149,6 +149,7 @@ const Side = () => {
 };
 
 const InntektForm = () => {
+    const { setInntektFormValues } = useForskudd();
     const { inntekter, roller } = useGetBehandlingV2();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = createInitialValues(bmOgBarn, inntekter);
@@ -158,6 +159,9 @@ const InntektForm = () => {
 
     // TODO update opplysninger && fetch new calculated values
     // const updateOpplysninger = () => {};
+    useEffect(() => {
+        setInntektFormValues(initialValues);
+    }, []);
 
     return (
         <FormProvider {...useFormMethods}>

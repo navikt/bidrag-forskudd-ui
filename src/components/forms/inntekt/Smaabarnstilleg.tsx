@@ -2,7 +2,7 @@ import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektDtoV2, Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
+import { InntektDtoV2, Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
@@ -17,56 +17,56 @@ import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelp
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { DeleteButton, EditOrSaveButton } from "./SkattepliktigeOgPensjonsgivendeInntekt";
 
-export const UtvidetBarnetrygd = () => (
+export const Småbarnstillegg = () => (
     <Box padding="4" background="surface-subtle" className="grid gap-y-4">
         <Heading level="3" size="medium">
-            Utvidet barnetrygd
+            Småbarnstillegg
         </Heading>
-        <UtvidetBarnetrygdTabel />
+        <SmåbarnstilleggTabel />
     </Box>
 );
-export const UtvidetBarnetrygdTabel = () => {
+export const SmåbarnstilleggTabel = () => {
     const { inntektFormValues, setInntektFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
-    const { søktFomDato } = useGetBehandling();
+    const { roller, søktFomDato } = useGetBehandling();
     const [editableRow, setEditableRow] = useState(undefined);
     const saveInntekt = useOnSaveInntekt();
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));
+
     const {
         control,
         getValues,
+        clearErrors,
         setError,
         setValue,
-        clearErrors,
         getFieldState,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control: control,
-        name: "utvidetBarnetrygd",
+        name: "småbarnstillegg",
     });
-
-    const watchFieldArray = useWatch({ control, name: "utvidetBarnetrygd" });
+    const watchFieldArray = useWatch({ control, name: "småbarnstillegg" });
 
     useEffect(() => {
         validatePeriods();
     }, [watchFieldArray]);
 
     const validatePeriods = () => {
-        const utvidetBarnetrygdList = getValues("utvidetBarnetrygd");
+        const småbarnstilleggList = getValues("småbarnstillegg");
 
-        if (!utvidetBarnetrygdList?.length) {
-            clearErrors("utvidetBarnetrygd");
+        if (!småbarnstilleggList.length) {
+            clearErrors("småbarnstillegg");
             return;
         }
-        const filtrertOgSorterListe = utvidetBarnetrygdList
+        const filtrertOgSorterListe = småbarnstilleggList
             .filter((periode) => periode.datoFom && isValidDate(periode.datoFom))
             .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
 
         const overlappingPerioder = checkOverlappingPeriods(filtrertOgSorterListe);
 
         if (overlappingPerioder?.length) {
-            setError("utvidetBarnetrygd", {
-                ...errors.utvidetBarnetrygd,
+            setError("småbarnstillegg", {
+                ...errors.barnetillegg,
                 types: {
                     overlappingPerioder: "Du har overlappende perioder",
                 },
@@ -75,17 +75,17 @@ export const UtvidetBarnetrygdTabel = () => {
 
         if (!overlappingPerioder?.length) {
             // @ts-ignore
-            clearErrors("utvidetBarnetrygd.types.overlappingPerioder");
+            clearErrors("småbarnstillegg.types.overlappingPerioder");
         }
     };
 
     const updatedAndSave = (inntekter: InntektDtoV2[]) => {
         const updatedValues = {
             ...inntektFormValues,
-            utvidetBarnetrygd: { ...inntektFormValues.utvidetBarnetrygd },
+            småbarnstillegg: { ...inntektFormValues.småbarnstillegg },
         };
         setInntektFormValues(updatedValues);
-        setValue("utvidetBarnetrygd", inntekter);
+        setValue("småbarnstillegg", inntekter);
         saveInntekt(updatedValues);
         setEditableRow(undefined);
     };
@@ -106,7 +106,7 @@ export const UtvidetBarnetrygdTabel = () => {
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            clearErrors(`utvidetBarnetrygd.${index}`);
+            clearErrors(`småbarnstillegg.${index}`);
             fieldArray.remove(index);
             if (editableRow === index) {
                 setEditableRow(undefined);
@@ -123,22 +123,22 @@ export const UtvidetBarnetrygdTabel = () => {
     };
 
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues("utvidetBarnetrygd");
+        const perioderValues = getValues("småbarnstillegg");
         if (perioderValues[index].datoFom === null) {
-            setError(`utvidetBarnetrygd.${index}.datoFom`, {
+            setError(`småbarnstillegg.${index}.datoFom`, {
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
         }
 
-        const fieldState = getFieldState(`utvidetBarnetrygd.${index}`);
+        const fieldState = getFieldState(`småbarnstillegg.${index}`);
         if (!fieldState.error) {
             updatedAndSave(editPeriods(perioderValues, index));
         }
     };
 
     const handleOnSelect = (value: boolean, index: number) => {
-        const periods = getValues("utvidetBarnetrygd");
+        const periods = getValues("småbarnstillegg");
         const updatedValues = periods.toSpliced(index, 1, {
             ...periods[index],
             taMed: value,
@@ -155,9 +155,9 @@ export const UtvidetBarnetrygdTabel = () => {
 
     return (
         <>
-            {errors?.utvidetBarnetrygd?.types?.overlappingPerioder && (
+            {errors?.småbarnstillegg?.types?.overlappingPerioder && (
                 <Alert variant="warning">
-                    <BodyShort>{errors.utvidetBarnetrygd.types.overlappingPerioder}</BodyShort>
+                    <BodyShort>{errors.småbarnstillegg.types.overlappingPerioder}</BodyShort>
                 </Alert>
             )}
             {controlledFields.length > 0 && (
@@ -167,14 +167,14 @@ export const UtvidetBarnetrygdTabel = () => {
                             key={item.id}
                             cells={[
                                 <FormControlledCheckbox
-                                    key={`utvidetBarnetrygd.${index}.taMed`}
-                                    name={`utvidetBarnetrygd.${index}.taMed`}
+                                    key={`småbarnstillegg.${index}.taMed`}
+                                    name={`småbarnstillegg.${index}.taMed`}
                                     onChange={(value) => handleOnSelect(value.target.checked, index)}
                                     legend=""
                                 />,
                                 <FormControlledMonthPicker
-                                    key={`utvidetBarnetrygd.${index}.datoFom`}
-                                    name={`utvidetBarnetrygd.${index}.datoFom`}
+                                    key={`småbarnstillegg.${index}.datoFom`}
+                                    name={`småbarnstillegg.${index}.datoFom`}
                                     label="Fra og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoFom}
@@ -184,8 +184,8 @@ export const UtvidetBarnetrygdTabel = () => {
                                     hideLabel
                                 />,
                                 <FormControlledMonthPicker
-                                    key={`utvidetBarnetrygd.${index}.datoTom`}
-                                    name={`utvidetBarnetrygd.${index}.datoTom`}
+                                    key={`småbarnstillegg.${index}.datoTom`}
+                                    name={`småbarnstillegg.${index}.datoTom`}
                                     label="Til og med"
                                     placeholder="DD.MM.ÅÅÅÅ"
                                     defaultValue={item.datoTom}
@@ -194,12 +194,10 @@ export const UtvidetBarnetrygdTabel = () => {
                                     hideLabel
                                     lastDayOfMonthPicker
                                 />,
-                                <BodyShort key={`utvidetBarnetrygd.${index}.kilde`}>
-                                    {KildeTexts[item.kilde]}
-                                </BodyShort>,
+                                <BodyShort key={`småbarnstillegg.${index}.kilde`}>{KildeTexts[item.kilde]}</BodyShort>,
                                 <FormControlledTextField
-                                    key={`utvidetBarnetrygd.${index}.beløp`}
-                                    name={`utvidetBarnetrygd.${index}.beløp`}
+                                    key={`småbarnstillegg.${index}.beløp`}
+                                    name={`småbarnstillegg.${index}.beløp`}
                                     label="Beløp"
                                     type="number"
                                     min="0"
@@ -231,12 +229,12 @@ export const UtvidetBarnetrygdTabel = () => {
                 onClick={() =>
                     fieldArray.append({
                         taMed: false,
-                        ident: "ads",
+                        ident: roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident,
                         kilde: Kilde.MANUELL,
                         datoFom: null,
                         datoTom: null,
                         beløp: 0,
-                        rapporteringstype: Inntektsrapportering.UTVIDET_BARNETRYGD,
+                        rapporteringstype: Inntektsrapportering.SMABARNSTILLEGG,
                         inntektsposter: [],
                         inntektstyper: [],
                     })
