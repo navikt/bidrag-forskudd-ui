@@ -1,27 +1,27 @@
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React, { memo } from "react";
 
-import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
-import text from "../../../constants/texts";
+import { InntektDtoV2 } from "../../../api/BidragBehandlingApiV1";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../utils/date-utils";
 import { roundDown, roundUp } from "../../../utils/number-utils";
 import { capitalize } from "../../../utils/string-utils";
 import { EChartsOption, ReactECharts } from "../../e-charts/ReactECharts";
+
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
-const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
+const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
     const today = new Date();
     const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 12 : 13), 12);
-    const past12Incomes = (inntekt: SummertManedsinntekt[]) =>
+    const past12Incomes = (inntekt: InntektDtoV2[]) =>
         past12Months.map((date) => {
             const incomeForThatMonth = inntekt.find((periode) =>
-                datesAreFromSameMonthAndYear(new Date(periode.gjelderÅrMåned), date)
+                datesAreFromSameMonthAndYear(new Date(periode.datoFom), date)
             );
             return incomeForThatMonth ?? null;
         });
 
-    const getTotalPerPeriode = (inntekt: SummertManedsinntekt[]) =>
-        past12Incomes(inntekt).map((incomeForThatMonth) => (incomeForThatMonth ? incomeForThatMonth.sumInntekt : 0));
+    const getTotalPerPeriode = (inntekt: InntektDtoV2[]) =>
+        past12Incomes(inntekt).map((incomeForThatMonth) => (incomeForThatMonth ? incomeForThatMonth.beløp : 0));
 
     return {
         legend: {
@@ -31,7 +31,7 @@ const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
             trigger: "axis",
             showContent: true,
             formatter: (params: TopLevelFormatterParams) => {
-                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.inntektPostListe;
+                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.inntektsposter;
                 return ainntektspostListe
                     ? ainntektspostListe
                           .map(
@@ -41,7 +41,7 @@ const buildChartOptions = (inntekt: SummertManedsinntekt[]): EChartsOption => {
                                   ).toLocaleString()}</p>`
                           )
                           .join("")
-                    : text.alert.ingenInntekt;
+                    : "Ingen inntekt funnet";
             },
             backgroundColor: "rgb(230,240,255)",
             borderColor: "rgb(230,240,255)",
@@ -82,6 +82,6 @@ const arePropsEqual = (oldProps, newProps) => {
 };
 
 export const InntektChart = memo(
-    ({ inntekt }: { inntekt: SummertManedsinntekt[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
+    ({ inntekt }: { inntekt: InntektDtoV2[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
     arePropsEqual
 );

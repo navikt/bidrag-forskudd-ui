@@ -17,7 +17,7 @@ export const Header = memo(() => {
             roller={rollerMedPersonNavn.map((person) => ({
                 ...person,
                 ident: person.ident!,
-                navn: person.visningsnavn ?? person.kortnavn,
+                navn: person.visningsnavn,
             }))}
             skjermbilde={{ navn: text.skjermbildeNavn, referanse: `#${behandlingId}` }}
         />

@@ -23,15 +23,27 @@ export const TableRowWrapper = ({ cells }: { cells: ReactElement[] }) => (
         {cells.map((cell, index) => {
             if (!index)
                 return (
-                    <Table.HeaderCell scope="row" key={cell.key} className="align-top">
+                    <Table.HeaderCell scope="row" key={cell.key} className="align-middle">
                         {cell}
                     </Table.HeaderCell>
                 );
             return (
-                <Table.DataCell key={cell.key} className="align-top">
+                <Table.DataCell key={cell.key} className="align-middle">
                     {cell}
                 </Table.DataCell>
             );
         })}
     </Table.Row>
+);
+
+export const TableExpandableRowWrapper = ({ cells, content }: { cells: ReactElement[]; content: ReactNode }) => (
+    <Table.ExpandableRow className="align-baseline" content={content} togglePlacement="right">
+        {cells.map((cell) => {
+            return (
+                <Table.DataCell key={cell.key} className="align-middle">
+                    {cell}
+                </Table.DataCell>
+            );
+        })}
+    </Table.ExpandableRow>
 );

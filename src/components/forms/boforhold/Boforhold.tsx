@@ -51,7 +51,6 @@ import {
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
-    SivilstandBeregnetInnhold,
 } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
@@ -257,7 +256,7 @@ const BoforholdsForm = () => {
         () =>
             createInitialValues(
                 boforhold,
-                sivilstandProssesert.sivilstandListe as unknown as SivilstandBeregnetInnhold[],
+                sivilstandProssesert.sivilstandListe,
                 opplysningerFraFolkRegistre,
                 virkningsOrSoktFraDato,
                 barnMedISaken

@@ -1,77 +1,61 @@
-import { ClockDashedIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
-import React, { useEffect, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
+import React, { useEffect } from "react";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { OpplysningerType, RolleDto, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
-import { SummertManedsinntekt } from "../../../api/BidragInntektApi";
+import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ROLE_FORKORTELSER } from "../../../constants/roleTags";
 import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import {
-    useAddOpplysningerData,
-    useGetBehandling,
-    useGetBidragInntektQueries,
-    useGetOpplysninger,
-    useGetOpplysningerHentetdato,
-    useGrunnlag,
-    useOppdaterBehandling,
-} from "../../../hooks/useApiData";
-import { useHentArbeidsforhold } from "../../../hooks/useApiData";
+import { useGetBehandling, useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { ISODateTimeStringToDDMMYYYYString, toISODateString } from "../../../utils/date-utils";
-import { removePlaceholder } from "../../../utils/string-utils";
+import { dateOrNull, isValidDate } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import UnderArbeidAlert from "../../UnderArbeidAlert";
-import {
-    compareArbeidsforholdOpplysninger,
-    compareOpplysninger,
-    createInitialValues,
-    createInntektPayload,
-    getPerioderFraBidragInntekt,
-    InntektOpplysninger,
-} from "../helpers/inntektFormHelpers";
+import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
-import AinntektLink from "./AinntektLink";
 import { Arbeidsforhold } from "./Arbeidsforhold";
+import { Barnetillegg } from "./Barnetillegg";
 import { InntektChart } from "./InntektChart";
-import { BarnetilleggTabel, InntekteneSomLeggesTilGrunnTabel, UtvidetBarnetrygdTabel } from "./InntektTables";
+import { Kontantstøtte } from "./Kontantstoette";
+import { SkattepliktigeOgPensjonsgivendeInntekt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { Småbarnstillegg } from "./Smaabarnstilleg";
+import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
-const InntektHeader = ({ inntekt, ident }: { inntekt: SummertManedsinntekt[]; ident: string }) => (
-    <div className="grid w-full max-w-[65ch] gap-y-8">
-        <InntektChart inntekt={inntekt} />
-        <ExpansionCard aria-label="default-demo" size="small">
-            <ExpansionCard.Header>
-                <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
-            </ExpansionCard.Header>
-            <ExpansionCard.Content>
-                <QueryErrorWrapper>
-                    <Arbeidsforhold ident={ident} />
-                </QueryErrorWrapper>
-            </ExpansionCard.Content>
-        </ExpansionCard>
-    </div>
-);
-
-const Main = ({
-    behandlingRoller,
-    ainntekt,
-    opplysningerChanges,
-    updateOpplysninger,
-}: {
-    behandlingRoller: RolleDto[];
-    ainntekt: { [ident: string]: SummertManedsinntekt[] };
-    opplysningerChanges: string[];
-    updateOpplysninger: () => void;
-}) => {
+const InntektHeader = ({ ident }: { ident: string }) => {
+    const { inntekter } = useGetBehandlingV2();
+    const inntekt = inntekter.månedsinntekter?.filter((inntekt) => inntekt.ident === ident);
+    return inntekt?.length > 0 ? (
+        <div className="grid w-full max-w-[65ch] gap-y-8">
+            <InntektChart inntekt={inntekt} />
+            <ExpansionCard aria-label="default-demo" size="small">
+                <ExpansionCard.Header>
+                    <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
+                </ExpansionCard.Header>
+                <ExpansionCard.Content>
+                    <QueryErrorWrapper>
+                        <Arbeidsforhold ident={ident} />
+                    </QueryErrorWrapper>
+                </ExpansionCard.Content>
+            </ExpansionCard>
+        </div>
+    ) : (
+        <Alert variant="info">
+            <BodyShort>Ingen inntekt funnet</BodyShort>
+        </Alert>
+    );
+};
+const Main = () => {
+    const {
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
+        roller: behandlingRoller,
+    } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
@@ -80,30 +64,11 @@ const Main = ({
             return 0;
         });
 
-    const opplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.INNTEKT_BEARBEIDET);
     return (
         <div className="grid gap-y-12">
-            {opplysningerChanges.length > 0 && (
-                <Alert variant="info">
-                    <div className="flex items-center mb-4">
-                        {removePlaceholder(
-                            text.alert.nyeOpplysninger,
-                            ISODateTimeStringToDDMMYYYYString(opplysningerHentetdato)
-                        )}
-                        <Button
-                            variant="tertiary"
-                            size="small"
-                            className="ml-8"
-                            icon={<ClockDashedIcon aria-hidden />}
-                            onClick={updateOpplysninger}
-                        >
-                            {text.label.oppdater}
-                        </Button>
-                    </div>
-                    <p>{text.alert.endringer}</p>
-                    {opplysningerChanges.map((change, index) => (
-                        <p key={`${change}-${index}`}>{change}</p>
-                    ))}
+            {!isValidDate(virkningstidspunkt) && (
+                <Alert variant="warning">
+                    <BodyShort>Mangler virkningstidspunkt</BodyShort>
                 </Alert>
             )}
             <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
@@ -119,41 +84,18 @@ const Main = ({
                     ))}
                 </Tabs.List>
                 {roller.map((rolle) => {
-                    const inntekt = ainntekt[rolle.ident];
                     return (
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
                             <div className="mt-12">
-                                {inntekt.length > 0 ? (
-                                    <InntektHeader inntekt={inntekt} ident={rolle.ident} />
-                                ) : (
-                                    <Alert variant="info">
-                                        <BodyShort>{text.alert.ingenInntekt}</BodyShort>
-                                    </Alert>
-                                )}
+                                <InntektHeader ident={rolle.ident} />
                             </div>
-                            <div className="grid gap-y-4">
-                                <div className="flex gap-x-4">
-                                    <Heading level="3" size="medium">
-                                        Inntektene som legges til grunn
-                                    </Heading>
-                                    {inntekt.length > 0 && <AinntektLink ident={rolle.ident} />}
-                                </div>
-                                <InntekteneSomLeggesTilGrunnTabel ident={rolle.ident} />
-                            </div>
+                            <SkattepliktigeOgPensjonsgivendeInntekt ident={rolle.ident} />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>
-                                    <div className="grid gap-y-4">
-                                        <Heading level="3" size="medium">
-                                            {text.title.barnetillegg}
-                                        </Heading>
-                                        <BarnetilleggTabel />
-                                    </div>
-                                    <div className="grid gap-y-4">
-                                        <Heading level="3" size="medium">
-                                            {text.title.utvidetBarnetrygd}
-                                        </Heading>
-                                        <UtvidetBarnetrygdTabel />
-                                    </div>
+                                    <Barnetillegg />
+                                    <UtvidetBarnetrygd />
+                                    <Småbarnstillegg />
+                                    <Kontantstøtte />
                                 </>
                             )}
                         </Tabs.Panel>
@@ -165,19 +107,40 @@ const Main = ({
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { setActiveStep, inntektFormValues, setInntektFormValues } = useForskudd();
+    const { mutation: oppdaterBehandling } = useOppdaterBehandlingV2();
+    const { watch } = useFormContext<InntektFormValues>();
+    const onSave = () => {
+        oppdaterBehandling.mutate(createInntektPayload(inntektFormValues));
+    };
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+
+    const debouncedOnSave = useDebounce(onSave);
+
+    useEffect(() => {
+        const subscription = watch(({ notat }, { name }) => {
+            if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
+                setInntektFormValues((prev) => ({
+                    ...prev,
+                    notat,
+                }));
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, []);
+
     return (
         <>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
-                    {text.title.begrunnelse}
+                    Begrunnelse
                 </Heading>
                 <div>
-                    <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
+                    <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
                 </div>
                 <div>
-                    <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
+                    <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
                 </div>
             </div>
             <ActionButtons onNext={onNext} />
@@ -186,187 +149,24 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { behandlingId } = useForskudd();
-    const isSavedInitialOpplysninger = useRef(false);
-    const isSavedInitialArbeidsforholdOpplysninger = useRef(false);
-    const behandling = useGetBehandling();
-    const inntektOpplysninger = useGetOpplysninger<InntektOpplysninger>(OpplysningerType.INNTEKT_BEARBEIDET);
-    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
-    const { mutation: saveOpplysninger } = useAddOpplysningerData();
-    const arbeidsforholdListe = useHentArbeidsforhold();
-    const grunnlagsdata = useGrunnlag();
-    const { inntekter, roller } = behandling;
-    const bidragInntekt = useGetBidragInntektQueries(behandling, grunnlagsdata).map(({ data }) => data);
-    const ainntekt: { [ident: string]: SummertManedsinntekt[] } = bidragInntekt.reduce(
-        (acc, curr) => ({ ...acc, [curr.ident]: curr.data.summertMånedsinntektListe }),
-        {}
-    );
-    const oppdaterBehandlingFn = useOppdaterBehandling();
-    const [opplysningerChanges, setOpplysningerChanges] = useState([]);
+    const { setInntektFormValues } = useForskudd();
+    const { inntekter, roller } = useGetBehandlingV2();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
-
-    const initialValues = createInitialValues(bmOgBarn, bidragInntekt, inntekter, grunnlagsdata);
-
+    const initialValues = createInitialValues(bmOgBarn, inntekter);
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
 
+    // TODO update opplysninger && fetch new calculated values
+    // const updateOpplysninger = () => {};
     useEffect(() => {
-        useFormMethods.trigger();
+        setInntektFormValues(initialValues);
     }, []);
-
-    const onSave = () => {
-        const values = useFormMethods.getValues();
-
-        console.log(values);
-        oppdaterBehandlingFn.mutation.mutate(createInntektPayload(values), {
-            onSuccess: () =>
-                useFormMethods.reset(values, { keepValues: true, keepErrors: true, keepDefaultValues: true }),
-        });
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
-
-    useEffect(() => {
-        if (!inntektOpplysninger && !isSavedInitialOpplysninger.current) {
-            lagreInntektOpplysninger();
-        }
-
-        if (!arbeidsforholdOpplysninger && !isSavedInitialArbeidsforholdOpplysninger.current) {
-            lagreArbeidsforholdOpplysninger();
-        }
-
-        // Prevent duplicate saving of opplysninger
-        isSavedInitialOpplysninger.current = true;
-        isSavedInitialArbeidsforholdOpplysninger.current = true;
-    }, []);
-
-    useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch(() => {
-            if (useFormMethods.formState.isDirty) {
-                debouncedOnSave();
-            }
-        });
-
-        return () => unsubscribe();
-    }, [useFormMethods.watch, useFormMethods.formState.isDirty]);
-
-    useEffect(() => {
-        if (inntektOpplysninger) {
-            const changesInntektOpplysninger = compareOpplysninger(inntektOpplysninger, {
-                inntekt: bidragInntekt.map((personInntekt) => ({
-                    ident: personInntekt.ident,
-                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe,
-                })),
-                utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe,
-                barnetillegg: grunnlagsdata.barnetilleggListe.map((bt) => ({
-                    ...bt,
-                    datoFom: bt.periodeFra!,
-                    ident: bt.partPersonId,
-                    gjelderBarn: bt.barnPersonId,
-                    barnetillegg: bt.beløpBrutto,
-                })),
-            });
-
-            const changesArbeidsforholdOpplysninger = arbeidsforholdOpplysninger
-                ? compareArbeidsforholdOpplysninger(arbeidsforholdOpplysninger, arbeidsforholdListe)
-                : [];
-
-            const allChanges = [...changesArbeidsforholdOpplysninger, ...changesInntektOpplysninger];
-            if (allChanges.length) {
-                setOpplysningerChanges(allChanges);
-            }
-        }
-    }, []);
-
-    const lagreArbeidsforholdOpplysninger = () => {
-        saveOpplysninger.mutate({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.ARBEIDSFORHOLD,
-            data: JSON.stringify(arbeidsforholdListe ?? []),
-            hentetDato: toISODateString(new Date()),
-        });
-    };
-    const lagreInntektOpplysninger = () => {
-        saveOpplysninger.mutate({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.INNTEKT_BEARBEIDET,
-            data: JSON.stringify({
-                inntekt: bidragInntekt.map((personInntekt) => ({
-                    ident: personInntekt.ident,
-                    versjon: personInntekt.data.versjon,
-                    summertAarsinntektListe: personInntekt.data.summertÅrsinntektListe.map((inntekt) => ({
-                        ...inntekt,
-                        datoFom: dateToDDMMYYYYString(new Date(inntekt.periode.fom)),
-                        datoTom: dateToDDMMYYYYString(new Date(inntekt.periode.til)),
-                    })),
-                    summertMånedsinntektListe: personInntekt.data.summertMånedsinntektListe,
-                })),
-                utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe,
-                barnetillegg: grunnlagsdata.barnetilleggListe,
-                arbeidsforhold: arbeidsforholdListe ?? [],
-            }),
-            hentetDato: toISODateString(new Date()),
-        });
-        saveOpplysninger.mutate({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.INNTEKT,
-            data: JSON.stringify({
-                ainntektListe: grunnlagsdata.ainntektListe,
-                skattegrunnlagListe: grunnlagsdata.skattegrunnlagListe,
-                barnetilleggListe: grunnlagsdata.barnetilleggListe,
-                barnetilsynListe: grunnlagsdata.barnetilsynListe,
-                kontantstotteListe: grunnlagsdata.kontantstøtteListe,
-                småbarnstilleggListe: grunnlagsdata.småbarnstilleggListe,
-                utvidetBarnetrygdListe: grunnlagsdata.utvidetBarnetrygdListe,
-            }),
-            hentetDato: toISODateString(new Date()),
-        });
-    };
-    const updateOpplysninger = () => {
-        lagreInntektOpplysninger();
-        lagreArbeidsforholdOpplysninger();
-
-        const fieldValues = useFormMethods.getValues();
-        const values: InntektFormValues = {
-            ...fieldValues,
-            inntekteneSomLeggesTilGrunn: getPerioderFraBidragInntekt(bidragInntekt),
-            utvidetbarnetrygd: grunnlagsdata.utvidetBarnetrygdListe.map((ubst) => ({
-                deltBosted: false,
-                beløp: ubst.beløp,
-                datoFom: ubst.periodeFra,
-                datoTom: ubst.periodeTil,
-            })),
-            barnetillegg: grunnlagsdata.barnetilleggListe.map((periode) => ({
-                ident: periode.barnPersonId,
-                barnetillegg: periode.beløpBrutto,
-                datoFom: periode.periodeFra,
-                datoTom: periode.periodeTil,
-            })),
-        };
-        useFormMethods.reset(values);
-        oppdaterBehandlingFn.mutation.mutate(createInntektPayload(values));
-        setOpplysningerChanges([]);
-    };
 
     return (
         <FormProvider {...useFormMethods}>
-            <form onSubmit={useFormMethods.handleSubmit(onSave)}>
-                <FormLayout
-                    title="Inntekt"
-                    main={
-                        <Main
-                            behandlingRoller={behandling.roller}
-                            ainntekt={ainntekt}
-                            opplysningerChanges={opplysningerChanges}
-                            updateOpplysninger={updateOpplysninger}
-                        />
-                    }
-                    side={<Side />}
-                />
+            <form onSubmit={(e) => e.preventDefault()}>
+                <FormLayout title="Inntekt" main={<Main />} side={<Side />} />
             </form>
         </FormProvider>
     );

@@ -8,6 +8,7 @@ import {
     Kilde,
     OppdaterBehandlingRequest,
     RolleDto,
+    Sivilstand,
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
@@ -20,7 +21,6 @@ import {
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
-    SivilstandBeregnetInnhold,
     SivilstandOpplysninger,
 } from "../../../types/boforholdFormValues";
 import {
@@ -340,7 +340,7 @@ export const getBarnPerioderFromHusstandsListe = (
 
 export const createInitialValues = (
     boforhold: BoforholdDto,
-    sivilstandBeregnet: SivilstandBeregnetInnhold[],
+    sivilstandBeregnet: Sivilstand[],
     opplysningerFraFolkRegistre: {
         husstand: HusstandOpplysningFraFolkeRegistre[];
         sivilstand: SivilstandGrunnlagDto[];
@@ -361,12 +361,12 @@ export const createInitialValues = (
     };
 };
 
-export const mapSivilstandProsessert = (sivilstandBeregnet: SivilstandBeregnetInnhold[]): SivilstandDto[] =>
+export const mapSivilstandProsessert = (sivilstandBeregnet: Sivilstand[]): SivilstandDto[] =>
     sivilstandBeregnet.map((v) => ({
         kilde: Kilde.OFFENTLIG,
-        datoFom: v.periodeFom,
-        datoTom: v.periodeTom,
-        sivilstand: v.sivilstandskode,
+        datoFom: v.datoFom,
+        datoTom: v.datoTom,
+        sivilstand: v.sivilstand,
     }));
 
 export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequest => ({

@@ -23,7 +23,7 @@ interface IForskuddContext {
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
-    setInntektFormValues: (values: InntektFormValues) => void;
+    setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
     boforholdFormValues: BoforholdFormValues;
     setBoforholdFormValues: Dispatch<SetStateAction<BoforholdFormValues>>;
     errorMessage: { title: string; text: string };
