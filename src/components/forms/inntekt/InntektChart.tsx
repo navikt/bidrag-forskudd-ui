@@ -75,7 +75,7 @@ const arePropsEqual = (oldProps, newProps) => {
             return (
                 oldInntekt.periode === newInntekt.periode &&
                 oldInntekt.visningsnavn === newInntekt.visningsnavn &&
-                oldInntekt.inntektPostListe.length === newInntekt.inntektPostListe.length
+                oldInntekt.inntektPostListe?.length === newInntekt.inntektPostListe?.length
             );
         })
     );

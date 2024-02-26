@@ -8,7 +8,7 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling, useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { InntektFormValues } from "../../../types/inntektFormValues";
@@ -54,7 +54,7 @@ const Main = () => {
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
         roller: behandlingRoller,
-    } = useGetBehandling();
+    } = useGetBehandlingV2();
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)

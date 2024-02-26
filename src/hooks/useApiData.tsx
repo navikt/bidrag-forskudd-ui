@@ -47,7 +47,6 @@ import {
 import { useForskudd } from "../context/ForskuddContext";
 import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
-import useFeatureToogle from "./useFeatureToggle";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
     oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
@@ -63,6 +62,7 @@ export const QueryKeys = {
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     behandling: (behandlingId: number) => ["behandling", QueryKeys.behandlingVersion, behandlingId],
+    behandlingV2: (behandlingId: number) => ["behandlingV2", QueryKeys.behandlingVersion, behandlingId],
     sivilstandBeregning: (behandlingId: number, virkningstidspunkt: string) => [
         "behandling",
         QueryKeys.behandlingVersion,
@@ -142,7 +142,6 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
 };
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
-    const { isInntektSkjermbildeEnabled } = useFeatureToogle();
     const queryClient = useQueryClient();
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
@@ -162,22 +161,6 @@ export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
         },
         staleTime: Infinity,
     });
-
-    if (isInntektSkjermbildeEnabled) {
-        const grunnlag: HentGrunnlagDto = queryClient.getQueryData(QueryKeys.grunnlag());
-        const bidragIncomeRequests = createBidragIncomeRequest(behandling, grunnlag);
-
-        bidragIncomeRequests.forEach((request) => {
-            queryClient.prefetchQuery({
-                queryKey: ["bidraginntekt", request.ident],
-                queryFn: async () => {
-                    const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
-                    return data;
-                },
-                staleTime: Infinity,
-            });
-        });
-    }
 };
 
 export const useAddOpplysningerData = () => {
@@ -240,7 +223,7 @@ export const useGetBehandling = (): BehandlingDto => {
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId } = useForskudd();
     const { data: behandling } = useSuspenseQuery({
-        queryKey: QueryKeys.behandling(behandlingId),
+        queryKey: QueryKeys.behandlingV2(behandlingId),
         queryFn: async (): Promise<BehandlingDtoV2> => {
             const { data } = await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
             return data;
