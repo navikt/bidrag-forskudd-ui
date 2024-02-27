@@ -2,10 +2,10 @@ import { useFormContext } from "react-hook-form";
 
 import { createInntektPayload } from "../components/forms/helpers/inntektFormHelpers";
 import { InntektFormValues } from "../types/inntektFormValues";
-import { useOppdaterBehandling } from "./useApiData";
+import { useOppdaterBehandlingV2 } from "./useApiData";
 
 export const useOnSaveInntekt = () => {
-    const updateInntekter = useOppdaterBehandling();
+    const updateInntekter = useOppdaterBehandlingV2();
     const { reset } = useFormContext<InntektFormValues>();
     return (values: InntektFormValues) => {
         updateInntekter.mutation.mutate(createInntektPayload(values), {

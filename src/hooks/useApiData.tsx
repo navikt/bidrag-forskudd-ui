@@ -1,12 +1,5 @@
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
-import {
-    useMutation,
-    useQueries,
-    useQuery,
-    useQueryClient,
-    useSuspenseQueries,
-    useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 import { useCallback } from "react";
@@ -16,7 +9,6 @@ import {
     BehandlingDto,
     BehandlingDtoV2,
     GrunnlagsdataDto,
-    OppdaterBehandlingRequest,
     OppdaterBehandlingRequestV2,
     OpplysningerType,
     RolleDto,
@@ -31,22 +23,12 @@ import {
     HentGrunnlagDto,
     HentGrunnlagRequestDto,
 } from "../api/BidragGrunnlagApi";
-import {
-    TransformerInntekterRequest,
-    TransformerInntekterResponse,
-    UtvidetBarnetrygdOgSmabarnstillegg,
-} from "../api/BidragInntektApi";
 import { PersonDto } from "../api/PersonApi";
-import {
-    BEHANDLING_API_V1,
-    BIDRAG_DOKUMENT_PRODUKSJON_API,
-    BIDRAG_GRUNNLAG_API,
-    BIDRAG_INNTEKT_API,
-    PERSON_API,
-} from "../constants/api";
+import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
 import { useForskudd } from "../context/ForskuddContext";
 import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
+import { prefetchVisningsnavn } from "./useVisningsnavn";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
     oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
@@ -102,14 +84,13 @@ export const useOppdaterBehandlingV2 = () => {
 
     return { mutation, error: mutation.isError };
 };
-
 export const oppdaterBehandlingMutation = (behandlingId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
-        mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, payload);
+        mutationFn: async (payload: OppdaterBehandlingRequestV2): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, payload);
             return data;
         },
         networkMode: "always",
@@ -121,12 +102,11 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
         },
     });
 };
-
 export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: MutationKeys.oppdaterBehandlingV2(behandlingId),
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdaterBehandlingRequestV2): Promise<BehandlingDtoV2> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, payload);
             return data;
@@ -143,6 +123,7 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
 
 export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
     const queryClient = useQueryClient();
+    prefetchVisningsnavn();
     await queryClient.prefetchQuery({
         queryKey: QueryKeys.behandling(behandlingId),
         queryFn: async (): Promise<BehandlingDto> => (await BEHANDLING_API_V1.api.hentBehandling(behandlingId)).data,
@@ -310,48 +291,6 @@ const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDt
     return grunnlagRequest;
 };
 
-const createBidragIncomeRequest = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagDto) => {
-    const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
-    const barnIdenter = behandling?.roller
-        ?.filter((rolle) => rolle.rolletype === Rolletype.BA)
-        .map((barn) => barn.ident);
-
-    const requests: { ident: string; request: TransformerInntekterRequest }[] = barnIdenter
-        .concat(bmIdent)
-        .map((ident) => ({
-            ident,
-            request: {
-                ainntektHentetDato: toISODateString(new Date()),
-                ainntektsposter: grunnlagspakke.ainntektListe
-                    .filter((ainntekt) => ainntekt.personId === ident)
-                    .flatMap((ainntekt) =>
-                        ainntekt.ainntektspostListe.map((ainntekt) => ({
-                            ...ainntekt,
-                            beløp: Math.round(ainntekt.belop),
-                        }))
-                    ),
-                skattegrunnlagsliste: grunnlagspakke.skattegrunnlagListe
-                    .filter((skattegrunnlag) => skattegrunnlag.personId === ident)
-                    .map((skattegrunnlag) => ({
-                        skattegrunnlagsposter: skattegrunnlag.skattegrunnlagspostListe,
-                        ligningsår: new Date(Date.parse(skattegrunnlag.periodeFra)).getFullYear(),
-                    })),
-                kontantstøtteliste: grunnlagspakke.kontantstøtteListe
-                    .filter((kontantstotte) => kontantstotte.barnPersonId === ident)
-                    .map((kontantstotte) => ({ ...kontantstotte, beløp: kontantstotte.beløp })),
-                utvidetBarnetrygdOgSmåbarnstilleggliste: grunnlagspakke.utvidetBarnetrygdListe
-                    .filter((ubst) => ubst.personId === ident)
-                    .map((ubst) => ({
-                        ...ubst,
-                        beløp: ubst.beløp,
-                        type: "UTVIDET",
-                    })) as UtvidetBarnetrygdOgSmabarnstillegg[],
-            } as TransformerInntekterRequest,
-        }));
-
-    return requests;
-};
-
 export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
     const behandling = useGetBehandling();
     const { sivilstandListe } = useGrunnlag();
@@ -382,25 +321,6 @@ export const useGrunnlag = (): HentGrunnlagDto | null => {
 export const useHentArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const grunnlag = useGrunnlag();
     return grunnlag?.arbeidsforholdListe ?? [];
-};
-
-export const useGetBidragInntektQueries = (behandling: BehandlingDto, grunnlagspakke: HentGrunnlagDto) => {
-    const requests = createBidragIncomeRequest(behandling, grunnlagspakke);
-
-    return useQueries({
-        queries: requests.map((request) => {
-            return {
-                queryKey: ["bidragInntekt", request.ident],
-                queryFn: async (): Promise<{ ident: string; data: TransformerInntekterResponse }> => {
-                    const { data } = await BIDRAG_INNTEKT_API.transformer.transformerInntekter(request.request);
-                    return { ident: request.ident, data: data };
-                },
-                staleTime: Infinity,
-                suspense: true,
-                enabled: !!behandling && !!grunnlagspakke,
-            };
-        }),
-    });
 };
 
 export const useNotat = (behandlingId: number) => {

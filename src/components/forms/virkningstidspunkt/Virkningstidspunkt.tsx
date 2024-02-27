@@ -17,7 +17,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -98,7 +98,6 @@ const Main = ({ initialValues, error }) => {
     const virkningsDato = getValues("virkningstidspunkt");
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
-    const tilVisningsnavn = useVisningsnavn();
     const onAarsakSelect = (value: string) => {
         const barnsFødselsdato = kunEtBarnIBehandlingen
             ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
@@ -175,14 +174,14 @@ const Main = ({ initialValues, error }) => {
                             })
                             .map((value) => (
                                 <option key={value} value={value}>
-                                    {tilVisningsnavn(value)}
+                                    {hentVisningsnavn(value)}
                                 </option>
                             ))}
                     </optgroup>
                     <optgroup label={text.label.avslag}>
                         {avslagsListe.map((value) => (
                             <option key={value} value={value}>
-                                {tilVisningsnavn(value)}
+                                {hentVisningsnavn(value)}
                             </option>
                         ))}
                     </optgroup>

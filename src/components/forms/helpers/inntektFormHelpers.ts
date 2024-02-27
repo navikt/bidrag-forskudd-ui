@@ -15,6 +15,10 @@ import { isAfterDate } from "../../../utils/date-utils";
 
 const mapToConvertedDates = (inntekt) => ({
     ...inntekt,
+    angittPeriode: {
+        fom: inntekt.datoFom,
+        til: inntekt.datoTom,
+    },
     datoTom: inntekt.datoTom ?? null,
 });
 export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequestV2 => ({

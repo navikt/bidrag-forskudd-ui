@@ -1,6 +1,6 @@
-import { ResultatForskuddsberegning } from "../api/BidragBehandlingApiV1";
+import { ResultatBeregningBarnDto } from "../api/BidragBehandlingApiV1";
 
 export interface VedtakBeregningResult {
-    resultat?: ResultatForskuddsberegning;
+    resultat?: ResultatBeregningBarnDto[];
     feil?: string[];
 }
