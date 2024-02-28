@@ -20,7 +20,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
@@ -52,7 +52,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const [showResetButton, setShowResetButton] = useState(false);
 
     const saveBoforhold = useOnSaveBoforhold();
-    const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
     const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
@@ -292,13 +291,13 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                             className="w-52"
                                             options={sivilstandForskuddOptions.map((value) => ({
                                                 value,
-                                                text: toVisningsnavn(value.toString()),
+                                                text: hentVisningsnavn(value.toString()),
                                             }))}
                                             hideLabel
                                         />
                                     ) : (
                                         <BodyShort key={`sivilstand.${index}.sivilstand.placeholder`}>
-                                            {toVisningsnavn(item.sivilstand)}
+                                            {hentVisningsnavn(item.sivilstand)}
                                         </BodyShort>
                                     ),
                                     <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">

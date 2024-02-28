@@ -15,6 +15,10 @@ import { isAfterDate } from "../../../utils/date-utils";
 
 const mapToConvertedDates = (inntekt) => ({
     ...inntekt,
+    angittPeriode: {
+        fom: inntekt.datoFom,
+        til: inntekt.datoTom,
+    },
     datoTom: inntekt.datoTom ?? null,
 });
 export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequestV2 => ({
@@ -49,7 +53,7 @@ export const createInntektPayload = (values: InntektFormValues): OppdaterBehandl
                     : []
             ),
         oppdatereManuelleInntekter: Object.entries(values.årsinntekter)
-            .map(([, value]) => value.map(mapToConvertedDates))
+            .map(([, value]) => value.filter((inntekt) => inntekt.kilde === Kilde.MANUELL).map(mapToConvertedDates))
             .flat()
             .concat(
                 Object.keys(values.barnetillegg).length

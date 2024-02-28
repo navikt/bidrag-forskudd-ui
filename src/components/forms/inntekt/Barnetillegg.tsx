@@ -14,7 +14,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -58,7 +58,6 @@ export const Barnetillegg = () => {
 export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
     const { inntektFormValues, setInntektFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const { roller, søktFomDato } = useGetBehandling();
-    const toVisningsnavn = useVisningsnavn();
     const [editableRow, setEditableRow] = useState(undefined);
     const saveInntekt = useOnSaveInntekt();
     const [fom, tom] = getFomAndTomForMonthPicker(new Date(søktFomDato));
@@ -240,7 +239,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                                 <BodyShort key={`barnetillegg.${index}.kilde`}>{KildeTexts[item.kilde]}</BodyShort>,
                                 item.kilde === Kilde.OFFENTLIG ? (
                                     <BodyShort key={`barnetillegg.${index}.rapporteringstype`}>
-                                        {toVisningsnavn(item.rapporteringstype)}
+                                        {hentVisningsnavn(item.rapporteringstype)}
                                     </BodyShort>
                                 ) : (
                                     <FormControlledSelectField
@@ -251,7 +250,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                                                 .filter(([, text]) => text.includes("BARNETILLEGG"))
                                                 .map(([value, text]) => ({
                                                     value,
-                                                    text: toVisningsnavn(text),
+                                                    text: hentVisningsnavn(text),
                                                 }))
                                         )}
                                         hideLabel

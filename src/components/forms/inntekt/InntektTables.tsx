@@ -1,6 +1,6 @@
 import { FloppydiskIcon, InformationSquareIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Heading, Popover } from "@navikt/ds-react";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -8,7 +8,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, usePersonsQueries } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { Inntekt, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, getYearFromDate, isValidDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -20,10 +20,9 @@ import { checkOverlappingPeriods, editPeriods } from "../helpers/inntektFormHelp
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const Beskrivelse = ({ item, index, ident }: { item: Inntekt; index: number; ident: string }) => {
-    const toVisningsnavn = useVisningsnavn();
     return item.fraGrunnlag ? (
         <BodyShort className="min-w-[215px] capitalize">
-            {toVisningsnavn(item.inntektstype, getYearFromDate(item.datoFom))}
+            {hentVisningsnavn(item.inntektstype, getYearFromDate(item.datoFom))}
         </BodyShort>
     ) : (
         <FormControlledSelectField
@@ -137,7 +136,7 @@ const Periode = ({ index, value, editableRow, datepicker }) => {
 
 export const InntekteneSomLeggesTilGrunnTabel = ({ ident }: { ident: string }) => {
     const {
-        virkningstidspunkt: { virkningsdato },
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandling();
     const { setErrorModalOpen, setErrorMessage, inntektFormValues, setInntektFormValues } = useForskudd();
     const [editableRow, setEditableRow] = useState(undefined);

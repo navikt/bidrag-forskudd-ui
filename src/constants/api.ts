@@ -3,7 +3,6 @@ import { useApi } from "@navikt/bidrag-ui-common";
 import { Api as BidragBehandlingApiV1 } from "../api/BidragBehandlingApiV1";
 import { Api as BidragDokumentProduksjonApi } from "../api/BidragDokumentProduksjonApi";
 import { Api as BidragGrunnlagApi } from "../api/BidragGrunnlagApi";
-import { Api as BidragInntektApi } from "../api/BidragInntektApi";
 import { Api as BidragVedtakApi } from "../api/BidragVedtakApi";
 import { Api as PersonApi } from "../api/PersonApi";
 import environment from "../environment";
@@ -26,11 +25,6 @@ export const BEHANDLING_API_V1 = useApi(
     "gcp"
 );
 
-export const BIDRAG_INNTEKT_API = useApi(
-    new BidragInntektApi({ baseURL: environment.url.bidragInntekt }),
-    "bidrag-inntekt",
-    "gcp"
-);
 export const BIDRAG_DOKUMENT_PRODUKSJON_API = useApi(
     new BidragDokumentProduksjonApi({ baseURL: environment.url.bidragDokumentProduksjon }),
     "bidrag-dokument-produksjon",

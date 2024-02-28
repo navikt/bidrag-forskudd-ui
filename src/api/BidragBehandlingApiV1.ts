@@ -58,9 +58,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
     bidragspliktig?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    søknadsbarn: Rolle[];
+    bidragsmottaker?: Rolle;
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
 }
 
 export enum Bostatuskode {
@@ -94,6 +97,7 @@ export interface GrunnlagEntity {
     innhentet: string;
     /** @format date-time */
     aktiv?: string;
+    rolle: Rolle;
     /** @format int64 */
     id?: number;
 }
@@ -247,6 +251,8 @@ export enum OpplysningerType {
     SIVILSTAND = "SIVILSTAND",
     UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
     SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
+    AINNTEKT = "AINNTEKT",
+    SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
     BOFORHOLD = "BOFORHOLD",
     INNTEKTSOPPLYSNINGER = "INNTEKTSOPPLYSNINGER",
 }
@@ -299,6 +305,8 @@ export interface Rolle {
     id?: number;
     navn?: string;
     deleted: boolean;
+    /** @uniqueItems true */
+    grunnlag: GrunnlagEntity[];
 }
 
 export enum Rolletype {
@@ -385,6 +393,14 @@ export enum TypeArsakstype {
     TIDLIGERE_FEILAKTIG_AVSLAG = "TIDLIGERE_FEILAKTIG_AVSLAG",
     TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
+}
+
+/** Angi periode inntekten skal dekke ved beregnings */
+export interface Datoperiode {
+    /** @format date */
+    fom: string;
+    /** @format date */
+    til?: string;
 }
 
 export interface HusstandsbarnDto {
@@ -533,15 +549,7 @@ export interface OppdaterePeriodeInntekt {
     /** Anig om inntekten skal inkluderes i beregning */
     taMedIBeregning: boolean;
     /** Angi periode inntekten skal dekke ved beregnings */
-    angittPeriode: PeriodeLocalDate;
-}
-
-/** Angi periode inntekten skal dekke ved beregnings */
-export interface PeriodeLocalDate {
-    /** @format date */
-    til?: string;
-    /** @format date */
-    fom: string;
+    angittPeriode: Datoperiode;
 }
 
 export interface SivilstandDto {
@@ -734,6 +742,16 @@ export interface InntektDto {
      * @example "2025-01-25"
      */
     datoTom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    opprinneligFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    opprinneligTom?: string;
     ident: string;
     fraGrunnlag: boolean;
     /** @uniqueItems true */
@@ -945,6 +963,494 @@ export interface SivilstandBeregnet {
     sivilstandListe: Sivilstand[];
 }
 
+/** Periodisert liste over innhentede inntekter fra a-inntekt og underliggende poster */
+export interface AinntektGrunnlagDto {
+    /** Id til personen inntekten er rapportert for */
+    personId: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil: string;
+    /** Liste over poster for innhentede inntektsposter */
+    ainntektspostListe: AinntektspostDto[];
+}
+
+/** Liste over poster for innhentede inntektsposter */
+export interface AinntektspostDto {
+    /** Perioden innteksposten er utbetalt YYYYMM */
+    utbetalingsperiode?: string;
+    /**
+     * Fra-dato for opptjening
+     * @format date
+     */
+    opptjeningsperiodeFra?: string;
+    /**
+     * Til-dato for opptjening
+     * @format date
+     */
+    opptjeningsperiodeTil?: string;
+    /** Id til de som rapporterer inn inntekten */
+    opplysningspliktigId?: string;
+    /** Id til virksomheten som rapporterer inn inntekten */
+    virksomhetId?: string;
+    /** Type fordel: Kontantytelse, Naturalytelse, Utgiftsgodtgjorelse */
+    fordelType?: string;
+    /** Beskrivelse av inntekt */
+    beskrivelse?: string;
+    /**
+     * Fra-dato etterbetaling
+     * @format date
+     */
+    etterbetalingsperiodeFra?: string;
+    /**
+     * Til-dato etterbetaling
+     * @format date
+     */
+    etterbetalingsperiodeTil?: string;
+    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+    inntektType: string;
+    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+    kategori: AinntektspostDtoKategoriEnum;
+    /** Beløp */
+    belop: number;
+    /** Beløp */
+    beløp: number;
+}
+
+/** Liste av ansettelsesdetaljer, med eventuell historikk */
+export interface Ansettelsesdetaljer {
+    /** Fradato for ansettelsesdetalj. År + måned */
+    periodeFra?: {
+        /** @format int32 */
+        year?: number;
+        month?: AnsettelsesdetaljerMonthEnum;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
+    periodeTil?: {
+        /** @format int32 */
+        year?: number;
+        month?: AnsettelsesdetaljerMonthEnum1;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** Type arbeidsforhold, Ordinaer, Maritim, Forenklet, Frilanser' */
+    arbeidsforholdType?: string;
+    /** Beskrivelse av arbeidstidsordning. Eks: 'Ikke skift' */
+    arbeidstidsordningBeskrivelse?: string;
+    /** Beskrivelse av ansettelsesform. Eks: 'Fast ansettelse' */
+    ansettelsesformBeskrivelse?: string;
+    /** Beskrivelse av yrke. Eks: 'KONTORLEDER' */
+    yrkeBeskrivelse?: string;
+    /**
+     * Avtalt antall timer i uken
+     * @format double
+     */
+    antallTimerPrUke?: number;
+    /**
+     * Avtalt stillingsprosent
+     * @format double
+     */
+    avtaltStillingsprosent?: number;
+    /**
+     * Dato for forrige endring i stillingsprosent
+     * @format date
+     */
+    sisteStillingsprosentendringDato?: string;
+    /**
+     * Dato for forrige lønnsendring
+     * @format date
+     */
+    sisteLønnsendringDato?: string;
+}
+
+/** Periodisert liste over arbeidsforhold */
+export interface ArbeidsforholdGrunnlagDto {
+    /** Id til personen arbeidsforholdet gjelder */
+    partPersonId: string;
+    /**
+     * Startdato for arbeidsforholdet
+     * @format date
+     */
+    startdato?: string;
+    /**
+     * Eventuell sluttdato for arbeidsforholdet
+     * @format date
+     */
+    sluttdato?: string;
+    /** Navn på arbeidsgiver */
+    arbeidsgiverNavn?: string;
+    /** Arbeidsgivers organisasjonsnummer */
+    arbeidsgiverOrgnummer?: string;
+    /** Liste av ansettelsesdetaljer, med eventuell historikk */
+    ansettelsesdetaljerListe?: Ansettelsesdetaljer[];
+    /** Liste over registrerte permisjoner */
+    permisjonListe?: Permisjon[];
+    /** Liste over registrerte permitteringer */
+    permitteringListe?: Permittering[];
+}
+
+/** Periodisert liste over innhentet barnetillegg */
+export interface BarnetilleggGrunnlagDto {
+    /** Id til personen barnetillegg er rapportert for */
+    partPersonId: string;
+    /** Id til barnet barnetillegget er rapportert for */
+    barnPersonId: string;
+    /** Type barnetillegg */
+    barnetilleggType: string;
+    /**
+     * Periode fra- og med måned
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+    /** Bruttobeløp */
+    beløpBrutto: number;
+    /** Angir om barnet er felles- eller særkullsbarn */
+    barnType: string;
+}
+
+/** Periodisert liste over innhentet barnetilsyn */
+export interface BarnetilsynGrunnlagDto {
+    /** Id til personen som mottar barnetilsynet */
+    partPersonId: string;
+    /** Id til barnet barnetilsynet er for */
+    barnPersonId: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil?: string;
+    /**
+     * Beløpet barnetilsynet er på
+     * @format int32
+     */
+    beløp?: number;
+    /** Angir om barnetilsynet er heltid eller deltid */
+    tilsynstype?: BarnetilsynGrunnlagDtoTilsynstypeEnum;
+    /** Angir om barnet er over eller under skolealder */
+    skolealder?: BarnetilsynGrunnlagDtoSkolealderEnum;
+}
+
+/** Liste over perioder personen bor i samme husstand som BM/BP */
+export interface BorISammeHusstandDto {
+    /**
+     * Personen bor i samme husstand som BM/BP fra- og med måned
+     * @format date
+     */
+    periodeFra?: string;
+    /**
+     * Personen bor i samme husstand som BM/BP til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+}
+
+/** Liste over evt. feil rapportert under henting av grunnlag */
+export interface FeilrapporteringDto {
+    grunnlagstype: GrunnlagRequestType;
+    /** Id til personen grunnlaget er forsøkt hentet for */
+    personId?: string;
+    /** @format date */
+    periodeFra?: string;
+    /** @format date */
+    periodeTil?: string;
+    feiltype: FeilrapporteringDtoFeiltypeEnum;
+    feilmelding?: string;
+}
+
+export enum GrunnlagRequestType {
+    AINNTEKT = "AINNTEKT",
+    SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
+    UTVIDETBARNETRYGDOGSMABARNSTILLEGG = "UTVIDET_BARNETRYGD_OG_SMÅBARNSTILLEGG",
+    BARNETILLEGG = "BARNETILLEGG",
+    HUSSTANDSMEDLEMMER_OG_EGNE_BARN = "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
+    SIVILSTAND = "SIVILSTAND",
+    KONTANTSTOTTE = "KONTANTSTØTTE",
+    BARNETILSYN = "BARNETILSYN",
+    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
+    OVERGANGSSTONAD = "OVERGANGSSTONAD",
+}
+
+export interface HentGrunnlagDto {
+    /** Periodisert liste over innhentede inntekter fra a-inntekt og underliggende poster */
+    ainntektListe: AinntektGrunnlagDto[];
+    /** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
+    skattegrunnlagListe: SkattegrunnlagGrunnlagDto[];
+    /** Periodisert liste over innhentet utvidet barnetrygd */
+    utvidetBarnetrygdListe: UtvidetBarnetrygdGrunnlagDto[];
+    /** Periodisert liste over innhentet småbarnstillegg */
+    småbarnstilleggListe: SmabarnstilleggGrunnlagDto[];
+    /** Periodisert liste over innhentet barnetillegg */
+    barnetilleggListe: BarnetilleggGrunnlagDto[];
+    /** Periodisert liste over innhentet kontantstøtte */
+    kontantstøtteListe: KontantstotteGrunnlagDto[];
+    /** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
+    husstandsmedlemmerOgEgneBarnListe: RelatertPersonGrunnlagDto[];
+    /** Periodisert liste over en persons sivilstand */
+    sivilstandListe: SivilstandGrunnlagDto[];
+    /** Periodisert liste over innhentet barnetilsyn */
+    barnetilsynListe: BarnetilsynGrunnlagDto[];
+    /** Periodisert liste over arbeidsforhold */
+    arbeidsforholdListe: ArbeidsforholdGrunnlagDto[];
+    /** Liste over evt. feil rapportert under henting av grunnlag */
+    feilrapporteringListe: FeilrapporteringDto[];
+    /** @format date-time */
+    hentetTidspunkt: string;
+}
+
+/** Periodisert liste over innhentet kontantstøtte */
+export interface KontantstotteGrunnlagDto {
+    /** Id til personen som mottar kontantstøtten */
+    partPersonId: string;
+    /** Id til barnet kontantstøtten mottas for */
+    barnPersonId: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil?: string;
+    /**
+     * Beløpet kontantstøtten er på
+     * @format int32
+     */
+    beløp: number;
+}
+
+export interface KonverterInntekterDto {
+    personId: string;
+    grunnlagDto: HentGrunnlagDto;
+}
+
+/** Liste over registrerte permisjoner */
+export interface Permisjon {
+    /** @format date */
+    startdato?: string;
+    /** @format date */
+    sluttdato?: string;
+    beskrivelse?: string;
+    /** @format double */
+    prosent?: number;
+}
+
+/** Liste over registrerte permitteringer */
+export interface Permittering {
+    /** @format date */
+    startdato?: string;
+    /** @format date */
+    sluttdato?: string;
+    beskrivelse?: string;
+    /** @format double */
+    prosent?: number;
+}
+
+/** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
+export interface RelatertPersonGrunnlagDto {
+    /** Personid til BM/BP */
+    partPersonId?: string;
+    /** Personid til relatert person. Dette er husstandsmedlem eller barn av BM/BP */
+    relatertPersonPersonId?: string;
+    /** Navn på den relaterte personen, format <Fornavn, mellomnavn, Etternavn */
+    navn?: string;
+    /**
+     * Den relaterte personens fødselsdato
+     * @format date
+     */
+    fødselsdato?: string;
+    /** Angir om den relaterte personen er barn av BM/BP */
+    erBarnAvBmBp: boolean;
+    /** Liste over perioder personen bor i samme husstand som BM/BP */
+    borISammeHusstandDtoListe: BorISammeHusstandDto[];
+}
+
+/** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
+export interface SkattegrunnlagGrunnlagDto {
+    /** Id til personen inntekten er rapportert for */
+    personId: string;
+    /**
+     * Periode fra
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode frem til
+     * @format date
+     */
+    periodeTil: string;
+    /** Liste over poster med skattegrunnlag */
+    skattegrunnlagspostListe: SkattegrunnlagspostDto[];
+}
+
+/** Liste over poster med skattegrunnlag */
+export interface SkattegrunnlagspostDto {
+    /** Type skattegrunnlag: Ordinær eller Svalbard */
+    skattegrunnlagType: string;
+    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+    inntektType: string;
+    /** Beløp */
+    belop: number;
+    /** Beløp på skattegrunnlagposten */
+    beløp: number;
+    /** Tekniske navnet på inntektsposten. Er samme verdi som "Summert skattegrunnlag" fra NAV kodeverk ( https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Summert%20skattegrunnlag ) */
+    kode: string;
+}
+
+/** Periodisert liste over innhentet småbarnstillegg */
+export interface SmabarnstilleggGrunnlagDto {
+    /** Id til personen småbarnstillegg er rapportert for */
+    personId: string;
+    /**
+     * Periode fra- og med måned
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+    /** Beløp */
+    beløp: number;
+    /** Angir om stønaden er manuelt beregnet */
+    manueltBeregnet: boolean;
+}
+
+/** Periodisert liste over innhentet utvidet barnetrygd */
+export interface UtvidetBarnetrygdGrunnlagDto {
+    /** Id til personen utvidet barnetrygd er rapportert for */
+    personId: string;
+    /**
+     * Periode fra- og med måned
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til- og med måned
+     * @format date
+     */
+    periodeTil?: string;
+    /** Beløp */
+    beløp: number;
+    /** Angir om stønaden er manuelt beregnet */
+    manueltBeregnet: boolean;
+}
+
+/** Liste over summerte månedsinntekter (Ainntekt ++)) */
+export interface SummertManedsinntekt {
+    /**
+     * Perioden inntekten gjelder for (format YYYY-MM)
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    gjelderÅrMåned: string;
+    /**
+     * Summert inntekt for måneden
+     * @example 50000
+     */
+    sumInntekt: number;
+    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
+    inntektPostListe: InntektPost[];
+    grunnlagsreferanseListe: string[];
+}
+
+/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
+export interface SummertArsinntekt {
+    inntektRapportering: Inntektsrapportering;
+    /**
+     * Visningsnavn for inntekt
+     * @example "Lønn og trekk 2022"
+     */
+    visningsnavn: string;
+    /**
+     * Summert inntekt for perioden, omgjort til årsinntekt
+     * @example 600000
+     */
+    sumInntekt: number;
+    /** Perioden inntekten gjelder for (fom-til) */
+    periode: TypeArManedsperiode;
+    /**
+     * Id til barnet inntekten mottas for, brukes for kontantstøtte og barnetillegg
+     * @example "12345678910"
+     */
+    gjelderBarnPersonId: string;
+    /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
+    inntektPostListe: InntektPost[];
+    grunnlagsreferanseListe: string[];
+}
+
+export interface TransformerInntekterResponse {
+    /**
+     * Dato + commit hash
+     * @example "20230705081501_68e71c7"
+     */
+    versjon: string;
+    /** Liste over summerte månedsinntekter (Ainntekt ++)) */
+    summertMånedsinntektListe: SummertManedsinntekt[];
+    /** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
+    summertÅrsinntektListe: SummertArsinntekt[];
+}
+
+/** Perioden inntekten gjelder for (fom-til) */
+export interface TypeArManedsperiode {
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    fom: string;
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    til?: string;
+}
+
+export interface ResultatBeregningBarnDto {
+    barn: ResultatRolle;
+    perioder: ResultatPeriodeDto[];
+}
+
+export interface ResultatPeriodeDto {
+    /** Perioden inntekten gjelder for (fom-til) */
+    periode: TypeArManedsperiode;
+    beløp: number;
+    resultatKode: Resultatkode;
+    regel: string;
+    sivilstand: Sivilstandskode;
+    inntekt: number;
+    /** @format int32 */
+    antallBarnIHusstanden: number;
+}
+
+export interface ResultatRolle {
+    ident?: string;
+    navn: string;
+    /** @format date */
+    fødselsdato: string;
+}
+
 export interface BehandlingInfoDto {
     /** @format int64 */
     vedtakId?: number;
@@ -1017,12 +1523,85 @@ export interface OpprettBehandlingResponse {
     id: number;
 }
 
-/** Resultatet av en forskuddsberegning */
-export interface BeregnetForskuddResultat {
-    /** Periodisert liste over resultat av forskuddsberegning */
-    beregnetForskuddPeriodeListe: ResultatPeriode[];
-    /** Liste over grunnlag brukt i beregning */
-    grunnlagListe: GrunnlagDto[];
+export interface AddOpplysningerRequest {
+    /** @format int64 */
+    behandlingId: number;
+    aktiv: boolean;
+    grunnlagstype: OpplysningerType;
+    /** data */
+    data: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    hentetDato: string;
+}
+
+export interface ArbeidOgInntektLenkeRequest {
+    /** @format int64 */
+    behandlingId: number;
+    ident: string;
+}
+
+/** Kilde/type for en behandlingsreferanse */
+export enum BehandlingsrefKilde {
+    BEHANDLING_ID = "BEHANDLING_ID",
+    BISYSSOKNAD = "BISYS_SØKNAD",
+    BISYSKLAGEREFSOKNAD = "BISYS_KLAGE_REF_SØKNAD",
+}
+
+/** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
+export interface BehandlingsreferanseDto {
+    /** Kilde/type for en behandlingsreferanse */
+    kilde: BehandlingsrefKilde;
+    /** Kildesystemets referanse til behandlingen */
+    referanse: string;
+}
+
+/** Angir om søknaden om engangsbeløp er besluttet avvist, stadfestet eller skal medføre endringGyldige verdier er 'AVVIST', 'STADFESTELSE' og 'ENDRING' */
+export enum Beslutningstype {
+    AVVIST = "AVVIST",
+    STADFESTELSE = "STADFESTELSE",
+    ENDRING = "ENDRING",
+}
+
+/** Liste over alle engangsbeløp som inngår i vedtaket */
+export interface EngangsbelopDto {
+    type: Engangsbeloptype;
+    /** Referanse til sak */
+    sak: string;
+    /** Personidenten til den som skal betale engangsbeløpet */
+    skyldner: string;
+    /** Personidenten til den som krever engangsbeløpet */
+    kravhaver: string;
+    /** Personidenten til den som mottar engangsbeløpet */
+    mottaker: string;
+    /**
+     * Beregnet engangsbeløp
+     * @min 0
+     */
+    beløp?: number;
+    /** Valutakoden tilhørende engangsbeløpet */
+    valutakode: string;
+    /** Resultatkoden tilhørende engangsbeløpet */
+    resultatkode: string;
+    /** Angir om engangsbeløpet skal innkreves */
+    innkreving: Innkrevingstype;
+    /** Angir om søknaden om engangsbeløp er besluttet avvist, stadfestet eller skal medføre endringGyldige verdier er 'AVVIST', 'STADFESTELSE' og 'ENDRING' */
+    beslutning: Beslutningstype;
+    /**
+     * Id for vedtaket det er klaget på. Utgjør sammen med referanse en unik id for et engangsbeløp
+     * @format int32
+     */
+    omgjørVedtakId?: number;
+    /** Referanse til engangsbeløp, brukes for å kunne omgjøre engangsbeløp senere i et klagevedtak. Unik innenfor et vedtak.Referansen er enten angitt i requesten for opprettelse av vedtak eller generert av bidrag-vedtak hvis den ikke var angitt i requesten. */
+    referanse: string;
+    /** Referanse - delytelsesId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
+    /** Liste over alle grunnlag som inngår i beregningen */
+    grunnlagReferanseListe: string[];
 }
 
 /** Grunnlag */
@@ -1035,6 +1614,8 @@ export interface GrunnlagDto {
     innhold: JsonNode;
     /** Liste over grunnlagsreferanser */
     grunnlagsreferanseListe: string[];
+    /** Referanse til personobjektet grunnlaget gjelder */
+    gjelderReferanse?: string;
 }
 
 /** Grunnlagstype */
@@ -1069,8 +1650,8 @@ export enum Grunnlagstype {
     SOKNAD = "SØKNAD",
     VIRKNINGSTIDSPUNKT = "VIRKNINGSTIDSPUNKT",
     NOTAT = "NOTAT",
-    SLUTTBEREGNING = "SLUTTBEREGNING",
-    DELBEREGNING_INNTEKT = "DELBEREGNING_INNTEKT",
+    SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
+    DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
@@ -1079,80 +1660,121 @@ export enum Grunnlagstype {
     PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
-    INNHENTET_HUSSTANDSMEDLEM_PERIODE = "INNHENTET_HUSSTANDSMEDLEM_PERIODE",
-    INNHENTET_SIVILSTAND_PERIODE = "INNHENTET_SIVILSTAND_PERIODE",
-    INNHENTET_ARBEIDSFORHOLD_PERIODE = "INNHENTET_ARBEIDSFORHOLD_PERIODE",
+    INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
+    INNHENTET_SIVILSTAND = "INNHENTET_SIVILSTAND",
+    INNHENTET_ARBEIDSFORHOLD = "INNHENTET_ARBEIDSFORHOLD",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
-    INNHENTET_INNTEKT_AORDNING_PERIODE = "INNHENTET_INNTEKT_AORDNING_PERIODE",
-    INNHENTET_INNTEKT_BARNETILLEGG_PERIODE = "INNHENTET_INNTEKT_BARNETILLEGG_PERIODE",
-    INNHENTETINNTEKTKONTANTSTOTTEPERIODE = "INNHENTET_INNTEKT_KONTANTSTØTTE_PERIODE",
-    INNHENTET_INNTEKT_AINNTEKT_PERIODE = "INNHENTET_INNTEKT_AINNTEKT_PERIODE",
-    INNHENTET_INNTEKT_BARNETILSYN_PERIODE = "INNHENTET_INNTEKT_BARNETILSYN_PERIODE",
-    INNHENTETINNTEKTSMABARNSTILLEGGPERIODE = "INNHENTET_INNTEKT_SMÅBARNSTILLEGG_PERIODE",
-    INNHENTET_INNTEKT_UTVIDETBARNETRYGD_PERIODE = "INNHENTET_INNTEKT_UTVIDETBARNETRYGD_PERIODE",
+    INNHENTET_INNTEKT_AORDNING = "INNHENTET_INNTEKT_AORDNING",
+    INNHENTET_INNTEKT_BARNETILLEGG = "INNHENTET_INNTEKT_BARNETILLEGG",
+    INNHENTETINNTEKTKONTANTSTOTTE = "INNHENTET_INNTEKT_KONTANTSTØTTE",
+    INNHENTET_INNTEKT_AINNTEKT = "INNHENTET_INNTEKT_AINNTEKT",
+    INNHENTET_INNTEKT_BARNETILSYN = "INNHENTET_INNTEKT_BARNETILSYN",
+    INNHENTETINNTEKTSMABARNSTILLEGG = "INNHENTET_INNTEKT_SMÅBARNSTILLEGG",
+    INNHENTET_INNTEKT_UTVIDETBARNETRYGD = "INNHENTET_INNTEKT_UTVIDETBARNETRYGD",
+}
+
+/** Angir om engangsbeløpet skal innkreves */
+export enum Innkrevingstype {
+    MED_INNKREVING = "MED_INNKREVING",
+    UTEN_INNKREVING = "UTEN_INNKREVING",
 }
 
 /** Grunnlagsinnhold (generisk) */
 export type JsonNode = object;
 
-/** Resultatet av en beregning */
-export interface ResultatBeregning {
-    /** Resultat beløp */
-    belop: number;
-    kode: Resultatkode;
-    /** Resultat regel */
-    regel: string;
+/** Liste over alle stønadsendringer som inngår i vedtaket */
+export interface StonadsendringDto {
+    type: Stonadstype;
+    /** Referanse til sak */
+    sak: string;
+    /** Personidenten til den som skal betale bidraget */
+    skyldner: string;
+    /** Personidenten til den som krever bidraget */
+    kravhaver: string;
+    /** Personidenten til den som mottar bidraget */
+    mottaker: string;
+    /**
+     * Angir første år en stønad skal indeksreguleres
+     * @format int32
+     */
+    førsteIndeksreguleringsår?: number;
+    /** Angir om engangsbeløpet skal innkreves */
+    innkreving: Innkrevingstype;
+    /** Angir om søknaden om engangsbeløp er besluttet avvist, stadfestet eller skal medføre endringGyldige verdier er 'AVVIST', 'STADFESTELSE' og 'ENDRING' */
+    beslutning: Beslutningstype;
+    /**
+     * Id for vedtaket det er klaget på
+     * @format int32
+     */
+    omgjørVedtakId?: number;
+    /** Referanse som brukes i utlandssaker */
+    eksternReferanse?: string;
+    /** Liste over grunnlag som er knyttet direkte til stønadsendringen */
+    grunnlagReferanseListe: string[];
+    /** Liste over alle perioder som inngår i stønadsendringen */
+    periodeListe: VedtakPeriodeDto[];
 }
 
-export interface ResultatForskuddsberegning {
-    resultatBarn: ResultatForskuddsberegningBarn[];
+export interface VedtakDto {
+    /** Hva er kilden til vedtaket. Automatisk eller manuelt */
+    kilde: VedtakDtoKildeEnum;
+    type: Vedtakstype;
+    /** Id til saksbehandler eller batchjobb som opprettet vedtaket. For saksbehandler er ident hentet fra token */
+    opprettetAv: string;
+    /** Saksbehandlers navn */
+    opprettetAvNavn?: string;
+    /** Navn på applikasjon som vedtaket er opprettet i */
+    kildeapplikasjon: string;
+    /**
+     * Tidspunkt/timestamp når vedtaket er fattet
+     * @format date-time
+     */
+    vedtakstidspunkt: string;
+    /** Enheten som er ansvarlig for vedtaket. Kan være null for feks batch */
+    enhetsnummer?: string;
+    /**
+     * Settes hvis overføring til Elin skal utsettes
+     * @format date
+     */
+    innkrevingUtsattTilDato?: string;
+    /** Settes hvis vedtaket er fastsatt i utlandet */
+    fastsattILand?: string;
+    /**
+     * Tidspunkt vedtaket er fattet
+     * @format date-time
+     */
+    opprettetTidspunkt: string;
+    /** Liste over alle grunnlag som inngår i vedtaket */
+    grunnlagListe: GrunnlagDto[];
+    /** Liste over alle stønadsendringer som inngår i vedtaket */
+    stønadsendringListe: StonadsendringDto[];
+    /** Liste over alle engangsbeløp som inngår i vedtaket */
+    engangsbeløpListe: EngangsbelopDto[];
+    /** Liste med referanser til alle behandlinger som ligger som grunnlag til vedtaket */
+    behandlingsreferanseListe: BehandlingsreferanseDto[];
 }
 
-export interface ResultatForskuddsberegningBarn {
-    barn: ResultatRolle;
-    /** Resultatet av en forskuddsberegning */
-    resultat: BeregnetForskuddResultat;
-}
-
-/** Resultatet av en beregning for en gitt periode */
-export interface ResultatPeriode {
-    /** Beregnet resultat periode */
+/** Liste over alle perioder som inngår i stønadsendringen */
+export interface VedtakPeriodeDto {
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
-    /** Resultatet av en beregning */
-    resultat: ResultatBeregning;
-    /** Beregnet grunnlag innhold */
-    grunnlagsreferanseListe: string[];
-}
-
-export interface ResultatRolle {
-    ident?: string;
-    navn: string;
-    /** @format date */
-    fødselsdato: string;
-}
-
-/** Beregnet resultat periode */
-export interface TypeArManedsperiode {
     /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
+     * Beregnet stønadsbeløp
+     * @min 0
      */
-    fom: string;
-    /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
-    til?: string;
-}
-
-export interface ArbeidOgInntektLenkeRequest {
-    /** @format int64 */
-    behandlingId: number;
-    ident: string;
+    beløp?: number;
+    /** Valutakoden tilhørende stønadsbeløpet */
+    valutakode?: string;
+    /** Resultatkoden tilhørende stønadsbeløpet */
+    resultatkode: string;
+    /** Referanse - delytelseId/beslutningslinjeId -> bidrag-regnskap. Skal fjernes senere */
+    delytelseId?: string;
+    /** Liste over alle grunnlag som inngår i perioden */
+    grunnlagReferanseListe: string[];
 }
 
 export interface Arbeidsforhold {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     arbeidsgiver: string;
     stillingProsent?: string;
@@ -1161,7 +1783,7 @@ export interface Arbeidsforhold {
 }
 
 export interface Barnetillegg {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     beløp: number;
 }
@@ -1196,7 +1818,7 @@ export interface InntekterPerRolle {
 export interface InntekterSomLeggesTilGrunn {
     inntektType?: Inntektsrapportering;
     beskrivelse?: string;
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode?: TypeArManedsperiode;
     beløp: number;
 }
@@ -1217,27 +1839,27 @@ export interface NotatDto {
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status: Bostatuskode;
     kilde: string;
 }
 
 export interface OpplysningerBruktTilBeregningSivilstandskode {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status: Sivilstandskode;
     kilde: string;
 }
 
 export interface OpplysningerFraFolkeregisteretBostatuskode {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
 }
 
 export interface OpplysningerFraFolkeregisteretSivilstandskodePDL {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     /** Type sivilstand fra PDL */
     status?: SivilstandskodePDL;
@@ -1253,7 +1875,7 @@ export interface ParterISoknad {
 
 export interface Resultat {
     type: string;
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     inntekt: number;
     sivilstand: string;
@@ -1268,7 +1890,7 @@ export interface SivilstandNotat {
 }
 
 export interface UtvidetBarnetrygd {
-    /** Beregnet resultat periode */
+    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     beløp: number;
 }
@@ -1312,10 +1934,74 @@ export enum SivilstandBeregnetStatusEnum {
     SIVILSTANDSTYPE_MANGLER = "SIVILSTANDSTYPE_MANGLER",
 }
 
+/** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
+export enum AinntektspostDtoKategoriEnum {
+    LOENNSINNTEKT = "LOENNSINNTEKT",
+    NAERINGSINNTEKT = "NAERINGSINNTEKT",
+    PENSJON_ELLER_TRYGD = "PENSJON_ELLER_TRYGD",
+    YTELSE_FRA_OFFENTLIGE = "YTELSE_FRA_OFFENTLIGE",
+}
+
+export enum AnsettelsesdetaljerMonthEnum {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+export enum AnsettelsesdetaljerMonthEnum1 {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+/** Angir om barnetilsynet er heltid eller deltid */
+export enum BarnetilsynGrunnlagDtoTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+/** Angir om barnet er over eller under skolealder */
+export enum BarnetilsynGrunnlagDtoSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+export enum FeilrapporteringDtoFeiltypeEnum {
+    TEKNISK_FEIL = "TEKNISK_FEIL",
+    FUNKSJONELL_FEIL = "FUNKSJONELL_FEIL",
+    UKJENT_FEIL = "UKJENT_FEIL",
+}
+
 export enum InitalizeForsendelseRequestBehandlingStatusEnum {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
     FEILREGISTRERT = "FEILREGISTRERT",
+}
+
+/** Hva er kilden til vedtaket. Automatisk eller manuelt */
+export enum VedtakDtoKildeEnum {
+    MANUELT = "MANUELT",
+    AUTOMATISK = "AUTOMATISK",
 }
 
 export enum VirkningstidspunktMonthEnum {
@@ -1393,10 +2079,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1485,7 +2168,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1585,6 +2268,60 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * No description
+         *
+         * @tags databehandler-controller
+         * @name KonverterInntekter
+         * @request POST:/api/v2/databehandler/inntekt/{behandlingId}
+         * @deprecated
+         * @secure
+         */
+        konverterInntekter: (behandlingId: number, data: KonverterInntekterDto, params: RequestParams = {}) =>
+            this.request<TransformerInntekterResponse, any>({
+                path: `/api/v2/databehandler/inntekt/${behandlingId}`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags vedtak-controller
+         * @name FatteVedtak
+         * @request POST:/api/v2/behandling/{behandlingsid}/vedtak
+         * @secure
+         */
+        fatteVedtak: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<number, any>({
+                path: `/api/v2/behandling/${behandlingsid}/vedtak`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultat
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @secure
+         */
+        hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Oppretter forsendelse for behandling eller vedtak. Skal bare benyttes hvis vedtakId eller behandlingId mangler for behandling (Søknad som behandles gjennom Bisys)
          *
          * @tags forsendelse-controller
@@ -1626,16 +2363,36 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Beregn forskudd
          *
-         * @tags behandling-beregn-forskudd-controller
+         * @tags behandling-beregn-controller
          * @name BeregnForskudd
          * @request POST:/api/v1/behandling/{behandlingsid}/beregn
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatForskuddsberegning, any>({
+            this.request<ResultatBeregningBarnDto[], any>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Legge til nye opplysninger til behandling
+         *
+         * @tags opplysninger-controller
+         * @name LeggTilOpplysninger
+         * @request POST:/api/v1/behandling/{behandlingId}/opplysninger
+         * @deprecated
+         * @secure
+         */
+        leggTilOpplysninger: (behandlingId: number, data: AddOpplysningerRequest, params: RequestParams = {}) =>
+            this.request<GrunnlagsdataDto, GrunnlagsdataDto>({
+                path: `/api/v1/behandling/${behandlingId}/opplysninger`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
                 format: "json",
                 ...params,
             }),
@@ -1674,6 +2431,40 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 body: data,
                 secure: true,
                 type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Simuler vedtakstruktur for en behandling. Brukes for testing av grunnlagsstruktur uten å faktisk fatte vedtak
+         *
+         * @tags vedtak-simulering-controller
+         * @name BehandlingTilVedtak
+         * @request GET:/api/v2/simulervedtak/{behandlingId}
+         * @secure
+         */
+        behandlingTilVedtak: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<VedtakDto, any>({
+                path: `/api/v2/simulervedtak/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hent vedtak som behandling for lesemodus. Vedtak vil bli konvertert til behandling uten lagring
+         *
+         * @tags behandling-controller-v-2
+         * @name VedtakLesemodus
+         * @request GET:/api/v2/behandling/vedtak/{vedtakId}
+         * @secure
+         */
+        vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDtoV2, BehandlingDtoV2>({
+                path: `/api/v2/behandling/vedtak/${vedtakId}`,
+                method: "GET",
+                secure: true,
                 format: "json",
                 ...params,
             }),
@@ -1724,6 +2515,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
             this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/v1/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hent vedtak som behandling for lesemodus. Vedtak vil bli konvertert til behandling uten lagring
+         *
+         * @tags behandling-controller
+         * @name VedtakLesemodusV1
+         * @request GET:/api/v1/behandling/vedtak/{vedtakId}
+         * @deprecated
+         * @secure
+         */
+        vedtakLesemodusV1: (vedtakId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/v1/behandling/vedtak/${vedtakId}`,
                 method: "GET",
                 secure: true,
                 format: "json",

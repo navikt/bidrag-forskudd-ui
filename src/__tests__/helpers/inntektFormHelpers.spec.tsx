@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { Inntektsrapportering } from "../../api/BidragInntektApi";
+import { Inntektsrapportering } from "../../api/BidragBehandlingApiV1";
 import { editPeriods } from "../../components/forms/helpers/inntektFormHelpers";
 
 describe("InntektFormHelpers", () => {

@@ -9,7 +9,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -22,10 +22,9 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 import AinntektLink from "./AinntektLink";
 
 const Beskrivelse = ({ item, index, ident }: { item: InntektDtoV2; index: number; ident: string }) => {
-    const toVisningsnavn = useVisningsnavn();
     return item.kilde === Kilde.OFFENTLIG ? (
         <BodyShort className="min-w-[215px] capitalize">
-            {toVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
         </BodyShort>
     ) : (
         <FormControlledSelectField
