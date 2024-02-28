@@ -292,10 +292,11 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
     const behandling = useGetBehandling();
     const { sivilstandListe } = useGrunnlag();
 
+    const { lesemodus } = useForskudd();
     const { data: beregnet } = useSuspenseQuery({
         queryKey: QueryKeys.sivilstandBeregning(behandling.id, behandling.virkningstidspunkt.virkningstidspunkt),
         queryFn: async () => {
-            if (behandling.id == -1) {
+            if (lesemodus) {
                 return { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
             }
             return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data;

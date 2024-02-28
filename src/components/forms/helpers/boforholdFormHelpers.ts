@@ -357,16 +357,20 @@ export const createInitialValues = (
                   virkningsOrSoktFraDato,
                   barnMedISaken
               ).sort(compareHusstandsBarn),
-        sivilstand: boforhold?.sivilstand?.length ? boforhold.sivilstand : mapSivilstandProsessert(sivilstandBeregnet),
+        sivilstand:
+            boforhold?.sivilstand?.length > 0 ? boforhold.sivilstand : mapSivilstandProsessert(sivilstandBeregnet),
     };
 };
 
 export const mapSivilstandProsessert = (sivilstandBeregnet: Sivilstand[]): SivilstandDto[] =>
     sivilstandBeregnet.map((v) => ({
         kilde: Kilde.OFFENTLIG,
-        datoFom: v.datoFom,
-        datoTom: v.datoTom,
-        sivilstand: v.sivilstand,
+        //@ts-ignore
+        datoFom: v.periodeFom,
+        //@ts-ignore
+        datoTom: v.periodeTom,
+        //@ts-ignore
+        sivilstand: v.sivilstandskode,
     }));
 
 export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequest => ({
