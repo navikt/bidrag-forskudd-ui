@@ -77,7 +77,6 @@ export const useGetOpplysninger = <T extends object>(opplysningerType: Opplysnin
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
     const behandling = useGetBehandling();
-    console.log(behandling);
     return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
 };
 
