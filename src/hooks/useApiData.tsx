@@ -9,6 +9,7 @@ import {
     BehandlingDto,
     BehandlingDtoV2,
     GrunnlagsdataDto,
+    OppdaterBehandlingRequest,
     OppdaterBehandlingRequestV2,
     OpplysningerType,
     RolleDto,
@@ -100,13 +101,13 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
 
     return useMutation({
         mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
-        mutationFn: async (payload: OppdaterBehandlingRequestV2): Promise<BehandlingDtoV2> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, payload);
+        mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, payload);
             return data;
         },
         networkMode: "always",
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
+            queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
         },
         onError: (error) => {
             console.log("onError", error);
