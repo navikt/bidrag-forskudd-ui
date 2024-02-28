@@ -1,5 +1,4 @@
-import { BehandlingNotatDto, InntektDtoV2 } from "../api/BidragBehandlingApiV1";
-import { TransformerInntekterResponse } from "../api/BidragInntektApi";
+import { BehandlingNotatDto, InntektDtoV2, TransformerInntekterResponse } from "../api/BidragBehandlingApiV1";
 
 export interface InntektFormValues {
     årsinntekter: { [key: string]: InntektDtoV2[] };

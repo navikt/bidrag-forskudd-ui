@@ -1,4 +1,4 @@
-import { Inntektsrapportering, TransformerInntekterResponse } from "../../api/BidragInntektApi";
+import { Inntektsrapportering, TransformerInntekterResponse } from "../../api/BidragBehandlingApiV1";
 
 export const bidragInntektTestData: TransformerInntekterResponse = {
     versjon: "",

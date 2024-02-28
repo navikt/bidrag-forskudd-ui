@@ -10,7 +10,7 @@ import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ErrorModal } from "./components/modal/ErrorModal";
 import text from "./constants/texts";
 import { ForskuddProvider } from "./context/ForskuddContext";
-import { usePrefetchBehandlingAndGrunnlagspakke } from "./hooks/useApiData";
+import { prefetchVisningsnavn } from "./hooks/useVisningsnavn";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
 
@@ -66,6 +66,14 @@ export default function App() {
                                 <Route index element={<ForskudWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
+                            <Route path="/sak/:saksnummer/vedtak/:vedtakId">
+                                <Route index element={<VedtakLesemodusWrapper />} />
+                                <Route path="notat" element={<NotatPageWrapper />} />
+                            </Route>
+                            <Route path="/vedtak/:behandlingId">
+                                <Route index element={<VedtakLesemodusWrapper />} />
+                                <Route path="notat" element={<NotatPageWrapper />} />
+                            </Route>
                             <Route path="/forskudd/:behandlingId">
                                 <Route index element={<ForskudWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
@@ -77,12 +85,33 @@ export default function App() {
         </FlagProvider>
     );
 }
+function VedtakLesemodusWrapper() {
+    const { vedtakId } = useParams<{ vedtakId?: string }>();
+    const { flagsReady, flagsError } = useFlagsStatus();
 
+    prefetchVisningsnavn();
+    if (!flagsReady && flagsError == false) {
+        return (
+            <div className="flex justify-center">
+                <Loader size="3xlarge" title={text.loading} variant="interaction" />
+            </div>
+        );
+    }
+    return (
+        <>
+            <ForskuddProvider vedtakId={Number(vedtakId)}>
+                <ForskuddHeader />
+                <ForskuddPage />
+                <ErrorModal />
+            </ForskuddProvider>
+        </>
+    );
+}
 function ForskudWrapper() {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { flagsReady, flagsError } = useFlagsStatus();
 
-    usePrefetchBehandlingAndGrunnlagspakke(Number(behandlingId));
+    prefetchVisningsnavn();
     if (!flagsReady && flagsError == false) {
         return (
             <div className="flex justify-center">

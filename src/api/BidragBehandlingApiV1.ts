@@ -58,10 +58,10 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
     bidragspliktig?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    søknadsbarn: Rolle[];
+    bidragsmottaker?: Rolle;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
 }
@@ -1427,6 +1427,30 @@ export interface TypeArManedsperiode {
     til?: string;
 }
 
+export interface ResultatBeregningBarnDto {
+    barn: ResultatRolle;
+    perioder: ResultatPeriodeDto[];
+}
+
+export interface ResultatPeriodeDto {
+    /** Perioden inntekten gjelder for (fom-til) */
+    periode: TypeArManedsperiode;
+    beløp: number;
+    resultatKode: Resultatkode;
+    regel: string;
+    sivilstand: Sivilstandskode;
+    inntekt: number;
+    /** @format int32 */
+    antallBarnIHusstanden: number;
+}
+
+export interface ResultatRolle {
+    ident?: string;
+    navn: string;
+    /** @format date */
+    fødselsdato: string;
+}
+
 export interface BehandlingInfoDto {
     /** @format int64 */
     vedtakId?: number;
@@ -1497,30 +1521,6 @@ export interface OpprettBehandlingRequest {
 export interface OpprettBehandlingResponse {
     /** @format int64 */
     id: number;
-}
-
-export interface ResultatBeregningBarnDto {
-    barn: ResultatRolle;
-    perioder: ResultatPeriodeDto[];
-}
-
-export interface ResultatPeriodeDto {
-    /** Perioden inntekten gjelder for (fom-til) */
-    periode: TypeArManedsperiode;
-    beløp: number;
-    resultatKode: Resultatkode;
-    regel: string;
-    sivilstand: Sivilstandskode;
-    inntekt: number;
-    /** @format int32 */
-    antallBarnIHusstanden: number;
-}
-
-export interface ResultatRolle {
-    ident?: string;
-    navn: string;
-    /** @format date */
-    fødselsdato: string;
 }
 
 export interface AddOpplysningerRequest {
@@ -2305,6 +2305,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultat
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @secure
+         */
+        hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Oppretter forsendelse for behandling eller vedtak. Skal bare benyttes hvis vedtakId eller behandlingId mangler for behandling (Søknad som behandles gjennom Bisys)
          *
          * @tags forsendelse-controller
@@ -2346,7 +2363,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * @description Beregn forskudd
          *
-         * @tags behandling-beregn-forskudd-controller
+         * @tags behandling-beregn-controller
          * @name BeregnForskudd
          * @request POST:/api/v1/behandling/{behandlingsid}/beregn
          * @secure
@@ -2436,14 +2453,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Omgjør vedtak til en behandling
+         * @description Hent vedtak som behandling for lesemodus. Vedtak vil bli konvertert til behandling uten lagring
          *
          * @tags behandling-controller-v-2
-         * @name OmgjorVedtakTilBehandling
+         * @name VedtakLesemodus
          * @request GET:/api/v2/behandling/vedtak/{vedtakId}
          * @secure
          */
-        omgjorVedtakTilBehandling: (vedtakId: number, params: RequestParams = {}) =>
+        vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
                 method: "GET",
@@ -2498,6 +2515,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentBehandling: (behandlingId: number, params: RequestParams = {}) =>
             this.request<BehandlingDto, BehandlingDto>({
                 path: `/api/v1/behandling/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hent vedtak som behandling for lesemodus. Vedtak vil bli konvertert til behandling uten lagring
+         *
+         * @tags behandling-controller
+         * @name VedtakLesemodusV1
+         * @request GET:/api/v1/behandling/vedtak/{vedtakId}
+         * @deprecated
+         * @secure
+         */
+        vedtakLesemodusV1: (vedtakId: number, params: RequestParams = {}) =>
+            this.request<BehandlingDto, BehandlingDto>({
+                path: `/api/v1/behandling/vedtak/${vedtakId}`,
                 method: "GET",
                 secure: true,
                 format: "json",

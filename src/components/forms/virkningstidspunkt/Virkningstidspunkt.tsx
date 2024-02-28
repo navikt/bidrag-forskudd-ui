@@ -50,8 +50,6 @@ const årsakListe = [
     TypeArsakstype.TREARSREGELEN,
 ];
 
-console.log("Kode", årsakListe);
-
 const avslagsListe = [
     Resultatkode.PAGRUNNAVBARNEPENSJON,
     Resultatkode.BARNETS_EKTESKAP,
@@ -233,7 +231,7 @@ const VirkningstidspunktForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
         oppdaterBehandling.mutation.mutate(
-            { virkningstidspunkt: createPayload(values) },
+            { virkningstidspunkt: createPayload(values), aktivereGrunnlag: [] },
             {
                 onSuccess: () => {
                     useFormMethods.reset(values, {

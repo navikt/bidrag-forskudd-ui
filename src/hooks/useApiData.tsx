@@ -28,7 +28,6 @@ import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API,
 import { useForskudd } from "../context/ForskuddContext";
 import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
-import { prefetchVisningsnavn } from "./useVisningsnavn";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
     oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
@@ -43,8 +42,18 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
-    behandling: (behandlingId: number) => ["behandling", QueryKeys.behandlingVersion, behandlingId],
-    behandlingV2: (behandlingId: number) => ["behandlingV2", QueryKeys.behandlingVersion, behandlingId],
+    behandling: (behandlingId: number, vedtakId?: number) => [
+        "behandling",
+        QueryKeys.behandlingVersion,
+        behandlingId,
+        vedtakId,
+    ],
+    behandlingV2: (behandlingId: number, vedtakId?: number) => [
+        "behandlingV2",
+        QueryKeys.behandlingVersion,
+        behandlingId,
+        vedtakId,
+    ],
     sivilstandBeregning: (behandlingId: number, virkningstidspunkt: string) => [
         "behandling",
         QueryKeys.behandlingVersion,
@@ -60,12 +69,15 @@ export const QueryKeys = {
 
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType);
+    const opplysninger = behandling.opplysninger?.find(
+        (opplysning) => opplysning.grunnlagsdatatype == opplysningerType
+    );
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
     const behandling = useGetBehandling();
+    console.log(behandling);
     return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
 };
 
@@ -113,34 +125,11 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
         },
         networkMode: "always",
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
+            queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
         },
         onError: (error) => {
             console.log("onError", error);
         },
-    });
-};
-
-export const usePrefetchBehandlingAndGrunnlagspakke = async (behandlingId) => {
-    const queryClient = useQueryClient();
-    prefetchVisningsnavn();
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.behandling(behandlingId),
-        queryFn: async (): Promise<BehandlingDto> => (await BEHANDLING_API_V1.api.hentBehandling(behandlingId)).data,
-        retry: 1,
-        staleTime: Infinity,
-    });
-
-    const behandling: BehandlingDto = queryClient.getQueryData(QueryKeys.behandling(behandlingId));
-    const grunnlagRequest = createGrunnlagRequest(behandling);
-
-    await queryClient.prefetchQuery({
-        queryKey: QueryKeys.grunnlag(),
-        queryFn: async (): Promise<HentGrunnlagDto> => {
-            const { data } = await BIDRAG_GRUNNLAG_API.hentgrunnlag.hentGrunnlag(grunnlagRequest);
-            return data;
-        },
-        staleTime: Infinity,
     });
 };
 
@@ -189,10 +178,14 @@ export const useGetVisningsnavn = () =>
     });
 
 export const useGetBehandling = (): BehandlingDto => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId, vedtakId } = useForskudd();
     const { data: behandling } = useSuspenseQuery({
-        queryKey: QueryKeys.behandling(behandlingId),
+        queryKey: QueryKeys.behandling(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDto> => {
+            if (vedtakId) {
+                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
+                return data;
+            }
             const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
             return data;
         },
@@ -202,10 +195,14 @@ export const useGetBehandling = (): BehandlingDto => {
 };
 
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId, vedtakId } = useForskudd();
     const { data: behandling } = useSuspenseQuery({
-        queryKey: QueryKeys.behandlingV2(behandlingId),
+        queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDtoV2> => {
+            if (vedtakId) {
+                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId);
+                return data;
+            }
             const { data } = await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
             return data;
         },
@@ -297,7 +294,12 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
 
     const { data: beregnet } = useSuspenseQuery({
         queryKey: QueryKeys.sivilstandBeregning(behandling.id, behandling.virkningstidspunkt.virkningstidspunkt),
-        queryFn: async () => (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data,
+        queryFn: async () => {
+            if (behandling.id == -1) {
+                return { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
+            }
+            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data;
+        },
         staleTime: Infinity,
     });
     return beregnet ?? { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
@@ -351,12 +353,16 @@ export const useNotat = (behandlingId: number) => {
 };
 
 export const useGetBeregningForskudd = () => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId, vedtakId } = useForskudd();
 
     return useSuspenseQuery<VedtakBeregningResult>({
         queryKey: QueryKeys.beregningForskudd(),
         queryFn: async () => {
             try {
+                if (vedtakId) {
+                    const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultat(vedtakId);
+                    return { resultat: response.data };
+                }
                 const response = await BEHANDLING_API_V1.api.beregnForskudd(behandlingId);
                 return { resultat: response.data };
             } catch (error) {

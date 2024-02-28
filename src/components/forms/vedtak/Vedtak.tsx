@@ -19,7 +19,7 @@ import { RolleTag } from "../../RolleTag";
 import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 const Vedtak = () => {
-    const { behandlingId, activeStep } = useForskudd();
+    const { behandlingId, activeStep, lesemodus } = useForskudd();
     const {
         erVedtakFattet,
         virkningstidspunkt: { avslag },
@@ -35,7 +35,7 @@ const Vedtak = () => {
 
     return (
         <div className="grid gap-y-8">
-            {erVedtakFattet && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
+            {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="xlarge">
                     {text.title.vedtak}
@@ -63,7 +63,7 @@ const Vedtak = () => {
                     </Alert>
                 </>
             )}
-            {!beregnetForskudd?.feil && <FatteVedtakButtons />}
+            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
         </div>
     );
 };
@@ -221,8 +221,7 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
         <RolleTag rolleType={Rolletype.BA} />
         <BodyShort>
-            {barn.navn} / <span className="ml-1">{barn.ident}</span> /{" "}
-            <span className="ml-1">{dateToDDMMYYYYString(new Date(barn.fødselsdato))}</span>
+            {barn.navn} / <span className="ml-1">{barn.ident}</span>
         </BodyShort>
     </div>
 );

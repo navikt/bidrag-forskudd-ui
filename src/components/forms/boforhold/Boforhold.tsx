@@ -44,7 +44,7 @@ import {
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
-import useVisningsnavn from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import {
     BoforholdFormValues,
     HusstandOpplysningFraFolkeRegistre,
@@ -97,7 +97,6 @@ import { ActionButtons } from "../inntekt/ActionButtons";
 import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string }) => {
-    const tilVisningsnavn = useVisningsnavn();
     const opplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(OpplysningerType.BOFORHOLD_BEARBEIDET);
     const perioder = opplysninger?.husstand.find((opplysning) => opplysning.ident == ident)
         ?.perioder as SavedOpplysningFraFolkeRegistrePeriode[];
@@ -127,7 +126,7 @@ const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string 
                                         {periode.tilDato ? DateToDDMMYYYYString(new Date(periode.tilDato)) : ""}
                                     </>
                                 </Table.DataCell>
-                                <Table.DataCell>{tilVisningsnavn(periode.bostatus)}</Table.DataCell>
+                                <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
                             </Table.Row>
                         ))}
                 </Table.Body>
@@ -666,7 +665,6 @@ const Perioder = ({
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId } = useForskudd();
-    const toVisningsnavn = useVisningsnavn();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const saveBoforhold = useOnSaveBoforhold();
@@ -867,7 +865,7 @@ const Perioder = ({
     };
 
     function bosstatusToVisningsnavn(bostsatus: Bostatuskode): string {
-        const visningsnavn = toVisningsnavn(bostsatus);
+        const visningsnavn = hentVisningsnavn(bostsatus);
         if (boststatusOver18År.includes(bostsatus)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }

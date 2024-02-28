@@ -19,6 +19,8 @@ interface IForskuddContext {
     activeStep: string;
     setActiveStep: (x: number) => void;
     behandlingId: number;
+    vedtakId: number;
+    lesemodus: boolean;
     saksnummer?: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
@@ -33,12 +35,13 @@ interface IForskuddContext {
 }
 
 interface IForskuddContextProps {
-    behandlingId: number;
+    vedtakId?: number;
+    behandlingId?: number;
 }
 
 export const ForskuddContext = createContext<IForskuddContext | null>(null);
 
-function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskuddContextProps>) {
+function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
@@ -57,6 +60,8 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
             activeStep,
             setActiveStep,
             behandlingId,
+            vedtakId,
+            lesemodus: vedtakId != null,
             saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,
@@ -72,6 +77,7 @@ function ForskuddProvider({ behandlingId, children }: PropsWithChildren<IForskud
         [
             activeStep,
             behandlingId,
+            vedtakId,
             saksnummer,
             virkningstidspunktFormValues,
             inntektFormValues,
