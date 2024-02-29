@@ -1,31 +1,37 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { Inntektsrapportering } from "../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde } from "../../api/BidragBehandlingApiV1";
 import { editPeriods } from "../../components/forms/helpers/inntektFormHelpers";
 
 describe("InntektFormHelpers", () => {
     it.skip("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {
         const inntekter = [
             {
-                inntektType: Inntektsrapportering.LONNTREKK,
+                rapporteringstype: Inntektsrapportering.LONNTREKK,
                 datoFom: null,
                 taMed: true,
                 fraGrunnlag: true,
                 datoTom: null,
-                belop: 10,
-                inntektPostListe: [],
+                beløp: 10,
+                ident: "",
+                kilde: Kilde.OFFENTLIG,
+                inntektsposter: [],
+                inntektstyper: [],
             },
         ];
         const expectedResult = [
             {
-                inntektType: Inntektsrapportering.LONNTREKK,
+                rapporteringstype: Inntektsrapportering.LONNTREKK,
                 datoFom: null,
                 taMed: true,
                 fraGrunnlag: true,
                 datoTom: null,
-                belop: 10,
-                inntektPostListe: [],
+                beløp: 10,
+                ident: "",
+                kilde: Kilde.OFFENTLIG,
+                inntektsposter: [],
+                inntektstyper: [],
             },
         ];
         const updatedInntekter = editPeriods(inntekter, 2);
@@ -33,7 +39,7 @@ describe("InntektFormHelpers", () => {
         updatedInntekter.forEach((inntekt, i) => {
             expect(inntekt.datoFom).equals(expectedResult[i].datoFom);
             expect(inntekt.datoTom).equals(expectedResult[i].datoTom);
-            expect(inntekt.inntektType).equals(expectedResult[i].inntektType);
+            expect(inntekt.rapporteringstype).equals(expectedResult[i].rapporteringstype);
         });
     });
 });

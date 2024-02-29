@@ -1,21 +1,21 @@
-import { useFormContext } from "react-hook-form";
-
-import { createInntektPayload } from "../components/forms/helpers/inntektFormHelpers";
-import { InntektFormValues } from "../types/inntektFormValues";
+import { OppdatereManuellInntekt, OppdaterePeriodeInntekt, OppdaterNotat } from "../api/BidragBehandlingApiV1";
 import { useOppdaterBehandlingV2 } from "./useApiData";
 
 export const useOnSaveInntekt = () => {
     const updateInntekter = useOppdaterBehandlingV2();
-    const { reset } = useFormContext<InntektFormValues>();
-    return (values: InntektFormValues) => {
-        updateInntekter.mutation.mutate(createInntektPayload(values), {
-            onSuccess: () =>
-                reset(values, {
-                    keepErrors: true,
-                    keepValues: true,
-                    keepDefaultValues: true,
-                    keepDirtyValues: true,
-                }),
+    return (updatedValues: {
+        oppdatereInntektsperioder?: OppdaterePeriodeInntekt[];
+        oppdatereManuelleInntekter?: OppdatereManuellInntekt[];
+        sletteInntekter?: number[];
+        notat?: OppdaterNotat;
+    }) =>
+        updateInntekter.mutation.mutate({
+            inntekter: {
+                oppdatereInntektsperioder: [],
+                oppdatereManuelleInntekter: [],
+                sletteInntekter: [],
+                ...updatedValues,
+            },
+            aktivereGrunnlag: [],
         });
-    };
 };

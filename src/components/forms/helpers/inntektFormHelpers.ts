@@ -4,8 +4,6 @@ import {
     InntektDtoV2,
     InntekterDtoV2,
     Inntektsrapportering,
-    Kilde,
-    OppdaterBehandlingRequestV2,
     RolleDto,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
@@ -21,56 +19,6 @@ const mapToConvertedDates = (inntekt) => ({
     },
     datoTom: inntekt.datoTom ?? null,
 });
-export const createInntektPayload = (values: InntektFormValues): OppdaterBehandlingRequestV2 => ({
-    inntekter: {
-        oppdatereInntektsperioder: Object.entries(values.årsinntekter)
-            .map(([, value]) => value.filter((inntekt) => inntekt.kilde === Kilde.OFFENTLIG).map(mapToConvertedDates))
-            .flat()
-            .concat(
-                Object.keys(values.barnetillegg).length
-                    ? Object.entries(values.barnetillegg).map(([, value]) => value.map(mapToConvertedDates))
-                    : []
-            )
-            .concat(
-                values.småbarnstillegg.length
-                    ? values.småbarnstillegg
-                          .filter((inntekt) => inntekt.kilde === Kilde.OFFENTLIG)
-                          .map(mapToConvertedDates)
-                    : []
-            )
-            .concat(
-                values.kontantstøtte.length
-                    ? values.kontantstøtte
-                          .filter((inntekt) => inntekt.kilde === Kilde.OFFENTLIG)
-                          .map(mapToConvertedDates)
-                    : []
-            )
-            .concat(
-                values.utvidetBarnetrygd.length
-                    ? values.utvidetBarnetrygd
-                          .filter((inntekt) => inntekt.kilde === Kilde.OFFENTLIG)
-                          .map(mapToConvertedDates)
-                    : []
-            ),
-        oppdatereManuelleInntekter: Object.entries(values.årsinntekter)
-            .map(([, value]) => value.filter((inntekt) => inntekt.kilde === Kilde.MANUELL).map(mapToConvertedDates))
-            .flat()
-            .concat(
-                Object.keys(values.barnetillegg).length
-                    ? Object.entries(values.barnetillegg).map(([, value]) => value.map(mapToConvertedDates))
-                    : []
-            )
-            .concat(values.småbarnstillegg.length ? values.småbarnstillegg.map(mapToConvertedDates) : [])
-            .concat(values.kontantstøtte.length ? values.kontantstøtte.map(mapToConvertedDates) : [])
-            .concat(values.utvidetBarnetrygd.length ? values.utvidetBarnetrygd.map(mapToConvertedDates) : []),
-        sletteInntekter: [],
-        notat: {
-            medIVedtaket: values.notat?.medIVedtaket,
-            kunINotat: values.notat?.kunINotat,
-        },
-    },
-    aktivereGrunnlag: [],
-});
 
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
@@ -78,32 +26,26 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
 });
 
 const mapInntekterToRolle =
-    (inntekter: InntektDtoV2[]) =>
+    (inntekter: InntektDtoV2[], fieldToCheck: string) =>
     (rolle): InntektDtoV2[] =>
         inntekter
-            ?.filter((inntekt) => inntekt.ident === rolle.ident)
+            ?.filter((inntekt) => inntekt[fieldToCheck] === rolle.ident)
             .map(mapToConvertedDates)
             .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
-export const getPerioderFraInntekter = (bmOgBarn: RolleDto[], inntekter: InntektDtoV2[]) =>
-    bmOgBarn.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter)), {});
+export const getInntektPerioder = (
+    roller: RolleDto[],
+    inntekter: InntektDtoV2[],
+    comparisonField: "gjelderBarn" | "ident"
+) => roller.reduce(reduceAndMapRolleToInntekt(mapInntekterToRolle(inntekter, comparisonField)), {});
 
 export const createInitialValues = (bmOgBarn: RolleDto[], inntekter: InntekterDtoV2): InntektFormValues => {
+    const barn = bmOgBarn.filter((rolle) => rolle.rolletype === Rolletype.BA);
     return {
-        årsinntekter: getPerioderFraInntekter(bmOgBarn, inntekter.årsinntekter),
-        barnetillegg: bmOgBarn
-            .filter((rolle) => rolle.rolletype === Rolletype.BA)
-            .reduce(
-                (acc, rolle) => ({
-                    ...acc,
-                    [rolle.ident]: inntekter.barnetillegg
-                        ?.filter((btilleg) => btilleg.gjelderBarn === rolle.ident)
-                        .map(mapToConvertedDates),
-                }),
-                {}
-            ),
+        årsinntekter: getInntektPerioder(bmOgBarn, inntekter.årsinntekter, "ident"),
+        barnetillegg: getInntektPerioder(barn, inntekter.barnetillegg, "gjelderBarn"),
         småbarnstillegg: inntekter.småbarnstillegg?.map(mapToConvertedDates),
-        kontantstøtte: inntekter.kontantstøtte?.map(mapToConvertedDates),
+        kontantstøtte: getInntektPerioder(barn, inntekter.kontantstøtte, "gjelderBarn"),
         utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(mapToConvertedDates),
         notat: {
             medIVedtaket: inntekter.notat.medIVedtaket,

@@ -7,3 +7,9 @@
 .navds-tabs__tablist-wrapper {
     width: max-content;
 }
+.navds-checkbox__label {
+    align-items: center;
+}
+.navds-checkbox__icon {
+    max-height: 0.5rem;
+}
