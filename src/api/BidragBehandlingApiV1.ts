@@ -31,6 +31,8 @@ export interface Behandling {
     engangsbeloptype?: Engangsbeloptype;
     /** @format int64 */
     vedtaksid?: number;
+    /** @format int64 */
+    omgjørVedtaksid?: number;
     /** @format date */
     virkningstidspunkt?: string;
     getårsak?: TypeArsakstype;
@@ -58,12 +60,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    bidragspliktig?: Rolle;
-    grunnlagListe: GrunnlagEntity[];
-    søknadsbarn: Rolle[];
-    bidragsmottaker?: Rolle;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
+    grunnlagListe: GrunnlagEntity[];
+    bidragsmottaker?: Rolle;
+    søknadsbarn: Rolle[];
+    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -163,6 +165,8 @@ export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
     AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
+    AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAK = "AINNTEKT_BEREGNET_3MND_FRA_OPPRINNELIG_VEDTAK",
+    AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAK = "AINNTEKT_BEREGNET_12MND_FRA_OPPRINNELIG_VEDTAK",
     KAPITALINNTEKT = "KAPITALINNTEKT",
     LIGNINGSINNTEKT = "LIGNINGSINNTEKT",
     KONTANTSTOTTE = "KONTANTSTØTTE",
@@ -963,477 +967,12 @@ export interface SivilstandBeregnet {
     sivilstandListe: Sivilstand[];
 }
 
-/** Periodisert liste over innhentede inntekter fra a-inntekt og underliggende poster */
-export interface AinntektGrunnlagDto {
-    /** Id til personen inntekten er rapportert for */
-    personId: string;
-    /**
-     * Periode fra-dato
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til-dato
-     * @format date
-     */
-    periodeTil: string;
-    /** Liste over poster for innhentede inntektsposter */
-    ainntektspostListe: AinntektspostDto[];
-}
-
-/** Liste over poster for innhentede inntektsposter */
-export interface AinntektspostDto {
-    /** Perioden innteksposten er utbetalt YYYYMM */
-    utbetalingsperiode?: string;
-    /**
-     * Fra-dato for opptjening
-     * @format date
-     */
-    opptjeningsperiodeFra?: string;
-    /**
-     * Til-dato for opptjening
-     * @format date
-     */
-    opptjeningsperiodeTil?: string;
-    /** Id til de som rapporterer inn inntekten */
-    opplysningspliktigId?: string;
-    /** Id til virksomheten som rapporterer inn inntekten */
-    virksomhetId?: string;
-    /** Type fordel: Kontantytelse, Naturalytelse, Utgiftsgodtgjorelse */
-    fordelType?: string;
-    /** Beskrivelse av inntekt */
-    beskrivelse?: string;
-    /**
-     * Fra-dato etterbetaling
-     * @format date
-     */
-    etterbetalingsperiodeFra?: string;
-    /**
-     * Til-dato etterbetaling
-     * @format date
-     */
-    etterbetalingsperiodeTil?: string;
-    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-    inntektType: string;
-    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-    kategori: AinntektspostDtoKategoriEnum;
-    /** Beløp */
-    belop: number;
-    /** Beløp */
-    beløp: number;
-}
-
-/** Liste av ansettelsesdetaljer, med eventuell historikk */
-export interface Ansettelsesdetaljer {
-    /** Fradato for ansettelsesdetalj. År + måned */
-    periodeFra?: {
-        /** @format int32 */
-        year?: number;
-        month?: AnsettelsesdetaljerMonthEnum;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
-    /** Eventuell sluttdato for ansettelsesdetalj. År + måned */
-    periodeTil?: {
-        /** @format int32 */
-        year?: number;
-        month?: AnsettelsesdetaljerMonthEnum1;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
-    /** Type arbeidsforhold, Ordinaer, Maritim, Forenklet, Frilanser' */
-    arbeidsforholdType?: string;
-    /** Beskrivelse av arbeidstidsordning. Eks: 'Ikke skift' */
-    arbeidstidsordningBeskrivelse?: string;
-    /** Beskrivelse av ansettelsesform. Eks: 'Fast ansettelse' */
-    ansettelsesformBeskrivelse?: string;
-    /** Beskrivelse av yrke. Eks: 'KONTORLEDER' */
-    yrkeBeskrivelse?: string;
-    /**
-     * Avtalt antall timer i uken
-     * @format double
-     */
-    antallTimerPrUke?: number;
-    /**
-     * Avtalt stillingsprosent
-     * @format double
-     */
-    avtaltStillingsprosent?: number;
-    /**
-     * Dato for forrige endring i stillingsprosent
-     * @format date
-     */
-    sisteStillingsprosentendringDato?: string;
-    /**
-     * Dato for forrige lønnsendring
-     * @format date
-     */
-    sisteLønnsendringDato?: string;
-}
-
-/** Periodisert liste over arbeidsforhold */
-export interface ArbeidsforholdGrunnlagDto {
-    /** Id til personen arbeidsforholdet gjelder */
-    partPersonId: string;
-    /**
-     * Startdato for arbeidsforholdet
-     * @format date
-     */
-    startdato?: string;
-    /**
-     * Eventuell sluttdato for arbeidsforholdet
-     * @format date
-     */
-    sluttdato?: string;
-    /** Navn på arbeidsgiver */
-    arbeidsgiverNavn?: string;
-    /** Arbeidsgivers organisasjonsnummer */
-    arbeidsgiverOrgnummer?: string;
-    /** Liste av ansettelsesdetaljer, med eventuell historikk */
-    ansettelsesdetaljerListe?: Ansettelsesdetaljer[];
-    /** Liste over registrerte permisjoner */
-    permisjonListe?: Permisjon[];
-    /** Liste over registrerte permitteringer */
-    permitteringListe?: Permittering[];
-}
-
-/** Periodisert liste over innhentet barnetillegg */
-export interface BarnetilleggGrunnlagDto {
-    /** Id til personen barnetillegg er rapportert for */
-    partPersonId: string;
-    /** Id til barnet barnetillegget er rapportert for */
-    barnPersonId: string;
-    /** Type barnetillegg */
-    barnetilleggType: string;
-    /**
-     * Periode fra- og med måned
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Bruttobeløp */
-    beløpBrutto: number;
-    /** Angir om barnet er felles- eller særkullsbarn */
-    barnType: string;
-}
-
-/** Periodisert liste over innhentet barnetilsyn */
-export interface BarnetilsynGrunnlagDto {
-    /** Id til personen som mottar barnetilsynet */
-    partPersonId: string;
-    /** Id til barnet barnetilsynet er for */
-    barnPersonId: string;
-    /**
-     * Periode fra-dato
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til-dato
-     * @format date
-     */
-    periodeTil?: string;
-    /**
-     * Beløpet barnetilsynet er på
-     * @format int32
-     */
-    beløp?: number;
-    /** Angir om barnetilsynet er heltid eller deltid */
-    tilsynstype?: BarnetilsynGrunnlagDtoTilsynstypeEnum;
-    /** Angir om barnet er over eller under skolealder */
-    skolealder?: BarnetilsynGrunnlagDtoSkolealderEnum;
-}
-
-/** Liste over perioder personen bor i samme husstand som BM/BP */
-export interface BorISammeHusstandDto {
-    /**
-     * Personen bor i samme husstand som BM/BP fra- og med måned
-     * @format date
-     */
-    periodeFra?: string;
-    /**
-     * Personen bor i samme husstand som BM/BP til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-}
-
-/** Liste over evt. feil rapportert under henting av grunnlag */
-export interface FeilrapporteringDto {
-    grunnlagstype: GrunnlagRequestType;
-    /** Id til personen grunnlaget er forsøkt hentet for */
-    personId?: string;
-    /** @format date */
-    periodeFra?: string;
-    /** @format date */
-    periodeTil?: string;
-    feiltype: FeilrapporteringDtoFeiltypeEnum;
-    feilmelding?: string;
-}
-
-export enum GrunnlagRequestType {
-    AINNTEKT = "AINNTEKT",
-    SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
-    UTVIDETBARNETRYGDOGSMABARNSTILLEGG = "UTVIDET_BARNETRYGD_OG_SMÅBARNSTILLEGG",
-    BARNETILLEGG = "BARNETILLEGG",
-    HUSSTANDSMEDLEMMER_OG_EGNE_BARN = "HUSSTANDSMEDLEMMER_OG_EGNE_BARN",
-    SIVILSTAND = "SIVILSTAND",
-    KONTANTSTOTTE = "KONTANTSTØTTE",
-    BARNETILSYN = "BARNETILSYN",
-    ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
-    OVERGANGSSTONAD = "OVERGANGSSTONAD",
-}
-
-export interface HentGrunnlagDto {
-    /** Periodisert liste over innhentede inntekter fra a-inntekt og underliggende poster */
-    ainntektListe: AinntektGrunnlagDto[];
-    /** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
-    skattegrunnlagListe: SkattegrunnlagGrunnlagDto[];
-    /** Periodisert liste over innhentet utvidet barnetrygd */
-    utvidetBarnetrygdListe: UtvidetBarnetrygdGrunnlagDto[];
-    /** Periodisert liste over innhentet småbarnstillegg */
-    småbarnstilleggListe: SmabarnstilleggGrunnlagDto[];
-    /** Periodisert liste over innhentet barnetillegg */
-    barnetilleggListe: BarnetilleggGrunnlagDto[];
-    /** Periodisert liste over innhentet kontantstøtte */
-    kontantstøtteListe: KontantstotteGrunnlagDto[];
-    /** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
-    husstandsmedlemmerOgEgneBarnListe: RelatertPersonGrunnlagDto[];
-    /** Periodisert liste over en persons sivilstand */
-    sivilstandListe: SivilstandGrunnlagDto[];
-    /** Periodisert liste over innhentet barnetilsyn */
-    barnetilsynListe: BarnetilsynGrunnlagDto[];
-    /** Periodisert liste over arbeidsforhold */
-    arbeidsforholdListe: ArbeidsforholdGrunnlagDto[];
-    /** Liste over evt. feil rapportert under henting av grunnlag */
-    feilrapporteringListe: FeilrapporteringDto[];
-    /** @format date-time */
-    hentetTidspunkt: string;
-}
-
-/** Periodisert liste over innhentet kontantstøtte */
-export interface KontantstotteGrunnlagDto {
-    /** Id til personen som mottar kontantstøtten */
-    partPersonId: string;
-    /** Id til barnet kontantstøtten mottas for */
-    barnPersonId: string;
-    /**
-     * Periode fra-dato
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til-dato
-     * @format date
-     */
-    periodeTil?: string;
-    /**
-     * Beløpet kontantstøtten er på
-     * @format int32
-     */
-    beløp: number;
-}
-
-export interface KonverterInntekterDto {
-    personId: string;
-    grunnlagDto: HentGrunnlagDto;
-}
-
-/** Liste over registrerte permisjoner */
-export interface Permisjon {
-    /** @format date */
-    startdato?: string;
-    /** @format date */
-    sluttdato?: string;
-    beskrivelse?: string;
-    /** @format double */
-    prosent?: number;
-}
-
-/** Liste over registrerte permitteringer */
-export interface Permittering {
-    /** @format date */
-    startdato?: string;
-    /** @format date */
-    sluttdato?: string;
-    beskrivelse?: string;
-    /** @format double */
-    prosent?: number;
-}
-
-/** Liste over alle personer som har bodd sammen med BM/BP i perioden fra virkningstidspunkt og fremover med en liste over hvilke perioder de har delt bolig. Listen inkluderer i tillegg personens egne barn, selv om de ikke har delt bolig med BM/BP */
-export interface RelatertPersonGrunnlagDto {
-    /** Personid til BM/BP */
-    partPersonId?: string;
-    /** Personid til relatert person. Dette er husstandsmedlem eller barn av BM/BP */
-    relatertPersonPersonId?: string;
-    /** Navn på den relaterte personen, format <Fornavn, mellomnavn, Etternavn */
-    navn?: string;
-    /**
-     * Den relaterte personens fødselsdato
-     * @format date
-     */
-    fødselsdato?: string;
-    /** Angir om den relaterte personen er barn av BM/BP */
-    erBarnAvBmBp: boolean;
-    /** Liste over perioder personen bor i samme husstand som BM/BP */
-    borISammeHusstandDtoListe: BorISammeHusstandDto[];
-}
-
-/** Periodisert liste over innhentede inntekter fra skatt og underliggende poster */
-export interface SkattegrunnlagGrunnlagDto {
-    /** Id til personen inntekten er rapportert for */
-    personId: string;
-    /**
-     * Periode fra
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode frem til
-     * @format date
-     */
-    periodeTil: string;
-    /** Liste over poster med skattegrunnlag */
-    skattegrunnlagspostListe: SkattegrunnlagspostDto[];
-}
-
-/** Liste over poster med skattegrunnlag */
-export interface SkattegrunnlagspostDto {
-    /** Type skattegrunnlag: Ordinær eller Svalbard */
-    skattegrunnlagType: string;
-    /** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-    inntektType: string;
-    /** Beløp */
-    belop: number;
-    /** Beløp på skattegrunnlagposten */
-    beløp: number;
-    /** Tekniske navnet på inntektsposten. Er samme verdi som "Summert skattegrunnlag" fra NAV kodeverk ( https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Summert%20skattegrunnlag ) */
-    kode: string;
-}
-
-/** Periodisert liste over innhentet småbarnstillegg */
-export interface SmabarnstilleggGrunnlagDto {
-    /** Id til personen småbarnstillegg er rapportert for */
-    personId: string;
-    /**
-     * Periode fra- og med måned
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Beløp */
-    beløp: number;
-    /** Angir om stønaden er manuelt beregnet */
-    manueltBeregnet: boolean;
-}
-
-/** Periodisert liste over innhentet utvidet barnetrygd */
-export interface UtvidetBarnetrygdGrunnlagDto {
-    /** Id til personen utvidet barnetrygd er rapportert for */
-    personId: string;
-    /**
-     * Periode fra- og med måned
-     * @format date
-     */
-    periodeFra: string;
-    /**
-     * Periode til- og med måned
-     * @format date
-     */
-    periodeTil?: string;
-    /** Beløp */
-    beløp: number;
-    /** Angir om stønaden er manuelt beregnet */
-    manueltBeregnet: boolean;
-}
-
-/** Liste over summerte månedsinntekter (Ainntekt ++)) */
-export interface SummertManedsinntekt {
-    /**
-     * Perioden inntekten gjelder for (format YYYY-MM)
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
-    gjelderÅrMåned: string;
-    /**
-     * Summert inntekt for måneden
-     * @example 50000
-     */
-    sumInntekt: number;
-    /** Liste over inntektsposter som utgjør grunnlaget for summert inntekt */
-    inntektPostListe: InntektPost[];
-    grunnlagsreferanseListe: string[];
-}
-
-/** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-export interface SummertArsinntekt {
-    inntektRapportering: Inntektsrapportering;
-    /**
-     * Visningsnavn for inntekt
-     * @example "Lønn og trekk 2022"
-     */
-    visningsnavn: string;
-    /**
-     * Summert inntekt for perioden, omgjort til årsinntekt
-     * @example 600000
-     */
-    sumInntekt: number;
-    /** Perioden inntekten gjelder for (fom-til) */
-    periode: TypeArManedsperiode;
-    /**
-     * Id til barnet inntekten mottas for, brukes for kontantstøtte og barnetillegg
-     * @example "12345678910"
-     */
-    gjelderBarnPersonId: string;
-    /** Liste over inntektsposter (generisk, avhengig av type) som utgjør grunnlaget for summert inntekt */
-    inntektPostListe: InntektPost[];
-    grunnlagsreferanseListe: string[];
-}
-
-export interface TransformerInntekterResponse {
-    /**
-     * Dato + commit hash
-     * @example "20230705081501_68e71c7"
-     */
-    versjon: string;
-    /** Liste over summerte månedsinntekter (Ainntekt ++)) */
-    summertMånedsinntektListe: SummertManedsinntekt[];
-    /** Liste over summerte årsinntekter (Ainntekt + Sigrun ++) */
-    summertÅrsinntektListe: SummertArsinntekt[];
-}
-
-/** Perioden inntekten gjelder for (fom-til) */
-export interface TypeArManedsperiode {
-    /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
-    fom: string;
-    /**
-     * @pattern YYYY-MM
-     * @example "2023-01"
-     */
-    til?: string;
-}
-
 export interface ResultatBeregningBarnDto {
     barn: ResultatRolle;
     perioder: ResultatPeriodeDto[];
 }
 
 export interface ResultatPeriodeDto {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     beløp: number;
     resultatKode: Resultatkode;
@@ -1449,6 +988,19 @@ export interface ResultatRolle {
     navn: string;
     /** @format date */
     fødselsdato: string;
+}
+
+export interface TypeArManedsperiode {
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    fom: string;
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    til?: string;
 }
 
 export interface BehandlingInfoDto {
@@ -1756,7 +1308,6 @@ export interface VedtakDto {
 
 /** Liste over alle perioder som inngår i stønadsendringen */
 export interface VedtakPeriodeDto {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     /**
      * Beregnet stønadsbeløp
@@ -1774,7 +1325,6 @@ export interface VedtakPeriodeDto {
 }
 
 export interface Arbeidsforhold {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     arbeidsgiver: string;
     stillingProsent?: string;
@@ -1783,7 +1333,6 @@ export interface Arbeidsforhold {
 }
 
 export interface Barnetillegg {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     beløp: number;
 }
@@ -1818,7 +1367,6 @@ export interface InntekterPerRolle {
 export interface InntekterSomLeggesTilGrunn {
     inntektType?: Inntektsrapportering;
     beskrivelse?: string;
-    /** Perioden inntekten gjelder for (fom-til) */
     periode?: TypeArManedsperiode;
     beløp: number;
 }
@@ -1839,27 +1387,23 @@ export interface NotatDto {
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status: Bostatuskode;
     kilde: string;
 }
 
 export interface OpplysningerBruktTilBeregningSivilstandskode {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status: Sivilstandskode;
     kilde: string;
 }
 
 export interface OpplysningerFraFolkeregisteretBostatuskode {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
 }
 
 export interface OpplysningerFraFolkeregisteretSivilstandskodePDL {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     /** Type sivilstand fra PDL */
     status?: SivilstandskodePDL;
@@ -1875,7 +1419,6 @@ export interface ParterISoknad {
 
 export interface Resultat {
     type: string;
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     inntekt: number;
     sivilstand: string;
@@ -1890,7 +1433,6 @@ export interface SivilstandNotat {
 }
 
 export interface UtvidetBarnetrygd {
-    /** Perioden inntekten gjelder for (fom-til) */
     periode: TypeArManedsperiode;
     beløp: number;
 }
@@ -1932,64 +1474,6 @@ export enum SivilstandBeregnetStatusEnum {
     LOGISK_FEIL_I_TIDSLINJE = "LOGISK_FEIL_I_TIDSLINJE",
     ALLE_FOREKOMSTER_ER_HISTORISKE = "ALLE_FOREKOMSTER_ER_HISTORISKE",
     SIVILSTANDSTYPE_MANGLER = "SIVILSTANDSTYPE_MANGLER",
-}
-
-/** Type inntekt: Lonnsinntekt, Naeringsinntekt, Pensjon eller trygd, Ytelse fra offentlig */
-export enum AinntektspostDtoKategoriEnum {
-    LOENNSINNTEKT = "LOENNSINNTEKT",
-    NAERINGSINNTEKT = "NAERINGSINNTEKT",
-    PENSJON_ELLER_TRYGD = "PENSJON_ELLER_TRYGD",
-    YTELSE_FRA_OFFENTLIGE = "YTELSE_FRA_OFFENTLIGE",
-}
-
-export enum AnsettelsesdetaljerMonthEnum {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum AnsettelsesdetaljerMonthEnum1 {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-/** Angir om barnetilsynet er heltid eller deltid */
-export enum BarnetilsynGrunnlagDtoTilsynstypeEnum {
-    HELTID = "HELTID",
-    DELTID = "DELTID",
-    IKKE_ANGITT = "IKKE_ANGITT",
-}
-
-/** Angir om barnet er over eller under skolealder */
-export enum BarnetilsynGrunnlagDtoSkolealderEnum {
-    OVER = "OVER",
-    UNDER = "UNDER",
-    IKKE_ANGITT = "IKKE_ANGITT",
-}
-
-export enum FeilrapporteringDtoFeiltypeEnum {
-    TEKNISK_FEIL = "TEKNISK_FEIL",
-    FUNKSJONELL_FEIL = "FUNKSJONELL_FEIL",
-    UKJENT_FEIL = "UKJENT_FEIL",
 }
 
 export enum InitalizeForsendelseRequestBehandlingStatusEnum {
@@ -2079,7 +1563,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2168,7 +1655,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2259,26 +1746,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         konverterSivilstand: (behandlingId: number, data: SivilstandGrunnlagDto[], params: RequestParams = {}) =>
             this.request<SivilstandBeregnet, any>({
                 path: `/api/v2/databehandler/sivilstand/${behandlingId}`,
-                method: "POST",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags databehandler-controller
-         * @name KonverterInntekter
-         * @request POST:/api/v2/databehandler/inntekt/{behandlingId}
-         * @deprecated
-         * @secure
-         */
-        konverterInntekter: (behandlingId: number, data: KonverterInntekterDto, params: RequestParams = {}) =>
-            this.request<TransformerInntekterResponse, any>({
-                path: `/api/v2/databehandler/inntekt/${behandlingId}`,
                 method: "POST",
                 body: data,
                 secure: true,

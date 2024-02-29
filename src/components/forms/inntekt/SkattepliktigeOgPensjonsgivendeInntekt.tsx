@@ -1,34 +1,43 @@
-import { FloppydiskIcon, InformationSquareIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { FloppydiskIcon, PencilIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Box, Button, Heading, Popover } from "@navikt/ds-react";
-import React, { useRef, useState } from "react";
+import { Alert, BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
+import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektDtoV2, Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
+import {
+    InntektDtoV2,
+    Inntektsrapportering,
+    Kilde,
+    OppdatereManuellInntekt,
+    OppdaterePeriodeInntekt,
+} from "../../../api/BidragBehandlingApiV1";
+import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYString, getYearFromDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, getYearFromDate, isAfterDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { TableExpandableRowWrapper, TableWrapper } from "../../table/TableWrapper";
-import { editPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import AinntektLink from "./AinntektLink";
 
-const Beskrivelse = ({ item, index, ident }: { item: InntektDtoV2; index: number; ident: string }) => {
-    return item.kilde === Kilde.OFFENTLIG ? (
-        <BodyShort className="min-w-[215px] capitalize">
-            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
-        </BodyShort>
-    ) : (
+export const Beskrivelse = ({
+    item,
+    field,
+    erRedigerbart,
+}: {
+    item: InntektDtoV2;
+    field: string;
+    erRedigerbart: boolean;
+}) => {
+    return erRedigerbart ? (
         <FormControlledSelectField
-            name={`årsinntekter.${ident}.${index}.inntektstype`}
+            name={`${field}.inntektstype`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 Object.entries(GrunnlagInntektType).map(([value, text]) => ({
@@ -38,100 +47,66 @@ const Beskrivelse = ({ item, index, ident }: { item: InntektDtoV2; index: number
             )}
             hideLabel
         />
+    ) : (
+        <BodyShort className="min-w-[215px] capitalize">
+            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+        </BodyShort>
     );
 };
+export const Totalt = ({
+    item,
+    field,
+    erRedigerbart,
+}: {
+    item: InntektDtoV2;
+    field: string;
+    erRedigerbart: boolean;
+}) => (
+    <>
+        {erRedigerbart ? (
+            <div className="w-[120px]">
+                <FormControlledTextField name={`${field}.beløp`} label="Totalt" type="number" min="1" hideLabel />
+            </div>
+        ) : (
+            <div className="flex items-center gap-x-4">
+                <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
+            </div>
+        )}
+    </>
+);
 
-const Detaljer = ({ totalt }) => {
-    const buttonRef = useRef<HTMLButtonElement>(null);
-    const [openState, setOpenState] = useState(false);
-
+export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
     return (
         <>
-            <Button
-                type="button"
-                size="small"
-                variant="tertiary"
-                ref={buttonRef}
-                icon={<InformationSquareIcon aria-hidden />}
-                onClick={() => setOpenState(true)}
-            />
-            <Popover open={openState} onClose={() => setOpenState(false)} anchorEl={buttonRef.current}>
-                <Popover.Content className="grid gap-y-4">
-                    <Heading level="4" size="small">
-                        Detaljer
-                    </Heading>
-                    <BodyShort size="small">Lønnsinntekt med trygdeavgiftsplikt og med trekkplikt: {totalt}</BodyShort>
-                    <BodyShort size="small">Sum: {totalt}</BodyShort>
-                    <Button
-                        type="button"
-                        size="small"
-                        variant="secondary"
-                        className="w-max"
-                        onClick={() => setOpenState(false)}
-                    >
-                        Lukk
-                    </Button>
-                </Popover.Content>
-            </Popover>
+            {editableRow !== index && !erMed && <div className="min-w-[40px]"></div>}
+            {erMed && editableRow !== index && (
+                <Button
+                    type="button"
+                    onClick={() => onEditRow(index)}
+                    icon={<PencilIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            )}
+            {editableRow === index && (
+                <Button
+                    type="button"
+                    onClick={() => onSaveRow(index)}
+                    icon={<FloppydiskIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            )}
         </>
     );
 };
-const Totalt = ({ item, index, ident }: { item: InntektDtoV2; index: number; ident: string }) =>
-    item.kilde === Kilde.OFFENTLIG ? (
-        <div className="flex items-center gap-x-4">
-            <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
-            <Detaljer totalt={item.beløp} />
-        </div>
-    ) : (
-        <div className="w-[120px]">
-            <FormControlledTextField
-                name={`årsinntekter.${ident}.${index}.beløp`}
-                label="Totalt"
-                type="number"
-                min="1"
-                hideLabel
-            />
-        </div>
-    );
 
-export const DeleteButton = ({ item, index, handleOnDelete }) =>
-    item.kilde === Kilde.OFFENTLIG ? (
-        <div className="min-w-[40px]"></div>
-    ) : (
-        <Button
-            type="button"
-            onClick={() => handleOnDelete(index)}
-            icon={<TrashIcon aria-hidden />}
-            variant="tertiary"
-            size="small"
-        />
-    );
-
-export const EditOrSaveButton = ({ index, editableRow, onEditRow, onSaveRow }) =>
-    editableRow === index ? (
-        <Button
-            type="button"
-            onClick={() => onSaveRow(index)}
-            icon={<FloppydiskIcon aria-hidden />}
-            variant="tertiary"
-            size="small"
-        />
-    ) : (
-        <Button
-            type="button"
-            onClick={() => onEditRow(index)}
-            icon={<PencilIcon aria-hidden />}
-            variant="tertiary"
-            size="small"
-        />
-    );
-
-const Periode = ({ index, value, editableRow, datepicker }) => {
+export const Periode = ({ index, value, editableRow, datepicker, erMed }) => {
     return editableRow === index ? (
-        <div className="min-w-[160px]">{datepicker}</div>
+        datepicker
     ) : (
         <BodyShort key={`årsinntekter.${index}.datoTom.placeholder`}>
-            {value && DateToDDMMYYYYString(dateOrNull(value))}
+            {erMed && value && DateToDDMMYYYYString(dateOrNull(value))}
         </BodyShort>
     );
 };
@@ -140,7 +115,8 @@ const ExpandableContent = ({ item }: { item: InntektDtoV2 }) => {
     return (
         <>
             <BodyShort size="small">
-                Periode: {dateToDDMMYYYYString(new Date(item.datoFom))} - {dateToDDMMYYYYString(new Date(item.datoTom))}
+                Periode: {item.datoFom && dateToDDMMYYYYString(new Date(item.datoFom))} -{" "}
+                {item.datoTom && dateToDDMMYYYYString(new Date(item.datoTom))}
             </BodyShort>
             {item.inntektsposter.map((inntektpost) => (
                 <BodyShort size="small" key={inntektpost.kode}>
@@ -168,55 +144,84 @@ export const SkattepliktigeOgPensjonsgivendeInntekt = ({ ident }: { ident: strin
 };
 
 export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: string }) => {
-    const { inntektFormValues, setErrorMessage, setErrorModalOpen, setInntektFormValues } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen } = useForskudd();
     const [editableRow, setEditableRow] = useState(undefined);
     const saveInntekt = useOnSaveInntekt();
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandling();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
+    const fieldName = `årsinntekter.${ident}` as const;
     const {
         control,
         getFieldState,
         getValues,
         clearErrors,
         setError,
-        setValue,
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control,
-        name: `årsinntekter.${ident}`,
+        name: fieldName,
     });
-    const watchFieldArray = useWatch({ control, name: `årsinntekter.${ident}` });
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
+    const watchFieldArray = useWatch({ control, name: fieldName });
 
-    const handleOnSelect = (value: boolean, index: number) => {
-        const periodeValues = getValues(`årsinntekter.${ident}`);
-        const updatedValues = periodeValues.toSpliced(index, 1, {
-            ...periodeValues[index],
-            taMed: value,
-        });
-        updatedAndSave(updatedValues);
+    const unsetEditedRow = (index) => {
+        if (editableRow === index) {
+            setEditableRow(undefined);
+        }
     };
 
-    const handleOnDelete = (index: number) => {
-        if (checkIfAnotherRowIsEdited(index)) {
-            showErrorModal();
+    const handleOnSelect = (value: boolean, index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
+        let updatedPeriod: OppdaterePeriodeInntekt | OppdatereManuellInntekt;
+        if (erOffentlig) {
+            updatedPeriod = {
+                id: periode.id,
+                taMedIBeregning: value,
+                angittPeriode: {
+                    fom: periode.datoFom,
+                    til: periode.datoTom,
+                },
+            };
         } else {
-            clearErrors(`årsinntekter.${index}`);
-            fieldArray.remove(index);
-            if (editableRow === index) {
-                setEditableRow(undefined);
+            updatedPeriod = {
+                id: periode.id,
+                taMed: value,
+                type: periode.rapporteringstype,
+                beløp: periode.beløp,
+                datoFom: periode.datoFom,
+                datoTom: periode.datoTom,
+                ident: periode.ident,
+            };
+        }
+
+        if (!value && !erOffentlig) {
+            handleDelete(index);
+        } else {
+            if (erOffentlig) {
+                updatedAndSave({ oppdatereInntektsperioder: [updatedPeriod as OppdaterePeriodeInntekt] });
+            } else {
+                updatedAndSave({ oppdatereManuelleInntekter: [updatedPeriod as OppdatereManuellInntekt] });
             }
         }
+        unsetEditedRow(index);
+    };
+
+    const handleDelete = (index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        clearErrors(`${fieldName}.${index}`);
+        fieldArray.remove(index);
+        updatedAndSave({ sletteInntekter: [periode.id] });
     };
 
     const addPeriode = () => {
         if (checkIfAnotherRowIsEdited()) {
             showErrorModal();
         } else {
-            const periodeValues = getValues(`årsinntekter.${ident}`);
+            const periodeValues = getValues(`${fieldName}`);
             fieldArray.append({
                 datoFom: null,
                 datoTom: null,
@@ -231,28 +236,60 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
             setEditableRow(periodeValues.length);
         }
     };
-    const updatedAndSave = (inntekter: InntektDtoV2[]) => {
-        const updatedValues = {
-            ...inntektFormValues,
-            årsinntekter: { ...inntektFormValues.årsinntekter, [ident]: inntekter },
-        };
-        setInntektFormValues(updatedValues);
-        setValue(`årsinntekter.${ident}`, inntekter);
+    const updatedAndSave = (updatedValues: {
+        oppdatereInntektsperioder?: OppdaterePeriodeInntekt[];
+        oppdatereManuelleInntekter?: OppdatereManuellInntekt[];
+        sletteInntekter?: number[];
+    }) => {
         saveInntekt(updatedValues);
-        setEditableRow(undefined);
     };
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`årsinntekter.${ident}`);
-        if (perioderValues[index].datoFom === null) {
-            setError(`årsinntekter.${ident}.${index}.datoFom`, {
+        const periode = getValues(`${fieldName}.${index}`);
+        if (periode.datoFom === null) {
+            setError(`${fieldName}.${index}.datoFom`, {
                 type: "notValid",
                 message: "Dato må fylles ut",
             });
         }
 
-        const fieldState = getFieldState(`årsinntekter.${ident}.${index}`);
+        const fieldState = getFieldState(`${fieldName}.${index}`);
         if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index));
+            if (periode.kilde === Kilde.OFFENTLIG) {
+                const updatedPeriod = {
+                    id: periode.id,
+                    taMedIBeregning: periode.taMed,
+                    angittPeriode: {
+                        fom: periode.datoFom,
+                        til: periode.datoTom,
+                    },
+                };
+                updatedAndSave({ oppdatereInntektsperioder: [updatedPeriod] });
+            } else {
+                const updatedPeriod = {
+                    id: periode.id ?? null,
+                    taMed: periode.taMed,
+                    type: periode.rapporteringstype,
+                    beløp: periode.beløp,
+                    datoFom: periode.datoFom,
+                    datoTom: periode.datoTom,
+                    ident: periode.ident,
+                };
+                updatedAndSave({ oppdatereManuelleInntekter: [updatedPeriod] });
+            }
+            unsetEditedRow(index);
+        }
+    };
+    const validateFomOgTom = (index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        const fomOgTomInvalid = periode.datoTom !== null && isAfterDate(periode?.datoFom, periode.datoTom);
+
+        if (fomOgTomInvalid) {
+            setError(`${fieldName}.${index}.datoFom`, {
+                type: "notValid",
+                message: text.error.tomDatoKanIkkeVæreFørFomDato,
+            });
+        } else {
+            clearErrors(`${fieldName}.${index}.datoFom`);
         }
     };
     const checkIfAnotherRowIsEdited = (index?: number) => {
@@ -303,83 +340,113 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                 </Alert>
             )}
             {controlledFields.length > 0 && (
-                <TableWrapper heading={["Ta med", "Fra og med", "Til og med", "Beskrivelse", "Beløp", "", "", ""]}>
-                    {controlledFields.map((item, index) => (
-                        <TableExpandableRowWrapper
-                            content={<ExpandableContent item={item} />}
-                            key={item.id}
-                            cells={[
-                                <FormControlledCheckbox
-                                    key={`årsinntekter.${ident}.${index}.taMed`}
-                                    name={`årsinntekter.${ident}.${index}.taMed`}
-                                    onChange={(value) => handleOnSelect(value.target.checked, index)}
-                                    legend=""
-                                />,
-                                <Periode
-                                    key={`årsinntekter.${ident}.${index}.datoFom`}
-                                    value={item.datoFom}
-                                    editableRow={editableRow}
-                                    index={index}
-                                    datepicker={
-                                        <FormControlledMonthPicker
-                                            name={`årsinntekter.${ident}.${index}.datoFom`}
-                                            label="Fra og med"
-                                            placeholder="DD.MM.ÅÅÅÅ"
-                                            defaultValue={item.datoFom}
-                                            required={item.taMed}
-                                            fromDate={fom}
-                                            toDate={tom}
-                                            hideLabel
+                <div className="overflow-x-auto whitespace-nowrap">
+                    <Table size="small">
+                        <Table.Header>
+                            <Table.Row className="align-baseline">
+                                <Table.HeaderCell scope="col" className="w-[84px]">
+                                    Ta med
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[145px]">
+                                    Fra og med
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[145px]">
+                                    Til og med
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[154px]">
+                                    Beløp
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col"></Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {controlledFields.map((item, index) => (
+                                <Table.ExpandableRow
+                                    key={item.ident + index}
+                                    content={<ExpandableContent item={item} />}
+                                    togglePlacement="right"
+                                    className="h-[41px] align-baseline"
+                                >
+                                    <Table.DataCell className="w-[84px]" align="center">
+                                        <FormControlledCheckbox
+                                            className="w-full flex justify-center"
+                                            name={`${fieldName}.${index}.taMed`}
+                                            onChange={(value) => handleOnSelect(value.target.checked, index)}
+                                            legend=""
                                         />
-                                    }
-                                />,
-                                <Periode
-                                    key={`årsinntekter.${ident}.${index}.datoTom`}
-                                    editableRow={editableRow}
-                                    value={item.datoTom}
-                                    index={index}
-                                    datepicker={
-                                        <FormControlledMonthPicker
-                                            name={`årsinntekter.${ident}.${index}.datoTom`}
-                                            label="Til og med"
-                                            placeholder="DD.MM.ÅÅÅÅ"
-                                            defaultValue={item.datoTom}
-                                            fromDate={fom}
-                                            toDate={tom}
-                                            hideLabel
-                                            lastDayOfMonthPicker
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Periode
+                                            value={item.datoFom}
+                                            erMed={item.taMed}
+                                            editableRow={editableRow}
+                                            index={index}
+                                            datepicker={
+                                                <FormControlledMonthPicker
+                                                    name={`${fieldName}.${index}.datoFom`}
+                                                    label="Fra og med"
+                                                    placeholder="DD.MM.ÅÅÅÅ"
+                                                    defaultValue={item.datoFom}
+                                                    required={item.taMed}
+                                                    fromDate={fom}
+                                                    toDate={tom}
+                                                    customValidation={() => validateFomOgTom(index)}
+                                                    hideLabel
+                                                />
+                                            }
                                         />
-                                    }
-                                />,
-                                <Beskrivelse
-                                    key={`årsinntekter.${ident}.${index}.inntektBeskrivelse`}
-                                    item={item}
-                                    index={index}
-                                    ident={ident}
-                                />,
-                                <Totalt
-                                    key={`årsinntekter.${ident}.${index}.belop`}
-                                    item={item}
-                                    index={index}
-                                    ident={ident}
-                                />,
-                                <EditOrSaveButton
-                                    key={`edit-or-save-button-${index}`}
-                                    index={index}
-                                    editableRow={editableRow}
-                                    onEditRow={onEditRow}
-                                    onSaveRow={onSaveRow}
-                                />,
-                                <DeleteButton
-                                    key={`delete-button-${index}`}
-                                    item={item}
-                                    index={index}
-                                    handleOnDelete={handleOnDelete}
-                                />,
-                            ]}
-                        />
-                    ))}
-                </TableWrapper>
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Periode
+                                            editableRow={editableRow}
+                                            value={item.datoTom}
+                                            erMed={item.taMed}
+                                            index={index}
+                                            datepicker={
+                                                <FormControlledMonthPicker
+                                                    name={`${fieldName}.${index}.datoTom`}
+                                                    label="Til og med"
+                                                    placeholder="DD.MM.ÅÅÅÅ"
+                                                    defaultValue={item.datoTom}
+                                                    fromDate={fom}
+                                                    toDate={tom}
+                                                    customValidation={() => validateFomOgTom(index)}
+                                                    hideLabel
+                                                    lastDayOfMonthPicker
+                                                />
+                                            }
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Beskrivelse
+                                            item={item}
+                                            field={`${fieldName}.${index}`}
+                                            erRedigerbart={editableRow === index && item.kilde === Kilde.MANUELL}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Totalt
+                                            item={item}
+                                            field={`${fieldName}.${index}`}
+                                            erRedigerbart={editableRow === index && item.kilde === Kilde.MANUELL}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <EditOrSaveButton
+                                            index={index}
+                                            erMed={item.taMed}
+                                            editableRow={editableRow}
+                                            onEditRow={onEditRow}
+                                            onSaveRow={onSaveRow}
+                                        />
+                                    </Table.DataCell>
+                                </Table.ExpandableRow>
+                            ))}
+                        </Table.Body>
+                    </Table>
+                </div>
             )}
             <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                 + Legg til periode

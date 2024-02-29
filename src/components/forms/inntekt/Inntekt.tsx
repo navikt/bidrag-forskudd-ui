@@ -8,16 +8,17 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
+import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, isValidDate } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import UnderArbeidAlert from "../../UnderArbeidAlert";
-import { createInitialValues, createInntektPayload } from "../helpers/inntektFormHelpers";
+import { createInitialValues } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
@@ -85,7 +86,7 @@ const Main = () => {
                 </Tabs.List>
                 {roller.map((rolle) => {
                     return (
-                        <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-12">
+                        <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
                             <div className="mt-12">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
@@ -107,23 +108,20 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { setActiveStep, inntektFormValues, setInntektFormValues } = useForskudd();
-    const { mutation: oppdaterBehandling } = useOppdaterBehandlingV2();
-    const { watch } = useFormContext<InntektFormValues>();
+    const { setActiveStep } = useForskudd();
+    const saveInntekt = useOnSaveInntekt();
+    const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
-        oppdaterBehandling.mutate(createInntektPayload(inntektFormValues));
+        const [medIVedtaket, kunINotat] = getValues(["notat.medIVedtaket", "notat.kunINotat"]);
+        saveInntekt({ notat: { medIVedtaket, kunINotat } });
     };
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
 
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const subscription = watch(({ notat }, { name }) => {
+        const subscription = watch((_, { name }) => {
             if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
-                setInntektFormValues((prev) => ({
-                    ...prev,
-                    notat,
-                }));
                 debouncedOnSave();
             }
         });
