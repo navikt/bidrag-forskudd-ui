@@ -231,7 +231,7 @@ const VirkningstidspunktForm = () => {
     const onSave = () => {
         const values = useFormMethods.getValues();
         oppdaterBehandling.mutation.mutate(
-            { virkningstidspunkt: createPayload(values), aktivereGrunnlag: [] },
+            { virkningstidspunkt: createPayload(values) },
             {
                 onSuccess: () => {
                     useFormMethods.reset(values, {

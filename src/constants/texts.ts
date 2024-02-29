@@ -63,7 +63,7 @@ export default {
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",
         beløp: "Beløp",
         beskrivelse: "Beskrivelse",
-        fatteVedtakButton: "Fatte vedtak og gå til sakshistorikk",
+        fatteVedtakButton: "Fatte vedtak",
         forskudd: "Forskudd",
         fraDato: "Fra dato",
         fraOgMed: "Fra og med",
@@ -127,6 +127,7 @@ export default {
     varsel: {
         beregneFeil: "Kunne ikke beregne forskudd",
         ukjentNavn: "UKJENT",
+        bekreftFatteVedtak: "Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer.",
         vedtakNotat:
             "Så snart vedtaket er fattet, kan den gjenfinnes i sakshistorikk. Notatet blir generert automatisk basert på opplysningene oppgitt.",
         ønskerDuÅSlette: "Ønsker du å slette?",

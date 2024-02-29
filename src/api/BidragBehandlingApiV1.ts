@@ -60,12 +60,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
+    bidragspliktig?: Rolle;
     grunnlagListe: GrunnlagEntity[];
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
-    bidragspliktig?: Rolle;
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
 }
 
 export enum Bostatuskode {
@@ -1563,10 +1563,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1655,7 +1652,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
