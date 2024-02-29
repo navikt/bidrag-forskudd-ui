@@ -13,7 +13,6 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { GrunnlagInntektType } from "../../../enum/InntektBeskrivelse";
 import { useGetBehandling, useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -40,9 +39,16 @@ export const Beskrivelse = ({
             name={`${field}.inntektstype`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
-                Object.entries(GrunnlagInntektType).map(([value, text]) => ({
+                [
+                    Inntektsrapportering.LONNMANUELTBEREGNET,
+                    Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+                    Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                    Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+                ].map((value) => ({
                     value,
-                    text,
+                    text: hentVisningsnavn(value),
                 }))
             )}
             hideLabel
@@ -228,7 +234,7 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                 ident: ident,
                 beløp: 0,
                 rapporteringstype: Inntektsrapportering.SKATTEGRUNNLAG_SKE,
-                taMed: false,
+                taMed: true,
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],
