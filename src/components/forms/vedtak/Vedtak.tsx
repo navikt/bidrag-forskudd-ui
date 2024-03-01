@@ -49,7 +49,7 @@ const Vedtak = () => {
 
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
             </div>
-            {!erVedtakFattet && !beregnetForskudd?.feil && (
+            {!erVedtakFattet && !beregnetForskudd?.feil && !lesemodus && (
                 <>
                     <Alert variant="info">
                         <div className="grid gap-y-4">
