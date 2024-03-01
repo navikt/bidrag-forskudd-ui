@@ -574,7 +574,7 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
     );
 };
 const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
-    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const { boforholdFormValues, setBoforholdFormValues, lesemodus } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
@@ -625,7 +625,9 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                     </BodyShort>
                                     <BodyShort size="small">{item.ident}</BodyShort>
                                 </div>
-                                {!item.medISak && <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />}
+                                {!item.medISak && !lesemodus && (
+                                    <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
+                                )}
                             </div>
                             <Opplysninger datoFom={datoFom} ident={item.ident} />
                         </div>
@@ -644,7 +646,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                     barnFieldArray={barnFieldArray}
                 />
             )}
-            {!openAddBarnForm && (
+            {!openAddBarnForm && !lesemodus && (
                 <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
                     + Legg til barn
                 </Button>
@@ -664,7 +666,7 @@ const Perioder = ({
 }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
-    const { behandlingId } = useForskudd();
+    const { behandlingId, lesemodus } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const saveBoforhold = useOnSaveBoforhold();
@@ -886,9 +888,46 @@ const Perioder = ({
         return !!index;
     };
 
+    const editButtons = (index: number) => {
+        if (lesemodus) return [];
+        return [
+            editableRow === `${barnIndex}.${index}` ? (
+                <Button
+                    key={`save-button-${barnIndex}-${index}`}
+                    type="button"
+                    onClick={() => onSaveRow(index)}
+                    icon={<FloppydiskIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ) : (
+                <Button
+                    key={`edit-button-${barnIndex}-${index}`}
+                    type="button"
+                    onClick={() => onEditRow(index)}
+                    icon={<PencilIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ),
+            showDeleteButton(index) && !lesemodus ? (
+                <Button
+                    key={`delete-button-${barnIndex}-${index}`}
+                    type="button"
+                    onClick={() => onRemovePeriode(index)}
+                    icon={<TrashIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ) : (
+                <div key={`delete-button-${barnIndex}-${index}.placeholder`} className="min-w-[40px]"></div>
+            ),
+        ];
+    };
+
     return (
         <>
-            {barnIsOver18 && (
+            {barnIsOver18 && !lesemodus && (
                 <div className="mb-4">
                     <StatefulAlert
                         variant="info"
@@ -930,7 +969,13 @@ const Perioder = ({
             )}
             {controlledFields.length > 0 && (
                 <TableWrapper
-                    heading={[text.label.fraOgMed, text.label.tilOgMed, text.label.status, text.label.kilde, "", ""]}
+                    heading={[
+                        text.label.fraOgMed,
+                        text.label.tilOgMed,
+                        text.label.status,
+                        text.label.kilde,
+                        ...(lesemodus ? [] : ["", ""]),
+                    ]}
                 >
                     {controlledFields.map((item, index) => (
                         <TableRowWrapper
@@ -1000,40 +1045,7 @@ const Perioder = ({
                                 >
                                     {KildeTexts[item.kilde]}
                                 </BodyShort>,
-                                editableRow === `${barnIndex}.${index}` ? (
-                                    <Button
-                                        key={`save-button-${barnIndex}-${index}`}
-                                        type="button"
-                                        onClick={() => onSaveRow(index)}
-                                        icon={<FloppydiskIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <Button
-                                        key={`edit-button-${barnIndex}-${index}`}
-                                        type="button"
-                                        onClick={() => onEditRow(index)}
-                                        icon={<PencilIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ),
-                                showDeleteButton(index) ? (
-                                    <Button
-                                        key={`delete-button-${barnIndex}-${index}`}
-                                        type="button"
-                                        onClick={() => onRemovePeriode(index)}
-                                        icon={<TrashIcon aria-hidden />}
-                                        variant="tertiary"
-                                        size="small"
-                                    />
-                                ) : (
-                                    <div
-                                        key={`delete-button-${barnIndex}-${index}.placeholder`}
-                                        className="min-w-[40px]"
-                                    ></div>
-                                ),
+                                ...editButtons(index),
                             ]}
                         />
                     ))}
@@ -1053,9 +1065,11 @@ const Perioder = ({
                         {text.label.angreSisteSteg}
                     </Button>
                 )}
-                <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                    {text.label.leggTilPeriode}
-                </Button>
+                {!lesemodus && (
+                    <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
+                        {text.label.leggTilPeriode}
+                    </Button>
+                )}
             </div>
         </>
     );

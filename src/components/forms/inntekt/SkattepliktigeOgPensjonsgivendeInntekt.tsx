@@ -23,6 +23,7 @@ import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox"
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import AinntektLink from "./AinntektLink";
 
@@ -76,6 +77,8 @@ export const Totalt = ({
 );
 
 export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
+    const { lesemodus } = useForskudd();
+    if (lesemodus) return null;
     return (
         <>
             {editableRow !== index && !erMed && <div className="min-w-[40px]"></div>}
@@ -448,9 +451,7 @@ export const SkattepliktigeOgPensjonsgivendeInntektTabel = ({ ident }: { ident: 
                     </Table>
                 </div>
             )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
-            </Button>
+            <LeggTilPeriodeButton addPeriode={addPeriode} />
         </>
     );
 };

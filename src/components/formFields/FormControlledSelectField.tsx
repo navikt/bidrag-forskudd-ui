@@ -2,6 +2,8 @@ import { Select } from "@navikt/ds-react";
 import React, { PropsWithChildren } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
+import { useForskudd } from "../../context/ForskuddContext";
+
 interface Option {
     value: string;
     text: string;
@@ -28,6 +30,7 @@ export const FormControlledSelectField = ({
     const { control } = useFormContext();
     const { field, fieldState } = useController({ name, control });
 
+    const { lesemodus } = useForskudd();
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         field.onChange(e.target.value);
         onSelect?.(e.target.value);
@@ -36,6 +39,7 @@ export const FormControlledSelectField = ({
     return (
         <Select
             label={label}
+            readOnly={lesemodus}
             className={`w-52 ${className}`}
             size="small"
             value={field.value}

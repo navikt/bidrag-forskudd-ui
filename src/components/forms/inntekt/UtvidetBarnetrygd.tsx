@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -18,6 +18,7 @@ import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isAfterDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { EditOrSaveButton, Periode, Totalt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
 
@@ -310,9 +311,7 @@ export const UtvidetBarnetrygdTabel = () => {
                     </Table>
                 </div>
             )}
-            <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                + Legg til periode
-            </Button>
+            <LeggTilPeriodeButton addPeriode={addPeriode} />
         </>
     );
 };

@@ -61,9 +61,9 @@ export interface Behandling {
     sivilstand: Sivilstand[];
     deleted: boolean;
     bidragspliktig?: Rolle;
-    grunnlagListe: GrunnlagEntity[];
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
+    grunnlagListe: GrunnlagEntity[];
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
 }
@@ -967,6 +967,11 @@ export interface SivilstandBeregnet {
     sivilstandListe: Sivilstand[];
 }
 
+export interface OpprettBehandlingResponse {
+    /** @format int64 */
+    id: number;
+}
+
 export interface ResultatBeregningBarnDto {
     barn: ResultatRolle;
     perioder: ResultatPeriodeDto[];
@@ -1068,11 +1073,6 @@ export interface OpprettBehandlingRequest {
     søknadsid: number;
     /** @format int64 */
     søknadsreferanseid?: number;
-}
-
-export interface OpprettBehandlingResponse {
-    /** @format int64 */
-    id: number;
 }
 
 export interface AddOpplysningerRequest {
@@ -1693,6 +1693,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Logisk slett en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name SlettBehandling
+         * @request DELETE:/api/v2/behandling/{behandlingsid}
+         * @secure
+         */
+        slettBehandling: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/api/v2/behandling/${behandlingsid}`,
+                method: "DELETE",
+                secure: true,
+                ...params,
+            }),
+
+        /**
          * @description Oppdatere behandling
          *
          * @tags behandling-controller
@@ -1752,16 +1768,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Beregn forskudd
+         * @description Opprett behandling fra vedtak. Brukes når det skal opprettes klagebehanling fra vedtak.
+         *
+         * @tags behandling-controller-v-2
+         * @name OpprettBehandlingForVedtak
+         * @request POST:/api/v2/behandling/vedtak/{vedtaksId}
+         * @secure
+         */
+        opprettBehandlingForVedtak: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<OpprettBehandlingResponse, any>({
+                path: `/api/v2/behandling/vedtak/${vedtaksId}`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Fatte vedtak for behandling
          *
          * @tags vedtak-controller
          * @name FatteVedtak
-         * @request POST:/api/v2/behandling/{behandlingsid}/vedtak
+         * @request POST:/api/v2/behandling/fattevedtak/{behandlingsid}
          * @secure
          */
         fatteVedtak: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<number, any>({
-                path: `/api/v2/behandling/${behandlingsid}/vedtak`,
+                path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
                 method: "POST",
                 secure: true,
                 format: "json",
