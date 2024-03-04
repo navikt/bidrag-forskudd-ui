@@ -36,7 +36,7 @@ export const Beskrivelse = ({
 }) => {
     return erRedigerbart ? (
         <FormControlledSelectField
-            name={`${field}.inntektstype`}
+            name={`${field}.rapporteringstype`}
             label="Beskrivelse"
             options={[{ value: "", text: "Velg type inntekt" }].concat(
                 [

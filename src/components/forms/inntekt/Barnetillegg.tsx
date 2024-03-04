@@ -45,7 +45,7 @@ const Beskrivelse = ({ item, field, erRedigerbart }: { item: InntektDtoV2; field
         />
     ) : (
         <BodyShort className="min-w-[215px] capitalize">
-            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+            {hentVisningsnavn(item.inntektstyper[0], getYearFromDate(item.datoFom))}
         </BodyShort>
     );
 };
@@ -121,7 +121,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
             updatedPeriod = {
                 id: periode.id,
                 taMed: value,
-                type: periode.rapporteringstype,
+                type: periode.inntektstype,
                 beløp: periode.beløp,
                 datoFom: periode.datoFom,
                 datoTom: periode.datoTom,
@@ -164,6 +164,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],
+                inntektstype: "",
             });
             setEditableRow(periodeValues.length);
         }
