@@ -1,15 +1,17 @@
-import { BehandlingNotatDto, InntektDtoV2, TransformerInntekterResponse } from "../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, InntektDtoV2, Inntektstype } from "../api/BidragBehandlingApiV1";
 
-export interface InntektFormValues {
-    årsinntekter: { [key: string]: InntektDtoV2[] };
-    barnetillegg: { [key: string]: InntektDtoV2[] };
-    småbarnstillegg: InntektDtoV2[];
-    kontantstøtte: { [key: string]: InntektDtoV2[] };
-    utvidetBarnetrygd: InntektDtoV2[];
-    notat?: BehandlingNotatDto;
+interface InntektFormPeriode extends InntektDtoV2 {
+    angittPeriode?: {
+        fom?: string;
+        til?: string;
+    };
+    inntektstype?: Inntektstype | "";
 }
-
-export interface InntektTransformed {
-    ident: string;
-    data: TransformerInntekterResponse;
+export interface InntektFormValues {
+    årsinntekter: { [key: string]: InntektFormPeriode[] };
+    barnetillegg: { [key: string]: InntektFormPeriode[] };
+    småbarnstillegg: InntektFormPeriode[];
+    kontantstøtte: { [key: string]: InntektFormPeriode[] };
+    utvidetBarnetrygd: InntektFormPeriode[];
+    notat?: BehandlingNotatDto;
 }

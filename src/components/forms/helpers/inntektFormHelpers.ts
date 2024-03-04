@@ -11,13 +11,15 @@ import { perioderSomIkkeKanOverlape, perioderSomKanIkkeOverlapeKunMedHverandre }
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { isAfterDate } from "../../../utils/date-utils";
 
-const mapToConvertedDates = (inntekt) => ({
+const transformInntekt = (inntekt) => ({
     ...inntekt,
     angittPeriode: {
-        fom: inntekt.datoFom,
-        til: inntekt.datoTom,
+        fom: inntekt.datoFom ?? null,
+        til: inntekt.datoTom ?? null,
     },
+    datoFom: inntekt.datoFom ?? null,
     datoTom: inntekt.datoTom ?? null,
+    inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
 });
 
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
@@ -30,7 +32,7 @@ const mapInntekterToRolle =
     (rolle): InntektDtoV2[] =>
         inntekter
             ?.filter((inntekt) => inntekt[fieldToCheck] === rolle.ident)
-            .map(mapToConvertedDates)
+            .map(transformInntekt)
             .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
 
 export const getInntektPerioder = (
@@ -44,9 +46,9 @@ export const createInitialValues = (bmOgBarn: RolleDto[], inntekter: InntekterDt
     return {
         årsinntekter: getInntektPerioder(bmOgBarn, inntekter.årsinntekter, "ident"),
         barnetillegg: getInntektPerioder(barn, inntekter.barnetillegg, "gjelderBarn"),
-        småbarnstillegg: inntekter.småbarnstillegg?.map(mapToConvertedDates),
+        småbarnstillegg: inntekter.småbarnstillegg?.map(transformInntekt),
         kontantstøtte: getInntektPerioder(barn, inntekter.kontantstøtte, "gjelderBarn"),
-        utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(mapToConvertedDates),
+        utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(transformInntekt),
         notat: {
             medIVedtaket: inntekter.notat.medIVedtaket,
             kunINotat: inntekter.notat.kunINotat,

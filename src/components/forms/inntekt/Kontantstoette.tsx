@@ -137,7 +137,7 @@ export const KontantstøtteTabel = ({ barn }: { barn: RolleDto }) => {
                 gjelderBarn: barn.ident,
                 beløp: 0,
                 rapporteringstype: Inntektsrapportering.KONTANTSTOTTE,
-                taMed: false,
+                taMed: true,
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],
