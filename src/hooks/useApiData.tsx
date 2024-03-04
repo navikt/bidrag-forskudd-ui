@@ -196,6 +196,10 @@ export const useGetBehandling = (): BehandlingDto => {
 
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId, vedtakId } = useForskudd();
+    return useBehandlingV2(behandlingId, vedtakId);
+};
+
+export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDtoV2> => {

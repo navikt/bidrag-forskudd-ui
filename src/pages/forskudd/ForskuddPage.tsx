@@ -1,5 +1,5 @@
 import { BidragContainer } from "@navikt/bidrag-ui-common";
-import { Stepper } from "@navikt/ds-react";
+import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import React from "react";
 
 import FormWrapper from "../../components/forms/FormWrapper";
@@ -13,12 +13,21 @@ export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
     const {
         virkningstidspunkt: { avslag },
+        erVedtakFattet,
     } = useGetBehandling();
     const interactive = !avslag;
 
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
+                {erVedtakFattet && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            Vedtak er fattet
+                        </Heading>
+                        Vedtak er fattet for behandlingen og kan derfor ikke endres
+                    </Alert>
+                )}
                 <Stepper
                     aria-labelledby="stepper-heading"
                     activeStep={STEPS[activeStep]}
