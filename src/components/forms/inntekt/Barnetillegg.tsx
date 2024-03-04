@@ -24,7 +24,6 @@ import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox"
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
-
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
