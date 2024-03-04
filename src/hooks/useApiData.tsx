@@ -107,7 +107,8 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
         },
         networkMode: "always",
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
+            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);
@@ -126,6 +127,7 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
         networkMode: "always",
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);
