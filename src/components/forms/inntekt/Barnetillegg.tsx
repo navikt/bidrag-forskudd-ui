@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
+    InntektDtoV2,
     Inntektsrapportering,
+    Inntektstype,
     Kilde,
     OppdatereManuellInntekt,
     OppdaterePeriodeInntekt,
@@ -15,14 +17,38 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { isAfterDate } from "../../../utils/date-utils";
+import { getYearFromDate, isAfterDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { Beskrivelse, EditOrSaveButton, Periode, Totalt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { EditOrSaveButton, Periode, Totalt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+
+const Beskrivelse = ({ item, field, erRedigerbart }: { item: InntektDtoV2; field: string; erRedigerbart: boolean }) => {
+    return erRedigerbart ? (
+        <FormControlledSelectField
+            name={`${field}.inntektstype`}
+            label="Beskrivelse"
+            options={[{ value: "", text: "Velg type inntekt" }].concat(
+                Object.entries(Inntektstype)
+                    .filter(([, text]) => text.includes("BARNETILLEGG"))
+                    .map(([value, text]) => ({
+                        value,
+                        text: hentVisningsnavn(text),
+                    }))
+            )}
+            hideLabel
+        />
+    ) : (
+        <BodyShort className="min-w-[215px] capitalize">
+            {hentVisningsnavn(item.inntektstyper[0], getYearFromDate(item.datoFom))}
+        </BodyShort>
+    );
+};
 
 export const Barnetillegg = () => {
     const { roller } = useGetBehandling();
@@ -95,7 +121,7 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
             updatedPeriod = {
                 id: periode.id,
                 taMed: value,
-                type: periode.rapporteringstype,
+                type: periode.inntektstype,
                 beløp: periode.beløp,
                 datoFom: periode.datoFom,
                 datoTom: periode.datoTom,
@@ -134,10 +160,11 @@ export const BarnetilleggTabel = ({ barn }: { barn: RolleDto }) => {
                 gjelderBarn: barn.ident,
                 beløp: 0,
                 rapporteringstype: Inntektsrapportering.SKATTEGRUNNLAG_SKE,
-                taMed: false,
+                taMed: true,
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],
+                inntektstype: "",
             });
             setEditableRow(periodeValues.length);
         }

@@ -112,7 +112,7 @@ export const SmåbarnstilleggTabel = () => {
                 ident: roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident,
                 beløp: 0,
                 rapporteringstype: Inntektsrapportering.SMABARNSTILLEGG,
-                taMed: false,
+                taMed: true,
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],

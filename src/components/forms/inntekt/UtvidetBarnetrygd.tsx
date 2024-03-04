@@ -112,7 +112,7 @@ export const UtvidetBarnetrygdTabel = () => {
                 ident: roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident,
                 beløp: 0,
                 rapporteringstype: Inntektsrapportering.UTVIDET_BARNETRYGD,
-                taMed: false,
+                taMed: true,
                 kilde: Kilde.MANUELL,
                 inntektsposter: [],
                 inntektstyper: [],
