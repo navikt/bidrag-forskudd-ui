@@ -107,7 +107,8 @@ export const oppdaterBehandlingMutation = (behandlingId: number) => {
         },
         networkMode: "always",
         onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
+            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);
@@ -126,6 +127,7 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
         networkMode: "always",
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);
@@ -196,6 +198,10 @@ export const useGetBehandling = (): BehandlingDto => {
 
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId, vedtakId } = useForskudd();
+    return useBehandlingV2(behandlingId, vedtakId);
+};
+
+export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDtoV2> => {
