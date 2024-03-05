@@ -3,6 +3,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import text from "../../../constants/texts";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -26,8 +27,8 @@ const Beskrivelse = ({
     return erRedigerbart ? (
         <FormControlledSelectField
             name={`${field}.inntektstype`}
-            label="Beskrivelse"
-            options={[{ value: "", text: "Velg type inntekt" }].concat(
+            label={text.label.beskrivelse}
+            options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
                 Object.entries(Inntektstype)
                     .filter(([, text]) => text.includes("BARNETILLEGG"))
                     .map(([value, text]) => ({
@@ -96,21 +97,21 @@ export const Barnetillegg = () => {
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
                                                     <Table.HeaderCell scope="col" className="w-[84px]">
-                                                        Ta med
+                                                        {text.label.taMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[145px]">
-                                                        Fra og med
+                                                        {text.label.fraOgMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[145px]">
-                                                        Til og med
+                                                        {text.label.tilOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col">{text.label.kilde}</Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col">{text.label.type}</Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[154px]">
-                                                        Beløp (mnd)
+                                                        {text.label.beløpMnd}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[154px]">
-                                                        Beløp (12 mnd)
+                                                        {text.label.beløp12Mnd}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col"></Table.HeaderCell>
                                                     <Table.HeaderCell scope="col"></Table.HeaderCell>
@@ -136,7 +137,7 @@ export const Barnetillegg = () => {
                                                             <Periode
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                label="Fra og med"
+                                                                label={text.label.fraOgMed}
                                                                 fieldName={`barnetillegg.${barn.ident}`}
                                                                 field="datoFom"
                                                                 item={item}
@@ -146,7 +147,7 @@ export const Barnetillegg = () => {
                                                             <Periode
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                label="Til og med"
+                                                                label={text.label.tilOgMed}
                                                                 fieldName={`barnetillegg.${barn.ident}`}
                                                                 field="datoTom"
                                                                 item={item}
@@ -217,7 +218,7 @@ export const Barnetillegg = () => {
                                         })
                                     }
                                 >
-                                    + Legg til periode
+                                    {text.label.leggTilPeriode}
                                 </Button>
                             </>
                         )}

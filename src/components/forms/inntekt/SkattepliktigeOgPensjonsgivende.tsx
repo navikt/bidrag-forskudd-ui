@@ -26,7 +26,7 @@ const Beskrivelse = ({
     return erRedigerbart ? (
         <FormControlledSelectField
             name={`${field}.rapporteringstype`}
-            label="Beskrivelse"
+            label={text.label.beskrivelse}
             options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
                 [
                     Inntektsrapportering.LONNMANUELTBEREGNET,
@@ -77,7 +77,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <div className="flex gap-x-4">
                 <Heading level="3" size="medium">
-                    Skattepliktige og pensjonsgivende inntekt
+                    {text.title.skattepliktigeogPensjonsgivendeInntekt}
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
@@ -104,17 +104,17 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
                                             <Table.HeaderCell scope="col" className="w-[84px]">
-                                                Ta med
+                                                {text.label.taMed}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[145px]">
-                                                Fra og med
+                                                {text.label.fraOgMed}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[145px]">
-                                                Til og med
+                                                {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
+                                            <Table.HeaderCell scope="col">{text.label.beskrivelse}</Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[154px]">
-                                                Beløp
+                                                {text.label.beløp}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col"></Table.HeaderCell>
                                             <Table.HeaderCell scope="col"></Table.HeaderCell>
@@ -142,7 +142,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                     <Periode
                                                         editableRow={editableRow}
                                                         index={index}
-                                                        label="Fra og med"
+                                                        label={text.label.fraOgMed}
                                                         fieldName={fieldName}
                                                         field="datoFom"
                                                         item={item}
@@ -152,7 +152,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                     <Periode
                                                         editableRow={editableRow}
                                                         index={index}
-                                                        label="Til og med"
+                                                        label={text.label.tilOgMed}
                                                         fieldName={fieldName}
                                                         field="datoTom"
                                                         item={item}
@@ -210,7 +210,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                 })
                             }
                         >
-                            + Legg til periode
+                            {text.label.leggTilPeriode}
                         </Button>
                     </>
                 )}

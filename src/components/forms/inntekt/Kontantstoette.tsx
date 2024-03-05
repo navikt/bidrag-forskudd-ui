@@ -3,6 +3,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import text from "../../../constants/texts";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
@@ -22,7 +23,7 @@ export const Kontantstøtte = () => {
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <Heading level="3" size="medium">
-                Kontantstøtte
+                {text.title.kontantstøtte}
             </Heading>
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
@@ -63,17 +64,17 @@ export const Kontantstøtte = () => {
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
                                                     <Table.HeaderCell scope="col" className="w-[84px]">
-                                                        Ta med
+                                                        {text.label.taMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[145px]">
-                                                        Fra og med
+                                                        {text.label.fraOgMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[145px]">
-                                                        Til og med
+                                                        {text.label.tilOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col">{text.label.kilde}</Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[154px]">
-                                                        Beløp
+                                                        {text.label.beløp}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col"></Table.HeaderCell>
                                                     <Table.HeaderCell scope="col"></Table.HeaderCell>
@@ -99,7 +100,7 @@ export const Kontantstøtte = () => {
                                                             <Periode
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                label="Fra og med"
+                                                                label={text.label.fraOgMed}
                                                                 fieldName={`kontantstøtte.${barn.ident}`}
                                                                 field="datoFom"
                                                                 item={item}
@@ -109,7 +110,7 @@ export const Kontantstøtte = () => {
                                                             <Periode
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                label="Til og med"
+                                                                label={text.label.tilOgMed}
                                                                 fieldName={`kontantstøtte.${barn.ident}`}
                                                                 field="datoTom"
                                                                 item={item}
@@ -165,7 +166,7 @@ export const Kontantstøtte = () => {
                                         })
                                     }
                                 >
-                                    + Legg til periode
+                                    {text.label.leggTilPeriode}
                                 </Button>
                             </>
                         )}
