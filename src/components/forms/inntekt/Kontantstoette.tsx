@@ -6,25 +6,17 @@ import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehan
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
-import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
 export const Kontantstøtte = () => {
-    const {
-        roller,
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-    } = useGetBehandling();
+    const { roller } = useGetBehandling();
     const {
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
 
     return (
@@ -54,7 +46,6 @@ export const Kontantstøtte = () => {
                             onSaveRow,
                             handleOnSelect,
                             editableRow,
-                            validateFomOgTom,
                             onEditRow,
                             addPeriod,
                         }: {
@@ -62,7 +53,6 @@ export const Kontantstøtte = () => {
                             editableRow: number;
                             onSaveRow: (index: number) => void;
                             handleOnSelect: (value: boolean, index: number) => void;
-                            validateFomOgTom: (index: number) => void;
                             onEditRow: (index: number) => void;
                             addPeriod: (periode: InntektFormPeriode) => void;
                         }) => (
@@ -107,44 +97,22 @@ export const Kontantstøtte = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                value={item.datoFom}
-                                                                erMed={item.taMed}
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                datepicker={
-                                                                    <FormControlledMonthPicker
-                                                                        name={`kontantstøtte.${barn.ident}.${index}.datoFom`}
-                                                                        label="Fra og med"
-                                                                        placeholder="DD.MM.ÅÅÅÅ"
-                                                                        defaultValue={item.datoFom}
-                                                                        required={item.taMed}
-                                                                        fromDate={fom}
-                                                                        toDate={tom}
-                                                                        customValidation={() => validateFomOgTom(index)}
-                                                                        hideLabel
-                                                                    />
-                                                                }
+                                                                label="Fra og med"
+                                                                fieldName={`kontantstøtte.${barn.ident}`}
+                                                                field="datoFom"
+                                                                item={item}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
                                                                 editableRow={editableRow}
-                                                                value={item.datoTom}
-                                                                erMed={item.taMed}
                                                                 index={index}
-                                                                datepicker={
-                                                                    <FormControlledMonthPicker
-                                                                        name={`kontantstøtte.${barn.ident}.${index}.datoTom`}
-                                                                        label="Til og med"
-                                                                        placeholder="DD.MM.ÅÅÅÅ"
-                                                                        defaultValue={item.datoTom}
-                                                                        fromDate={fom}
-                                                                        toDate={tom}
-                                                                        customValidation={() => validateFomOgTom(index)}
-                                                                        hideLabel
-                                                                        lastDayOfMonthPicker
-                                                                    />
-                                                                }
+                                                                label="Til og med"
+                                                                fieldName={`kontantstøtte.${barn.ident}`}
+                                                                field="datoTom"
+                                                                item={item}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>

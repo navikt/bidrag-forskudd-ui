@@ -6,22 +6,14 @@ import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehan
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
-import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
-import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
 export const UtvidetBarnetrygd = () => {
-    const {
-        roller,
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-    } = useGetBehandlingV2();
+    const { roller } = useGetBehandlingV2();
     const {
         formState: { errors },
     } = useFormContext<InntektFormValues>();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
     const fieldName = "utvidetBarnetrygd";
     const fieldErrors = errors?.utvidetBarnetrygd;
@@ -37,7 +29,6 @@ export const UtvidetBarnetrygd = () => {
                     onSaveRow,
                     handleOnSelect,
                     editableRow,
-                    validateFomOgTom,
                     onEditRow,
                     addPeriod,
                 }: {
@@ -45,7 +36,6 @@ export const UtvidetBarnetrygd = () => {
                     editableRow: number;
                     onSaveRow: (index: number) => void;
                     handleOnSelect: (value: boolean, index: number) => void;
-                    validateFomOgTom: (index: number) => void;
                     onEditRow: (index: number) => void;
                     addPeriod: (periode: InntektFormPeriode) => void;
                 }) => (
@@ -87,44 +77,22 @@ export const UtvidetBarnetrygd = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
-                                                        value={item.datoFom}
-                                                        erMed={item.taMed}
                                                         editableRow={editableRow}
                                                         index={index}
-                                                        datepicker={
-                                                            <FormControlledMonthPicker
-                                                                name={`${fieldName}.${index}.datoFom`}
-                                                                label="Fra og med"
-                                                                placeholder="DD.MM.ÅÅÅÅ"
-                                                                defaultValue={item.datoFom}
-                                                                required={item.taMed}
-                                                                fromDate={fom}
-                                                                toDate={tom}
-                                                                customValidation={() => validateFomOgTom(index)}
-                                                                hideLabel
-                                                            />
-                                                        }
+                                                        label="Fra og med"
+                                                        fieldName={fieldName}
+                                                        field="datoFom"
+                                                        item={item}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
                                                         editableRow={editableRow}
-                                                        value={item.datoTom}
-                                                        erMed={item.taMed}
                                                         index={index}
-                                                        datepicker={
-                                                            <FormControlledMonthPicker
-                                                                name={`${fieldName}.${index}.datoTom`}
-                                                                label="Til og med"
-                                                                placeholder="DD.MM.ÅÅÅÅ"
-                                                                defaultValue={item.datoTom}
-                                                                fromDate={fom}
-                                                                toDate={tom}
-                                                                customValidation={() => validateFomOgTom(index)}
-                                                                hideLabel
-                                                                lastDayOfMonthPicker
-                                                            />
-                                                        }
+                                                        label="Til og med"
+                                                        fieldName={fieldName}
+                                                        field="datoTom"
+                                                        item={item}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>

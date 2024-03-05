@@ -11,10 +11,13 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const Totalt = ({
     item,
@@ -64,13 +67,60 @@ export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveR
     );
 };
 
-export const Periode = ({ index, value, editableRow, datepicker, erMed }) => {
+export const Periode = ({
+    index,
+    editableRow,
+    fieldName,
+    field,
+    label,
+    item,
+}: {
+    index: number;
+    editableRow: number;
+    fieldName:
+        | "småbarnstillegg"
+        | "utvidetBarnetrygd"
+        | `årsinntekter.${string}`
+        | `barnetillegg.${string}`
+        | `kontantstøtte.${string}`;
+    label: string;
+    field: "datoFom" | "datoTom";
+    item: InntektFormPeriode;
+}) => {
+    const {
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
+    } = useGetBehandlingV2();
+    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
+    const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
+    const validateFomOgTom = () => {
+        const periode = getValues(`${fieldName}.${index}`);
+        const fomOgTomInvalid = periode.datoTom !== null && isAfterDate(periode?.datoFom, periode.datoTom);
+
+        if (fomOgTomInvalid) {
+            setError(`${fieldName}.${index}.datoFom`, {
+                type: "notValid",
+                message: text.error.tomDatoKanIkkeVæreFørFomDato,
+            });
+        } else {
+            clearErrors(`${fieldName}.${index}.datoFom`);
+        }
+    };
+
     return editableRow === index ? (
-        datepicker
+        <FormControlledMonthPicker
+            name={`${fieldName}.${index}.${field}`}
+            label={label}
+            placeholder="DD.MM.ÅÅÅÅ"
+            defaultValue={item[field]}
+            required={item.taMed}
+            fromDate={fom}
+            toDate={tom}
+            customValidation={validateFomOgTom}
+            hideLabel
+        />
     ) : (
-        <BodyShort key={`årsinntekter.${index}.datoTom.placeholder`}>
-            {erMed && value && DateToDDMMYYYYString(dateOrNull(value))}
-        </BodyShort>
+        <BodyShort>{item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
     );
 };
 

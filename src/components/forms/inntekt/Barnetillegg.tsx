@@ -7,13 +7,11 @@ import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, getYearFromDate } from "../../../utils/date-utils";
+import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
-import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
 const Beskrivelse = ({
@@ -47,17 +45,12 @@ const Beskrivelse = ({
 };
 
 export const Barnetillegg = () => {
-    const {
-        roller,
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-    } = useGetBehandlingV2();
+    const { roller } = useGetBehandlingV2();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const {
         formState: { errors },
     } = useFormContext<InntektFormValues>();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
@@ -86,7 +79,6 @@ export const Barnetillegg = () => {
                             onSaveRow,
                             handleOnSelect,
                             editableRow,
-                            validateFomOgTom,
                             onEditRow,
                             addPeriod,
                         }: {
@@ -94,7 +86,6 @@ export const Barnetillegg = () => {
                             editableRow: number;
                             onSaveRow: (index: number) => void;
                             handleOnSelect: (value: boolean, index: number) => void;
-                            validateFomOgTom: (index: number) => void;
                             onEditRow: (index: number) => void;
                             addPeriod: (periode: InntektFormPeriode) => void;
                         }) => (
@@ -143,44 +134,22 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                value={item.datoFom}
-                                                                erMed={item.taMed}
                                                                 editableRow={editableRow}
                                                                 index={index}
-                                                                datepicker={
-                                                                    <FormControlledMonthPicker
-                                                                        name={`barnetillegg.${barn.ident}.${index}.datoFom`}
-                                                                        label="Fra og med"
-                                                                        placeholder="DD.MM.ÅÅÅÅ"
-                                                                        defaultValue={item.datoFom}
-                                                                        required={item.taMed}
-                                                                        fromDate={fom}
-                                                                        toDate={tom}
-                                                                        customValidation={() => validateFomOgTom(index)}
-                                                                        hideLabel
-                                                                    />
-                                                                }
+                                                                label="Fra og med"
+                                                                fieldName={`barnetillegg.${barn.ident}`}
+                                                                field="datoFom"
+                                                                item={item}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
                                                                 editableRow={editableRow}
-                                                                value={item.datoTom}
-                                                                erMed={item.taMed}
                                                                 index={index}
-                                                                datepicker={
-                                                                    <FormControlledMonthPicker
-                                                                        name={`barnetillegg.${barn.ident}.${index}.datoTom`}
-                                                                        label="Til og med"
-                                                                        placeholder="DD.MM.ÅÅÅÅ"
-                                                                        defaultValue={item.datoTom}
-                                                                        fromDate={fom}
-                                                                        toDate={tom}
-                                                                        customValidation={() => validateFomOgTom(index)}
-                                                                        hideLabel
-                                                                        lastDayOfMonthPicker
-                                                                    />
-                                                                }
+                                                                label="Til og med"
+                                                                fieldName={`barnetillegg.${barn.ident}`}
+                                                                field="datoTom"
+                                                                item={item}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
