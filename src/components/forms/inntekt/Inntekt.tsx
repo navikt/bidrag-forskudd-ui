@@ -24,7 +24,7 @@ import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
 import { InntektChart } from "./InntektChart";
 import { Kontantstøtte } from "./Kontantstoette";
-import { SkattepliktigeOgPensjonsgivendeInntekt } from "./SkattepliktigeOgPensjonsgivendeInntekt";
+import { SkattepliktigeOgPensjonsgivende } from "./SkattepliktigeOgPensjonsgivende";
 import { Småbarnstillegg } from "./Smaabarnstilleg";
 import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
@@ -90,7 +90,7 @@ const Main = () => {
                             <div className="mt-12">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
-                            <SkattepliktigeOgPensjonsgivendeInntekt ident={rolle.ident} />
+                            <SkattepliktigeOgPensjonsgivende />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>
                                     <Barnetillegg />

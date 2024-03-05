@@ -1,19 +1,72 @@
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull } from "../../../utils/date-utils";
+import { dateOrNull, getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
-export const Småbarnstillegg = () => {
+const Beskrivelse = ({
+    item,
+    field,
+    erRedigerbart,
+}: {
+    item: InntektFormPeriode;
+    field: string;
+    erRedigerbart: boolean;
+}) => {
+    return erRedigerbart ? (
+        <FormControlledSelectField
+            name={`${field}.rapporteringstype`}
+            label="Beskrivelse"
+            options={[{ value: "", text: "Velg type inntekt" }].concat(
+                [
+                    Inntektsrapportering.LONNMANUELTBEREGNET,
+                    Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+                    Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                    Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+                ].map((value) => ({
+                    value,
+                    text: hentVisningsnavn(value),
+                }))
+            )}
+            hideLabel
+        />
+    ) : (
+        <BodyShort className="min-w-[215px] capitalize">
+            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+        </BodyShort>
+    );
+};
+const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
+    return (
+        <>
+            <BodyShort size="small">
+                Periode: {item.datoFom && dateToDDMMYYYYString(new Date(item.datoFom))} -{" "}
+                {item.datoTom && dateToDDMMYYYYString(new Date(item.datoTom))}
+            </BodyShort>
+            {item.inntektsposter.map((inntektpost) => (
+                <BodyShort size="small" key={inntektpost.kode}>
+                    {inntektpost.visningsnavn}: {inntektpost.beløp}
+                </BodyShort>
+            ))}
+        </>
+    );
+};
+export const SkattepliktigeOgPensjonsgivende = () => {
     const {
+        inntekter,
         roller,
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandlingV2();
@@ -23,14 +76,18 @@ export const Småbarnstillegg = () => {
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-    const fieldName = "småbarnstillegg";
-    const fieldErrors = errors?.småbarnstillegg;
+    const fieldName = `årsinntekter.${ident}` as const;
+    const fieldErrors = errors?.årsinntekter?.[ident];
+    const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium">
-                Småbarnstillegg
-            </Heading>
+            <div className="flex gap-x-4">
+                <Heading level="3" size="medium">
+                    Skattepliktige og pensjonsgivende inntekt
+                </Heading>
+                {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+            </div>
             <InntektTabel fieldName={fieldName} fieldErrors={fieldErrors}>
                 {({
                     controlledFields,
@@ -64,7 +121,7 @@ export const Småbarnstillegg = () => {
                                             <Table.HeaderCell scope="col" className="w-[145px]">
                                                 Til og med
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+                                            <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[154px]">
                                                 Beløp
                                             </Table.HeaderCell>
@@ -74,7 +131,12 @@ export const Småbarnstillegg = () => {
                                     </Table.Header>
                                     <Table.Body>
                                         {controlledFields.map((item, index) => (
-                                            <Table.Row key={item.ident + index} className="h-[41px] align-baseline">
+                                            <Table.ExpandableRow
+                                                key={item.ident + index}
+                                                content={<ExpandableContent item={item} />}
+                                                togglePlacement="right"
+                                                className="h-[41px] align-baseline"
+                                            >
                                                 <Table.DataCell className="w-[84px]" align="center">
                                                     <FormControlledCheckbox
                                                         className="w-full flex justify-center"
@@ -128,9 +190,13 @@ export const Småbarnstillegg = () => {
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <BodyShort className="min-w-[215px] capitalize">
-                                                        {KildeTexts[item.kilde]}
-                                                    </BodyShort>
+                                                    <Beskrivelse
+                                                        item={item}
+                                                        field={`${fieldName}.${index}`}
+                                                        erRedigerbart={
+                                                            editableRow === index && item.kilde === Kilde.MANUELL
+                                                        }
+                                                    />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Totalt
@@ -150,7 +216,7 @@ export const Småbarnstillegg = () => {
                                                         onSaveRow={onSaveRow}
                                                     />
                                                 </Table.DataCell>
-                                            </Table.Row>
+                                            </Table.ExpandableRow>
                                         ))}
                                     </Table.Body>
                                 </Table>
@@ -167,7 +233,7 @@ export const Småbarnstillegg = () => {
                                     datoFom: null,
                                     datoTom: null,
                                     beløp: 0,
-                                    rapporteringstype: Inntektsrapportering.SMABARNSTILLEGG,
+                                    rapporteringstype: "",
                                     taMed: true,
                                     kilde: Kilde.MANUELL,
                                     inntektsposter: [],
