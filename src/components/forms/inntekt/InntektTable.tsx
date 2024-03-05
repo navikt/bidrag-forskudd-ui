@@ -88,10 +88,11 @@ export const Periode = ({
     item: InntektFormPeriode;
 }) => {
     const {
+        søktFomDato,
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandlingV2();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
+    const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -219,7 +220,7 @@ export const InntektTabel = ({
         if (periode.datoFom === null) {
             setError(`${fieldName}.${index}.datoFom`, {
                 type: "notValid",
-                message: "Dato må fylles ut",
+                message: text.error.datoMåFyllesUt,
             });
         }
 
@@ -268,8 +269,8 @@ export const InntektTabel = ({
     };
     const showErrorModal = () => {
         setErrorMessage({
-            title: "Fullfør redigering",
-            text: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
         });
         setErrorModalOpen(true);
     };
