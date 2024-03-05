@@ -1,29 +1,86 @@
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
+import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
-export const UtvidetBarnetrygd = () => {
-    const { roller } = useGetBehandlingV2();
+const Beskrivelse = ({
+    item,
+    field,
+    erRedigerbart,
+}: {
+    item: InntektFormPeriode;
+    field: string;
+    erRedigerbart: boolean;
+}) => {
+    return erRedigerbart ? (
+        <FormControlledSelectField
+            name={`${field}.rapporteringstype`}
+            label={text.label.beskrivelse}
+            options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
+                [
+                    Inntektsrapportering.LONNMANUELTBEREGNET,
+                    Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+                    Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+                    Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+                    Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+                ].map((value) => ({
+                    value,
+                    text: hentVisningsnavn(value),
+                }))
+            )}
+            hideLabel
+        />
+    ) : (
+        <BodyShort className="min-w-[215px] capitalize">
+            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+        </BodyShort>
+    );
+};
+const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
+    return (
+        <>
+            <BodyShort size="small">
+                Periode: {item.datoFom && dateToDDMMYYYYString(new Date(item.datoFom))} -{" "}
+                {item.datoTom && dateToDDMMYYYYString(new Date(item.datoTom))}
+            </BodyShort>
+            {item.inntektsposter.map((inntektpost) => (
+                <BodyShort size="small" key={inntektpost.kode}>
+                    {inntektpost.visningsnavn}: {inntektpost.beløp}
+                </BodyShort>
+            ))}
+        </>
+    );
+};
+export const SkattepliktigeOgPensjonsgivende = () => {
+    const { inntekter, roller } = useGetBehandlingV2();
     const {
         formState: { errors },
     } = useFormContext<InntektFormValues>();
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-    const fieldName = "utvidetBarnetrygd";
-    const fieldErrors = errors?.utvidetBarnetrygd;
+    const fieldName = `årsinntekter.${ident}` as const;
+    const fieldErrors = errors?.årsinntekter?.[ident];
+    const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium">
-                {text.title.utvidetBarnetrygd}
-            </Heading>
+            <div className="flex gap-x-4">
+                <Heading level="3" size="medium">
+                    {text.title.skattepliktigeogPensjonsgivendeInntekt}
+                </Heading>
+                {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+            </div>
             <InntektTabel fieldName={fieldName} fieldErrors={fieldErrors}>
                 {({
                     controlledFields,
@@ -55,7 +112,7 @@ export const UtvidetBarnetrygd = () => {
                                             <Table.HeaderCell scope="col" className="w-[145px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col">{text.label.kilde}</Table.HeaderCell>
+                                            <Table.HeaderCell scope="col">{text.label.beskrivelse}</Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[154px]">
                                                 {text.label.beløp}
                                             </Table.HeaderCell>
@@ -65,7 +122,12 @@ export const UtvidetBarnetrygd = () => {
                                     </Table.Header>
                                     <Table.Body>
                                         {controlledFields.map((item, index) => (
-                                            <Table.Row key={item.ident + index} className="h-[41px] align-baseline">
+                                            <Table.ExpandableRow
+                                                key={item.ident + index}
+                                                content={<ExpandableContent item={item} />}
+                                                togglePlacement="right"
+                                                className="h-[41px] align-baseline"
+                                            >
                                                 <Table.DataCell className="w-[84px]" align="center">
                                                     <FormControlledCheckbox
                                                         className="w-full flex justify-center"
@@ -97,9 +159,13 @@ export const UtvidetBarnetrygd = () => {
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <BodyShort className="min-w-[215px] capitalize">
-                                                        {KildeTexts[item.kilde]}
-                                                    </BodyShort>
+                                                    <Beskrivelse
+                                                        item={item}
+                                                        field={`${fieldName}.${index}`}
+                                                        erRedigerbart={
+                                                            editableRow === index && item.kilde === Kilde.MANUELL
+                                                        }
+                                                    />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Totalt
@@ -119,7 +185,7 @@ export const UtvidetBarnetrygd = () => {
                                                         onSaveRow={onSaveRow}
                                                     />
                                                 </Table.DataCell>
-                                            </Table.Row>
+                                            </Table.ExpandableRow>
                                         ))}
                                     </Table.Body>
                                 </Table>
@@ -136,7 +202,7 @@ export const UtvidetBarnetrygd = () => {
                                     datoFom: null,
                                     datoTom: null,
                                     beløp: 0,
-                                    rapporteringstype: Inntektsrapportering.UTVIDET_BARNETRYGD,
+                                    rapporteringstype: "",
                                     taMed: true,
                                     kilde: Kilde.MANUELL,
                                     inntektsposter: [],
