@@ -42,29 +42,32 @@ export const Totalt = ({
 );
 
 export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
-    return (
-        <>
-            {editableRow !== index && !erMed && <div className="min-w-[40px]"></div>}
-            {erMed && editableRow !== index && (
-                <Button
-                    type="button"
-                    onClick={() => onEditRow(index)}
-                    icon={<PencilIcon aria-hidden />}
-                    variant="tertiary"
-                    size="small"
-                />
-            )}
-            {editableRow === index && (
-                <Button
-                    type="button"
-                    onClick={() => onSaveRow(index)}
-                    icon={<FloppydiskIcon aria-hidden />}
-                    variant="tertiary"
-                    size="small"
-                />
-            )}
-        </>
-    );
+    const { lesemodus } = useForskudd();
+    const emptyButton = () => <div className="min-w-[40px]"></div>;
+    if (lesemodus) return emptyButton();
+
+    if (erMed && editableRow !== index) {
+        return (
+            <Button
+                type="button"
+                onClick={() => onEditRow(index)}
+                icon={<PencilIcon aria-hidden />}
+                variant="tertiary"
+                size="small"
+            />
+        );
+    } else if (editableRow === index) {
+        return (
+            <Button
+                type="button"
+                onClick={() => onSaveRow(index)}
+                icon={<FloppydiskIcon aria-hidden />}
+                variant="tertiary"
+                size="small"
+            />
+        );
+    }
+    return emptyButton();
 };
 
 export const Periode = ({

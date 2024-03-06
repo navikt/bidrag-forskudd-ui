@@ -1,4 +1,4 @@
-import { BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -8,6 +8,7 @@ import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandling } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
+import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
@@ -146,12 +147,8 @@ export const Kontantstøtte = () => {
                                         </Table>
                                     </div>
                                 )}
-                                <Button
-                                    variant="tertiary"
-                                    type="button"
-                                    size="small"
-                                    className="w-fit"
-                                    onClick={() =>
+                                <LeggTilPeriodeButton
+                                    addPeriode={() =>
                                         addPeriod({
                                             ident,
                                             datoFom: null,
@@ -165,9 +162,7 @@ export const Kontantstøtte = () => {
                                             inntektstyper: [],
                                         })
                                     }
-                                >
-                                    {text.label.leggTilPeriode}
-                                </Button>
+                                />
                             </>
                         )}
                     </InntektTabel>
