@@ -1,11 +1,12 @@
-import { BehandlingNotatDto, InntektDtoV2, Inntektstype } from "../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, InntektDtoV2, Inntektsrapportering, Inntektstype } from "../api/BidragBehandlingApiV1";
 
-interface InntektFormPeriode extends InntektDtoV2 {
+export interface InntektFormPeriode extends Omit<InntektDtoV2, "rapporteringstype"> {
     angittPeriode?: {
         fom?: string;
         til?: string;
     };
     inntektstype?: Inntektstype | "";
+    rapporteringstype: Inntektsrapportering | "";
 }
 export interface InntektFormValues {
     årsinntekter: { [key: string]: InntektFormPeriode[] };

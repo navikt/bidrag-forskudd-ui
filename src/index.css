@@ -3,13 +3,4 @@
 @import "@navikt/bidrag-ui-common/styles/index.css";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
-
-.navds-tabs__tablist-wrapper {
-    width: max-content;
-}
-.navds-checkbox__label {
-    align-items: center;
-}
-.navds-checkbox__icon {
-    max-height: 0.5rem;
-}
+@import "forskudd.css";
