@@ -27,6 +27,7 @@ import {
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
 import { useForskudd } from "../context/ForskuddContext";
+import { FantIkkeVedtakEllerBehandlingError } from "../types/apiStatus";
 import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 export const MutationKeys = {
@@ -184,12 +185,28 @@ export const useGetBehandling = (): BehandlingDto => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandling(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDto> => {
-            if (vedtakId) {
-                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
+            try {
+                if (vedtakId) {
+                    const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
+                    return data;
+                }
+                const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
                 return data;
+            } catch (e) {
+                console.log(e, e.status == 404);
+                if (e instanceof AxiosError && e.response.status == 404) {
+                    throw new FantIkkeVedtakEllerBehandlingError(
+                        `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
+                    );
+                }
+                throw e;
             }
-            const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
-            return data;
+        },
+        retry: (count, error) => {
+            if (error instanceof FantIkkeVedtakEllerBehandlingError) {
+                return false;
+            }
+            return count < 3;
         },
         staleTime: Infinity,
     });
@@ -204,13 +221,27 @@ export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
 export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
-        queryFn: async (): Promise<BehandlingDtoV2> => {
-            if (vedtakId) {
-                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId);
-                return data;
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    return await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId);
+                }
+                return await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
+            } catch (e) {
+                if (e instanceof AxiosError && e.response.status == 404) {
+                    throw new FantIkkeVedtakEllerBehandlingError(
+                        `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
+                    );
+                }
+                throw e;
             }
-            const { data } = await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
-            return data;
+        },
+        select: (data): BehandlingDtoV2 => data?.data,
+        retry: (count, error) => {
+            if (error instanceof FantIkkeVedtakEllerBehandlingError) {
+                return false;
+            }
+            return count < 3;
         },
         staleTime: Infinity,
     });

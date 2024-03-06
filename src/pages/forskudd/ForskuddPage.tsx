@@ -6,7 +6,7 @@ import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling } from "../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
@@ -14,7 +14,7 @@ export const ForskuddPage = () => {
     const {
         virkningstidspunkt: { avslag },
         erVedtakFattet,
-    } = useGetBehandling();
+    } = useGetBehandlingV2();
     const interactive = !avslag;
 
     return (
