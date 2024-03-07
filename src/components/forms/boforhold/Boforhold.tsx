@@ -221,7 +221,7 @@ const Side = () => {
 };
 
 const BoforholdsForm = () => {
-    const { behandlingId, setBoforholdFormValues } = useForskudd();
+    const { setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const {
