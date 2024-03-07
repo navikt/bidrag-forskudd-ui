@@ -78,7 +78,6 @@ import {
     boststatusOver18År,
     checkPeriodizationErrors,
     compareHusstandsBarn,
-    compareOpplysninger,
     createInitialValues,
     editPeriods,
     getBarnPerioder,
@@ -95,10 +94,10 @@ import { ActionButtons } from "../inntekt/ActionButtons";
 import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string }) => {
+    // const opplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(OpplysningerType.BOFORHOLD_BEARBEIDET);
     const { husstandsmedlemmerOgEgneBarnListe } = useGrunnlag();
-    const perioder = mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe).find(
-        (opplysning) => opplysning.ident == ident
-    )?.perioder;
+    const opplysninger = mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe);
+    const perioder = opplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     if (!perioder) {
         return null;
     }
@@ -230,9 +229,9 @@ const BoforholdsForm = () => {
         søktFomDato,
         roller,
     } = useGetBehandling();
-    const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
-        OpplysningerType.BOFORHOLD_BEARBEIDET
-    );
+    // const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
+    //     OpplysningerType.BOFORHOLD_BEARBEIDET
+    // );
     const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
     // const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
@@ -240,7 +239,6 @@ const BoforholdsForm = () => {
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
             husstand: mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe),
-            //sivilstand: sivilstandProssesert as SivilstandOpplysninger[],
             sivilstand: sivilstandListe,
         }),
         [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
@@ -268,15 +266,16 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (boforoholdOpplysninger) {
-            const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
+        // if (boforoholdOpplysninger) {
+        //     const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
 
-            if (changesInOpplysninger?.length) {
-                setOpplysningerChanges(changesInOpplysninger);
-            }
-        }
+        //     if (changesInOpplysninger?.length) {
+        //         setOpplysningerChanges(changesInOpplysninger);
+        //     }
+        // }
 
-        if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
+        // if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
+        if (boforhold.husstandsbarn.length == 0 && !isSavedInitialOpplysninger.current) {
             // lagreAlleOpplysninger();
             saveBoforhold(initialValues);
         }

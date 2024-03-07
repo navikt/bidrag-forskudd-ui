@@ -353,6 +353,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
+    // const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const { sivilstandListe: sivilstandOpplysninger } = useGrunnlag();
 
