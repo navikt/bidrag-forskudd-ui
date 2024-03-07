@@ -79,7 +79,7 @@ export default {
         lukk: "Lukk",
         lønnsendring: "Lønnsendring",
         lønnsinntektMedTrygdeavgiftspliktOgMedTrekkplikt: "Lønnsinntekt med trygdeavgiftsplikt og med trekkplikt: {}",
-        mottattdato: "Mottat dato",
+        mottattdato: "Mottatt dato",
         navn: "Navn",
         notatButton: "Vis notat",
         nåværendeArbeidsforhold: "Nåværende arbeidsforhold",
