@@ -18,7 +18,12 @@ import { boforholdPeriodiseringErros } from "../../../constants/error";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetBehandling, useGetOpplysninger, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
+import {
+    useGetBehandling,
+    useGetOpplysninger,
+    useGrunnlag,
+    useSivilstandOpplysningerProssesert,
+} from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -348,8 +353,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
+    const { sivilstandListe: sivilstandOpplysninger } = useGrunnlag();
 
     const behandling = useGetBehandling();
     if (!sivilstandOpplysninger) {
