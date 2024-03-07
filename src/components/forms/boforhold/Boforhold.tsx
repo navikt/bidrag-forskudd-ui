@@ -35,7 +35,6 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import {
-    useAddOpplysningerData,
     useGetBehandling,
     useGetOpplysninger,
     useGetOpplysningerHentetdato,
@@ -50,7 +49,6 @@ import {
     HusstandOpplysningFraFolkeRegistre,
     ParsedBoforholdOpplysninger,
     SavedHustandOpplysninger,
-    SavedOpplysningFraFolkeRegistrePeriode,
 } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
@@ -80,7 +78,6 @@ import {
     boststatusOver18År,
     checkPeriodizationErrors,
     compareHusstandsBarn,
-    compareOpplysninger,
     createInitialValues,
     editPeriods,
     getBarnPerioder,
@@ -97,9 +94,10 @@ import { ActionButtons } from "../inntekt/ActionButtons";
 import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string }) => {
-    const opplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(OpplysningerType.BOFORHOLD_BEARBEIDET);
-    const perioder = opplysninger?.husstand.find((opplysning) => opplysning.ident == ident)
-        ?.perioder as SavedOpplysningFraFolkeRegistrePeriode[];
+    // const opplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    const { husstandsmedlemmerOgEgneBarnListe } = useGrunnlag();
+    const opplysninger = mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe);
+    const perioder = opplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     if (!perioder) {
         return null;
     }
@@ -222,7 +220,7 @@ const Side = () => {
 };
 
 const BoforholdsForm = () => {
-    const { behandlingId, setBoforholdFormValues } = useForskudd();
+    const { setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const {
@@ -231,17 +229,16 @@ const BoforholdsForm = () => {
         søktFomDato,
         roller,
     } = useGetBehandling();
-    const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
-        OpplysningerType.BOFORHOLD_BEARBEIDET
-    );
+    // const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
+    //     OpplysningerType.BOFORHOLD_BEARBEIDET
+    // );
     const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
-    const { mutation: saveOpplysninger } = useAddOpplysningerData();
+    // const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const opplysningerFraFolkRegistre = useMemo(
         () => ({
             husstand: mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe),
-            //sivilstand: sivilstandProssesert as SivilstandOpplysninger[],
             sivilstand: sivilstandListe,
         }),
         [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
@@ -269,16 +266,17 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (boforoholdOpplysninger) {
-            const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
+        // if (boforoholdOpplysninger) {
+        //     const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
 
-            if (changesInOpplysninger?.length) {
-                setOpplysningerChanges(changesInOpplysninger);
-            }
-        }
+        //     if (changesInOpplysninger?.length) {
+        //         setOpplysningerChanges(changesInOpplysninger);
+        //     }
+        // }
 
-        if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
-            lagreAlleOpplysninger();
+        // if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
+        if (boforhold.husstandsbarn.length == 0 && !isSavedInitialOpplysninger.current) {
+            // lagreAlleOpplysninger();
             saveBoforhold(initialValues);
         }
 
@@ -287,31 +285,31 @@ const BoforholdsForm = () => {
         setBoforholdFormValues(initialValues);
     }, []);
 
-    const lagreAlleOpplysninger = async () => {
-        await saveOpplysninger.mutateAsync({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
-            data: JSON.stringify(opplysningerFraFolkRegistre),
-            hentetDato: toISODateString(new Date()),
-        });
-        await saveOpplysninger.mutateAsync({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
-            data: JSON.stringify(husstandsmedlemmerOgEgneBarnListe),
-            hentetDato: toISODateString(new Date()),
-        });
-        await saveOpplysninger.mutateAsync({
-            behandlingId,
-            aktiv: true,
-            grunnlagstype: OpplysningerType.SIVILSTAND,
-            data: JSON.stringify(sivilstandListe),
-            hentetDato: toISODateString(new Date()),
-        });
-    };
+    // const lagreAlleOpplysninger = async () => {
+    //     await saveOpplysninger.mutateAsync({
+    //         behandlingId,
+    //         aktiv: true,
+    //         grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
+    //         data: JSON.stringify(opplysningerFraFolkRegistre),
+    //         hentetDato: toISODateString(new Date()),
+    //     });
+    //     await saveOpplysninger.mutateAsync({
+    //         behandlingId,
+    //         aktiv: true,
+    //         grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
+    //         data: JSON.stringify(husstandsmedlemmerOgEgneBarnListe),
+    //         hentetDato: toISODateString(new Date()),
+    //     });
+    //     await saveOpplysninger.mutateAsync({
+    //         behandlingId,
+    //         aktiv: true,
+    //         grunnlagstype: OpplysningerType.SIVILSTAND,
+    //         data: JSON.stringify(sivilstandListe),
+    //         hentetDato: toISODateString(new Date()),
+    //     });
+    // };
     const updateOpplysninger = () => {
-        lagreAlleOpplysninger();
+        // lagreAlleOpplysninger();
 
         const fieldValues = useFormMethods.getValues();
         const values: OppdaterBoforholdRequest = {
