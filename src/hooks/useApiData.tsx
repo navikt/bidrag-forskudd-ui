@@ -27,6 +27,7 @@ import {
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
 import { useForskudd } from "../context/ForskuddContext";
+import { FantIkkeVedtakEllerBehandlingError } from "../types/apiStatus";
 import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 export const MutationKeys = {
@@ -69,16 +70,17 @@ export const QueryKeys = {
 };
 
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
-    const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger?.find(
+    const behandling = useGetBehandlingV2();
+    const opplysninger = behandling.aktiveGrunnlagsdata?.find(
         (opplysning) => opplysning.grunnlagsdatatype == opplysningerType
     );
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
-    const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)
+        ?.innhentet;
 };
 
 export const useOppdaterBehandling = () => {
@@ -184,12 +186,27 @@ export const useGetBehandling = (): BehandlingDto => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandling(behandlingId, vedtakId),
         queryFn: async (): Promise<BehandlingDto> => {
-            if (vedtakId) {
-                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
+            try {
+                if (vedtakId) {
+                    const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
+                    return data;
+                }
+                const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
                 return data;
+            } catch (e) {
+                if (e instanceof AxiosError && e.response.status == 404) {
+                    throw new FantIkkeVedtakEllerBehandlingError(
+                        `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
+                    );
+                }
+                throw e;
             }
-            const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
-            return data;
+        },
+        retry: (count, error) => {
+            if (error instanceof FantIkkeVedtakEllerBehandlingError) {
+                return false;
+            }
+            return count < 3;
         },
         staleTime: Infinity,
     });
@@ -204,13 +221,26 @@ export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
 export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
-        queryFn: async (): Promise<BehandlingDtoV2> => {
-            if (vedtakId) {
-                const { data } = await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId);
-                return data;
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    return (await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId)).data;
+                }
+                return (await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId)).data;
+            } catch (e) {
+                if (e instanceof AxiosError && e.response.status == 404) {
+                    throw new FantIkkeVedtakEllerBehandlingError(
+                        `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
+                    );
+                }
+                throw e;
             }
-            const { data } = await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
-            return data;
+        },
+        retry: (count, error) => {
+            if (error instanceof FantIkkeVedtakEllerBehandlingError) {
+                return false;
+            }
+            return count < 3;
         },
         staleTime: Infinity,
     });
@@ -252,7 +282,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
         })),
     });
 
-const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDto => {
+const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequestDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = new Date();
@@ -295,7 +325,7 @@ const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDt
 };
 
 export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     const { sivilstandListe } = useGrunnlag();
 
     const { lesemodus } = useForskudd();
@@ -313,7 +343,7 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
 };
 
 export const useGrunnlag = (): HentGrunnlagDto | null => {
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     const grunnlagRequest = createGrunnlagRequest(behandling);
 
     const { data: grunnlagspakke } = useSuspenseQuery({

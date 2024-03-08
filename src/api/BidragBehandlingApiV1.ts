@@ -60,12 +60,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
-    grunnlagListe: GrunnlagEntity[];
+    bidragspliktig?: Rolle;
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
-    bidragspliktig?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
 }
 
 export enum Bostatuskode {
@@ -967,6 +967,11 @@ export interface SivilstandBeregnet {
     sivilstandListe: Sivilstand[];
 }
 
+export interface OpprettBehandlingResponse {
+    /** @format int64 */
+    id: number;
+}
+
 export interface ResultatBeregningBarnDto {
     barn: ResultatRolle;
     perioder: ResultatPeriodeDto[];
@@ -1068,11 +1073,6 @@ export interface OpprettBehandlingRequest {
     søknadsid: number;
     /** @format int64 */
     søknadsreferanseid?: number;
-}
-
-export interface OpprettBehandlingResponse {
-    /** @format int64 */
-    id: number;
 }
 
 export interface AddOpplysningerRequest {
@@ -1563,10 +1563,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1655,7 +1652,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1692,6 +1689,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Logisk slett en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name SlettBehandling
+         * @request DELETE:/api/v2/behandling/{behandlingsid}
+         * @secure
+         */
+        slettBehandling: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<void, void>({
+                path: `/api/v2/behandling/${behandlingsid}`,
+                method: "DELETE",
+                secure: true,
                 ...params,
             }),
 
@@ -1755,16 +1768,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Beregn forskudd
+         * @description Opprett behandling fra vedtak. Brukes når det skal opprettes klagebehanling fra vedtak.
+         *
+         * @tags behandling-controller-v-2
+         * @name OpprettBehandlingForVedtak
+         * @request POST:/api/v2/behandling/vedtak/{vedtaksId}
+         * @secure
+         */
+        opprettBehandlingForVedtak: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<OpprettBehandlingResponse, any>({
+                path: `/api/v2/behandling/vedtak/${vedtaksId}`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Fatte vedtak for behandling
          *
          * @tags vedtak-controller
          * @name FatteVedtak
-         * @request POST:/api/v2/behandling/{behandlingsid}/vedtak
+         * @request POST:/api/v2/behandling/fattevedtak/{behandlingsid}
          * @secure
          */
         fatteVedtak: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<number, any>({
-                path: `/api/v2/behandling/${behandlingsid}/vedtak`,
+                path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
                 method: "POST",
                 secure: true,
                 format: "json",

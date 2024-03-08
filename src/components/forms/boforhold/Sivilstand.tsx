@@ -19,7 +19,7 @@ import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import {
-    useGetBehandling,
+    useGetBehandlingV2,
     useGetOpplysninger,
     useGrunnlag,
     useSivilstandOpplysningerProssesert,
@@ -52,7 +52,8 @@ export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
 );
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
-    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen, lesemodus } =
+        useForskudd();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
 
@@ -206,6 +207,43 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
         setShowResetButton(false);
     };
+
+    const editButtons = (index: number) => {
+        if (lesemodus) return [];
+        return [
+            editableRow === index ? (
+                <Button
+                    key={`save-button-${index}`}
+                    type="button"
+                    onClick={() => onSaveRow(index)}
+                    icon={<FloppydiskIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ) : (
+                <Button
+                    key={`edit-button-${index}`}
+                    type="button"
+                    onClick={() => onEditRow(index)}
+                    icon={<PencilIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ),
+            index ? (
+                <Button
+                    key={`delete-button-${index}`}
+                    type="button"
+                    onClick={() => onRemovePeriode(index)}
+                    icon={<TrashIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            ) : (
+                <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
+            ),
+        ];
+    };
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
@@ -244,8 +282,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             text.label.tilOgMed,
                             text.label.sivilstand,
                             text.label.kilde,
-                            "",
-                            "",
+                            ...(lesemodus ? [] : ["", ""]),
                         ]}
                     >
                         {controlledFields.map((item, index) => (
@@ -308,45 +345,17 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                     <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">
                                         {KildeTexts[item.kilde]}
                                     </BodyShort>,
-                                    editableRow === index ? (
-                                        <Button
-                                            key={`save-button-${index}`}
-                                            type="button"
-                                            onClick={() => onSaveRow(index)}
-                                            icon={<FloppydiskIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        <Button
-                                            key={`edit-button-${index}`}
-                                            type="button"
-                                            onClick={() => onEditRow(index)}
-                                            icon={<PencilIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ),
-                                    index ? (
-                                        <Button
-                                            key={`delete-button-${index}`}
-                                            type="button"
-                                            onClick={() => onRemovePeriode(index)}
-                                            icon={<TrashIcon aria-hidden />}
-                                            variant="tertiary"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        <div key={`delete-button-${index}.placeholder`} className="min-w-[40px]"></div>
-                                    ),
+                                    ...editButtons(index),
                                 ]}
                             />
                         ))}
                     </TableWrapper>
                 )}
-                <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
-                    {text.label.leggTilPeriode}
-                </Button>
+                {!lesemodus && (
+                    <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
+                        {text.label.leggTilPeriode}
+                    </Button>
+                )}
             </Box>
         </div>
     );
@@ -357,7 +366,7 @@ const Opplysninger = () => {
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const { sivilstandListe: sivilstandOpplysninger } = useGrunnlag();
 
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     if (!sivilstandOpplysninger) {
         return null;
     }

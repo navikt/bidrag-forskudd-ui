@@ -1,10 +1,11 @@
 import { dateToDDMMYYYYString, RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Table } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { ResultatBeregningBarnDto, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { BEHANDLING_API_V1 } from "../../../constants/api";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import environment from "../../../environment";
@@ -48,7 +49,7 @@ const Vedtak = () => {
 
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
             </div>
-            {!erVedtakFattet && !beregnetForskudd?.feil && (
+            {!erVedtakFattet && !beregnetForskudd?.feil && !lesemodus && (
                 <>
                     <Alert variant="info">
                         <div className="grid gap-y-4">
@@ -68,32 +69,53 @@ const Vedtak = () => {
     );
 };
 
+class MåBekrefteOpplysningerStemmerError extends Error {
+    constructor() {
+        super("Bekreft at opplysningene stemmer");
+    }
+}
 const FatteVedtakButtons = () => {
+    const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { isFatteVedtakEnabled } = useFeatureToogle();
+    const { behandlingId } = useForskudd();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const queryClient = useQueryClient();
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status == "error";
     const fatteVedtakFn = useMutation({
-        mutationFn: async () => {
-            console.log("Fatte vedtak");
-            return new Promise((resolve) => {
-                setTimeout(resolve, 2000);
-            });
+        mutationFn: () => {
+            if (!bekreftetVedtak) {
+                throw new MåBekrefteOpplysningerStemmerError();
+            }
+            return BEHANDLING_API_V1.api.fatteVedtak(behandlingId);
         },
         onSuccess: () => {
-            // RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
+            RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
         },
     });
 
+    const måBekrefteAtOpplysningerStemmerFeil =
+        fatteVedtakFn.isError && fatteVedtakFn.error instanceof MåBekrefteOpplysningerStemmerError;
+
     return (
         <div>
-            {fatteVedtakFn.isError && (
+            {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
                 <Alert variant="error" className="w-8/12 m-auto mt-8">
                     <div>
                         <BodyShort size="small">{text.error.fatteVedtak}</BodyShort>
                     </div>
                 </Alert>
             )}
+            <ConfirmationPanel
+                className="pb-2"
+                checked={bekreftetVedtak}
+                label={text.varsel.bekreftFatteVedtak}
+                onChange={() => setBekreftetVedtak((x) => !x)}
+                error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
+            >
+                <Heading level="2" size="xsmall">
+                    Bekreft
+                </Heading>
+            </ConfirmationPanel>
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}

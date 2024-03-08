@@ -3,6 +3,7 @@ import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 import text from "../../constants/texts";
+import { useForskudd } from "../../context/ForskuddContext";
 import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "../../utils/date-utils";
 import { MonthPicker } from "../date-picker/MonthPicker";
 interface FormControlledDatePickerProps {
@@ -35,6 +36,7 @@ export const FormControlledMonthPicker = ({
     customValidation,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors, getValues } = useFormContext();
+    const { lesemodus } = useForskudd();
     const { field, fieldState } = useController({
         name,
         control,
@@ -80,6 +82,7 @@ export const FormControlledMonthPicker = ({
     return (
         <MonthPicker
             label={label}
+            readonly={lesemodus}
             placeholder={placeholder}
             onChange={(value) => handleChange(value)}
             defaultValue={defaultValue}

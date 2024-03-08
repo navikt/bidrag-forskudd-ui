@@ -4,11 +4,11 @@ import React, { memo, Suspense } from "react";
 
 import text from "../../constants/texts";
 import { useForskudd } from "../../context/ForskuddContext";
-import { useGetBehandling, usePersonsQueries } from "../../hooks/useApiData";
+import { useGetBehandlingV2, usePersonsQueries } from "../../hooks/useApiData";
 
 export const Header = memo(() => {
     const { behandlingId } = useForskudd();
-    const { roller, saksnummer } = useGetBehandling();
+    const { roller, saksnummer } = useGetBehandlingV2();
     const personsQueries = usePersonsQueries(roller);
     const rollerMedPersonNavn = personsQueries.map(({ data }) => data);
     return (

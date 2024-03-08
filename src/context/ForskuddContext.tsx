@@ -11,6 +11,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { useBehandlingV2 } from "../hooks/useApiData";
 import { BoforholdFormValues } from "../types/boforholdFormValues";
 import { InntektFormValues } from "../types/inntektFormValues";
 import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
@@ -21,6 +22,7 @@ interface IForskuddContext {
     behandlingId: number;
     vedtakId: number;
     lesemodus: boolean;
+    erVedtakFattet: boolean;
     saksnummer?: string;
     virkningstidspunktFormValues: VirkningstidspunktFormValues;
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
@@ -55,13 +57,15 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
+    const behandling = useBehandlingV2(behandlingId, vedtakId);
     const value = React.useMemo(
         () => ({
             activeStep,
             setActiveStep,
             behandlingId,
             vedtakId,
-            lesemodus: vedtakId != null,
+            lesemodus: vedtakId != null || behandling.erVedtakFattet,
+            erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             virkningstidspunktFormValues,
             setVirkningstidspunktFormValues,

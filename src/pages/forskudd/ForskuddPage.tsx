@@ -1,24 +1,30 @@
 import { BidragContainer } from "@navikt/bidrag-ui-common";
-import { Stepper } from "@navikt/ds-react";
+import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import React from "react";
 
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { useGetBehandling } from "../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
-    const {
-        virkningstidspunkt: { avslag },
-    } = useGetBehandling();
-    const interactive = !avslag;
+    const { virkningstidspunkt, erVedtakFattet } = useGetBehandlingV2();
+    const interactive = !virkningstidspunkt.avslag;
 
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
+                {erVedtakFattet && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            Vedtak er fattet
+                        </Heading>
+                        Vedtak er fattet for behandlingen og kan derfor ikke endres
+                    </Alert>
+                )}
                 <Stepper
                     aria-labelledby="stepper-heading"
                     activeStep={STEPS[activeStep]}
