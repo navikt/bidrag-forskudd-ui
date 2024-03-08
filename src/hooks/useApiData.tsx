@@ -194,7 +194,6 @@ export const useGetBehandling = (): BehandlingDto => {
                 const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
                 return data;
             } catch (e) {
-                console.log(e, e.status == 404);
                 if (e instanceof AxiosError && e.response.status == 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
                         `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
