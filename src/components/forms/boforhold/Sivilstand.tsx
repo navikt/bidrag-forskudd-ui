@@ -19,7 +19,7 @@ import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import {
-    useGetBehandling,
+    useGetBehandlingV2,
     useGetOpplysninger,
     useGrunnlag,
     useSivilstandOpplysningerProssesert,
@@ -366,7 +366,7 @@ const Opplysninger = () => {
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const { sivilstandListe: sivilstandOpplysninger } = useGrunnlag();
 
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     if (!sivilstandOpplysninger) {
         return null;
     }

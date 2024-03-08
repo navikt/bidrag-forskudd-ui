@@ -70,16 +70,17 @@ export const QueryKeys = {
 };
 
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
-    const behandling = useGetBehandling();
-    const opplysninger = behandling.opplysninger?.find(
+    const behandling = useGetBehandlingV2();
+    const opplysninger = behandling.aktiveGrunnlagsdata?.find(
         (opplysning) => opplysning.grunnlagsdatatype == opplysningerType
     );
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
-    const behandling = useGetBehandling();
-    return behandling.opplysninger.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)?.innhentet;
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)
+        ?.innhentet;
 };
 
 export const useOppdaterBehandling = () => {
@@ -282,7 +283,7 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
         })),
     });
 
-const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDto => {
+const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequestDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = new Date();
@@ -325,7 +326,7 @@ const createGrunnlagRequest = (behandling: BehandlingDto): HentGrunnlagRequestDt
 };
 
 export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     const { sivilstandListe } = useGrunnlag();
 
     const { lesemodus } = useForskudd();
@@ -343,7 +344,7 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
 };
 
 export const useGrunnlag = (): HentGrunnlagDto | null => {
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     const grunnlagRequest = createGrunnlagRequest(behandling);
 
     const { data: grunnlagspakke } = useSuspenseQuery({

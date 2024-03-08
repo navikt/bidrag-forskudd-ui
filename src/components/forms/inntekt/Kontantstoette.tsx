@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetBehandling } from "../../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
@@ -14,7 +14,7 @@ import { RolleTag } from "../../RolleTag";
 import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
 
 export const Kontantstøtte = () => {
-    const { roller } = useGetBehandling();
+    const { roller } = useGetBehandlingV2();
     const {
         formState: { errors },
     } = useFormContext<InntektFormValues>();

@@ -15,7 +15,7 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandling, useOppdaterBehandling } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useOppdaterBehandling } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
@@ -89,7 +89,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningst
 };
 
 const Main = ({ initialValues, error }) => {
-    const behandling = useGetBehandling();
+    const behandling = useGetBehandlingV2();
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
@@ -220,7 +220,7 @@ const Side = () => {
 };
 
 const VirkningstidspunktForm = () => {
-    const { virkningstidspunkt } = useGetBehandling();
+    const { virkningstidspunkt } = useGetBehandlingV2();
     const oppdaterBehandling = useOppdaterBehandling();
     const initialValues = createInitialValues(virkningstidspunkt);
 

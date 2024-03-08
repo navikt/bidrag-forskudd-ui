@@ -35,7 +35,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import {
-    useGetBehandling,
+    useGetBehandlingV2,
     useGetOpplysninger,
     useGetOpplysningerHentetdato,
     useGrunnlag,
@@ -143,7 +143,7 @@ const Main = ({
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
         søktFomDato,
-    } = useGetBehandling();
+    } = useGetBehandlingV2();
     const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
     const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
@@ -228,7 +228,7 @@ const BoforholdsForm = () => {
         virkningstidspunkt: { virkningstidspunkt },
         søktFomDato,
         roller,
-    } = useGetBehandling();
+    } = useGetBehandlingV2();
     // const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
     //     OpplysningerType.BOFORHOLD_BEARBEIDET
     // );
