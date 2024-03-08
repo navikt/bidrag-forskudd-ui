@@ -244,7 +244,6 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
         },
         staleTime: Infinity,
     });
-    console.log(behandling);
     return behandling;
 };
 
