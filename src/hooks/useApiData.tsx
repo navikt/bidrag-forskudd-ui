@@ -224,9 +224,9 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
         queryFn: async () => {
             try {
                 if (vedtakId) {
-                    return await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId);
+                    return (await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId)).data;
                 }
-                return await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId);
+                return (await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId)).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status == 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
@@ -236,7 +236,6 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
                 throw e;
             }
         },
-        select: (data): BehandlingDtoV2 => data?.data,
         retry: (count, error) => {
             if (error instanceof FantIkkeVedtakEllerBehandlingError) {
                 return false;
@@ -245,6 +244,7 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
         },
         staleTime: Infinity,
     });
+    console.log(behandling);
     return behandling;
 };
 

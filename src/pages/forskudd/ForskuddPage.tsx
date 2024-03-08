@@ -11,11 +11,8 @@ import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
-    const {
-        virkningstidspunkt: { avslag },
-        erVedtakFattet,
-    } = useGetBehandlingV2();
-    const interactive = !avslag;
+    const { virkningstidspunkt, erVedtakFattet } = useGetBehandlingV2();
+    const interactive = !virkningstidspunkt.avslag;
 
     return (
         <PageWrapper name="tracking-wide">
