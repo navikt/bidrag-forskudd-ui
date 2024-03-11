@@ -4,14 +4,12 @@ import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 export const Kontantstøtte = () => {
     const { roller } = useGetBehandlingV2();
@@ -61,40 +59,38 @@ export const Kontantstøtte = () => {
                             <>
                                 {controlledFields.length > 0 && (
                                     <div className="overflow-x-auto whitespace-nowrap">
-                                        <Table size="small">
+                                        <Table size="small" className="table-fixed">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
-                                                    <Table.HeaderCell scope="col" className="w-[84px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[84px]">
                                                         {text.label.taMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[145px]">
+                                                    <Table.HeaderCell scope="col" className="w-[144px]">
                                                         {text.label.fraOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[145px]">
+                                                    <Table.HeaderCell scope="col" className="w-[144px]">
                                                         {text.label.tilOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">{text.label.kilde}</Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[154px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                                        {text.label.kilde}
+                                                    </Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
                                                         {text.label.beløp}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col"></Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col"></Table.HeaderCell>
+                                                    <Table.HeaderCell
+                                                        scope="col"
+                                                        className="w-[56px]"
+                                                    ></Table.HeaderCell>
                                                 </Table.Row>
                                             </Table.Header>
                                             <Table.Body>
                                                 {controlledFields.map((item, index) => (
-                                                    <Table.Row
-                                                        key={item.ident + index}
-                                                        className="h-[41px] align-baseline"
-                                                    >
-                                                        <Table.DataCell className="w-[84px]" align="center">
-                                                            <FormControlledCheckbox
-                                                                className="w-full flex justify-center"
-                                                                name={`kontantstøtte.${barn.ident}.${index}.taMed`}
-                                                                onChange={(value) =>
-                                                                    handleOnSelect(value.target.checked, index)
-                                                                }
-                                                                legend=""
+                                                    <Table.Row key={item.ident + index} className="align-top">
+                                                        <Table.DataCell>
+                                                            <TaMed
+                                                                fieldName={`kontantstøtte.${barn.ident}`}
+                                                                index={index}
+                                                                handleOnSelect={handleOnSelect}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
@@ -118,9 +114,7 @@ export const Kontantstøtte = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <BodyShort className="min-w-[215px] capitalize">
-                                                                {KildeTexts[item.kilde]}
-                                                            </BodyShort>
+                                                            <KildeIcon kilde={item.kilde} />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Totalt

@@ -112,7 +112,7 @@ export default {
     title: {
         arbeidsforhold: "Arbeidsforhold",
         barn: "Barn",
-        barnetillegg: "Barnetillegg (for bidragsbarnet, per måned i tillegg til inntekter)",
+        barnetillegg: "Barnetillegg",
         barnOver18: "Barn over 18 år",
         begrunnelse: "Begrunnelse",
         boforhold: "Boforhold",

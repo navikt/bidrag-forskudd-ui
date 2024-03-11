@@ -9,10 +9,9 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
-import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import AinntektLink from "./AinntektLink";
-import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 const Beskrivelse = ({
     item,
@@ -43,7 +42,7 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="min-w-[215px] capitalize">
+        <BodyShort className="capitalize leading-8">
             {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
         </BodyShort>
     );
@@ -100,24 +99,29 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                     <>
                         {controlledFields.length > 0 && (
                             <div className="overflow-x-auto whitespace-nowrap">
-                                <Table size="small">
+                                <Table size="small" className="table-fixed">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
-                                            <Table.HeaderCell scope="col" className="w-[84px]">
+                                            <Table.HeaderCell scope="col" align="center" className="w-[84px]">
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[145px]">
+                                            <Table.HeaderCell scope="col" className="w-[144px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[145px]">
+                                            <Table.HeaderCell scope="col" className="w-[144px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col">{text.label.beskrivelse}</Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[154px]">
+                                            <Table.HeaderCell scope="col" className="w-[252px]">
+                                                {text.label.beskrivelse}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                                {text.label.kilde}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" align="right" className="w-[154px]">
                                                 {text.label.beløp}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col"></Table.HeaderCell>
-                                            <Table.HeaderCell scope="col"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
@@ -126,16 +130,13 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                 key={item.ident + index}
                                                 content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
-                                                className="h-[41px] align-baseline"
+                                                className="align-top"
                                             >
-                                                <Table.DataCell className="w-[84px]" align="center">
-                                                    <FormControlledCheckbox
-                                                        className="w-full flex justify-center"
-                                                        name={`${fieldName}.${index}.taMed`}
-                                                        onChange={(value) =>
-                                                            handleOnSelect(value.target.checked, index)
-                                                        }
-                                                        legend=""
+                                                <Table.DataCell>
+                                                    <TaMed
+                                                        fieldName={fieldName}
+                                                        index={index}
+                                                        handleOnSelect={handleOnSelect}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
@@ -168,6 +169,9 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
+                                                    <KildeIcon kilde={item.kilde} />
+                                                </Table.DataCell>
+                                                <Table.DataCell align="right">
                                                     <Totalt
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
