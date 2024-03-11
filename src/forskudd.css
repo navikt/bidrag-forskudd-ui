@@ -7,6 +7,12 @@
 .navds-checkbox__icon {
     max-height: 0.5rem;
 }
-.navds-date__field-input {
-    width: 144px;
+.navds-form-field--small .navds-date__field-input {
+    width: 120px;
+}
+.navds-form-field--small .navds-date__field-input::placeholder {
+    font-size: var(--a-font-size-small);
+}
+.navds-table--small .navds-table__expanded-row-content {
+    padding: var(--a-spacing-2) 92px;
 }

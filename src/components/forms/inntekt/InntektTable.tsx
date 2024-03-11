@@ -1,4 +1,4 @@
-import { FloppydiskIcon, PencilIcon } from "@navikt/aksel-icons";
+import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { FieldError, FieldErrorsImpl, Merge, useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -15,9 +15,40 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+
+export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
+    return (
+        <div className="h-8 w-full flex items-center justify-center">
+            {kilde === Kilde.OFFENTLIG ? (
+                <Buldings2Icon title="a11y-title" fontSize="1.5rem" />
+            ) : (
+                <PersonIcon title="a11y-title" fontSize="1.5rem" />
+            )}
+        </div>
+    );
+};
+
+export const TaMed = ({
+    fieldName,
+    handleOnSelect,
+    index,
+}: {
+    fieldName: string;
+    handleOnSelect: (checked: boolean, index: number) => void;
+    index: number;
+}) => (
+    <div className="h-8 w-full flex items-center justify-center">
+        <FormControlledCheckbox
+            name={`${fieldName}.${index}.taMed`}
+            onChange={(value) => handleOnSelect(value.target.checked, index)}
+            legend=""
+        />
+    </div>
+);
 
 export const Totalt = ({
     item,
@@ -30,12 +61,10 @@ export const Totalt = ({
 }) => (
     <>
         {erRedigerbart ? (
-            <div className="w-[120px]">
-                <FormControlledTextField name={`${field}.beløp`} label="Totalt" type="number" min="1" hideLabel />
-            </div>
+            <FormControlledTextField name={`${field}.beløp`} label="Totalt" type="number" min="1" hideLabel />
         ) : (
-            <div className="flex items-center gap-x-4">
-                <BodyShort className="min-w-[80px] flex justify-end">{item.beløp}</BodyShort>
+            <div className="h-8 flex items-center justify-end">
+                <BodyShort>{item.beløp}</BodyShort>
             </div>
         )}
     </>
@@ -43,31 +72,29 @@ export const Totalt = ({
 
 export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
     const { lesemodus } = useForskudd();
-    const emptyButton = () => <div className="min-w-[40px]"></div>;
-    if (lesemodus) return emptyButton();
 
-    if (erMed && editableRow !== index) {
-        return (
-            <Button
-                type="button"
-                onClick={() => onEditRow(index)}
-                icon={<PencilIcon aria-hidden />}
-                variant="tertiary"
-                size="small"
-            />
-        );
-    } else if (editableRow === index) {
-        return (
-            <Button
-                type="button"
-                onClick={() => onSaveRow(index)}
-                icon={<FloppydiskIcon aria-hidden />}
-                variant="tertiary"
-                size="small"
-            />
-        );
-    }
-    return emptyButton();
+    return (
+        <div className="h-8 flex items-center justify-center">
+            {!lesemodus && erMed && editableRow !== index && (
+                <Button
+                    type="button"
+                    onClick={() => onEditRow(index)}
+                    icon={<PencilIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            )}
+            {!lesemodus && editableRow === index && (
+                <Button
+                    type="button"
+                    onClick={() => onSaveRow(index)}
+                    icon={<FloppydiskIcon aria-hidden />}
+                    variant="tertiary"
+                    size="small"
+                />
+            )}
+        </div>
+    );
 };
 
 export const Periode = ({
@@ -124,7 +151,9 @@ export const Periode = ({
             hideLabel
         />
     ) : (
-        <BodyShort>{item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+        <div className="h-8 flex items-center">
+            <BodyShort>{item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+        </div>
     );
 };
 
@@ -161,35 +190,37 @@ export const InntektTabel = ({
     const handleOnSelect = (value: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
-        let updatedPeriod: OppdaterePeriodeInntekt | OppdatereManuellInntekt;
-        if (erOffentlig) {
-            updatedPeriod = {
-                id: periode.id,
-                taMedIBeregning: value,
-                angittPeriode: {
-                    fom: periode.datoFom,
-                    til: periode.datoTom,
-                },
-            };
-        } else {
-            updatedPeriod = {
-                id: periode.id,
-                taMed: value,
-                type: periode.rapporteringstype as Inntektsrapportering,
-                beløp: periode.beløp,
-                datoFom: periode.datoFom,
-                datoTom: periode.datoTom,
-                ident: periode.ident,
-            };
-        }
 
         if (!value && !erOffentlig) {
             handleDelete(index);
         } else {
             if (erOffentlig) {
-                updatedAndSave({ oppdatereInntektsperioder: [updatedPeriod as OppdaterePeriodeInntekt] });
+                updatedAndSave({
+                    oppdatereInntektsperioder: [
+                        {
+                            id: periode.id,
+                            taMedIBeregning: value,
+                            angittPeriode: {
+                                fom: periode.datoFom,
+                                til: periode.datoTom,
+                            },
+                        } as OppdaterePeriodeInntekt,
+                    ],
+                });
             } else {
-                updatedAndSave({ oppdatereManuelleInntekter: [updatedPeriod as OppdatereManuellInntekt] });
+                updatedAndSave({
+                    oppdatereManuelleInntekter: [
+                        {
+                            id: periode.id,
+                            taMed: value,
+                            type: periode.rapporteringstype as Inntektsrapportering,
+                            beløp: periode.beløp,
+                            datoFom: periode.datoFom,
+                            datoTom: periode.datoTom,
+                            ident: periode.ident,
+                        } as OppdatereManuellInntekt,
+                    ],
+                });
             }
         }
         unsetEditedRow(index);
@@ -248,23 +279,11 @@ export const InntektTabel = ({
                     datoFom: periode.datoFom,
                     datoTom: periode.datoTom,
                     ident: periode.ident,
+                    gjelderBarn: periode.gjelderBarn,
                 };
                 updatedAndSave({ oppdatereManuelleInntekter: [updatedPeriod] });
             }
             unsetEditedRow(index);
-        }
-    };
-    const validateFomOgTom = (index: number) => {
-        const periode = getValues(`${fieldName}.${index}`);
-        const fomOgTomInvalid = periode.datoTom !== null && isAfterDate(periode?.datoFom, periode.datoTom);
-
-        if (fomOgTomInvalid) {
-            setError(`${fieldName}.${index}.datoFom`, {
-                type: "notValid",
-                message: text.error.tomDatoKanIkkeVæreFørFomDato,
-            });
-        } else {
-            clearErrors(`${fieldName}.${index}.datoFom`);
         }
     };
     const checkIfAnotherRowIsEdited = (index?: number) => {
@@ -299,7 +318,7 @@ export const InntektTabel = ({
                     {fieldErrors.types?.periodGaps && <BodyShort>{fieldErrors.types.periodGaps}</BodyShort>}
                     {fieldErrors.types?.overlappingPerioder && (
                         <>
-                            <BodyShort>Du har overlappende perioder:</BodyShort>
+                            <BodyShort>{text.alert.overlappendePerioder}:</BodyShort>
                             {JSON.parse(fieldErrors.types.overlappingPerioder as string).map((perioder) => (
                                 <BodyShort key={perioder}>
                                     <span className="capitalize">{perioder[0]}</span> og{" "}
@@ -314,7 +333,6 @@ export const InntektTabel = ({
                 controlledFields,
                 editableRow,
                 onEditRow,
-                validateFomOgTom,
                 onSaveRow,
                 addPeriod,
                 handleOnSelect,

@@ -4,17 +4,15 @@ import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
-import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { EditOrSaveButton, InntektTabel, Periode, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 const Beskrivelse = ({
     item,
@@ -40,7 +38,7 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="min-w-[215px] capitalize">
+        <BodyShort className="capitalize leading-8">
             {hentVisningsnavn(item.inntektstyper[0], getYearFromDate(item.datoFom))}
         </BodyShort>
     );
@@ -57,7 +55,7 @@ export const Barnetillegg = () => {
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <Heading level="3" size="medium">
-                Barnetillegg
+                {text.title.barnetillegg}
             </Heading>
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
@@ -94,44 +92,44 @@ export const Barnetillegg = () => {
                             <>
                                 {controlledFields.length > 0 && (
                                     <div className="overflow-x-auto whitespace-nowrap">
-                                        <Table size="small">
+                                        <Table size="small" className="table-fixed">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
-                                                    <Table.HeaderCell scope="col" className="w-[84px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[84px]">
                                                         {text.label.taMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[145px]">
+                                                    <Table.HeaderCell scope="col" className="w-[144px]">
                                                         {text.label.fraOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[145px]">
+                                                    <Table.HeaderCell scope="col" className="w-[144px]">
                                                         {text.label.tilOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">{text.label.kilde}</Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col">{text.label.type}</Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[154px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                                        {text.label.kilde}
+                                                    </Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col" className="w-[252px]">
+                                                        {text.label.type}
+                                                    </Table.HeaderCell>
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
                                                         {text.label.beløpMnd}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[154px]">
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
                                                         {text.label.beløp12Mnd}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col"></Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col"></Table.HeaderCell>
+                                                    <Table.HeaderCell
+                                                        scope="col"
+                                                        className="w-[56px]"
+                                                    ></Table.HeaderCell>
                                                 </Table.Row>
                                             </Table.Header>
                                             <Table.Body>
                                                 {controlledFields.map((item, index) => (
-                                                    <Table.Row
-                                                        key={item.ident + index}
-                                                        className="h-[41px] align-baseline"
-                                                    >
-                                                        <Table.DataCell className="w-[84px]" align="center">
-                                                            <FormControlledCheckbox
-                                                                className="w-full flex justify-center"
-                                                                name={`barnetillegg.${barn.ident}.${index}.taMed`}
-                                                                onChange={(value) =>
-                                                                    handleOnSelect(value.target.checked, index)
-                                                                }
-                                                                legend=""
+                                                    <Table.Row key={item.ident + index} className="align-top">
+                                                        <Table.DataCell>
+                                                            <TaMed
+                                                                fieldName={`barnetillegg.${barn.ident}`}
+                                                                index={index}
+                                                                handleOnSelect={handleOnSelect}
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
@@ -155,9 +153,7 @@ export const Barnetillegg = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <BodyShort className="min-w-[215px] capitalize">
-                                                                {KildeTexts[item.kilde]}
-                                                            </BodyShort>
+                                                            <KildeIcon kilde={item.kilde} />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Beskrivelse
@@ -180,9 +176,9 @@ export const Barnetillegg = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <BodyShort className="min-w-[80px]">
-                                                                {item.beløp * 12}
-                                                            </BodyShort>
+                                                            <div className="h-8 flex items-center justify-end">
+                                                                <BodyShort>{item.beløp * 12}</BodyShort>
+                                                            </div>
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <EditOrSaveButton

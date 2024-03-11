@@ -40,7 +40,7 @@ export const FormControlledSelectField = ({
         <Select
             label={label}
             readOnly={lesemodus}
-            className={`w-52 ${className}`}
+            className={className}
             size="small"
             value={field.value}
             onChange={(e) => onChange(e)}
