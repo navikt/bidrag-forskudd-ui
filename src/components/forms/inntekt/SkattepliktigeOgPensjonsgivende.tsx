@@ -1,5 +1,5 @@
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -10,6 +10,7 @@ import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
@@ -195,12 +196,8 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                 </Table>
                             </div>
                         )}
-                        <Button
-                            variant="tertiary"
-                            type="button"
-                            size="small"
-                            className="w-fit"
-                            onClick={() =>
+                        <LeggTilPeriodeButton
+                            addPeriode={() =>
                                 addPeriod({
                                     ident,
                                     datoFom: null,
@@ -213,9 +210,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                     inntektstyper: [],
                                 })
                             }
-                        >
-                            {text.label.leggTilPeriode}
-                        </Button>
+                        />
                     </>
                 )}
             </InntektTabel>
