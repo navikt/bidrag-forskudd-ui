@@ -300,6 +300,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
         GrunnlagRequestType.SKATTEGRUNNLAG,
         GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
         GrunnlagRequestType.BARNETILLEGG,
+        GrunnlagRequestType.KONTANTSTOTTE,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
         GrunnlagRequestType.ARBEIDSFORHOLD,

@@ -8,6 +8,7 @@ export default function useFeatureToogle() {
     const enableInntektSkjermbilde = useFlag("behandling.skjermbilde.inntekter");
     const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
+    const enableAdmin = useFlag("behandling.admin");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
         queryKey: ["user"],
@@ -37,5 +38,6 @@ export default function useFeatureToogle() {
         isFatteVedtakEnabled: enableFatteVedtak,
         isInntektSkjermbildeEnabled: enableInntektSkjermbilde,
         isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde,
+        isAdminEnabled: enableAdmin,
     };
 }
