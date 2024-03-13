@@ -65,10 +65,32 @@ const Vedtak = () => {
                 </>
             )}
             {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
+            <AdminButtons />
         </div>
     );
 };
 
+function AdminButtons() {
+    const { isAdminEnabled } = useFeatureToogle();
+    const { behandlingId } = useForskudd();
+    if (!isAdminEnabled) return null;
+
+    return (
+        <div className="border-t border-solid">
+            <Button
+                variant="tertiary-neutral"
+                size="small"
+                onClick={() =>
+                    window.open(
+                        `${window.location.origin}/admin/vedtak/explorer/?erBehandlingId=true&id=${behandlingId}&graftype=flowchart`
+                    )
+                }
+            >
+                Vis vedtaksgraf
+            </Button>
+        </div>
+    );
+}
 class MåBekrefteOpplysningerStemmerError extends Error {
     constructor() {
         super("Bekreft at opplysningene stemmer");

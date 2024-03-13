@@ -18,12 +18,7 @@ import {
     SivilstandBeregnetStatusEnum,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
-import {
-    ArbeidsforholdGrunnlagDto,
-    GrunnlagRequestType,
-    HentGrunnlagDto,
-    HentGrunnlagRequestDto,
-} from "../api/BidragGrunnlagApi";
+import { GrunnlagRequestType, HentGrunnlagDto, HentGrunnlagRequestDto } from "../api/BidragGrunnlagApi";
 import { PersonDto } from "../api/PersonApi";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
 import { useForskudd } from "../context/ForskuddContext";
@@ -72,14 +67,14 @@ export const QueryKeys = {
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandlingV2();
     const opplysninger = behandling.aktiveGrunnlagsdata?.find(
-        (opplysning) => opplysning.grunnlagsdatatype == opplysningerType
+        (opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType
     );
     return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype == opplysningerType)
+    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
         ?.innhentet;
 };
 
@@ -300,6 +295,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
         GrunnlagRequestType.SKATTEGRUNNLAG,
         GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
         GrunnlagRequestType.BARNETILLEGG,
+        GrunnlagRequestType.KONTANTSTOTTE,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
         GrunnlagRequestType.ARBEIDSFORHOLD,
@@ -355,11 +351,6 @@ export const useGrunnlag = (): HentGrunnlagDto | null => {
         staleTime: Infinity,
     });
     return grunnlagspakke;
-};
-
-export const useHentArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
-    const grunnlag = useGrunnlag();
-    return grunnlag?.arbeidsforholdListe ?? [];
 };
 
 export const useNotat = (behandlingId: number) => {

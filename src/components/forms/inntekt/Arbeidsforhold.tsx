@@ -5,7 +5,7 @@ import React from "react";
 import { OpplysningerType } from "../../../api/BidragBehandlingApiV1";
 import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import text from "../../../constants/texts";
-import { useGetOpplysninger, useHentArbeidsforhold } from "../../../hooks/useApiData";
+import { useGetOpplysninger } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
@@ -21,11 +21,11 @@ type ArbeidsforholdProps = {
     ident: string;
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
-    const arbeidsforholdListeGrunnlag = useHentArbeidsforhold();
     const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
-    const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeGrunnlag;
 
-    const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);
+    const arbeidsforholdTableData = arbeidsforholdOpplysninger
+        .filter((af) => af.partPersonId == ident)
+        .map(mapToTabledata);
     return (
         <div className="grid gap-y-2">
             <div className="inline-flex items-center gap-x-4">
