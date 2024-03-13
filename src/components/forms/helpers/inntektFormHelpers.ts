@@ -1,4 +1,4 @@
-import { addDays } from "@navikt/bidrag-ui-common";
+import { addDays, toISODateString } from "@navikt/bidrag-ui-common";
 
 import {
     InntektDtoV2,
@@ -8,7 +8,7 @@ import {
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isAfterDate, isBeforeDate } from "../../../utils/date-utils";
+import { dateOrNull, isAfterDate, isBeforeDate } from "../../../utils/date-utils";
 import { periodsAreOverlapping } from "./helpers";
 
 const transformInntekt = (inntekt) => ({
@@ -222,8 +222,8 @@ export const checkErrorsInPeriods = (
 
     if (firstTaMedPeriod && isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)) {
         gapsInPeriods.push({
-            datoFom: DateToDDMMYYYYString(virkningstidspunkt),
-            datoTom: DateToDDMMYYYYString(dateOrNull(firstTaMedPeriod.datoFom)),
+            datoFom: toISODateString(virkningstidspunkt),
+            datoTom: firstTaMedPeriod.datoFom,
         });
     }
 
@@ -239,10 +239,13 @@ export const checkErrorsInPeriods = (
                     overlappingPeriodIndexes.push([i, j]);
                 }
 
-                if (isAfterDate(addDays(dateOrNull(perioder[j].datoFom), 1), perioder[i].datoTom)) {
+                if (
+                    perioder[i].datoTom &&
+                    isAfterDate(dateOrNull(perioder[j].datoFom), addDays(dateOrNull(perioder[i].datoTom), 1))
+                ) {
                     gapsInPeriods.push({
-                        datoFom: DateToDDMMYYYYString(dateOrNull(perioder[i].datoTom)),
-                        datoTom: DateToDDMMYYYYString(dateOrNull(perioder[j].datoFom)),
+                        datoFom: perioder[i].datoTom,
+                        datoTom: perioder[j].datoFom,
                     });
                 }
             }
