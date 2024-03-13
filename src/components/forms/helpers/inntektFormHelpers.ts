@@ -1,4 +1,4 @@
-import { isValidDate } from "@navikt/bidrag-ui-common";
+import { addDays } from "@navikt/bidrag-ui-common";
 
 import {
     InntektDtoV2,
@@ -7,9 +7,9 @@ import {
     RolleDto,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
-import { perioderSomIkkeKanOverlape, perioderSomKanIkkeOverlapeKunMedHverandre } from "../../../constants/inntektene";
-import { InntektFormValues } from "../../../types/inntektFormValues";
-import { isAfterDate } from "../../../utils/date-utils";
+import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate, isBeforeDate } from "../../../utils/date-utils";
+import { periodsAreOverlapping } from "./helpers";
 
 const transformInntekt = (inntekt) => ({
     ...inntekt,
@@ -26,14 +26,21 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
     [rolle.ident]: mapFunction(rolle),
 });
-
+const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
+    if (a.taMed === b.taMed) {
+        return isAfterDate(a.datoFom, b.datoFom) ? 1 : -1;
+    }
+    if (a.taMed !== b.taMed) {
+        return a.taMed ? 1 : -1;
+    }
+};
 const mapInntekterToRolle =
     (inntekter: InntektDtoV2[], fieldToCheck: string) =>
     (rolle): InntektDtoV2[] =>
         inntekter
             ?.filter((inntekt) => inntekt[fieldToCheck] === rolle.ident)
             .map(transformInntekt)
-            .sort((a, b) => (isAfterDate(a.datoFom, b.datoFom) ? 1 : -1));
+            .sort(inntektSorting);
 
 export const getInntektPerioder = (
     roller: RolleDto[],
@@ -55,7 +62,7 @@ export const createInitialValues = (bmOgBarn: RolleDto[], inntekter: InntekterDt
         },
     };
 };
-const getListOfIncomesThatCanRunInParallelWithInntektType = (inntektType: string) => {
+const canRunInParallelWithInntektType = (inntektType: Inntektsrapportering | "") => {
     switch (inntektType) {
         case Inntektsrapportering.AINNTEKTBEREGNET3MND:
         case Inntektsrapportering.AINNTEKTBEREGNET12MND:
@@ -173,8 +180,6 @@ const getListOfIncomesThatCanRunInParallelWithInntektType = (inntektType: string
                 Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
                 Inntektsrapportering.LONNTREKK,
             ];
-        case Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET:
-            return Object.values(Inntektsrapportering);
         case Inntektsrapportering.LONNTREKK:
             return [
                 Inntektsrapportering.KAPITALINNTEKT,
@@ -198,96 +203,106 @@ const getListOfIncomesThatCanRunInParallelWithInntektType = (inntektType: string
                 Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
                 Inntektsrapportering.LONNTREKK,
             ];
+        default:
+            return Object.values(Inntektsrapportering).filter((value) => value !== inntektType);
     }
 };
-export const editPeriods = (periodsList: InntektDtoV2[], periodeIndex: number): InntektDtoV2[] => {
-    const editedPeriod = periodsList[periodeIndex];
-    const inntektType = editedPeriod.rapporteringstype;
-    const listOfIncomesThatCanRunInParallelWithEditedPeriode =
-        getListOfIncomesThatCanRunInParallelWithInntektType(inntektType);
 
-    const periodsThatCannotRunInParallel = periodsList
-        .toSpliced(periodeIndex, 1)
-        .filter((period) => !listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.rapporteringstype));
-    let startIndex = periodsThatCannotRunInParallel.filter(
-        (period) => new Date(period.datoFom).getTime() < new Date(editedPeriod.datoFom).getTime()
-    ).length;
-    const postPeriodIndex = editedPeriod.datoTom
-        ? periodsThatCannotRunInParallel.findIndex(
-              (period) =>
-                  period.datoTom === null || (period.datoTom && isAfterDate(period.datoTom, editedPeriod.datoTom))
-          )
-        : -1;
+export const checkErrorsInPeriods = (
+    virkningstidspunkt: Date,
+    perioder: InntektFormPeriode[]
+): {
+    overlappingPeriodIndexes: number[];
+    gapsInPeriods: { datoFom: string; datoTom: string }[];
+    overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
+} => {
+    const overlappingPeriodIndexes: number[][] = [];
+    const gapsInPeriods: { datoFom: string; datoTom: string }[] = [];
+    const firstTaMedPeriod = perioder.find((periode) => periode.taMed);
 
-    let deleteCount =
-        postPeriodIndex === -1 ? periodsThatCannotRunInParallel.length - startIndex : postPeriodIndex - startIndex;
-    const prevPeriodIndex = startIndex ? startIndex - 1 : 0;
-    const prevPeriod = startIndex ? periodsThatCannotRunInParallel[prevPeriodIndex] : undefined;
-    const postPeriod = postPeriodIndex !== -1 ? periodsThatCannotRunInParallel[postPeriodIndex] : undefined;
-    const existingPeriodCoversWholeEditedPeriod = prevPeriodIndex === postPeriodIndex;
-
-    if (periodeIndex && existingPeriodCoversWholeEditedPeriod) {
-        return periodsThatCannotRunInParallel;
+    if (firstTaMedPeriod && isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)) {
+        gapsInPeriods.push({
+            datoFom: DateToDDMMYYYYString(virkningstidspunkt),
+            datoTom: DateToDDMMYYYYString(dateOrNull(firstTaMedPeriod.datoFom)),
+        });
     }
-
-    if (prevPeriod) {
-        startIndex -= 1;
-        deleteCount += 1;
-        editedPeriod.datoFom = prevPeriod.datoFom;
-    }
-
-    if (postPeriod) {
-        deleteCount += 1;
-        editedPeriod.datoTom = postPeriod.datoTom;
-    }
-
-    const updatedPeriodsOfSameInntektType = periodsThatCannotRunInParallel.toSpliced(
-        startIndex,
-        deleteCount,
-        editedPeriod
-    );
-
-    return periodsList
-        .filter((period) => listOfIncomesThatCanRunInParallelWithEditedPeriode.includes(period.rapporteringstype))
-        .concat(updatedPeriodsOfSameInntektType)
-        .sort((a, b) => new Date(a.datoFom).getTime() - new Date(b.datoFom).getTime());
-};
-
-export const checkOverlappingPeriods = (perioder) => {
-    const overlappingPeriods = [];
 
     for (let i = 0; i < perioder.length; i++) {
         for (let j = i + 1; j < perioder.length; j++) {
-            if (
-                (perioder[i].tilDato === null || new Date(perioder[i].tilDato) >= new Date(perioder[j].fraDato)) &&
-                (perioder[j].tilDato === null || new Date(perioder[j].tilDato) >= new Date(perioder[i].fraDato))
-            ) {
-                overlappingPeriods.push([`${perioder[i].beskrivelse}`, `${perioder[j].beskrivelse}`]);
+            if (perioder[i].taMed && perioder[j].taMed) {
+                if (
+                    periodsAreOverlapping(perioder[i], perioder[j]) &&
+                    !canRunInParallelWithInntektType(perioder[i].rapporteringstype).includes(
+                        perioder[j].rapporteringstype as Inntektsrapportering
+                    )
+                ) {
+                    overlappingPeriodIndexes.push([i, j]);
+                }
+
+                if (isAfterDate(addDays(dateOrNull(perioder[j].datoFom), 1), perioder[i].datoTom)) {
+                    gapsInPeriods.push({
+                        datoFom: DateToDDMMYYYYString(dateOrNull(perioder[i].datoTom)),
+                        datoTom: DateToDDMMYYYYString(dateOrNull(perioder[j].datoFom)),
+                    });
+                }
             }
         }
     }
 
-    return overlappingPeriods;
+    return {
+        gapsInPeriods,
+        overlappingPeriodIndexes: [...new Set(overlappingPeriodIndexes.flat())],
+        overlappingPeriodsSummary: getSummaryOfOverlappingPeriods(overlappingPeriodIndexes, perioder),
+    };
 };
 
-export const getOverlappingInntektPerioder = (perioder) => {
-    const ytelsePerioder = perioder
-        .filter(
-            (periode) =>
-                periode.fraDato &&
-                isValidDate(periode.fraDato) &&
-                perioderSomIkkeKanOverlape.includes(periode.tekniskNavn)
-        )
-        .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
-    const overlappingPeriods = checkOverlappingPeriods(ytelsePerioder);
+export const getSummaryOfOverlappingPeriods = (
+    overlappingPeriodIndexes: number[][],
+    perioder: InntektFormPeriode[]
+): { datoFom: string; datoTom: string }[] => {
+    return Object.values(
+        overlappingPeriodIndexes.reduce((acc, indexPair) => {
+            const periodA = perioder[indexPair[0]];
+            const periodB = perioder[indexPair[1]];
+            const pairKey = `${periodA.rapporteringstype}-${periodB.rapporteringstype}`;
+            const existingOverlapingPeriodKey = Object.keys(acc).find(
+                (key) => key.includes(periodA.rapporteringstype) || key.includes(periodB.rapporteringstype)
+            );
+            const existingOverlapingPeriod = acc[existingOverlapingPeriodKey];
 
-    perioderSomKanIkkeOverlapeKunMedHverandre.forEach((tekniskNavn) => {
-        const filteredAndSortedPerioder = perioder
-            .filter((periode) => periode.fraDato && isValidDate(periode.fraDato) && periode.tekniskNavn === tekniskNavn)
-            .sort((a, b) => new Date(a.fraDato).getTime() - new Date(b.fraDato).getTime());
+            if (existingOverlapingPeriod) {
+                const currentPairFomAndTom = {
+                    datoFom: isBeforeDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
+                    datoTom:
+                        periodA.datoTom === null || (periodB.datoTom && isAfterDate(periodA.datoTom, periodB.datoTom))
+                            ? periodA.datoTom
+                            : periodB.datoTom,
+                };
+                const updatedObject = {
+                    ...acc,
+                    [`${existingOverlapingPeriodKey}-${pairKey}`]: {
+                        datoFom: isBeforeDate(currentPairFomAndTom.datoFom, existingOverlapingPeriod.datoFom)
+                            ? currentPairFomAndTom.datoFom
+                            : existingOverlapingPeriod.datoFom,
+                        datoTom:
+                            periodA.datoTom === null ||
+                            (periodB.datoTom &&
+                                isAfterDate(currentPairFomAndTom.datoTom, existingOverlapingPeriod.datoTom))
+                                ? currentPairFomAndTom.datoTom
+                                : existingOverlapingPeriod.datoTom,
+                    },
+                };
+                delete updatedObject[existingOverlapingPeriodKey];
+                return updatedObject;
+            }
 
-        overlappingPeriods.concat(checkOverlappingPeriods(filteredAndSortedPerioder));
-    });
-
-    return overlappingPeriods;
+            return {
+                ...acc,
+                [pairKey]: {
+                    datoFom: isBeforeDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
+                    datoTom: isAfterDate(periodA.datoTom, periodB.datoTom) ? periodA.datoTom : periodB.datoTom,
+                },
+            };
+        }, {})
+    );
 };

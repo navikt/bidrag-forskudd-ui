@@ -16,6 +16,5 @@ export const useOnSaveInntekt = () => {
                 sletteInntekter: [],
                 ...updatedValues,
             },
-            aktivereGrunnlag: [],
         });
 };
