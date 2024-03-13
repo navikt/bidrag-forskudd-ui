@@ -357,15 +357,18 @@ export const InntektTabel = ({
                                 )}
                         </BodyShort>
                     ))}
-                    {gapsInPeriods.map((gap) => (
-                        <BodyShort key={`${gap.datoFom}-${gap.datoTom}`} size="small">
-                            {removePlaceholder(
-                                text.error.hullIPerioder,
-                                DateToDDMMYYYYString(dateOrNull(gap.datoFom)),
-                                DateToDDMMYYYYString(dateOrNull(gap.datoTom))
-                            )}
-                        </BodyShort>
-                    ))}
+                    {gapsInPeriods.length > 0 && (
+                        <>
+                            <BodyShort size="small">{text.error.hullIPerioder}:</BodyShort>
+                            {gapsInPeriods.map((gap) => (
+                                <BodyShort key={`${gap.datoFom}-${gap.datoTom}`} size="small">
+                                    {DateToDDMMYYYYString(dateOrNull(gap.datoFom))} -{" "}
+                                    {DateToDDMMYYYYString(dateOrNull(gap.datoTom))}
+                                </BodyShort>
+                            ))}
+                            <BodyShort size="small">{text.error.hullIPerioderFiks}</BodyShort>
+                        </>
+                    )}
                 </Alert>
             )}
             {children({
