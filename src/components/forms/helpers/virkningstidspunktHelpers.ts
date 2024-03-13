@@ -1,6 +1,6 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
-import { BehandlingDto, TypeArsakstype } from "../../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, TypeArsakstype } from "../../../api/BidragBehandlingApiV1";
 import { deductMonths, firstDayOfMonth, isAfterDate } from "../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
@@ -8,7 +8,7 @@ export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
 };
 export const aarsakToVirkningstidspunktMapper = (
     aarsak: TypeArsakstype | string,
-    behandling: BehandlingDto,
+    behandling: BehandlingDtoV2,
     barnsFødselsdato?: string
 ) => {
     const soktFraDato = new Date(behandling.søktFomDato);

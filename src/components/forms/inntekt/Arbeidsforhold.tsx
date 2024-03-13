@@ -23,8 +23,6 @@ type ArbeidsforholdProps = {
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const arbeidsforholdListeGrunnlag = useHentArbeidsforhold();
     const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
-
-    console.log(arbeidsforholdListeGrunnlag, arbeidsforholdOpplysninger);
     const arbeidsforholdListe = arbeidsforholdOpplysninger ?? arbeidsforholdListeGrunnlag;
 
     const arbeidsforholdTableData = arbeidsforholdListe.filter((af) => af.partPersonId == ident).map(mapToTabledata);

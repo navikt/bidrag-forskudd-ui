@@ -1,11 +1,10 @@
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
@@ -13,9 +12,6 @@ import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } fro
 
 export const Kontantstøtte = () => {
     const { roller } = useGetBehandlingV2();
-    const {
-        formState: { errors },
-    } = useFormContext<InntektFormValues>();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
 
@@ -37,10 +33,7 @@ export const Kontantstøtte = () => {
                             <BodyShort size="small">{barn.ident}</BodyShort>
                         </div>
                     </div>
-                    <InntektTabel
-                        fieldName={`kontantstøtte.${barn.ident}` as const}
-                        fieldErrors={errors?.kontantstøtte?.[barn.ident]}
-                    >
+                    <InntektTabel fieldName={`kontantstøtte.${barn.ident}` as const}>
                         {({
                             controlledFields,
                             onSaveRow,

@@ -1,29 +1,24 @@
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 export const Småbarnstillegg = () => {
     const { roller } = useGetBehandlingV2();
-    const {
-        formState: { errors },
-    } = useFormContext<InntektFormValues>();
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
     const fieldName = "småbarnstillegg";
-    const fieldErrors = errors?.småbarnstillegg;
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <Heading level="3" size="medium">
                 {text.title.småbarnstillegg}
             </Heading>
-            <InntektTabel fieldName={fieldName} fieldErrors={fieldErrors}>
+            <InntektTabel fieldName={fieldName}>
                 {({
                     controlledFields,
                     onSaveRow,

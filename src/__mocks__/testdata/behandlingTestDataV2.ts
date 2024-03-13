@@ -48,6 +48,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         småbarnstillegg: [],
         kontantstøtte: [],
         utvidetBarnetrygd: [],
+        beregnetInntekter: [],
         notat: {
             kunINotat: "",
             medIVedtaket: "",

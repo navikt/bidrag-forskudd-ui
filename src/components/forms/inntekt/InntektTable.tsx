@@ -1,7 +1,7 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { Alert, BodyShort, Button } from "@navikt/ds-react";
-import React, { useState } from "react";
-import { FieldError, FieldErrorsImpl, Merge, useFieldArray, useFormContext, useWatch } from "react-hook-form";
+import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
+import React, { useEffect, useState } from "react";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
     Inntektsrapportering,
@@ -15,9 +15,11 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import { checkErrorsInPeriods } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -64,7 +66,7 @@ export const Totalt = ({
             <FormControlledTextField name={`${field}.beløp`} label="Totalt" type="number" min="1" hideLabel />
         ) : (
             <div className="h-8 flex items-center justify-end">
-                <BodyShort>{item.beløp}</BodyShort>
+                <BodyShort>{item.beløp.toLocaleString("nb-NO")}</BodyShort>
             </div>
         )}
     </>
@@ -148,6 +150,7 @@ export const Periode = ({
             fromDate={fom}
             toDate={tom}
             customValidation={validateFomOgTom}
+            lastDayOfMonthPicker={field === "datoTom"}
             hideLabel
         />
     ) : (
@@ -159,7 +162,6 @@ export const Periode = ({
 
 export const InntektTabel = ({
     fieldName,
-    fieldErrors,
     children,
 }: {
     fieldName:
@@ -168,11 +170,24 @@ export const InntektTabel = ({
         | `årsinntekter.${string}`
         | `barnetillegg.${string}`
         | `kontantstøtte.${string}`;
-    fieldErrors: Merge<FieldError, FieldErrorsImpl<InntektFormPeriode>>;
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen } = useForskudd();
+    const {
+        søktFomDato,
+        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
+    } = useGetBehandlingV2();
+    const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
     const [editableRow, setEditableRow] = useState(undefined);
+    const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods }, setTableErros] = useState<{
+        overlappingPeriodIndexes: number[];
+        gapsInPeriods: { datoFom: string; datoTom: string }[];
+        overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
+    }>({
+        overlappingPeriodsSummary: [],
+        gapsInPeriods: [],
+        overlappingPeriodIndexes: [],
+    });
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
@@ -180,6 +195,16 @@ export const InntektTabel = ({
         name: fieldName,
     });
     const watchFieldArray = useWatch({ control, name: fieldName });
+
+    useEffect(() => {
+        validatePeriods();
+    }, []);
+
+    const validatePeriods = () => {
+        const perioder = getValues(fieldName);
+        const tableErros = checkErrorsInPeriods(datoFom, perioder);
+        setTableErros(tableErros);
+    };
 
     const unsetEditedRow = (index) => {
         if (editableRow === index) {
@@ -248,6 +273,7 @@ export const InntektTabel = ({
         sletteInntekter?: number[];
     }) => {
         saveInntekt(updatedValues);
+        validatePeriods();
     };
     const onSaveRow = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -313,25 +339,39 @@ export const InntektTabel = ({
 
     return (
         <>
-            {fieldErrors?.types && (
+            {[overlappingPeriodsSummary, gapsInPeriods].some((errorsList) => errorsList.length > 0) && (
                 <Alert variant="warning" className="mb-4">
-                    {fieldErrors.types?.periodGaps && <BodyShort>{fieldErrors.types.periodGaps}</BodyShort>}
-                    {fieldErrors.types?.overlappingPerioder && (
-                        <>
-                            <BodyShort>{text.alert.overlappendePerioder}:</BodyShort>
-                            {JSON.parse(fieldErrors.types.overlappingPerioder as string).map((perioder) => (
-                                <BodyShort key={perioder}>
-                                    <span className="capitalize">{perioder[0]}</span> og{" "}
-                                    <span className="capitalize">{perioder[1]}</span>
-                                </BodyShort>
-                            ))}
-                        </>
-                    )}
+                    <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
+                    {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }) => (
+                        <BodyShort key={`${period.datoFom}-${period.datoTom}`} size="small">
+                            {period.datoTom &&
+                                removePlaceholder(
+                                    text.alert.overlappendePerioder,
+                                    DateToDDMMYYYYString(dateOrNull(period.datoFom)),
+                                    DateToDDMMYYYYString(dateOrNull(period.datoTom))
+                                )}
+                            {!period.datoTom &&
+                                removePlaceholder(
+                                    text.alert.overlappendeLøpendePerioder,
+                                    DateToDDMMYYYYString(dateOrNull(period.datoFom))
+                                )}
+                        </BodyShort>
+                    ))}
+                    {gapsInPeriods.map((gap) => (
+                        <BodyShort key={`${gap.datoFom}-${gap.datoTom}`} size="small">
+                            {removePlaceholder(
+                                text.error.hullIPerioder,
+                                DateToDDMMYYYYString(dateOrNull(gap.datoFom)),
+                                DateToDDMMYYYYString(dateOrNull(gap.datoTom))
+                            )}
+                        </BodyShort>
+                    ))}
                 </Alert>
             )}
             {children({
                 controlledFields,
                 editableRow,
+                overlappingPeriodIndexes,
                 onEditRow,
                 onSaveRow,
                 addPeriod,

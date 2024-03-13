@@ -34,8 +34,8 @@ export default function useFeatureToogle() {
         );
     }, [enableVedtakSkjermbilde, enableInntektSkjermbilde, enableFatteVedtak]);
     return {
-        isFatteVedtakEnabled: enableFatteVedtak,
-        isInntektSkjermbildeEnabled: enableInntektSkjermbilde,
-        isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde,
+        isFatteVedtakEnabled: true,
+        isInntektSkjermbildeEnabled: true, // enableInntektSkjermbilde,
+        isVedtakSkjermbildeEnabled: true,
     };
 }

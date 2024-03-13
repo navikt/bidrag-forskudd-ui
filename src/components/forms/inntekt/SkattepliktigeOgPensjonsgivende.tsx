@@ -1,13 +1,12 @@
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Table } from "@navikt/ds-react";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import AinntektLink from "./AinntektLink";
@@ -51,8 +50,8 @@ const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
     return (
         <>
             <BodyShort size="small">
-                Periode: {item.datoFom && dateToDDMMYYYYString(new Date(item.datoFom))} -{" "}
-                {item.datoTom && dateToDDMMYYYYString(new Date(item.datoTom))}
+                Periode: {item.opprinneligFom && dateToDDMMYYYYString(new Date(item.opprinneligFom))} -{" "}
+                {item.opprinneligTom && dateToDDMMYYYYString(new Date(item.opprinneligTom))}
             </BodyShort>
             {item.inntektsposter.map((inntektpost) => (
                 <BodyShort size="small" key={inntektpost.kode}>
@@ -62,14 +61,9 @@ const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
         </>
     );
 };
-export const SkattepliktigeOgPensjonsgivende = () => {
-    const { inntekter, roller } = useGetBehandlingV2();
-    const {
-        formState: { errors },
-    } = useFormContext<InntektFormValues>();
-    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
+    const { inntekter } = useGetBehandlingV2();
     const fieldName = `årsinntekter.${ident}` as const;
-    const fieldErrors = errors?.årsinntekter?.[ident];
     const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
 
     return (
@@ -80,7 +74,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
-            <InntektTabel fieldName={fieldName} fieldErrors={fieldErrors}>
+            <InntektTabel fieldName={fieldName}>
                 {({
                     controlledFields,
                     onSaveRow,

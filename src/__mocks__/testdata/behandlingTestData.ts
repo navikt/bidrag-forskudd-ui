@@ -1,6 +1,6 @@
-import { BehandlingDto, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
 
-export const behandlingMockApiData: BehandlingDto = {
+export const behandlingMockApiData: BehandlingDtoV2 = {
     id: 1,
     søknadsid: 1234,
     erVedtakFattet: false,
@@ -42,11 +42,13 @@ export const behandlingMockApiData: BehandlingDto = {
         },
     },
     inntekter: {
-        inntekter: [],
+        månedsinntekter: [],
+        årsinntekter: [],
         barnetillegg: [],
         småbarnstillegg: [],
         kontantstøtte: [],
-        utvidetbarnetrygd: [],
+        utvidetBarnetrygd: [],
+        beregnetInntekter: [],
         notat: {
             kunINotat: "",
             medIVedtaket: "",
@@ -60,5 +62,6 @@ export const behandlingMockApiData: BehandlingDto = {
             medIVedtaket: "",
         },
     },
-    opplysninger: [],
+    aktiveGrunnlagsdata: [],
+    ikkeAktiverteEndringerIGrunnlagsdata: [],
 };

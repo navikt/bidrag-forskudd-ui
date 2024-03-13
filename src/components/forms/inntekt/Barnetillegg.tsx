@@ -1,12 +1,11 @@
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
@@ -47,9 +46,6 @@ const Beskrivelse = ({
 export const Barnetillegg = () => {
     const { roller } = useGetBehandlingV2();
     const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const {
-        formState: { errors },
-    } = useFormContext<InntektFormValues>();
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
 
     return (
@@ -70,10 +66,7 @@ export const Barnetillegg = () => {
                             <BodyShort size="small">{barn.ident}</BodyShort>
                         </div>
                     </div>
-                    <InntektTabel
-                        fieldName={`barnetillegg.${barn.ident}` as const}
-                        fieldErrors={errors?.barnetillegg?.[barn.ident]}
-                    >
+                    <InntektTabel fieldName={`barnetillegg.${barn.ident}` as const}>
                         {({
                             controlledFields,
                             onSaveRow,
@@ -177,7 +170,9 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <div className="h-8 flex items-center justify-end">
-                                                                <BodyShort>{item.beløp * 12}</BodyShort>
+                                                                <BodyShort>
+                                                                    {(item.beløp * 12).toLocaleString("nb-NO")}
+                                                                </BodyShort>
                                                             </div>
                                                         </Table.DataCell>
                                                         <Table.DataCell>

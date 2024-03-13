@@ -22,6 +22,7 @@ import { createInitialValues } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
+import { BeregnetInntekter } from "./BeregnetInntekter";
 import { InntektChart } from "./InntektChart";
 import { Kontantstøtte } from "./Kontantstoette";
 import { SkattepliktigeOgPensjonsgivende } from "./SkattepliktigeOgPensjonsgivende";
@@ -90,13 +91,14 @@ const Main = () => {
                             <div className="mt-12">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
-                            <SkattepliktigeOgPensjonsgivende />
+                            <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>
                                     <Barnetillegg />
                                     <UtvidetBarnetrygd />
                                     <Småbarnstillegg />
                                     <Kontantstøtte />
+                                    <BeregnetInntekter />
                                 </>
                             )}
                         </Tabs.Panel>
