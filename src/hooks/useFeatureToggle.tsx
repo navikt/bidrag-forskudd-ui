@@ -21,11 +21,10 @@ export default function useFeatureToogle() {
         client.updateContext({
             userId,
         });
-        console.log(client.getAllToggles(), client.getContext());
     }, [userId]);
 
     useEffect(() => {
-        console.log(
+        console.debug(
             "enableVedtakSkjermbilde",
             enableVedtakSkjermbilde,
             "enableInntektSkjermbilde",
