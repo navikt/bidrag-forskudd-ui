@@ -35,7 +35,7 @@ export default function useFeatureToogle() {
     }, [enableVedtakSkjermbilde, enableInntektSkjermbilde, enableFatteVedtak]);
     return {
         isFatteVedtakEnabled: enableFatteVedtak,
-        isInntektSkjermbildeEnabled: true, //enableInntektSkjermbilde,
+        isInntektSkjermbildeEnabled: enableInntektSkjermbilde,
         isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde,
         isAdminEnabled: enableAdmin,
     };
