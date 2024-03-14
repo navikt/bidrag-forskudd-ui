@@ -215,10 +215,12 @@ export const checkErrorsInPeriods = (
     overlappingPeriodIndexes: number[];
     gapsInPeriods: { datoFom: string; datoTom: string }[];
     overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
+    runningPeriod: boolean;
 } => {
     const overlappingPeriodIndexes: number[][] = [];
     const gapsInPeriods: { datoFom: string; datoTom: string }[] = [];
     const firstTaMedPeriod = perioder.find((periode) => periode.taMed);
+    let runningPeriod = false;
 
     if (firstTaMedPeriod && isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)) {
         gapsInPeriods.push({
@@ -228,6 +230,10 @@ export const checkErrorsInPeriods = (
     }
 
     for (let i = 0; i < perioder.length; i++) {
+        if (perioder[i].taMed && !runningPeriod && !perioder[i].datoTom) {
+            runningPeriod = true;
+        }
+
         for (let j = i + 1; j < perioder.length; j++) {
             if (perioder[i].taMed && perioder[j].taMed) {
                 if (
@@ -254,6 +260,7 @@ export const checkErrorsInPeriods = (
 
     return {
         gapsInPeriods,
+        runningPeriod,
         overlappingPeriodIndexes: [...new Set(overlappingPeriodIndexes.flat())],
         overlappingPeriodsSummary: getSummaryOfOverlappingPeriods(overlappingPeriodIndexes, perioder),
     };
@@ -275,22 +282,22 @@ export const getSummaryOfOverlappingPeriods = (
 
             if (existingOverlapingPeriod) {
                 const currentPairFomAndTom = {
-                    datoFom: isBeforeDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
+                    datoFom: isAfterDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
                     datoTom:
-                        periodA.datoTom === null || (periodB.datoTom && isAfterDate(periodA.datoTom, periodB.datoTom))
+                        periodA.datoTom === null || (periodB.datoTom && isBeforeDate(periodA.datoTom, periodB.datoTom))
                             ? periodA.datoTom
                             : periodB.datoTom,
                 };
                 const updatedObject = {
                     ...acc,
                     [`${existingOverlapingPeriodKey}-${pairKey}`]: {
-                        datoFom: isBeforeDate(currentPairFomAndTom.datoFom, existingOverlapingPeriod.datoFom)
+                        datoFom: isAfterDate(currentPairFomAndTom.datoFom, existingOverlapingPeriod.datoFom)
                             ? currentPairFomAndTom.datoFom
                             : existingOverlapingPeriod.datoFom,
                         datoTom:
                             periodA.datoTom === null ||
                             (periodB.datoTom &&
-                                isAfterDate(currentPairFomAndTom.datoTom, existingOverlapingPeriod.datoTom))
+                                isBeforeDate(currentPairFomAndTom.datoTom, existingOverlapingPeriod.datoTom))
                                 ? currentPairFomAndTom.datoTom
                                 : existingOverlapingPeriod.datoTom,
                     },
@@ -302,8 +309,8 @@ export const getSummaryOfOverlappingPeriods = (
             return {
                 ...acc,
                 [pairKey]: {
-                    datoFom: isBeforeDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
-                    datoTom: isAfterDate(periodA.datoTom, periodB.datoTom) ? periodA.datoTom : periodB.datoTom,
+                    datoFom: isAfterDate(periodA.datoFom, periodB.datoFom) ? periodA.datoFom : periodB.datoFom,
+                    datoTom: isBeforeDate(periodA.datoTom, periodB.datoTom) ? periodA.datoTom : periodB.datoTom,
                 },
             };
         }, {})

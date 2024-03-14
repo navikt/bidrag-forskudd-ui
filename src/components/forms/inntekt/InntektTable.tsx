@@ -179,15 +179,18 @@ export const InntektTabel = ({
     } = useGetBehandlingV2();
     const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
     const [editableRow, setEditableRow] = useState(undefined);
-    const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods }, setTableErros] = useState<{
-        overlappingPeriodIndexes: number[];
-        gapsInPeriods: { datoFom: string; datoTom: string }[];
-        overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
-    }>({
-        overlappingPeriodsSummary: [],
-        gapsInPeriods: [],
-        overlappingPeriodIndexes: [],
-    });
+    const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods, runningPeriod }, setTableErros] =
+        useState<{
+            overlappingPeriodIndexes: number[];
+            gapsInPeriods: { datoFom: string; datoTom: string }[];
+            overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
+            runningPeriod: boolean;
+        }>({
+            overlappingPeriodsSummary: [],
+            gapsInPeriods: [],
+            overlappingPeriodIndexes: [],
+            runningPeriod: true,
+        });
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
@@ -342,21 +345,26 @@ export const InntektTabel = ({
             {[overlappingPeriodsSummary, gapsInPeriods].some((errorsList) => errorsList.length > 0) && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
-                    {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }) => (
-                        <BodyShort key={`${period.datoFom}-${period.datoTom}`} size="small">
-                            {period.datoTom &&
-                                removePlaceholder(
-                                    text.alert.overlappendePerioder,
-                                    DateToDDMMYYYYString(dateOrNull(period.datoFom)),
-                                    DateToDDMMYYYYString(dateOrNull(period.datoTom))
-                                )}
-                            {!period.datoTom &&
-                                removePlaceholder(
-                                    text.alert.overlappendeLøpendePerioder,
-                                    DateToDDMMYYYYString(dateOrNull(period.datoFom))
-                                )}
-                        </BodyShort>
-                    ))}
+                    {overlappingPeriodsSummary.length > 0 && (
+                        <>
+                            {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }) => (
+                                <BodyShort key={`${period.datoFom}-${period.datoTom}`} size="small">
+                                    {period.datoTom &&
+                                        removePlaceholder(
+                                            text.alert.overlappendePerioder,
+                                            DateToDDMMYYYYString(dateOrNull(period.datoFom)),
+                                            DateToDDMMYYYYString(dateOrNull(period.datoTom))
+                                        )}
+                                    {!period.datoTom &&
+                                        removePlaceholder(
+                                            text.alert.overlappendeLøpendePerioder,
+                                            DateToDDMMYYYYString(dateOrNull(period.datoFom))
+                                        )}
+                                </BodyShort>
+                            ))}
+                            <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
+                        </>
+                    )}
                     {gapsInPeriods.length > 0 && (
                         <>
                             <BodyShort size="small">{text.error.hullIPerioder}:</BodyShort>
@@ -369,6 +377,7 @@ export const InntektTabel = ({
                             <BodyShort size="small">{text.error.hullIPerioderFiks}</BodyShort>
                         </>
                     )}
+                    {!runningPeriod && <BodyShort size="small">{text.error.ingenLoependeInntektPeriode}</BodyShort>}
                 </Alert>
             )}
             {children({

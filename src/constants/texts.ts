@@ -22,10 +22,9 @@ export default {
         manglerVirkningstidspunkt: "Mangler virkningstidspunkt",
         minstEnInntektMindre: "Det er minst en inntekt som legges til grunn mindre for person med ident - {}",
         nyeOpplysninger: "Nye opplysninger tilgjengelig. Sist hentet {}",
-        overlappendePerioder:
-            "To eller flere inntektsperioder i perioden {} - {} overlapper. Rediger eller slett en av periodene.",
-        overlappendeLøpendePerioder:
-            "To eller flere løpende inntektsperioder fra {} overlapper. Rediger eller slett periodene.",
+        overlappendeLøpendePerioder: "To eller flere løpende inntektsperioder fra {} overlapper.",
+        overlappendePerioder: "To eller flere inntektsperioder i perioden {} - {} overlapper.",
+        overlappendePerioderFiks: "Rediger eller slett periodene.",
         periodeUnderRedigering: "Det er en periode som er under redigering. Fullfør redigering eller slett periode.",
         sluttdatoForArbeidsforholdEndret: "Sluttdato for arbeidsforhold {} er endret fra {} til {}",
         startdatoForArbeidsforholdEndret: "Startdato for arbeidsforhold {} er endret",
@@ -47,6 +46,8 @@ export default {
         hullIPerioder: "Det er perioder uten inntekt",
         hullIPerioderFiks: "Korriger eller legg til inntekt i periodene.",
         identMåFyllesUt: "Ident må fylles ut",
+        ingenLoependeInntektPeriode:
+            "Det er ingen løpende inntektsperiode. Rediger en av periodene eller legg til en ny periode.",
         ingenLoependePeriode: "Det er ingen løpende status i beregningen.",
         navnMåFyllesUt: "Navn må fylles ut",
         kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
