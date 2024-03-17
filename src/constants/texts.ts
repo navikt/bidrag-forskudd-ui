@@ -43,7 +43,8 @@ export default {
         fatteVedtak: "Det skjedde en feil ved fatte vedtak",
         feilmelding: "Det har skjedd en feil",
         hentingAvNotat: "Det skjedde en feil ved henting av notat",
-        hullIPerioder: "Det er perioder uten inntekt",
+        hullIPerioder: "Det er perioder uten status",
+        hullIPerioderInntekt: "Det er perioder uten inntekt",
         hullIPerioderFiks: "Korriger eller legg til inntekt i periodene.",
         identMåFyllesUt: "Ident må fylles ut",
         ingenLoependeInntektPeriode:
