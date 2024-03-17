@@ -63,12 +63,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    søknadsbarn: Rolle[];
     erVedtakFattet: boolean;
     bidragsmottaker?: Rolle;
+    søknadsbarn: Rolle[];
+    grunnlagListe: GrunnlagEntity[];
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    grunnlagListe: GrunnlagEntity[];
     bidragspliktig?: Rolle;
 }
 
@@ -111,7 +111,7 @@ export interface GrunnlagEntity {
 
 export interface Husstandsbarn {
     behandling: Behandling;
-    medISaken: boolean;
+    kilde?: Kilde;
     /** @format int64 */
     id?: number;
     ident?: string;
@@ -427,6 +427,7 @@ export interface Datoperiode {
 export interface HusstandsbarnDto {
     /** @format int64 */
     id?: number;
+    kilde?: Kilde;
     medISak: boolean;
     /** @uniqueItems true */
     perioder: HusstandsbarnperiodeDto[];
@@ -1674,11 +1675,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @description Hente en behandling
          *
          * @tags behandling-controller-v-2
-         * @name HentBehandlingV2
+         * @name HenteBehandlingV2
          * @request GET:/api/v2/behandling/{behandlingsid}
          * @secure
          */
-        hentBehandlingV2: (behandlingsid: number, params: RequestParams = {}) =>
+        henteBehandlingV2: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/${behandlingsid}`,
                 method: "GET",

@@ -367,7 +367,7 @@ export const InntektTabel = ({
                     )}
                     {gapsInPeriods.length > 0 && (
                         <>
-                            <BodyShort size="small">{text.error.hullIPerioder}:</BodyShort>
+                            <BodyShort size="small">{text.error.hullIPerioderInntekt}:</BodyShort>
                             {gapsInPeriods.map((gap) => (
                                 <BodyShort key={`${gap.datoFom}-${gap.datoTom}`} size="small">
                                     {DateToDDMMYYYYString(dateOrNull(gap.datoFom))} -{" "}
