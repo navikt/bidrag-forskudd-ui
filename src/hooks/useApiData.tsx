@@ -221,7 +221,7 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
                 if (vedtakId) {
                     return (await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId)).data;
                 }
-                return (await BEHANDLING_API_V1.api.hentBehandlingV2(behandlingId)).data;
+                return (await BEHANDLING_API_V1.api.henteBehandlingV2(behandlingId)).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status == 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(

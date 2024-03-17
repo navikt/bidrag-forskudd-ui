@@ -17,7 +17,6 @@ import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import {
     useGetBehandlingV2,
     useGetOpplysninger,
@@ -41,6 +40,7 @@ import {
     sivilstandForskuddOptions,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { KildeIcon } from "../inntekt/InntektTable";
 
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
     <>
@@ -342,9 +342,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                             {hentVisningsnavn(item.sivilstand)}
                                         </BodyShort>
                                     ),
-                                    <BodyShort key={`sivilstand.${index}.kilde.placeholder`} className="capitalize">
-                                        {KildeTexts[item.kilde]}
-                                    </BodyShort>,
+                                    <KildeIcon key={`sivilstand.${index}.kilde.placeholder`} kilde={item.kilde} />,
                                     ...editButtons(index),
                                 ]}
                             />

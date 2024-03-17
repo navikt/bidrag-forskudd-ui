@@ -33,7 +33,6 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import {
     useGetBehandlingV2,
     useGetOpplysninger,
@@ -91,6 +90,7 @@ import {
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
+import { KildeIcon } from "../inntekt/InntektTable";
 import { Sivilstand } from "./Sivilstand";
 
 const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string }) => {
@@ -406,6 +406,7 @@ const AddBarnForm = ({
             medISak: false,
             navn: navn,
             fødselsdato: fd,
+            kilde: Kilde.MANUELL,
             perioder: [
                 {
                     datoFom: isAfterDate(fd, datoFom)
@@ -623,7 +624,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                     </BodyShort>
                                     <BodyShort size="small">{item.ident}</BodyShort>
                                 </div>
-                                {!item.medISak && !lesemodus && (
+                                {!item.medISak && !lesemodus && item.kilde === Kilde.MANUELL && (
                                     <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
                                 )}
                             </div>
@@ -1037,12 +1038,10 @@ const Perioder = ({
                                         {bosstatusToVisningsnavn(item.bostatus)}
                                     </BodyShort>
                                 ),
-                                <BodyShort
+                                <KildeIcon
                                     key={`husstandsbarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
-                                    className="capitalize"
-                                >
-                                    {KildeTexts[item.kilde]}
-                                </BodyShort>,
+                                    kilde={item.kilde}
+                                />,
                                 ...editButtons(index),
                             ]}
                         />
