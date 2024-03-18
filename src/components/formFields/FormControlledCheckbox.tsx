@@ -1,5 +1,5 @@
 import { Checkbox } from "@navikt/ds-react";
-import React, { ChangeEvent } from "react";
+import React, { BaseSyntheticEvent } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 import { useForskudd } from "../../context/ForskuddContext";
@@ -12,7 +12,7 @@ export const FormControlledCheckbox = ({
 }: {
     name: string;
     legend: string;
-    onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+    onChange?: (checked: boolean) => void;
     className?: string;
 }) => {
     const { control } = useFormContext();
@@ -20,11 +20,9 @@ export const FormControlledCheckbox = ({
 
     const { field } = useController({ name, control });
 
-    const handleOnChange = (value) => {
-        if (onChange) {
-            onChange(value);
-        }
-        field.onChange(value);
+    const handleOnChange = (value: BaseSyntheticEvent) => {
+        field.onChange(value.target.checked);
+        onChange?.(value.target.checked);
     };
 
     return (
