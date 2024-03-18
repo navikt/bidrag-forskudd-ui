@@ -46,7 +46,7 @@ export const TaMed = ({
     <div className="h-8 w-full flex items-center justify-center">
         <FormControlledCheckbox
             name={`${fieldName}.${index}.taMed`}
-            onChange={(value) => handleOnSelect(value.target.checked, index)}
+            onChange={(checked) => handleOnSelect(checked, index)}
             legend=""
         />
     </div>
@@ -222,34 +222,42 @@ export const InntektTabel = ({
         if (!value && !erOffentlig) {
             handleDelete(index);
         } else {
-            if (erOffentlig) {
-                updatedAndSave({
-                    oppdatereInntektsperioder: [
-                        {
-                            id: periode.id,
-                            taMedIBeregning: value,
-                            angittPeriode: {
-                                fom: periode.datoFom,
-                                til: periode.datoTom,
-                            },
-                        } as OppdaterePeriodeInntekt,
-                    ],
-                });
-            } else {
-                updatedAndSave({
-                    oppdatereManuelleInntekter: [
-                        {
-                            id: periode.id,
-                            taMed: value,
-                            type: periode.rapporteringstype as Inntektsrapportering,
-                            beløp: periode.beløp,
-                            datoFom: periode.datoFom,
-                            datoTom: periode.datoTom,
-                            ident: periode.ident,
-                        } as OppdatereManuellInntekt,
-                    ],
-                });
-            }
+            handleUpdate(index);
+        }
+    };
+
+    const handleUpdate = (index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
+
+        if (erOffentlig) {
+            updatedAndSave({
+                oppdatereInntektsperioder: [
+                    {
+                        id: periode.id,
+                        taMedIBeregning: periode.taMed,
+                        angittPeriode: {
+                            fom: periode.datoFom,
+                            til: periode.datoTom,
+                        },
+                    } as OppdaterePeriodeInntekt,
+                ],
+            });
+        } else {
+            updatedAndSave({
+                oppdatereManuelleInntekter: [
+                    {
+                        id: periode.id,
+                        taMed: periode.taMed,
+                        type: periode.rapporteringstype as Inntektsrapportering,
+                        beløp: periode.beløp,
+                        datoFom: periode.datoFom,
+                        datoTom: periode.datoTom,
+                        ident: periode.ident,
+                        inntektstyper: [periode.inntektstype],
+                    } as OppdatereManuellInntekt,
+                ],
+            });
         }
         unsetEditedRow(index);
     };
@@ -259,6 +267,7 @@ export const InntektTabel = ({
         clearErrors(`${fieldName}.${index}`);
         fieldArray.remove(index);
         updatedAndSave({ sletteInntekter: [periode.id] });
+        unsetEditedRow(index);
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
@@ -289,30 +298,7 @@ export const InntektTabel = ({
 
         const fieldState = getFieldState(`${fieldName}.${index}`);
         if (!fieldState.error) {
-            if (periode.kilde === Kilde.OFFENTLIG) {
-                const updatedPeriod = {
-                    id: periode.id,
-                    taMedIBeregning: periode.taMed,
-                    angittPeriode: {
-                        fom: periode.datoFom,
-                        til: periode.datoTom,
-                    },
-                };
-                updatedAndSave({ oppdatereInntektsperioder: [updatedPeriod] });
-            } else {
-                const updatedPeriod = {
-                    id: periode.id ?? null,
-                    taMed: periode.taMed,
-                    type: periode.rapporteringstype as Inntektsrapportering,
-                    beløp: periode.beløp,
-                    datoFom: periode.datoFom,
-                    datoTom: periode.datoTom,
-                    ident: periode.ident,
-                    gjelderBarn: periode.gjelderBarn,
-                };
-                updatedAndSave({ oppdatereManuelleInntekter: [updatedPeriod] });
-            }
-            unsetEditedRow(index);
+            handleUpdate(index);
         }
     };
     const checkIfAnotherRowIsEdited = (index?: number) => {
