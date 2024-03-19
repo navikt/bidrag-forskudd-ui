@@ -1,4 +1,5 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -295,6 +296,17 @@ export const InntektTabel = ({
                 type: "notValid",
                 message: text.error.datoMåFyllesUt,
             });
+        }
+
+        if (periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG) {
+            if (ObjectUtils.isEmpty(periode.inntektstype)) {
+                setError(`${fieldName}.${index}.inntektstype`, {
+                    type: "notValid",
+                    message: text.error.barnetilleggType,
+                });
+            } else {
+                clearErrors(`${fieldName}.${index}.inntektstype`);
+            }
         }
 
         const fieldState = getFieldState(`${fieldName}.${index}`);

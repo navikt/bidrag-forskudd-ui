@@ -36,6 +36,7 @@ export default {
     error: {
         datoIkkeGyldig: "Dato er ikke gyldig",
         datoMåFyllesUt: "Dato må fylles ut",
+        barnetilleggType: "Barnetillegg type må settes",
         datoMåSettesManuelt: "Dato må settes manuelt",
         datoMåVæreDenSisteIMåneden: "Dato må være den siste i måneden",
         datoMåVæreDenFørsteIMåneden: "Dato må være den første i måneden",
