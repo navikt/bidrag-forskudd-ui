@@ -64,7 +64,7 @@ export default {
         avslag: "Avslag",
         avbryt: "Avbryt",
         barn: "Barn",
-        barnetilleg: "Barnetilleg",
+        barnetillegg: "Barnetillegg",
         begrunnelseKunINotat: "Begrunnelse (kun med i notat)",
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",
         beløp: "Beløp",

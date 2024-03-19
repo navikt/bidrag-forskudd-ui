@@ -40,22 +40,22 @@ export const BeregnetInntekter = () => {
                                     <Table.HeaderCell scope="col" className="w-[198px]">
                                         {text.label.fraOgMed} - {text.label.tilOgMed}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[144px]">
+                                    <Table.HeaderCell scope="col" align="left" className="w-[120px]">
                                         {text.label.skattepliktigeInntekter}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[74px]">
-                                        {text.label.barnetilleg}
+                                    <Table.HeaderCell scope="col" align="left" className="w-[105px]">
+                                        {text.label.barnetillegg}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                    <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                         {text.label.utvidetBarnetrygd}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                    <Table.HeaderCell scope="col" align="left" className="w-[135px]">
                                         {text.label.småbarnstillegg}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                    <Table.HeaderCell scope="col" align="left" className="w-[120px]">
                                         {text.label.kontantstøtte}
                                     </Table.HeaderCell>
-                                    <Table.HeaderCell scope="col" align="right" className="w-[144px]">
+                                    <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                         {text.label.totalt}
                                     </Table.HeaderCell>
                                 </Table.Row>
@@ -67,22 +67,22 @@ export const BeregnetInntekter = () => {
                                             {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.fom))} -{" "}
                                             {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.til))}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString("nb-NO") ?? 0}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.barnetillegg?.toLocaleString("nb-NO") ?? 0}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.utvidetBarnetrygd?.toLocaleString("nb-NO") ?? 0}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.småbarnstillegg?.toLocaleString("nb-NO") ?? 0}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.kontantstøtte?.toLocaleString("nb-NO") ?? 0}
                                         </Table.DataCell>
-                                        <Table.DataCell align="right">
+                                        <Table.DataCell align="left">
                                             {delberegningSumInntekt.totalinntekt.toLocaleString("nb-NO")}
                                         </Table.DataCell>
                                     </Table.Row>

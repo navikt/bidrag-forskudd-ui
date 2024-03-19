@@ -30,7 +30,7 @@ const Beskrivelse = ({
                 Object.entries(Inntektstype)
                     .filter(([, text]) => text.includes("BARNETILLEGG"))
                     .map(([value, text]) => ({
-                        value,
+                        value: Inntektstype[value],
                         text: hentVisningsnavn(text),
                     }))
             )}
@@ -191,7 +191,7 @@ export const Barnetillegg = () => {
                                     </div>
                                 )}
                                 <LeggTilPeriodeButton
-                                    addPeriode={() =>
+                                    addPeriode={() => {
                                         addPeriod({
                                             ident,
                                             datoFom: null,
@@ -203,8 +203,8 @@ export const Barnetillegg = () => {
                                             kilde: Kilde.MANUELL,
                                             inntektsposter: [],
                                             inntektstyper: [],
-                                        })
-                                    }
+                                        });
+                                    }}
                                 />
                             </>
                         )}

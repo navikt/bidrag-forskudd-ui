@@ -254,7 +254,8 @@ export const InntektTabel = ({
                         datoFom: periode.datoFom,
                         datoTom: periode.datoTom,
                         ident: periode.ident,
-                        inntektstyper: [periode.inntektstype],
+                        gjelderBarn: periode.gjelderBarn,
+                        inntektstype: periode.inntektstype,
                     } as OppdatereManuellInntekt,
                 ],
             });
