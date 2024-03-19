@@ -63,12 +63,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    erVedtakFattet: boolean;
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
     grunnlagListe: GrunnlagEntity[];
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
+    erVedtakFattet: boolean;
     bidragspliktig?: Rolle;
 }
 
@@ -159,7 +159,7 @@ export interface Inntekt {
 export interface Inntektspost {
     beløp: number;
     kode: string;
-    visningsnavn: string;
+    visningsnavn?: string;
     /** @format int64 */
     id?: number;
     inntekt?: Inntekt;
@@ -1575,10 +1575,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1667,7 +1664,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
