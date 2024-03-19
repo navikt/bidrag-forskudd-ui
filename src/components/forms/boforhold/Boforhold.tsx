@@ -266,17 +266,7 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        // if (boforoholdOpplysninger) {
-        //     const changesInOpplysninger = compareOpplysninger(boforoholdOpplysninger, opplysningerFraFolkRegistre);
-
-        //     if (changesInOpplysninger?.length) {
-        //         setOpplysningerChanges(changesInOpplysninger);
-        //     }
-        // }
-
-        // if (!boforoholdOpplysninger && !isSavedInitialOpplysninger.current) {
         if (boforhold.husstandsbarn.length == 0 && !isSavedInitialOpplysninger.current) {
-            // lagreAlleOpplysninger();
             saveBoforhold(initialValues);
         }
 
@@ -285,32 +275,7 @@ const BoforholdsForm = () => {
         setBoforholdFormValues(initialValues);
     }, []);
 
-    // const lagreAlleOpplysninger = async () => {
-    //     await saveOpplysninger.mutateAsync({
-    //         behandlingId,
-    //         aktiv: true,
-    //         grunnlagstype: OpplysningerType.BOFORHOLD_BEARBEIDET,
-    //         data: JSON.stringify(opplysningerFraFolkRegistre),
-    //         hentetDato: toISODateString(new Date()),
-    //     });
-    //     await saveOpplysninger.mutateAsync({
-    //         behandlingId,
-    //         aktiv: true,
-    //         grunnlagstype: OpplysningerType.HUSSTANDSMEDLEMMER,
-    //         data: JSON.stringify(husstandsmedlemmerOgEgneBarnListe),
-    //         hentetDato: toISODateString(new Date()),
-    //     });
-    //     await saveOpplysninger.mutateAsync({
-    //         behandlingId,
-    //         aktiv: true,
-    //         grunnlagstype: OpplysningerType.SIVILSTAND,
-    //         data: JSON.stringify(sivilstandListe),
-    //         hentetDato: toISODateString(new Date()),
-    //     });
-    // };
     const updateOpplysninger = () => {
-        // lagreAlleOpplysninger();
-
         const fieldValues = useFormMethods.getValues();
         const values: OppdaterBoforholdRequest = {
             ...fieldValues,
@@ -622,7 +587,9 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                         {item.medISak && <PersonNavn ident={item.ident}></PersonNavn>}
                                         {!item.medISak && item.navn}
                                     </BodyShort>
-                                    <BodyShort size="small">{item.ident}</BodyShort>
+                                    <BodyShort size="small">
+                                        {DateToDDMMYYYYString(dateOrNull(item.fødselsdato))}
+                                    </BodyShort>
                                 </div>
                                 {!item.medISak && !lesemodus && item.kilde === Kilde.MANUELL && (
                                     <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
