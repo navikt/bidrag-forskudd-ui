@@ -173,7 +173,7 @@ export const InntektTabel = ({
         | `kontantstøtte.${string}`;
     children: React.FunctionComponent;
 }) => {
-    const { setErrorMessage, setErrorModalOpen } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const {
         søktFomDato,
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
@@ -341,7 +341,7 @@ export const InntektTabel = ({
 
     return (
         <>
-            {[overlappingPeriodsSummary, gapsInPeriods].some((errorsList) => errorsList.length > 0) && (
+            {!lesemodus && [overlappingPeriodsSummary, gapsInPeriods].some((errorsList) => errorsList.length > 0) && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
                     {overlappingPeriodsSummary.length > 0 && (

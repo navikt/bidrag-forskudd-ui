@@ -11,6 +11,12 @@ import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFor
 import { dateOrNull, isAfterDate, isBeforeDate } from "../../../utils/date-utils";
 import { periodsAreOverlapping } from "./helpers";
 
+const inntekterSomKanHaHullIPerioder = [
+    Inntektsrapportering.UTVIDET_BARNETRYGD,
+    Inntektsrapportering.BARNETILLEGG,
+    Inntektsrapportering.KONTANTSTOTTE,
+    Inntektsrapportering.SMABARNSTILLEGG,
+];
 const transformInntekt = (inntekt) => ({
     ...inntekt,
     angittPeriode: {
@@ -222,7 +228,11 @@ export const checkErrorsInPeriods = (
     const firstTaMedPeriod = perioder.find((periode) => periode.taMed);
     let runningPeriod = false;
 
-    if (firstTaMedPeriod && isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)) {
+    if (
+        firstTaMedPeriod &&
+        !inntekterSomKanHaHullIPerioder.includes(firstTaMedPeriod.rapporteringstype as Inntektsrapportering) &&
+        isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)
+    ) {
         gapsInPeriods.push({
             datoFom: toISODateString(virkningstidspunkt),
             datoTom: firstTaMedPeriod.datoFom,
