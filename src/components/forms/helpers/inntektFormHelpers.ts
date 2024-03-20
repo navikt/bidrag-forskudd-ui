@@ -228,9 +228,12 @@ export const checkErrorsInPeriods = (
     const firstTaMedPeriod = perioder.find((periode) => periode.taMed);
     let runningPeriod = false;
 
+    const ignorerSjekkForHullIPerioder =
+        firstTaMedPeriod &&
+        inntekterSomKanHaHullIPerioder.includes(firstTaMedPeriod.rapporteringstype as Inntektsrapportering);
     if (
         firstTaMedPeriod &&
-        !inntekterSomKanHaHullIPerioder.includes(firstTaMedPeriod.rapporteringstype as Inntektsrapportering) &&
+        !ignorerSjekkForHullIPerioder &&
         isBeforeDate(virkningstidspunkt, firstTaMedPeriod?.datoFom)
     ) {
         gapsInPeriods.push({
@@ -257,6 +260,7 @@ export const checkErrorsInPeriods = (
 
                 if (
                     perioder[i].datoTom &&
+                    !ignorerSjekkForHullIPerioder &&
                     isAfterDate(dateOrNull(perioder[j].datoFom), addDays(dateOrNull(perioder[i].datoTom), 1))
                 ) {
                     gapsInPeriods.push({
