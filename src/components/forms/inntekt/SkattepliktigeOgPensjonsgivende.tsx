@@ -129,6 +129,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
                                                 className="align-top"
+                                                expansionDisabled={item.kilde == Kilde.MANUELL}
                                             >
                                                 <Table.DataCell>
                                                     <TaMed
