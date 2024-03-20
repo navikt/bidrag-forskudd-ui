@@ -4,3 +4,18 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "forskudd.css";
+
+.bd_datadisplay dt:after {
+    content: ": ";
+}
+
+
+.bd_datadisplay dt:before {
+    content: "";
+    display: block;
+}
+
+.bd_datadisplay dt,
+.bd_datadisplay dd {
+    display: inline;
+}

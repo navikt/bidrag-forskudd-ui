@@ -54,11 +54,14 @@ const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
                 Periode: {item.opprinneligFom && dateToDDMMYYYYString(new Date(item.opprinneligFom))} -{" "}
                 {item.opprinneligTom && dateToDDMMYYYYString(new Date(item.opprinneligTom))}
             </BodyShort>
-            {item.inntektsposter.map((inntektpost) => (
-                <BodyShort size="small" key={inntektpost.kode}>
-                    {inntektpost.visningsnavn}: {inntektpost.beløp}
-                </BodyShort>
-            ))}
+            <dl className="bd_datadisplay">
+                {item.inntektsposter.map((inntektpost) => (
+                    <BodyShort size="small" key={inntektpost.kode}>
+                        <dt>{inntektpost.visningsnavn}</dt>
+                        <dd>{inntektpost.beløp}</dd>
+                    </BodyShort>
+                ))}
+            </dl>
         </>
     );
 };
