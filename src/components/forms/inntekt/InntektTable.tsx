@@ -129,7 +129,7 @@ export const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
-        const fomOgTomInvalid = periode.datoTom !== null && isAfterDate(periode?.datoFom, periode.datoTom);
+        const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
 
         if (fomOgTomInvalid) {
             setError(`${fieldName}.${index}.datoFom`, {
@@ -147,7 +147,7 @@ export const Periode = ({
             label={label}
             placeholder="DD.MM.ÅÅÅÅ"
             defaultValue={item[field]}
-            required={item.taMed}
+            required={item.taMed && field === "datoFom"}
             fromDate={fom}
             toDate={tom}
             customValidation={validateFomOgTom}
