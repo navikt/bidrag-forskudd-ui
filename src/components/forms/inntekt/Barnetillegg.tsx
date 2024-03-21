@@ -88,25 +88,25 @@ export const Barnetillegg = () => {
                                         <Table size="small" className="table-fixed">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
-                                                    <Table.HeaderCell scope="col" align="center" className="w-[84px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[74px]">
                                                         {text.label.taMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[144px]">
+                                                    <Table.HeaderCell scope="col" className="w-[134px]">
                                                         {text.label.fraOgMed}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[144px]">
+                                                    <Table.HeaderCell scope="col" className="w-[134px]">
                                                         {text.label.tilOgMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" align="center" className="w-[74px]">
                                                         {text.label.kilde}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[252px]">
+                                                    <Table.HeaderCell scope="col" className="w-[204px]">
                                                         {text.label.type}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[130px]">
                                                         {text.label.beløpMnd}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[134px]">
                                                         {text.label.beløp12Mnd}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell
