@@ -115,7 +115,14 @@ const Side = () => {
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
         const [medIVedtaket, kunINotat] = getValues(["notat.medIVedtaket", "notat.kunINotat"]);
-        saveInntekt({ notat: { medIVedtaket, kunINotat } });
+        saveInntekt.mutate({
+            inntekter: {
+                oppdatereInntektsperioder: [],
+                oppdatereManuelleInntekter: [],
+                sletteInntekter: [],
+                notat: { medIVedtaket, kunINotat },
+            },
+        });
     };
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
 

@@ -17,7 +17,7 @@ const inntekterSomKanHaHullIPerioder = [
     Inntektsrapportering.KONTANTSTOTTE,
     Inntektsrapportering.SMABARNSTILLEGG,
 ];
-const transformInntekt = (inntekt) => ({
+export const transformInntekt = (inntekt) => ({
     ...inntekt,
     angittPeriode: {
         fom: inntekt.datoFom ?? null,
@@ -32,7 +32,7 @@ const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
     ...acc,
     [rolle.ident]: mapFunction(rolle),
 });
-const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
+export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
     if (a.taMed === b.taMed) {
         return isAfterDate(a.datoFom, b.datoFom) ? 1 : -1;
     }

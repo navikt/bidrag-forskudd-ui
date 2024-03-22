@@ -9,6 +9,7 @@ export const FormControlledTextField = ({
     type,
     disabled,
     min,
+    inputMode,
 }: {
     name: string;
     label: string;
@@ -16,20 +17,30 @@ export const FormControlledTextField = ({
     type?: "number" | "email" | "password" | "tel" | "text" | "url";
     disabled?: boolean;
     min?: string | number;
+    inputMode?: "email" | "tel" | "text" | "url" | "search" | "none" | "numeric" | "decimal";
 }) => {
     const { control } = useFormContext();
     const { field } = useController({ name, control });
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (type === "number") {
+            field.onChange(Number(e.target.value));
+        } else {
+            field.onChange(e.target.value);
+        }
+    };
 
     return (
         <TextField
             type={type}
             label={label}
             size="small"
-            value={field.value}
-            onChange={field.onChange}
+            value={field.value?.toString()}
+            onChange={(value) => onChange(value)}
             hideLabel={hideLabel}
             disabled={disabled}
             min={min}
+            inputMode={inputMode}
         />
     );
 };

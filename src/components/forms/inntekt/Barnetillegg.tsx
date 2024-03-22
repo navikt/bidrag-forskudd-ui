@@ -1,16 +1,26 @@
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import {
+    BehandlingDtoV2,
+    InntektDtoV2,
+    Inntektsrapportering,
+    Inntektstype,
+    Kilde,
+    Rolletype,
+} from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
-import { InntektFormPeriode } from "../../../types/inntektFormValues";
+import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
+import { inntektSorting, transformInntekt } from "../helpers/inntektFormHelpers";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 const Beskrivelse = ({
@@ -45,8 +55,31 @@ const Beskrivelse = ({
 
 export const Barnetillegg = () => {
     const { roller } = useGetBehandlingV2();
-    const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+    const { getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
+    const barna = roller
+        .filter((rolle) => rolle.rolletype === Rolletype.BA)
+        .sort((a, b) => a.navn.localeCompare(b.navn));
+    const bmIdent = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+
+    const onRowSaveSuccess = (ident: string) => (data: BehandlingDtoV2) => {
+        const barnInntekter = data.inntekter.barnetillegg
+            .filter((inntekt: InntektDtoV2) => inntekt.gjelderBarn === ident)
+            .map(transformInntekt)
+            .sort(inntektSorting);
+        setValue(`barnetillegg.${ident}`, barnInntekter);
+    };
+
+    const customRowValidation = (fieldName: `barnetillegg.${string}.${number}`) => {
+        const periode = getValues(fieldName);
+        if (ObjectUtils.isEmpty(periode.inntektstype)) {
+            setError(`${fieldName}.inntektstype`, {
+                type: "notValid",
+                message: text.error.barnetilleggType,
+            });
+        } else {
+            clearErrors(`${fieldName}.inntektstype`);
+        }
+    };
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
@@ -66,7 +99,11 @@ export const Barnetillegg = () => {
                             <BodyShort size="small">{barn.ident}</BodyShort>
                         </div>
                     </div>
-                    <InntektTabel fieldName={`barnetillegg.${barn.ident}` as const}>
+                    <InntektTabel
+                        fieldName={`barnetillegg.${barn.ident}` as const}
+                        customRowValidation={customRowValidation}
+                        onRowSaveSuccess={onRowSaveSuccess(barn.ident)}
+                    >
                         {({
                             controlledFields,
                             onSaveRow,
@@ -120,6 +157,7 @@ export const Barnetillegg = () => {
                                                     <Table.Row key={item.ident + index} className="align-top">
                                                         <Table.DataCell>
                                                             <TaMed
+                                                                key={item?.id}
                                                                 fieldName={`barnetillegg.${barn.ident}`}
                                                                 index={index}
                                                                 handleOnSelect={handleOnSelect}
@@ -193,7 +231,7 @@ export const Barnetillegg = () => {
                                 <LeggTilPeriodeButton
                                     addPeriode={() => {
                                         addPeriod({
-                                            ident,
+                                            ident: bmIdent,
                                             datoFom: null,
                                             datoTom: null,
                                             gjelderBarn: barn.ident,
