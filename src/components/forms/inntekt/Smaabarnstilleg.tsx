@@ -1,24 +1,32 @@
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
-import { InntektFormPeriode } from "../../../types/inntektFormValues";
+import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
+import { inntektSorting, transformInntekt } from "../helpers/inntektFormHelpers";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 export const Småbarnstillegg = () => {
     const { roller } = useGetBehandlingV2();
+    const { setValue } = useFormContext<InntektFormValues>();
     const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
     const fieldName = "småbarnstillegg";
+
+    const onRowSaveSuccess = (data: BehandlingDtoV2) => {
+        const småbarnstillegg = data.inntekter.småbarnstillegg.map(transformInntekt).sort(inntektSorting);
+        setValue(fieldName, småbarnstillegg);
+    };
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <Heading level="3" size="medium">
                 {text.title.småbarnstillegg}
             </Heading>
-            <InntektTabel fieldName={fieldName}>
+            <InntektTabel fieldName={fieldName} onRowSaveSuccess={onRowSaveSuccess}>
                 {({
                     controlledFields,
                     onSaveRow,
@@ -63,6 +71,7 @@ export const Småbarnstillegg = () => {
                                             <Table.Row key={item.ident + index} className="align-top">
                                                 <Table.DataCell>
                                                     <TaMed
+                                                        key={item?.id}
                                                         fieldName={fieldName}
                                                         index={index}
                                                         handleOnSelect={handleOnSelect}

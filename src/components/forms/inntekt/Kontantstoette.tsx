@@ -1,19 +1,38 @@
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import {
+    BehandlingDtoV2,
+    InntektDtoV2,
+    Inntektsrapportering,
+    Kilde,
+    Rolletype,
+} from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
-import { InntektFormPeriode } from "../../../types/inntektFormValues";
+import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
+import { inntektSorting, transformInntekt } from "../helpers/inntektFormHelpers";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 export const Kontantstøtte = () => {
     const { roller } = useGetBehandlingV2();
-    const barna = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
-    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+    const { setValue } = useFormContext<InntektFormValues>();
+    const barna = roller
+        .filter((rolle) => rolle.rolletype === Rolletype.BA)
+        .sort((a, b) => a.navn.localeCompare(b.navn));
+    const bmIdent = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+
+    const onRowSaveSuccess = (ident: string) => (data: BehandlingDtoV2) => {
+        const kontantstøtte = data.inntekter.kontantstøtte
+            .filter((inntekt: InntektDtoV2) => inntekt.gjelderBarn === ident)
+            .map(transformInntekt)
+            .sort(inntektSorting);
+        setValue(`kontantstøtte.${ident}`, kontantstøtte);
+    };
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
@@ -33,7 +52,10 @@ export const Kontantstøtte = () => {
                             <BodyShort size="small">{barn.ident}</BodyShort>
                         </div>
                     </div>
-                    <InntektTabel fieldName={`kontantstøtte.${barn.ident}` as const}>
+                    <InntektTabel
+                        fieldName={`kontantstøtte.${barn.ident}` as const}
+                        onRowSaveSuccess={onRowSaveSuccess(barn.ident)}
+                    >
                         {({
                             controlledFields,
                             onSaveRow,
@@ -81,6 +103,7 @@ export const Kontantstøtte = () => {
                                                     <Table.Row key={item.ident + index} className="align-top">
                                                         <Table.DataCell>
                                                             <TaMed
+                                                                key={item?.id}
                                                                 fieldName={`kontantstøtte.${barn.ident}`}
                                                                 index={index}
                                                                 handleOnSelect={handleOnSelect}
@@ -137,7 +160,7 @@ export const Kontantstøtte = () => {
                                 <LeggTilPeriodeButton
                                     addPeriode={() =>
                                         addPeriod({
-                                            ident,
+                                            ident: bmIdent,
                                             datoFom: null,
                                             datoTom: null,
                                             gjelderBarn: barn.ident,

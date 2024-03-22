@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
+    BehandlingDtoV2,
     Inntektsrapportering,
     Kilde,
     OppdatereManuellInntekt,
@@ -64,7 +65,14 @@ export const Totalt = ({
 }) => (
     <>
         {erRedigerbart ? (
-            <FormControlledTextField name={`${field}.beløp`} label="Totalt" type="number" min="1" hideLabel />
+            <FormControlledTextField
+                name={`${field}.beløp`}
+                label="Totalt"
+                type="number"
+                min="1"
+                inputMode="numeric"
+                hideLabel
+            />
         ) : (
             <div className="h-8 flex items-center justify-end">
                 <BodyShort>{item.beløp.toLocaleString("nb-NO")}</BodyShort>
@@ -163,6 +171,8 @@ export const Periode = ({
 
 export const InntektTabel = ({
     fieldName,
+    customRowValidation,
+    onRowSaveSuccess,
     children,
 }: {
     fieldName:
@@ -171,6 +181,8 @@ export const InntektTabel = ({
         | `årsinntekter.${string}`
         | `barnetillegg.${string}`
         | `kontantstøtte.${string}`;
+    customRowValidation?: (fieldName: string) => void;
+    onRowSaveSuccess?: (data: BehandlingDtoV2) => void;
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
@@ -179,7 +191,7 @@ export const InntektTabel = ({
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandlingV2();
     const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
-    const [editableRow, setEditableRow] = useState(undefined);
+    const [editableRow, setEditableRow] = useState<number>(undefined);
     const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods, runningPeriod }, setTableErros] =
         useState<{
             overlappingPeriodIndexes: number[];
@@ -210,7 +222,7 @@ export const InntektTabel = ({
         setTableErros(tableErros);
     };
 
-    const unsetEditedRow = (index) => {
+    const unsetEditedRow = (index: number) => {
         if (editableRow === index) {
             setEditableRow(undefined);
         }
@@ -245,21 +257,24 @@ export const InntektTabel = ({
                 ],
             });
         } else {
-            updatedAndSave({
-                oppdatereManuelleInntekter: [
-                    {
-                        id: periode.id,
-                        taMed: periode.taMed,
-                        type: periode.rapporteringstype as Inntektsrapportering,
-                        beløp: periode.beløp,
-                        datoFom: periode.datoFom,
-                        datoTom: periode.datoTom,
-                        ident: periode.ident,
-                        gjelderBarn: periode.gjelderBarn,
-                        inntektstype: periode.inntektstype,
-                    } as OppdatereManuellInntekt,
-                ],
-            });
+            updatedAndSave(
+                {
+                    oppdatereManuelleInntekter: [
+                        {
+                            id: periode.id,
+                            taMed: periode.taMed,
+                            type: periode.rapporteringstype as Inntektsrapportering,
+                            beløp: periode.beløp,
+                            datoFom: periode.datoFom,
+                            datoTom: periode.datoTom,
+                            ident: periode.ident,
+                            gjelderBarn: periode.gjelderBarn,
+                            inntektstype: periode.inntektstype,
+                        } as OppdatereManuellInntekt,
+                    ],
+                },
+                onRowSaveSuccess
+            );
         }
         unsetEditedRow(index);
     };
@@ -267,9 +282,15 @@ export const InntektTabel = ({
     const handleDelete = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         clearErrors(`${fieldName}.${index}`);
-        fieldArray.remove(index);
         updatedAndSave({ sletteInntekter: [periode.id] });
-        unsetEditedRow(index);
+        fieldArray.remove(index);
+
+        if (editableRow === index) {
+            setEditableRow(undefined);
+        }
+        if (editableRow) {
+            setEditableRow(editableRow - 1);
+        }
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
@@ -281,12 +302,27 @@ export const InntektTabel = ({
             setEditableRow(perioder.length);
         }
     };
-    const updatedAndSave = (updatedValues: {
-        oppdatereInntektsperioder?: OppdaterePeriodeInntekt[];
-        oppdatereManuelleInntekter?: OppdatereManuellInntekt[];
-        sletteInntekter?: number[];
-    }) => {
-        saveInntekt(updatedValues);
+    const updatedAndSave = (
+        updatedValues: {
+            oppdatereInntektsperioder?: OppdaterePeriodeInntekt[];
+            oppdatereManuelleInntekter?: OppdatereManuellInntekt[];
+            sletteInntekter?: number[];
+        },
+        onSaveSuccess?: (data: BehandlingDtoV2) => void
+    ) => {
+        saveInntekt.mutate(
+            {
+                inntekter: {
+                    oppdatereInntektsperioder: [],
+                    oppdatereManuelleInntekter: [],
+                    sletteInntekter: [],
+                    ...updatedValues,
+                },
+            },
+            {
+                onSuccess: onSaveSuccess,
+            }
+        );
         validatePeriods();
     };
     const onSaveRow = (index: number) => {
@@ -298,16 +334,7 @@ export const InntektTabel = ({
             });
         }
 
-        if (periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG) {
-            if (ObjectUtils.isEmpty(periode.inntektstype)) {
-                setError(`${fieldName}.${index}.inntektstype`, {
-                    type: "notValid",
-                    message: text.error.barnetilleggType,
-                });
-            } else {
-                clearErrors(`${fieldName}.${index}.inntektstype`);
-            }
-        }
+        customRowValidation?.(`${fieldName}.${index}`);
 
         const fieldState = getFieldState(`${fieldName}.${index}`);
         if (!fieldState.error) {
@@ -346,8 +373,8 @@ export const InntektTabel = ({
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
                     {overlappingPeriodsSummary.length > 0 && (
                         <>
-                            {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }) => (
-                                <BodyShort key={`${period.datoFom}-${period.datoTom}`} size="small">
+                            {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }, index) => (
+                                <BodyShort key={`${period.datoFom}-${period.datoTom}-${index}`} size="small">
                                     {period.datoTom &&
                                         removePlaceholder(
                                             text.alert.overlappendePerioder,
@@ -367,8 +394,8 @@ export const InntektTabel = ({
                     {gapsInPeriods.length > 0 && (
                         <>
                             <BodyShort size="small">{text.error.hullIPerioderInntekt}:</BodyShort>
-                            {gapsInPeriods.map((gap) => (
-                                <BodyShort key={`${gap.datoFom}-${gap.datoTom}`} size="small">
+                            {gapsInPeriods.map((gap, index) => (
+                                <BodyShort key={`${gap.datoFom}-${gap.datoTom}-${index}`} size="small">
                                     {DateToDDMMYYYYString(dateOrNull(gap.datoFom))} -{" "}
                                     {DateToDDMMYYYYString(dateOrNull(gap.datoTom))}
                                 </BodyShort>
@@ -387,6 +414,8 @@ export const InntektTabel = ({
                 onSaveRow,
                 addPeriod,
                 handleOnSelect,
+                validatePeriods,
+                unsetEditedRow,
             })}
         </>
     );

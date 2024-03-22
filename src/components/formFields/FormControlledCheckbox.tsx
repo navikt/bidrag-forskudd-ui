@@ -17,7 +17,6 @@ export const FormControlledCheckbox = ({
 }) => {
     const { control } = useFormContext();
     const { lesemodus } = useForskudd();
-
     const { field } = useController({ name, control });
 
     const handleOnChange = (value: BaseSyntheticEvent) => {
