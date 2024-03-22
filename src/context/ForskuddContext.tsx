@@ -57,6 +57,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
     }, []);
 
+    const queryLesemodus = searchParams.get("lesemodus") == "true";
     const behandling = useBehandlingV2(behandlingId, vedtakId);
     const value = React.useMemo(
         () => ({
@@ -64,7 +65,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             setActiveStep,
             behandlingId,
             vedtakId,
-            lesemodus: vedtakId != null || behandling.erVedtakFattet,
+            lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             virkningstidspunktFormValues,
