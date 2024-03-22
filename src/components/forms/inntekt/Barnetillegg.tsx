@@ -165,6 +165,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
+                                                                key={item?.id}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.fraOgMed}
@@ -175,6 +176,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
+                                                                key={item?.id}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.tilOgMed}
@@ -184,10 +186,11 @@ export const Barnetillegg = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <KildeIcon kilde={item.kilde} />
+                                                            <KildeIcon key={item?.id} kilde={item.kilde} />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Beskrivelse
+                                                                key={item?.id}
                                                                 item={item}
                                                                 field={`barnetillegg.${barn.ident}.${index}`}
                                                                 erRedigerbart={
@@ -198,6 +201,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Totalt
+                                                                key={item?.id}
                                                                 item={item}
                                                                 field={`barnetillegg.${barn.ident}.${index}`}
                                                                 erRedigerbart={
@@ -215,6 +219,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <EditOrSaveButton
+                                                                key={item?.id}
                                                                 index={index}
                                                                 erMed={item.taMed}
                                                                 editableRow={editableRow}

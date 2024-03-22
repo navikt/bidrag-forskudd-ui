@@ -287,8 +287,7 @@ export const InntektTabel = ({
 
         if (editableRow === index) {
             setEditableRow(undefined);
-        }
-        if (editableRow) {
+        } else if (editableRow) {
             setEditableRow(editableRow - 1);
         }
     };
