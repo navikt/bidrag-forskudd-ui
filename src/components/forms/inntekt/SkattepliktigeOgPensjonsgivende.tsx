@@ -1,9 +1,9 @@
-import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
+import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { BehandlingDtoV2, InntektDtoV2, Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -11,7 +11,6 @@ import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFor
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
-import { inntektSorting, transformInntekt } from "../helpers/inntektFormHelpers";
 import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
@@ -69,16 +68,20 @@ const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
 };
 export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
-    const { setValue } = useFormContext<InntektFormValues>();
+    const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
     const fieldName = `årsinntekter.${ident}` as const;
     const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
 
-    const onRowSaveSuccess = (data: BehandlingDtoV2) => {
-        const årsinntekter = data.inntekter.årsinntekter
-            .filter((inntekt: InntektDtoV2) => inntekt.ident === ident)
-            .map(transformInntekt)
-            .sort(inntektSorting);
-        setValue(fieldName, årsinntekter);
+    const customRowValidation = (fieldName: `årsinntekter.${string}.${number}`) => {
+        const periode = getValues(fieldName);
+        if (ObjectUtils.isEmpty(periode.rapporteringstype)) {
+            setError(`${fieldName}.rapporteringstype`, {
+                type: "notValid",
+                message: text.error.inntektType,
+            });
+        } else {
+            clearErrors(`${fieldName}.rapporteringstype`);
+        }
     };
 
     return (
@@ -89,7 +92,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
-            <InntektTabel fieldName={fieldName} onRowSaveSuccess={onRowSaveSuccess}>
+            <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,
                     onSaveRow,

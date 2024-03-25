@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
-    BehandlingDtoV2,
+    InntektDtoV2,
     Inntektsrapportering,
     Kilde,
+    OppdatereInntektRequest,
     OppdatereManuellInntekt,
-    OppdaterePeriodeInntekt,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -172,7 +172,6 @@ export const Periode = ({
 export const InntektTabel = ({
     fieldName,
     customRowValidation,
-    onRowSaveSuccess,
     children,
 }: {
     fieldName:
@@ -182,7 +181,6 @@ export const InntektTabel = ({
         | `barnetillegg.${string}`
         | `kontantstøtte.${string}`;
     customRowValidation?: (fieldName: string) => void;
-    onRowSaveSuccess?: (data: BehandlingDtoV2) => void;
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
@@ -205,7 +203,7 @@ export const InntektTabel = ({
             runningPeriod: true,
         });
     const saveInntekt = useOnSaveInntekt();
-    const { control, getFieldState, getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
+    const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control,
         name: fieldName,
@@ -245,35 +243,31 @@ export const InntektTabel = ({
 
         if (erOffentlig) {
             updatedAndSave({
-                oppdatereInntektsperioder: [
-                    {
-                        id: periode.id,
-                        taMedIBeregning: periode.taMed,
-                        angittPeriode: {
-                            fom: periode.datoFom,
-                            til: periode.datoTom,
-                        },
-                    } as OppdaterePeriodeInntekt,
-                ],
+                oppdatereInntektsperiode: {
+                    id: periode.id,
+                    taMedIBeregning: periode.taMed,
+                    angittPeriode: {
+                        fom: periode.datoFom,
+                        til: periode.datoTom,
+                    },
+                },
             });
         } else {
             updatedAndSave(
                 {
-                    oppdatereManuelleInntekter: [
-                        {
-                            id: periode.id,
-                            taMed: periode.taMed,
-                            type: periode.rapporteringstype as Inntektsrapportering,
-                            beløp: periode.beløp,
-                            datoFom: periode.datoFom,
-                            datoTom: periode.datoTom,
-                            ident: periode.ident,
-                            gjelderBarn: periode.gjelderBarn,
-                            inntektstype: periode.inntektstype,
-                        } as OppdatereManuellInntekt,
-                    ],
+                    oppdatereManuellInntekt: {
+                        id: periode.id,
+                        taMed: periode.taMed,
+                        type: periode.rapporteringstype as Inntektsrapportering,
+                        beløp: periode.beløp,
+                        datoFom: periode.datoFom,
+                        datoTom: periode.datoTom,
+                        ident: periode.ident,
+                        gjelderBarn: periode.gjelderBarn,
+                        inntektstype: periode.inntektstype,
+                    } as OppdatereManuellInntekt,
                 },
-                onRowSaveSuccess
+                (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, data)
             );
         }
         unsetEditedRow(index);
@@ -282,7 +276,7 @@ export const InntektTabel = ({
     const handleDelete = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         clearErrors(`${fieldName}.${index}`);
-        updatedAndSave({ sletteInntekter: [periode.id] });
+        updatedAndSave({ sletteInntekt: periode.id });
         fieldArray.remove(index);
 
         if (editableRow === index) {
@@ -301,27 +295,10 @@ export const InntektTabel = ({
             setEditableRow(perioder.length);
         }
     };
-    const updatedAndSave = (
-        updatedValues: {
-            oppdatereInntektsperioder?: OppdaterePeriodeInntekt[];
-            oppdatereManuelleInntekter?: OppdatereManuellInntekt[];
-            sletteInntekter?: number[];
-        },
-        onSaveSuccess?: (data: BehandlingDtoV2) => void
-    ) => {
-        saveInntekt.mutate(
-            {
-                inntekter: {
-                    oppdatereInntektsperioder: [],
-                    oppdatereManuelleInntekter: [],
-                    sletteInntekter: [],
-                    ...updatedValues,
-                },
-            },
-            {
-                onSuccess: onSaveSuccess,
-            }
-        );
+    const updatedAndSave = (updatedValues: OppdatereInntektRequest, onSaveSuccess?: (data: InntektDtoV2) => void) => {
+        saveInntekt.mutate(updatedValues, {
+            onSuccess: onSaveSuccess,
+        });
         validatePeriods();
     };
     const onSaveRow = (index: number) => {

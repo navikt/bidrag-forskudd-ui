@@ -1,6 +1,7 @@
-import { useOppdaterBehandlingV2 } from "./useApiData";
+import { useUpdateInntekt } from "./useApiData";
 
 export const useOnSaveInntekt = () => {
-    const updateInntekter = useOppdaterBehandlingV2();
-    return updateInntekter.mutation;
+    const updateInntekter = useUpdateInntekt();
+
+    return updateInntekter;
 };

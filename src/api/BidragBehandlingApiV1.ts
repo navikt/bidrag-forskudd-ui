@@ -37,6 +37,8 @@ export interface Behandling {
     virkningstidspunkt?: string;
     /** @format date-time */
     vedtakstidspunkt?: string;
+    /** @format date-time */
+    slettetTidspunkt?: string;
     vedtakFattetAv?: string;
     getårsak?: TypeArsakstype;
     avslag?: Resultatkode;
@@ -63,12 +65,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
+    erVedtakFattet: boolean;
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
     grunnlagListe: GrunnlagEntity[];
-    erVedtakFattet: boolean;
     bidragspliktig?: Rolle;
 }
 
@@ -761,6 +763,19 @@ export interface TypeArManedsperiode {
      * @example "2023-01"
      */
     til?: string;
+}
+
+export interface OppdatereInntektRequest {
+    /** Angi periodeinformasjon for inntekter */
+    oppdatereInntektsperiode?: OppdaterePeriodeInntekt;
+    /** Opprette eller oppdatere manuelt oppgitte inntekter */
+    oppdatereManuellInntekt?: OppdatereManuellInntekt;
+    oppdatereNotat?: OppdaterNotat;
+    /**
+     * Angi id til inntekt som skal slettes
+     * @format int64
+     */
+    sletteInntekt?: number;
 }
 
 export interface OppdaterRollerRequest {
@@ -1575,7 +1590,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1664,7 +1682,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1717,6 +1735,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 path: `/api/v2/behandling/${behandlingsid}`,
                 method: "DELETE",
                 secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere inntekt for behandling. Returnerer inntekt som ble endret, opprettet, eller slettet.
+         *
+         * @tags behandling-controller-v-2
+         * @name OppdatereInntekt
+         * @request PUT:/api/v2/behandling/{behandlingsid}/inntekt
+         * @secure
+         */
+        oppdatereInntekt: (behandlingsid: number, data: OppdatereInntektRequest, params: RequestParams = {}) =>
+            this.request<InntektDtoV2, InntektDtoV2>({
+                path: `/api/v2/behandling/${behandlingsid}/inntekt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
