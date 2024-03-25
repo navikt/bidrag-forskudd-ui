@@ -23,9 +23,8 @@ type ArbeidsforholdProps = {
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
 
-    const arbeidsforholdTableData = arbeidsforholdOpplysninger
-        .filter((af) => af.partPersonId == ident)
-        .map(mapToTabledata);
+    const arbeidsforholdTableData =
+        arbeidsforholdOpplysninger?.filter((af) => af.partPersonId == ident)?.map(mapToTabledata) ?? [];
     return (
         <div className="grid gap-y-2">
             <div className="inline-flex items-center gap-x-4">
@@ -42,16 +41,24 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {arbeidsforholdTableData.map((arbeidsforhold, index) => (
-                        <tr key={`${arbeidsforhold.arbeidsgivernavn}-${index}`}>
-                            <td>
-                                {arbeidsforhold.periodeFra} - {arbeidsforhold.periodeTil}
+                    {arbeidsforholdTableData.length == 0 ? (
+                        <tr>
+                            <td colSpan={4}>
+                                <i>Ingen arbeidsforhold</i>
                             </td>
-                            <td>{arbeidsforhold.arbeidsgivernavn}</td>
-                            <td>{arbeidsforhold.stillingsprosent}</td>
-                            <td>{arbeidsforhold.sisteLønnsendring}</td>
                         </tr>
-                    ))}
+                    ) : (
+                        arbeidsforholdTableData.map((arbeidsforhold, index) => (
+                            <tr key={`${arbeidsforhold.arbeidsgivernavn}-${index}`}>
+                                <td>
+                                    {arbeidsforhold.periodeFra} - {arbeidsforhold.periodeTil}
+                                </td>
+                                <td>{arbeidsforhold.arbeidsgivernavn}</td>
+                                <td>{arbeidsforhold.stillingsprosent}</td>
+                                <td>{arbeidsforhold.sisteLønnsendring}</td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </div>
