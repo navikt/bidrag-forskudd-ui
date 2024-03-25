@@ -264,7 +264,7 @@ export const InntektTabel = ({
                         datoTom: periode.datoTom,
                         ident: periode.ident,
                         gjelderBarn: periode.gjelderBarn,
-                        inntektstype: periode.inntektstype,
+                        inntektstype: periode.inntektstype ? periode.inntektstype : null,
                     } as OppdatereManuellInntekt,
                 },
                 (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, transformInntekt(data))
