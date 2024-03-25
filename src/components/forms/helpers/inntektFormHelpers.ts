@@ -17,7 +17,7 @@ const inntekterSomKanHaHullIPerioder = [
     Inntektsrapportering.KONTANTSTOTTE,
     Inntektsrapportering.SMABARNSTILLEGG,
 ];
-export const transformInntekt = (inntekt) => ({
+export const transformInntekt = (inntekt: InntektDtoV2): InntektFormPeriode => ({
     ...inntekt,
     angittPeriode: {
         fom: inntekt.datoFom ?? null,
@@ -42,7 +42,7 @@ export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => 
 };
 const mapInntekterToRolle =
     (inntekter: InntektDtoV2[], fieldToCheck: string) =>
-    (rolle): InntektDtoV2[] =>
+    (rolle): InntektFormPeriode[] =>
         inntekter
             ?.filter((inntekt) => inntekt[fieldToCheck] === rolle.ident)
             .map(transformInntekt)
