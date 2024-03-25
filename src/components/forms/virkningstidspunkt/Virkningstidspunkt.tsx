@@ -15,7 +15,7 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useOppdaterBehandling } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
@@ -221,7 +221,7 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const oppdaterBehandling = useOppdaterBehandling();
+    const oppdaterBehandling = useOppdaterBehandlingV2();
     const initialValues = createInitialValues(virkningstidspunkt);
 
     const useFormMethods = useForm({

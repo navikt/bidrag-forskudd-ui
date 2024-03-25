@@ -5,11 +5,7 @@ import { AxiosError } from "axios";
 import { useCallback } from "react";
 
 import {
-    AddOpplysningerRequest,
-    BehandlingDto,
     BehandlingDtoV2,
-    GrunnlagsdataDto,
-    OppdaterBehandlingRequest,
     OppdaterBehandlingRequestV2,
     OpplysningerType,
     RolleDto,
@@ -78,39 +74,12 @@ export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType)
         ?.innhentet;
 };
 
-export const useOppdaterBehandling = () => {
-    const { behandlingId } = useForskudd();
-
-    const mutation = oppdaterBehandlingMutation(behandlingId);
-
-    return { mutation, error: mutation.isError };
-};
-
 export const useOppdaterBehandlingV2 = () => {
     const { behandlingId } = useForskudd();
 
     const mutation = oppdaterBehandlingMutationV2(behandlingId);
 
     return { mutation, error: mutation.isError };
-};
-export const oppdaterBehandlingMutation = (behandlingId: number) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
-        mutationFn: async (payload: OppdaterBehandlingRequest): Promise<BehandlingDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandling(behandlingId, payload);
-            return data;
-        },
-        networkMode: "always",
-        onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandling(behandlingId), data);
-            queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
-        },
-        onError: (error) => {
-            console.log("onError", error);
-        },
-    });
 };
 export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
     const queryClient = useQueryClient();
@@ -124,7 +93,6 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
         networkMode: "always",
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
-            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);
@@ -132,81 +100,12 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
     });
 };
 
-export const useAddOpplysningerData = () => {
-    const { behandlingId } = useForskudd();
-    const queryClient = useQueryClient();
-    const mutation = useMutation({
-        mutationFn: async (payload: AddOpplysningerRequest): Promise<GrunnlagsdataDto> =>
-            (await BEHANDLING_API_V1.api.leggTilOpplysninger(behandlingId, payload))?.data,
-        onSuccess: (data) => {
-            queryClient.setQueryData<BehandlingDto>(QueryKeys.behandling(behandlingId), (prevData) => {
-                const prevDataExists = prevData.opplysninger.some(
-                    (opplysning) => opplysning.grunnlagsdatatype == data.grunnlagsdatatype
-                );
-
-                const opplysninger = prevDataExists
-                    ? prevData.opplysninger.map((saved) => {
-                          if (saved.grunnlagsdatatype == data.grunnlagsdatatype) {
-                              return data;
-                          }
-                          return saved;
-                      })
-                    : [...prevData.opplysninger, data];
-                return {
-                    ...prevData,
-                    opplysninger,
-                };
-            });
-        },
-    });
-
-    return { mutation, error: mutation.isError };
-};
-
-/**
- *
- * V1
- *
- */
-
 export const useGetVisningsnavn = () =>
     useSuspenseQuery({
         queryKey: QueryKeys.visningsnavn(),
         queryFn: (): Promise<AxiosResponse<Record<string, string>>> => BEHANDLING_API_V1.api.hentVisningsnavn(),
         staleTime: 0,
     });
-
-export const useGetBehandling = (): BehandlingDto => {
-    const { behandlingId, vedtakId } = useForskudd();
-    const { data: behandling } = useSuspenseQuery({
-        queryKey: QueryKeys.behandling(behandlingId, vedtakId),
-        queryFn: async (): Promise<BehandlingDto> => {
-            try {
-                if (vedtakId) {
-                    const { data } = await BEHANDLING_API_V1.api.vedtakLesemodusV1(vedtakId);
-                    return data;
-                }
-                const { data } = await BEHANDLING_API_V1.api.hentBehandling(behandlingId);
-                return data;
-            } catch (e) {
-                if (e instanceof AxiosError && e.response.status == 404) {
-                    throw new FantIkkeVedtakEllerBehandlingError(
-                        `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
-                    );
-                }
-                throw e;
-            }
-        },
-        retry: (count, error) => {
-            if (error instanceof FantIkkeVedtakEllerBehandlingError) {
-                return false;
-            }
-            return count < 3;
-        },
-        staleTime: Infinity,
-    });
-    return behandling;
-};
 
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
     const { behandlingId, vedtakId } = useForskudd();
