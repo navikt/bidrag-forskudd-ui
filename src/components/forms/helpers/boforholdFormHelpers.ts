@@ -6,7 +6,7 @@ import {
     HusstandsbarnDto,
     HusstandsbarnperiodeDto,
     Kilde,
-    OppdaterBehandlingRequest,
+    OppdaterBehandlingRequestV2,
     RolleDto,
     Sivilstand,
     SivilstandDto,
@@ -373,7 +373,7 @@ export const mapSivilstandProsessert = (sivilstandBeregnet: Sivilstand[]): Sivil
         sivilstand: v.sivilstandskode,
     }));
 
-export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequest => ({
+export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequestV2 => ({
     boforhold: {
         ...values,
         husstandsbarn: values.husstandsbarn,
