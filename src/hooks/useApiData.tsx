@@ -6,7 +6,9 @@ import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
+    InntektDtoV2,
     OppdaterBehandlingRequestV2,
+    OppdatereInntektRequest,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -93,6 +95,25 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
         networkMode: "always",
         onSuccess: (data) => {
             queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
+        },
+        onError: (error) => {
+            console.log("onError", error);
+        },
+    });
+};
+
+export const useUpdateInntekt = () => {
+    const { behandlingId } = useForskudd();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (payload: OppdatereInntektRequest): Promise<InntektDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereInntekt(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onSuccess: () => {
+            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
         },
         onError: (error) => {
             console.log("onError", error);

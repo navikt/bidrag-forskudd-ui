@@ -51,6 +51,7 @@ export default {
         ingenLoependeInntektPeriode:
             "Det er ingen løpende inntektsperiode. Rediger en av periodene eller legg til en ny periode.",
         ingenLoependePeriode: "Det er ingen løpende status i beregningen.",
+        inntektType: "Inntekt type må settes",
         navnMåFyllesUt: "Navn må fylles ut",
         kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
         personFinnesIkke: "Finner ikke person med ident: {}",

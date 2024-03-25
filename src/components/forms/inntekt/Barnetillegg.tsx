@@ -3,14 +3,7 @@ import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import {
-    BehandlingDtoV2,
-    InntektDtoV2,
-    Inntektsrapportering,
-    Inntektstype,
-    Kilde,
-    Rolletype,
-} from "../../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -20,7 +13,6 @@ import { FormControlledSelectField } from "../../formFields/FormControlledSelect
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { inntektSorting, transformInntekt } from "../helpers/inntektFormHelpers";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 
 const Beskrivelse = ({
@@ -55,19 +47,11 @@ const Beskrivelse = ({
 
 export const Barnetillegg = () => {
     const { roller } = useGetBehandlingV2();
-    const { getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
+    const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const barna = roller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)
         .sort((a, b) => a.navn.localeCompare(b.navn));
     const bmIdent = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-
-    const onRowSaveSuccess = (ident: string) => (data: BehandlingDtoV2) => {
-        const barnInntekter = data.inntekter.barnetillegg
-            .filter((inntekt: InntektDtoV2) => inntekt.gjelderBarn === ident)
-            .map(transformInntekt)
-            .sort(inntektSorting);
-        setValue(`barnetillegg.${ident}`, barnInntekter);
-    };
 
     const customRowValidation = (fieldName: `barnetillegg.${string}.${number}`) => {
         const periode = getValues(fieldName);
@@ -102,7 +86,6 @@ export const Barnetillegg = () => {
                     <InntektTabel
                         fieldName={`barnetillegg.${barn.ident}` as const}
                         customRowValidation={customRowValidation}
-                        onRowSaveSuccess={onRowSaveSuccess(barn.ident)}
                     >
                         {({
                             controlledFields,

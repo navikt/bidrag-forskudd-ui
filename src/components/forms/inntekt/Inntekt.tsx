@@ -116,11 +116,9 @@ const Side = () => {
     const onSave = () => {
         const [medIVedtaket, kunINotat] = getValues(["notat.medIVedtaket", "notat.kunINotat"]);
         saveInntekt.mutate({
-            inntekter: {
-                oppdatereInntektsperioder: [],
-                oppdatereManuelleInntekter: [],
-                sletteInntekter: [],
-                notat: { medIVedtaket, kunINotat },
+            oppdatereNotat: {
+                medIVedtaket,
+                kunINotat,
             },
         });
     };
