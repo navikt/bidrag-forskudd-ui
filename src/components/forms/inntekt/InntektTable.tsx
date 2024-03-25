@@ -21,7 +21,7 @@ import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { checkErrorsInPeriods } from "../helpers/inntektFormHelpers";
+import { checkErrorsInPeriods, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -267,7 +267,7 @@ export const InntektTabel = ({
                         inntektstype: periode.inntektstype,
                     } as OppdatereManuellInntekt,
                 },
-                (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, data)
+                (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, transformInntekt(data))
             );
         }
         unsetEditedRow(index);

@@ -140,7 +140,7 @@ export const Barnetillegg = () => {
                                                     <Table.Row key={item.ident + index} className="align-top">
                                                         <Table.DataCell>
                                                             <TaMed
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 fieldName={`barnetillegg.${barn.ident}`}
                                                                 index={index}
                                                                 handleOnSelect={handleOnSelect}
@@ -148,7 +148,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.fraOgMed}
@@ -159,7 +159,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.tilOgMed}
@@ -169,11 +169,11 @@ export const Barnetillegg = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <KildeIcon key={item?.id} kilde={item.kilde} />
+                                                            <KildeIcon key={item?.id + index} kilde={item.kilde} />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Beskrivelse
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 item={item}
                                                                 field={`barnetillegg.${barn.ident}.${index}`}
                                                                 erRedigerbart={
@@ -184,7 +184,7 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Totalt
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 item={item}
                                                                 field={`barnetillegg.${barn.ident}.${index}`}
                                                                 erRedigerbart={
@@ -195,14 +195,14 @@ export const Barnetillegg = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <div className="h-8 flex items-center justify-end">
-                                                                <BodyShort>
+                                                                <BodyShort key={item?.id + index}>
                                                                     {(item.beløp * 12).toLocaleString("nb-NO")}
                                                                 </BodyShort>
                                                             </div>
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <EditOrSaveButton
-                                                                key={item?.id}
+                                                                key={item?.id + index}
                                                                 index={index}
                                                                 erMed={item.taMed}
                                                                 editableRow={editableRow}
