@@ -80,10 +80,9 @@ export const Kontantstøtte = () => {
                                             </Table.Header>
                                             <Table.Body>
                                                 {controlledFields.map((item, index) => (
-                                                    <Table.Row key={item.ident + index} className="align-top">
+                                                    <Table.Row key={item.id + index} className="align-top">
                                                         <Table.DataCell>
                                                             <TaMed
-                                                                key={item?.id + index}
                                                                 fieldName={`kontantstøtte.${barn.ident}`}
                                                                 index={index}
                                                                 handleOnSelect={handleOnSelect}
@@ -91,7 +90,6 @@ export const Kontantstøtte = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                key={item?.id + index}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.fraOgMed}
@@ -102,7 +100,6 @@ export const Kontantstøtte = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Periode
-                                                                key={item?.id + index}
                                                                 editableRow={editableRow}
                                                                 index={index}
                                                                 label={text.label.tilOgMed}
@@ -112,11 +109,10 @@ export const Kontantstøtte = () => {
                                                             />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
-                                                            <KildeIcon key={item?.id + index} kilde={item.kilde} />
+                                                            <KildeIcon kilde={item.kilde} />
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <Totalt
-                                                                key={item?.id + index}
                                                                 item={item}
                                                                 field={`kontantstøtte.${barn.ident}.${index}`}
                                                                 erRedigerbart={
@@ -127,7 +123,6 @@ export const Kontantstøtte = () => {
                                                         </Table.DataCell>
                                                         <Table.DataCell>
                                                             <EditOrSaveButton
-                                                                key={item?.id + index}
                                                                 index={index}
                                                                 erMed={item.taMed}
                                                                 editableRow={editableRow}

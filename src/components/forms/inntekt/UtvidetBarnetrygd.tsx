@@ -60,10 +60,9 @@ export const UtvidetBarnetrygd = () => {
                                     </Table.Header>
                                     <Table.Body>
                                         {controlledFields.map((item, index) => (
-                                            <Table.Row key={item.ident + index} className="align-top">
+                                            <Table.Row key={item.id + index} className="align-top">
                                                 <Table.DataCell>
                                                     <TaMed
-                                                        key={item?.id + index}
                                                         fieldName={fieldName}
                                                         index={index}
                                                         handleOnSelect={handleOnSelect}
@@ -71,7 +70,6 @@ export const UtvidetBarnetrygd = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
-                                                        key={item?.id + index}
                                                         editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.fraOgMed}
@@ -82,7 +80,6 @@ export const UtvidetBarnetrygd = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
-                                                        key={item?.id + index}
                                                         editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.tilOgMed}
@@ -92,11 +89,10 @@ export const UtvidetBarnetrygd = () => {
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <KildeIcon key={item?.id + index} kilde={item.kilde} />
+                                                    <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Totalt
-                                                        key={item?.id + index}
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
                                                         erRedigerbart={
@@ -106,7 +102,6 @@ export const UtvidetBarnetrygd = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <EditOrSaveButton
-                                                        key={item?.id + index}
                                                         index={index}
                                                         erMed={item.taMed}
                                                         editableRow={editableRow}

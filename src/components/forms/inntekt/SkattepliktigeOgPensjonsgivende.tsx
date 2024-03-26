@@ -139,7 +139,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                     <Table.Body>
                                         {controlledFields.map((item, index) => (
                                             <Table.ExpandableRow
-                                                key={item.ident + index}
+                                                key={item?.id + item.ident + index}
                                                 content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
                                                 className="align-top"
@@ -147,7 +147,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                             >
                                                 <Table.DataCell>
                                                     <TaMed
-                                                        key={item?.id + index}
                                                         fieldName={fieldName}
                                                         index={index}
                                                         handleOnSelect={handleOnSelect}
@@ -155,7 +154,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
-                                                        key={item?.id + index}
                                                         editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.fraOgMed}
@@ -166,7 +164,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Periode
-                                                        key={item?.id + index}
                                                         editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.tilOgMed}
@@ -177,7 +174,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <Beskrivelse
-                                                        key={item?.id + index}
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
                                                         erRedigerbart={
@@ -186,11 +182,10 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <KildeIcon key={item?.id + index} kilde={item.kilde} />
+                                                    <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
                                                 <Table.DataCell align="right">
                                                     <Totalt
-                                                        key={item?.id + index}
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
                                                         erRedigerbart={
@@ -200,7 +195,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <EditOrSaveButton
-                                                        key={item?.id + index}
                                                         index={index}
                                                         erMed={item.taMed}
                                                         editableRow={editableRow}
