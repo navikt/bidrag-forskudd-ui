@@ -1,3 +1,4 @@
+import { LoggerService } from "@navikt/bidrag-ui-common";
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -6,9 +7,9 @@ import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
-    InntektDtoV2,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
+    OppdatereInntektResponse,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -37,12 +38,6 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
-    behandling: (behandlingId: number, vedtakId?: number) => [
-        "behandling",
-        QueryKeys.behandlingVersion,
-        behandlingId,
-        vedtakId,
-    ],
     behandlingV2: (behandlingId: number, vedtakId?: number) => [
         "behandlingV2",
         QueryKeys.behandlingVersion,
@@ -107,16 +102,23 @@ export const useUpdateInntekt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (payload: OppdatereInntektRequest): Promise<InntektDtoV2> => {
+        mutationFn: async (payload: OppdatereInntektRequest): Promise<OppdatereInntektResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereInntekt(behandlingId, payload);
             return data;
         },
         networkMode: "always",
-        onSuccess: () => {
-            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
+        onSuccess: (response) => {
+            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => ({
+                ...currentData,
+                inntekter: {
+                    ...currentData.inntekter,
+                    beregnetInntekter: response.beregnetInntekter,
+                },
+            }));
         },
         onError: (error) => {
             console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av inntekter", error);
         },
     });
 };
