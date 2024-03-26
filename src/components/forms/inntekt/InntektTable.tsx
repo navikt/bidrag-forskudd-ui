@@ -300,7 +300,7 @@ export const InntektTabel = ({
     };
     const updatedAndSave = (updatedValues: OppdatereInntektRequest, onSaveSuccess?: (data: InntektDtoV2) => void) => {
         saveInntekt.mutate(updatedValues, {
-            onSuccess: (response) => onSaveSuccess(response?.inntekt),
+            onSuccess: (response) => onSaveSuccess?.(response?.inntekt),
         });
         validatePeriods();
     };
