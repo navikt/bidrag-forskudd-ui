@@ -210,6 +210,8 @@ const canRunInParallelWithInntektType = (inntektType: Inntektsrapportering | "")
                 Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
                 Inntektsrapportering.LONNTREKK,
             ];
+        case Inntektsrapportering.BARNETILLEGG:
+            return Object.values(Inntektsrapportering);
         default:
             return Object.values(Inntektsrapportering).filter((value) => value !== inntektType);
     }
@@ -250,12 +252,12 @@ export const checkErrorsInPeriods = (
 
         for (let j = i + 1; j < perioder.length; j++) {
             if (perioder[i].taMed && perioder[j].taMed) {
-                if (
-                    periodsAreOverlapping(perioder[i], perioder[j]) &&
-                    !canRunInParallelWithInntektType(perioder[i].rapporteringstype).includes(
-                        perioder[j].rapporteringstype as Inntektsrapportering
-                    )
-                ) {
+                const overlappingPeriods = periodsAreOverlapping(perioder[i], perioder[j]);
+                const inntektsCanRunInParallel = canRunInParallelWithInntektType(
+                    perioder[i].rapporteringstype
+                ).includes(perioder[j].rapporteringstype as Inntektsrapportering);
+
+                if (overlappingPeriods && !inntektsCanRunInParallel) {
                     overlappingPeriodIndexes.push([i, j]);
                 }
 
