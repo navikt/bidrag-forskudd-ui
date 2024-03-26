@@ -1,3 +1,4 @@
+import { LoggerService } from "@navikt/bidrag-ui-common";
 import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -106,17 +107,18 @@ export const useUpdateInntekt = () => {
             return data;
         },
         networkMode: "always",
-        onSuccess: (data) => {
-            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (prevData) => ({
-                ...prevData,
+        onSuccess: (response) => {
+            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => ({
+                ...currentData,
                 inntekter: {
-                    ...prevData.inntekter,
-                    beregnetInntekter: data.beregnetInntekter,
+                    ...currentData.inntekter,
+                    beregnetInntekter: response.beregnetInntekter,
                 },
             }));
         },
         onError: (error) => {
             console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av inntekter", error);
         },
     });
 };
