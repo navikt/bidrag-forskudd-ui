@@ -259,7 +259,10 @@ export const InntektTabel = ({
                         id: periode.id,
                         taMed: periode.taMed,
                         type: periode.rapporteringstype as Inntektsrapportering,
-                        beløp: periode.beløp,
+                        beløp:
+                            periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG
+                                ? periode.beløpMnd * 12
+                                : periode.beløp,
                         datoFom: periode.datoFom,
                         datoTom: periode.datoTom,
                         ident: periode.ident,

@@ -10,10 +10,11 @@ import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 
 const Beskrivelse = ({
     item,
@@ -44,6 +45,33 @@ const Beskrivelse = ({
         </BodyShort>
     );
 };
+
+const Totalt = ({
+    item,
+    field,
+    erRedigerbart,
+}: {
+    item: InntektFormPeriode;
+    field: string;
+    erRedigerbart: boolean;
+}) => (
+    <>
+        {erRedigerbart ? (
+            <FormControlledTextField
+                name={`${field}.beløpMnd`}
+                label="Totalt"
+                type="number"
+                min="1"
+                inputMode="numeric"
+                hideLabel
+            />
+        ) : (
+            <div className="h-8 flex items-center justify-end">
+                <BodyShort>{item.beløpMnd.toLocaleString("nb-NO")}</BodyShort>
+            </div>
+        )}
+    </>
+);
 
 export const Barnetillegg = () => {
     const { roller } = useGetBehandlingV2();
@@ -196,7 +224,7 @@ export const Barnetillegg = () => {
                                                         <Table.DataCell>
                                                             <div className="h-8 flex items-center justify-end">
                                                                 <BodyShort key={item?.id + index}>
-                                                                    {(item.beløp * 12).toLocaleString("nb-NO")}
+                                                                    {(item.beløpMnd * 12).toLocaleString("nb-NO")}
                                                                 </BodyShort>
                                                             </div>
                                                         </Table.DataCell>
