@@ -7,7 +7,7 @@ import { useForskudd } from "../../context/ForskuddContext";
 import { useGetBehandlingV2, usePersonsQueries } from "../../hooks/useApiData";
 
 export const Header = memo(() => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId, vedtakId } = useForskudd();
     const { roller, saksnummer } = useGetBehandlingV2();
     const personsQueries = usePersonsQueries(roller);
     const rollerMedPersonNavn = personsQueries.map(({ data }) => data);
@@ -19,7 +19,7 @@ export const Header = memo(() => {
                 ident: person.ident!,
                 navn: person.visningsnavn,
             }))}
-            skjermbilde={{ navn: text.skjermbildeNavn, referanse: `#${behandlingId}` }}
+            skjermbilde={{ navn: text.skjermbildeNavn, referanse: `#${behandlingId ?? vedtakId}` }}
         />
     );
 });

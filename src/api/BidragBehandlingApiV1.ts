@@ -35,6 +35,8 @@ export interface Behandling {
     refVedtaksid?: number;
     /** @format date */
     virkningstidspunkt?: string;
+    /** @format date */
+    opprinneligVirkningstidspunkt?: string;
     /** @format date-time */
     vedtakstidspunkt?: string;
     /** @format date-time */
@@ -65,11 +67,12 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    erVedtakFattet: boolean;
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
+    erVedtakFattet: boolean;
+    grunnlagListe: GrunnlagEntity[];
     bidragspliktig?: Rolle;
+    erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
 }
@@ -747,6 +750,8 @@ export interface RolleDto {
 export interface VirkningstidspunktDto {
     /** @format date */
     virkningstidspunkt?: string;
+    /** @format date */
+    opprinneligVirkningstidspunkt?: string;
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: BehandlingNotatDto;
