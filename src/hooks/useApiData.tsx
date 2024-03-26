@@ -6,9 +6,9 @@ import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
-    InntektDtoV2,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
+    OppdatereInntektResponse,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -37,12 +37,6 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
-    behandling: (behandlingId: number, vedtakId?: number) => [
-        "behandling",
-        QueryKeys.behandlingVersion,
-        behandlingId,
-        vedtakId,
-    ],
     behandlingV2: (behandlingId: number, vedtakId?: number) => [
         "behandlingV2",
         QueryKeys.behandlingVersion,
@@ -107,13 +101,19 @@ export const useUpdateInntekt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (payload: OppdatereInntektRequest): Promise<InntektDtoV2> => {
+        mutationFn: async (payload: OppdatereInntektRequest): Promise<OppdatereInntektResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereInntekt(behandlingId, payload);
             return data;
         },
         networkMode: "always",
-        onSuccess: () => {
-            queryClient.refetchQueries({ queryKey: QueryKeys.behandling(behandlingId) });
+        onSuccess: (data) => {
+            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (prevData) => ({
+                ...prevData,
+                inntekter: {
+                    ...prevData.inntekter,
+                    beregnetInntekter: data.beregnetInntekter,
+                },
+            }));
         },
         onError: (error) => {
             console.log("onError", error);

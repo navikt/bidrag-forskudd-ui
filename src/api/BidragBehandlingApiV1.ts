@@ -65,13 +65,13 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
+    grunnlagListe: GrunnlagEntity[];
     erVedtakFattet: boolean;
     bidragsmottaker?: Rolle;
     søknadsbarn: Rolle[];
+    bidragspliktig?: Rolle;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    grunnlagListe: GrunnlagEntity[];
-    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -776,6 +776,12 @@ export interface OppdatereInntektRequest {
      * @format int64
      */
     sletteInntekt?: number;
+}
+
+export interface OppdatereInntektResponse {
+    inntekt?: InntektDtoV2;
+    /** Periodisert beregnet inntekter per barn */
+    beregnetInntekter: InntektPerBarn[];
 }
 
 export interface OppdaterRollerRequest {
@@ -1590,10 +1596,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1682,7 +1685,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -1747,7 +1750,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdatereInntekt: (behandlingsid: number, data: OppdatereInntektRequest, params: RequestParams = {}) =>
-            this.request<InntektDtoV2, InntektDtoV2>({
+            this.request<OppdatereInntektResponse, OppdatereInntektResponse>({
                 path: `/api/v2/behandling/${behandlingsid}/inntekt`,
                 method: "PUT",
                 body: data,
