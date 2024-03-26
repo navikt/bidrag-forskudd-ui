@@ -26,6 +26,7 @@ export const transformInntekt = (inntekt: InntektDtoV2): InntektFormPeriode => (
     datoFom: inntekt.datoFom ?? null,
     datoTom: inntekt.datoTom ?? null,
     inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
+    beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
 });
 
 const reduceAndMapRolleToInntekt = (mapFunction) => (acc, rolle) => ({
