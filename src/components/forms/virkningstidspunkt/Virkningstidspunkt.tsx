@@ -19,7 +19,7 @@ import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useA
 import { useDebounce } from "../../../hooks/useDebounce";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
-import { addMonths, DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
@@ -106,7 +106,10 @@ const Main = ({ initialValues, error }) => {
     };
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
-    const tom = useMemo(() => addMonths(new Date(), 50 * 12), [fom]);
+    const tom = useMemo(
+        () => dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
+        [fom]
+    );
 
     useEffect(() => {
         if (!initialVirkningsdato && behandling) {
