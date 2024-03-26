@@ -252,6 +252,7 @@ export const Barnetillegg = () => {
                                             datoTom: null,
                                             gjelderBarn: barn.ident,
                                             beløp: 0,
+                                            beløpMnd: 0,
                                             rapporteringstype: Inntektsrapportering.BARNETILLEGG,
                                             taMed: true,
                                             kilde: Kilde.MANUELL,
