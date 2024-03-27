@@ -139,7 +139,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                     <Table.Body>
                                         {controlledFields.map((item, index) => (
                                             <Table.ExpandableRow
-                                                key={item?.id + item.ident + index}
+                                                key={item?.id + item.ident}
                                                 content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
                                                 className="align-top"

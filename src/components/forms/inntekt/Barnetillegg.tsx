@@ -165,7 +165,7 @@ export const Barnetillegg = () => {
                                             </Table.Header>
                                             <Table.Body>
                                                 {controlledFields.map((item, index) => (
-                                                    <Table.Row key={item.id + index} className="align-top">
+                                                    <Table.Row key={item.id} className="align-top">
                                                         <Table.DataCell>
                                                             <TaMed
                                                                 fieldName={`barnetillegg.${barn.ident}`}
