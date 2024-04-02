@@ -67,14 +67,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
+    erVedtakFattet: boolean;
     erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    bidragspliktig?: Rolle;
-    søknadsbarn: Rolle[];
     bidragsmottaker?: Rolle;
+    søknadsbarn: Rolle[];
     grunnlagListe: GrunnlagEntity[];
-    erVedtakFattet: boolean;
+    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -698,14 +698,13 @@ export interface Grunnlagstype {
 }
 
 export interface HusstandsbarnOverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    /** Angi periode inntekten skal dekke ved beregnings */
     periode: Datoperiode;
     /** @uniqueItems true */
     bosstatus: Bostatuskode[];
 }
 
 export interface HusstandsbarnPeriodiseringsfeilDto {
-    navn?: string;
     ident?: string;
     /** @format date */
     fødselsdato: string;
@@ -763,27 +762,17 @@ export interface InntektPerBarn {
 export interface InntektValideringsfeil {
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
-    fremtidigPeriode: boolean;
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    /** Er sann hvis det ikke finnes noen valgte inntekter. Vil alltid være false hvis det er ytelse */
-    manglerPerioder: boolean;
-    ident: string;
-    /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
-    gjelderBarn?: string;
-    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
 }
 
 export interface InntektValideringsfeilDto {
-    /** @uniqueItems true */
-    barnetillegg: InntektValideringsfeil[];
-    utvidetBarnetrygd?: InntektValideringsfeil;
-    /** @uniqueItems true */
-    kontantstøtte: InntektValideringsfeil[];
-    småbarnstillegg?: InntektValideringsfeil;
-    /** @uniqueItems true */
-    årsinntekter: InntektValideringsfeil[];
+    barnetillegg: InntektValideringsfeil;
+    utvidetBarnetrygd: InntektValideringsfeil;
+    kontantstøtte: InntektValideringsfeil;
+    småbarnstillegg: InntektValideringsfeil;
+    årsinntekter: InntektValideringsfeil;
 }
 
 export interface InntekterDtoV2 {
@@ -813,7 +802,7 @@ export interface InntektspostDtoV2 {
 }
 
 export interface OverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    /** Angi periode inntekten skal dekke ved beregnings */
     periode: Datoperiode;
     /**
      * Teknisk id på inntekter som overlapper
@@ -843,7 +832,7 @@ export interface RolleDto {
 }
 
 export interface SivilstandOverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    /** Angi periode inntekten skal dekke ved beregnings */
     periode: Datoperiode;
     /** @uniqueItems true */
     sivilstandskode: Sivilstandskode[];
@@ -1280,16 +1269,15 @@ export interface InitalizeForsendelseRequest {
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatusEnum;
 }
 
-export interface BeregningValideringsfeil2 {
-    virkningstidspunkt?: VirkningstidspunktFeilDto;
-    inntekter?: InntektValideringsfeilDto;
-    husstandsbarn?: BoforholdPeriodeseringsfeil[];
-    sivilstand?: SivilstandPeriodeseringsfeil;
+export interface BeregningValideringsfeil {
+    type: BeregningValideringsfeilTypeEnum;
+    feilListe: string[];
 }
 
-export interface VirkningstidspunktFeilDto {
-    manglerVirkningstidspunkt: boolean;
-    manglerÅrsakEllerAvslag: boolean;
+export interface BeregningValideringsfeilList {
+    empty?: boolean;
+    first?: BeregningValideringsfeil;
+    last?: BeregningValideringsfeil;
 }
 
 export interface AddOpplysningerRequest {
@@ -2112,7 +2100,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil2>({
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeilList>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,
