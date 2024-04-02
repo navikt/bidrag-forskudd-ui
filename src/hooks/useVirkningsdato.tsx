@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { dateOrNull } from "../utils/date-utils";
 import { useGetBehandlingV2 } from "./useApiData";
 
@@ -6,7 +8,10 @@ export const useVirkningsdato = () => {
         søktFomDato,
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
     } = useGetBehandlingV2();
-    const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
+    const virkningsOrSoktFraDato = useMemo(
+        () => dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato),
+        [virkningsdato, søktFomDato]
+    );
 
-    return datoFom;
+    return virkningsOrSoktFraDato;
 };

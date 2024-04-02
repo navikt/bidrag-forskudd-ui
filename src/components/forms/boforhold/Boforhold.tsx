@@ -42,6 +42,7 @@ import {
 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import {
     BoforholdFormValues,
@@ -143,10 +144,9 @@ const Main = ({
 }) => {
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
-        søktFomDato,
     } = useGetBehandlingV2();
+    const datoFom = useVirkningsdato();
     const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
-    const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
     const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
     useEffect(scrollToHash, []);
@@ -225,12 +225,11 @@ const BoforholdsForm = () => {
     const { setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
-    const {
-        boforhold,
-        virkningstidspunkt: { virkningstidspunkt },
-        søktFomDato,
-        roller,
-    } = useGetBehandlingV2();
+    const { boforhold, roller } = useGetBehandlingV2();
+    const virkningsOrSoktFraDato = useVirkningsdato();
+    // const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
+    //     OpplysningerType.BOFORHOLD_BEARBEIDET
+    // );
     const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
     const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
@@ -240,10 +239,6 @@ const BoforholdsForm = () => {
             sivilstand: sivilstandListe,
         }),
         [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
-    );
-    const virkningsOrSoktFraDato = useMemo(
-        () => dateOrNull(virkningstidspunkt) ?? dateOrNull(søktFomDato),
-        [virkningstidspunkt, søktFomDato]
     );
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
