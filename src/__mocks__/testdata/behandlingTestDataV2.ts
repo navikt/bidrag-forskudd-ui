@@ -40,6 +40,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
             kunINotat: "",
             medIVedtaket: "",
         },
+        valideringsfeil: null,
     },
     inntekter: {
         månedsinntekter: [],
@@ -53,6 +54,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
             kunINotat: "",
             medIVedtaket: "",
         },
+        valideringsfeil: null,
     },
     virkningstidspunkt: {
         virkningstidspunkt: "",

@@ -4,24 +4,18 @@ import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import {
-    InntektDtoV2,
-    Inntektsrapportering,
-    Kilde,
-    OppdatereInntektRequest,
-    OppdatereManuellInntekt,
-} from "../../../api/BidragBehandlingApiV1";
+import { InntektDtoV2, Kilde, OppdatereInntektRequest } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { checkErrorsInPeriods, transformInntekt } from "../helpers/inntektFormHelpers";
+import { checkErrorsInPeriods, createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -128,12 +122,8 @@ export const Periode = ({
     field: "datoFom" | "datoTom";
     item: InntektFormPeriode;
 }) => {
-    const {
-        søktFomDato,
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-    } = useGetBehandlingV2();
-    const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFom);
+    const virkningsdato = useVirkningsdato();
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -184,11 +174,7 @@ export const InntektTabel = ({
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
-    const {
-        søktFomDato,
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-    } = useGetBehandlingV2();
-    const datoFom = dateOrNull(virkningsdato) ?? dateOrNull(søktFomDato);
+    const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods, runningPeriod }, setTableErros] =
         useState<{
@@ -216,7 +202,7 @@ export const InntektTabel = ({
 
     const validatePeriods = () => {
         const perioder = getValues(fieldName);
-        const tableErros = checkErrorsInPeriods(datoFom, perioder);
+        const tableErros = checkErrorsInPeriods(virkningsdato, perioder);
         setTableErros(tableErros);
     };
 
@@ -239,40 +225,9 @@ export const InntektTabel = ({
 
     const handleUpdate = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
-
-        if (erOffentlig) {
-            updatedAndSave({
-                oppdatereInntektsperiode: {
-                    id: periode.id,
-                    taMedIBeregning: periode.taMed,
-                    angittPeriode: {
-                        fom: periode.datoFom,
-                        til: periode.datoTom,
-                    },
-                },
-            });
-        } else {
-            updatedAndSave(
-                {
-                    oppdatereManuellInntekt: {
-                        id: periode.id,
-                        taMed: periode.taMed,
-                        type: periode.rapporteringstype as Inntektsrapportering,
-                        beløp:
-                            periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG
-                                ? periode.beløpMnd * 12
-                                : periode.beløp,
-                        datoFom: periode.datoFom,
-                        datoTom: periode.datoTom,
-                        ident: periode.ident,
-                        gjelderBarn: periode.gjelderBarn,
-                        inntektstype: periode.inntektstype ? periode.inntektstype : null,
-                    } as OppdatereManuellInntekt,
-                },
-                (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, transformInntekt(data))
-            );
-        }
+        const payload = createPayload(periode, virkningsdato);
+        const transformFn = transformInntekt(virkningsdato);
+        updatedAndSave(payload, (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, transformFn(data)));
         unsetEditedRow(index);
     };
 
