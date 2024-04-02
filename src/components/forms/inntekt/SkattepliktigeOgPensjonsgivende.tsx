@@ -44,7 +44,7 @@ const Beskrivelse = ({
         />
     ) : (
         <BodyShort className="capitalize leading-8">
-            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.datoFom))}
+            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.opprinneligFom ?? item.datoFom))}
         </BodyShort>
     );
 };
