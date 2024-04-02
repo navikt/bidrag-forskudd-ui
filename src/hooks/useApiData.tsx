@@ -114,6 +114,7 @@ export const useUpdateInntekt = () => {
                 inntekter: {
                     ...currentData.inntekter,
                     beregnetInntekter: response.beregnetInntekter,
+                    valideringsfeil: response.valideringsfeil,
                 },
             }));
         },
