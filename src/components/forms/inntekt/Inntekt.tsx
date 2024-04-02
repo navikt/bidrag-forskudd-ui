@@ -12,6 +12,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, isValidDate } from "../../../utils/date-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
@@ -156,8 +157,9 @@ const Side = () => {
 const InntektForm = () => {
     const { setInntektFormValues } = useForskudd();
     const { inntekter, roller } = useGetBehandlingV2();
+    const virkningsdato = useVirkningsdato();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
-    const initialValues = createInitialValues(bmOgBarn, inntekter);
+    const initialValues = createInitialValues(bmOgBarn, inntekter, virkningsdato);
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
