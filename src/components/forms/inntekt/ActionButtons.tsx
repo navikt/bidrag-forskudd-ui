@@ -14,7 +14,7 @@ export const ActionButtons = ({ onNext }) => {
             <Button
                 type="button"
                 onClick={onNext}
-                variant="secondary"
+                variant="primary"
                 icon={<ArrowRightIcon title="a11y-title" />}
                 iconPosition="right"
                 className="w-max"
