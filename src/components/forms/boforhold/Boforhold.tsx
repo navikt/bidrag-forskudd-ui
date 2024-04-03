@@ -611,7 +611,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                 />
             )}
             {!openAddBarnForm && !lesemodus && (
-                <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
+                <Button variant="secondary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
                     + Legg til barn
                 </Button>
             )}
