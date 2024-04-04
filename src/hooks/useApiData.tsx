@@ -7,6 +7,7 @@ import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
+    BeregningValideringsfeil2,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
@@ -317,7 +318,11 @@ export const useGetBeregningForskudd = () => {
                 return { resultat: response.data };
             } catch (error) {
                 if (error instanceof AxiosError && error.response.status == 400) {
-                    console.log(error.response.headers["warning"]);
+                    if (error.response?.data) {
+                        return {
+                            feilInnhold: error.response.data as BeregningValideringsfeil2,
+                        };
+                    }
                     return {
                         feil: error.response.headers["warning"]?.split(",") ?? [],
                     };

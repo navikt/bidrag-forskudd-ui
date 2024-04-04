@@ -67,14 +67,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
-    erVedtakFattet: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    bidragspliktig?: Rolle;
     erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
+    bidragspliktig?: Rolle;
+    søknadsbarn: Rolle[];
+    bidragsmottaker?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    erVedtakFattet: boolean;
 }
 
 export enum Bostatuskode {
@@ -140,6 +140,7 @@ export interface Husstandsbarnperiode {
 }
 
 export interface Inntekt {
+    /** Inntektsrapportering typer på inntekter som overlapper */
     type: Inntektsrapportering;
     belop: number;
     /** @format date */
@@ -168,9 +169,11 @@ export interface Inntektspost {
     /** @format int64 */
     id?: number;
     inntekt?: Inntekt;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
 }
 
+/** Inntektsrapportering typer på inntekter som overlapper */
 export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -220,6 +223,7 @@ export enum Inntektsrapportering {
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
 }
 
+/** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
 export enum Inntektstype {
     AAP = "AAP",
     DAGPENGER = "DAGPENGER",
@@ -421,7 +425,7 @@ export interface AktivereGrunnlagRequest {
     grunnlagsdatatyper: OpplysningerType[];
 }
 
-/** Angi periode inntekten skal dekke ved beregnings */
+/** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
 export interface Datoperiode {
     /** @format date */
     fom: string;
@@ -536,6 +540,7 @@ export interface OppdatereManuellInntekt {
     id?: number;
     /** Angir om inntekten skal inkluderes i beregning. Hvis ikke spesifisert inkluderes inntekten. */
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     type: Inntektsrapportering;
     /** Inntektens beløp i norske kroner */
     beløp: number;
@@ -559,6 +564,7 @@ export interface OppdatereManuellInntekt {
      * @example "12345678910"
      */
     gjelderBarn?: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
 }
 
@@ -571,7 +577,7 @@ export interface OppdaterePeriodeInntekt {
     id: number;
     /** Anig om inntekten skal inkluderes i beregning */
     taMedIBeregning: boolean;
-    /** Angi periode inntekten skal dekke ved beregnings */
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     angittPeriode: Datoperiode;
 }
 
@@ -634,6 +640,27 @@ export interface BoforholdDto {
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
     notat: BehandlingNotatDto;
+    valideringsfeil: BoforholdValideringsfeil;
+}
+
+export interface BoforholdPeriodeseringsfeil {
+    hullIPerioder: Datoperiode[];
+    overlappendePerioder: HusstandsbarnOverlappendePeriode[];
+    /** Er sann hvis husstandsbarn har en periode som starter senere enn starten av dagens måned. */
+    fremtidigPeriode: boolean;
+    /**
+     * Er sann hvis husstandsbarn mangler perioder.
+     *         Dette vil si at husstandsbarn ikke har noen perioder i det hele tatt."
+     */
+    manglerPerioder: boolean;
+    /** Er sann hvis husstandsbarn ikke har noen løpende periode. Det vil si en periode hvor datoTom er null */
+    ingenLøpendePeriode: boolean;
+    barn?: HusstandsbarnPeriodiseringsfeilDto;
+}
+
+export interface BoforholdValideringsfeil {
+    husstandsbarn: BoforholdPeriodeseringsfeil[];
+    sivilstand?: SivilstandPeriodeseringsfeil;
 }
 
 /** Liste over summerte inntektsperioder */
@@ -670,10 +697,30 @@ export interface Grunnlagstype {
     erBearbeidet: boolean;
 }
 
+export interface HusstandsbarnOverlappendePeriode {
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    periode: Datoperiode;
+    /** @uniqueItems true */
+    bosstatus: Bostatuskode[];
+}
+
+export interface HusstandsbarnPeriodiseringsfeilDto {
+    navn?: string;
+    ident?: string;
+    /** @format date */
+    fødselsdato: string;
+    /**
+     * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @format int64
+     */
+    tekniskId: number;
+}
+
 export interface InntektDtoV2 {
     /** @format int64 */
     id?: number;
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     rapporteringstype: Inntektsrapportering;
     beløp: number;
     /**
@@ -713,6 +760,32 @@ export interface InntektPerBarn {
     summertInntektListe: DelberegningSumInntekt[];
 }
 
+export interface InntektValideringsfeil {
+    /** @uniqueItems true */
+    overlappendePerioder: OverlappendePeriode[];
+    fremtidigPeriode: boolean;
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    hullIPerioder: Datoperiode[];
+    /** Er sann hvis det ikke finnes noen valgte inntekter. Vil alltid være false hvis det er ytelse */
+    manglerPerioder: boolean;
+    ident: string;
+    /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
+    gjelderBarn?: string;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
+    ingenLøpendePeriode: boolean;
+}
+
+export interface InntektValideringsfeilDto {
+    /** @uniqueItems true */
+    barnetillegg: InntektValideringsfeil[];
+    utvidetBarnetrygd?: InntektValideringsfeil;
+    /** @uniqueItems true */
+    kontantstøtte: InntektValideringsfeil[];
+    småbarnstillegg?: InntektValideringsfeil;
+    /** @uniqueItems true */
+    årsinntekter: InntektValideringsfeil[];
+}
+
 export interface InntekterDtoV2 {
     /** @uniqueItems true */
     barnetillegg: InntektDtoV2[];
@@ -728,13 +801,35 @@ export interface InntekterDtoV2 {
     årsinntekter: InntektDtoV2[];
     beregnetInntekter: InntektPerBarn[];
     notat: BehandlingNotatDto;
+    valideringsfeil: InntektValideringsfeilDto;
 }
 
 export interface InntektspostDtoV2 {
     kode: string;
     visningsnavn: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
     beløp?: number;
+}
+
+export interface OverlappendePeriode {
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    periode: Datoperiode;
+    /**
+     * Teknisk id på inntekter som overlapper
+     * @uniqueItems true
+     */
+    idListe: number[];
+    /**
+     * Inntektsrapportering typer på inntekter som overlapper
+     * @uniqueItems true
+     */
+    rapporteringTyper: Inntektsrapportering[];
+    /**
+     * Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper.
+     * @uniqueItems true
+     */
+    inntektstyper: Inntektstype[];
 }
 
 export interface RolleDto {
@@ -745,6 +840,24 @@ export interface RolleDto {
     navn?: string;
     /** @format date */
     fødselsdato?: string;
+}
+
+export interface SivilstandOverlappendePeriode {
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    periode: Datoperiode;
+    /** @uniqueItems true */
+    sivilstandskode: Sivilstandskode[];
+}
+
+export interface SivilstandPeriodeseringsfeil {
+    hullIPerioder: Datoperiode[];
+    overlappendePerioder: SivilstandOverlappendePeriode[];
+    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
+    fremtidigPeriode: boolean;
+    /** Er sann hvis det mangler sivilstand perioder." */
+    manglerPerioder: boolean;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
+    ingenLøpendePeriode: boolean;
 }
 
 export interface VirkningstidspunktDto {
@@ -787,6 +900,7 @@ export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodisert beregnet inntekter per barn */
     beregnetInntekter: InntektPerBarn[];
+    valideringsfeil: InntektValideringsfeilDto;
 }
 
 export interface OppdaterRollerRequest {
@@ -836,6 +950,7 @@ export interface InntektDto {
     /** @format int64 */
     id?: number;
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     inntektstype: Inntektsrapportering;
     beløp: number;
     /**
@@ -870,6 +985,7 @@ export interface InntektPost {
      * @example "bonus"
      */
     kode: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntekstype?: Inntektstype;
     /**
      * Visningsnavn for kode
@@ -1164,6 +1280,18 @@ export interface InitalizeForsendelseRequest {
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatusEnum;
 }
 
+export interface BeregningValideringsfeil2 {
+    virkningstidspunkt?: VirkningstidspunktFeilDto;
+    inntekter?: InntektValideringsfeilDto;
+    husstandsbarn?: BoforholdPeriodeseringsfeil[];
+    sivilstand?: SivilstandPeriodeseringsfeil;
+}
+
+export interface VirkningstidspunktFeilDto {
+    manglerVirkningstidspunkt: boolean;
+    manglerÅrsakEllerAvslag: boolean;
+}
+
 export interface AddOpplysningerRequest {
     /** @format int64 */
     behandlingId: number;
@@ -1398,6 +1526,7 @@ export interface InntekterPerRolle {
 }
 
 export interface InntekterSomLeggesTilGrunn {
+    /** Inntektsrapportering typer på inntekter som overlapper */
     inntektType?: Inntektsrapportering;
     beskrivelse?: string;
     periode?: TypeArManedsperiode;
@@ -1972,7 +2101,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], any>({
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil2>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,

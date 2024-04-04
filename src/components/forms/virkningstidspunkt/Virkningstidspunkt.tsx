@@ -106,6 +106,7 @@ const Main = ({ initialValues, error }) => {
     };
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
+
     const tom = useMemo(
         () => dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
         [fom]

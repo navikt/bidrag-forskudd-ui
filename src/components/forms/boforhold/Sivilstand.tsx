@@ -44,7 +44,7 @@ import { KildeIcon } from "../inntekt/InntektTable";
 
 export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
     <>
-        <Heading level="3" size="medium">
+        <Heading level="3" size="medium" id="sivilstand">
             {text.label.sivilstand}
         </Heading>
         <SivilistandPerioder virkningstidspunkt={datoFom} />

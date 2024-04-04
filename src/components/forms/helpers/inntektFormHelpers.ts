@@ -261,6 +261,7 @@ export const checkErrorsInPeriods = (
                     overlappingPeriodIndexes.push([i, j]);
                 }
 
+                console.log("Sammenligne perioder", perioder[i], perioder[j]);
                 if (
                     perioder[i].datoTom &&
                     !ignorerSjekkForHullIPerioder &&

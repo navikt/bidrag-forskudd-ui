@@ -2,6 +2,7 @@ import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import elementId from "../../../constants/elementId";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
@@ -15,7 +16,7 @@ export const UtvidetBarnetrygd = () => {
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium">
+            <Heading level="3" size="medium" id={elementId.tabell_utvidetbarnetrygd}>
                 {text.title.utvidetBarnetrygd}
             </Heading>
             <InntektTabel fieldName={fieldName}>

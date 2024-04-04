@@ -60,6 +60,7 @@ import {
     toISODateString,
 } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
+import { scrollToHash } from "../../../utils/window-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -148,6 +149,7 @@ const Main = ({
     const datoFom = virkningstidspunkt ?? dateOrNull(søktFomDato);
 
     const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    useEffect(scrollToHash, []);
     return (
         <>
             {opplysningerChanges.length > 0 && (
@@ -229,11 +231,7 @@ const BoforholdsForm = () => {
         søktFomDato,
         roller,
     } = useGetBehandlingV2();
-    // const boforoholdOpplysninger = useGetOpplysninger<ParsedBoforholdOpplysninger>(
-    //     OpplysningerType.BOFORHOLD_BEARBEIDET
-    // );
     const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
-    // const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const opplysningerFraFolkRegistre = useMemo(
@@ -576,7 +574,12 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <Box padding="4" background="surface-subtle" className="overflow-hidden">
+                    <Box
+                        padding="4"
+                        background="surface-subtle"
+                        className="overflow-hidden"
+                        id={`boforhold_${item.id}`}
+                    >
                         <div className="mb-4">
                             <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                 <div className="w-8 mr-2 h-max">

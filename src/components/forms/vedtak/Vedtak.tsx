@@ -1,12 +1,15 @@
 import { dateToDDMMYYYYString, RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Table } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, ConfirmationPanel, ErrorSummary, Heading, Table } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { ResultatBeregningBarnDto, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { BEHANDLING_API_V1 } from "../../../constants/api";
+import elementId from "../../../constants/elementId";
+import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
+import texts from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import environment from "../../../environment";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "../../../hooks/useApiData";
@@ -43,28 +46,16 @@ const Vedtak = () => {
                 </Heading>
             </div>
             <div className="grid gap-y-2">
-                <Heading level="3" size="medium">
-                    {text.title.oppsummering}
-                </Heading>
+                {!beregnetForskudd?.feilInnhold && (
+                    <Heading level="3" size="medium">
+                        {text.title.oppsummering}
+                    </Heading>
+                )}
 
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
             </div>
-            {!erVedtakFattet && !beregnetForskudd?.feil && !lesemodus && (
-                <>
-                    <Alert variant="info">
-                        <div className="grid gap-y-4">
-                            <Heading level="3" size="medium">
-                                {text.title.sjekkNotat}
-                            </Heading>
-                            <div>
-                                {text.varsel.vedtakNotat}
-                                <NotatButton />
-                            </div>
-                        </div>
-                    </Alert>
-                </>
-            )}
-            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
+
+            {!beregnetForskudd?.feilInnhold && !lesemodus && <FatteVedtakButtons />}
             <AdminButtons />
         </div>
     );
@@ -131,12 +122,18 @@ const FatteVedtakButtons = () => {
                 className="pb-2"
                 checked={bekreftetVedtak}
                 label={text.varsel.bekreftFatteVedtak}
-                onChange={() => setBekreftetVedtak((x) => !x)}
+                onChange={() => {
+                    setBekreftetVedtak((x) => !x);
+                    fatteVedtakFn.reset();
+                }}
                 error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
             >
-                <Heading level="2" size="xsmall">
-                    Bekreft
+                <Heading spacing level="2" size="xsmall">
+                    {text.title.sjekkNotatOgOpplysninger}
                 </Heading>
+                <div>
+                    {text.varsel.vedtakNotat} <NotatButton />
+                </div>
             </ConfirmationPanel>
             <FlexRow>
                 <Button
@@ -147,19 +144,6 @@ const FatteVedtakButtons = () => {
                     size="small"
                 >
                     {text.label.fatteVedtakButton}
-                </Button>
-                <Button
-                    type="button"
-                    loading={false}
-                    disabled={fatteVedtakFn.isPending}
-                    variant="secondary"
-                    onClick={() => {
-                        RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
-                    }}
-                    className="w-max"
-                    size="small"
-                >
-                    {text.label.avbryt}
                 </Button>
             </FlexRow>
         </div>
@@ -210,20 +194,97 @@ const VedtakAvslag = () => {
 };
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
-    if (beregnetForskudd.feil) {
+    const { setActiveStep } = useForskudd();
+
+    function renderFeilmeldinger() {
+        console.log(beregnetForskudd);
+        if (!beregnetForskudd.feilInnhold) return null;
+        const feilInnhold = beregnetForskudd.feilInnhold;
+        const feilliste = [];
+        if (feilInnhold.virkningstidspunkt != null) {
+            feilliste.push(
+                <ErrorSummary.Item href="#" onClick={() => setActiveStep(STEPS.virkningstidspunkt)}>
+                    Virkningstidspunkt
+                </ErrorSummary.Item>
+            );
+        }
+        if (feilInnhold.husstandsbarn != null) {
+            feilInnhold.husstandsbarn.forEach((value) =>
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#boforhold_${value.barn.tekniskId}`}
+                        onClick={() => setActiveStep(STEPS.boforhold)}
+                    >
+                        Boforhold: Perioder for barn {value.barn.navn}
+                    </ErrorSummary.Item>
+                )
+            );
+        }
+        if (feilInnhold.sivilstand != null) {
+            feilliste.push(
+                <ErrorSummary.Item href={"#sivilstand"} onClick={() => setActiveStep(STEPS.boforhold)}>
+                    Sivilstand
+                </ErrorSummary.Item>
+            );
+        }
+        if (feilInnhold.inntekter != null) {
+            feilInnhold.inntekter.årsinntekter &&
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementId.tabell_skattepliktig}`}
+                        onClick={() => setActiveStep(STEPS.inntekt)}
+                    >
+                        Inntekter: Perioder i {texts.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}
+                    </ErrorSummary.Item>
+                );
+            feilInnhold.inntekter.barnetillegg &&
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementId.tabell_barnetillegg}`}
+                        onClick={() => setActiveStep(STEPS.inntekt)}
+                    >
+                        Inntekter: Perioder i {texts.title.barnetillegg.toLowerCase()}
+                    </ErrorSummary.Item>
+                );
+            feilInnhold.inntekter.kontantstøtte &&
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementId.tabell_kontantstøtte}`}
+                        onClick={() => setActiveStep(STEPS.inntekt)}
+                    >
+                        Inntekter: Perioder i {texts.title.kontantstøtte.toLowerCase()}
+                    </ErrorSummary.Item>
+                );
+            feilInnhold.inntekter.utvidetBarnetrygd &&
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementId.tabell_utvidetbarnetrygd}`}
+                        onClick={() => setActiveStep(STEPS.inntekt)}
+                    >
+                        Inntekter: Perioder i {texts.title.utvidetBarnetrygd.toLowerCase()}
+                    </ErrorSummary.Item>
+                );
+            feilInnhold.inntekter.småbarnstillegg &&
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementId.tabell_småbarnstillegg}`}
+                        onClick={() => setActiveStep(STEPS.inntekt)}
+                    >
+                        Inntekter: Perioder i {texts.title.småbarnstillegg.toLowerCase()}
+                    </ErrorSummary.Item>
+                );
+        }
+        return feilliste;
+    }
+    if (beregnetForskudd.feilInnhold) {
+        console.log(beregnetForskudd.feilInnhold);
         return (
-            <Alert variant="warning" className="w-8/12 m-auto mt-8">
-                <div>
-                    <Heading spacing size="small" level="3">
-                        {text.varsel.beregneFeil}
-                    </Heading>
-                    <BodyShort size="small">
-                        <ul>{beregnetForskudd.feil?.map((feil) => <li>{feil}</li>)}</ul>
-                    </BodyShort>
-                </div>
-            </Alert>
+            <ErrorSummary heading={text.varsel.beregneFeil} size="small">
+                {renderFeilmeldinger().map((Component) => Component)}
+            </ErrorSummary>
         );
     }
+
     return (
         <>
             {beregnetForskudd.resultat?.map((r, i) => (

@@ -134,7 +134,7 @@ export default {
         inntekt: "Inntekt",
         kontantstøtte: "Kontantstøtte",
         sivilstand: "Sivilstand",
-        sjekkNotat: "Sjekk notat",
+        sjekkNotatOgOpplysninger: "Sjekk notatet og bekreft at opplysningene stemmer",
         skattepliktigeogPensjonsgivendeInntekt: "Skattepliktige og pensjonsgivende inntekt",
         småbarnstillegg: "Småbarnstillegg",
         opplysningerFraFolkeregistret: "Opplysninger fra Folkeregistret",
@@ -144,7 +144,7 @@ export default {
         virkningstidspunkt: "Virkningstidspunkt",
     },
     varsel: {
-        beregneFeil: "Kunne ikke beregne forskudd",
+        beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
         ukjentNavn: "UKJENT",
         bekreftFatteVedtak: "Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer.",
         vedtakNotat:
