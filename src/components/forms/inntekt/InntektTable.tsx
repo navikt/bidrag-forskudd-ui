@@ -4,9 +4,10 @@ import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektDtoV2, Kilde, OppdatereInntektRequest } from "../../../api/BidragBehandlingApiV1";
+import { InntektDtoV2, Kilde, OppdatereInntektRequest, OpplysningerType } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
@@ -159,6 +160,14 @@ export const Periode = ({
     );
 };
 
+const OpplysningerTypeInntektTabelMapper = {
+    [OpplysningerType.SMABARNSTILLEGG]: "småbarnstillegg",
+    [OpplysningerType.UTVIDET_BARNETRYGD]: "utvidetBarnetrygd",
+    [OpplysningerType.SKATTEPLIKTIGE_INNTEKTER]: "årsinntekter",
+    [OpplysningerType.BARNETILLEGG]: "barnetillegg",
+    [OpplysningerType.KONTANTSTOTTE]: "kontantstøtte",
+};
+
 export const InntektTabel = ({
     fieldName,
     customRowValidation,
@@ -174,6 +183,7 @@ export const InntektTabel = ({
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
+    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods, runningPeriod }, setTableErros] =
@@ -299,6 +309,19 @@ export const InntektTabel = ({
             ...watchFieldArray?.[index],
         };
     });
+
+    const [tableSection, ident] = fieldName.split(".");
+    const ikkeAktiverteEndringer = ikkeAktiverteEndringerIGrunnlagsdata.find(
+        (grunnlagsdataEndring) =>
+            (ident === undefined || (ident && ident === grunnlagsdataEndring.nyeData.gjelder)) &&
+            grunnlagsdataEndring.nyeData.grunnlagsdatatype.erBearbeidet &&
+            OpplysningerTypeInntektTabelMapper[grunnlagsdataEndring.nyeData.grunnlagsdatatype.type] === tableSection
+    );
+    const ikkeAktivertEndringerData = ikkeAktiverteEndringer?.nyeData?.data
+        ? JSON.parse(ikkeAktiverteEndringer.nyeData.data)
+        : undefined;
+
+    console.log("ikkeAktivertEndringerData", ikkeAktivertEndringerData);
 
     return (
         <>
