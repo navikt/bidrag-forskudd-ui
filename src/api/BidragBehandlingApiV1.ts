@@ -70,11 +70,11 @@ export interface Behandling {
     erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    bidragspliktig?: Rolle;
+    erVedtakFattet: boolean;
+    grunnlagListe: GrunnlagEntity[];
     søknadsbarn: Rolle[];
     bidragsmottaker?: Rolle;
-    grunnlagListe: GrunnlagEntity[];
-    erVedtakFattet: boolean;
+    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -144,7 +144,7 @@ export interface Inntekt {
     type: Inntektsrapportering;
     belop: number;
     /** @format date */
-    datoFom: string;
+    datoFom?: string;
     /** @format date */
     datoTom?: string;
     ident: string;
@@ -160,6 +160,8 @@ export interface Inntekt {
     opprinneligFom?: string;
     /** @format date */
     opprinneligTom?: string;
+    /** @format date */
+    datoFomEllerOpprinneligFom?: string;
 }
 
 export interface Inntektspost {
@@ -727,7 +729,7 @@ export interface InntektDtoV2 {
      * @format date
      * @example "2024-01-01"
      */
-    datoFom: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2024-12-31"
@@ -938,7 +940,7 @@ export interface BarnetilleggDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -957,7 +959,7 @@ export interface InntektDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -1009,7 +1011,7 @@ export interface KontantstotteDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -1067,7 +1069,7 @@ export interface UtvidetBarnetrygdDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom: string;
+    datoFom?: string;
     /**
      * @format date
      * @example "2025-01-25"
