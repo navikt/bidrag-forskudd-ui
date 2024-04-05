@@ -68,11 +68,11 @@ export interface Behandling {
     sivilstand: Sivilstand[];
     deleted: boolean;
     erVedtakFattet: boolean;
+    søknadsbarn: Rolle[];
+    bidragsmottaker?: Rolle;
     erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
     grunnlagListe: GrunnlagEntity[];
     bidragspliktig?: Rolle;
 }
@@ -755,17 +755,27 @@ export interface InntektPerBarn {
 export interface InntektValideringsfeil {
     /** @uniqueItems true */
     overlappendePerioder: OverlappendePeriode[];
+    fremtidigPeriode: boolean;
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
+    /** Er sann hvis det ikke finnes noen valgte inntekter. Vil alltid være false hvis det er ytelse */
+    manglerPerioder: boolean;
+    ident: string;
+    /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
+    gjelderBarn?: string;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
 }
 
 export interface InntektValideringsfeilDto {
-    barnetillegg: InntektValideringsfeil;
-    utvidetBarnetrygd: InntektValideringsfeil;
-    kontantstøtte: InntektValideringsfeil;
-    småbarnstillegg: InntektValideringsfeil;
-    årsinntekter: InntektValideringsfeil;
+    /** @uniqueItems true */
+    barnetillegg: InntektValideringsfeil[];
+    utvidetBarnetrygd?: InntektValideringsfeil;
+    /** @uniqueItems true */
+    kontantstøtte: InntektValideringsfeil[];
+    småbarnstillegg?: InntektValideringsfeil;
+    /** @uniqueItems true */
+    årsinntekter: InntektValideringsfeil[];
 }
 
 export interface InntekterDtoV2 {
