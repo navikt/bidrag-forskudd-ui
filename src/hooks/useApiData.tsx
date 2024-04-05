@@ -1,9 +1,7 @@
-import { LoggerService } from "@navikt/bidrag-ui-common";
-import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
+import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
-import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
@@ -181,22 +179,21 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
     useSuspenseQueries({
         queries: roller.map((rolle) => ({
             queryKey: QueryKeys.person(rolle.ident),
-            queryFn: async (): Promise<PersonDto> => {
-                if (!rolle.ident) return { ident: "", visningsnavn: rolle.navn };
+            queryFn: async (): Promise<PersonDto & { rolleType: RolleTypeFullName }> => {
+                if (!rolle.ident)
+                    return { ident: "", visningsnavn: rolle.navn, rolleType: RolleTypeFullName.FEILREGISTRERT };
                 const { data } = await PERSON_API.informasjon.hentPersonPost({ ident: rolle.ident });
-                return data;
-            },
-            staleTime: Infinity,
-            select: useCallback(
-                (data) => ({
+                return {
                     ...rolle,
+                    ident: rolle.ident!,
                     rolleType: rolle.rolletype as unknown as RolleTypeFullName,
                     navn: data.navn,
                     kortnavn: data.kortnavn,
                     visningsnavn: data.visningsnavn,
-                }),
-                []
-            ),
+                };
+            },
+            staleTime: Infinity,
+
             enabled: !!rolle,
         })),
     });
