@@ -28,6 +28,7 @@ import {
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
+import elementIds from "../../../constants/elementIds";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
@@ -61,6 +62,7 @@ import {
     toISODateString,
 } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
+import { scrollToHash } from "../../../utils/window-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -148,6 +150,7 @@ const Main = ({
     const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
 
     const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    useEffect(scrollToHash, []);
     return (
         <>
             {opplysningerChanges.length > 0 && (
@@ -229,7 +232,6 @@ const BoforholdsForm = () => {
     //     OpplysningerType.BOFORHOLD_BEARBEIDET
     // );
     const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
-    // const { mutation: saveOpplysninger } = useAddOpplysningerData();
     const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const opplysningerFraFolkRegistre = useMemo(
@@ -568,7 +570,12 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
         <>
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
-                    <Box padding="4" background="surface-subtle" className="overflow-hidden">
+                    <Box
+                        padding="4"
+                        background="surface-subtle"
+                        className="overflow-hidden"
+                        id={`${elementIds.seksjon_boforhold}_${item.id}`}
+                    >
                         <div className="mb-4">
                             <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
                                 <div className="w-8 mr-2 h-max">

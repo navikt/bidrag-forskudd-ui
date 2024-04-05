@@ -67,14 +67,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    erVedtakFattet: boolean;
-    søknadsbarn: Rolle[];
-    bidragsmottaker?: Rolle;
     erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    grunnlagListe: GrunnlagEntity[];
     bidragspliktig?: Rolle;
+    søknadsbarn: Rolle[];
+    bidragsmottaker?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    erVedtakFattet: boolean;
 }
 
 export enum Bostatuskode {
@@ -140,6 +140,7 @@ export interface Husstandsbarnperiode {
 }
 
 export interface Inntekt {
+    /** Inntektsrapportering typer på inntekter som overlapper */
     type: Inntektsrapportering;
     belop: number;
     /** @format date */
@@ -168,9 +169,11 @@ export interface Inntektspost {
     /** @format int64 */
     id?: number;
     inntekt?: Inntekt;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
 }
 
+/** Inntektsrapportering typer på inntekter som overlapper */
 export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
@@ -220,6 +223,7 @@ export enum Inntektsrapportering {
     SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
 }
 
+/** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
 export enum Inntektstype {
     AAP = "AAP",
     DAGPENGER = "DAGPENGER",
@@ -421,7 +425,7 @@ export interface AktivereGrunnlagRequest {
     grunnlagsdatatyper: OpplysningerType[];
 }
 
-/** Angi periode inntekten skal dekke ved beregnings */
+/** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
 export interface Datoperiode {
     /** @format date */
     fom: string;
@@ -536,6 +540,7 @@ export interface OppdatereManuellInntekt {
     id?: number;
     /** Angir om inntekten skal inkluderes i beregning. Hvis ikke spesifisert inkluderes inntekten. */
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     type: Inntektsrapportering;
     /** Inntektens beløp i norske kroner */
     beløp: number;
@@ -559,6 +564,7 @@ export interface OppdatereManuellInntekt {
      * @example "12345678910"
      */
     gjelderBarn?: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
 }
 
@@ -571,7 +577,7 @@ export interface OppdaterePeriodeInntekt {
     id: number;
     /** Anig om inntekten skal inkluderes i beregning */
     taMedIBeregning: boolean;
-    /** Angi periode inntekten skal dekke ved beregnings */
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     angittPeriode: Datoperiode;
 }
 
@@ -692,13 +698,14 @@ export interface Grunnlagstype {
 }
 
 export interface HusstandsbarnOverlappendePeriode {
-    /** Angi periode inntekten skal dekke ved beregnings */
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /** @uniqueItems true */
     bosstatus: Bostatuskode[];
 }
 
 export interface HusstandsbarnPeriodiseringsfeilDto {
+    navn?: string;
     ident?: string;
     /** @format date */
     fødselsdato: string;
@@ -713,6 +720,7 @@ export interface InntektDtoV2 {
     /** @format int64 */
     id?: number;
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     rapporteringstype: Inntektsrapportering;
     beløp: number;
     /**
@@ -769,13 +777,13 @@ export interface InntektValideringsfeil {
 
 export interface InntektValideringsfeilDto {
     /** @uniqueItems true */
-    barnetillegg: InntektValideringsfeil[];
+    barnetillegg?: InntektValideringsfeil[];
     utvidetBarnetrygd?: InntektValideringsfeil;
     /** @uniqueItems true */
-    kontantstøtte: InntektValideringsfeil[];
+    kontantstøtte?: InntektValideringsfeil[];
     småbarnstillegg?: InntektValideringsfeil;
     /** @uniqueItems true */
-    årsinntekter: InntektValideringsfeil[];
+    årsinntekter?: InntektValideringsfeil[];
 }
 
 export interface InntekterDtoV2 {
@@ -799,12 +807,13 @@ export interface InntekterDtoV2 {
 export interface InntektspostDtoV2 {
     kode: string;
     visningsnavn: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
     beløp?: number;
 }
 
 export interface OverlappendePeriode {
-    /** Angi periode inntekten skal dekke ved beregnings */
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /**
      * Teknisk id på inntekter som overlapper
@@ -834,7 +843,7 @@ export interface RolleDto {
 }
 
 export interface SivilstandOverlappendePeriode {
-    /** Angi periode inntekten skal dekke ved beregnings */
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /** @uniqueItems true */
     sivilstandskode: Sivilstandskode[];
@@ -941,6 +950,7 @@ export interface InntektDto {
     /** @format int64 */
     id?: number;
     taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
     inntektstype: Inntektsrapportering;
     beløp: number;
     /**
@@ -975,6 +985,7 @@ export interface InntektPost {
      * @example "bonus"
      */
     kode: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntekstype?: Inntektstype;
     /**
      * Visningsnavn for kode
@@ -1270,14 +1281,15 @@ export interface InitalizeForsendelseRequest {
 }
 
 export interface BeregningValideringsfeil {
-    type: BeregningValideringsfeilTypeEnum;
-    feilListe: string[];
+    virkningstidspunkt?: VirkningstidspunktFeilDto;
+    inntekter?: InntektValideringsfeilDto;
+    husstandsbarn?: BoforholdPeriodeseringsfeil[];
+    sivilstand?: SivilstandPeriodeseringsfeil;
 }
 
-export interface BeregningValideringsfeilList {
-    empty?: boolean;
-    first?: BeregningValideringsfeil;
-    last?: BeregningValideringsfeil;
+export interface VirkningstidspunktFeilDto {
+    manglerVirkningstidspunkt: boolean;
+    manglerÅrsakEllerAvslag: boolean;
 }
 
 export interface AddOpplysningerRequest {
@@ -1514,6 +1526,7 @@ export interface InntekterPerRolle {
 }
 
 export interface InntekterSomLeggesTilGrunn {
+    /** Inntektsrapportering typer på inntekter som overlapper */
     inntektType?: Inntektsrapportering;
     beskrivelse?: string;
     periode?: TypeArManedsperiode;
@@ -1636,14 +1649,6 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
     FEILREGISTRERT = "FEILREGISTRERT",
 }
 
-export enum BeregningValideringsfeilTypeEnum {
-    BOFORHOLD = "BOFORHOLD",
-    SIVILSTAND = "SIVILSTAND",
-    INNTEKT = "INNTEKT",
-    VIRKNINGSTIDSPUNKT = "VIRKNINGSTIDSPUNKT",
-    ANDRE = "ANDRE",
-}
-
 /** Hva er kilden til vedtaket. Automatisk eller manuelt */
 export enum VedtakDtoKildeEnum {
     MANUELT = "MANUELT",
@@ -1725,10 +1730,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no:443",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1817,7 +1819,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no:443
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2099,7 +2101,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeilList>({
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,
