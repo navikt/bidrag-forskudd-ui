@@ -1,10 +1,16 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektDtoV2, Kilde, OppdatereInntektRequest, OpplysningerType } from "../../../api/BidragBehandlingApiV1";
+import {
+    InntektDtoV2,
+    InntektValideringsfeil,
+    Kilde,
+    OppdatereInntektRequest,
+    OpplysningerType,
+} from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
@@ -16,7 +22,7 @@ import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { checkErrorsInPeriods, createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
+import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -183,21 +189,12 @@ export const InntektTabel = ({
     children: React.FunctionComponent;
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
-    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const {
+        ikkeAktiverteEndringerIGrunnlagsdata,
+        inntekter: { valideringsfeil },
+    } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
-    const [{ overlappingPeriodsSummary, overlappingPeriodIndexes, gapsInPeriods, runningPeriod }, setTableErros] =
-        useState<{
-            overlappingPeriodIndexes: number[];
-            gapsInPeriods: { datoFom: string; datoTom: string }[];
-            overlappingPeriodsSummary: { datoFom: string; datoTom: string }[];
-            runningPeriod: boolean;
-        }>({
-            overlappingPeriodsSummary: [],
-            gapsInPeriods: [],
-            overlappingPeriodIndexes: [],
-            runningPeriod: true,
-        });
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
@@ -205,16 +202,6 @@ export const InntektTabel = ({
         name: fieldName,
     });
     const watchFieldArray = useWatch({ control, name: fieldName });
-
-    useEffect(() => {
-        validatePeriods();
-    }, []);
-
-    const validatePeriods = () => {
-        const perioder = getValues(fieldName);
-        const tableErros = checkErrorsInPeriods(virkningsdato, perioder);
-        setTableErros(tableErros);
-    };
 
     const unsetEditedRow = (index: number) => {
         if (editableRow === index) {
@@ -267,7 +254,6 @@ export const InntektTabel = ({
         saveInntekt.mutate(updatedValues, {
             onSuccess: (response) => onSaveSuccess?.(response?.inntekt),
         });
-        validatePeriods();
     };
     const onSaveRow = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -310,12 +296,23 @@ export const InntektTabel = ({
         };
     });
 
-    const [tableSection, ident] = fieldName.split(".");
+    const [inntektType, ident] = fieldName.split(".");
+    const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
+        inntektType
+    )
+        ? valideringsfeil[inntektType]
+        : valideringsfeil[inntektType]?.find((feil) => {
+              if (["barnetillegg", "kontantsøtte"].includes(inntektType)) {
+                  return feil.gjelderBarn === ident;
+              }
+              return feil.ident === ident;
+          });
+
     const ikkeAktiverteEndringer = ikkeAktiverteEndringerIGrunnlagsdata.find(
         (grunnlagsdataEndring) =>
             (ident === undefined || (ident && ident === grunnlagsdataEndring.nyeData.gjelder)) &&
             grunnlagsdataEndring.nyeData.grunnlagsdatatype.erBearbeidet &&
-            OpplysningerTypeInntektTabelMapper[grunnlagsdataEndring.nyeData.grunnlagsdatatype.type] === tableSection
+            OpplysningerTypeInntektTabelMapper[grunnlagsdataEndring.nyeData.grunnlagsdatatype.type] === inntektType
     );
     const ikkeAktivertEndringerData = ikkeAktiverteEndringer?.nyeData?.data
         ? JSON.parse(ikkeAktiverteEndringer.nyeData.data)
@@ -325,53 +322,53 @@ export const InntektTabel = ({
 
     return (
         <>
-            {!lesemodus && [overlappingPeriodsSummary, gapsInPeriods].some((errorsList) => errorsList.length > 0) && (
+            {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
-                    {overlappingPeriodsSummary.length > 0 && (
+                    {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
-                            {overlappingPeriodsSummary.map((period: { datoFom: string; datoTom: string }, index) => (
-                                <BodyShort key={`${period.datoFom}-${period.datoTom}-${index}`} size="small">
-                                    {period.datoTom &&
+                            {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
+                                <BodyShort key={`${periode.fom}-${periode.til}-${index}`} size="small">
+                                    {periode.til &&
                                         removePlaceholder(
                                             text.alert.overlappendePerioder,
-                                            DateToDDMMYYYYString(dateOrNull(period.datoFom)),
-                                            DateToDDMMYYYYString(dateOrNull(period.datoTom))
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom)),
+                                            DateToDDMMYYYYString(dateOrNull(periode.til))
                                         )}
-                                    {!period.datoTom &&
+                                    {!periode.til &&
                                         removePlaceholder(
                                             text.alert.overlappendeLøpendePerioder,
-                                            DateToDDMMYYYYString(dateOrNull(period.datoFom))
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom))
                                         )}
                                 </BodyShort>
                             ))}
                             <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
                         </>
                     )}
-                    {gapsInPeriods.length > 0 && (
+                    {tableValideringsfeil.hullIPerioder.length > 0 && (
                         <>
                             <BodyShort size="small">{text.error.hullIPerioderInntekt}:</BodyShort>
-                            {gapsInPeriods.map((gap, index) => (
-                                <BodyShort key={`${gap.datoFom}-${gap.datoTom}-${index}`} size="small">
-                                    {DateToDDMMYYYYString(dateOrNull(gap.datoFom))} -{" "}
-                                    {DateToDDMMYYYYString(dateOrNull(gap.datoTom))}
+                            {tableValideringsfeil.hullIPerioder.map((gap, index) => (
+                                <BodyShort key={`${gap.fom}-${gap.til}-${index}`} size="small">
+                                    {DateToDDMMYYYYString(dateOrNull(gap.fom))} -{" "}
+                                    {DateToDDMMYYYYString(dateOrNull(gap.til))}
                                 </BodyShort>
                             ))}
                             <BodyShort size="small">{text.error.hullIPerioderFiks}</BodyShort>
                         </>
                     )}
-                    {!runningPeriod && <BodyShort size="small">{text.error.ingenLoependeInntektPeriode}</BodyShort>}
+                    {tableValideringsfeil.ingenLøpendePeriode && (
+                        <BodyShort size="small">{text.error.ingenLoependeInntektPeriode}</BodyShort>
+                    )}
                 </Alert>
             )}
             {children({
                 controlledFields,
                 editableRow,
-                overlappingPeriodIndexes,
                 onEditRow,
                 onSaveRow,
                 addPeriod,
                 handleOnSelect,
-                validatePeriods,
                 unsetEditedRow,
             })}
         </>
