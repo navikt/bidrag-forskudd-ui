@@ -1,5 +1,4 @@
-import { LoggerService } from "@navikt/bidrag-ui-common";
-import { RolleTypeFullName } from "@navikt/bidrag-ui-common/src/types/roller/RolleType";
+import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
