@@ -7,6 +7,7 @@ import { useCallback } from "react";
 
 import {
     BehandlingDtoV2,
+    BeregningValideringsfeil,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
@@ -221,7 +222,6 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
         GrunnlagRequestType.KONTANTSTOTTE,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
-        GrunnlagRequestType.ARBEIDSFORHOLD,
     ].map((type) => ({
         type,
         personId: bmIdent,
@@ -317,10 +317,20 @@ export const useGetBeregningForskudd = () => {
                 const response = await BEHANDLING_API_V1.api.beregnForskudd(behandlingId);
                 return { resultat: response.data };
             } catch (error) {
+                const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
                 if (error instanceof AxiosError && error.response.status == 400) {
-                    console.log(error.response.headers["warning"]);
+                    if (error.response?.data) {
+                        return {
+                            feil: {
+                                melding: feilmelding,
+                                detaljer: error.response.data as BeregningValideringsfeil,
+                            },
+                        };
+                    }
                     return {
-                        feil: error.response.headers["warning"]?.split(",") ?? [],
+                        feil: {
+                            melding: feilmelding,
+                        },
                     };
                 }
             }

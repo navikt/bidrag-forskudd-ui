@@ -15,6 +15,7 @@ import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, isValidDate } from "../../../utils/date-utils";
+import { scrollToHash } from "../../../utils/window-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -66,7 +67,7 @@ const Main = () => {
             if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
             return 0;
         });
-
+    useEffect(scrollToHash, []);
     return (
         <div className="grid gap-y-12">
             {!isValidDate(virkningstidspunkt) && (
