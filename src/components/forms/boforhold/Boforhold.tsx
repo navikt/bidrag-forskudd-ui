@@ -28,6 +28,7 @@ import {
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
+import elementIds from "../../../constants/elementIds";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
@@ -573,7 +574,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                         padding="4"
                         background="surface-subtle"
                         className="overflow-hidden"
-                        id={`boforhold_${item.id}`}
+                        id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
                         <div className="mb-4">
                             <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">

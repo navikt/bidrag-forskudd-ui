@@ -1280,7 +1280,7 @@ export interface InitalizeForsendelseRequest {
     behandlingStatus?: InitalizeForsendelseRequestBehandlingStatusEnum;
 }
 
-export interface BeregningValideringsfeil2 {
+export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
     inntekter?: InntektValideringsfeilDto;
     husstandsbarn?: BoforholdPeriodeseringsfeil[];
@@ -2101,7 +2101,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil2>({
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",
                 secure: true,

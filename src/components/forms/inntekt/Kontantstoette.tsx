@@ -2,7 +2,7 @@ import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
-import elementId from "../../../constants/elementId";
+import elementId from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
@@ -20,7 +20,7 @@ export const Kontantstøtte = () => {
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium" id={elementId.tabell_kontantstøtte}>
+            <Heading level="3" size="medium" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>
             {barna.map((barn) => (

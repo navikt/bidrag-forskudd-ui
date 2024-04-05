@@ -6,7 +6,8 @@ import { useParams } from "react-router-dom";
 
 import { ResultatBeregningBarnDto, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { BEHANDLING_API_V1 } from "../../../constants/api";
-import elementId from "../../../constants/elementId";
+import elementId from "../../../constants/elementIds";
+import elementIds from "../../../constants/elementIds";
 import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import texts from "../../../constants/texts";
@@ -46,7 +47,7 @@ const Vedtak = () => {
                 </Heading>
             </div>
             <div className="grid gap-y-2">
-                {!beregnetForskudd?.feilInnhold && (
+                {!beregnetForskudd?.feil && (
                     <Heading level="3" size="medium">
                         {text.title.oppsummering}
                     </Heading>
@@ -55,7 +56,7 @@ const Vedtak = () => {
                 {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
             </div>
 
-            {!beregnetForskudd?.feilInnhold && !lesemodus && <FatteVedtakButtons />}
+            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
             <AdminButtons />
         </div>
     );
@@ -111,13 +112,6 @@ const FatteVedtakButtons = () => {
 
     return (
         <div>
-            {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
-                <Alert variant="error" className="w-8/12 m-auto mt-8">
-                    <div>
-                        <BodyShort size="small">{text.error.fatteVedtak}</BodyShort>
-                    </div>
-                </Alert>
-            )}
             <ConfirmationPanel
                 className="pb-2"
                 checked={bekreftetVedtak}
@@ -135,6 +129,14 @@ const FatteVedtakButtons = () => {
                     {text.varsel.vedtakNotat} <NotatButton />
                 </div>
             </ConfirmationPanel>
+            {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
+                <Alert variant="error" className="mt-2 mb-2">
+                    <Heading spacing size="small" level="3">
+                        {text.error.kunneIkkFatteVedtak}
+                    </Heading>
+                    <BodyShort>{text.error.fatteVedtak}</BodyShort>
+                </Alert>
+            )}
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
@@ -198,8 +200,8 @@ const VedtakResultat = () => {
 
     function renderFeilmeldinger() {
         console.log(beregnetForskudd);
-        if (!beregnetForskudd.feilInnhold) return null;
-        const feilInnhold = beregnetForskudd.feilInnhold;
+        if (!beregnetForskudd.feil?.detaljer) return null;
+        const feilInnhold = beregnetForskudd.feil?.detaljer;
         const feilliste = [];
         if (feilInnhold.virkningstidspunkt != null) {
             feilliste.push(
@@ -212,7 +214,7 @@ const VedtakResultat = () => {
             feilInnhold.husstandsbarn.forEach((value) =>
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#boforhold_${value.barn.tekniskId}`}
+                        href={`#${elementIds.seksjon_boforhold}_${value.barn.tekniskId}`}
                         onClick={() => setActiveStep(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}
@@ -222,7 +224,10 @@ const VedtakResultat = () => {
         }
         if (feilInnhold.sivilstand != null) {
             feilliste.push(
-                <ErrorSummary.Item href={"#sivilstand"} onClick={() => setActiveStep(STEPS.boforhold)}>
+                <ErrorSummary.Item
+                    href={`#${elementIds.seksjon_sivilstand}`}
+                    onClick={() => setActiveStep(STEPS.boforhold)}
+                >
                     Sivilstand
                 </ErrorSummary.Item>
             );
@@ -231,7 +236,7 @@ const VedtakResultat = () => {
             feilInnhold.inntekter.årsinntekter &&
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementId.tabell_skattepliktig}`}
+                        href={`#${elementId.seksjon_inntekt_skattepliktig}`}
                         onClick={() => setActiveStep(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}
@@ -240,7 +245,7 @@ const VedtakResultat = () => {
             feilInnhold.inntekter.barnetillegg &&
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementId.tabell_barnetillegg}`}
+                        href={`#${elementId.seksjon_inntekt_barnetillegg}`}
                         onClick={() => setActiveStep(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.barnetillegg.toLowerCase()}
@@ -249,7 +254,7 @@ const VedtakResultat = () => {
             feilInnhold.inntekter.kontantstøtte &&
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementId.tabell_kontantstøtte}`}
+                        href={`#${elementId.seksjon_inntekt_kontantstøtte}`}
                         onClick={() => setActiveStep(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.kontantstøtte.toLowerCase()}
@@ -258,7 +263,7 @@ const VedtakResultat = () => {
             feilInnhold.inntekter.utvidetBarnetrygd &&
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementId.tabell_utvidetbarnetrygd}`}
+                        href={`#${elementId.seksjon_inntekt_utvidetbarnetrygd}`}
                         onClick={() => setActiveStep(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.utvidetBarnetrygd.toLowerCase()}
@@ -267,7 +272,7 @@ const VedtakResultat = () => {
             feilInnhold.inntekter.småbarnstillegg &&
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementId.tabell_småbarnstillegg}`}
+                        href={`#${elementId.seksjon_inntekt_småbarnstillegg}`}
                         onClick={() => setActiveStep(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.småbarnstillegg.toLowerCase()}
@@ -276,8 +281,17 @@ const VedtakResultat = () => {
         }
         return feilliste;
     }
-    if (beregnetForskudd.feilInnhold) {
-        console.log(beregnetForskudd.feilInnhold);
+    if (beregnetForskudd.feil) {
+        if (!beregnetForskudd.feil?.detaljer) {
+            return (
+                <Alert variant={"error"} size="small">
+                    <Heading spacing size="small" level="3">
+                        {text.error.ukjentfeil}
+                    </Heading>
+                    <BodyShort>{text.error.beregning}</BodyShort>
+                </Alert>
+            );
+        }
         return (
             <ErrorSummary heading={text.varsel.beregneFeil} size="small">
                 {renderFeilmeldinger().map((Component) => Component)}

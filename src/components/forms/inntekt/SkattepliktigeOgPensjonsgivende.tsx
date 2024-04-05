@@ -4,7 +4,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
-import elementId from "../../../constants/elementId";
+import elementId from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -88,7 +88,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <div className="flex gap-x-4">
-                <Heading level="3" size="medium" id={elementId.tabell_skattepliktig}>
+                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_skattepliktig}>
                     {text.title.skattepliktigeogPensjonsgivendeInntekt}
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}

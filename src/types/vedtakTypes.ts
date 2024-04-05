@@ -1,7 +1,9 @@
-import { BeregningValideringsfeil2, ResultatBeregningBarnDto } from "../api/BidragBehandlingApiV1";
+import { BeregningValideringsfeil, ResultatBeregningBarnDto } from "../api/BidragBehandlingApiV1";
 
 export interface VedtakBeregningResult {
     resultat?: ResultatBeregningBarnDto[];
-    feil?: string[];
-    feilInnhold?: BeregningValideringsfeil2;
+    feil?: {
+        melding: string[];
+        detaljer?: BeregningValideringsfeil;
+    };
 }
