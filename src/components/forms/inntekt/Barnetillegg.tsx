@@ -9,7 +9,6 @@ import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
@@ -42,7 +41,11 @@ const Beskrivelse = ({
         />
     ) : (
         <BodyShort className="capitalize leading-8">
-            {hentVisningsnavn(item.inntektstype, getYearFromDate(item.opprinneligFom ?? item.datoFom))}
+            {hentVisningsnavn(
+                item.inntektstype,
+                item.opprinneligFom ?? item.datoFom,
+                item.opprinneligTom ?? item.datoTom
+            )}
         </BodyShort>
     );
 };

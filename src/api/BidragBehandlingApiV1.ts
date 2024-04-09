@@ -67,12 +67,21 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
+<<<<<<< HEAD
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
     erKlageEllerOmgjøring: boolean;
     søknadsbarn: Rolle[];
     erVedtakFattet: boolean;
     grunnlagListe: GrunnlagEntity[];
+=======
+    erKlageEllerOmgjøring: boolean;
+    /** @format date */
+    virkningstidspunktEllerSøktFomDato: string;
+    erVedtakFattet: boolean;
+    grunnlagListe: GrunnlagEntity[];
+    søknadsbarn: Rolle[];
+>>>>>>> main
     bidragsmottaker?: Rolle;
     bidragspliktig?: Rolle;
 }
@@ -162,7 +171,10 @@ export interface Inntekt {
     opprinneligTom?: string;
     /** @format date */
     datoFomEllerOpprinneligFom?: string;
+<<<<<<< HEAD
     opprinneligPeriode?: TypeArManedsperiode;
+=======
+>>>>>>> main
 }
 
 export interface Inntektspost {
@@ -829,10 +841,15 @@ export interface HusstandsbarnPeriodiseringsfeilDto {
 
 export interface IkkeAktivInntektDto {
     /** @format int64 */
+<<<<<<< HEAD
     originalId?: number;
     /** @format date-time */
     innhentetTidspunkt: string;
     endringstype: IkkeAktivInntektDtoEndringstypeEnum;
+=======
+    id?: number;
+    taMed: boolean;
+>>>>>>> main
     /** Inntektsrapportering typer på inntekter som overlapper */
     rapporteringstype: Inntektsrapportering;
     beløp: number;
@@ -840,6 +857,7 @@ export interface IkkeAktivInntektDto {
      * @format date
      * @example "2024-01-01"
      */
+<<<<<<< HEAD
     periode: string;
     ident: string;
     gjelderBarn?: string;
@@ -878,6 +896,8 @@ export interface InntektDtoV2 {
      * @format date
      * @example "2024-01-01"
      */
+=======
+>>>>>>> main
     datoFom?: string;
     /**
      * @format date
@@ -1015,11 +1035,287 @@ export interface RolleDto {
     fødselsdato?: string;
 }
 
+<<<<<<< HEAD
 export interface SivilstandAktivGrunnlagDto {
     /** @uniqueItems true */
     grunnlag: SivilstandGrunnlagDto[];
     /** @format date-time */
     innhentetTidspunkt: string;
+=======
+export interface SivilstandOverlappendePeriode {
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    periode: Datoperiode;
+    /** @uniqueItems true */
+    sivilstandskode: Sivilstandskode[];
+}
+
+export interface SivilstandPeriodeseringsfeil {
+    hullIPerioder: Datoperiode[];
+    overlappendePerioder: SivilstandOverlappendePeriode[];
+    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
+    fremtidigPeriode: boolean;
+    /** Er sann hvis det mangler sivilstand perioder." */
+    manglerPerioder: boolean;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
+    ingenLøpendePeriode: boolean;
+}
+
+export interface VirkningstidspunktDto {
+    /** @format date */
+    virkningstidspunkt?: string;
+    /** @format date */
+    opprinneligVirkningstidspunkt?: string;
+    årsak?: TypeArsakstype;
+    avslag?: Resultatkode;
+    notat: BehandlingNotatDto;
+}
+
+export interface TypeArManedsperiode {
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    fom: string;
+    /**
+     * @pattern YYYY-MM
+     * @example "2023-01"
+     */
+    til?: string;
+}
+
+export interface OppdatereInntektRequest {
+    /** Angi periodeinformasjon for inntekter */
+    oppdatereInntektsperiode?: OppdaterePeriodeInntekt;
+    /** Opprette eller oppdatere manuelt oppgitte inntekter */
+    oppdatereManuellInntekt?: OppdatereManuellInntekt;
+    oppdatereNotat?: OppdaterNotat;
+    /**
+     * Angi id til inntekt som skal slettes
+     * @format int64
+     */
+    sletteInntekt?: number;
+}
+
+export interface OppdatereInntektResponse {
+    inntekt?: InntektDtoV2;
+    /** Periodisert beregnet inntekter per barn */
+    beregnetInntekter: InntektPerBarn[];
+    valideringsfeil: InntektValideringsfeilDto;
+}
+
+export interface OppdaterRollerRequest {
+    roller: OpprettRolleDto[];
+}
+
+/** Rolle beskrivelse som er brukte til å opprette nye roller */
+export interface OpprettRolleDto {
+    rolletype: Rolletype;
+    /** F.eks fødselsnummer. Påkrevd for alle rolletyper utenom for barn som ikke inngår i beregning. */
+    ident?: string | null;
+    /** Navn på rolleinnehaver hvis ident er ukjent. Gjelder kun barn som ikke inngår i beregning */
+    navn?: string | null;
+    /**
+     * F.eks fødselsdato
+     * @format date
+     */
+    fødselsdato?: string;
+    erSlettet: boolean;
+}
+
+export interface OppdaterRollerResponse {
+    status: OppdaterRollerResponseStatusEnum;
+}
+
+export interface BarnetilleggDto {
+    /** @format int64 */
+    id?: number;
+    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
+    ident: string;
+    /** Hvilken barn barnetillegget mottas for */
+    gjelderBarn: string;
+    barnetillegg: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface InntektDto {
+    /** @format int64 */
+    id?: number;
+    taMed: boolean;
+    /** Inntektsrapportering typer på inntekter som overlapper */
+    inntektstype: Inntektsrapportering;
+    beløp: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    opprinneligFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    opprinneligTom?: string;
+    ident: string;
+    fraGrunnlag: boolean;
+    /** @uniqueItems true */
+    inntektsposter: InntektPost[];
+}
+
+export interface InntektPost {
+    /**
+     * Kode for inntektspost
+     * @example "bonus"
+     */
+    kode: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
+    inntekstype?: Inntektstype;
+    /**
+     * Visningsnavn for kode
+     * @example "Bonus"
+     */
+    visningsnavn: string;
+    /**
+     * Beløp som utgjør inntektsposten
+     * @example 60000
+     */
+    beløp: number;
+}
+
+export interface KontantstotteDto {
+    /** Bidragsmottaker eller bidragspliktig som mottar barnetillegget */
+    ident: string;
+    /** Hvilken barn barnetillegget mottas for */
+    gjelderBarn: string;
+    kontantstøtte: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface OppdaterBehandlingRequest {
+    virkningstidspunkt?: OppdaterVirkningstidspunkt;
+    /**
+     *
+     * For `husstandsbarn` og `sivilstand`
+     * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+     * * Hvis feltet er tom liste vil alt bli slettet
+     * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+     */
+    boforhold?: OppdaterBoforholdRequest;
+    /**
+     *
+     * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+     * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+     * * Hvis feltet er tom liste vil alt bli slettet
+     * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+     */
+    inntekter?: OppdatereInntekterRequest;
+}
+
+/**
+ *
+ * For `inntekter`, `kontantstøtte`, `småbarnstillegg`, `barnetillegg`, `utvidetBarnetrygd`
+ * * Hvis feltet er null eller ikke satt vil det ikke bli gjort noe endringer.
+ * * Hvis feltet er tom liste vil alt bli slettet
+ * * Innholdet i listen vil erstatte alt som er lagret. Det er derfor ikke mulig å endre på deler av informasjon i listene.
+ */
+export interface OppdatereInntekterRequest {
+    /** @uniqueItems true */
+    inntekter?: InntektDto[];
+    /** @uniqueItems true */
+    kontantstøtte?: KontantstotteDto[];
+    /** @uniqueItems true */
+    småbarnstillegg?: InntektDto[];
+    /** @uniqueItems true */
+    barnetillegg?: BarnetilleggDto[];
+    /** @uniqueItems true */
+    utvidetbarnetrygd?: UtvidetBarnetrygdDto[];
+    notat?: OppdaterNotat;
+}
+
+export interface UtvidetBarnetrygdDto {
+    /** @format int64 */
+    id?: number;
+    deltBosted: boolean;
+    beløp: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+}
+
+export interface BehandlingDto {
+    /** @format int64 */
+    id: number;
+    vedtakstype: Vedtakstype;
+    stønadstype?: Stonadstype;
+    engangsbeløptype?: Engangsbeloptype;
+    erVedtakFattet: boolean;
+    /** @format date */
+    søktFomDato: string;
+    /** @format date */
+    mottattdato: string;
+    søktAv: SoktAvType;
+    saksnummer: string;
+    /** @format int64 */
+    søknadsid: number;
+    /** @format int64 */
+    søknadRefId?: number;
+    behandlerenhet: string;
+    /** @uniqueItems true */
+    roller: RolleDto[];
+    /** @format int64 */
+    grunnlagspakkeid?: number;
+    virkningstidspunkt: VirkningstidspunktDto;
+    inntekter: InntekterDto;
+    boforhold: BoforholdDto;
+    opplysninger: GrunnlagsdataDto[];
+}
+
+export interface InntekterDto {
+    /** @uniqueItems true */
+    inntekter: InntektDto[];
+    /** @uniqueItems true */
+    barnetillegg: BarnetilleggDto[];
+    /** @uniqueItems true */
+    utvidetbarnetrygd: UtvidetBarnetrygdDto[];
+    /** @uniqueItems true */
+    kontantstøtte: KontantstotteDto[];
+    /** @uniqueItems true */
+    småbarnstillegg: InntektDto[];
+    notat: BehandlingNotatDto;
+>>>>>>> main
 }
 
 export interface SivilstandGrunnlagDto {
