@@ -239,7 +239,7 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (boforhold.husstandsbarn.length == 0 && !isSavedInitialOpplysninger.current) {
+        if (boforhold.sivilstand.length == 0 && !isSavedInitialOpplysninger.current) {
             saveBoforhold(initialValues);
         }
 
