@@ -116,6 +116,7 @@ export const Barnetillegg = () => {
                         </div>
                     </div>
                     <InntektTabel
+                        ident={bmIdent}
                         fieldName={`barnetillegg.${barn.ident}` as const}
                         customRowValidation={customRowValidation}
                     >
@@ -140,7 +141,7 @@ export const Barnetillegg = () => {
                                         <Table size="small" className="table-fixed">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
-                                                    <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                                    <Table.HeaderCell scope="col" align="center" className="w-[84px]">
                                                         {text.label.taMed}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell scope="col" className="w-[134px]">
@@ -152,13 +153,13 @@ export const Barnetillegg = () => {
                                                     <Table.HeaderCell scope="col" align="center" className="w-[74px]">
                                                         {text.label.kilde}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" className="w-[204px]">
+                                                    <Table.HeaderCell scope="col" className="w-[140px]">
                                                         {text.label.type}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" align="right" className="w-[130px]">
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[150px]">
                                                         {text.label.beløpMnd}
                                                     </Table.HeaderCell>
-                                                    <Table.HeaderCell scope="col" align="right" className="w-[134px]">
+                                                    <Table.HeaderCell scope="col" align="right" className="w-[150px]">
                                                         {text.label.beløp12Mnd}
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell

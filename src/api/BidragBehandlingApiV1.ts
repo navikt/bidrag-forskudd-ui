@@ -67,14 +67,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
+    bidragspliktig?: Rolle;
+    søknadsbarn: Rolle[];
+    grunnlagListe: GrunnlagEntity[];
+    erVedtakFattet: boolean;
+    bidragsmottaker?: Rolle;
+    erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
-    erKlageEllerOmgjøring: boolean;
-    søknadsbarn: Rolle[];
-    erVedtakFattet: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    bidragsmottaker?: Rolle;
-    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -160,9 +160,9 @@ export interface Inntekt {
     opprinneligFom?: string;
     /** @format date */
     opprinneligTom?: string;
+    opprinneligPeriode?: TypeArManedsperiode;
     /** @format date */
     datoFomEllerOpprinneligFom?: string;
-    opprinneligPeriode?: TypeArManedsperiode;
 }
 
 export interface Inntektspost {
@@ -448,11 +448,11 @@ export interface Datoperiode {
     til?: string;
 }
 
-export interface HusstandsbarnDto {
+export interface HusstandsbarnDtoV2 {
     /** @format int64 */
     id?: number;
-    kilde?: Kilde;
-    medISak: boolean;
+    kilde: Kilde;
+    medIBehandling: boolean;
     /** @uniqueItems true */
     perioder: HusstandsbarnperiodeDto[];
     ident?: string;
@@ -504,7 +504,7 @@ export interface OppdaterBehandlingRequestV2 {
  */
 export interface OppdaterBoforholdRequest {
     /** @uniqueItems true */
-    husstandsbarn?: HusstandsbarnDto[];
+    husstandsbarn?: HusstandsbarnDtoV2[];
     /** @uniqueItems true */
     sivilstand?: SivilstandDto[];
     notat?: OppdaterNotat;
@@ -770,22 +770,6 @@ export interface DelberegningSumInntekt {
     småbarnstillegg?: number;
 }
 
-export interface HusstandsbarnDtoV2 {
-    /** @format int64 */
-    id?: number;
-    kilde: Kilde;
-    medIBehandling: boolean;
-    /** @uniqueItems true */
-    perioder: HusstandsbarnperiodeDto[];
-    ident?: string;
-    navn?: string;
-    /**
-     * @format date
-     * @example "2025-01-25"
-     */
-    fødselsdato: string;
-}
-
 export interface HusstandsbarnGrunnlagDto {
     /** @uniqueItems true */
     perioder: HusstandsbarnGrunnlagPeriodeDto[];
@@ -836,11 +820,7 @@ export interface IkkeAktivInntektDto {
     /** Inntektsrapportering typer på inntekter som overlapper */
     rapporteringstype: Inntektsrapportering;
     beløp: number;
-    /**
-     * @format date
-     * @example "2024-01-01"
-     */
-    periode: string;
+    periode: TypeArManedsperiode;
     ident: string;
     gjelderBarn?: string;
     /** @uniqueItems true */
@@ -1716,6 +1696,7 @@ export enum AnsettelsesdetaljerMonthEnum1 {
 
 export enum IkkeAktivInntektDtoEndringstypeEnum {
     ENDRING = "ENDRING",
+    INGEN_ENDRING = "INGEN_ENDRING",
     SLETTET = "SLETTET",
     NY = "NY",
 }

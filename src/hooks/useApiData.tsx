@@ -60,32 +60,20 @@ export const QueryKeys = {
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.arbeidsforhold;
+    return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
 };
 export const useGetOpplysningerBoforhold = (): HusstandsbarnGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.husstandsbarn;
+    return behandling.aktiveGrunnlagsdata?.husstandsbarn;
 };
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.sivilstand;
-};
-export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
-    const behandling = useGetBehandlingV2();
-    switch (opplysningerType) {
-        case OpplysningerType.ARBEIDSFORHOLD:
-            return behandling.aktiveGrunnlagsdata.arbeidsforhold as T;
-        case OpplysningerType.BOFORHOLD:
-            return behandling.aktiveGrunnlagsdata.husstandsbarn as T;
-    }
-    return null;
+    return behandling.aktiveGrunnlagsdata?.sivilstand;
 };
 
 export const useGetOpplysningerHentetdato = (): string | undefined => {
     const opplysninger = useGetOpplysningerBoforhold();
     return opplysninger.length == 0 ? new Date().toISOString() : opplysninger[0].innhentetTidspunkt;
-    // return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
-    //     ?.innhentet;
 };
 
 export const useOppdaterBehandlingV2 = () => {
@@ -317,7 +305,24 @@ export const useNotat = (behandlingId: number) => {
 
     return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatHtml;
 };
+export const useAktiveGrunnlagsdata = () => {
+    const { behandlingId } = useForskudd();
+    const queryClient = useQueryClient();
 
+    return useMutation<void, void, { personident: string; type: OpplysningerType }>({
+        mutationFn: async ({ personident, type }) => {
+            await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, {
+                aktivereGrunnlagForPerson: {
+                    personident,
+                    grunnlagsdatatyper: [type],
+                },
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+        },
+    });
+};
 export const useGetBeregningForskudd = () => {
     const { behandlingId, vedtakId } = useForskudd();
 

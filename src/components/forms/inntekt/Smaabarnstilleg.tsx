@@ -19,7 +19,7 @@ export const Småbarnstillegg = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_småbarnstillegg}>
                 {text.title.småbarnstillegg}
             </Heading>
-            <InntektTabel fieldName={fieldName}>
+            <InntektTabel ident={ident} fieldName={fieldName}>
                 {({
                     controlledFields,
                     onSaveRow,

@@ -42,22 +42,22 @@ export const BeregnetInntekter = () => {
                                         <Table.HeaderCell scope="col" className="w-[198px]">
                                             {text.label.fraOgMed} - {text.label.tilOgMed}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[120px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[138px]">
                                             {text.label.skattepliktigeInntekter}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[105px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[122px]">
                                             {text.label.barnetillegg}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[130px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[112px]">
                                             {text.label.utvidetBarnetrygd}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[135px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[94px]">
                                             {text.label.småbarnstillegg}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[120px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[132px]">
                                             {text.label.kontantstøtte}
                                         </Table.HeaderCell>
-                                        <Table.HeaderCell scope="col" align="left" className="w-[130px]">
+                                        <Table.HeaderCell scope="col" align="left" className="w-[92px]">
                                             {text.label.totalt}
                                         </Table.HeaderCell>
                                     </Table.Row>
