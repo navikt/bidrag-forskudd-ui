@@ -58,7 +58,10 @@ export const QueryKeys = {
 
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandlingV2();
-    return null;
+    const opplysninger = behandling.aktiveGrunnlagsdata?.find(
+        (opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType
+    );
+    return opplysninger != null ? JSON.parse(opplysninger.data) : null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
