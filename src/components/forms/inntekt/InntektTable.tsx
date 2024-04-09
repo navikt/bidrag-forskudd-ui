@@ -340,7 +340,6 @@ export const InntektTabel = ({
 
     console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function renderNyeOpplysninger() {
         if (ikkeAktiverteEndringer.length === 0) return null;
         return (
@@ -439,7 +438,7 @@ export const InntektTabel = ({
                     )}
                 </Alert>
             )}
-            {/* {renderNyeOpplysninger()} */}
+            {renderNyeOpplysninger()}
             {children({
                 controlledFields,
                 editableRow,
