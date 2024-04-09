@@ -5,16 +5,19 @@ import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
+    IkkeAktivInntektDtoEndringstypeEnum,
     InntektDtoV2,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
+    OpplysningerType,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { useGetBehandlingV2 } from "../../../hooks/useApiData";
+import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
@@ -169,7 +172,9 @@ export const InntektTabel = ({
     fieldName,
     customRowValidation,
     children,
+    ident,
 }: {
+    ident;
     fieldName:
         | "småbarnstillegg"
         | "utvidetBarnetrygd"
@@ -181,8 +186,10 @@ export const InntektTabel = ({
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const {
+        ikkeAktiverteEndringerIGrunnlagsdata,
         inntekter: { valideringsfeil },
     } = useGetBehandlingV2();
+    const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
@@ -286,7 +293,8 @@ export const InntektTabel = ({
         };
     });
 
-    const [inntektType, ident] = fieldName.split(".");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [inntektType, _] = fieldName.split(".");
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
     )
@@ -298,6 +306,94 @@ export const InntektTabel = ({
               return feil.ident === ident;
           });
 
+    function hentIkkeAktiverteEndringer() {
+        switch (inntektType) {
+            case "småbarnstillegg":
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.småbarnstillegg;
+            case "utvidetBarnetrygd":
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.utvidetBarnetrygd;
+            case "barnetillegg":
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.barnetillegg;
+            case "kontantstøtte":
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.kontantstøtte;
+            default:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.årsinntekter;
+        }
+    }
+
+    function hentOpplysningerType() {
+        switch (inntektType) {
+            case "småbarnstillegg":
+                return OpplysningerType.SMABARNSTILLEGG;
+            case "utvidetBarnetrygd":
+                return OpplysningerType.UTVIDET_BARNETRYGD;
+            case "barnetillegg":
+                return OpplysningerType.BARNETILLEGG;
+            case "kontantstøtte":
+                return OpplysningerType.KONTANTSTOTTE;
+            default:
+                return OpplysningerType.SKATTEPLIKTIGE_INNTEKTER;
+        }
+    }
+
+    const ikkeAktiverteEndringer = hentIkkeAktiverteEndringer()?.filter((v) => v.ident == ident) ?? [];
+
+    console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    function renderNyeOpplysninger() {
+        if (ikkeAktiverteEndringer.length === 0) return null;
+        return (
+            <Alert variant="warning" className="mb-4">
+                <Heading size="small">{text.alert.nyOpplysninger}</Heading>
+                <BodyShort>{text.alert.nyOpplysninger}</BodyShort>
+                <table className="mt-2">
+                    <thead>
+                        <tr>
+                            <th align="left">{text.label.opplysninger}</th>
+                            <th align="left">{text.label.beløp}</th>
+                            <th align="left">{text.label.status}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ikkeAktiverteEndringer.map(({ beløp, rapporteringstype, periode, endringstype }, i) => {
+                            return (
+                                <tr key={i + rapporteringstype}>
+                                    <td width="250px" scope="row">
+                                        {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
+                                    </td>
+                                    <td width="75px">{beløp}</td>
+                                    <td width="100px">
+                                        {endringstype == IkkeAktivInntektDtoEndringstypeEnum.NY
+                                            ? " Ny"
+                                            : endringstype == IkkeAktivInntektDtoEndringstypeEnum.SLETTET
+                                              ? "Fjernes"
+                                              : "Endring"}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+                <Button
+                    size="xsmall"
+                    variant="secondary"
+                    spacing
+                    disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
+                    loading={aktiverGrunnlagFn.isPending}
+                    className="mt-2"
+                    onClick={() =>
+                        aktiverGrunnlagFn.mutate({
+                            personident: ident,
+                            type: hentOpplysningerType(),
+                        })
+                    }
+                >
+                    Oppdater opplysninger
+                </Button>
+            </Alert>
+        );
+    }
     return (
         <>
             {!lesemodus && tableValideringsfeil && (
@@ -338,8 +434,12 @@ export const InntektTabel = ({
                     {tableValideringsfeil.ingenLøpendePeriode && (
                         <BodyShort size="small">{text.error.ingenLoependeInntektPeriode}</BodyShort>
                     )}
+                    {tableValideringsfeil.manglerPerioder && (
+                        <BodyShort size="small">{text.error.manglerPerioder}</BodyShort>
+                    )}
                 </Alert>
             )}
+            {/* {renderNyeOpplysninger()} */}
             {children({
                 controlledFields,
                 editableRow,

@@ -4,14 +4,17 @@ import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 
 import {
+    ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
+    HusstandsbarnGrunnlagDto,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
     OpplysningerType,
     RolleDto,
     Rolletype,
+    SivilstandAktivGrunnlagDto,
     SivilstandBeregnet,
     SivilstandBeregnetStatusEnum,
 } from "../api/BidragBehandlingApiV1";
@@ -55,19 +58,22 @@ export const QueryKeys = {
     person: (ident: string) => ["person", ident],
     personMulti: (ident: string) => ["persons", ident],
 };
-
-export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
+export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
-    const opplysninger = behandling.aktiveGrunnlagsdata?.find(
-        (opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType
-    );
-    return opplysninger != null ? JSON.parse(opplysninger.data) : null;
+    return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
+};
+export const useGetOpplysningerBoforhold = (): HusstandsbarnGrunnlagDto[] => {
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata?.husstandsbarn;
+};
+export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata?.sivilstand;
 };
 
-export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
-    const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
-        ?.innhentet;
+export const useGetOpplysningerHentetdato = (): string | undefined => {
+    const opplysninger = useGetOpplysningerBoforhold();
+    return opplysninger.length == 0 ? new Date().toISOString() : opplysninger[0].innhentetTidspunkt;
 };
 
 export const useOppdaterBehandlingV2 = () => {
@@ -299,7 +305,24 @@ export const useNotat = (behandlingId: number) => {
 
     return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatHtml;
 };
+export const useAktiveGrunnlagsdata = () => {
+    const { behandlingId } = useForskudd();
+    const queryClient = useQueryClient();
 
+    return useMutation<void, void, { personident: string; type: OpplysningerType }>({
+        mutationFn: async ({ personident, type }) => {
+            await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, {
+                aktivereGrunnlagForPerson: {
+                    personident,
+                    grunnlagsdatatyper: [type],
+                },
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+        },
+    });
+};
 export const useGetBeregningForskudd = () => {
     const { behandlingId, vedtakId } = useForskudd();
 

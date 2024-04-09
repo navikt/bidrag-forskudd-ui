@@ -19,7 +19,7 @@ export const UtvidetBarnetrygd = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
                 {text.title.utvidetBarnetrygd}
             </Heading>
-            <InntektTabel fieldName={fieldName}>
+            <InntektTabel ident={ident} fieldName={fieldName}>
                 {({
                     controlledFields,
                     onSaveRow,

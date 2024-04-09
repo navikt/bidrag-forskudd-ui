@@ -8,18 +8,16 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
     Kilde,
-    OpplysningerType,
     SivilstandBeregnetStatusEnum,
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
-import { SivilstandGrunnlagDto } from "../../../api/BidragGrunnlagApi";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import {
     useGetBehandlingV2,
-    useGetOpplysninger,
+    useGetOpplysningerSivilstand,
     useGrunnlag,
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
@@ -59,7 +57,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     const saveBoforhold = useOnSaveBoforhold();
     const [editableRow, setEditableRow] = useState(undefined);
-    const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
+    const sivilstandOpplysninger = useGetOpplysningerSivilstand();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningstidspunkt);
     const {
         control,

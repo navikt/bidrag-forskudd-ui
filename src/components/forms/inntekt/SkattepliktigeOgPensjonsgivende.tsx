@@ -96,7 +96,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
-            <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
+            <InntektTabel ident={ident} fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,
                     onSaveRow,
@@ -121,10 +121,10 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                             <Table.HeaderCell scope="col" align="left" className="w-[74px]">
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[134px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[134px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" align="left" className="w-[290px]">

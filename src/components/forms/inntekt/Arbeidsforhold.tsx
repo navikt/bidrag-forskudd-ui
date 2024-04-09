@@ -2,10 +2,9 @@ import { capitalize } from "@navikt/bidrag-ui-common";
 import { Label } from "@navikt/ds-react";
 import React from "react";
 
-import { OpplysningerType } from "../../../api/BidragBehandlingApiV1";
-import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragGrunnlagApi";
+import { ArbeidsforholdGrunnlagDto } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { useGetOpplysninger } from "../../../hooks/useApiData";
+import { useGetArbeidsforhold } from "../../../hooks/useApiData";
 import { ISODateTimeStringToDDMMYYYYString } from "../../../utils/date-utils";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
@@ -21,7 +20,7 @@ type ArbeidsforholdProps = {
     ident: string;
 };
 export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
-    const arbeidsforholdOpplysninger = useGetOpplysninger<ArbeidsforholdGrunnlagDto[]>(OpplysningerType.ARBEIDSFORHOLD);
+    const arbeidsforholdOpplysninger = useGetArbeidsforhold();
 
     const arbeidsforholdTableData =
         arbeidsforholdOpplysninger?.filter((af) => af.partPersonId == ident)?.map(mapToTabledata) ?? [];
