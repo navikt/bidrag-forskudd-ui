@@ -3,7 +3,7 @@ import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     BoforholdDto,
     Bostatuskode,
-    HusstandsbarnDto,
+    HusstandsbarnDtoV2,
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBehandlingRequestV2,
@@ -329,11 +329,11 @@ export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
     virkningsOrSoktFraDato: Date,
     barnMedISaken: RolleDto[]
-): HusstandsbarnDto[] => {
+): HusstandsbarnDtoV2[] => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         fødselsdato: barn.foedselsdato,
-        medISak: barnMedISaken.some((b) => b.ident === barn.ident),
+        medIBehandling: barnMedISaken.some((b) => b.ident === barn.ident),
         perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
     }));
 };
@@ -735,14 +735,17 @@ export const compareOpplysninger = (
     return changedLog;
 };
 
-export const compareHusstandsBarn = (currentBarn: HusstandsbarnDto, nextBarn: HusstandsbarnDto) => {
-    if ((currentBarn.medISak && nextBarn.medISak) || (!currentBarn.medISak && !nextBarn.medISak)) {
+export const compareHusstandsBarn = (currentBarn: HusstandsbarnDtoV2, nextBarn: HusstandsbarnDtoV2) => {
+    if (
+        (currentBarn.medIBehandling && nextBarn.medIBehandling) ||
+        (!currentBarn.medIBehandling && !nextBarn.medIBehandling)
+    ) {
         return new Date(currentBarn.fødselsdato).getTime() - new Date(nextBarn.fødselsdato).getTime();
     }
-    if (currentBarn.medISak && !nextBarn.medISak) {
+    if (currentBarn.medIBehandling && !nextBarn.medIBehandling) {
         return -1;
     }
-    if (!currentBarn.medISak && nextBarn.medISak) {
+    if (!currentBarn.medIBehandling && nextBarn.medIBehandling) {
         return 1;
     }
 };

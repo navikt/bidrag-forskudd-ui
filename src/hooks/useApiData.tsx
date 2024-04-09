@@ -4,6 +4,7 @@ import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 
 import {
+    ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
     OppdaterBehandlingRequestV2,
@@ -55,19 +56,26 @@ export const QueryKeys = {
     person: (ident: string) => ["person", ident],
     personMulti: (ident: string) => ["persons", ident],
 };
-
+export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata.arbeidsforhold;
+};
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandlingV2();
-    const opplysninger = behandling.aktiveGrunnlagsdata?.find(
-        (opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType
-    );
-    return opplysninger != null ? JSON.parse(opplysninger.data) : null;
+    switch (opplysningerType) {
+        case OpplysningerType.ARBEIDSFORHOLD:
+            return behandling.aktiveGrunnlagsdata.arbeidsforhold as T;
+        case OpplysningerType.BOFORHOLD:
+            return behandling.aktiveGrunnlagsdata.husstandsbarn as T;
+    }
+    return null;
 };
 
 export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
-        ?.innhentet;
+    return null;
+    // return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
+    //     ?.innhentet;
 };
 
 export const useOppdaterBehandlingV2 = () => {

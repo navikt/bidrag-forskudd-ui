@@ -6,10 +6,10 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
     InntektDtoV2,
+    Inntektsrapportering,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
-    OpplysningerType,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -166,12 +166,11 @@ export const Periode = ({
     );
 };
 
-const OpplysningerTypeInntektTabelMapper = {
-    [OpplysningerType.SMABARNSTILLEGG]: "småbarnstillegg",
-    [OpplysningerType.UTVIDET_BARNETRYGD]: "utvidetBarnetrygd",
-    [OpplysningerType.SKATTEPLIKTIGE_INNTEKTER]: "årsinntekter",
-    [OpplysningerType.BARNETILLEGG]: "barnetillegg",
-    [OpplysningerType.KONTANTSTOTTE]: "kontantstøtte",
+const inntekstrapporteringInntektTabelMapper = {
+    [Inntektsrapportering.SMABARNSTILLEGG]: "småbarnstillegg",
+    [Inntektsrapportering.UTVIDET_BARNETRYGD]: "utvidetBarnetrygd",
+    [Inntektsrapportering.BARNETILLEGG]: "barnetillegg",
+    [Inntektsrapportering.KONTANTSTOTTE]: "kontantstøtte",
 };
 
 export const InntektTabel = ({
@@ -308,17 +307,25 @@ export const InntektTabel = ({
               return feil.ident === ident;
           });
 
-    const ikkeAktiverteEndringer = ikkeAktiverteEndringerIGrunnlagsdata.find(
-        (grunnlagsdataEndring) =>
-            (ident === undefined || (ident && ident === grunnlagsdataEndring.nyeData.gjelder)) &&
-            grunnlagsdataEndring.nyeData.grunnlagsdatatype.erBearbeidet &&
-            OpplysningerTypeInntektTabelMapper[grunnlagsdataEndring.nyeData.grunnlagsdatatype.type] === inntektType
-    );
-    const ikkeAktivertEndringerData = ikkeAktiverteEndringer?.nyeData?.data
-        ? JSON.parse(ikkeAktiverteEndringer.nyeData.data)
-        : undefined;
+    function hentIkkeAktiverteEndringer() {
+        const inntektType = inntekstrapporteringInntektTabelMapper[fieldName];
+        switch (inntektType) {
+            case Inntektsrapportering.SMABARNSTILLEGG:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.småbarnstillegg;
+            case Inntektsrapportering.UTVIDET_BARNETRYGD:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.utvidetBarnetrygd;
+            case Inntektsrapportering.BARNETILLEGG:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.barnetillegg;
+            case Inntektsrapportering.KONTANTSTOTTE:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.kontantstøtte;
+            default:
+                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.årsinntekter;
+        }
+    }
 
-    console.log("ikkeAktivertEndringerData", ikkeAktivertEndringerData);
+    const ikkeAktiverteEndringer = hentIkkeAktiverteEndringer();
+
+    console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
 
     return (
         <>

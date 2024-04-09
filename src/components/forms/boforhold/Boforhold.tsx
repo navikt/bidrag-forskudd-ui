@@ -19,7 +19,7 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import {
     Bostatuskode,
-    HusstandsbarnDto,
+    HusstandsbarnDtoV2,
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBoforholdRequest,
@@ -360,9 +360,9 @@ const AddBarnForm = ({
 
         const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
 
-        const addedBarn: HusstandsbarnDto = {
+        const addedBarn: HusstandsbarnDtoV2 = {
             ident: val === "dnummer" ? ident : "",
-            medISak: false,
+            medIBehandling: false,
             navn: navn,
             fødselsdato: fd,
             kilde: Kilde.MANUELL,
