@@ -133,3 +133,9 @@ export const getYearFromDate = (date?: Date | string): number | undefined => {
     if (typeof date == "string") return new Date(date).getFullYear();
     return date.getFullYear();
 };
+export const dateToMMYYYY = (date?: Date | string): string | undefined => {
+    if (!date) return;
+    if (typeof date == "string")
+        return new Date(date).toLocaleDateString("nb-NB", { month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("nb-NB", { month: "2-digit", year: "numeric" });
+};

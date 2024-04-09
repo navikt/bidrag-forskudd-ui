@@ -9,7 +9,6 @@ import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { getYearFromDate } from "../../../utils/date-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
@@ -45,7 +44,11 @@ const Beskrivelse = ({
         />
     ) : (
         <BodyShort className="capitalize leading-8">
-            {hentVisningsnavn(item.rapporteringstype, getYearFromDate(item.opprinneligFom ?? item.datoFom))}
+            {hentVisningsnavn(
+                item.rapporteringstype,
+                item.opprinneligFom ?? item.datoFom,
+                item.opprinneligTom ?? item.datoTom
+            )}
         </BodyShort>
     );
 };
@@ -115,19 +118,19 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                 <Table size="small" className="table-fixed">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
-                                            <Table.HeaderCell scope="col" align="center" className="w-[84px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[74px]">
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[144px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[144px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[252px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[290px]">
                                                 {text.label.beskrivelse}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[54px]">
                                                 {text.label.kilde}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" align="right" className="w-[154px]">
