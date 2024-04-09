@@ -121,13 +121,13 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                             <Table.HeaderCell scope="col" align="left" className="w-[74px]">
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[124px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[124px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[130px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[290px]">
+                                            <Table.HeaderCell scope="col" align="left" className="w-[290px]">
                                                 {text.label.beskrivelse}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" align="left" className="w-[54px]">
