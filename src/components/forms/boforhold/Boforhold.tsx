@@ -37,7 +37,7 @@ import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import {
     useGetBehandlingV2,
     useGetOpplysninger,
-    useGetOpplysningerHentetdato,
+    useGetOpplysningerBoforhold,
     useGrunnlag,
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
@@ -149,7 +149,7 @@ const Main = ({
     const datoFom = useVirkningsdato();
     const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
 
-    const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato(OpplysningerType.BOFORHOLD_BEARBEIDET);
+    const boforoholdOpplysningerHentetdato = useGetOpplysningerBoforhold();
     useEffect(scrollToHash, []);
     return (
         <>

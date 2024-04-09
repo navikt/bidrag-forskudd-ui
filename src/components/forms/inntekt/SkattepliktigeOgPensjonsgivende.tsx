@@ -43,7 +43,7 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="capitalize leading-8">
+        <BodyShort className="leading-8">
             {hentVisningsnavn(
                 item.rapporteringstype,
                 item.opprinneligFom ?? item.datoFom,

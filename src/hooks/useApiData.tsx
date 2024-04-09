@@ -7,12 +7,14 @@ import {
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
+    HusstandsbarnGrunnlagDto,
     OppdaterBehandlingRequestV2,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
     OpplysningerType,
     RolleDto,
     Rolletype,
+    SivilstandAktivGrunnlagDto,
     SivilstandBeregnet,
     SivilstandBeregnetStatusEnum,
 } from "../api/BidragBehandlingApiV1";
@@ -60,6 +62,14 @@ export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata.arbeidsforhold;
 };
+export const useGetOpplysningerBoforhold = (): HusstandsbarnGrunnlagDto[] => {
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata.husstandsbarn;
+};
+export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
+    const behandling = useGetBehandlingV2();
+    return behandling.aktiveGrunnlagsdata.sivilstand;
+};
 export const useGetOpplysninger = <T extends object>(opplysningerType: OpplysningerType): T | null => {
     const behandling = useGetBehandlingV2();
     switch (opplysningerType) {
@@ -71,9 +81,9 @@ export const useGetOpplysninger = <T extends object>(opplysningerType: Opplysnin
     return null;
 };
 
-export const useGetOpplysningerHentetdato = (opplysningerType: OpplysningerType): string | undefined => {
-    const behandling = useGetBehandlingV2();
-    return null;
+export const useGetOpplysningerHentetdato = (): string | undefined => {
+    const opplysninger = useGetOpplysningerBoforhold();
+    return opplysninger.length == 0 ? new Date().toISOString() : opplysninger[0].innhentetTidspunkt;
     // return behandling.aktiveGrunnlagsdata.find((opplysning) => opplysning.grunnlagsdatatype.type == opplysningerType)
     //     ?.innhentet;
 };
