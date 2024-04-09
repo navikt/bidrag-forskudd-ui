@@ -293,6 +293,7 @@ export const InntektTabel = ({
         };
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [inntektType, _] = fieldName.split(".");
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
@@ -339,6 +340,7 @@ export const InntektTabel = ({
 
     console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function renderNyeOpplysninger() {
         if (ikkeAktiverteEndringer.length === 0) return null;
         return (
