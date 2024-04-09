@@ -431,8 +431,11 @@ export const InntektTabel = ({
                             <BodyShort size="small">{text.error.hullIPerioderFiks}</BodyShort>
                         </>
                     )}
-                    {(tableValideringsfeil.ingenLøpendePeriode || tableValideringsfeil.manglerPerioder) && (
+                    {tableValideringsfeil.ingenLøpendePeriode && (
                         <BodyShort size="small">{text.error.ingenLoependeInntektPeriode}</BodyShort>
+                    )}
+                    {tableValideringsfeil.manglerPerioder && (
+                        <BodyShort size="small">{text.error.manglerPerioder}</BodyShort>
                     )}
                 </Alert>
             )}

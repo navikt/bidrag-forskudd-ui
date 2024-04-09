@@ -7,6 +7,7 @@ import {
     HusstandsbarnperiodeDto,
     Kilde,
     OppdaterBehandlingRequestV2,
+    RolleDto,
     Sivilstand,
     SivilstandDto,
     Sivilstandskode,
@@ -16,6 +17,7 @@ import text from "../../../constants/texts";
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,
+    HusstandOpplysningFraFolkeRegistre,
     HusstandOpplysningPeriode,
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
@@ -666,4 +668,107 @@ export const checkPeriodizationErrors = (
     }
 
     return errorTypes;
+};
+
+// Kan fjernes
+
+export const getBarnPerioder = (
+    perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
+    virkningsOrSoktFraDato: Date,
+    barnsFoedselsDato: string
+): HusstandsbarnperiodeDto[] => {
+    const virkingsdato = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barnsFoedselsDato, virkningsOrSoktFraDato);
+    const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato));
+    const isOver18 = isOver18YearsOld(barnsFoedselsDato);
+    const periodsBetweenVirkningstidspunktAnd18 = perioder?.filter(
+        ({ tilDato, fraDato }) =>
+            !isAfterEqualsDate(fraDato, monthAfter18) &&
+            (tilDato === null || (tilDato && isAfterDate(tilDato, virkingsdato)))
+    );
+    const isDateAfter18 = (date: Date | string) => date && isAfterEqualsDate(date, monthAfter18);
+    const result: HusstandsbarnperiodeDto[] = [];
+
+    if (isAfterEqualsDate(virkingsdato, monthAfter18)) {
+        return [
+            {
+                datoFom: toISODateString(virkingsdato),
+                datoTom: null,
+                bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                kilde: Kilde.MANUELL,
+            },
+        ];
+    }
+
+    periodsBetweenVirkningstidspunktAnd18?.forEach(({ fraDato, tilDato, bostatus }) => {
+        const isRegistrertPeriode = (bostatus: Bostatuskode) => bostatus === Bostatuskode.MED_FORELDER;
+        const prevPeriode = result[result.length - 1];
+        const datoFom = toISODateString(
+            result.length === 0 ? virkingsdato : addDays(new Date(result[result.length - 1].datoTom), 1)
+        );
+        const datoTom = tilDato ? toISODateString(lastDayOfMonth(new Date(tilDato))) : null;
+        const isPeriodAfter18YearOld = isDateAfter18(datoFom) || datoTom == null || isDateAfter18(datoTom);
+
+        if (boststatusOver18År.includes(prevPeriode?.bostatus)) {
+            return;
+        }
+
+        if (isPeriodAfter18YearOld && isOver18) {
+            if (prevPeriode?.bostatus === bostatus) {
+                prevPeriode.datoTom = toISODateString(deductDays(new Date(monthAfter18), 1));
+            } else {
+                result.push({
+                    datoFom,
+                    datoTom: toISODateString(deductDays(new Date(monthAfter18), 1)),
+                    bostatus,
+                    kilde: Kilde.OFFENTLIG,
+                });
+            }
+            result.push({
+                datoFom: toISODateString(monthAfter18),
+                datoTom: null,
+                bostatus: Bostatuskode.REGNES_IKKE_SOM_BARN,
+                kilde: Kilde.MANUELL,
+            });
+        } else if (isRegistrertPeriode(bostatus)) {
+            if (prevPeriode && isRegistrertPeriode(prevPeriode.bostatus)) {
+                result[result.length - 1].datoTom = datoTom;
+            } else {
+                result.push({
+                    datoFom,
+                    datoTom,
+                    bostatus,
+                    kilde: Kilde.OFFENTLIG,
+                });
+            }
+        } else {
+            const coversAtLeastOneCalendarMonth = tilDato
+                ? periodCoversMinOneFullCalendarMonth(new Date(fraDato), new Date(tilDato))
+                : true;
+
+            if (coversAtLeastOneCalendarMonth) {
+                result.push({
+                    bostatus,
+                    datoFom,
+                    datoTom: tilDato ? toISODateString(new Date(tilDato)) : null,
+                    kilde: Kilde.OFFENTLIG,
+                });
+            }
+        }
+    });
+
+    return result;
+};
+
+export const getBarnPerioderFromHusstandsListe = (
+    opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
+    virkningsOrSoktFraDato: Date,
+    barnMedISaken: RolleDto[]
+): HusstandsbarnDtoV2[] => {
+    return opplysningerFraFolkRegistre.map((barn) => ({
+        ...barn,
+        kilde: Kilde.OFFENTLIG,
+        fødselsdato: barn.foedselsdato,
+        medIBehandling: barnMedISaken.some((b) => b.ident === barn.ident),
+        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
+    }));
 };
