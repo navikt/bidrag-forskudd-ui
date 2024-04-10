@@ -1,6 +1,6 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -15,6 +15,7 @@ import {
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -172,9 +173,7 @@ export const InntektTabel = ({
     fieldName,
     customRowValidation,
     children,
-    ident,
 }: {
-    ident;
     fieldName:
         | "småbarnstillegg"
         | "utvidetBarnetrygd"
@@ -191,6 +190,7 @@ export const InntektTabel = ({
     } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
+    const { isAdminEnabled } = useFeatureToogle();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
@@ -294,7 +294,7 @@ export const InntektTabel = ({
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [inntektType, _] = fieldName.split(".");
+    const [inntektType, ident] = fieldName.split(".");
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
     )
@@ -305,21 +305,6 @@ export const InntektTabel = ({
               }
               return feil.ident === ident;
           });
-
-    function hentIkkeAktiverteEndringer() {
-        switch (inntektType) {
-            case "småbarnstillegg":
-                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.småbarnstillegg;
-            case "utvidetBarnetrygd":
-                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.utvidetBarnetrygd;
-            case "barnetillegg":
-                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.barnetillegg;
-            case "kontantstøtte":
-                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.kontantstøtte;
-            default:
-                return ikkeAktiverteEndringerIGrunnlagsdata.inntekter.årsinntekter;
-        }
-    }
 
     function hentOpplysningerType() {
         switch (inntektType) {
@@ -336,15 +321,13 @@ export const InntektTabel = ({
         }
     }
 
-    const ikkeAktiverteEndringer = hentIkkeAktiverteEndringer()?.filter((v) => v.ident == ident) ?? [];
+    const ikkeAktiverteEndringer =
+        ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType]?.filter((v) => v.ident == ident) ?? [];
 
-    console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function renderNyeOpplysninger() {
         if (ikkeAktiverteEndringer.length === 0) return null;
         return (
-            <Alert variant="warning" className="mb-4">
+            <Box padding="4" background="surface-default" borderWidth="1">
                 <Heading size="small">{text.alert.nyOpplysninger}</Heading>
                 <BodyShort>{text.alert.nyOpplysninger}</BodyShort>
                 <table className="mt-2">
@@ -391,11 +374,13 @@ export const InntektTabel = ({
                 >
                     Oppdater opplysninger
                 </Button>
-            </Alert>
+            </Box>
         );
     }
+
     return (
         <>
+            {isAdminEnabled && renderNyeOpplysninger()}
             {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
@@ -439,7 +424,6 @@ export const InntektTabel = ({
                     )}
                 </Alert>
             )}
-            {/* {renderNyeOpplysninger()} */}
             {children({
                 controlledFields,
                 editableRow,

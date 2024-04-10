@@ -14,7 +14,7 @@ import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, isValidDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYHHMMString, isValidDate } from "../../../utils/date-utils";
 import { scrollToHash } from "../../../utils/window-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FormLayout } from "../../layout/grid/FormLayout";
@@ -58,7 +58,9 @@ const Main = () => {
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
         roller: behandlingRoller,
+        ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
+    const { isAdminEnabled } = useFeatureToogle();
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -68,8 +70,28 @@ const Main = () => {
             return 0;
         });
     useEffect(scrollToHash, []);
+
+    // TODO: Hva om det har kommet opplysninger fra ytelser?
+    const ikkeAktiverteEndringer = Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).filter(
+        (i) => i.length > 0
+    );
+
+    function renderNyeOpplysningerAlert() {
+        if (ikkeAktiverteEndringer.length === 0) return null;
+        return (
+            <Alert variant="info" size="small">
+                <Heading size="small">{text.alert.nyOpplysningerInfo}</Heading>
+                <BodyShort>
+                    Nye opplysninger fra offentlige register er tilgjengelig. Oppdatert{" "}
+                    {DateToDDMMYYYYHHMMString(dateOrNull(ikkeAktiverteEndringer[0][0].innhentetTidspunkt))}.
+                </BodyShort>
+            </Alert>
+        );
+    }
+
     return (
         <div className="grid gap-y-12">
+            {isAdminEnabled && renderNyeOpplysningerAlert()}
             {!isValidDate(virkningstidspunkt) && (
                 <Alert variant="warning">
                     <BodyShort>Mangler virkningstidspunkt</BodyShort>

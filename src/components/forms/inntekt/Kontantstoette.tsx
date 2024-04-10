@@ -36,7 +36,7 @@ export const Kontantstøtte = () => {
                             <BodyShort size="small">{barn.ident}</BodyShort>
                         </div>
                     </div>
-                    <InntektTabel ident={bmIdent} fieldName={`kontantstøtte.${barn.ident}` as const}>
+                    <InntektTabel fieldName={`kontantstøtte.${barn.ident}` as const}>
                         {({
                             controlledFields,
                             onSaveRow,

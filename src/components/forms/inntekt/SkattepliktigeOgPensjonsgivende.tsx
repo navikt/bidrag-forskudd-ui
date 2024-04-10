@@ -96,7 +96,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
-            <InntektTabel ident={ident} fieldName={fieldName} customRowValidation={customRowValidation}>
+            <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,
                     onSaveRow,
