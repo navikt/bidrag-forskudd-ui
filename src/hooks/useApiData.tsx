@@ -248,7 +248,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
 
 export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
     const behandling = useGetBehandlingV2();
-    const { sivilstandListe } = useGrunnlag();
+    const opplysninger = useGetOpplysningerSivilstand();
 
     const { lesemodus } = useForskudd();
     const { data: beregnet } = useSuspenseQuery({
@@ -257,7 +257,7 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
             if (lesemodus) {
                 return { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
             }
-            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, sivilstandListe)).data;
+            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, opplysninger.grunnlag)).data;
         },
         staleTime: Infinity,
     });

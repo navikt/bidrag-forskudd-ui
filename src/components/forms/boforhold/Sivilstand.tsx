@@ -18,7 +18,6 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
-    useGrunnlag,
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
@@ -358,9 +357,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    // const sivilstandOpplysninger = useGetOpplysninger<SivilstandGrunnlagDto[]>(OpplysningerType.SIVILSTAND);
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
-    const { sivilstandListe: sivilstandOpplysninger } = useGrunnlag();
+    const sivilstandOpplysninger = useGetOpplysningerSivilstand();
 
     const behandling = useGetBehandlingV2();
     if (!sivilstandOpplysninger) {
@@ -370,7 +368,7 @@ const Opplysninger = () => {
     const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
 
     const sivilstandsOpplysningerFiltrert = () => {
-        const opplysningerSortert = sivilstandOpplysninger.sort((a, b) => {
+        const opplysningerSortert = sivilstandOpplysninger.grunnlag.sort((a, b) => {
             if (a.gyldigFom == null) return -1;
             if (b.gyldigFom == null) return 1;
             return dateOrNull(a.gyldigFom) > dateOrNull(b.gyldigFom) ? 1 : -1;
@@ -379,8 +377,13 @@ const Opplysninger = () => {
             return opplysningerSortert;
         }
 
-        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand) => {
-            return virkingstidspunkt == null || dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt;
+        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand, i) => {
+            const nesteSivilstand = opplysningerSortert[i + 1];
+            return (
+                virkingstidspunkt == null ||
+                dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt ||
+                (nesteSivilstand != null && dateOrNull(nesteSivilstand.gyldigFom) > virkingstidspunkt)
+            );
         });
 
         if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
