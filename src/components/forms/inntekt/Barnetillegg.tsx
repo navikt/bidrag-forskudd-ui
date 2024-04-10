@@ -116,7 +116,6 @@ export const Barnetillegg = () => {
                         </div>
                     </div>
                     <InntektTabel
-                        ident={bmIdent}
                         fieldName={`barnetillegg.${barn.ident}` as const}
                         customRowValidation={customRowValidation}
                     >

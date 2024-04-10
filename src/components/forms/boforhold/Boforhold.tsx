@@ -534,7 +534,6 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
         saveBoforhold(updatedValues);
     };
 
-    console.log(controlledFields);
     return (
         <>
             {controlledFields.map((item, index) => (

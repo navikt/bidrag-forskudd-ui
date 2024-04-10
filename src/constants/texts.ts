@@ -160,7 +160,7 @@ export default {
         ønskerDuÅSlette: "Ønsker du å slette?",
         ønskerDuÅSletteBarnet: "Ønsker du å slette barnet som er lagt til i beregningen?",
     },
-    barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig",
+    barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig.",
     resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
     år: "år",
 };
