@@ -1,3 +1,4 @@
+import { toISODateTimeString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -58,6 +59,7 @@ const Main = () => {
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningsdato },
         roller: behandlingRoller,
+        ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
@@ -88,11 +90,30 @@ const Main = () => {
                     ))}
                 </Tabs.List>
                 {roller.map((rolle) => {
+                    // TODO: Hva om det har kommet opplysninger fra ytelser?
+                    const ikkeAktiverteEndringer =
+                        ikkeAktiverteEndringerIGrunnlagsdata.inntekter.årsinntekter?.filter(
+                            (v) => v.ident == rolle.ident
+                        ) ?? [];
+                    function renderNyeOpplysningerAlert() {
+                        if (ikkeAktiverteEndringer.length === 0) return null;
+                        return (
+                            <Alert variant="info" size="small">
+                                <Heading size="small">{text.alert.nyOpplysningerInfo}</Heading>
+                                <BodyShort>
+                                    Oppdatert{" "}
+                                    {toISODateTimeString(dateOrNull(ikkeAktiverteEndringer[0].innhentetTidspunkt))}. De
+                                    nye opplysningene vil erstatte de gamle.
+                                </BodyShort>
+                            </Alert>
+                        );
+                    }
                     return (
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
                             <div className="mt-12">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
+                            {renderNyeOpplysningerAlert()}
                             <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>

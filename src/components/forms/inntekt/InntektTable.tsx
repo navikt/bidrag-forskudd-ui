@@ -393,6 +393,7 @@ export const InntektTabel = ({
             </Alert>
         );
     }
+
     return (
         <>
             {!lesemodus && tableValideringsfeil && (

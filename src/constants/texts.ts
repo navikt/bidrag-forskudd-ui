@@ -16,6 +16,7 @@ export default {
         enEllerFlereSivilstandPerioderEndret: "En eller flere sivilstandsperioder har blitt endret",
         feilIPeriodisering: "Feil i periodisering",
         nyOpplysninger: "Nye opplysninger fra offentlig register vil erstatte de gamle",
+        nyOpplysningerInfo: "Nye opplysninger fra offentlig register er tilgjengelig.",
         nyOpplysningerInfomelding: "Dette kan medføre at inntekt som er lagt til grunn må vurderes på nytt.",
         flereBarnRegistrertPåAdresse: "Det er flere barn registret på samme adresse i Folkeregisteret.",
         fullførRedigering: "Fullfør redigering",
