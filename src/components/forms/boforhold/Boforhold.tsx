@@ -80,7 +80,6 @@ import {
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
     isOver18YearsOld,
-    mapHusstandsMedlemmerToBarn,
     mapSivilstandProsessert,
     removeAndEditPeriods,
 } from "../helpers/boforholdFormHelpers";
@@ -212,25 +211,19 @@ const Side = () => {
 };
 
 const BoforholdsForm = () => {
+    // Behold dette for debugging i prod
+    useGrunnlag();
     const { setBoforholdFormValues } = useForskudd();
     const isSavedInitialOpplysninger = useRef(false);
     const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { husstandsmedlemmerOgEgneBarnListe, sivilstandListe } = useGrunnlag();
     const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
-    const opplysningerFraFolkRegistre = useMemo(
-        () => ({
-            husstand: mapHusstandsMedlemmerToBarn(husstandsmedlemmerOgEgneBarnListe),
-            sivilstand: sivilstandListe,
-        }),
-        [husstandsmedlemmerOgEgneBarnListe, sivilstandListe]
-    );
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
         () => createInitialValues(boforhold, sivilstandProssesert.sivilstandListe),
-        [boforhold, sivilstandProssesert, opplysningerFraFolkRegistre, virkningsOrSoktFraDato, barnMedISaken]
+        [boforhold, sivilstandProssesert, virkningsOrSoktFraDato, barnMedISaken]
     );
 
     const useFormMethods = useForm({
