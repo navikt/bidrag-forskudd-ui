@@ -15,6 +15,7 @@ import {
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -189,6 +190,7 @@ export const InntektTabel = ({
     } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
+    const { isAdminEnabled } = useFeatureToogle();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
@@ -322,8 +324,6 @@ export const InntektTabel = ({
     const ikkeAktiverteEndringer =
         ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType]?.filter((v) => v.ident == ident) ?? [];
 
-    console.log("ikkeAktivertEndringerData", ikkeAktiverteEndringer);
-
     function renderNyeOpplysninger() {
         if (ikkeAktiverteEndringer.length === 0) return null;
         return (
@@ -380,7 +380,7 @@ export const InntektTabel = ({
 
     return (
         <>
-            {renderNyeOpplysninger()}
+            {isAdminEnabled && renderNyeOpplysninger()}
             {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>

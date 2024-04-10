@@ -60,6 +60,7 @@ const Main = () => {
         roller: behandlingRoller,
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
+    const { isAdminEnabled } = useFeatureToogle();
     const virkningstidspunkt = dateOrNull(virkningsdato);
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -90,7 +91,7 @@ const Main = () => {
 
     return (
         <div className="grid gap-y-12">
-            {renderNyeOpplysningerAlert()}
+            {isAdminEnabled && renderNyeOpplysningerAlert()}
             {!isValidDate(virkningstidspunkt) && (
                 <Alert variant="warning">
                     <BodyShort>Mangler virkningstidspunkt</BodyShort>
