@@ -25,12 +25,8 @@ import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useForskudd();
-    const {
-        erVedtakFattet,
-        virkningstidspunkt: { avslag },
-    } = useGetBehandlingV2();
+    const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
-    const isAvslag = avslag != null;
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
 
     useEffect(() => {
@@ -53,7 +49,7 @@ const Vedtak = () => {
                     </Heading>
                 )}
 
-                {isAvslag ? <VedtakAvslag /> : <VedtakResultat />}
+                <VedtakResultat />
             </div>
 
             {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
@@ -152,52 +148,12 @@ const FatteVedtakButtons = () => {
     );
 };
 
-const VedtakAvslag = () => {
-    const {
-        roller,
-        virkningstidspunkt: { virkningstidspunkt, avslag },
-        søktFomDato,
-    } = useGetBehandlingV2();
-    return (
-        <>
-            {roller
-                .filter((rolle) => rolle.rolletype === Rolletype.BA)
-                .map((barn, i) => (
-                    <div key={i + barn.ident + avslag} className="mb-8">
-                        <div className="my-4 flex items-center gap-x-2">
-                            <RolleTag rolleType={Rolletype.BA} />
-                            <BodyShort>
-                                {barn.navn} / <span className="ml-1">{barn.ident}</span> /{" "}
-                                <span className="ml-1">{dateToDDMMYYYYString(new Date(barn.fødselsdato))}</span>
-                            </BodyShort>
-                        </div>
-                        <Table>
-                            <Table.Header>
-                                <Table.Row>
-                                    <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
-                                    <Table.HeaderCell scope="col">{text.label.årsak}</Table.HeaderCell>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                                <Table.Row>
-                                    <Table.DataCell>
-                                        {dateToDDMMYYYYString(new Date(virkningstidspunkt ?? søktFomDato))} -
-                                    </Table.DataCell>
-                                    <Table.DataCell>{text.label.avslag}</Table.DataCell>
-                                    <Table.DataCell>{hentVisningsnavn(avslag)}</Table.DataCell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table>
-                    </div>
-                ))}
-        </>
-    );
-};
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
     const { setActiveStep } = useForskudd();
-
+    const {
+        virkningstidspunkt: { avslag },
+    } = useGetBehandlingV2();
     function renderFeilmeldinger() {
         console.log(beregnetForskudd);
         if (!beregnetForskudd.feil?.detaljer) return null;
@@ -299,14 +255,15 @@ const VedtakResultat = () => {
         );
     }
 
+    const erAvslag = avslag != null;
     return (
         <>
             {beregnetForskudd.resultat?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
                     <Table>
-                        <VedtakTableHeader />
-                        <VedtakTableBody resultatBarn={r} />
+                        <VedtakTableHeader avslag={erAvslag} />
+                        <VedtakTableBody resultatBarn={r} avslag={erAvslag} />
                     </Table>
                 </div>
             ))}
@@ -314,23 +271,36 @@ const VedtakResultat = () => {
     );
 };
 
-const VedtakTableBody = ({ resultatBarn }: { resultatBarn: ResultatBeregningBarnDto }) => {
+const VedtakTableBody = ({ resultatBarn, avslag }: { resultatBarn: ResultatBeregningBarnDto; avslag: boolean }) => {
     return (
         <Table.Body>
             {resultatBarn.perioder.map((periode) => (
-                <Table.Row>
-                    <Table.DataCell>
-                        {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                        {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
-                    </Table.DataCell>
-                    <Table.DataCell>{periode.inntekt}</Table.DataCell>
+                <>
+                    {avslag ? (
+                        <Table.Row>
+                            <Table.DataCell>
+                                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                                {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
+                            </Table.DataCell>
+                            <Table.DataCell>{text.label.avslag}</Table.DataCell>
+                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                        </Table.Row>
+                    ) : (
+                        <Table.Row>
+                            <Table.DataCell>
+                                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                                {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
+                            </Table.DataCell>
+                            <Table.DataCell>{periode.inntekt}</Table.DataCell>
 
-                    <Table.DataCell>{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
+                            <Table.DataCell>{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
 
-                    <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                    <Table.DataCell>{periode.beløp}</Table.DataCell>
-                    <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
-                </Table.Row>
+                            <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
+                            <Table.DataCell>{periode.beløp}</Table.DataCell>
+                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                        </Table.Row>
+                    )}
+                </>
             ))}
         </Table.Body>
     );
@@ -344,16 +314,24 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
         </BodyShort>
     </div>
 );
-const VedtakTableHeader = () => (
+const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
     <Table.Header>
-        <Table.Row>
-            <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
-            <Table.HeaderCell scope="col">{text.label.inntekt}</Table.HeaderCell>
-            <Table.HeaderCell scope="col">{text.label.sivilstandBM}</Table.HeaderCell>
-            <Table.HeaderCell scope="col">{text.label.antallBarn}</Table.HeaderCell>
-            <Table.HeaderCell scope="col">{text.label.forskudd}</Table.HeaderCell>
-            <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
-        </Table.Row>
+        {avslag ? (
+            <Table.Row>
+                <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.årsak}</Table.HeaderCell>
+            </Table.Row>
+        ) : (
+            <Table.Row>
+                <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.inntekt}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.sivilstandBM}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.antallBarn}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.forskudd}</Table.HeaderCell>
+                <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
+            </Table.Row>
+        )}
     </Table.Header>
 );
 export default () => {
