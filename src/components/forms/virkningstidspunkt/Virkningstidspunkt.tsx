@@ -8,6 +8,7 @@ import {
     Resultatkode,
     Rolletype,
     TypeArsakstype,
+    Vedtakstype,
     VirkningstidspunktDto,
 } from "../../../api/BidragBehandlingApiV1";
 import { SOKNAD_LABELS } from "../../../constants/soknadFraLabels";
@@ -96,6 +97,7 @@ const Main = ({ initialValues, error }) => {
     const virkningsDato = getValues("virkningstidspunkt");
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
+    const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
     const onAarsakSelect = (value: string) => {
         const barnsFødselsdato = kunEtBarnIBehandlingen
             ? behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA).fødselsdato
@@ -168,18 +170,20 @@ const Main = ({ initialValues, error }) => {
                     className="w-max"
                 >
                     <option value="">{text.select.årsakAvslagPlaceholder}</option>
-                    <optgroup label={text.label.årsak}>
-                        {årsakListe
-                            .filter((value) => {
-                                if (kunEtBarnIBehandlingen) return true;
-                                return value !== TypeArsakstype.FRABARNETSFODSEL;
-                            })
-                            .map((value) => (
-                                <option key={value} value={value}>
-                                    {hentVisningsnavn(value)}
-                                </option>
-                            ))}
-                    </optgroup>
+                    {skalViseÅrsakstyper && (
+                        <optgroup label={text.label.årsak}>
+                            {årsakListe
+                                .filter((value) => {
+                                    if (kunEtBarnIBehandlingen) return true;
+                                    return value !== TypeArsakstype.FRABARNETSFODSEL;
+                                })
+                                .map((value) => (
+                                    <option key={value} value={value}>
+                                        {hentVisningsnavn(value)}
+                                    </option>
+                                ))}
+                        </optgroup>
+                    )}
                     <optgroup label={text.label.avslag}>
                         {avslagsListe.map((value) => (
                             <option key={value} value={value}>
