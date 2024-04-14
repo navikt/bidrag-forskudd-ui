@@ -1,15 +1,16 @@
+import { FilePdfFillIcon } from "@navikt/aksel-icons";
 import { Broadcast } from "@navikt/bidrag-ui-common";
-import { Alert, Loader } from "@navikt/ds-react";
+import { Alert, Button, Loader } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Suspense, useEffect } from "react";
 
 import text from "../../constants/texts";
-import { QueryKeys, useNotat } from "../../hooks/useApiData";
+import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
 
-export default ({ behandlingId }: { behandlingId: number }) => {
+export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boolean }) => {
     return (
-        <div className="max-w-[1092px] mx-auto px-6 py-6">
+        <div className="max-w-[1092px] px-6 py-6">
             <Suspense
                 fallback={
                     <div className="flex justify-center">
@@ -17,12 +18,55 @@ export default ({ behandlingId }: { behandlingId: number }) => {
                     </div>
                 }
             >
-                <RenderNotatHtml behandlingId={behandlingId} />
+                <div style={{ maxHeight: "calc(100% - 100px)", width: "100vw", overflow: "auto" }}>
+                    {!pdf && (
+                        <div className="flex justify-end">
+                            <Button variant="secondary" onClick={() => console.log("")} style={{ alignSelf: "right" }}>
+                                <FilePdfFillIcon />
+                            </Button>
+                        </div>
+                    )}
+                    {pdf ? (
+                        <RenderNotatPdf behandlingId={behandlingId} />
+                    ) : (
+                        <RenderNotatHtml behandlingId={behandlingId} />
+                    )}
+                </div>
             </Suspense>
         </div>
     );
 };
 
+const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
+    const { data: notatPdf, isLoading, isError } = useNotatPdf(behandlingId);
+    const queryClient = useQueryClient();
+    async function subscribeToChanges() {
+        await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
+        console.debug("Received broadcast", notatBroadcastName, behandlingId);
+        queryClient.refetchQueries({ queryKey: QueryKeys.notat(behandlingId) });
+        setTimeout(() => subscribeToChanges(), 200);
+    }
+    useEffect(() => {
+        subscribeToChanges();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center">
+                <Loader size="3xlarge" title={text.loading} variant="interaction" />
+            </div>
+        );
+    }
+    if (isError) {
+        return <Alert variant="error">{text.error.hentingAvNotat}</Alert>;
+    }
+
+    function getUrl() {
+        const fileBlob = new Blob([notatPdf], { type: "application/pdf" });
+        return URL.createObjectURL(fileBlob);
+    }
+    return <object data={getUrl()} type="application/pdf" width="90%" height="100%" />;
+};
 const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     const { data: notatHtml, isLoading, isError } = useNotat(behandlingId);
     const queryClient = useQueryClient();
@@ -47,6 +91,7 @@ const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     if (isError) {
         return <Alert variant="error">{text.error.hentingAvNotat}</Alert>;
     }
+
     //@ts-ignore
     return <notat-view html={notatHtml} />;
 };
