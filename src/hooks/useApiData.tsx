@@ -40,6 +40,7 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     notat: (behandlingId) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
+    notatPdf: (behandlingId) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
     behandlingV2: (behandlingId: number, vedtakId?: number) => [
         "behandlingV2",
         QueryKeys.behandlingVersion,
@@ -277,6 +278,36 @@ export const useGrunnlag = (): HentGrunnlagDto | null => {
         staleTime: Infinity,
     });
     return grunnlagspakke;
+};
+
+export const useNotatPdf = (behandlingId: number) => {
+    const resultPayload = useQuery({
+        queryKey: QueryKeys.notatPdf(behandlingId),
+        queryFn: async () => (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+    });
+
+    const resultNotatPdf = useQuery({
+        queryKey: ["notat_pdf", behandlingId, resultPayload.data],
+        queryFn: () =>
+            BIDRAG_DOKUMENT_PRODUKSJON_API.api.generatePdf(
+                "forskudd",
+                //@ts-ignore
+                resultPayload.data as NotatPayload,
+                {
+                    format: "blob",
+                }
+            ),
+        select: (response) => response.data,
+        enabled: resultPayload.isFetched,
+        refetchOnWindowFocus: false,
+        refetchInterval: 0,
+        staleTime: Infinity,
+        placeholderData: (previousData) => previousData,
+    });
+
+    return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatPdf;
 };
 
 export const useNotat = (behandlingId: number) => {

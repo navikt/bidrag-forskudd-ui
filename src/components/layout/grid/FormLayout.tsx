@@ -11,6 +11,7 @@ export const FormLayout = ({ title, main, side }) => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
     const listenToMutations = [
+        MutationKeys.oppdaterBehandling(behandlingId),
         MutationKeys.updateBoforhold(behandlingId),
         MutationKeys.updateVirkningstidspunkt(behandlingId),
         MutationKeys.updateInntekter(behandlingId),
