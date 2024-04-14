@@ -2,7 +2,7 @@ import { FilePdfFillIcon } from "@navikt/aksel-icons";
 import { Broadcast } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Loader } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 
 import text from "../../constants/texts";
 import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
@@ -40,14 +40,18 @@ export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boole
 const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
     const { data: notatPdf, isLoading, isError } = useNotatPdf(behandlingId);
     const queryClient = useQueryClient();
+    const hasSubscribed = useRef<boolean>(false);
     async function subscribeToChanges() {
+        console.debug("Waiting for broadcast", notatBroadcastName, behandlingId);
         await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
         console.debug("Received broadcast", notatBroadcastName, behandlingId);
-        queryClient.refetchQueries({ queryKey: QueryKeys.notat(behandlingId) });
+        queryClient.refetchQueries({ queryKey: QueryKeys.notatPdf(behandlingId) });
         setTimeout(() => subscribeToChanges(), 200);
     }
     useEffect(() => {
+        if (hasSubscribed.current) return;
         subscribeToChanges();
+        hasSubscribed.current = true;
     }, []);
 
     if (isLoading) {

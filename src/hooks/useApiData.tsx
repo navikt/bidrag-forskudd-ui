@@ -282,7 +282,7 @@ export const useGrunnlag = (): HentGrunnlagDto | null => {
 
 export const useNotatPdf = (behandlingId: number) => {
     const resultPayload = useQuery({
-        queryKey: QueryKeys.notat(behandlingId),
+        queryKey: QueryKeys.notatPdf(behandlingId),
         queryFn: async () => (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data,
         refetchOnWindowFocus: false,
         refetchInterval: 0,
