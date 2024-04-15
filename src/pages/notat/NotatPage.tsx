@@ -1,16 +1,17 @@
 //@ts-ignore
 import styles from "./NotatPage.lazy.css";
 styles.use();
-import { FilePdfFillIcon } from "@navikt/aksel-icons";
+import { FileIcon, FilePdfIcon } from "@navikt/aksel-icons";
 import { Broadcast } from "@navikt/bidrag-ui-common";
-import { Alert, Button, Loader } from "@navikt/ds-react";
+import { Alert, Loader, Tabs } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Suspense, useEffect, useMemo, useRef } from "react";
 
 import text from "../../constants/texts";
 import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
-export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boolean }) => {
+export default ({ behandlingId, pdf = false }: { behandlingId: number; pdf: boolean }) => {
+    const [showTab, setShowTab] = React.useState<string>("html");
     return (
         <div className="max-w-[1092px] px-6 py-6">
             <Suspense
@@ -20,19 +21,22 @@ export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boole
                     </div>
                 }
             >
-                <div style={{ maxHeight: "calc(100% - 200px)", width: "100$" }}>
-                    {!pdf && (
-                        <div className="flex justify-end">
-                            <Button variant="secondary" onClick={() => console.log("")} style={{ alignSelf: "right" }}>
-                                <FilePdfFillIcon />
-                            </Button>
-                        </div>
-                    )}
-                    {pdf ? (
-                        <RenderNotatPdf behandlingId={behandlingId} />
-                    ) : (
-                        <RenderNotatHtml behandlingId={behandlingId} />
-                    )}
+                <div>
+                    <Tabs defaultValue={showTab} onChange={setShowTab}>
+                        <Tabs.List>
+                            <Tabs.Tab value="html" label="Standard" icon={<FileIcon />} />
+                            <Tabs.Tab value="pdf" label="PDF" icon={<FilePdfIcon />} />
+                        </Tabs.List>
+                        <Tabs.Panel value="pdf" style={{ maxHeight: "calc(100% - 200px)", width: "100%" }}>
+                            <RenderNotatPdf behandlingId={behandlingId} />
+                        </Tabs.Panel>
+                        <Tabs.Panel
+                            value="html"
+                            style={{ height: "calc(100% - 200px)", width: "100%", overflow: "auto" }}
+                        >
+                            <RenderNotatHtml behandlingId={behandlingId} />
+                        </Tabs.Panel>
+                    </Tabs>
                 </div>
             </Suspense>
         </div>
@@ -73,7 +77,7 @@ const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
         const fileBlob = new Blob([notatPdf], { type: "application/pdf" });
         return URL.createObjectURL(fileBlob);
     }
-    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="92%" />;
+    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="85%" />;
 };
 const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     const { data: notatHtml, isLoading, isError } = useNotat(behandlingId);
