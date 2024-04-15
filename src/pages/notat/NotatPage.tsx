@@ -10,7 +10,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import text from "../../constants/texts";
 import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
-export default ({ behandlingId, pdf = false }: { behandlingId: number; pdf: boolean }) => {
+export default ({ behandlingId }: { behandlingId: number }) => {
     const [showTab, setShowTab] = React.useState<string>("html");
     return (
         <div className="max-w-[1092px] px-6 py-6">
