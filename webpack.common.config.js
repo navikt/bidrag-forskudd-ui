@@ -38,7 +38,12 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
+                exclude: /\.lazy\.css$/i,
                 use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
+            },
+            {
+                test: /\.lazy\.css$/i,
+                use: [{ loader: "style-loader", options: { injectType: "lazyStyleTag" } }, "css-loader"],
             },
             {
                 test: /\.([jt]sx?)?$/,

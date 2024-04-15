@@ -1,13 +1,15 @@
+//@ts-ignore
+import styles from "./NotatPage.lazy.css";
+styles.use();
 import { FilePdfFillIcon } from "@navikt/aksel-icons";
 import { Broadcast } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Loader } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { Suspense, useEffect, useRef } from "react";
+import React, { Suspense, useEffect, useMemo, useRef } from "react";
 
 import text from "../../constants/texts";
 import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
-
 export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boolean }) => {
     return (
         <div className="max-w-[1092px] px-6 py-6">
@@ -18,7 +20,7 @@ export default ({ behandlingId, pdf = true }: { behandlingId: number; pdf: boole
                     </div>
                 }
             >
-                <div style={{ maxHeight: "calc(100% - 100px)", width: "100vw", overflow: "auto" }}>
+                <div style={{ maxHeight: "calc(100% - 200px)", width: "100$" }}>
                     {!pdf && (
                         <div className="flex justify-end">
                             <Button variant="secondary" onClick={() => console.log("")} style={{ alignSelf: "right" }}>
@@ -42,12 +44,14 @@ const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
     const queryClient = useQueryClient();
     const hasSubscribed = useRef<boolean>(false);
     async function subscribeToChanges() {
-        console.debug("Waiting for broadcast", notatBroadcastName, behandlingId);
+        console.debug("Waiting for broadcast PDF", notatBroadcastName, behandlingId);
         await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
-        console.debug("Received broadcast", notatBroadcastName, behandlingId);
+        console.debug("Received broadcast PDF", notatBroadcastName, behandlingId);
         queryClient.refetchQueries({ queryKey: QueryKeys.notatPdf(behandlingId) });
         setTimeout(() => subscribeToChanges(), 200);
     }
+
+    const notatUrl = useMemo(() => getUrl(), [notatPdf]);
     useEffect(() => {
         if (hasSubscribed.current) return;
         subscribeToChanges();
@@ -69,7 +73,7 @@ const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
         const fileBlob = new Blob([notatPdf], { type: "application/pdf" });
         return URL.createObjectURL(fileBlob);
     }
-    return <object data={getUrl()} type="application/pdf" width="90%" height="100%" />;
+    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="92%" />;
 };
 const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
     const { data: notatHtml, isLoading, isError } = useNotat(behandlingId);
@@ -77,7 +81,7 @@ const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
 
     async function subscribeToChanges() {
         await Broadcast.waitForBroadcast(notatBroadcastName, behandlingId.toString());
-        console.debug("Received broadcast", notatBroadcastName, behandlingId);
+        console.debug("Received broadcast HTML", notatBroadcastName, behandlingId);
         queryClient.refetchQueries({ queryKey: QueryKeys.notat(behandlingId) });
         setTimeout(() => subscribeToChanges(), 200);
     }
