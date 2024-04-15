@@ -45,6 +45,7 @@
     "unleash-proxy-client": "^3.3.0"
   },
   "devDependencies": {
+    "style-loader": "^3.3.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
