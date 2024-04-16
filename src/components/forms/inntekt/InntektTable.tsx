@@ -1,24 +1,20 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Box, Button, Heading } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
-    IkkeAktivInntektDtoEndringstypeEnum,
     InntektDtoV2,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
-    OpplysningerType,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useApiData";
-import useFeatureToogle from "../../../hooks/useFeatureToggle";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
-import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
@@ -27,6 +23,7 @@ import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthP
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { Opplysninger } from "./Opplysninger";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
@@ -185,12 +182,10 @@ export const InntektTabel = ({
 }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const {
-        ikkeAktiverteEndringerIGrunnlagsdata,
         inntekter: { valideringsfeil },
+        roller,
     } = useGetBehandlingV2();
-    const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
-    const { isAdminEnabled } = useFeatureToogle();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
@@ -306,81 +301,9 @@ export const InntektTabel = ({
               return feil.ident === ident;
           });
 
-    function hentOpplysningerType() {
-        switch (inntektType) {
-            case "småbarnstillegg":
-                return OpplysningerType.SMABARNSTILLEGG;
-            case "utvidetBarnetrygd":
-                return OpplysningerType.UTVIDET_BARNETRYGD;
-            case "barnetillegg":
-                return OpplysningerType.BARNETILLEGG;
-            case "kontantstøtte":
-                return OpplysningerType.KONTANTSTOTTE;
-            default:
-                return OpplysningerType.SKATTEPLIKTIGE_INNTEKTER;
-        }
-    }
-
-    const ikkeAktiverteEndringer =
-        ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType]?.filter((v) => v.ident == ident) ?? [];
-
-    function renderNyeOpplysninger() {
-        if (ikkeAktiverteEndringer.length === 0) return null;
-        return (
-            <Box padding="4" background="surface-default" borderWidth="1">
-                <Heading size="small">{text.alert.nyOpplysninger}</Heading>
-                <BodyShort>{text.alert.nyOpplysninger}</BodyShort>
-                <table className="mt-2">
-                    <thead>
-                        <tr>
-                            <th align="left">{text.label.opplysninger}</th>
-                            <th align="left">{text.label.beløp}</th>
-                            <th align="left">{text.label.status}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {ikkeAktiverteEndringer.map(({ beløp, rapporteringstype, periode, endringstype }, i) => {
-                            return (
-                                <tr key={i + rapporteringstype}>
-                                    <td width="250px" scope="row">
-                                        {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
-                                    </td>
-                                    <td width="75px">{beløp}</td>
-                                    <td width="100px">
-                                        {endringstype == IkkeAktivInntektDtoEndringstypeEnum.NY
-                                            ? " Ny"
-                                            : endringstype == IkkeAktivInntektDtoEndringstypeEnum.SLETTET
-                                              ? "Fjernes"
-                                              : "Endring"}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                <Button
-                    size="xsmall"
-                    variant="secondary"
-                    spacing
-                    disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
-                    loading={aktiverGrunnlagFn.isPending}
-                    className="mt-2"
-                    onClick={() =>
-                        aktiverGrunnlagFn.mutate({
-                            personident: ident,
-                            type: hentOpplysningerType(),
-                        })
-                    }
-                >
-                    Oppdater opplysninger
-                </Button>
-            </Box>
-        );
-    }
-
     return (
         <>
-            {isAdminEnabled && renderNyeOpplysninger()}
+            <Opplysninger fieldName={fieldName} roller={roller} />
             {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
