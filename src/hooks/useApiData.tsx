@@ -340,17 +340,39 @@ export const useAktiveGrunnlagsdata = () => {
     const { behandlingId } = useForskudd();
     const queryClient = useQueryClient();
 
-    return useMutation<void, void, { personident: string; type: OpplysningerType }>({
+    return useMutation<
+        { data: BehandlingDtoV2; type: OpplysningerType },
+        { data: BehandlingDtoV2; type: OpplysningerType },
+        { personident: string; type: OpplysningerType }
+    >({
         mutationFn: async ({ personident, type }) => {
-            await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, {
                 aktivereGrunnlagForPerson: {
                     personident,
                     grunnlagsdatatyper: [type],
                 },
             });
+            return { data, type };
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+        onSuccess: ({ data, type }) => {
+            const opplysningTypeInntektTypeMapper = {
+                [OpplysningerType.SMABARNSTILLEGG]: "småbarnstillegg",
+                [OpplysningerType.UTVIDET_BARNETRYGD]: "utvidetBarnetrygd",
+                [OpplysningerType.BARNETILLEGG]: "barnetillegg",
+                [OpplysningerType.KONTANTSTOTTE]: "kontantstøtte",
+                [OpplysningerType.SKATTEPLIKTIGE_INNTEKTER]: "årsinntekter",
+            };
+
+            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => ({
+                ...currentData,
+                inntekter: {
+                    ...currentData.inntekter,
+                    [opplysningTypeInntektTypeMapper[type]]: data.inntekter[opplysningTypeInntektTypeMapper[type]],
+                    beregnetInntekter: data.inntekter.beregnetInntekter,
+                    valideringsfeil: data.inntekter.valideringsfeil,
+                },
+                ikkeAktiverteEndringerIGrunnlagsdata: data.ikkeAktiverteEndringerIGrunnlagsdata,
+            }));
         },
     });
 };
