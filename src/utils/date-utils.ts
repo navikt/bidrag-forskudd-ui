@@ -148,3 +148,6 @@ export const dateToMMYYYY = (date?: Date | string): string | undefined => {
         return new Date(date).toLocaleDateString("nb-NB", { month: "2-digit", year: "numeric" });
     return date.toLocaleDateString("nb-NB", { month: "2-digit", year: "numeric" });
 };
+export function minOfDates(date1: Date, date2: Date) {
+    return isAfterDate(date1, date2) ? date2 : date1;
+}
