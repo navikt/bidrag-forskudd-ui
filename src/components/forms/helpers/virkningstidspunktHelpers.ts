@@ -1,12 +1,25 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import { BehandlingDtoV2, TypeArsakstype } from "../../../api/BidragBehandlingApiV1";
-import { deductMonths, firstDayOfMonth, isAfterDate } from "../../../utils/date-utils";
+import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
     return isAfterDate(soktFraDato, mottatDato) ? soktFraDato : mottatDato;
 };
 export const aarsakToVirkningstidspunktMapper = (
+    aarsak: TypeArsakstype | string,
+    behandling: BehandlingDtoV2,
+    barnsFødselsdato?: string
+) => {
+    const nyVirkningstidspunkt = mapÅrsakTilVirkningstidspunkt(aarsak, behandling, barnsFødselsdato);
+    const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
+
+    if (opprinneligVirkningstidspunkt != null && nyVirkningstidspunkt != null) {
+        return minOfDates(opprinneligVirkningstidspunkt, nyVirkningstidspunkt);
+    }
+    return nyVirkningstidspunkt;
+};
+export const mapÅrsakTilVirkningstidspunkt = (
     aarsak: TypeArsakstype | string,
     behandling: BehandlingDtoV2,
     barnsFødselsdato?: string
@@ -37,7 +50,6 @@ export const aarsakToVirkningstidspunktMapper = (
             return null;
     }
 };
-
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
     const virkningstidspunktIsInFuture = isAfterDate(
         firstDayOfMonth(new Date(virkningstidspunkt)),
