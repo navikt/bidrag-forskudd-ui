@@ -49,8 +49,7 @@ export const createInitialValues = (
                 ...acc,
                 [rolle.ident]: inntekter.årsinntekter
                     ?.filter((inntekt) => inntekt.ident === rolle.ident)
-                    .map(transformFn)
-                    .sort(inntektSorting),
+                    .map(transformFn),
             }),
             {}
         ),
@@ -59,8 +58,7 @@ export const createInitialValues = (
                 ...acc,
                 [rolle.ident]: inntekter.barnetillegg
                     ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
-                    .map(transformFn)
-                    .sort(inntektSorting),
+                    .map(transformFn),
             }),
             {}
         ),
@@ -69,13 +67,12 @@ export const createInitialValues = (
                 ...acc,
                 [rolle.ident]: inntekter.kontantstøtte
                     ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
-                    .map(transformFn)
-                    .sort(inntektSorting),
+                    .map(transformFn),
             }),
             {}
         ),
-        småbarnstillegg: inntekter.småbarnstillegg?.map(transformFn).sort(inntektSorting),
-        utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(transformFn).sort(inntektSorting),
+        småbarnstillegg: inntekter.småbarnstillegg?.map(transformFn),
+        utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(transformFn),
         notat: {
             medIVedtaket: inntekter.notat.medIVedtaket,
             kunINotat: inntekter.notat.kunINotat,
