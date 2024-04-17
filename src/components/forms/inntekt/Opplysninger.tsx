@@ -1,17 +1,22 @@
 import { BodyShort, Box, Button, Heading } from "@navikt/ds-react";
-import React from "react";
+import React, { Fragment } from "react";
+import { useFormContext } from "react-hook-form";
 
 import {
     IkkeAktivInntektDto,
     IkkeAktivInntektDtoEndringstypeEnum,
     OpplysningerType,
-    RolleDto,
+    Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
+import { useForskudd } from "../../../context/ForskuddContext";
 import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useApiData";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
+import { InntektFormValues } from "../../../types/inntektFormValues";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
+import { transformInntekt } from "../helpers/inntektFormHelpers";
 
 const inntektTypeToOpplysningerMapper = {
     småbarnstillegg: OpplysningerType.SMABARNSTILLEGG,
@@ -23,20 +28,15 @@ const inntektTypeToOpplysningerMapper = {
 
 export const Opplysninger = ({
     fieldName,
-    roller,
 }: {
-    fieldName:
-        | "småbarnstillegg"
-        | "utvidetBarnetrygd"
-        | `årsinntekter.${string}`
-        | `barnetillegg.${string}`
-        | `kontantstøtte.${string}`;
-    roller: RolleDto[];
+    fieldName: "småbarnstillegg" | "utvidetBarnetrygd" | "barnetillegg" | "kontantstøtte" | `årsinntekter.${string}`;
 }) => {
-    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const virkningsdato = useVirkningsdato();
+    const { lesemodus } = useForskudd();
+    const { resetField } = useFormContext<InntektFormValues>();
+    const transformFn = transformInntekt(virkningsdato);
     const [inntektType, ident] = fieldName.split(".");
 
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
@@ -54,6 +54,37 @@ export const Opplysninger = ({
         {}
     );
 
+    const onUpdate = () => {
+        aktiverGrunnlagFn.mutate(
+            {
+                personident: ident,
+                type: inntektTypeToOpplysningerMapper[inntektType],
+            },
+            {
+                onSuccess: ({ data }) => {
+                    if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
+                        const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
+                        resetField(inntektType as "barnetillegg" | "kontantstøtte", {
+                            defaultValue: barn.reduce(
+                                (acc, rolle) => ({
+                                    ...acc,
+                                    [rolle.ident]: data.inntekter[inntektType]
+                                        ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
+                                        .map(transformFn),
+                                }),
+                                {}
+                            ),
+                        });
+                    } else {
+                        resetField(fieldName, { defaultValue: data.inntekter[inntektType] });
+                    }
+                },
+            }
+        );
+    };
+
+    if (lesemodus) return null;
+
     return (
         <>
             <Box padding="4" background="surface-default" borderWidth="1">
@@ -63,12 +94,12 @@ export const Opplysninger = ({
                     if (ikkeAktiverteEndringer[key].length < 1) return null;
                     const rolle = roller.find((rolle) => rolle.ident === key);
                     return (
-                        <>
+                        <Fragment key={key}>
                             <BodyShort className="font-bold	mt-4">
                                 <RolleTag rolleType={rolle.rolletype} />
                                 <PersonNavn ident={key} />
                             </BodyShort>
-                            <table key={key} className="mt-2">
+                            <table className="mt-2">
                                 <thead>
                                     <tr>
                                         <th align="left">{text.label.opplysninger}</th>
@@ -96,7 +127,7 @@ export const Opplysninger = ({
                                     )}
                                 </tbody>
                             </table>
-                        </>
+                        </Fragment>
                     );
                 })}
                 <Button
@@ -105,12 +136,7 @@ export const Opplysninger = ({
                     disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
                     loading={aktiverGrunnlagFn.isPending}
                     className="mt-2"
-                    onClick={() =>
-                        aktiverGrunnlagFn.mutate({
-                            personident: ident,
-                            type: inntektTypeToOpplysningerMapper[inntektType],
-                        })
-                    }
+                    onClick={onUpdate}
                 >
                     Oppdater opplysninger
                 </Button>

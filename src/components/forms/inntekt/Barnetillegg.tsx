@@ -15,6 +15,7 @@ import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({
     item,
@@ -102,6 +103,7 @@ export const Barnetillegg = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_barnetillegg}>
                 {text.title.barnetillegg}
             </Heading>
+            <Opplysninger fieldName={"barnetillegg"} />
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
                     <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">

@@ -8,6 +8,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 export const UtvidetBarnetrygd = () => {
     const { roller } = useGetBehandlingV2();
@@ -19,6 +20,7 @@ export const UtvidetBarnetrygd = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
                 {text.title.utvidetBarnetrygd}
             </Heading>
+            <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName}>
                 {({
                     controlledFields,

@@ -363,16 +363,19 @@ export const useAktiveGrunnlagsdata = () => {
                 [OpplysningerType.SKATTEPLIKTIGE_INNTEKTER]: "årsinntekter",
             };
 
-            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => ({
-                ...currentData,
-                inntekter: {
-                    ...currentData.inntekter,
-                    [opplysningTypeInntektTypeMapper[type]]: data.inntekter[opplysningTypeInntektTypeMapper[type]],
-                    beregnetInntekter: data.inntekter.beregnetInntekter,
-                    valideringsfeil: data.inntekter.valideringsfeil,
-                },
-                ikkeAktiverteEndringerIGrunnlagsdata: data.ikkeAktiverteEndringerIGrunnlagsdata,
-            }));
+            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => {
+                const updatedBehandling = {
+                    ...currentData,
+                    inntekter: {
+                        ...currentData.inntekter,
+                        [opplysningTypeInntektTypeMapper[type]]: data.inntekter[opplysningTypeInntektTypeMapper[type]],
+                        beregnetInntekter: data.inntekter.beregnetInntekter,
+                        valideringsfeil: data.inntekter.valideringsfeil,
+                    },
+                    ikkeAktiverteEndringerIGrunnlagsdata: data.ikkeAktiverteEndringerIGrunnlagsdata,
+                };
+                return updatedBehandling;
+            });
         },
     });
 };

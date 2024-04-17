@@ -13,6 +13,7 @@ import { FormControlledSelectField } from "../../formFields/FormControlledSelect
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({
     item,
@@ -96,6 +97,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
+            <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,

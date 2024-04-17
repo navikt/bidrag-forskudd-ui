@@ -23,7 +23,6 @@ import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthP
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { Opplysninger } from "./Opplysninger";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
@@ -183,7 +182,6 @@ export const InntektTabel = ({
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const {
         inntekter: { valideringsfeil },
-        roller,
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
@@ -288,7 +286,6 @@ export const InntektTabel = ({
         };
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [inntektType, ident] = fieldName.split(".");
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
@@ -303,7 +300,6 @@ export const InntektTabel = ({
 
     return (
         <>
-            <Opplysninger fieldName={fieldName} roller={roller} />
             {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
                     <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>

@@ -8,6 +8,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 export const Småbarnstillegg = () => {
     const { roller } = useGetBehandlingV2();
@@ -19,6 +20,7 @@ export const Småbarnstillegg = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_småbarnstillegg}>
                 {text.title.småbarnstillegg}
             </Heading>
+            <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName}>
                 {({
                     controlledFields,
