@@ -3,7 +3,7 @@ import React, { ReactElement, ReactNode } from "react";
 
 export const TableWrapper = ({ heading, children }: { heading: string[]; children: ReactNode }) => (
     <div className="overflow-x-auto whitespace-nowrap">
-        <Table size="small" zebraStripes>
+        <Table size="small" className="bg-white">
             <Table.Header>
                 <Table.Row className="align-baseline">
                     {heading.map((header, index) => (

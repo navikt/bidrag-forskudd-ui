@@ -57,7 +57,7 @@ export const Kontantstøtte = () => {
                             <>
                                 {controlledFields.length > 0 && (
                                     <div className="overflow-x-auto whitespace-nowrap">
-                                        <Table size="small" className="table-fixed">
+                                        <Table size="small" className="table-fixed bg-white">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
                                                     <Table.HeaderCell scope="col" align="center" className="w-[84px]">
