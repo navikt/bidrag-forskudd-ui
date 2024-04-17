@@ -10,6 +10,7 @@ import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 export const Kontantstøtte = () => {
     const { roller } = useGetBehandlingV2();
@@ -23,6 +24,7 @@ export const Kontantstøtte = () => {
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>
+            <Opplysninger fieldName={"kontantstøtte"} />
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
                     <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">

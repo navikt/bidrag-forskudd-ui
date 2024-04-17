@@ -1,5 +1,5 @@
 import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -71,7 +71,6 @@ const Main = () => {
         });
     useEffect(scrollToHash, []);
 
-    // TODO: Hva om det har kommet opplysninger fra ytelser?
     const ikkeAktiverteEndringer = Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).filter(
         (i) => i.length > 0
     );
@@ -178,20 +177,16 @@ const Side = () => {
 };
 
 const InntektForm = () => {
-    const { setInntektFormValues } = useForskudd();
     const { inntekter, roller } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
-    const initialValues = createInitialValues(bmOgBarn, inntekter, virkningsdato);
+    const initialValues = useMemo(
+        () => createInitialValues(bmOgBarn, inntekter, virkningsdato),
+        [bmOgBarn, inntekter, virkningsdato]
+    );
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
-
-    // TODO update opplysninger && fetch new calculated values
-    // const updateOpplysninger = () => {};
-    useEffect(() => {
-        setInntektFormValues(initialValues);
-    }, []);
 
     return (
         <FormProvider {...useFormMethods}>
