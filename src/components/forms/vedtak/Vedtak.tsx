@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { ResultatBeregningBarnDto, ResultatRolle, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { ResultatBeregningBarnDto, ResultatRolle, Rolletype, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
 import { BEHANDLING_API_V1 } from "../../../constants/api";
 import elementId from "../../../constants/elementIds";
 import elementIds from "../../../constants/elementIds";
@@ -153,6 +153,7 @@ const VedtakResultat = () => {
     const { setActiveStep } = useForskudd();
     const {
         virkningstidspunkt: { avslag },
+        vedtakstype,
     } = useGetBehandlingV2();
     function renderFeilmeldinger() {
         console.log(beregnetForskudd);
@@ -263,7 +264,11 @@ const VedtakResultat = () => {
                     <VedtakResultatBarn barn={r.barn} />
                     <Table>
                         <VedtakTableHeader avslag={erAvslag} />
-                        <VedtakTableBody resultatBarn={r} avslag={erAvslag} />
+                        <VedtakTableBody
+                            resultatBarn={r}
+                            avslag={erAvslag}
+                            opphør={vedtakstype == Vedtakstype.OPPHOR}
+                        />
                     </Table>
                 </div>
             ))}
@@ -271,7 +276,15 @@ const VedtakResultat = () => {
     );
 };
 
-const VedtakTableBody = ({ resultatBarn, avslag }: { resultatBarn: ResultatBeregningBarnDto; avslag: boolean }) => {
+const VedtakTableBody = ({
+    resultatBarn,
+    avslag,
+    opphør,
+}: {
+    resultatBarn: ResultatBeregningBarnDto;
+    avslag: boolean;
+    opphør: boolean;
+}) => {
     return (
         <Table.Body>
             {resultatBarn.perioder.map((periode) => (
@@ -282,7 +295,7 @@ const VedtakTableBody = ({ resultatBarn, avslag }: { resultatBarn: ResultatBereg
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                                 {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{text.label.avslag}</Table.DataCell>
+                            <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
                             <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
                         </Table.Row>
                     ) : (
