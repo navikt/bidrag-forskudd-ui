@@ -71,6 +71,7 @@ export default {
         antallBarn: "Antall barn i husstand",
         arbeidsgiver: "Arbeidsgiver",
         avslag: "Avslag",
+        opphør: "Opphør",
         avbryt: "Avbryt",
         barn: "Barn",
         barnetillegg: "Barnetillegg",
