@@ -4,12 +4,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { ResultatBeregningBarnDto, ResultatRolle, Rolletype, Vedtakstype } from "../../../api/BidragBehandlingApiV1";
+import {
+    OpplysningerType,
+    ResultatBeregningBarnDto,
+    ResultatRolle,
+    Rolletype,
+    Vedtakstype,
+} from "../../../api/BidragBehandlingApiV1";
 import { BEHANDLING_API_V1 } from "../../../constants/api";
 import elementId from "../../../constants/elementIds";
 import elementIds from "../../../constants/elementIds";
 import { STEPS } from "../../../constants/steps";
-import text from "../../../constants/texts";
+import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "../../../constants/texts";
 import texts from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import environment from "../../../environment";
@@ -147,7 +153,37 @@ const FatteVedtakButtons = () => {
         </div>
     );
 };
-
+const opplysningTilStep = (opplysninger: OpplysningerType) => {
+    switch (opplysninger) {
+        case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
+        case OpplysningerType.SMABARNSTILLEGG:
+        case OpplysningerType.UTVIDET_BARNETRYGD:
+        case OpplysningerType.BARNETILLEGG:
+        case OpplysningerType.KONTANTSTOTTE:
+            return STEPS.inntekt;
+        case OpplysningerType.SIVILSTAND:
+        case OpplysningerType.BOFORHOLD:
+            return STEPS.boforhold;
+    }
+};
+const opplysningTilElementId = (opplysninger: OpplysningerType) => {
+    switch (opplysninger) {
+        case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
+            return elementId.seksjon_inntekt_skattepliktig;
+        case OpplysningerType.SMABARNSTILLEGG:
+            return elementId.seksjon_inntekt_småbarnstillegg;
+        case OpplysningerType.UTVIDET_BARNETRYGD:
+            return elementId.seksjon_inntekt_utvidetbarnetrygd;
+        case OpplysningerType.BARNETILLEGG:
+            return elementId.seksjon_inntekt_barnetillegg;
+        case OpplysningerType.KONTANTSTOTTE:
+            return elementId.seksjon_inntekt_kontantstøtte;
+        case OpplysningerType.BOFORHOLD:
+            return elementId.seksjon_boforhold;
+        case OpplysningerType.SIVILSTAND:
+            return elementId.seksjon_sivilstand;
+    }
+};
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
     const { setActiveStep } = useForskudd();
@@ -236,6 +272,16 @@ const VedtakResultat = () => {
                     </ErrorSummary.Item>
                 );
         }
+        feilInnhold.måBekrefteNyeOpplysninger?.forEach((value) => {
+            feilliste.push(
+                <ErrorSummary.Item
+                    href={`#${opplysningTilElementId(value)}`}
+                    onClick={() => setActiveStep(opplysningTilStep(value))}
+                >
+                    {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
+                </ErrorSummary.Item>
+            );
+        });
         return feilliste;
     }
     if (beregnetForskudd.feil) {

@@ -1,4 +1,6 @@
-export default {
+import { OpplysningerType } from "../api/BidragBehandlingApiV1";
+
+const tekster = {
     alert: {
         ansettelsesdetaljerEndret: "Ansettelsesdetaljer fra arbeidsgiver {} er endret",
         antallArbeidsforholdEndret: "Antall arbeidsforhold for {} har blitt endret",
@@ -33,6 +35,7 @@ export default {
         startdatoForArbeidsforholdEndret: "Startdato for arbeidsforhold {} er endret",
         stillingprosentEndret: "Stillingprosent fra arbeidsgiver {} er endret fra {}% til {}%",
         sumEndret: "Sum for {} har blitt endret for rolle med ident - {} fra {} til {}",
+        nyeOpplysningerMåBekreftes: "Nye opplysninger må bekreftes",
         underArbeit:
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
@@ -144,7 +147,7 @@ export default {
         kontantstøtte: "Kontantstøtte",
         sivilstand: "Sivilstand",
         sjekkNotatOgOpplysninger: "Sjekk notatet og bekreft at opplysningene stemmer",
-        skattepliktigeogPensjonsgivendeInntekt: "Skattepliktige og pensjonsgivende inntekt",
+        skattepliktigeogPensjonsgivendeInntekt: "Skattepliktige og pensjonsgivende inntekter",
         småbarnstillegg: "Småbarnstillegg",
         opplysningerFraFolkeregistret: "Opplysninger fra Folkeregistret",
         oppsummering: "Oppsummering",
@@ -165,3 +168,37 @@ export default {
     resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
     år: "år",
 };
+export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: OpplysningerType) => {
+    switch (opplysningstype) {
+        case OpplysningerType.KONTANTSTOTTE:
+            return `Inntekter: ${
+                tekster.alert.nyeOpplysningerMåBekreftes
+            } for ${tekster.title.kontantstøtte.toLowerCase()}`;
+        case OpplysningerType.SMABARNSTILLEGG:
+            return `Inntekter: ${
+                tekster.alert.nyeOpplysningerMåBekreftes
+            } for ${tekster.title.småbarnstillegg.toLowerCase()}`;
+        case OpplysningerType.UTVIDET_BARNETRYGD:
+            return `Inntekter: ${
+                tekster.alert.nyeOpplysningerMåBekreftes
+            } for ${tekster.title.utvidetBarnetrygd.toLowerCase()}`;
+        case OpplysningerType.BARNETILLEGG:
+            return `Inntekter: ${
+                tekster.alert.nyeOpplysningerMåBekreftes
+            } for ${tekster.title.barnetillegg.toLowerCase()}`;
+        case OpplysningerType.BARNETILSYN:
+            return `Inntekter: ${tekster.alert.nyeOpplysningerMåBekreftes} for barnetilsyn`;
+        case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
+            return `Inntekter: ${
+                tekster.alert.nyeOpplysningerMåBekreftes
+            } for ${tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}`;
+        case OpplysningerType.BOFORHOLD:
+            return `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
+        case OpplysningerType.SIVILSTAND:
+            return `Sivilstand: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
+        default:
+            return tekster.alert.nyeOpplysningerMåBekreftes;
+    }
+};
+
+export default tekster;

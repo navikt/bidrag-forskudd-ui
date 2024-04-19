@@ -8,9 +8,9 @@ import {
     Kilde,
     OppdaterBehandlingRequestV2,
     RolleDto,
-    Sivilstand,
     SivilstandDto,
     Sivilstandskode,
+    SivilstandV1,
 } from "../../../api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "../../../api/BidragGrunnlagApi";
 import text from "../../../constants/texts";
@@ -242,7 +242,7 @@ export const getSivilstandPerioder = (
 
 export const createInitialValues = (
     boforhold: BoforholdDtoV2,
-    sivilstandBeregnet: Sivilstand[]
+    sivilstandBeregnet: SivilstandV1[]
 ): BoforholdFormValues => {
     return {
         ...boforhold,
@@ -252,7 +252,7 @@ export const createInitialValues = (
     };
 };
 
-export const mapSivilstandProsessert = (sivilstandBeregnet: Sivilstand[]): SivilstandDto[] =>
+export const mapSivilstandProsessert = (sivilstandBeregnet: SivilstandV1[]): SivilstandDto[] =>
     sivilstandBeregnet.map((v) => ({
         kilde: Kilde.OFFENTLIG,
         //@ts-ignore
