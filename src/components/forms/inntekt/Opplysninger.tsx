@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 import {
     IkkeAktivInntektDto,
     IkkeAktivInntektDtoEndringstypeEnum,
+    InntektDtoV2,
     OpplysningerType,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
@@ -54,29 +55,45 @@ export const Opplysninger = ({
         {}
     );
 
-    const onUpdate = () => {
-        aktiverGrunnlagFn.mutate(
+    const onUpdate = async () => {
+        for (const personident in ikkeAktiverteEndringer) {
+            if (ikkeAktiverteEndringer[personident].length > 0) {
+                await aktiverGrunnlag(personident);
+            }
+        }
+    };
+    const aktiverGrunnlag = (aktiverForIdent: string): Promise<unknown> => {
+        return aktiverGrunnlagFn.mutateAsync(
             {
-                personident: ident,
+                personident: aktiverForIdent,
                 type: inntektTypeToOpplysningerMapper[inntektType],
             },
             {
-                onSuccess: ({ data }) => {
+                onSuccess: ({ data }, { personident }) => {
                     if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
+                        if (personident != ident) return;
                         const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
                         resetField(inntektType as "barnetillegg" | "kontantstøtte", {
                             defaultValue: barn.reduce(
                                 (acc, rolle) => ({
                                     ...acc,
                                     [rolle.ident]: data.inntekter[inntektType]
-                                        ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
+                                        ?.filter(
+                                            (inntekt) =>
+                                                inntekt.gjelderBarn === rolle.ident && inntekt.ident === personident
+                                        )
                                         .map(transformFn),
                                 }),
                                 {}
                             ),
                         });
                     } else {
-                        resetField(fieldName, { defaultValue: data.inntekter[inntektType] });
+                        // @ts-ignore
+                        resetField(`${inntektType}.${personident}`, {
+                            defaultValue: data.inntekter[inntektType].filter(
+                                (v: InntektDtoV2) => v.ident == personident
+                            ),
+                        });
                     }
                 },
             }
