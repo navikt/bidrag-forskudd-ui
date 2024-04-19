@@ -67,9 +67,11 @@ export const BeregnetInntekter = () => {
                                         <Table.Row key={`${delberegningSumInntekt}-${index}`} className="align-top">
                                             <Table.DataCell>
                                                 {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.fom))} -{" "}
-                                                {DateToDDMMYYYYString(
-                                                    deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
-                                                )}
+                                                {delberegningSumInntekt.periode.til
+                                                    ? DateToDDMMYYYYString(
+                                                          deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
+                                                      )
+                                                    : null}
                                             </Table.DataCell>
                                             <Table.DataCell align="left">
                                                 {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString("nb-NO") ??
