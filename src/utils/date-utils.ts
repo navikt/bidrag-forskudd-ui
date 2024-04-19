@@ -14,8 +14,7 @@ export const addDays = (date: Date, days: number) => {
     return newDate;
 };
 
-export const deductDays = (date?: Date, days: number) => {
-    if (date == null) return null;
+export const deductDays = (date: Date, days: number) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() - days);
     return newDate;
