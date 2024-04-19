@@ -38,9 +38,13 @@ export interface Behandling {
     /** @format date */
     opprinneligVirkningstidspunkt?: string;
     /** @format date-time */
+    opprinneligVedtakstidspunkt?: string;
+    /** @format date-time */
     vedtakstidspunkt?: string;
     /** @format date-time */
     slettetTidspunkt?: string;
+    /** @format date-time */
+    opprettetTidspunkt: string;
     vedtakFattetAv?: string;
     getårsak?: TypeArsakstype;
     avslag?: Resultatkode;
@@ -67,14 +71,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    bidragspliktig?: Rolle;
-    søknadsbarn: Rolle[];
-    grunnlagListe: GrunnlagEntity[];
-    erVedtakFattet: boolean;
-    bidragsmottaker?: Rolle;
-    erKlageEllerOmgjøring: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
+    erKlageEllerOmgjøring: boolean;
+    bidragspliktig?: Rolle;
+    erVedtakFattet: boolean;
+    grunnlagListe: GrunnlagEntity[];
+    bidragsmottaker?: Rolle;
+    søknadsbarn: Rolle[];
 }
 
 export enum Bostatuskode {
@@ -160,9 +164,10 @@ export interface Inntekt {
     opprinneligFom?: string;
     /** @format date */
     opprinneligTom?: string;
-    opprinneligPeriode?: TypeArManedsperiode;
     /** @format date */
     datoFomEllerOpprinneligFom?: string;
+    opprinneligPeriode?: TypeArManedsperiode;
+    periode?: TypeArManedsperiode;
 }
 
 export interface Inntektspost {
@@ -180,6 +185,8 @@ export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
     AINNTEKTBEREGNET3MND = "AINNTEKT_BEREGNET_3MND",
     AINNTEKTBEREGNET12MND = "AINNTEKT_BEREGNET_12MND",
+    AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT = "AINNTEKT_BEREGNET_3MND_FRA_OPPRINNELIG_VEDTAKSTIDSPUNKT",
+    AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT = "AINNTEKT_BEREGNET_12MND_FRA_OPPRINNELIG_VEDTAKSTIDSPUNKT",
     AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAK = "AINNTEKT_BEREGNET_3MND_FRA_OPPRINNELIG_VEDTAK",
     AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAK = "AINNTEKT_BEREGNET_12MND_FRA_OPPRINNELIG_VEDTAK",
     KAPITALINNTEKT = "KAPITALINNTEKT",
@@ -356,6 +363,7 @@ export enum Sivilstandskode {
     BOR_ALENE_MED_BARN = "BOR_ALENE_MED_BARN",
     ENSLIG = "ENSLIG",
     SAMBOER = "SAMBOER",
+    UKJENT = "UKJENT",
 }
 
 export enum Stonadstype {
@@ -703,6 +711,9 @@ export interface BehandlingDtoV2 {
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
     erVedtakFattet: boolean;
+    erKlageEllerOmgjøring: boolean;
+    /** @format date-time */
+    opprettetTidspunkt: string;
     /** @format date */
     søktFomDato: string;
     /** @format date */
@@ -713,6 +724,8 @@ export interface BehandlingDtoV2 {
     søknadsid: number;
     /** @format int64 */
     søknadRefId?: number;
+    /** @format int64 */
+    vedtakRefId?: number;
     behandlerenhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
@@ -1029,8 +1042,8 @@ export interface SivilstandGrunnlagDto {
 }
 
 export interface SivilstandIkkeAktivGrunnlagDto {
-    /** @uniqueItems true */
     sivilstand: SivilstandDto[];
+    status: SivilstandIkkeAktivGrunnlagDtoStatusEnum;
     /** @uniqueItems true */
     grunnlag: SivilstandGrunnlagDto[];
     /** @format date-time */
@@ -1099,16 +1112,6 @@ export interface OppdatereInntektResponse {
     valideringsfeil: InntektValideringsfeilDto;
 }
 
-export interface Bostatusperiode {
-    /** @format int64 */
-    idHusstandsbarn: number;
-    /** @format date */
-    fraOgMed: string;
-    /** @format date */
-    tilOgMed?: string;
-    bostatus: Bostatuskode;
-}
-
 /** Oppdaterer husstandsbarn, sivilstand, eller notat */
 export interface OppdatereBoforholdRequestV2 {
     oppdatereHusstandsbarn?: OppdatereHusstandsbarn;
@@ -1118,7 +1121,9 @@ export interface OppdatereBoforholdRequestV2 {
 
 export interface OppdatereHusstandsbarn {
     nyttHusstandsbarn?: PersonaliaHusstandsbarn;
-    nyBostatusperiode?: Bostatusperiode;
+    nyHusstandsbarnperiode?: Husstandsbarnperiode;
+    /** @format int64 */
+    sletteHusstandsbarnperiode?: number;
     /** @format int64 */
     sletteHusstandsbarn?: number;
 }
@@ -1151,6 +1156,21 @@ export interface OppdatereBoforholdResponse {
     valideringsfeil: BoforholdValideringsfeil;
 }
 
+export interface AktivereGrunnlagRequestV2 {
+    /** Personident tilhørende rolle i behandling grunnlag skal aktiveres for */
+    personident: string;
+    grunnlagstype: OpplysningerType;
+    /** Angi om manuelle opplysninger skal overskrives */
+    overskriveManuelleOpplysninger: boolean;
+}
+
+export interface AktivereGrunnlagResponseV2 {
+    inntekter: InntekterDtoV2;
+    boforhold: BoforholdDtoV2;
+    aktiveGrunnlagsdata: AktiveGrunnlagsdata;
+    ikkeAktiverteEndringerIGrunnlagsdata: IkkeAktiveGrunnlagsdata;
+}
+
 export interface OppdaterRollerRequest {
     roller: OpprettRolleDto[];
 }
@@ -1176,7 +1196,15 @@ export interface OppdaterRollerResponse {
 
 export interface SivilstandBeregnet {
     status: SivilstandBeregnetStatusEnum;
-    sivilstandListe: Sivilstand[];
+    sivilstandListe: SivilstandV1[];
+}
+
+export interface SivilstandV1 {
+    /** @format date */
+    periodeFom: string;
+    /** @format date */
+    periodeTom?: string;
+    sivilstandskode: Sivilstandskode;
 }
 
 export interface OpprettBehandlingRequest {
@@ -1248,7 +1276,7 @@ export interface ResultatPeriodeDto {
     beløp: number;
     resultatKode: Resultatkode;
     regel: string;
-    sivilstand: Sivilstandskode;
+    sivilstand?: Sivilstandskode;
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
@@ -1302,6 +1330,7 @@ export interface BeregningValideringsfeil {
     inntekter?: InntektValideringsfeilDto;
     husstandsbarn?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
+    måBekrefteNyeOpplysninger: OpplysningerType[];
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1527,11 +1556,6 @@ export interface Arbeidsforhold {
     lønnsendringDato?: string;
 }
 
-export interface Barnetillegg {
-    periode: TypeArManedsperiode;
-    beløp: number;
-}
-
 export interface Boforhold {
     barn: BoforholdBarn[];
     sivilstand: SivilstandNotat;
@@ -1539,9 +1563,9 @@ export interface Boforhold {
 }
 
 export interface BoforholdBarn {
-    navn: string;
-    /** @format date */
-    fødselsdato?: string;
+    gjelder: PersonNotatDto;
+    medIBehandling: boolean;
+    kilde: Kilde;
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretBostatuskode[];
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
@@ -1552,19 +1576,14 @@ export interface Inntekter {
 }
 
 export interface InntekterPerRolle {
-    rolle: Rolletype;
+    gjelder: PersonNotatDto;
     arbeidsforhold: Arbeidsforhold[];
-    inntekterSomLeggesTilGrunn: InntekterSomLeggesTilGrunn[];
-    barnetillegg: Barnetillegg[];
-    utvidetBarnetrygd: UtvidetBarnetrygd[];
-}
-
-export interface InntekterSomLeggesTilGrunn {
-    /** Inntektsrapportering typer på inntekter som overlapper */
-    inntektType?: Inntektsrapportering;
-    beskrivelse?: string;
-    periode?: TypeArManedsperiode;
-    beløp: number;
+    årsinntekter: NotatInntektDto[];
+    barnetillegg: NotatInntektDto[];
+    utvidetBarnetrygd: NotatInntektDto[];
+    småbarnstillegg: NotatInntektDto[];
+    kontantstøtte: NotatInntektDto[];
+    beregnetInntekter: NotatBeregnetInntektDto[];
 }
 
 export interface Notat {
@@ -1572,55 +1591,93 @@ export interface Notat {
     intern?: string;
 }
 
+export interface NotatBeregnetInntektDto {
+    gjelderBarn: PersonNotatDto;
+    summertInntektListe: DelberegningSumInntekt[];
+}
+
 export interface NotatDto {
     saksnummer: string;
     saksbehandlerNavn?: string;
     virkningstidspunkt: Virkningstidspunkt;
     boforhold: Boforhold;
-    parterISøknad: ParterISoknad[];
+    roller: PersonNotatDto[];
     inntekter: Inntekter;
-    vedtak: Vedtak[];
+    vedtak: Vedtak;
+}
+
+export interface NotatInntektDto {
+    periode?: TypeArManedsperiode;
+    opprinneligPeriode?: TypeArManedsperiode;
+    beløp: number;
+    kilde: Kilde;
+    /** Inntektsrapportering typer på inntekter som overlapper */
+    type: Inntektsrapportering;
+    medIBeregning: boolean;
+    gjelderBarn?: PersonNotatDto;
+    inntektsposter: NotatInntektspostDto[];
+    visningsnavn: string;
+}
+
+export interface NotatInntektspostDto {
+    kode?: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
+    inntektstype?: Inntektstype;
+    beløp: number;
+    visningsnavn?: string;
+}
+
+export interface NotatResultatBeregningBarnDto {
+    barn: PersonNotatDto;
+    perioder: NotatResultatPeriodeDto[];
+}
+
+export interface NotatResultatPeriodeDto {
+    periode: TypeArManedsperiode;
+    beløp: number;
+    resultatKode: Resultatkode;
+    regel: string;
+    sivilstand?: Sivilstandskode;
+    inntekt: number;
+    /** @format int32 */
+    antallBarnIHusstanden: number;
+    resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
-    kilde: string;
+    kilde: Kilde;
+    statusVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningSivilstandskode {
     periode: TypeArManedsperiode;
     status: Sivilstandskode;
-    kilde: string;
+    kilde: Kilde;
+    statusVisningsnavn?: string;
 }
 
 export interface OpplysningerFraFolkeregisteretBostatuskode {
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
+    statusVisningsnavn?: string;
 }
 
 export interface OpplysningerFraFolkeregisteretSivilstandskodePDL {
     periode: TypeArManedsperiode;
     /** Type sivilstand fra PDL */
     status?: SivilstandskodePDL;
+    statusVisningsnavn?: string;
 }
 
-export interface ParterISoknad {
-    rolle: Rolletype;
+export interface PersonNotatDto {
+    rolle?: Rolletype;
     navn?: string;
     /** @format date */
     fødselsdato?: string;
-    personident?: string;
-}
-
-export interface Resultat {
-    type: string;
-    periode: TypeArManedsperiode;
-    inntekt: number;
-    sivilstand: string;
-    /** @format int32 */
-    antallBarn: number;
-    resultat: string;
+    ident?: string;
 }
 
 export interface SivilstandNotat {
@@ -1628,40 +1685,29 @@ export interface SivilstandNotat {
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
 }
 
-export interface UtvidetBarnetrygd {
-    periode: TypeArManedsperiode;
-    beløp: number;
-}
-
 export interface Vedtak {
-    navn: string;
-    /** @format date */
-    fødselsdato: string;
-    resultat: Resultat[];
+    erFattet: boolean;
+    fattetAvSaksbehandler?: string;
+    /** @format date-time */
+    fattetTidspunkt?: string;
+    resultat: NotatResultatBeregningBarnDto[];
 }
 
 export interface Virkningstidspunkt {
     søknadstype?: string;
+    vedtakstype?: Vedtakstype;
     søktAv?: SoktAvType;
-    mottattDato?: {
-        /** @format int32 */
-        year?: number;
-        month?: VirkningstidspunktMonthEnum;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
-    søktFraDato?: {
-        /** @format int32 */
-        year?: number;
-        month?: VirkningstidspunktMonthEnum1;
-        /** @format int32 */
-        monthValue?: number;
-        leapYear?: boolean;
-    };
+    /** @format date */
+    mottattDato?: string;
+    /** @format date */
+    søktFraDato?: string;
     /** @format date */
     virkningstidspunkt?: string;
+    årsak?: TypeArsakstype;
+    avslag?: Resultatkode;
     notat: Notat;
+    årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1701,6 +1747,14 @@ export enum IkkeAktivInntektDtoEndringstypeEnum {
     NY = "NY",
 }
 
+export enum SivilstandIkkeAktivGrunnlagDtoStatusEnum {
+    OK = "OK",
+    MANGLENDE_DATOINFORMASJON = "MANGLENDE_DATOINFORMASJON",
+    LOGISK_FEIL_I_TIDSLINJE = "LOGISK_FEIL_I_TIDSLINJE",
+    ALLE_FOREKOMSTER_ER_HISTORISKE = "ALLE_FOREKOMSTER_ER_HISTORISKE",
+    SIVILSTANDSTYPE_MANGLER = "SIVILSTANDSTYPE_MANGLER",
+}
+
 export enum OppdaterRollerResponseStatusEnum {
     BEHANDLING_SLETTET = "BEHANDLING_SLETTET",
     ROLLER_OPPDATERT = "ROLLER_OPPDATERT",
@@ -1724,36 +1778,6 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
 export enum VedtakDtoKildeEnum {
     MANUELT = "MANUELT",
     AUTOMATISK = "AUTOMATISK",
-}
-
-export enum VirkningstidspunktMonthEnum {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
-}
-
-export enum VirkningstidspunktMonthEnum1 {
-    JANUARY = "JANUARY",
-    FEBRUARY = "FEBRUARY",
-    MARCH = "MARCH",
-    APRIL = "APRIL",
-    MAY = "MAY",
-    JUNE = "JUNE",
-    JULY = "JULY",
-    AUGUST = "AUGUST",
-    SEPTEMBER = "SEPTEMBER",
-    OCTOBER = "OCTOBER",
-    NOVEMBER = "NOVEMBER",
-    DECEMBER = "DECEMBER",
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -1985,6 +2009,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Aktivere grunnlag for behandling. Returnerer grunnlag som ble aktivert.
+         *
+         * @tags behandling-controller-v-2
+         * @name AktivereGrunnlag
+         * @request PUT:/api/v2/behandling/{behandlingsid}/aktivere
+         * @secure
+         */
+        aktivereGrunnlag: (behandlingsid: number, data: AktivereGrunnlagRequestV2, params: RequestParams = {}) =>
+            this.request<AktivereGrunnlagResponseV2, AktivereGrunnlagResponseV2>({
+                path: `/api/v2/behandling/${behandlingsid}/aktivere`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Oppdater roller i behandling
          *
          * @tags behandling-controller-v-2
@@ -2100,6 +2143,39 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 method: "POST",
                 secure: true,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags notat-opplysninger-controller
+         * @name HentNotatOpplysninger
+         * @request GET:/api/v1/notat/{behandlingId}
+         * @secure
+         */
+        hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<NotatDto, any>({
+                path: `/api/v1/notat/${behandlingId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags notat-opplysninger-controller
+         * @name OpprettNotat
+         * @request POST:/api/v1/notat/{behandlingId}
+         * @secure
+         */
+        opprettNotat: (behandlingId: number, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v1/notat/${behandlingId}`,
+                method: "POST",
+                secure: true,
                 ...params,
             }),
 
@@ -2242,23 +2318,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentVisningsnavn: (params: RequestParams = {}) =>
             this.request<Record<string, string>, any>({
                 path: `/api/v1/visningsnavn`,
-                method: "GET",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags notat-opplysninger-controller
-         * @name HentNotatOpplysninger
-         * @request GET:/api/v1/notat/{behandlingId}
-         * @secure
-         */
-        hentNotatOpplysninger: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<NotatDto, any>({
-                path: `/api/v1/notat/${behandlingId}`,
                 method: "GET",
                 secure: true,
                 format: "json",
