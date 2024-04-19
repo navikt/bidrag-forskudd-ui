@@ -1,4 +1,4 @@
-import { ArrowRightIcon, ExternalLinkIcon } from "@navikt/aksel-icons";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Button, Link } from "@navikt/ds-react";
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -15,7 +15,6 @@ export const ActionButtons = ({ onNext }) => {
                 type="button"
                 onClick={onNext}
                 variant="primary"
-                icon={<ArrowRightIcon title="a11y-title" />}
                 iconPosition="right"
                 className="w-max"
                 size="small"

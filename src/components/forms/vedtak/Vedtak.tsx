@@ -197,9 +197,16 @@ const VedtakResultat = () => {
         const feilInnhold = beregnetForskudd.feil?.detaljer;
         const feilliste = [];
         if (feilInnhold.virkningstidspunkt != null) {
+            const beskrivelse = feilInnhold.virkningstidspunkt.virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig
+                ? "Virkningstidspunkt kan ikke være senere enn opprinnelig virkningstidspunkt"
+                : feilInnhold.virkningstidspunkt.manglerVirkningstidspunkt
+                  ? "Mangler virkningstidspunkt"
+                  : feilInnhold.virkningstidspunkt.manglerÅrsakEllerAvslag
+                    ? "Virkningstidspunkt: Mangler årsak"
+                    : "Virkningstidspunkt";
             feilliste.push(
                 <ErrorSummary.Item href="#" onClick={() => setActiveStep(STEPS.virkningstidspunkt)}>
-                    Virkningstidspunkt
+                    {beskrivelse}
                 </ErrorSummary.Item>
             );
         }
@@ -383,12 +390,24 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.inntekt}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.sivilstandBM}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.antallBarn}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.forskudd}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                    {text.label.periode}
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                    {text.label.inntekt}
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                    {text.label.sivilstandBM}
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                    {text.label.antallBarn}
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "100px" }}>
+                    {text.label.forskudd}
+                </Table.HeaderCell>
+                <Table.HeaderCell scope="col" style={{ width: "250px" }}>
+                    {text.label.resultat}
+                </Table.HeaderCell>
             </Table.Row>
         )}
     </Table.Header>

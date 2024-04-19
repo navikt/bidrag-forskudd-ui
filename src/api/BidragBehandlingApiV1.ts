@@ -72,10 +72,10 @@ export interface Behandling {
     sivilstand: Sivilstand[];
     deleted: boolean;
     bidragspliktig?: Rolle;
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
-    grunnlagListe: GrunnlagEntity[];
     erVedtakFattet: boolean;
+    bidragsmottaker?: Rolle;
+    grunnlagListe: GrunnlagEntity[];
+    søknadsbarn: Rolle[];
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
     erKlageEllerOmgjøring: boolean;
@@ -310,6 +310,9 @@ export enum Resultatkode {
     AVSLAG = "AVSLAG",
     AVSLAG2 = "AVSLAG2",
     PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
+    AVSLAGOVER18AR = "AVSLAG_OVER_18_ÅR",
+    AVSLAGIKKEREGISTRERTPAADRESSE = "AVSLAG_IKKE_REGISTRERT_PÅ_ADRESSE",
+    AVSLAGHOYINNTEKT = "AVSLAG_HØY_INNTEKT",
     BARNETS_EKTESKAP = "BARNETS_EKTESKAP",
     BARNETS_INNTEKT = "BARNETS_INNTEKT",
     PAGRUNNAVYTELSEFRAFOLKETRYGDEN = "PÅ_GRUNN_AV_YTELSE_FRA_FOLKETRYGDEN",
@@ -1355,6 +1358,7 @@ export interface BeregningValideringsfeil {
 export interface VirkningstidspunktFeilDto {
     manglerVirkningstidspunkt: boolean;
     manglerÅrsakEllerAvslag: boolean;
+    virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
 }
 
 export interface AddOpplysningerRequest {
