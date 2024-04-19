@@ -162,12 +162,13 @@ export const Opplysninger = ({
                                                 </tr>
                                                 {inntektsposterSomErEndret.map((i, index) => (
                                                     <tr
-                                                        style={{
-                                                            borderBottom:
-                                                                index == inntektsposterSomErEndret.length - 1
-                                                                    ? "1px solid black"
-                                                                    : "none",
-                                                        }}
+                                                        style={
+                                                            index == inntektsposterSomErEndret.length - 1
+                                                                ? {
+                                                                      borderBottom: "1px solid black",
+                                                                  }
+                                                                : {}
+                                                        }
                                                     >
                                                         <td>{i.visningsnavn}</td>
                                                         <td>{i.beløp}</td>
