@@ -71,14 +71,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
+    bidragspliktig?: Rolle;
+    bidragsmottaker?: Rolle;
+    søknadsbarn: Rolle[];
+    grunnlagListe: GrunnlagEntity[];
+    erVedtakFattet: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
     erKlageEllerOmgjøring: boolean;
-    bidragspliktig?: Rolle;
-    erVedtakFattet: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    bidragsmottaker?: Rolle;
-    søknadsbarn: Rolle[];
 }
 
 export enum Bostatuskode {
@@ -164,10 +164,10 @@ export interface Inntekt {
     opprinneligFom?: string;
     /** @format date */
     opprinneligTom?: string;
+    periode?: TypeArManedsperiode;
+    opprinneligPeriode?: TypeArManedsperiode;
     /** @format date */
     datoFomEllerOpprinneligFom?: string;
-    opprinneligPeriode?: TypeArManedsperiode;
-    periode?: TypeArManedsperiode;
 }
 
 export interface Inntektspost {
@@ -783,6 +783,13 @@ export interface DelberegningSumInntekt {
     småbarnstillegg?: number;
 }
 
+export enum GrunnlagInntektEndringstype {
+    ENDRING = "ENDRING",
+    INGEN_ENDRING = "INGEN_ENDRING",
+    SLETTET = "SLETTET",
+    NY = "NY",
+}
+
 export interface HusstandsbarnGrunnlagDto {
     /** @uniqueItems true */
     perioder: HusstandsbarnGrunnlagPeriodeDto[];
@@ -829,7 +836,7 @@ export interface IkkeAktivInntektDto {
     originalId?: number;
     /** @format date-time */
     innhentetTidspunkt: string;
-    endringstype: IkkeAktivInntektDtoEndringstypeEnum;
+    endringstype: GrunnlagInntektEndringstype;
     /** Inntektsrapportering typer på inntekter som overlapper */
     rapporteringstype: Inntektsrapportering;
     beløp: number;
@@ -838,6 +845,8 @@ export interface IkkeAktivInntektDto {
     gjelderBarn?: string;
     /** @uniqueItems true */
     inntektsposter: InntektspostDtoV2[];
+    /** @uniqueItems true */
+    inntektsposterSomErEndret: InntektspostEndringDto[];
 }
 
 export interface IkkeAktiveGrunnlagsdata {
@@ -954,6 +963,15 @@ export interface InntektspostDtoV2 {
     /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
     inntektstype?: Inntektstype;
     beløp?: number;
+}
+
+export interface InntektspostEndringDto {
+    kode: string;
+    visningsnavn: string;
+    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
+    inntektstype?: Inntektstype;
+    beløp?: number;
+    endringstype: GrunnlagInntektEndringstype;
 }
 
 export interface OverlappendePeriode {
@@ -1330,6 +1348,7 @@ export interface BeregningValideringsfeil {
     inntekter?: InntektValideringsfeilDto;
     husstandsbarn?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
+    /** @uniqueItems true */
     måBekrefteNyeOpplysninger: OpplysningerType[];
 }
 
@@ -1641,8 +1660,8 @@ export interface NotatResultatPeriodeDto {
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1738,13 +1757,6 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum IkkeAktivInntektDtoEndringstypeEnum {
-    ENDRING = "ENDRING",
-    INGEN_ENDRING = "INGEN_ENDRING",
-    SLETTET = "SLETTET",
-    NY = "NY",
 }
 
 export enum SivilstandIkkeAktivGrunnlagDtoStatusEnum {
