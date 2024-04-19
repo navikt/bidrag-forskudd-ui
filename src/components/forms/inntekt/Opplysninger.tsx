@@ -3,8 +3,8 @@ import React, { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
 
 import {
+    GrunnlagInntektEndringstype,
     IkkeAktivInntektDto,
-    IkkeAktivInntektDtoEndringstypeEnum,
     InntektDtoV2,
     OpplysningerType,
     Rolletype,
@@ -87,9 +87,15 @@ export const Opplysninger = ({
                                 {}
                             ),
                         });
-                    } else {
+                    } else if (inntektType === "årsinntekter") {
                         // @ts-ignore
                         resetField(`${inntektType}.${personident}`, {
+                            defaultValue: data.inntekter[inntektType].filter(
+                                (v: InntektDtoV2) => v.ident == personident
+                            ),
+                        });
+                    } else {
+                        resetField(fieldName, {
                             defaultValue: data.inntekter[inntektType].filter(
                                 (v: InntektDtoV2) => v.ident == personident
                             ),
@@ -100,6 +106,16 @@ export const Opplysninger = ({
         );
     };
 
+    function endringstypeTilVisningsnavn(endringstype: GrunnlagInntektEndringstype): string {
+        switch (endringstype) {
+            case GrunnlagInntektEndringstype.NY:
+                return "Ny";
+            case GrunnlagInntektEndringstype.SLETTET:
+                return "Fjernes";
+            default:
+                return "Endring";
+        }
+    }
     if (lesemodus) return null;
 
     return (
@@ -126,20 +142,39 @@ export const Opplysninger = ({
                                 </thead>
                                 <tbody>
                                     {ikkeAktiverteEndringer[key].map(
-                                        ({ beløp, rapporteringstype, periode, endringstype }, i) => (
-                                            <tr key={i + rapporteringstype}>
-                                                <td width="250px" scope="row">
-                                                    {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
-                                                </td>
-                                                <td width="75px">{beløp}</td>
-                                                <td width="100px">
-                                                    {endringstype == IkkeAktivInntektDtoEndringstypeEnum.NY
-                                                        ? " Ny"
-                                                        : endringstype == IkkeAktivInntektDtoEndringstypeEnum.SLETTET
-                                                          ? "Fjernes"
-                                                          : "Endring"}
-                                                </td>
-                                            </tr>
+                                        (
+                                            {
+                                                beløp,
+                                                rapporteringstype,
+                                                periode,
+                                                endringstype,
+                                                inntektsposterSomErEndret,
+                                            },
+                                            i
+                                        ) => (
+                                            <>
+                                                <tr key={i + rapporteringstype}>
+                                                    <td width="250px" scope="row">
+                                                        {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
+                                                    </td>
+                                                    <td width="75px">{beløp}</td>
+                                                    <td width="100px">{endringstypeTilVisningsnavn(endringstype)}</td>
+                                                </tr>
+                                                {inntektsposterSomErEndret.map((i, index) => (
+                                                    <tr
+                                                        style={{
+                                                            borderBottom:
+                                                                index == inntektsposterSomErEndret.length - 1
+                                                                    ? "1px solid black"
+                                                                    : "none",
+                                                        }}
+                                                    >
+                                                        <td>{i.visningsnavn}</td>
+                                                        <td>{i.beløp}</td>
+                                                        <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
+                                                    </tr>
+                                                ))}
+                                            </>
                                         )
                                     )}
                                 </tbody>
