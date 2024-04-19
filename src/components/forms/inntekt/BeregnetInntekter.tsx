@@ -4,7 +4,7 @@ import React from "react";
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
-import { dateOrNull, DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, deductDays } from "../../../utils/date-utils";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 
@@ -67,7 +67,9 @@ export const BeregnetInntekter = () => {
                                         <Table.Row key={`${delberegningSumInntekt}-${index}`} className="align-top">
                                             <Table.DataCell>
                                                 {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.fom))} -{" "}
-                                                {DateToDDMMYYYYString(dateOrNull(delberegningSumInntekt.periode.til))}
+                                                {DateToDDMMYYYYString(
+                                                    deductDays(dateOrNull(delberegningSumInntekt.periode.til), 1)
+                                                )}
                                             </Table.DataCell>
                                             <Table.DataCell align="left">
                                                 {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString("nb-NO") ??
