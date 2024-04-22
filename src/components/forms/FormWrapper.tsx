@@ -1,13 +1,13 @@
 import { Loader } from "@navikt/ds-react";
-import React, { lazy, memo, Suspense } from "react";
+import React, { memo, Suspense } from "react";
 
 import text from "../../constants/texts";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-const Boforhold = lazy(() => import("./boforhold/Boforhold"));
-const Inntekt = lazy(() => import("./inntekt/Inntekt"));
-const Vedtak = lazy(() => import("./vedtak/Vedtak"));
-const Virkningstidspunkt = lazy(() => import("./virkningstidspunkt/Virkningstidspunkt"));
+import Boforhold from "./boforhold/Boforhold";
+import Inntekt from "./inntekt/Inntekt";
+import Vedtak from "./vedtak/Vedtak";
+import Virkningstidspunkt from "./virkningstidspunkt/Virkningstidspunkt";
 
 const ForskuddForm = memo(({ activeStep }: { activeStep: string }) => {
     switch (activeStep) {

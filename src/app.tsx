@@ -1,9 +1,7 @@
-import { LoggerService } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
-import { QueryClient, QueryClientProvider, useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { Loader } from "@navikt/ds-react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import React, { lazy, Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
@@ -30,57 +28,34 @@ const config: IConfig = {
     appName: "bidrag-behandling-ui",
 };
 export default function App() {
-    const { reset } = useQueryErrorResetBoundary();
+    // const { reset } = useQueryErrorResetBoundary();
     return (
         <FlagProvider config={config}>
             <QueryClientProvider client={queryClient}>
-                <ErrorBoundary
-                    onReset={reset}
-                    onError={(error, compStack) => {
-                        LoggerService.error(
-                            `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message} - ${compStack.componentStack}`,
-                            error
-                        );
-                    }}
-                    fallbackRender={({ error, resetErrorBoundary }) => (
-                        <Alert variant="error" className="w-8/12 m-auto mt-8">
-                            <div>
-                                <Heading spacing size="small" level="3">
-                                    {text.error.feilmelding}
-                                </Heading>
-                                <BodyShort size="small">Feilmelding: {error.message}</BodyShort>
-                                <Button size="small" className="w-max mt-4" onClick={() => resetErrorBoundary()}>
-                                    {text.refresh}
-                                </Button>
-                            </div>
-                        </Alert>
-                    )}
-                >
-                    <BrowserRouter>
-                        <Routes>
-                            <Route path="/sak/:saksnummer/behandling/:behandlingId">
-                                <Route index element={<ForskudWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route path="/behandling/:behandlingId">
-                                <Route index element={<ForskudWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route path="/sak/:saksnummer/vedtak/:vedtakId">
-                                <Route index element={<VedtakLesemodusWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route path="/vedtak/:behandlingId">
-                                <Route index element={<VedtakLesemodusWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                            <Route path="/forskudd/:behandlingId">
-                                <Route index element={<ForskudWrapper />} />
-                                <Route path="notat" element={<NotatPageWrapper />} />
-                            </Route>
-                        </Routes>
-                    </BrowserRouter>
-                </ErrorBoundary>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/sak/:saksnummer/behandling/:behandlingId">
+                            <Route index element={<ForskudWrapper />} />
+                            <Route path="notat" element={<NotatPageWrapper />} />
+                        </Route>
+                        <Route path="/behandling/:behandlingId">
+                            <Route index element={<ForskudWrapper />} />
+                            <Route path="notat" element={<NotatPageWrapper />} />
+                        </Route>
+                        <Route path="/sak/:saksnummer/vedtak/:vedtakId">
+                            <Route index element={<VedtakLesemodusWrapper />} />
+                            <Route path="notat" element={<NotatPageWrapper />} />
+                        </Route>
+                        <Route path="/vedtak/:behandlingId">
+                            <Route index element={<VedtakLesemodusWrapper />} />
+                            <Route path="notat" element={<NotatPageWrapper />} />
+                        </Route>
+                        <Route path="/forskudd/:behandlingId">
+                            <Route index element={<ForskudWrapper />} />
+                            <Route path="notat" element={<NotatPageWrapper />} />
+                        </Route>
+                    </Routes>
+                </BrowserRouter>
             </QueryClientProvider>
         </FlagProvider>
     );
