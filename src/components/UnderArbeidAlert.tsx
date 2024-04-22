@@ -1,4 +1,5 @@
 import { Alert } from "@navikt/ds-react";
+import React from "react";
 
 import text from "../constants/texts";
 export default function UnderArbeidAlert() {
