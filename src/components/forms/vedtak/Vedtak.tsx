@@ -139,10 +139,18 @@ const FatteVedtakButtons = () => {
                     <BodyShort>{text.error.fatteVedtak}</BodyShort>
                 </Alert>
             )}
+            {fatteVedtakFn.isSuccess && (
+                <Alert variant="success" size="small" className={"mt-2 mb-2"}>
+                    <Heading size="small" level="3">
+                        {text.title.vedtakFattet}
+                    </Heading>
+                    <BodyShort>{text.varsel.vedtakFattet}</BodyShort>
+                </Alert>
+            )}
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || !isFatteVedtakEnabled}
+                    disabled={isBeregningError || !isFatteVedtakEnabled || fatteVedtakFn.isSuccess}
                     onClick={() => fatteVedtakFn.mutate()}
                     className="w-max"
                     size="small"
