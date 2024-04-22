@@ -244,7 +244,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
-                <Opplysninger />
                 {(errors?.root?.sivilstand as { types: string[] })?.types && (
                     <div className="mb-4">
                         <Alert variant="warning">
@@ -259,19 +258,22 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Alert>
                     </div>
                 )}
-                {sivilstandOpplysninger != null && showResetButton && (
-                    <div className="flex justify-end mb-4">
-                        <Button
-                            variant="tertiary"
-                            type="button"
-                            size="small"
-                            className="w-fit"
-                            onClick={resetTilDataFraFreg}
-                        >
-                            {text.resetTilOpplysninger}
-                        </Button>
-                    </div>
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                    <Opplysninger />
+                    {sivilstandOpplysninger != null && showResetButton && (
+                        <div className="flex justify-end mb-4">
+                            <Button
+                                variant="tertiary"
+                                type="button"
+                                size="small"
+                                className="w-fit h-fit"
+                                onClick={resetTilDataFraFreg}
+                            >
+                                {text.resetTilOpplysninger}
+                            </Button>
+                        </div>
+                    )}
+                </div>
                 {controlledFields.length > 0 && (
                     <TableWrapper
                         heading={[

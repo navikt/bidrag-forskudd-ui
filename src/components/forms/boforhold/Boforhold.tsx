@@ -562,7 +562,6 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                     <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
                                 )}
                             </div>
-                            <Opplysninger datoFom={datoFom} ident={item.ident} />
                         </div>
                         <Perioder
                             barnIndex={index}
@@ -886,19 +885,23 @@ const Perioder = ({
                     </Alert>
                 </div>
             )}
-            {hasOpplysningerFraFolkeregistre && showResetButton && (
-                <div className="flex justify-end mb-4">
-                    <Button
-                        variant="tertiary"
-                        type="button"
-                        size="small"
-                        className="w-fit"
-                        onClick={resetTilDataFraFreg}
-                    >
-                        {text.resetTilOpplysninger}
-                    </Button>
-                </div>
-            )}
+            <div className="grid grid-cols-2 gap-4">
+                <Opplysninger datoFom={virkningstidspunkt} ident={barn.ident} />
+                {hasOpplysningerFraFolkeregistre && showResetButton && (
+                    <div className="flex justify-end mb-4">
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit h-fit"
+                            onClick={resetTilDataFraFreg}
+                        >
+                            {text.resetTilOpplysninger}
+                        </Button>
+                    </div>
+                )}
+            </div>
+
             {controlledFields.length > 0 && (
                 <TableWrapper
                     heading={[
