@@ -142,11 +142,9 @@ const FatteVedtakButtons = () => {
             {fatteVedtakFn.isSuccess && (
                 <Alert variant="success" size="small" className={"mt-2 mb-2"}>
                     <Heading size="small" level="3">
-                        Vedtak er fattet
+                        {text.title.vedtakFattet}
                     </Heading>
-                    <BodyShort>
-                        Notat og forsendelse er opprettet og er tilgjengelig i journalen. Åpner sakshistorikken.
-                    </BodyShort>
+                    <BodyShort>{text.varsel.vedtakFattet}</BodyShort>
                 </Alert>
             )}
             <FlexRow>
