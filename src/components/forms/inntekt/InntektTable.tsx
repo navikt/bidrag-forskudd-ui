@@ -302,7 +302,7 @@ export const InntektTabel = ({
         <>
             {!lesemodus && tableValideringsfeil && (
                 <Alert variant="warning" className="mb-4">
-                    <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
+                    <Heading size="xsmall">{text.alert.feilIPeriodisering}.</Heading>
                     {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
                             {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (

@@ -21,6 +21,7 @@ import {
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
@@ -39,14 +40,17 @@ import {
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
 
-export const Sivilstand = ({ datoFom }: { datoFom: Date }) => (
-    <>
-        <Heading level="3" size="medium" id="sivilstand">
-            {text.label.sivilstand}
-        </Heading>
-        <SivilistandPerioder virkningstidspunkt={datoFom} />
-    </>
-);
+export const Sivilstand = () => {
+    const datoFom = useVirkningsdato();
+    return (
+        <>
+            <Heading level="3" size="medium" id="sivilstand">
+                {text.label.sivilstand}
+            </Heading>
+            <SivilistandPerioder virkningstidspunkt={datoFom} />
+        </>
+    );
+};
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen, lesemodus } =
@@ -246,8 +250,8 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
                 {(errors?.root?.sivilstand as { types: string[] })?.types && (
                     <div className="mb-4">
-                        <Alert variant="warning">
-                            <Heading spacing size="small" level="3">
+                        <Alert variant="warning" size="small">
+                            <Heading spacing size="xsmall" level="3">
                                 {text.alert.feilIPeriodisering}
                             </Heading>
                             {Object.values((errors.root.sivilstand as { types: string[] }).types).map(

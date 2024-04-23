@@ -1,58 +1,33 @@
-import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { firstDayOfMonth, isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import {
-    Alert,
-    BodyShort,
-    Box,
-    Button,
-    Heading,
-    Radio,
-    RadioGroup,
-    ReadMore,
-    Search,
-    Table,
-    TextField,
-    VStack,
-} from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, TextField, VStack } from "@navikt/ds-react";
 import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import {
-    Bostatuskode,
-    HusstandsbarnDtoV2,
-    HusstandsbarnGrunnlagDto,
-    HusstandsbarnperiodeDto,
-    Kilde,
-    OppdaterBoforholdRequest,
-} from "../../../api/BidragBehandlingApiV1";
+import { Bostatuskode, HusstandsbarnDtoV2, HusstandsbarnperiodeDto, Kilde } from "../../../api/BidragBehandlingApiV1";
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
 import elementIds from "../../../constants/elementIds";
 import { boforholdPeriodiseringErros } from "../../../constants/error";
-import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import {
     useGetBehandlingV2,
     useGetOpplysningerBoforhold,
-    useGetOpplysningerHentetdato,
     useGrunnlag,
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
-import { useDebounce } from "../../../hooks/useDebounce";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
-import { BoforholdFormValues, SavedHustandOpplysninger } from "../../../types/boforholdFormValues";
+import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
     DateToDDMMYYYYString,
     deductMonths,
     isAfterDate,
     isAfterEqualsDate,
-    ISODateTimeStringToDDMMYYYYString,
     toDateString,
     toISODateString,
 } from "../../../utils/date-utils";
@@ -61,7 +36,6 @@ import { scrollToHash } from "../../../utils/window-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { ConfirmationModal } from "../../modal/ConfirmationModal";
@@ -80,132 +54,33 @@ import {
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
     isOver18YearsOld,
-    mapSivilstandProsessert,
     removeAndEditPeriods,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { ActionButtons } from "../inntekt/ActionButtons";
 import { KildeIcon } from "../inntekt/InntektTable";
+import { BoforholdOpplysninger } from "./BoforholdOpplysninger";
+import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
 
-const Opplysninger = ({ datoFom, ident }: { datoFom: Date | null; ident: string }) => {
-    const opplysninger = useGetOpplysningerBoforhold();
-    const perioder = opplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
-    if (!perioder) {
-        return null;
-    }
-    return (
-        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
-            <Table className="w-[350px] opplysninger" size="small">
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell>{text.label.periode}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {perioder.map((periode, index) => (
-                        <Table.Row key={`${periode.bostatus}-${index}`}>
-                            <Table.DataCell className="flex justify-start gap-2">
-                                <>
-                                    {datoFom && new Date(periode.datoFom) < new Date(datoFom)
-                                        ? DateToDDMMYYYYString(datoFom)
-                                        : DateToDDMMYYYYString(new Date(periode.datoFom))}
-                                    <div>{"-"}</div>
-                                    {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
-                                </>
-                            </Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
-                        </Table.Row>
-                    ))}
-                </Table.Body>
-            </Table>
-        </ReadMore>
-    );
-};
-
-const Main = ({
-    opplysningerChanges,
-    updateOpplysninger,
-}: {
-    opplysningerChanges: string[];
-    updateOpplysninger: () => void;
-}) => {
+const Main = () => {
     const {
         virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
     } = useGetBehandlingV2();
-    const datoFom = useVirkningsdato();
     const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
-
-    const boforoholdOpplysningerHentetdato = useGetOpplysningerHentetdato();
     useEffect(scrollToHash, []);
+
     return (
         <>
-            {opplysningerChanges.length > 0 && (
-                <Alert variant="info">
-                    <div className="flex items-center mb-4">
-                        {removePlaceholder(
-                            text.alert.nyeOpplysninger,
-                            ISODateTimeStringToDDMMYYYYString(boforoholdOpplysningerHentetdato)
-                        )}
-                        <Button
-                            variant="tertiary"
-                            size="small"
-                            className="ml-8"
-                            icon={<ClockDashedIcon aria-hidden />}
-                            onClick={updateOpplysninger}
-                        >
-                            {text.label.oppdater}
-                        </Button>
-                    </div>
-                    <p>{text.alert.endringer}</p>
-                    {opplysningerChanges.map((change, i) => (
-                        <p key={change + i}>{change}</p>
-                    ))}
-                </Alert>
-            )}
             {!isValidDate(virkningstidspunkt) && (
-                <Alert variant="warning">{text.alert.manglerVirkningstidspunkt}</Alert>
+                <Alert variant="warning" size="small">
+                    {text.alert.manglerVirkningstidspunkt}
+                </Alert>
             )}
             <Heading level="3" size="medium">
                 {text.label.barn}
             </Heading>
-            <BarnPerioder datoFom={datoFom} />
-            <Sivilstand datoFom={datoFom} />
-        </>
-    );
-};
-
-const Side = () => {
-    const { setActiveStep, boforholdFormValues, setBoforholdFormValues } = useForskudd();
-    const { watch } = useFormContext<BoforholdFormValues>();
-    const saveBoforhold = useOnSaveBoforhold();
-    const onSave = () => saveBoforhold(boforholdFormValues);
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
-
-    const debouncedOnSave = useDebounce(onSave);
-
-    useEffect(() => {
-        const subscription = watch(({ notat }, { name }) => {
-            if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
-                setBoforholdFormValues((prev) => ({
-                    ...prev,
-                    notat,
-                }));
-                debouncedOnSave();
-            }
-        });
-        return () => subscription.unsubscribe();
-    }, []);
-
-    return (
-        <>
-            <Heading level="3" size="medium">
-                {text.title.begrunnelse}
-            </Heading>
-            <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
-            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
-            <ActionButtons onNext={onNext} />
+            <BarnPerioder />
+            <Sivilstand />
         </>
     );
 };
@@ -214,11 +89,8 @@ const BoforholdsForm = () => {
     // Behold dette for debugging i prod
     useGrunnlag();
     const { setBoforholdFormValues } = useForskudd();
-    const isSavedInitialOpplysninger = useRef(false);
-    const [opplysningerChanges, setOpplysningerChanges] = useState([]);
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const saveBoforhold = useOnSaveBoforhold();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
@@ -232,39 +104,14 @@ const BoforholdsForm = () => {
     });
 
     useEffect(() => {
-        if (boforhold.sivilstand.length == 0 && !isSavedInitialOpplysninger.current) {
-            saveBoforhold(initialValues);
-        }
-
-        isSavedInitialOpplysninger.current = true;
-
         setBoforholdFormValues(initialValues);
     }, []);
-
-    const updateOpplysninger = () => {
-        const fieldValues = useFormMethods.getValues();
-        const values: OppdaterBoforholdRequest = {
-            ...fieldValues,
-            sivilstand: mapSivilstandProsessert(sivilstandProssesert.sivilstandListe),
-        };
-
-        useFormMethods.reset(values);
-        saveBoforhold(values);
-        setBoforholdFormValues(values);
-        setOpplysningerChanges([]);
-    };
 
     return (
         <>
             <FormProvider {...useFormMethods}>
                 <form onSubmit={(e) => e.preventDefault()}>
-                    <FormLayout
-                        title={text.title.boforhold}
-                        main={
-                            <Main opplysningerChanges={opplysningerChanges} updateOpplysninger={updateOpplysninger} />
-                        }
-                        side={<Side />}
-                    />
+                    <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
                 </form>
             </FormProvider>
         </>
@@ -499,13 +346,12 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
         </>
     );
 };
-const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
+const BarnPerioder = () => {
+    const datoFom = useVirkningsdato();
     const { boforholdFormValues, setBoforholdFormValues, lesemodus } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
-    const opplysinger = useGetOpplysningerBoforhold();
-    const opplysningerFraFolkRegistre = opplysinger ?? [];
     const barnFieldArray = useFieldArray({
         control,
         name: "husstandsbarn",
@@ -563,11 +409,7 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
                                 )}
                             </div>
                         </div>
-                        <Perioder
-                            barnIndex={index}
-                            virkningstidspunkt={datoFom}
-                            opplysningerFraFolkRegistre={opplysningerFraFolkRegistre}
-                        />
+                        <Perioder barnIndex={index} />
                     </Box>
                 </Fragment>
             ))}
@@ -587,15 +429,9 @@ const BarnPerioder = ({ datoFom }: { datoFom: Date }) => {
     );
 };
 
-const Perioder = ({
-    barnIndex,
-    virkningstidspunkt,
-    opplysningerFraFolkRegistre,
-}: {
-    barnIndex: number;
-    virkningstidspunkt: Date;
-    opplysningerFraFolkRegistre: HusstandsbarnGrunnlagDto[] | SavedHustandOpplysninger[];
-}) => {
+const Perioder = ({ barnIndex }: { barnIndex: number }) => {
+    const { aktiveOpplysninger: opplysningerFraFolkRegistre } = useGetOpplysningerBoforhold();
+    const virkningsOrSoktFraDato = useVirkningsdato();
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus } = useForskudd();
@@ -624,11 +460,8 @@ const Perioder = ({
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
-    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningstidspunkt);
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
-    const hasOpplysningerFraFolkeregistre = opplysningerFraFolkRegistre.some(
-        (opplysning) => opplysning.ident === barn.ident
-    );
 
     useEffect(() => {
         validatePeriods(barn.perioder);
@@ -875,7 +708,7 @@ const Perioder = ({
             )}
             {errors?.root?.husstandsbarn?.[barnIndex]?.types && (
                 <div className="mb-4">
-                    <Alert variant="warning">
+                    <Alert variant="warning" size="small">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}
                         </Heading>
@@ -885,22 +718,11 @@ const Perioder = ({
                     </Alert>
                 </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
-                <Opplysninger datoFom={virkningstidspunkt} ident={barn.ident} />
-                {hasOpplysningerFraFolkeregistre && showResetButton && (
-                    <div className="flex justify-end mb-4">
-                        <Button
-                            variant="tertiary"
-                            type="button"
-                            size="small"
-                            className="w-fit h-fit"
-                            onClick={resetTilDataFraFreg}
-                        >
-                            {text.resetTilOpplysninger}
-                        </Button>
-                    </div>
-                )}
-            </div>
+            <BoforholdOpplysninger
+                ident={barn.ident}
+                showResetButton={showResetButton}
+                resetTilDataFraFreg={resetTilDataFraFreg}
+            />
 
             {controlledFields.length > 0 && (
                 <TableWrapper

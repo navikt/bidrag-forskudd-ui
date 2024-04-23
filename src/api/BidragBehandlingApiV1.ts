@@ -71,14 +71,14 @@ export interface Behandling {
     /** @uniqueItems true */
     sivilstand: Sivilstand[];
     deleted: boolean;
-    bidragspliktig?: Rolle;
-    erVedtakFattet: boolean;
     bidragsmottaker?: Rolle;
-    grunnlagListe: GrunnlagEntity[];
-    søknadsbarn: Rolle[];
+    erVedtakFattet: boolean;
     /** @format date */
     virkningstidspunktEllerSøktFomDato: string;
+    søknadsbarn: Rolle[];
     erKlageEllerOmgjøring: boolean;
+    grunnlagListe: GrunnlagEntity[];
+    bidragspliktig?: Rolle;
 }
 
 export enum Bostatuskode {
@@ -165,9 +165,11 @@ export interface Inntekt {
     /** @format date */
     opprinneligTom?: string;
     periode?: TypeArManedsperiode;
-    opprinneligPeriode?: TypeArManedsperiode;
     /** @format date */
     datoFomEllerOpprinneligFom?: string;
+    /** @format date */
+    datoTomEllerOpprinneligFom?: string;
+    opprinneligPeriode?: TypeArManedsperiode;
 }
 
 export interface Inntektspost {
@@ -1664,8 +1666,8 @@ export interface NotatResultatPeriodeDto {
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1841,7 +1843,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1930,7 +1935,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

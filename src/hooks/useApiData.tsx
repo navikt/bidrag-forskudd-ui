@@ -63,9 +63,15 @@ export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
 };
-export const useGetOpplysningerBoforhold = (): HusstandsbarnGrunnlagDto[] => {
+export const useGetOpplysningerBoforhold = (): {
+    aktiveOpplysninger: HusstandsbarnGrunnlagDto[];
+    ikkeAktiverteOpplysninger: HusstandsbarnGrunnlagDto[];
+} => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata?.husstandsbarn;
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
 };
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
     const behandling = useGetBehandlingV2();
@@ -73,8 +79,8 @@ export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
 };
 
 export const useGetOpplysningerHentetdato = (): string | undefined => {
-    const opplysninger = useGetOpplysningerBoforhold();
-    return opplysninger.length == 0 ? new Date().toISOString() : opplysninger[0].innhentetTidspunkt;
+    const { aktiveOpplysninger } = useGetOpplysningerBoforhold();
+    return aktiveOpplysninger.length == 0 ? new Date().toISOString() : aktiveOpplysninger[0].innhentetTidspunkt;
 };
 
 export const useOppdaterBehandlingV2 = () => {
