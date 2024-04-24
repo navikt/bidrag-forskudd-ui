@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, HStack, ReadMore, Table, Tag } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table, Tag } from "@navikt/ds-react";
 import React from "react";
 
 import { HusstandsbarnGrunnlagPeriodeDto } from "../../../api/BidragBehandlingApiV1";
@@ -99,7 +99,7 @@ export const BoforholdOpplysninger = ({
                 )}
             </div>
             {hasNewOpplysningerFraFolkeregistre && (
-                <Alert variant="warning" size="small">
+                <Box padding="4" background="surface-default" borderWidth="1">
                     <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
                     <Table size="small" className="table-fixed opplysninger">
                         <Table.Header>
@@ -136,7 +136,7 @@ export const BoforholdOpplysninger = ({
                             Nei
                         </Button>
                     </HStack>
-                </Alert>
+                </Box>
             )}
         </div>
     );

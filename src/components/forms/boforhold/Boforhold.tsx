@@ -691,6 +691,12 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
     return (
         <>
+            <BoforholdOpplysninger
+                ident={barn.ident}
+                showResetButton={showResetButton}
+                resetTilDataFraFreg={resetTilDataFraFreg}
+            />
+
             {barnIsOver18 && !lesemodus && (
                 <div className="mb-4">
                     <StatefulAlert
@@ -718,11 +724,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Alert>
                 </div>
             )}
-            <BoforholdOpplysninger
-                ident={barn.ident}
-                showResetButton={showResetButton}
-                resetTilDataFraFreg={resetTilDataFraFreg}
-            />
 
             {controlledFields.length > 0 && (
                 <TableWrapper
