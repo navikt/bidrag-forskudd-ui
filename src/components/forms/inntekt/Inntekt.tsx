@@ -137,12 +137,24 @@ const Side = () => {
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
         const [medIVedtaket, kunINotat] = getValues(["notat.medIVedtaket", "notat.kunINotat"]);
-        saveInntekt.mutate({
-            oppdatereNotat: {
-                medIVedtaket,
-                kunINotat,
+        saveInntekt.mutation.mutate(
+            {
+                oppdatereNotat: {
+                    medIVedtaket,
+                    kunINotat,
+                },
             },
-        });
+            {
+                onSuccess: (response) =>
+                    saveInntekt.queryClientUpdater((currentData) => ({
+                        ...currentData,
+                        inntekter: {
+                            ...currentData.inntekter,
+                            notat: response.notat,
+                        },
+                    })),
+            }
+        );
     };
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
 
