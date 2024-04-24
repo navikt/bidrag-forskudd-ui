@@ -23,6 +23,7 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "../../..
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "../../../types/vedtakTypes";
+import { deductDays } from "../../../utils/date-utils";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import NotatButton from "../../NotatButton";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -354,7 +355,9 @@ const VedtakTableBody = ({
                         <Table.Row>
                             <Table.DataCell>
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                                {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
+                                {periode.periode.til
+                                    ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
+                                    : ""}
                             </Table.DataCell>
                             <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
                             <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
@@ -363,7 +366,9 @@ const VedtakTableBody = ({
                         <Table.Row>
                             <Table.DataCell>
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                                {periode.periode.til ? dateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
+                                {periode.periode.til
+                                    ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
+                                    : ""}
                             </Table.DataCell>
                             <Table.DataCell>{periode.inntekt}</Table.DataCell>
 
