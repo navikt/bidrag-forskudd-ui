@@ -9,78 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface Behandling {
-    vedtakstype: Vedtakstype;
-    /** @format date */
-    søktFomDato: string;
-    /** @format date */
-    datoTom?: string;
-    /** @format date */
-    mottattdato: string;
-    saksnummer: string;
-    /** @format int64 */
-    soknadsid: number;
-    /** @format int64 */
-    soknadRefId?: number;
-    behandlerEnhet: string;
-    opprettetAv: string;
-    opprettetAvNavn?: string;
-    kildeapplikasjon: string;
-    soknadFra: SoktAvType;
-    stonadstype?: Stonadstype;
-    engangsbeloptype?: Engangsbeloptype;
-    /** @format int64 */
-    vedtaksid?: number;
-    /** @format int64 */
-    refVedtaksid?: number;
-    /** @format date */
-    virkningstidspunkt?: string;
-    /** @format date */
-    opprinneligVirkningstidspunkt?: string;
-    /** @format date-time */
-    opprinneligVedtakstidspunkt?: string;
-    /** @format date-time */
-    vedtakstidspunkt?: string;
-    /** @format date-time */
-    slettetTidspunkt?: string;
-    /** @format date-time */
-    opprettetTidspunkt: string;
-    vedtakFattetAv?: string;
-    getårsak?: TypeArsakstype;
-    avslag?: Resultatkode;
-    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
-    virkningstidspunktbegrunnelseKunINotat?: string;
-    boforholdsbegrunnelseIVedtakOgNotat?: string;
-    boforholdsbegrunnelseKunINotat?: string;
-    inntektsbegrunnelseIVedtakOgNotat?: string;
-    inntektsbegrunnelseKunINotat?: string;
-    /** @format int64 */
-    id?: number;
-    /** @format int64 */
-    grunnlagspakkeid?: number;
-    /** @format date-time */
-    grunnlagSistInnhentet?: string;
-    /** @uniqueItems true */
-    grunnlag: GrunnlagEntity[];
-    /** @uniqueItems true */
-    roller: Rolle[];
-    /** @uniqueItems true */
-    husstandsbarn: Husstandsbarn[];
-    /** @uniqueItems true */
-    inntekter: Inntekt[];
-    /** @uniqueItems true */
-    sivilstand: Sivilstand[];
-    deleted: boolean;
-    bidragspliktig?: Rolle;
-    erVedtakFattet: boolean;
-    bidragsmottaker?: Rolle;
-    grunnlagListe: GrunnlagEntity[];
-    søknadsbarn: Rolle[];
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
-    erKlageEllerOmgjøring: boolean;
-}
-
 export enum Bostatuskode {
     MED_FORELDER = "MED_FORELDER",
     DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
@@ -102,82 +30,6 @@ export enum Engangsbeloptype {
     SAERTILSKUDD = "SAERTILSKUDD",
     SAeRTILSKUDD = "SÆRTILSKUDD",
     TILBAKEKREVING = "TILBAKEKREVING",
-}
-
-export interface GrunnlagEntity {
-    behandling: Behandling;
-    type: OpplysningerType;
-    erBearbeidet: boolean;
-    data: string;
-    /** @format date-time */
-    innhentet: string;
-    /** @format date-time */
-    aktiv?: string;
-    rolle: Rolle;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Husstandsbarn {
-    behandling: Behandling;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
-    ident?: string;
-    navn?: string;
-    /** @format date */
-    fødselsdato: string;
-    /** @uniqueItems true */
-    perioder: Husstandsbarnperiode[];
-}
-
-export interface Husstandsbarnperiode {
-    husstandsbarn: Husstandsbarn;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    bostatus: Bostatuskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Inntekt {
-    /** Inntektsrapportering typer på inntekter som overlapper */
-    type: Inntektsrapportering;
-    belop: number;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    ident: string;
-    kilde: Kilde;
-    taMed: boolean;
-    /** @format int64 */
-    id?: number;
-    behandling?: Behandling;
-    /** @uniqueItems true */
-    inntektsposter: Inntektspost[];
-    gjelderBarn?: string;
-    /** @format date */
-    opprinneligFom?: string;
-    /** @format date */
-    opprinneligTom?: string;
-    periode?: TypeArManedsperiode;
-    opprinneligPeriode?: TypeArManedsperiode;
-    /** @format date */
-    datoFomEllerOpprinneligFom?: string;
-}
-
-export interface Inntektspost {
-    beløp: number;
-    kode: string;
-    /** @format int64 */
-    id?: number;
-    inntekt?: Inntekt;
-    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
-    inntektstype?: Inntektstype;
 }
 
 /** Inntektsrapportering typer på inntekter som overlapper */
@@ -325,40 +177,12 @@ export enum Resultatkode {
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
 }
 
-export interface Rolle {
-    behandling: Behandling;
-    rolletype: Rolletype;
-    ident?: string;
-    /** @format date */
-    foedselsdato: string;
-    /** @format date-time */
-    opprettet: string;
-    /** @format int64 */
-    id?: number;
-    navn?: string;
-    deleted: boolean;
-    /** @uniqueItems true */
-    grunnlag: GrunnlagEntity[];
-}
-
 export enum Rolletype {
     BA = "BA",
     BM = "BM",
     BP = "BP",
     FR = "FR",
     RM = "RM",
-}
-
-export interface Sivilstand {
-    behandling: Behandling;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    sivilstand: Sivilstandskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
 }
 
 export enum Sivilstandskode {
@@ -1130,7 +954,27 @@ export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
     beregnetInntekter: InntektPerBarn[];
+    notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
+}
+
+export interface NyHusstandsbarnperiode {
+    /**
+     * Id til husstandsbarnet perioden skal gjelde for
+     * @format int64
+     */
+    idHusstandsbarn: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    fraOgMed?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    tilOgMed?: string;
+    bostatus: Bostatuskode;
 }
 
 /** Oppdaterer husstandsbarn, sivilstand, eller notat */
@@ -1142,7 +986,7 @@ export interface OppdatereBoforholdRequestV2 {
 
 export interface OppdatereHusstandsbarn {
     nyttHusstandsbarn?: PersonaliaHusstandsbarn;
-    nyHusstandsbarnperiode?: Husstandsbarnperiode;
+    nyHusstandsbarnperiode?: NyHusstandsbarnperiode;
     /** @format int64 */
     sletteHusstandsbarnperiode?: number;
     /** @format int64 */
@@ -1664,8 +1508,8 @@ export interface NotatResultatPeriodeDto {
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1841,7 +1685,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1930,7 +1777,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

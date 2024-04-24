@@ -5,10 +5,12 @@ import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
+    BehandlingDtoV2,
     InntektDtoV2,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
+    OppdatereInntektResponse,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
@@ -192,6 +194,7 @@ export const InntektTabel = ({
         name: fieldName,
     });
     const watchFieldArray = useWatch({ control, name: fieldName });
+    const [inntektType, ident] = fieldName.split(".");
 
     const unsetEditedRow = (index: number) => {
         if (editableRow === index) {
@@ -214,14 +217,50 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const payload = createPayload(periode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
-        updatedAndSave(payload, (data: InntektDtoV2) => setValue(`${fieldName}.${index}`, transformFn(data)));
+        const onSaveSuccess = (response: OppdatereInntektResponse) => {
+            setValue(`${fieldName}.${index}`, transformFn(response.inntekt));
+            saveInntekt.queryClientUpdater((currentData) => {
+                const updatedInntektIndex = currentData.inntekter[inntektType].findIndex(
+                    (inntekt: InntektDtoV2) => inntekt.id === response.inntekt.id
+                );
+                const updatedInntekter =
+                    updatedInntektIndex === -1
+                        ? currentData.inntekter[inntektType].concat(response.inntekt)
+                        : currentData.inntekter[inntektType].toSpliced(updatedInntektIndex, 1, response.inntekt);
+                return {
+                    ...currentData,
+                    inntekter: {
+                        ...currentData.inntekter,
+                        [inntektType]: updatedInntekter,
+                        beregnetInntekter: response.beregnetInntekter,
+                        valideringsfeil: response.valideringsfeil,
+                    },
+                };
+            });
+        };
+        updatedAndSave(payload, onSaveSuccess);
         unsetEditedRow(index);
     };
 
     const handleDelete = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         clearErrors(`${fieldName}.${index}`);
-        updatedAndSave({ sletteInntekt: periode.id });
+        const onSaveSuccess = (response: OppdatereInntektResponse) =>
+            saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
+                return {
+                    ...currentData,
+                    inntekter: {
+                        ...currentData.inntekter,
+                        [inntektType]: currentData.inntekter[inntektType].filter(
+                            (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
+                        ),
+                        beregnetInntekter: response.beregnetInntekter,
+                        valideringsfeil: response.valideringsfeil,
+                    },
+                };
+            });
+
+        updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess);
         fieldArray.remove(index);
 
         if (editableRow === index) {
@@ -240,9 +279,12 @@ export const InntektTabel = ({
             setEditableRow(perioder.length);
         }
     };
-    const updatedAndSave = (updatedValues: OppdatereInntektRequest, onSaveSuccess?: (data: InntektDtoV2) => void) => {
-        saveInntekt.mutate(updatedValues, {
-            onSuccess: (response) => onSaveSuccess?.(response?.inntekt),
+    const updatedAndSave = (
+        updatedValues: OppdatereInntektRequest,
+        onSaveSuccess?: (data: OppdatereInntektResponse) => void
+    ) => {
+        saveInntekt.mutation.mutate(updatedValues, {
+            onSuccess: (response) => onSaveSuccess?.(response),
         });
     };
     const onSaveRow = (index: number) => {
@@ -286,7 +328,6 @@ export const InntektTabel = ({
         };
     });
 
-    const [inntektType, ident] = fieldName.split(".");
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
     )
