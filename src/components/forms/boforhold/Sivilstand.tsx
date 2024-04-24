@@ -1,7 +1,7 @@
 import "./Opplysninger.css";
 
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { capitalize } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -23,7 +23,7 @@ import {
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -142,7 +142,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const validateFomOgTom = (index) => {
         const sivilstandPerioder = getValues("sivilstand");
         const fomOgTomInvalid =
-            sivilstandPerioder[index].datoTom !== null &&
+            sivilstandPerioder[index].datoTom &&
             isAfterDate(sivilstandPerioder[index].datoFom, sivilstandPerioder[index].datoTom);
 
         if (fomOgTomInvalid) {
@@ -315,7 +315,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                             defaultValue={item.datoTom}
                                             customValidation={() => validateFomOgTom(index)}
                                             fromDate={fom}
-                                            toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                            toDate={tom}
                                             lastDayOfMonthPicker
                                             hideLabel
                                         />

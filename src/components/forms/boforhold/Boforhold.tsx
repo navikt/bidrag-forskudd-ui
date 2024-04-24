@@ -1,5 +1,5 @@
 import { ArrowUndoIcon, ClockDashedIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
 import {
     Alert,
     BodyShort,
@@ -49,7 +49,6 @@ import { BoforholdFormValues, SavedHustandOpplysninger } from "../../../types/bo
 import {
     dateOrNull,
     DateToDDMMYYYYString,
-    deductMonths,
     isAfterDate,
     isAfterEqualsDate,
     ISODateTimeStringToDDMMYYYYString,
@@ -728,8 +727,7 @@ const Perioder = ({
         const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
 
         const fomOgTomInvalid =
-            perioderValues[index].datoTom !== null &&
-            isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
+            perioderValues[index].datoTom && isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
 
         if (fomOgTomInvalid) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
@@ -943,7 +941,7 @@ const Perioder = ({
                                         defaultValue={item.datoTom}
                                         customValidation={() => validateFomOgTom(index)}
                                         fromDate={fom}
-                                        toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                        toDate={tom}
                                         lastDayOfMonthPicker
                                         hideLabel
                                     />
