@@ -333,7 +333,7 @@ export const InntektTabel = ({
     )
         ? valideringsfeil[inntektType]
         : valideringsfeil[inntektType]?.find((feil) => {
-              if (["barnetillegg", "kontantsøtte"].includes(inntektType)) {
+              if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
                   return feil.gjelderBarn === ident;
               }
               return feil.ident === ident;
