@@ -136,11 +136,10 @@ const Side = () => {
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
-        const [medIVedtaket, kunINotat] = getValues(["notat.medIVedtaket", "notat.kunINotat"]);
+        const [kunINotat] = getValues(["notat.kunINotat"]);
         saveInntekt.mutation.mutate(
             {
                 oppdatereNotat: {
-                    medIVedtaket,
                     kunINotat,
                 },
             },
@@ -162,7 +161,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name }) => {
-            if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
+            if (["notat.kunINotat"].includes(name)) {
                 debouncedOnSave();
             }
         });
@@ -173,14 +172,9 @@ const Side = () => {
         <>
             <div className="grid gap-y-4">
                 <Heading level="3" size="medium">
-                    Begrunnelse
+                    {text.title.begrunnelse}
                 </Heading>
-                <div>
-                    <FormControlledTextarea name="notat.medIVedtaket" label="Begrunnelse (med i vedtaket og notat)" />
-                </div>
-                <div>
-                    <FormControlledTextarea name="notat.kunINotat" label="Begrunnelse (kun med i notat)" />
-                </div>
+                <FormControlledTextarea name="notat.kunINotat" label="" hideLabel />
             </div>
             <ActionButtons onNext={onNext} />
         </>

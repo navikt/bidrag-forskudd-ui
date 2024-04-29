@@ -74,7 +74,6 @@ export const createInitialValues = (
         småbarnstillegg: inntekter.småbarnstillegg?.map(transformFn),
         utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(transformFn),
         notat: {
-            medIVedtaket: inntekter.notat.medIVedtaket,
             kunINotat: inntekter.notat.kunINotat,
         },
     };
