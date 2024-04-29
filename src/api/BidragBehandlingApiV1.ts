@@ -9,78 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface Behandling {
-    vedtakstype: Vedtakstype;
-    /** @format date */
-    søktFomDato: string;
-    /** @format date */
-    datoTom?: string;
-    /** @format date */
-    mottattdato: string;
-    saksnummer: string;
-    /** @format int64 */
-    soknadsid: number;
-    /** @format int64 */
-    soknadRefId?: number;
-    behandlerEnhet: string;
-    opprettetAv: string;
-    opprettetAvNavn?: string;
-    kildeapplikasjon: string;
-    soknadFra: SoktAvType;
-    stonadstype?: Stonadstype;
-    engangsbeloptype?: Engangsbeloptype;
-    /** @format int64 */
-    vedtaksid?: number;
-    /** @format int64 */
-    refVedtaksid?: number;
-    /** @format date */
-    virkningstidspunkt?: string;
-    /** @format date */
-    opprinneligVirkningstidspunkt?: string;
-    /** @format date-time */
-    opprinneligVedtakstidspunkt?: string;
-    /** @format date-time */
-    vedtakstidspunkt?: string;
-    /** @format date-time */
-    slettetTidspunkt?: string;
-    /** @format date-time */
-    opprettetTidspunkt: string;
-    vedtakFattetAv?: string;
-    getårsak?: TypeArsakstype;
-    avslag?: Resultatkode;
-    virkningstidspunktsbegrunnelseIVedtakOgNotat?: string;
-    virkningstidspunktbegrunnelseKunINotat?: string;
-    boforholdsbegrunnelseIVedtakOgNotat?: string;
-    boforholdsbegrunnelseKunINotat?: string;
-    inntektsbegrunnelseIVedtakOgNotat?: string;
-    inntektsbegrunnelseKunINotat?: string;
-    /** @format int64 */
-    id?: number;
-    /** @format int64 */
-    grunnlagspakkeid?: number;
-    /** @format date-time */
-    grunnlagSistInnhentet?: string;
-    /** @uniqueItems true */
-    grunnlag: GrunnlagEntity[];
-    /** @uniqueItems true */
-    roller: Rolle[];
-    /** @uniqueItems true */
-    husstandsbarn: Husstandsbarn[];
-    /** @uniqueItems true */
-    inntekter: Inntekt[];
-    /** @uniqueItems true */
-    sivilstand: Sivilstand[];
-    deleted: boolean;
-    bidragsmottaker?: Rolle;
-    erVedtakFattet: boolean;
-    /** @format date */
-    virkningstidspunktEllerSøktFomDato: string;
-    søknadsbarn: Rolle[];
-    erKlageEllerOmgjøring: boolean;
-    grunnlagListe: GrunnlagEntity[];
-    bidragspliktig?: Rolle;
-}
-
 export enum Bostatuskode {
     MED_FORELDER = "MED_FORELDER",
     DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
@@ -102,84 +30,6 @@ export enum Engangsbeloptype {
     SAERTILSKUDD = "SAERTILSKUDD",
     SAeRTILSKUDD = "SÆRTILSKUDD",
     TILBAKEKREVING = "TILBAKEKREVING",
-}
-
-export interface GrunnlagEntity {
-    behandling: Behandling;
-    type: OpplysningerType;
-    erBearbeidet: boolean;
-    data: string;
-    /** @format date-time */
-    innhentet: string;
-    /** @format date-time */
-    aktiv?: string;
-    rolle: Rolle;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Husstandsbarn {
-    behandling: Behandling;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
-    ident?: string;
-    navn?: string;
-    /** @format date */
-    fødselsdato: string;
-    /** @uniqueItems true */
-    perioder: Husstandsbarnperiode[];
-}
-
-export interface Husstandsbarnperiode {
-    husstandsbarn: Husstandsbarn;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    bostatus: Bostatuskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
-}
-
-export interface Inntekt {
-    /** Inntektsrapportering typer på inntekter som overlapper */
-    type: Inntektsrapportering;
-    belop: number;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    ident: string;
-    kilde: Kilde;
-    taMed: boolean;
-    /** @format int64 */
-    id?: number;
-    behandling?: Behandling;
-    /** @uniqueItems true */
-    inntektsposter: Inntektspost[];
-    gjelderBarn?: string;
-    /** @format date */
-    opprinneligFom?: string;
-    /** @format date */
-    opprinneligTom?: string;
-    periode?: TypeArManedsperiode;
-    /** @format date */
-    datoFomEllerOpprinneligFom?: string;
-    /** @format date */
-    datoTomEllerOpprinneligFom?: string;
-    opprinneligPeriode?: TypeArManedsperiode;
-}
-
-export interface Inntektspost {
-    beløp: number;
-    kode: string;
-    /** @format int64 */
-    id?: number;
-    inntekt?: Inntekt;
-    /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
-    inntektstype?: Inntektstype;
 }
 
 /** Inntektsrapportering typer på inntekter som overlapper */
@@ -327,40 +177,12 @@ export enum Resultatkode {
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
 }
 
-export interface Rolle {
-    behandling: Behandling;
-    rolletype: Rolletype;
-    ident?: string;
-    /** @format date */
-    foedselsdato: string;
-    /** @format date-time */
-    opprettet: string;
-    /** @format int64 */
-    id?: number;
-    navn?: string;
-    deleted: boolean;
-    /** @uniqueItems true */
-    grunnlag: GrunnlagEntity[];
-}
-
 export enum Rolletype {
     BA = "BA",
     BM = "BM",
     BP = "BP",
     FR = "FR",
     RM = "RM",
-}
-
-export interface Sivilstand {
-    behandling: Behandling;
-    /** @format date */
-    datoFom?: string;
-    /** @format date */
-    datoTom?: string;
-    sivilstand: Sivilstandskode;
-    kilde: Kilde;
-    /** @format int64 */
-    id?: number;
 }
 
 export enum Sivilstandskode {
@@ -1132,23 +954,66 @@ export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
     beregnetInntekter: InntektPerBarn[];
+    notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
+}
+
+export interface OppdaterHusstandsmedlemPeriode {
+    /**
+     * Id til husstandsbarnet perioden skal gjelde for
+     * @format int64
+     */
+    idHusstandsbarn: number;
+    /**
+     * Id til perioden som skal oppdateres
+     * @format int64
+     */
+    idPeriode?: number;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
+    bostatus: Bostatuskode;
 }
 
 /** Oppdaterer husstandsbarn, sivilstand, eller notat */
 export interface OppdatereBoforholdRequestV2 {
-    oppdatereHusstandsbarn?: OppdatereHusstandsbarn;
+    oppdatereHusstandsmedlem?: OppdatereHusstandsmedlem;
     oppdatereSivilstand?: OppdatereSivilstand;
     oppdatereNotat?: OppdaterNotat;
 }
 
-export interface OppdatereHusstandsbarn {
-    nyttHusstandsbarn?: PersonaliaHusstandsbarn;
-    nyHusstandsbarnperiode?: Husstandsbarnperiode;
-    /** @format int64 */
-    sletteHusstandsbarnperiode?: number;
-    /** @format int64 */
-    sletteHusstandsbarn?: number;
+export interface OppdatereHusstandsmedlem {
+    /** Informasjon om husstandsmedlem som skal opprettes */
+    opprettHusstandsmedlem?: OpprettHusstandsstandsmedlem;
+    oppdaterPeriode?: OppdaterHusstandsmedlemPeriode;
+    /**
+     * Id til perioden som skal slettes
+     * @format int64
+     */
+    slettPeriode?: number;
+    /**
+     * Id til husstandsmedlemmet som skal slettes
+     * @format int64
+     */
+    slettHusstandsmedlem?: number;
+    /**
+     * Id til husstandsmedlemmet perioden skal resettes for.
+     *         |Dette vil resette til opprinnelig perioder hentet fra offentlige registre
+     * @format int64
+     */
+    tilbakestillPerioderForHusstandsmedlem?: number;
+    /**
+     * Id til husstandsmedlemmet siste steg skal angres for
+     * @format int64
+     */
+    angreSisteStegForHusstandsmedlem?: number;
 }
 
 export interface OppdatereSivilstand {
@@ -1157,7 +1022,8 @@ export interface OppdatereSivilstand {
     sletteSivilstandsperiode?: number;
 }
 
-export interface PersonaliaHusstandsbarn {
+/** Informasjon om husstandsmedlem som skal opprettes */
+export interface OpprettHusstandsstandsmedlem {
     personident?: string;
     /** @format date */
     fødselsdato: string;
@@ -1992,6 +1858,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Oppdatere virkningstidspunkt for behandling. Returnerer oppdatert virkningstidspunkt
+         *
+         * @tags behandling-controller-v-2
+         * @name OppdatereVirkningstidspunktV2
+         * @request PUT:/api/v2/behandling/{behandlingsid}/virkningstidspunkt
+         * @secure
+         */
+        oppdatereVirkningstidspunktV2: (
+            behandlingsid: number,
+            data: OppdaterVirkningstidspunkt,
+            params: RequestParams = {}
+        ) =>
+            this.request<BehandlingDtoV2, BehandlingDtoV2>({
+                path: `/api/v2/behandling/${behandlingsid}/virkningstidspunkt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Oppdatere inntekt for behandling. Returnerer inntekt som ble endret, opprettet, eller slettet.
          *
          * @tags behandling-controller-v-2
@@ -2322,6 +2211,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name HenteBoforhold
+         * @request GET:/api/v2/behandling/boforhold/{behandlingsid}
+         * @secure
+         */
+        henteBoforhold: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<BoforholdDtoV2, BoforholdDtoV2>({
+                path: `/api/v2/behandling/boforhold/${behandlingsid}`,
                 method: "GET",
                 secure: true,
                 format: "json",

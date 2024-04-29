@@ -16,7 +16,25 @@ export const Notat = () => {
     const { setActiveStep, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { watch } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
-    const onSave = () => saveBoforhold(boforholdFormValues);
+    const onSave = () =>
+        saveBoforhold.mutation.mutate(
+            { oppdatereNotat: boforholdFormValues.notat },
+            {
+                onSuccess: (response) => {
+                    saveBoforhold.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                husstandsbarn: currentData.boforhold.husstandsbarn.concat(
+                                    response.oppdatertHusstandsbarn
+                                ),
+                            },
+                        };
+                    });
+                },
+            }
+        );
     const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
 
     const debouncedOnSave = useDebounce(onSave);

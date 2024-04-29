@@ -9,6 +9,8 @@ import {
     BeregningValideringsfeil,
     HusstandsbarnGrunnlagDto,
     OppdaterBehandlingRequestV2,
+    OppdatereBoforholdRequestV2,
+    OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
     OpplysningerType,
@@ -111,24 +113,31 @@ export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
 
 export const useUpdateInntekt = () => {
     const { behandlingId } = useForskudd();
-    const queryClient = useQueryClient();
 
     return useMutation({
+        mutationKey: MutationKeys.updateInntekter(behandlingId),
         mutationFn: async (payload: OppdatereInntektRequest): Promise<OppdatereInntektResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereInntekt(behandlingId, payload);
             return data;
         },
         networkMode: "always",
-        onSuccess: (response) => {
-            queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), (currentData) => ({
-                ...currentData,
-                inntekter: {
-                    ...currentData.inntekter,
-                    beregnetInntekter: response.beregnetInntekter,
-                    valideringsfeil: response.valideringsfeil,
-                },
-            }));
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av inntekter", error);
         },
+    });
+};
+
+export const useUpdateBoforhold = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: OppdatereBoforholdRequestV2): Promise<OppdatereBoforholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBoforhold(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av inntekter", error);

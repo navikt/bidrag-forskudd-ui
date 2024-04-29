@@ -1,9 +1,15 @@
-import { createPayload } from "../components/forms/helpers/boforholdFormHelpers";
-import { BoforholdFormValues } from "../types/boforholdFormValues";
-import { useOppdaterBehandlingV2 } from "./useApiData";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { BehandlingDtoV2 } from "../api/BidragBehandlingApiV1";
+import { useForskudd } from "../context/ForskuddContext";
+import { QueryKeys, useUpdateBoforhold } from "./useApiData";
 
 export const useOnSaveBoforhold = () => {
-    const updateBoforhold = useOppdaterBehandlingV2();
+    const queryClient = useQueryClient();
+    const { behandlingId } = useForskudd();
+    const mutation = useUpdateBoforhold();
+    const queryClientUpdater = (updateFn: (currentData: BehandlingDtoV2) => BehandlingDtoV2) =>
+        queryClient.setQueryData<BehandlingDtoV2>(QueryKeys.behandlingV2(behandlingId), updateFn);
 
-    return (values: BoforholdFormValues) => updateBoforhold.mutation.mutate(createPayload(values));
+    return { mutation, queryClientUpdater };
 };

@@ -1,5 +1,7 @@
-import { Alert, AlertProps } from "@navikt/ds-react";
+import { AlertProps } from "@navikt/ds-react";
 import React from "react";
+
+import { ForskuddAlert } from "./ForskuddAlert";
 
 type StatefulAlertProps = {
     children?: React.ReactNode;
@@ -24,9 +26,9 @@ const AlertWithCloseButton = ({
     };
     return (
         show && (
-            <Alert {...alertProps} closeButton onClose={close}>
+            <ForskuddAlert {...alertProps} closeButton onClose={close}>
                 {children || "Content"}
-            </Alert>
+            </ForskuddAlert>
         )
     );
 };

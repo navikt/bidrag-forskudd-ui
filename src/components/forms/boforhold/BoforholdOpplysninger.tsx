@@ -11,10 +11,10 @@ import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { DateToDDMMYYYYString } from "../../../utils/date-utils";
 
 const Header = ({ nyttTag }: { nyttTag: boolean }) => (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-4 h-2">
         <BodyShort size="small">{text.title.opplysningerFraFolkeregistret}</BodyShort>
         {nyttTag && (
-            <Tag variant="success" size="small" className="w-fit h-fit p-1.5 rounded">
+            <Tag variant="success" size="xsmall" className="w-fit h-1.5 p-1 rounded">
                 Nytt
             </Tag>
         )}

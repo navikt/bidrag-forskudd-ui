@@ -1,23 +1,22 @@
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate, lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, TextField, VStack } from "@navikt/ds-react";
+import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, TextField, VStack } from "@navikt/ds-react";
 import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { Bostatuskode, HusstandsbarnDtoV2, HusstandsbarnperiodeDto, Kilde } from "../../../api/BidragBehandlingApiV1";
+import {
+    Bostatuskode,
+    HusstandsbarnDtoV2,
+    Kilde,
+    OppdatereBoforholdRequestV2,
+} from "../../../api/BidragBehandlingApiV1";
 import { Rolletype } from "../../../api/BidragDokumentProduksjonApi";
 import { PersonDto } from "../../../api/PersonApi";
 import { PERSON_API } from "../../../constants/api";
 import elementIds from "../../../constants/elementIds";
-import { boforholdPeriodiseringErros } from "../../../constants/error";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import {
-    useGetBehandlingV2,
-    useGetOpplysningerBoforhold,
-    useGrunnlag,
-    useSivilstandOpplysningerProssesert,
-} from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useGrunnlag, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -25,10 +24,8 @@ import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
     dateOrNull,
     DateToDDMMYYYYString,
-    deductMonths,
     isAfterDate,
     isAfterEqualsDate,
-    toDateString,
     toISODateString,
 } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
@@ -36,8 +33,10 @@ import { scrollToHash } from "../../../utils/window-utils";
 import { DatePickerInput } from "../../date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
+import { ManglerVirkningstidspunktAlert } from "../../ManglerVirkningstidspunktAlert";
 import { ConfirmationModal } from "../../modal/ConfirmationModal";
 import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -47,14 +46,11 @@ import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     boforholdForskuddOptions,
     boststatusOver18År,
-    checkPeriodizationErrors,
     compareHusstandsBarn,
     createInitialValues,
-    editPeriods,
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
     isOver18YearsOld,
-    removeAndEditPeriods,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
@@ -63,19 +59,11 @@ import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
 
 const Main = () => {
-    const {
-        virkningstidspunkt: { virkningstidspunkt: virkningstidspunktRes },
-    } = useGetBehandlingV2();
-    const virkningstidspunkt = dateOrNull(virkningstidspunktRes);
     useEffect(scrollToHash, []);
 
     return (
         <>
-            {!isValidDate(virkningstidspunkt) && (
-                <Alert variant="warning" size="small">
-                    {text.alert.manglerVirkningstidspunkt}
-                </Alert>
-            )}
+            <ManglerVirkningstidspunktAlert />
             <Heading level="3" size="medium">
                 {text.label.barn}
             </Heading>
@@ -204,7 +192,22 @@ const AddBarnForm = ({
         };
 
         setBoforholdFormValues(updatedValues);
-        saveBoforhold(updatedValues);
+        saveBoforhold.mutation.mutate(
+            { oppdatereHusstandsmedlem: { opprettHusstandsmedlem: addedBarn } },
+            {
+                onSuccess: (response) => {
+                    saveBoforhold.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                notat: response.oppdatertNotat,
+                            },
+                        };
+                    });
+                },
+            }
+        );
         setOpenAddBarnForm(false);
     };
 
@@ -370,6 +373,7 @@ const BarnPerioder = () => {
 
     const onRemoveBarn = (index: number) => {
         const husstandsbarn = [...boforholdFormValues.husstandsbarn].filter((b, i) => i !== index);
+        const barn = boforholdFormValues.husstandsbarn[index];
         barnFieldArray.remove(index);
         const updatedValues = {
             ...boforholdFormValues,
@@ -377,7 +381,22 @@ const BarnPerioder = () => {
         };
 
         setBoforholdFormValues(updatedValues);
-        saveBoforhold(updatedValues);
+        saveBoforhold.mutation.mutate(
+            { oppdatereHusstandsmedlem: { slettHusstandsmedlem: barn.id } },
+            {
+                onSuccess: () => {
+                    saveBoforhold.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                husstandsbarn: currentData.boforhold.husstandsbarn.filter((b) => b.id !== barn.id),
+                            },
+                        };
+                    });
+                },
+            }
+        );
     };
 
     return (
@@ -430,28 +449,22 @@ const BarnPerioder = () => {
 };
 
 const Perioder = ({ barnIndex }: { barnIndex: number }) => {
-    const { aktiveOpplysninger: opplysningerFraFolkRegistre } = useGetOpplysningerBoforhold();
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const {
+        boforhold: { valideringsfeil },
+    } = useGetBehandlingV2();
     const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState("");
     const saveBoforhold = useOnSaveBoforhold();
-    const {
-        control,
-        getValues,
-        clearErrors,
-        setError,
-        setValue,
-        getFieldState,
-        formState: { errors },
-    } = useFormContext<BoforholdFormValues>();
+    const { control, getValues, clearErrors, setError, setValue, getFieldState } =
+        useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
         name: `husstandsbarn.${barnIndex}.perioder`,
     });
-    const [lastPeriodsState, setLastPeriodsState] = useState([]);
     const watchFieldArray = useWatch({ control, name: `husstandsbarn.${barnIndex}.perioder` });
     const controlledFields = barnPerioder.fields.map((field, index) => ({
         ...field,
@@ -463,47 +476,18 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
 
-    useEffect(() => {
-        validatePeriods(barn.perioder);
-    }, [barn.perioder]);
-
-    const validatePeriods = (perioderValues: HusstandsbarnperiodeDto[]) => {
-        const errorTypes = checkPeriodizationErrors(perioderValues, datoFra);
-
-        if (errorTypes.length) {
-            setError(`root.husstandsbarn.${barnIndex}`, {
-                types: errorTypes.reduce(
-                    (acc, errorType) => ({
-                        ...acc,
-                        [errorType]:
-                            errorType === "hullIPerioder"
-                                ? removePlaceholder(
-                                      boforholdPeriodiseringErros[errorType],
-                                      toDateString(datoFra),
-                                      toDateString(new Date(perioderValues[0].datoFom))
-                                  )
-                                : boforholdPeriodiseringErros[errorType],
-                    }),
-                    {}
-                ),
-            });
-        } else {
-            clearErrors(`root.husstandsbarn.${barnIndex}`);
-        }
-    };
-
     const onSaveRow = (index: number) => {
-        const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
-        if (perioderValues[index]?.datoFom === null) {
+        const periodeValues = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
+        if (periodeValues?.datoFom === null) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
                 type: "notValid",
                 message: text.error.datoMåFyllesUt,
             });
         }
 
-        const selectedStatus = perioderValues[index].bostatus;
-        const selectedDatoFom = perioderValues[index]?.datoFom;
-        const selectedDatoTom = perioderValues[index]?.datoTom;
+        const selectedStatus = periodeValues.bostatus;
+        const selectedDatoFom = periodeValues?.datoFom;
+        const selectedDatoTom = periodeValues?.datoTom;
 
         if (barnIsOver18) {
             const selectedStatusIsOver18 = boststatusOver18År.includes(selectedStatus);
@@ -531,27 +515,59 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
 
         if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index, monthAfter18));
+            updateAndSave({
+                oppdatereHusstandsmedlem: {
+                    oppdaterPeriode: {
+                        idHusstandsbarn: barn.id,
+                        datoFom: selectedDatoFom,
+                        datoTom: selectedDatoTom,
+                        bostatus: selectedStatus,
+                    },
+                },
+            });
         }
     };
 
     const undoAction = () => {
-        updatedAndSave(lastPeriodsState);
+        updateAndSave({
+            oppdatereHusstandsmedlem: {
+                angreSisteStegForHusstandsmedlem: barn.id,
+            },
+        });
     };
 
-    const updatedAndSave = (updatedPeriods: HusstandsbarnperiodeDto[]) => {
-        setLastPeriodsState(boforholdFormValues.husstandsbarn[barnIndex].perioder);
-        const husstandsbarn = boforholdFormValues.husstandsbarn.toSpliced(barnIndex, 1, {
-            ...boforholdFormValues.husstandsbarn[barnIndex],
-            perioder: updatedPeriods,
+    const updateAndSave = (payload: OppdatereBoforholdRequestV2) => {
+        saveBoforhold.mutation.mutate(payload, {
+            onSuccess: (response) => {
+                saveBoforhold.queryClientUpdater((currentData) => {
+                    const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
+                        (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
+                    );
+
+                    const updatedHusstandsbarns =
+                        updatedHusstandsbarnIndex === -1
+                            ? currentData.boforhold.husstandsbarn.concat(response.oppdatertHusstandsbarn)
+                            : currentData.boforhold.husstandsbarn.toSpliced(
+                                  updatedHusstandsbarnIndex,
+                                  1,
+                                  response.oppdatertHusstandsbarn
+                              );
+
+                    setBoforholdFormValues({ ...boforholdFormValues, husstandsbarn: updatedHusstandsbarns });
+                    setValue(`husstandsbarn.${barnIndex}.perioder`, response.oppdatertHusstandsbarn.perioder);
+
+                    return {
+                        ...currentData,
+                        boforhold: {
+                            ...currentData.boforhold,
+                            husstandsbarn: updatedHusstandsbarns,
+                            valideringsfeil: response.valideringsfeil,
+                        },
+                    };
+                });
+            },
         });
-        const updatedValues = {
-            ...boforholdFormValues,
-            husstandsbarn,
-        };
-        setBoforholdFormValues(updatedValues);
-        setValue(`husstandsbarn.${barnIndex}.perioder`, updatedPeriods);
-        saveBoforhold(updatedValues);
+
         setShowUndoButton(true);
         setShowResetButton(true);
         setEditableRow("");
@@ -561,8 +577,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
 
         const fomOgTomInvalid =
-            perioderValues[index].datoTom !== null &&
-            isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
+            perioderValues[index].datoTom && isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
 
         if (fomOgTomInvalid) {
             setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
@@ -595,17 +610,15 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
-            const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`) as HusstandsbarnperiodeDto[];
-            const updatedPeriods = removeAndEditPeriods(perioderValues, index, monthAfter18);
+            const periode = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
             clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
-            updatedAndSave(updatedPeriods);
+            updateAndSave({ oppdatereHusstandsmedlem: { slettPeriode: periode.id } });
         }
     };
 
     const resetTilDataFraFreg = () => {
         const barn = getValues(`husstandsbarn.${barnIndex}`);
-        const opplysningFraFreg = opplysningerFraFolkRegistre.find((opplysning) => opplysning.ident === barn.ident);
-        updatedAndSave(opplysningFraFreg.perioder.map((periode) => ({ ...periode, kilde: Kilde.OFFENTLIG })));
+        updateAndSave({ oppdatereHusstandsmedlem: { tilbakestillPerioderForHusstandsmedlem: barn.id } });
         setShowResetButton(false);
     };
 
@@ -689,6 +702,8 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         ];
     };
 
+    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
+
     return (
         <>
             <BoforholdOpplysninger
@@ -712,16 +727,17 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </StatefulAlert>
                 </div>
             )}
-            {errors?.root?.husstandsbarn?.[barnIndex]?.types && (
+            {valideringsfeilForBarn && (
                 <div className="mb-4">
-                    <Alert variant="warning" size="small">
+                    <ForskuddAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}
                         </Heading>
-                        {Object.values(errors.root.husstandsbarn[barnIndex].types).map((type: string) => (
-                            <p key={type}>{type}</p>
-                        ))}
-                    </Alert>
+                        {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
+                        {valideringsfeilForBarn.hullIPerioder && <p>{text.error.hullIPerioder}</p>}
+                        {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
+                        {valideringsfeilForBarn.manglerPerioder && <p>{text.error.manglerPerioder}</p>}
+                    </ForskuddAlert>
                 </div>
             )}
 
@@ -766,7 +782,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                         defaultValue={item.datoTom}
                                         customValidation={() => validateFomOgTom(index)}
                                         fromDate={fom}
-                                        toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                        toDate={tom}
                                         lastDayOfMonthPicker
                                         hideLabel
                                     />

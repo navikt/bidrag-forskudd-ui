@@ -1,8 +1,8 @@
 import "./Opplysninger.css";
 
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
+import { capitalize } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -24,10 +24,11 @@ import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { dateOrNull, DateToDDMMYYYYString, deductMonths, isAfterDate, toDateString } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     calculateFraDato,
@@ -146,7 +147,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const validateFomOgTom = (index) => {
         const sivilstandPerioder = getValues("sivilstand");
         const fomOgTomInvalid =
-            sivilstandPerioder[index].datoTom !== null &&
+            sivilstandPerioder[index].datoTom &&
             isAfterDate(sivilstandPerioder[index].datoFom, sivilstandPerioder[index].datoTom);
 
         if (fomOgTomInvalid) {
@@ -250,7 +251,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
                 {(errors?.root?.sivilstand as { types: string[] })?.types && (
                     <div className="mb-4">
-                        <Alert variant="warning" size="small">
+                        <ForskuddAlert variant="warning">
                             <Heading spacing size="xsmall" level="3">
                                 {text.alert.feilIPeriodisering}
                             </Heading>
@@ -259,7 +260,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                     <p key={type}>{type}</p>
                                 )
                             )}
-                        </Alert>
+                        </ForskuddAlert>
                     </div>
                 )}
                 <div className="grid grid-cols-2 gap-4">
@@ -319,7 +320,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                             defaultValue={item.datoTom}
                                             customValidation={() => validateFomOgTom(index)}
                                             fromDate={fom}
-                                            toDate={lastDayOfMonth(deductMonths(new Date(), 1))}
+                                            toDate={tom}
                                             lastDayOfMonthPicker
                                             hideLabel
                                         />
