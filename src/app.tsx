@@ -106,7 +106,7 @@ function ForskudWrapper() {
 }
 
 const NotatPageWrapper = () => {
-    const { behandlingId } = useParams<{ behandlingId?: string }>();
+    const { behandlingId, vedtakId } = useParams<{ behandlingId?: string; vedtakId?: string }>();
     return (
         <Suspense
             fallback={
@@ -115,7 +115,7 @@ const NotatPageWrapper = () => {
                 </div>
             }
         >
-            <NotatPage behandlingId={Number(behandlingId)} />
+            <NotatPage behandlingId={Number(behandlingId)} vedtakId={Number(vedtakId)} />
         </Suspense>
     );
 };

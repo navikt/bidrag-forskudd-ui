@@ -270,10 +270,15 @@ export const useGrunnlag = (): HentGrunnlagDto | null => {
     return grunnlagspakke;
 };
 
-export const useNotatPdf = (behandlingId: number) => {
+export const useNotatPdf = (behandlingId?: number, vedtakId?: number) => {
     const resultPayload = useQuery({
-        queryKey: QueryKeys.notatPdf(behandlingId),
-        queryFn: async () => (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data,
+        queryKey: QueryKeys.notatPdf(behandlingId ?? vedtakId),
+        queryFn: async () => {
+            if (vedtakId) {
+                return (await BEHANDLING_API_V1.api.hentNotatOpplysningerForVedtak(vedtakId)).data;
+            }
+            return (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data;
+        },
         refetchOnWindowFocus: false,
         refetchInterval: 0,
     });
@@ -300,10 +305,15 @@ export const useNotatPdf = (behandlingId: number) => {
     return resultPayload.isError || resultPayload.isLoading ? resultPayload : resultNotatPdf;
 };
 
-export const useNotat = (behandlingId: number) => {
+export const useNotat = (behandlingId?: number, vedtakId?: number) => {
     const resultPayload = useQuery({
-        queryKey: QueryKeys.notat(behandlingId),
-        queryFn: async () => (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data,
+        queryKey: QueryKeys.notat(behandlingId ?? vedtakId),
+        queryFn: async () => {
+            if (vedtakId) {
+                return (await BEHANDLING_API_V1.api.hentNotatOpplysningerForVedtak(vedtakId)).data;
+            }
+            return (await BEHANDLING_API_V1.api.hentNotatOpplysninger(behandlingId)).data;
+        },
         refetchOnWindowFocus: false,
         refetchInterval: 0,
     });

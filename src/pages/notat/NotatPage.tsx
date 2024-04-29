@@ -10,7 +10,9 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import text from "../../constants/texts";
 import { QueryKeys, useNotat, useNotatPdf } from "../../hooks/useApiData";
 import { notatBroadcastName } from "../../types/notat";
-export default ({ behandlingId }: { behandlingId: number }) => {
+
+type NotatProps = { behandlingId?: number; vedtakId?: number };
+export default (props: NotatProps) => {
     const [showTab, setShowTab] = React.useState<string>("html");
     return (
         <div className="max-w-[1092px] px-6 py-6">
@@ -28,13 +30,13 @@ export default ({ behandlingId }: { behandlingId: number }) => {
                             <Tabs.Tab value="pdf" label="PDF" icon={<FilePdfIcon />} />
                         </Tabs.List>
                         <Tabs.Panel value="pdf" style={{ maxHeight: "calc(100% - 200px)", width: "100%" }}>
-                            <RenderNotatPdf behandlingId={behandlingId} />
+                            <RenderNotatPdf {...props} />
                         </Tabs.Panel>
                         <Tabs.Panel
                             value="html"
                             style={{ height: "calc(100% - 200px)", width: "100%", overflow: "auto" }}
                         >
-                            <RenderNotatHtml behandlingId={behandlingId} />
+                            <RenderNotatHtml {...props} />
                         </Tabs.Panel>
                     </Tabs>
                 </div>
@@ -43,8 +45,8 @@ export default ({ behandlingId }: { behandlingId: number }) => {
     );
 };
 
-const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
-    const { data: notatPdf, isLoading, isError } = useNotatPdf(behandlingId);
+const RenderNotatPdf = ({ behandlingId, vedtakId }: NotatProps) => {
+    const { data: notatPdf, isLoading, isError } = useNotatPdf(behandlingId, vedtakId);
     const queryClient = useQueryClient();
     const hasSubscribed = useRef<boolean>(false);
     async function subscribeToChanges() {
@@ -79,8 +81,8 @@ const RenderNotatPdf = ({ behandlingId }: { behandlingId: number }) => {
     }
     return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="85%" />;
 };
-const RenderNotatHtml = ({ behandlingId }: { behandlingId: number }) => {
-    const { data: notatHtml, isLoading, isError } = useNotat(behandlingId);
+const RenderNotatHtml = ({ behandlingId, vedtakId }: NotatProps) => {
+    const { data: notatHtml, isLoading, isError } = useNotat(behandlingId, vedtakId);
     const queryClient = useQueryClient();
 
     async function subscribeToChanges() {
