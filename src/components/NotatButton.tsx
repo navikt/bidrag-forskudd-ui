@@ -6,7 +6,6 @@ import { useForskudd } from "../context/ForskuddContext";
 
 export default function NotatButton({ label = text.label.notatButton }: { label?: string }) {
     const { behandlingId, vedtakId, saksnummer } = useForskudd();
-    console.log(behandlingId, vedtakId);
     const notatUrl = behandlingId ? `/behandling/${behandlingId}/notat` : vedtakId ? `/vedtak/${vedtakId}/notat` : "";
     return (
         <Link href={saksnummer ? `/sak/${saksnummer}${notatUrl}` : notatUrl} target="_blank" className="font-bold">
