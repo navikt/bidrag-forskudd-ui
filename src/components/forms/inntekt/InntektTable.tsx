@@ -184,6 +184,8 @@ export const InntektTabel = ({
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const {
         inntekter: { valideringsfeil },
+        søktFomDato,
+        virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
@@ -275,7 +277,7 @@ export const InntektTabel = ({
             showErrorModal();
         } else {
             const perioder = getValues(fieldName);
-            fieldArray.append(periode);
+            fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato });
             setEditableRow(perioder.length);
         }
     };
