@@ -7,8 +7,12 @@ import text from "../../../constants/texts";
 import { FlexRow } from "../../layout/grid/FlexRow";
 
 export const ActionButtons = ({ onNext }) => {
-    const { behandlingId, saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
-    const notatUrl = `/behandling/${behandlingId}/notat`;
+    const { behandlingId, vedtakId, saksnummer } = useParams<{
+        behandlingId?: string;
+        vedtakId?: string;
+        saksnummer?: string;
+    }>();
+    const notatUrl = behandlingId ? `/behandling/${behandlingId}/notat` : vedtakId ? `/vedtak/${vedtakId}/notat` : "";
     return (
         <FlexRow className="items-center">
             <Button

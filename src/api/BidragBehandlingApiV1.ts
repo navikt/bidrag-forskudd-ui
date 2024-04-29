@@ -1709,10 +1709,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1801,7 +1798,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2245,6 +2242,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         hentVisningsnavn: (params: RequestParams = {}) =>
             this.request<Record<string, string>, any>({
                 path: `/api/v1/visningsnavn`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * No description
+         *
+         * @tags notat-opplysninger-controller
+         * @name HentNotatOpplysningerForVedtak
+         * @request GET:/api/v1/notat/vedtak/{vedtaksid}
+         * @secure
+         */
+        hentNotatOpplysningerForVedtak: (vedtaksid: number, params: RequestParams = {}) =>
+            this.request<NotatDto, any>({
+                path: `/api/v1/notat/vedtak/${vedtaksid}`,
                 method: "GET",
                 secure: true,
                 format: "json",
