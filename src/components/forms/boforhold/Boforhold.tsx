@@ -201,7 +201,9 @@ const AddBarnForm = ({
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
-                                notat: response.oppdatertNotat,
+                                husstandsbarn: currentData.boforhold.husstandsbarn.concat(
+                                    response.oppdatertHusstandsbarn
+                                ),
                             },
                         };
                     });
