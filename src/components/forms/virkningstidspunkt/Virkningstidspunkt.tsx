@@ -106,6 +106,7 @@ const Main = ({ initialValues, error }) => {
         setValue("virkningstidspunkt", date ? toISODateString(date) : null);
         clearErrors("virkningstidspunkt");
     };
+    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") == "";
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
@@ -169,6 +170,7 @@ const Main = ({ initialValues, error }) => {
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
+                    {erÅrsakAvslagIkkeValgt && <option value="">{text.select.årsakAvslagPlaceholder}</option>}
                     {skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
                             {årsakListe
