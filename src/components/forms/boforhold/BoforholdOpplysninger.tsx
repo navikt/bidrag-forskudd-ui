@@ -11,7 +11,7 @@ import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { DateToDDMMYYYYString } from "../../../utils/date-utils";
+import { DateToDDMMYYYYString, isBeforeDate } from "../../../utils/date-utils";
 
 const Header = ({ nyttTag }: { nyttTag: boolean }) => (
     <div className="grid grid-cols-2 gap-4 h-2">
@@ -93,24 +93,17 @@ export const BoforholdOpplysninger = ({
                         const oppdatertHusstandsbarn = response.boforhold.husstandsbarn.find(
                             (barn) => barn.ident === ident
                         );
-                        const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
-                            (barn) => barn.id === oppdatertHusstandsbarn.id
-                        );
-
-                        const updatedHusstandsbarns = currentData.boforhold.husstandsbarn.toSpliced(
-                            updatedHusstandsbarnIndex,
-                            1,
-                            oppdatertHusstandsbarn
-                        );
-
-                        setBoforholdFormValues({ ...boforholdFormValues, husstandsbarn: updatedHusstandsbarns });
+                        setBoforholdFormValues({
+                            ...boforholdFormValues,
+                            husstandsbarn: response.boforhold.husstandsbarn,
+                        });
                         setValue(fieldName, oppdatertHusstandsbarn.perioder);
 
                         return {
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
-                                husstandsbarn: updatedHusstandsbarns,
+                                husstandsbarn: response.boforhold.husstandsbarn,
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
                                     husstandsbarn: currentData.boforhold.valideringsfeil.husstandsbarn.filter(
@@ -168,8 +161,7 @@ export const BoforholdOpplysninger = ({
                             {ikkeAktivertePerioder?.map((periode, index) => (
                                 <Table.Row key={`${periode.bostatus}-${index}`}>
                                     <Table.DataCell>
-                                        {virkningsOrSoktFraDato &&
-                                        new Date(periode.datoFom) < new Date(virkningsOrSoktFraDato)
+                                        {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
                                             ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
                                             : DateToDDMMYYYYString(new Date(periode.datoFom))}
                                     </Table.DataCell>
