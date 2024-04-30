@@ -198,7 +198,7 @@ const Periode = ({
             name={`${fieldName}.${field}`}
             label={label}
             placeholder="DD.MM.ÅÅÅÅ"
-            defaultValue={item.datoFom}
+            defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
             toDate={tom}
@@ -206,7 +206,7 @@ const Periode = ({
             required
         />
     ) : (
-        <BodyShort>{item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}</BodyShort>
+        <BodyShort>{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
     );
 };
 
