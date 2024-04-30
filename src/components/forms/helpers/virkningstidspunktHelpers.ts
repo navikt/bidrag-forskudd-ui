@@ -47,7 +47,7 @@ export const mapÅrsakTilVirkningstidspunkt = (
         case TypeArsakstype.FRASOKNADSTIDSPUNKT:
             return firstDayOfMonth(soktFraDato);
         default:
-            return null;
+            return soktFraDato;
     }
 };
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
