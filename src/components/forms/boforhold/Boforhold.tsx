@@ -1,12 +1,13 @@
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, TextField, VStack } from "@navikt/ds-react";
+import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
 import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import {
     Bostatuskode,
     HusstandsbarnDtoV2,
+    HusstandsbarnperiodeDto,
     Kilde,
     OppdatereBoforholdRequestV2,
 } from "../../../api/BidragBehandlingApiV1";
@@ -42,7 +43,6 @@ import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
 import StatefulAlert from "../../StatefulAlert";
-import { TableRowWrapper, TableWrapper } from "../../table/TableWrapper";
 import {
     boforholdForskuddOptions,
     boststatusOver18År,
@@ -57,6 +57,159 @@ import { KildeIcon } from "../inntekt/InntektTable";
 import { BoforholdOpplysninger } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
+
+const DeleteButton = ({
+    onRemovePeriode,
+    barn,
+    index,
+}: {
+    onRemovePeriode: (index) => void;
+    barn: HusstandsbarnDtoV2;
+    index: number;
+}) => {
+    const { lesemodus } = useForskudd();
+    const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
+    const firstOver18PeriodIndex = barn.perioder.findIndex((period) => boststatusOver18År.includes(period.bostatus));
+    const showDeleteButton = barnIsOver18 && index === firstOver18PeriodIndex ? false : !!index;
+
+    return showDeleteButton && !lesemodus ? (
+        <Button
+            type="button"
+            onClick={() => onRemovePeriode(index)}
+            icon={<TrashIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    ) : (
+        <div className="min-w-[40px]"></div>
+    );
+};
+
+const EditOrSaveButton = ({
+    index,
+    editableRow,
+    onSaveRow,
+    onEditRow,
+}: {
+    index: number;
+    editableRow: boolean;
+    onSaveRow: (index: number) => void;
+    onEditRow: (index: number) => void;
+}) => {
+    const { lesemodus } = useForskudd();
+
+    if (lesemodus) return null;
+
+    return editableRow ? (
+        <Button
+            type="button"
+            onClick={() => onSaveRow(index)}
+            icon={<FloppydiskIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    ) : (
+        <Button
+            type="button"
+            onClick={() => onEditRow(index)}
+            icon={<PencilIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    );
+};
+
+const Status = ({
+    editableRow,
+    fieldName,
+    barn,
+    item,
+}: {
+    editableRow: boolean;
+    fieldName: `husstandsbarn.${number}.perioder.${number}`;
+    barn: HusstandsbarnDtoV2;
+    item: HusstandsbarnperiodeDto;
+}) => {
+    const { clearErrors } = useFormContext<BoforholdFormValues>();
+    const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
+        const visningsnavn = hentVisningsnavn(bostsatus);
+        if (boststatusOver18År.includes(bostsatus)) {
+            return `18 ${text.år}: ${visningsnavn}`;
+        }
+        return visningsnavn;
+    };
+
+    const boforholdOptions = isOver18YearsOld(barn.fødselsdato)
+        ? boforholdForskuddOptions.likEllerOver18År
+        : boforholdForskuddOptions.under18År;
+
+    return editableRow ? (
+        <FormControlledSelectField
+            name={`${fieldName}.bostatus`}
+            className="w-fit"
+            label={text.label.status}
+            options={boforholdOptions.map((value) => ({
+                value,
+                text: bosstatusToVisningsnavn(value),
+            }))}
+            hideLabel
+            onSelect={() => clearErrors(`${fieldName}.bostatus`)}
+        />
+    ) : (
+        <BodyShort>{bosstatusToVisningsnavn(item.bostatus)}</BodyShort>
+    );
+};
+
+const Periode = ({
+    editableRow,
+    item,
+    field,
+    fieldName,
+    barn,
+    label,
+}: {
+    editableRow: boolean;
+    item: HusstandsbarnperiodeDto;
+    fieldName: `husstandsbarn.${number}.perioder.${number}`;
+    field: "datoFom" | "datoTom";
+    barn: HusstandsbarnDtoV2;
+    label: string;
+}) => {
+    const virkningsOrSoktFraDato = useVirkningsdato();
+    const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
+
+    const validateFomOgTom = () => {
+        const periode = getValues(fieldName);
+        const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
+
+        if (fomOgTomInvalid) {
+            setError(`${fieldName}.datoFom`, {
+                type: "notValid",
+                message: text.error.tomDatoKanIkkeVæreFørFomDato,
+            });
+        } else {
+            clearErrors(`${fieldName}.datoFom`);
+        }
+    };
+
+    return editableRow ? (
+        <FormControlledMonthPicker
+            name={`${fieldName}.${field}`}
+            label={label}
+            placeholder="DD.MM.ÅÅÅÅ"
+            defaultValue={item.datoFom}
+            customValidation={validateFomOgTom}
+            fromDate={fom}
+            toDate={tom}
+            hideLabel
+            required
+        />
+    ) : (
+        <BodyShort>{item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}</BodyShort>
+    );
+};
 
 const Main = () => {
     useEffect(scrollToHash, []);
@@ -451,7 +604,6 @@ const BarnPerioder = () => {
 };
 
 const Perioder = ({ barnIndex }: { barnIndex: number }) => {
-    const virkningsOrSoktFraDato = useVirkningsdato();
     const {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
@@ -459,7 +611,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
-    const [editableRow, setEditableRow] = useState("");
+    const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
     const { control, getValues, clearErrors, setError, setValue, getFieldState } =
         useFormContext<BoforholdFormValues>();
@@ -475,8 +627,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
-    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
 
     const onSaveRow = (index: number) => {
         const periodeValues = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
@@ -572,23 +722,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         setShowUndoButton(true);
         setShowResetButton(true);
-        setEditableRow("");
-    };
-
-    const validateFomOgTom = (index: number) => {
-        const perioderValues = getValues(`husstandsbarn.${barnIndex}.perioder`);
-
-        const fomOgTomInvalid =
-            perioderValues[index].datoTom && isAfterDate(perioderValues[index]?.datoFom, perioderValues[index].datoTom);
-
-        if (fomOgTomInvalid) {
-            setError(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`, {
-                type: "notValid",
-                message: text.error.tomDatoKanIkkeVæreFørFomDato,
-            });
-        } else {
-            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`);
-        }
+        setEditableRow(undefined);
     };
 
     const addPeriode = () => {
@@ -614,7 +748,12 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         } else {
             const periode = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
             clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
-            updateAndSave({ oppdatereHusstandsmedlem: { slettPeriode: periode.id } });
+            barnPerioder.remove(index);
+            setEditableRow(undefined);
+
+            if (periode.id) {
+                updateAndSave({ oppdatereHusstandsmedlem: { slettPeriode: periode.id } });
+            }
         }
     };
 
@@ -625,7 +764,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     };
 
     const checkIfAnotherRowIsEdited = (index?: number) => {
-        const editableRowIndex = editableRow.split(".")[1];
+        const editableRowIndex = editableRow?.split(".")[1];
         return editableRowIndex && Number(editableRowIndex) !== index;
     };
 
@@ -643,65 +782,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         } else {
             setEditableRow(`${barnIndex}.${index}`);
         }
-    };
-
-    function bosstatusToVisningsnavn(bostsatus: Bostatuskode): string {
-        const visningsnavn = hentVisningsnavn(bostsatus);
-        if (boststatusOver18År.includes(bostsatus)) {
-            return `18 ${text.år}: ${visningsnavn}`;
-        }
-        return visningsnavn;
-    }
-
-    const boforholdOptions = isOver18YearsOld(barn.fødselsdato)
-        ? boforholdForskuddOptions.likEllerOver18År
-        : boforholdForskuddOptions.under18År;
-
-    const showDeleteButton = (index: number) => {
-        const firstOver18PeriodIndex = boforholdFormValues?.husstandsbarn[barnIndex].perioder.findIndex((period) =>
-            boststatusOver18År.includes(period.bostatus)
-        );
-        if (barnIsOver18 && index === firstOver18PeriodIndex) {
-            return false;
-        }
-        return !!index;
-    };
-
-    const editButtons = (index: number) => {
-        if (lesemodus) return [];
-        return [
-            editableRow === `${barnIndex}.${index}` ? (
-                <Button
-                    key={`save-button-${barnIndex}-${index}`}
-                    type="button"
-                    onClick={() => onSaveRow(index)}
-                    icon={<FloppydiskIcon aria-hidden />}
-                    variant="tertiary"
-                    size="small"
-                />
-            ) : (
-                <Button
-                    key={`edit-button-${barnIndex}-${index}`}
-                    type="button"
-                    onClick={() => onEditRow(index)}
-                    icon={<PencilIcon aria-hidden />}
-                    variant="tertiary"
-                    size="small"
-                />
-            ),
-            showDeleteButton(index) && !lesemodus ? (
-                <Button
-                    key={`delete-button-${barnIndex}-${index}`}
-                    type="button"
-                    onClick={() => onRemovePeriode(index)}
-                    icon={<TrashIcon aria-hidden />}
-                    variant="tertiary"
-                    size="small"
-                />
-            ) : (
-                <div key={`delete-button-${barnIndex}-${index}.placeholder`} className="min-w-[40px]"></div>
-            ),
-        ];
     };
 
     const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
@@ -745,86 +825,76 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             )}
 
             {controlledFields.length > 0 && (
-                <TableWrapper
-                    heading={[
-                        text.label.fraOgMed,
-                        text.label.tilOgMed,
-                        text.label.status,
-                        text.label.kilde,
-                        ...(lesemodus ? [] : ["", ""]),
-                    ]}
-                >
-                    {controlledFields.map((item, index) => (
-                        <TableRowWrapper
-                            key={item.id}
-                            cells={[
-                                editableRow === `${barnIndex}.${index}` ? (
-                                    <FormControlledMonthPicker
-                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
-                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom`}
-                                        label={text.label.fraOgMed}
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoFom}
-                                        customValidation={() => validateFomOgTom(index)}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        hideLabel
-                                        required
-                                    />
-                                ) : (
-                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoFom.placeholder`}>
-                                        {item.datoFom && DateToDDMMYYYYString(dateOrNull(item.datoFom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === `${barnIndex}.${index}` ? (
-                                    <FormControlledMonthPicker
-                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
-                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom`}
-                                        label={text.label.tilOgMed}
-                                        placeholder="DD.MM.ÅÅÅÅ"
-                                        defaultValue={item.datoTom}
-                                        customValidation={() => validateFomOgTom(index)}
-                                        fromDate={fom}
-                                        toDate={tom}
-                                        lastDayOfMonthPicker
-                                        hideLabel
-                                    />
-                                ) : (
-                                    <BodyShort key={`husstandsbarn.${barnIndex}.perioder.${index}.datoTom.placeholder`}>
-                                        {item.datoTom && DateToDDMMYYYYString(dateOrNull(item.datoTom))}
-                                    </BodyShort>
-                                ),
-                                editableRow === `${barnIndex}.${index}` ? (
-                                    <FormControlledSelectField
-                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
-                                        name={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`}
-                                        className="w-fit"
-                                        label={text.label.status}
-                                        options={boforholdOptions.map((value) => ({
-                                            value,
-                                            text: bosstatusToVisningsnavn(value),
-                                        }))}
-                                        hideLabel
-                                        onSelect={() =>
-                                            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}.bostatus`)
-                                        }
-                                    />
-                                ) : (
-                                    <BodyShort
-                                        key={`husstandsbarn.${barnIndex}.perioder.${index}.bostatus.placeholder`}
-                                    >
-                                        {bosstatusToVisningsnavn(item.bostatus)}
-                                    </BodyShort>
-                                ),
-                                <KildeIcon
-                                    key={`husstandsbarn.${barnIndex}.perioder.${index}.kilde.placeholder`}
-                                    kilde={item.kilde}
-                                />,
-                                ...editButtons(index),
-                            ]}
-                        />
-                    ))}
-                </TableWrapper>
+                <div className="overflow-x-auto whitespace-nowrap">
+                    <Table size="small" className="table-fixed bg-white">
+                        <Table.Header>
+                            <Table.Row className="align-baseline">
+                                <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                    {text.label.fraOgMed}
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                    {text.label.tilOgMed}
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" align="left" className="w-[290px]">
+                                    {text.label.status}
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" align="left" className="w-[54px]">
+                                    {text.label.kilde}
+                                </Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[50px]"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[50px]"></Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {controlledFields.map((item, index) => (
+                                <Table.Row key={item?.id} className="align-top">
+                                    <Table.DataCell>
+                                        <Periode
+                                            editableRow={editableRow === `${barnIndex}.${index}`}
+                                            label={text.label.fraOgMed}
+                                            fieldName={`husstandsbarn.${barnIndex}.perioder.${index}`}
+                                            field="datoFom"
+                                            item={item}
+                                            barn={barn}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Periode
+                                            editableRow={editableRow === `${barnIndex}.${index}`}
+                                            label={text.label.tilOgMed}
+                                            fieldName={`husstandsbarn.${barnIndex}.perioder.${index}`}
+                                            field="datoTom"
+                                            item={item}
+                                            barn={barn}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <Status
+                                            item={item}
+                                            editableRow={editableRow === `${barnIndex}.${index}`}
+                                            fieldName={`husstandsbarn.${barnIndex}.perioder.${index}`}
+                                            barn={barn}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <KildeIcon kilde={item.kilde} />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <EditOrSaveButton
+                                            index={index}
+                                            editableRow={editableRow === `${barnIndex}.${index}`}
+                                            onEditRow={onEditRow}
+                                            onSaveRow={onSaveRow}
+                                        />
+                                    </Table.DataCell>
+                                    <Table.DataCell>
+                                        <DeleteButton index={index} onRemovePeriode={onRemovePeriode} barn={barn} />
+                                    </Table.DataCell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                    </Table>
+                </div>
             )}
             <div className="mt-4 grid gap-4">
                 {showUndoButton && (
