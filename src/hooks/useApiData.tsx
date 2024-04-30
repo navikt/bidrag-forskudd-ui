@@ -4,6 +4,8 @@ import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 
 import {
+    AktivereGrunnlagRequestV2,
+    AktivereGrunnlagResponseV2,
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
@@ -30,7 +32,6 @@ import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
-    oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
     updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
@@ -78,11 +79,6 @@ export const useGetOpplysningerBoforhold = (): {
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.sivilstand;
-};
-
-export const useGetOpplysningerHentetdato = (): string | undefined => {
-    const { aktiveOpplysninger } = useGetOpplysningerBoforhold();
-    return aktiveOpplysninger.length == 0 ? new Date().toISOString() : aktiveOpplysninger[0].innhentetTidspunkt;
 };
 
 export const useOppdaterBehandlingV2 = () => {
@@ -435,6 +431,23 @@ export const useGetBeregningForskudd = () => {
                     };
                 }
             }
+        },
+    });
+};
+
+export const useAktiverGrunnlagsdata = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: AktivereGrunnlagRequestV2): Promise<AktivereGrunnlagResponseV2> => {
+            const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av grunnlag", error);
         },
     });
 };

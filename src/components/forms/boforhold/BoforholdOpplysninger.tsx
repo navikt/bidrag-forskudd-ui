@@ -1,13 +1,16 @@
 import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table, Tag } from "@navikt/ds-react";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
-import { HusstandsbarnGrunnlagPeriodeDto } from "../../../api/BidragBehandlingApiV1";
+import { HusstandsbarnGrunnlagPeriodeDto, OpplysningerType } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
+import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
+import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { DateToDDMMYYYYString } from "../../../utils/date-utils";
 
 const Header = ({ nyttTag }: { nyttTag: boolean }) => (
@@ -60,18 +63,69 @@ export const BoforholdOpplysninger = ({
     ident,
     showResetButton,
     resetTilDataFraFreg,
+    fieldName,
 }: {
     ident: string;
     showResetButton: boolean;
     resetTilDataFraFreg: () => void;
+    fieldName: `husstandsbarn.${number}.perioder`;
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
-    const { lesemodus } = useForskudd();
+    const activateGrunnlag = useOnActivateGrunnlag();
+    const { lesemodus, boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
     const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
+
+    const onActivate = (overskriveManuelleOpplysninger: boolean) => {
+        activateGrunnlag.mutation.mutate(
+            {
+                overskriveManuelleOpplysninger,
+                personident: ident,
+                grunnlagstype: OpplysningerType.BOFORHOLD,
+            },
+            {
+                onSuccess: (response) => {
+                    activateGrunnlag.queryClientUpdater((currentData) => {
+                        const oppdatertHusstandsbarn = response.boforhold.husstandsbarn.find(
+                            (barn) => barn.ident === ident
+                        );
+                        const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
+                            (barn) => barn.id === oppdatertHusstandsbarn.id
+                        );
+
+                        const updatedHusstandsbarns = currentData.boforhold.husstandsbarn.toSpliced(
+                            updatedHusstandsbarnIndex,
+                            1,
+                            oppdatertHusstandsbarn
+                        );
+
+                        setBoforholdFormValues({ ...boforholdFormValues, husstandsbarn: updatedHusstandsbarns });
+                        setValue(fieldName, oppdatertHusstandsbarn.perioder);
+
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                husstandsbarn: updatedHusstandsbarns,
+                                valideringsfeil: {
+                                    ...currentData.boforhold.valideringsfeil,
+                                    husstandsbarn: currentData.boforhold.valideringsfeil.husstandsbarn.filter(
+                                        (husstandsbarn) => husstandsbarn.barn.tekniskId !== oppdatertHusstandsbarn.id
+                                    ),
+                                },
+                            },
+                            aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                            ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                        };
+                    });
+                },
+            }
+        );
+    };
 
     if (lesemodus) return null;
 
@@ -129,10 +183,10 @@ export const BoforholdOpplysninger = ({
                         </Table.Body>
                     </Table>
                     <HStack gap="2" className="mt-4">
-                        <Button variant="secondary" size="small">
+                        <Button variant="secondary" size="small" onClick={() => onActivate(true)}>
                             Ja
                         </Button>
-                        <Button variant="secondary" size="small">
+                        <Button variant="secondary" size="small" onClick={() => onActivate(false)}>
                             Nei
                         </Button>
                     </HStack>

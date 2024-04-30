@@ -41,7 +41,7 @@ export const Notat = () => {
 
     useEffect(() => {
         const subscription = watch(({ notat }, { name }) => {
-            if (["notat.medIVedtaket", "notat.kunINotat"].includes(name)) {
+            if (["notat.kunINotat"].includes(name)) {
                 setBoforholdFormValues((prev) => ({
                     ...prev,
                     notat,
@@ -57,8 +57,7 @@ export const Notat = () => {
             <Heading level="3" size="medium">
                 {text.title.begrunnelse}
             </Heading>
-            <FormControlledTextarea name="notat.medIVedtaket" label={text.label.begrunnelseMedIVedtaket} />
-            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
+            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} hideLabel />
             <ActionButtons onNext={onNext} />
         </>
     );

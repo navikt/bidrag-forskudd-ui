@@ -712,6 +712,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 ident={barn.ident}
                 showResetButton={showResetButton}
                 resetTilDataFraFreg={resetTilDataFraFreg}
+                fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />
 
             {barnIsOver18 && !lesemodus && (
