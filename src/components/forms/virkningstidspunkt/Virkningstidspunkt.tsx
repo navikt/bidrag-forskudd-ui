@@ -169,7 +169,6 @@ const Main = ({ initialValues, error }) => {
                     onSelect={onAarsakSelect}
                     className="w-max"
                 >
-                    <option value="">{text.select.årsakAvslagPlaceholder}</option>
                     {skalViseÅrsakstyper && (
                         <optgroup label={text.label.årsak}>
                             {årsakListe
