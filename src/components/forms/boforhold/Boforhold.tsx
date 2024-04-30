@@ -46,7 +46,6 @@ import StatefulAlert from "../../StatefulAlert";
 import {
     boforholdForskuddOptions,
     boststatusOver18År,
-    compareHusstandsBarn,
     createInitialValues,
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFirstDayOfMonthAfterEighteenYears,
@@ -229,7 +228,6 @@ const Main = () => {
 const BoforholdsForm = () => {
     // Behold dette for debugging i prod
     useGrunnlag();
-    const { setBoforholdFormValues } = useForskudd();
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
@@ -243,10 +241,6 @@ const BoforholdsForm = () => {
         defaultValues: initialValues,
         criteriaMode: "all",
     });
-
-    useEffect(() => {
-        setBoforholdFormValues(initialValues);
-    }, []);
 
     return (
         <>
@@ -268,7 +262,6 @@ const AddBarnForm = ({
     setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
-    const { boforholdFormValues, setBoforholdFormValues } = useForskudd();
     const { getValues } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
@@ -332,19 +325,13 @@ const AddBarnForm = ({
                 },
             ],
         };
-        const husstandsbarn = boforholdFormValues.husstandsbarn.concat(addedBarn).sort(compareHusstandsBarn);
         const indexOfFirstOlderChild = getValues("husstandsbarn").findIndex(
             (barn) =>
                 !barn.medIBehandling && new Date(barn.fødselsdato).getTime() < new Date(addedBarn.fødselsdato).getTime()
         );
         const insertIndex = indexOfFirstOlderChild === -1 ? getValues("husstandsbarn").length : indexOfFirstOlderChild;
         barnFieldArray.insert(insertIndex, addedBarn);
-        const updatedValues = {
-            ...boforholdFormValues,
-            husstandsbarn,
-        };
 
-        setBoforholdFormValues(updatedValues);
         saveBoforhold.mutation.mutate(
             { oppdatereHusstandsmedlem: { opprettHusstandsmedlem: addedBarn } },
             {
@@ -506,7 +493,8 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
 };
 const BarnPerioder = () => {
     const datoFom = useVirkningsdato();
-    const { boforholdFormValues, setBoforholdFormValues, lesemodus } = useForskudd();
+    const { lesemodus } = useForskudd();
+    const { getValues } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control } = useFormContext<BoforholdFormValues>();
@@ -527,19 +515,13 @@ const BarnPerioder = () => {
     };
 
     const onRemoveBarn = (index: number) => {
-        const husstandsbarn = [...boforholdFormValues.husstandsbarn].filter((b, i) => i !== index);
-        const barn = boforholdFormValues.husstandsbarn[index];
-        barnFieldArray.remove(index);
-        const updatedValues = {
-            ...boforholdFormValues,
-            husstandsbarn,
-        };
+        const barn = getValues(`husstandsbarn.${index}`);
 
-        setBoforholdFormValues(updatedValues);
         saveBoforhold.mutation.mutate(
             { oppdatereHusstandsmedlem: { slettHusstandsmedlem: barn.id } },
             {
                 onSuccess: () => {
+                    barnFieldArray.remove(index);
                     saveBoforhold.queryClientUpdater((currentData) => {
                         return {
                             ...currentData,
@@ -607,7 +589,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
-    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
@@ -705,7 +687,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                   response.oppdatertHusstandsbarn
                               );
 
-                    setBoforholdFormValues({ ...boforholdFormValues, husstandsbarn: updatedHusstandsbarns });
                     setValue(`husstandsbarn.${barnIndex}.perioder`, response.oppdatertHusstandsbarn.perioder);
 
                     return {
@@ -742,17 +723,44 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
+    const removeAndCleanUpPeriodeErrors = (index: number) => {
+        clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
+        barnPerioder.remove(index);
+        setEditableRow(undefined);
+    };
+
     const onRemovePeriode = (index: number) => {
         if (checkIfAnotherRowIsEdited(index)) {
             showErrorModal();
         } else {
             const periode = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
-            clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
-            barnPerioder.remove(index);
-            setEditableRow(undefined);
 
             if (periode.id) {
-                updateAndSave({ oppdatereHusstandsmedlem: { slettPeriode: periode.id } });
+                saveBoforhold.mutation.mutate(
+                    { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
+                    {
+                        onSuccess: (response) => {
+                            saveBoforhold.queryClientUpdater((currentData) => {
+                                const updatedHusstandsbarn = currentData.boforhold.husstandsbarn.filter(
+                                    (husstandsbarn) => husstandsbarn.id === periode.id
+                                );
+
+                                removeAndCleanUpPeriodeErrors(index);
+
+                                return {
+                                    ...currentData,
+                                    boforhold: {
+                                        ...currentData.boforhold,
+                                        husstandsbarn: updatedHusstandsbarn,
+                                        valideringsfeil: response.valideringsfeil,
+                                    },
+                                };
+                            });
+                        },
+                    }
+                );
+            } else {
+                removeAndCleanUpPeriodeErrors(index);
             }
         }
     };
