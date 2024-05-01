@@ -619,6 +619,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             });
         }
 
+        const selectedPeriodeId = periodeValues.id;
         const selectedStatus = periodeValues.bostatus;
         const selectedDatoFom = periodeValues?.datoFom;
         const selectedDatoTom = periodeValues?.datoTom;
@@ -653,6 +654,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 oppdatereHusstandsmedlem: {
                     oppdaterPeriode: {
                         idHusstandsbarn: barn.id,
+                        idPeriode: selectedPeriodeId,
                         datoFom: selectedDatoFom,
                         datoTom: selectedDatoTom,
                         bostatus: selectedStatus,
