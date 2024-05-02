@@ -38,7 +38,7 @@ export const Opplysninger = ({
     const { lesemodus } = useForskudd();
     const { resetField } = useFormContext<InntektFormValues>();
     const transformFn = transformInntekt(virkningsdato);
-    const [inntektType, ident] = fieldName.split(".");
+    const [inntektType] = fieldName.split(".");
 
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
