@@ -9,7 +9,11 @@ const inntekskodeMedÅrstall = [
     Inntektsrapportering.KAPITALINNTEKT.toString(),
     Inntektsrapportering.LIGNINGSINNTEKT.toString(),
 ];
-const inntekskodeMedPeriode = [Inntektsrapportering.OVERGANGSSTONAD.toString()];
+const inntekskodeMedPeriode = [
+    Inntektsrapportering.OVERGANGSSTONAD.toString(),
+    Inntektsrapportering.AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
+    Inntektsrapportering.AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
+];
 const allInntektskoder = Object.values(Inntektsrapportering).map((entry) => entry.toString());
 
 export function prefetchVisningsnavn() {
