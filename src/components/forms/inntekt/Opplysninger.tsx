@@ -38,7 +38,7 @@ export const Opplysninger = ({
     const { lesemodus } = useForskudd();
     const { resetField } = useFormContext<InntektFormValues>();
     const transformFn = transformInntekt(virkningsdato);
-    const [inntektType, ident] = fieldName.split(".");
+    const [inntektType] = fieldName.split(".");
 
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
@@ -71,17 +71,13 @@ export const Opplysninger = ({
             {
                 onSuccess: ({ data }, { personident }) => {
                     if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                        if (personident != ident) return;
                         const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
                         resetField(inntektType as "barnetillegg" | "kontantstøtte", {
                             defaultValue: barn.reduce(
                                 (acc, rolle) => ({
                                     ...acc,
                                     [rolle.ident]: data.inntekter[inntektType]
-                                        ?.filter(
-                                            (inntekt) =>
-                                                inntekt.gjelderBarn === rolle.ident && inntekt.ident === personident
-                                        )
+                                        ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
                                         .map(transformFn),
                                 }),
                                 {}
@@ -89,15 +85,15 @@ export const Opplysninger = ({
                         });
                     } else if (inntektType === "årsinntekter") {
                         resetField(`${inntektType}.${personident}`, {
-                            defaultValue: data.inntekter[inntektType].filter(
-                                (v: InntektDtoV2) => v.ident == personident
-                            ),
+                            defaultValue: data.inntekter[inntektType]
+                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .map(transformFn),
                         });
                     } else {
                         resetField(fieldName, {
-                            defaultValue: data.inntekter[inntektType].filter(
-                                (v: InntektDtoV2) => v.ident == personident
-                            ),
+                            defaultValue: data.inntekter[inntektType]
+                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .map(transformFn),
                         });
                     }
                 },

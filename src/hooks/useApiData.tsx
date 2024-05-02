@@ -394,6 +394,7 @@ export const useAktiveGrunnlagsdata = () => {
                         valideringsfeil: data.inntekter.valideringsfeil,
                     },
                     ikkeAktiverteEndringerIGrunnlagsdata: data.ikkeAktiverteEndringerIGrunnlagsdata,
+                    aktiveGrunnlagsdata: data.aktiveGrunnlagsdata,
                 };
                 return updatedBehandling;
             });
