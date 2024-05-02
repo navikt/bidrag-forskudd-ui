@@ -139,6 +139,7 @@ const Main = ({ initialValues, error }) => {
         }
     }, [virkningsDato]);
 
+    const erTypeOpphør = behandling.vedtakstype == Vedtakstype.OPPHOR;
     return (
         <>
             {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
@@ -185,7 +186,7 @@ const Main = ({ initialValues, error }) => {
                                 ))}
                         </optgroup>
                     )}
-                    <optgroup label={text.label.avslag}>
+                    <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
                         {avslagsListe.map((value) => (
                             <option key={value} value={value}>
                                 {hentVisningsnavn(value)}
