@@ -86,15 +86,15 @@ export const Opplysninger = ({
                     } else if (inntektType === "årsinntekter") {
                         // @ts-ignore
                         resetField(`${inntektType}.${personident}`, {
-                            defaultValue: data.inntekter[inntektType].filter(
-                                (v: InntektDtoV2) => v.ident == personident
-                            ),
+                            defaultValue: data.inntekter[inntektType]
+                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .map(transformFn),
                         });
                     } else {
                         resetField(fieldName, {
-                            defaultValue: data.inntekter[inntektType].filter(
-                                (v: InntektDtoV2) => v.ident == personident
-                            ),
+                            defaultValue: data.inntekter[inntektType]
+                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .map(transformFn),
                         });
                     }
                 },
