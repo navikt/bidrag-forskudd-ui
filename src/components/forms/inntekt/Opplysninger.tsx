@@ -78,10 +78,7 @@ export const Opplysninger = ({
                                 (acc, rolle) => ({
                                     ...acc,
                                     [rolle.ident]: data.inntekter[inntektType]
-                                        ?.filter(
-                                            (inntekt) =>
-                                                inntekt.gjelderBarn === rolle.ident && inntekt.ident === personident
-                                        )
+                                        ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
                                         .map(transformFn),
                                 }),
                                 {}
