@@ -71,7 +71,6 @@ export const Opplysninger = ({
             {
                 onSuccess: ({ data }, { personident }) => {
                     if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                        if (personident != ident) return;
                         const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
                         resetField(inntektType as "barnetillegg" | "kontantstøtte", {
                             defaultValue: barn.reduce(
