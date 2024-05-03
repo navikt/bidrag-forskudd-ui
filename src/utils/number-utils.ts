@@ -1,18 +1,20 @@
 export const roundDown = (num: number) => {
-    if (num < 10) {
-        return num;
+    const numInt = parseInt(num.toString());
+    if (numInt < 10) {
+        return numInt;
     }
-    const numString = num.toString();
+    const numString = numInt.toString();
     const firstDigit = parseInt(numString[0]);
     const numOfDigits = numString.length;
     return (firstDigit - 1) * Math.pow(10, numOfDigits - 1);
 };
 
 export const roundUp = (num: number) => {
-    if (num < 10) {
+    const numInt = parseInt(num.toString());
+    if (numInt < 10) {
         return 10;
     }
-    const numString = num.toString();
+    const numString = numInt.toString();
     const firstDigit = parseInt(numString[0]);
     const numOfDigits = numString.length;
     return (firstDigit + 1) * Math.pow(10, numOfDigits - 1);

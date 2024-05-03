@@ -38,7 +38,7 @@ const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
                               (inntekt) =>
                                   `<p><strong>${inntekt.visningsnavn}</strong>: ${inntekt.beløp.toLocaleString(
                                       "nb-NO",
-                                      { minimumFractionDigits: 2 }
+                                      { minimumFractionDigits: 0, maximumFractionDigits: 2 }
                                   )}</p>`
                           )
                           .join("")
