@@ -36,9 +36,10 @@ const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
                     ? ainntektspostListe
                           .map(
                               (inntekt) =>
-                                  `<p><strong>${inntekt.visningsnavn}</strong>: ${Number(
-                                      inntekt.beløp
-                                  ).toLocaleString()}</p>`
+                                  `<p><strong>${inntekt.visningsnavn}</strong>: ${inntekt.beløp.toLocaleString(
+                                      "nb-NO",
+                                      { minimumFractionDigits: 2 }
+                                  )}</p>`
                           )
                           .join("")
                     : "Ingen inntekt funnet";
