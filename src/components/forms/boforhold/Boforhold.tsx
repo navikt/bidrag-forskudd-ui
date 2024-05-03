@@ -834,7 +834,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                             {text.alert.feilIPeriodisering}
                         </Heading>
                         {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
-                        {valideringsfeilForBarn.hullIPerioder && <p>{text.error.hullIPerioder}</p>}
+                        {valideringsfeilForBarn.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
                         {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
                         {valideringsfeilForBarn.manglerPerioder && <p>{text.error.manglerPerioder}</p>}
                     </ForskuddAlert>
