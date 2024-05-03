@@ -72,7 +72,7 @@ export const BoforholdOpplysninger = ({
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
-    const { lesemodus, boforholdFormValues, setBoforholdFormValues } = useForskudd();
+    const { lesemodus } = useForskudd();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
@@ -93,10 +93,6 @@ export const BoforholdOpplysninger = ({
                         const oppdatertHusstandsbarn = response.boforhold.husstandsbarn.find(
                             (barn) => barn.ident === ident
                         );
-                        setBoforholdFormValues({
-                            ...boforholdFormValues,
-                            husstandsbarn: response.boforhold.husstandsbarn,
-                        });
                         setValue(fieldName, oppdatertHusstandsbarn.perioder);
 
                         return {

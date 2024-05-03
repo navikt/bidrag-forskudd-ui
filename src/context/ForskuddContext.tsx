@@ -12,7 +12,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { useBehandlingV2 } from "../hooks/useApiData";
-import { BoforholdFormValues } from "../types/boforholdFormValues";
 import { InntektFormValues } from "../types/inntektFormValues";
 import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
 
@@ -28,8 +27,6 @@ interface IForskuddContext {
     setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
     setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
-    boforholdFormValues: BoforholdFormValues;
-    setBoforholdFormValues: Dispatch<SetStateAction<BoforholdFormValues>>;
     errorMessage: { title: string; text: string };
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
@@ -48,7 +45,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     const [searchParams, setSearchParams] = useSearchParams();
     const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
-    const [boforholdFormValues, setBoforholdFormValues] = useState<BoforholdFormValues>(undefined);
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
@@ -72,8 +68,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             setVirkningstidspunktFormValues,
             inntektFormValues,
             setInntektFormValues,
-            boforholdFormValues,
-            setBoforholdFormValues,
             errorMessage,
             setErrorMessage,
             errorModalOpen,
@@ -86,7 +80,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             saksnummer,
             virkningstidspunktFormValues,
             inntektFormValues,
-            boforholdFormValues,
             errorMessage,
             errorModalOpen,
         ]

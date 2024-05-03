@@ -13,12 +13,12 @@ import { FormControlledTextarea } from "../../formFields/FormControlledTextArea"
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 export const Notat = () => {
-    const { setActiveStep, boforholdFormValues, setBoforholdFormValues } = useForskudd();
-    const { watch } = useFormContext<BoforholdFormValues>();
+    const { setActiveStep } = useForskudd();
+    const { watch, getValues } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const onSave = () =>
         saveBoforhold.mutation.mutate(
-            { oppdatereNotat: boforholdFormValues.notat },
+            { oppdatereNotat: { kunINotat: getValues("notat.kunINotat") } },
             {
                 onSuccess: (response) => {
                     saveBoforhold.queryClientUpdater((currentData) => {
@@ -26,9 +26,7 @@ export const Notat = () => {
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
-                                husstandsbarn: currentData.boforhold.husstandsbarn.concat(
-                                    response.oppdatertHusstandsbarn
-                                ),
+                                notat: response.oppdatertNotat,
                             },
                         };
                     });
@@ -40,12 +38,8 @@ export const Notat = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const subscription = watch(({ notat }, { name }) => {
+        const subscription = watch((_, { name }) => {
             if (["notat.kunINotat"].includes(name)) {
-                setBoforholdFormValues((prev) => ({
-                    ...prev,
-                    notat,
-                }));
                 debouncedOnSave();
             }
         });
