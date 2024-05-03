@@ -16,8 +16,9 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "../../../utils/date-utils";
@@ -89,7 +90,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningst
     };
 };
 
-const Main = ({ initialValues, error }) => {
+const Main = ({ initialValues }) => {
     const behandling = useGetBehandlingV2();
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
@@ -128,10 +129,7 @@ const Main = ({ initialValues, error }) => {
 
     useEffect(() => {
         if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
-            const boforholdPeriodsExist = behandling.boforhold?.husstandsbarn[0]?.perioder.length;
-            if (boforholdPeriodsExist) {
-                setShowChangedVirkningsDatoAlert(true);
-            }
+            setShowChangedVirkningsDatoAlert(true);
         }
 
         if (initialVirkningsdato && showChangedVirkningsDatoAlert && initialVirkningsdato === virkningsDato) {
@@ -143,7 +141,6 @@ const Main = ({ initialValues, error }) => {
     return (
         <>
             {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
-            {error && <Alert variant="error">{error.message}</Alert>}
             <FlexRow className="gap-x-12 mt-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
@@ -230,7 +227,7 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const oppdaterBehandling = useOppdaterBehandlingV2();
+    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
 
     const useFormMethods = useForm({
@@ -239,18 +236,19 @@ const VirkningstidspunktForm = () => {
 
     const onSave = () => {
         const values = useFormMethods.getValues();
-        oppdaterBehandling.mutation.mutate(
-            { virkningstidspunkt: createPayload(values) },
-            {
-                onSuccess: () => {
-                    useFormMethods.reset(values, {
-                        keepValues: true,
-                        keepErrors: true,
-                        keepDefaultValues: true,
-                    });
-                },
-            }
-        );
+        oppdaterBehandling.mutation.mutate(createPayload(values), {
+            onSuccess: (response) => {
+                oppdaterBehandling.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        virkningstidspunkt: response.virkningstidspunkt,
+                        boforhold: response.boforhold,
+                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                    };
+                });
+            },
+        });
     };
 
     const debouncedOnSave = useDebounce(onSave);
@@ -267,7 +265,7 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title={text.label.virkningstidspunkt}
-                        main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
+                        main={<Main initialValues={initialValues} />}
                         side={<Side />}
                     />
                 </form>

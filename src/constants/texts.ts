@@ -11,7 +11,7 @@ const tekster = {
         barnSomIkkeFinnes: "Barn som ikke finnes i nye opplysninger fra Folkeregisteret:",
         beløpEndret: "Beløp for en eller flere perioder har blitt endret",
         endretVirkningstidspunkt:
-            "Virkningstidspunktet er endret. Dette kan påvirke beregningen. Boforhold og inntekt må manuelt vurderes på nytt",
+            "Virkningstidspunktet er endret. Dette kan påvirke beregningen. Inntekt må manuelt vurderes på nytt",
         endringer: "Følgende endringer har blitt utført:",
         enEllerFlereBoforholdPerioderEndret: "En eller flere perioder har blitt endret for barn med ident - {}",
         enEllerFlereInntektPerioderLagtTil: "En eller flere inntekt perioder har blitt lagt til rolle med ident - {}",

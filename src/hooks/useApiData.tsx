@@ -15,6 +15,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdaterVirkningstidspunkt,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -449,6 +450,23 @@ export const useAktiverGrunnlagsdata = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av grunnlag", error);
+        },
+    });
+};
+
+export const useOppdatereVirkningstidspunktV2 = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: OppdaterVirkningstidspunkt): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereVirkningstidspunktV2(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av virkningstidsdpunkt", error);
         },
     });
 };
