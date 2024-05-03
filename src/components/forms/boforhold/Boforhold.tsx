@@ -595,7 +595,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, setError, setValue, getFieldState } =
+    const { control, getValues, clearErrors, setError, setValue, getFieldState, resetField } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
@@ -680,7 +680,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
                     );
 
-                    const updatedHusstandsbarns =
+                    const updatedHusstandsbarnListe =
                         updatedHusstandsbarnIndex === -1
                             ? currentData.boforhold.husstandsbarn.concat(response.oppdatertHusstandsbarn)
                             : currentData.boforhold.husstandsbarn.toSpliced(
@@ -695,7 +695,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         ...currentData,
                         boforhold: {
                             ...currentData.boforhold,
-                            husstandsbarn: updatedHusstandsbarns,
+                            husstandsbarn: updatedHusstandsbarnListe,
                             valideringsfeil: response.valideringsfeil,
                         },
                     };
@@ -725,7 +725,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
-    const removeAndCleanUpPeriodeErrors = (index: number) => {
+    const removeAndCleanUpPeriodeAndErrors = (index: number) => {
         clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
         barnPerioder.remove(index);
         setEditableRow(undefined);
@@ -743,17 +743,24 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     {
                         onSuccess: (response) => {
                             saveBoforhold.queryClientUpdater((currentData) => {
-                                const updatedHusstandsbarn = currentData.boforhold.husstandsbarn.filter(
-                                    (husstandsbarn) => husstandsbarn.id === periode.id
+                                const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
+                                    (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
+                                );
+                                const updatedHusstandsbarnListe = currentData.boforhold.husstandsbarn.toSpliced(
+                                    updatedHusstandsbarnIndex,
+                                    1,
+                                    response.oppdatertHusstandsbarn
                                 );
 
-                                removeAndCleanUpPeriodeErrors(index);
+                                resetField(`husstandsbarn.${barnIndex}.perioder`, {
+                                    defaultValue: response.oppdatertHusstandsbarn.perioder,
+                                });
 
                                 return {
                                     ...currentData,
                                     boforhold: {
                                         ...currentData.boforhold,
-                                        husstandsbarn: updatedHusstandsbarn,
+                                        husstandsbarn: updatedHusstandsbarnListe,
                                         valideringsfeil: response.valideringsfeil,
                                     },
                                 };
@@ -762,7 +769,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     }
                 );
             } else {
-                removeAndCleanUpPeriodeErrors(index);
+                removeAndCleanUpPeriodeAndErrors(index);
             }
         }
     };
