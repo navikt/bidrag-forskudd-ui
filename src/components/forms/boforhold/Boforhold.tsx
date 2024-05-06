@@ -39,6 +39,7 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { ManglerVirkningstidspunktAlert } from "../../ManglerVirkningstidspunktAlert";
 import { ConfirmationModal } from "../../modal/ConfirmationModal";
+import { OverlayLoader } from "../../OverlayLoader";
 import { PersonNavn } from "../../PersonNavn";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
@@ -861,7 +862,8 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             )}
 
             {controlledFields.length > 0 && (
-                <div className="overflow-x-auto whitespace-nowrap">
+                <div className="relative overflow-x-auto whitespace-nowrap">
+                    <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed bg-white">
                         <Table.Header>
                             <Table.Row className="align-baseline">
