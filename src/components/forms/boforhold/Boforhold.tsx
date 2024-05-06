@@ -738,36 +738,55 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             const periode = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
 
             if (periode.id) {
-                saveBoforhold.mutation.mutate(
-                    { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
-                    {
-                        onSuccess: (response) => {
-                            saveBoforhold.queryClientUpdater((currentData) => {
-                                const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
-                                    (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
-                                );
-                                const updatedHusstandsbarnListe = currentData.boforhold.husstandsbarn.toSpliced(
-                                    updatedHusstandsbarnIndex,
-                                    1,
-                                    response.oppdatertHusstandsbarn
-                                );
+                if (periode.kilde === Kilde.MANUELL) {
+                    saveBoforhold.mutation.mutate(
+                        { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
+                        {
+                            onSuccess: (response) => {
+                                saveBoforhold.queryClientUpdater((currentData) => {
+                                    const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
+                                        (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
+                                    );
+                                    const updatedHusstandsbarnListe = currentData.boforhold.husstandsbarn.toSpliced(
+                                        updatedHusstandsbarnIndex,
+                                        1,
+                                        response.oppdatertHusstandsbarn
+                                    );
 
-                                resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                                    defaultValue: response.oppdatertHusstandsbarn.perioder,
+                                    resetField(`husstandsbarn.${barnIndex}.perioder`, {
+                                        defaultValue: response.oppdatertHusstandsbarn.perioder,
+                                    });
+
+                                    return {
+                                        ...currentData,
+                                        boforhold: {
+                                            ...currentData.boforhold,
+                                            husstandsbarn: updatedHusstandsbarnListe,
+                                            valideringsfeil: response.valideringsfeil,
+                                        },
+                                    };
                                 });
+                            },
+                        }
+                    );
+                }
 
-                                return {
-                                    ...currentData,
-                                    boforhold: {
-                                        ...currentData.boforhold,
-                                        husstandsbarn: updatedHusstandsbarnListe,
-                                        valideringsfeil: response.valideringsfeil,
-                                    },
-                                };
-                            });
+                if (periode.kilde === Kilde.OFFENTLIG) {
+                    updateAndSave({
+                        oppdatereHusstandsmedlem: {
+                            oppdaterPeriode: {
+                                idHusstandsbarn: barn.id,
+                                idPeriode: periode.id,
+                                datoFom: periode.datoFom,
+                                datoTom: periode.datoTom,
+                                bostatus:
+                                    periode.bostatus === Bostatuskode.MED_FORELDER
+                                        ? Bostatuskode.IKKE_MED_FORELDER
+                                        : Bostatuskode.MED_FORELDER,
+                            },
                         },
-                    }
-                );
+                    });
+                }
             } else {
                 removeAndCleanUpPeriodeAndErrors(index);
             }
