@@ -128,7 +128,7 @@ const Main = ({ initialValues }) => {
     }, [behandling]);
 
     useEffect(() => {
-        if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
+        if (initialVirkningsdato && virkningsDato && initialVirkningsdato !== virkningsDato) {
             setShowChangedVirkningsDatoAlert(true);
         }
 
@@ -254,9 +254,14 @@ const VirkningstidspunktForm = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch(() => debouncedOnSave());
-
-        return () => unsubscribe();
+        const subscription = useFormMethods.watch((value, { name }) => {
+            if (name === "virkningstidspunkt" && !value.virkningstidspunkt) {
+                return;
+            } else {
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
     }, []);
 
     return (
