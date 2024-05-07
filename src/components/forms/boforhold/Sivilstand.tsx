@@ -44,18 +44,17 @@ import { KildeIcon } from "../inntekt/InntektTable";
 export const Sivilstand = () => {
     const datoFom = useVirkningsdato();
     return (
-        <>
+        <div className="mt-8">
             <Heading level="3" size="medium" id="sivilstand">
                 {text.label.sivilstand}
             </Heading>
             <SivilistandPerioder virkningstidspunkt={datoFom} />
-        </>
+        </div>
     );
 };
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
-    const { boforholdFormValues, setBoforholdFormValues, setErrorMessage, setErrorModalOpen, lesemodus } =
-        useForskudd();
+    const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
 
@@ -132,11 +131,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     };
 
     const updatedAndSave = (sivilstand: SivilstandDto[]) => {
-        const updatedValues = {
-            ...boforholdFormValues,
-            sivilstand,
-        };
-        setBoforholdFormValues(updatedValues);
         setValue("sivilstand", sivilstand);
         saveBoforhold(updatedValues);
         setShowResetButton(true);

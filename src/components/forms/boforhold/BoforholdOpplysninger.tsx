@@ -119,7 +119,7 @@ export const BoforholdOpplysninger = ({
     if (lesemodus) return null;
 
     return (
-        <div className="grid gap-4 mb-4">
+        <div className="grid p-2 gap-2">
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} />
                 {hasNewOpplysningerFraFolkeregistre && (
@@ -128,7 +128,7 @@ export const BoforholdOpplysninger = ({
                     </div>
                 )}
                 {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (
-                    <div className="flex justify-end mb-4">
+                    <div className="flex justify-end">
                         <Button
                             variant="tertiary"
                             type="button"
@@ -142,7 +142,13 @@ export const BoforholdOpplysninger = ({
                 )}
             </div>
             {hasNewOpplysningerFraFolkeregistre && (
-                <Box padding="4" background="surface-default" borderWidth="1">
+                <Box
+                    padding="4"
+                    background="surface-default"
+                    borderWidth="1"
+                    borderRadius="medium"
+                    borderColor="border-default"
+                >
                     <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
                     <Table size="small" className="table-fixed opplysninger">
                         <Table.Header>

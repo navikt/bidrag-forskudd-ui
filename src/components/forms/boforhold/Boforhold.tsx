@@ -547,29 +547,24 @@ const BarnPerioder = () => {
             {controlledFields.map((item, index) => (
                 <Fragment key={item.id}>
                     <Box
-                        padding="4"
                         background="surface-subtle"
                         className="overflow-hidden"
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
-                        <div className="mb-4">
-                            <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
-                                <div className="w-8 mr-2 h-max">
-                                    {item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <BodyShort size="small" className="font-bold">
-                                        {item.medIBehandling && <PersonNavn ident={item.ident}></PersonNavn>}
-                                        {!item.medIBehandling && item.navn}
-                                    </BodyShort>
-                                    <BodyShort size="small">
-                                        {DateToDDMMYYYYString(dateOrNull(item.fødselsdato))}
-                                    </BodyShort>
-                                </div>
-                                {!item.medIBehandling && !lesemodus && item.kilde === Kilde.MANUELL && (
-                                    <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
-                                )}
+                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-[#EFECF4]">
+                            <div className="w-8 mr-2 h-max">
+                                {item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}
                             </div>
+                            <div className="flex items-center gap-4">
+                                <BodyShort size="small" className="font-bold">
+                                    {item.medIBehandling && <PersonNavn ident={item.ident}></PersonNavn>}
+                                    {!item.medIBehandling && item.navn}
+                                </BodyShort>
+                                <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(item.fødselsdato))}</BodyShort>
+                            </div>
+                            {!item.medIBehandling && !lesemodus && item.kilde === Kilde.MANUELL && (
+                                <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />
+                            )}
                         </div>
                         <Perioder barnIndex={index} />
                     </Box>
@@ -836,9 +831,8 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 resetTilDataFraFreg={resetTilDataFraFreg}
                 fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />
-
             {barnIsOver18 && !lesemodus && (
-                <div className="mb-4">
+                <div className="mb-4 ml-2">
                     <StatefulAlert
                         variant="info"
                         size="small"
@@ -853,7 +847,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </div>
             )}
             {valideringsfeilForBarn && (
-                <div className="mb-4">
+                <div className="mb-4 ml-2">
                     <ForskuddAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}
@@ -861,7 +855,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
                         {valideringsfeilForBarn.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
                         {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
-                        {valideringsfeilForBarn.manglerPerioder && <p>{text.error.manglerPerioder}</p>}
                     </ForskuddAlert>
                 </div>
             )}
@@ -870,7 +863,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 <div
                     className={`${
                         saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                    } overflow-x-auto whitespace-nowrap`}
+                    } overflow-x-auto whitespace-nowrap p-2`}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed bg-white">
@@ -943,7 +936,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Table>
                 </div>
             )}
-            <div className="mt-4 grid gap-4">
+            <div className="grid gap-4 p-2">
                 {showUndoButton && (
                     <Button
                         variant="tertiary"

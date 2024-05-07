@@ -67,8 +67,8 @@ const tekster = {
         kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
         personFinnesIkke: "Finner ikke person med ident: {}",
         tomDatoKanIkkeVæreFørFomDato: "Tom dato kan ikke være før fom dato",
-        ugyldigBoststatusFør18: "Ugyldig boststatus for periode etter barnet har fylt 18 år.",
-        ugyldigBoststatusEtter18: "Ugyldig bosstatus for periode før barnet har fylt 18 år.",
+        ugyldigBoststatusFør18: "Ugyldig boststatus for periode før barnet har fylt 18 år.",
+        ugyldigBoststatusEtter18: "Ugyldig bosstatus for periode etter barnet har fylt 18 år.",
     },
     label: {
         angreSisteSteg: "Angre siste steg",
