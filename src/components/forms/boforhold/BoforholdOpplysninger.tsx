@@ -14,14 +14,14 @@ import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { DateToDDMMYYYYString, isBeforeDate } from "../../../utils/date-utils";
 
 const Header = ({ nyttTag }: { nyttTag: boolean }) => (
-    <div className="grid grid-cols-2 gap-4 h-2">
-        <BodyShort size="small">{text.title.opplysningerFraFolkeregistret}</BodyShort>
+    <BodyShort size="small" className="flex h-2">
+        {text.title.opplysningerFraFolkeregistret}{" "}
         {nyttTag && (
-            <Tag variant="success" size="xsmall" className="w-fit h-1.5 p-1 rounded">
+            <Tag variant="success" size="xsmall" className="w-fit h-1.5 p-1 rounded ml-2">
                 Nytt
             </Tag>
         )}
-    </div>
+    </BodyShort>
 );
 const Opplysninger = ({ perioder, nyttTag }: { perioder: HusstandsbarnGrunnlagPeriodeDto[]; nyttTag?: boolean }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
