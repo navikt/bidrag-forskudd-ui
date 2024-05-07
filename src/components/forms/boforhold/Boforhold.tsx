@@ -551,7 +551,7 @@ const BarnPerioder = () => {
                         className="overflow-hidden"
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
-                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-[#EFECF4]">
+                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 border-b border-[--a-border-alt-1]">
                             <div className="w-8 mr-2 h-max">
                                 {item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}
                             </div>
