@@ -205,6 +205,7 @@ const Periode = ({
             customValidation={validateFomOgTom}
             fromDate={fom}
             toDate={tom}
+            lastDayOfMonthPicker={field === "datoTom"}
             hideLabel
             required
         />
