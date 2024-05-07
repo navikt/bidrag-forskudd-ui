@@ -863,7 +863,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 <div
                     className={`${
                         saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                    } overflow-x-auto whitespace-nowrap p-2`}
+                    } overflow-x-auto whitespace-nowrap m-2`}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed bg-white">
