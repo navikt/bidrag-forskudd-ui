@@ -156,7 +156,9 @@ const Status = ({
             onSelect={() => clearErrors(`${fieldName}.bostatus`)}
         />
     ) : (
-        <BodyShort>{bosstatusToVisningsnavn(item.bostatus)}</BodyShort>
+        <div className="h-8 flex items-center">
+            <BodyShort>{bosstatusToVisningsnavn(item.bostatus)}</BodyShort>
+        </div>
     );
 };
 
@@ -207,7 +209,9 @@ const Periode = ({
             required
         />
     ) : (
-        <BodyShort>{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+        <div className="h-8 flex items-center">
+            <BodyShort>{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+        </div>
     );
 };
 
@@ -862,7 +866,11 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             )}
 
             {controlledFields.length > 0 && (
-                <div className="relative overflow-x-auto whitespace-nowrap">
+                <div
+                    className={`${
+                        saveBoforhold.mutation.isPending ? "relative" : "inherit"
+                    } overflow-x-auto whitespace-nowrap`}
+                >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed bg-white">
                         <Table.Header>
