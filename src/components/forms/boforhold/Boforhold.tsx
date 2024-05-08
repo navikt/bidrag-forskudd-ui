@@ -552,9 +552,7 @@ const BarnPerioder = () => {
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
                         <div className="grid grid-cols-[max-content,max-content,auto] p-4 border-b border-[--a-border-alt-1]">
-                            <div className="w-8 mr-2 h-max">
-                                {item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}
-                            </div>
+                            <div>{item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}</div>
                             <div className="flex items-center gap-4">
                                 <BodyShort size="small" className="font-bold">
                                     {item.medIBehandling && <PersonNavn ident={item.ident}></PersonNavn>}
