@@ -551,7 +551,7 @@ const BarnPerioder = () => {
                         className="overflow-hidden"
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
-                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 border-b border-[--a-border-alt-1]">
+                        <div className="grid grid-cols-[max-content,max-content,auto] p-4 border-b border-[--a-border-alt-1]">
                             <div className="w-8 mr-2 h-max">
                                 {item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}
                             </div>
@@ -824,7 +824,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
 
     return (
-        <>
+        <div className="grid gap-2 p-4">
             <BoforholdOpplysninger
                 ident={barn.ident}
                 showResetButton={showResetButton}
@@ -863,7 +863,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 <div
                     className={`${
                         saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                    } overflow-x-auto whitespace-nowrap m-2`}
+                    } overflow-x-auto whitespace-nowrap`}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed bg-white">
@@ -936,7 +936,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Table>
                 </div>
             )}
-            <div className="grid gap-4 p-2">
+            <div className="grid gap-4">
                 {showUndoButton && (
                     <Button
                         variant="tertiary"
@@ -956,7 +956,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Button>
                 )}
             </div>
-        </>
+        </div>
     );
 };
 

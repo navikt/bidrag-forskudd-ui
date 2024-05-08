@@ -119,7 +119,7 @@ export const BoforholdOpplysninger = ({
     if (lesemodus) return null;
 
     return (
-        <div className="grid p-2 gap-2">
+        <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} />
                 {hasNewOpplysningerFraFolkeregistre && (
