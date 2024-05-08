@@ -115,9 +115,17 @@ export const Opplysninger = ({
 
     return (
         <>
-            <Box padding="4" background="surface-default" borderWidth="1">
-                <Heading size="small">{text.alert.nyOpplysninger}</Heading>
-                <BodyShort>{text.alert.nyOpplysningerInfomelding}</BodyShort>
+            <Box
+                padding="4"
+                background="surface-default"
+                borderWidth="1"
+                borderRadius="medium"
+                borderColor="border-default"
+            >
+                <Heading size="xsmall" level="6">
+                    {text.alert.nyOpplysninger}
+                </Heading>
+                <BodyShort size="small">{text.alert.nyOpplysningerInfomelding}</BodyShort>
                 {Object.keys(ikkeAktiverteEndringer).map((key) => {
                     if (ikkeAktiverteEndringer[key].length < 1) return null;
                     const rolle = roller.find((rolle) => rolle.ident === key);

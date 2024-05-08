@@ -1,4 +1,3 @@
-import { Heading } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -48,10 +47,7 @@ export const Notat = () => {
 
     return (
         <>
-            <Heading level="3" size="medium">
-                {text.title.begrunnelse}
-            </Heading>
-            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} hideLabel />
+            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
             <ActionButtons onNext={onNext} />
         </>
     );

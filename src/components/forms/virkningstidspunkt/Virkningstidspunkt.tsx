@@ -1,5 +1,5 @@
 import { capitalize, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
+import { BodyShort, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
@@ -25,14 +25,11 @@ import { addMonths, dateOrNull, DateToDDMMYYYYString } from "../../../utils/date
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
-import {
-    aarsakToVirkningstidspunktMapper,
-    getFomAndTomForMonthPicker,
-    getSoktFraOrMottatDato,
-} from "../helpers/virkningstidspunktHelpers";
+import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 const årsakListe = [
@@ -92,10 +89,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningst
 
 const Main = ({ initialValues }) => {
     const behandling = useGetBehandlingV2();
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningstidspunkt);
-    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
-    const virkningsDato = getValues("virkningstidspunkt");
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
     const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
@@ -116,32 +110,10 @@ const Main = ({ initialValues }) => {
         [fom]
     );
 
-    useEffect(() => {
-        if (!initialVirkningsdato && behandling) {
-            setInitialVirkningsdato(
-                behandling.virkningstidspunkt.virkningstidspunkt ??
-                    toISODateString(
-                        getSoktFraOrMottatDato(new Date(behandling.søktFomDato), new Date(behandling.mottattdato))
-                    )
-            );
-        }
-    }, [behandling]);
-
-    useEffect(() => {
-        if (initialVirkningsdato && virkningsDato && initialVirkningsdato !== virkningsDato) {
-            setShowChangedVirkningsDatoAlert(true);
-        }
-
-        if (initialVirkningsdato && showChangedVirkningsDatoAlert && initialVirkningsdato === virkningsDato) {
-            setShowChangedVirkningsDatoAlert(false);
-        }
-    }, [virkningsDato]);
-
     const erTypeOpphør = behandling.vedtakstype == Vedtakstype.OPPHOR;
     return (
         <>
-            {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
-            <FlexRow className="gap-x-12 mt-12">
+            <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">
@@ -216,10 +188,7 @@ const Side = () => {
 
     return (
         <>
-            <Heading level="3" size="medium">
-                {text.title.begrunnelse}
-            </Heading>
-            <FormControlledTextarea name="notat.kunINotat" label="" hideLabel />
+            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -229,6 +198,8 @@ const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
+    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -264,6 +235,28 @@ const VirkningstidspunktForm = () => {
         return () => subscription.unsubscribe();
     }, []);
 
+    useEffect(() => {
+        if (
+            initialVirkningsdato &&
+            virkningstidspunkt.virkningstidspunkt &&
+            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(true);
+        }
+
+        if (
+            initialVirkningsdato &&
+            showChangedVirkningsDatoAlert &&
+            initialVirkningsdato === virkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(false);
+        }
+
+        if (!initialVirkningsdato && virkningstidspunkt.virkningstidspunkt) {
+            setInitialVirkningsdato(virkningstidspunkt.virkningstidspunkt);
+        }
+    }, [virkningstidspunkt.virkningstidspunkt]);
+
     return (
         <>
             <FormProvider {...useFormMethods}>
@@ -272,6 +265,11 @@ const VirkningstidspunktForm = () => {
                         title={text.label.virkningstidspunkt}
                         main={<Main initialValues={initialValues} />}
                         side={<Side />}
+                        pageAlert={
+                            showChangedVirkningsDatoAlert && (
+                                <ForskuddAlert variant="warning">{text.alert.endretVirkningstidspunkt}</ForskuddAlert>
+                            )
+                        }
                     />
                 </form>
             </FormProvider>

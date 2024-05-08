@@ -37,7 +37,6 @@ import { FormControlledSelectField } from "../../formFields/FormControlledSelect
 import { ForskuddAlert } from "../../ForskuddAlert";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
-import { ManglerVirkningstidspunktAlert } from "../../ManglerVirkningstidspunktAlert";
 import { ConfirmationModal } from "../../modal/ConfirmationModal";
 import { OverlayLoader } from "../../OverlayLoader";
 import { PersonNavn } from "../../PersonNavn";
@@ -221,7 +220,6 @@ const Main = () => {
 
     return (
         <>
-            <ManglerVirkningstidspunktAlert />
             <Heading level="3" size="medium">
                 {text.label.barn}
             </Heading>
@@ -839,7 +837,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         alertKey={"18åralert" + behandlingId + barn.ident}
                         className="w-fit"
                     >
-                        <Heading spacing size="small" level="3">
+                        <Heading size="small" level="3">
                             {text.title.barnOver18}
                         </Heading>
                         {text.barnetHarFylt18SjekkBostatus}

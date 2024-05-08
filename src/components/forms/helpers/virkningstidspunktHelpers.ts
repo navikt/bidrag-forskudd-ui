@@ -1,7 +1,14 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
 
 import { BehandlingDtoV2, TypeArsakstype } from "../../../api/BidragBehandlingApiV1";
-import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "../../../utils/date-utils";
+import {
+    dateOrNull,
+    deductMonths,
+    firstDayOfMonth,
+    isAfterDate,
+    isAfterEqualsDate,
+    minOfDates,
+} from "../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
     return isAfterDate(soktFraDato, mottatDato) ? soktFraDato : mottatDato;
@@ -51,13 +58,12 @@ export const mapÅrsakTilVirkningstidspunkt = (
     }
 };
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
-    const virkningstidspunktIsInFuture = isAfterDate(
+    const virkningstidspunktIsInCurrentMonthOrFuture = isAfterEqualsDate(
         firstDayOfMonth(new Date(virkningstidspunkt)),
         firstDayOfMonth(new Date())
     );
+
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
-    const tom = virkningstidspunktIsInFuture
-        ? lastDayOfMonth(new Date(virkningstidspunkt))
-        : lastDayOfMonth(new Date());
+    const tom = virkningstidspunktIsInCurrentMonthOrFuture ? null : lastDayOfMonth(new Date());
     return [fom, tom];
 };
