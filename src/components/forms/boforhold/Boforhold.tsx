@@ -23,6 +23,7 @@ import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
+    addMonths,
     dateOrNull,
     DateToDDMMYYYYString,
     isAfterDate,
@@ -180,6 +181,7 @@ const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
+    const fieldIsDatoTom = field === "datoTom";
 
     const validateFomOgTom = () => {
         const periode = getValues(fieldName);
@@ -203,10 +205,10 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={tom}
-            lastDayOfMonthPicker={field === "datoTom"}
+            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            lastDayOfMonthPicker={fieldIsDatoTom}
+            required={!fieldIsDatoTom}
             hideLabel
-            required
         />
     ) : (
         <div className="h-8 flex items-center">

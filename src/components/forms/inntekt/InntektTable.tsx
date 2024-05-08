@@ -18,7 +18,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -133,6 +133,8 @@ export const Periode = ({
     const virkningsdato = useVirkningsdato();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
+    const fieldIsDatoTom = field === "datoTom";
+
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -153,11 +155,11 @@ export const Periode = ({
             label={label}
             placeholder="DD.MM.ÅÅÅÅ"
             defaultValue={item[field]}
-            required={item.taMed && field === "datoFom"}
             fromDate={fom}
-            toDate={tom}
             customValidation={validateFomOgTom}
-            lastDayOfMonthPicker={field === "datoTom"}
+            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            lastDayOfMonthPicker={fieldIsDatoTom}
+            required={item.taMed && !fieldIsDatoTom}
             hideLabel
         />
     ) : (
