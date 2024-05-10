@@ -16,7 +16,7 @@ export const Småbarnstillegg = () => {
     const fieldName = "småbarnstillegg";
 
     return (
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_småbarnstillegg}>
                 {text.title.småbarnstillegg}
             </Heading>

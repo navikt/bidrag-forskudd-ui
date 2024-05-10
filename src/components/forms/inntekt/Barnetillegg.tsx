@@ -99,14 +99,14 @@ export const Barnetillegg = () => {
     };
 
     return (
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <Heading level="3" size="medium" id={elementId.seksjon_inntekt_barnetillegg}>
                 {text.title.barnetillegg}
             </Heading>
             <Opplysninger fieldName={"barnetillegg"} />
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
-                    <div className="grid grid-cols-[max-content,max-content,auto] mb-2 p-2 bg-[#EFECF4]">
+                    <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-[#EFECF4]">
                         <div className="w-8 mr-2 h-max">
                             <RolleTag rolleType={Rolletype.BA} />
                         </div>

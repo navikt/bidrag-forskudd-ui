@@ -47,7 +47,7 @@ export const Notat = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.label.begrunnelseKunINotat} />
+            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );

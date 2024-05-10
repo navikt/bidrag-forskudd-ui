@@ -551,7 +551,7 @@ const BarnPerioder = () => {
                         className="overflow-hidden"
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
-                        <div className="grid grid-cols-[max-content,max-content,auto] p-4 border-b border-[--a-border-alt-1]">
+                        <div className="grid grid-cols-[max-content,max-content,auto] py-2 px-4 border-b border-[--a-border-alt-1]">
                             <div>{item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}</div>
                             <div className="flex items-center gap-4">
                                 <BodyShort size="small" className="font-bold">
@@ -822,7 +822,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
 
     return (
-        <div className="grid gap-2 p-4">
+        <div className="grid gap-2 py-2 px-4">
             <BoforholdOpplysninger
                 ident={barn.ident}
                 showResetButton={showResetButton}
@@ -830,7 +830,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />
             {barnIsOver18 && !lesemodus && (
-                <div className="mb-4 ml-2">
+                <div className="mb-4">
                     <StatefulAlert
                         variant="info"
                         size="small"
@@ -845,7 +845,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 </div>
             )}
             {valideringsfeilForBarn && (
-                <div className="mb-4 ml-2">
+                <div className="mb-4">
                     <ForskuddAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}
