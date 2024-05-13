@@ -25,3 +25,8 @@ export const getRandomInt = () => {
     const max = Math.floor(10000);
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
+
+export const formatterBeløp = (beløp: number | string | undefined): string => {
+    if (!beløp) return "0";
+    return beløp.toLocaleString("nb-NO");
+};
