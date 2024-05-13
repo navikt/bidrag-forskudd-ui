@@ -73,7 +73,7 @@ const Totalt = ({
             />
         ) : (
             <div className="h-8 flex items-center justify-end">
-                <BodyShort>{item.beløpMnd.toLocaleString("nb-NO")}</BodyShort>
+                <BodyShort>{formatterBeløp(item.beløpMnd)}</BodyShort>
             </div>
         )}
     </>
