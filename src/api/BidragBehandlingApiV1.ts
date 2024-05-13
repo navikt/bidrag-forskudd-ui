@@ -175,6 +175,7 @@ export enum Resultatkode {
     PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
     OPPHOLD_I_UTLANDET = "OPPHOLD_I_UTLANDET",
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
+    OPPHORPRIVATAVTALE = "OPPHØR_PRIVAT_AVTALE",
 }
 
 export enum Rolletype {
@@ -317,7 +318,7 @@ export interface HusstandsbarnperiodeDto {
 }
 
 export interface OppdaterBehandlingRequestV2 {
-    virkningstidspunkt?: OppdaterVirkningstidspunkt;
+    virkningstidspunkt?: OppdatereVirkningstidspunkt;
     /**
      *
      * For `husstandsbarn` og `sivilstand`
@@ -347,19 +348,6 @@ export interface OppdaterBoforholdRequest {
 
 export interface OppdaterNotat {
     kunINotat?: string;
-    medIVedtaket?: string;
-}
-
-export interface OppdaterVirkningstidspunkt {
-    årsak?: TypeArsakstype;
-    avslag?: Resultatkode;
-    /**
-     * Oppdater virkningsdato. Hvis verdien er satt til null vil virkningsdato bli slettet. Hvis verdien er satt til tom verdi eller ikke er satt vil det ikke bli gjort noe endringer
-     * @format date
-     * @example "2025-01-25"
-     */
-    virkningstidspunkt?: string;
-    notat?: OppdaterNotat;
 }
 
 export interface OppdatereInntekterRequestV2 {
@@ -429,6 +417,18 @@ export interface OppdaterePeriodeInntekt {
     taMedIBeregning: boolean;
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     angittPeriode: Datoperiode;
+}
+
+export interface OppdatereVirkningstidspunkt {
+    årsak?: TypeArsakstype;
+    avslag?: Resultatkode;
+    /**
+     * Oppdater virkningsdato. Hvis verdien er satt til null vil det ikke bli gjort noe endringer
+     * @format date
+     * @example "2025-01-25"
+     */
+    virkningstidspunkt?: string;
+    notat?: OppdaterNotat;
 }
 
 export interface SivilstandDto {
@@ -591,7 +591,7 @@ export interface BoforholdPeriodeseringsfeil {
     manglerPerioder: boolean;
     /** Er sann hvis husstandsbarn ikke har noen løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
-    barn?: HusstandsbarnPeriodiseringsfeilDto;
+    barn: HusstandsbarnPeriodiseringsfeilDto;
 }
 
 export interface BoforholdValideringsfeil {
@@ -653,6 +653,12 @@ export interface HusstandsbarnPeriodiseringsfeilDto {
     fødselsdato: string;
     /**
      * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @format int64
+     */
+    husstandsbarnId: number;
+    /**
+     * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @deprecated
      * @format int64
      */
     tekniskId: number;
@@ -909,6 +915,8 @@ export interface SivilstandPeriodeseringsfeil {
     fremtidigPeriode: boolean;
     /** Er sann hvis det mangler sivilstand perioder." */
     manglerPerioder: boolean;
+    /** Er sann hvis en eller flere perioder har status UKJENT." */
+    ugyldigStatus: boolean;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
 }
@@ -958,39 +966,62 @@ export interface OppdatereInntektResponse {
     valideringsfeil: InntektValideringsfeilDto;
 }
 
-export interface NyHusstandsbarnperiode {
+export interface OppdaterHusstandsmedlemPeriode {
     /**
      * Id til husstandsbarnet perioden skal gjelde for
      * @format int64
      */
     idHusstandsbarn: number;
     /**
-     * @format date
-     * @example "2025-01-25"
+     * Id til perioden som skal oppdateres
+     * @format int64
      */
-    fraOgMed?: string;
+    idPeriode?: number;
     /**
      * @format date
      * @example "2025-01-25"
      */
-    tilOgMed?: string;
+    datoFom?: string;
+    /**
+     * @format date
+     * @example "2025-01-25"
+     */
+    datoTom?: string;
     bostatus: Bostatuskode;
 }
 
 /** Oppdaterer husstandsbarn, sivilstand, eller notat */
 export interface OppdatereBoforholdRequestV2 {
-    oppdatereHusstandsbarn?: OppdatereHusstandsbarn;
+    oppdatereHusstandsmedlem?: OppdatereHusstandsmedlem;
     oppdatereSivilstand?: OppdatereSivilstand;
     oppdatereNotat?: OppdaterNotat;
 }
 
-export interface OppdatereHusstandsbarn {
-    nyttHusstandsbarn?: PersonaliaHusstandsbarn;
-    nyHusstandsbarnperiode?: NyHusstandsbarnperiode;
-    /** @format int64 */
-    sletteHusstandsbarnperiode?: number;
-    /** @format int64 */
-    sletteHusstandsbarn?: number;
+export interface OppdatereHusstandsmedlem {
+    /** Informasjon om husstandsmedlem som skal opprettes */
+    opprettHusstandsmedlem?: OpprettHusstandsstandsmedlem;
+    oppdaterPeriode?: OppdaterHusstandsmedlemPeriode;
+    /**
+     * Id til perioden som skal slettes
+     * @format int64
+     */
+    slettPeriode?: number;
+    /**
+     * Id til husstandsmedlemmet som skal slettes
+     * @format int64
+     */
+    slettHusstandsmedlem?: number;
+    /**
+     * Id til husstandsmedlemmet perioden skal resettes for.
+     *         |Dette vil resette til opprinnelig perioder hentet fra offentlige registre
+     * @format int64
+     */
+    tilbakestillPerioderForHusstandsmedlem?: number;
+    /**
+     * Id til husstandsmedlemmet siste steg skal angres for
+     * @format int64
+     */
+    angreSisteStegForHusstandsmedlem?: number;
 }
 
 export interface OppdatereSivilstand {
@@ -999,7 +1030,8 @@ export interface OppdatereSivilstand {
     sletteSivilstandsperiode?: number;
 }
 
-export interface PersonaliaHusstandsbarn {
+/** Informasjon om husstandsmedlem som skal opprettes */
+export interface OpprettHusstandsstandsmedlem {
     personident?: string;
     /** @format date */
     fødselsdato: string;
@@ -1801,6 +1833,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags behandling-controller-v-2
          * @name OppdatereBehandlingV2
          * @request PUT:/api/v2/behandling/{behandlingsid}
+         * @deprecated
          * @secure
          */
         oppdatereBehandlingV2: (behandlingsid: number, data: OppdaterBehandlingRequestV2, params: RequestParams = {}) =>
@@ -1827,6 +1860,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 path: `/api/v2/behandling/${behandlingsid}`,
                 method: "DELETE",
                 secure: true,
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere virkningstidspunkt for behandling. Returnerer oppdatert virkningstidspunkt
+         *
+         * @tags behandling-controller-v-2
+         * @name OppdatereVirkningstidspunktV2
+         * @request PUT:/api/v2/behandling/{behandlingsid}/virkningstidspunkt
+         * @secure
+         */
+        oppdatereVirkningstidspunktV2: (
+            behandlingsid: number,
+            data: OppdatereVirkningstidspunkt,
+            params: RequestParams = {}
+        ) =>
+            this.request<BehandlingDtoV2, BehandlingDtoV2>({
+                path: `/api/v2/behandling/${behandlingsid}/virkningstidspunkt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
                 ...params,
             }),
 
@@ -2161,6 +2217,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente en behandling
+         *
+         * @tags behandling-controller-v-2
+         * @name HenteBoforhold
+         * @request GET:/api/v2/behandling/boforhold/{behandlingsid}
+         * @secure
+         */
+        henteBoforhold: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<BoforholdDtoV2, BoforholdDtoV2>({
+                path: `/api/v2/behandling/boforhold/${behandlingsid}`,
                 method: "GET",
                 secure: true,
                 format: "json",

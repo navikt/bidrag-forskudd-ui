@@ -62,6 +62,7 @@ const avslagsListe = [
     Resultatkode.MANGLENDE_DOKUMENTASJON,
     Resultatkode.PAGRUNNAVSAMMENFLYTTING,
     Resultatkode.OPPHOLD_I_UTLANDET,
+    Resultatkode.OPPHORPRIVATAVTALE,
     Resultatkode.UTENLANDSK_YTELSE,
 ];
 
