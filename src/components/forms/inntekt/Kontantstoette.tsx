@@ -27,7 +27,7 @@ export const Kontantstøtte = () => {
             <Opplysninger fieldName={"kontantstøtte"} />
             {barna.map((barn) => (
                 <React.Fragment key={barn.ident}>
-                    <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-[#EFECF4]">
+                    <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
                         <div className="w-8 mr-2 h-max">
                             <RolleTag rolleType={Rolletype.BA} />
                         </div>
