@@ -24,6 +24,7 @@ import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "../../../types/vedtakTypes";
 import { deductDays } from "../../../utils/date-utils";
+import { formatterBeløp } from "../../../utils/number-utils";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import NotatButton from "../../NotatButton";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
@@ -370,12 +371,12 @@ const VedtakTableBody = ({
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{periode.inntekt}</Table.DataCell>
+                            <Table.DataCell>{formatterBeløp(periode.inntekt)}</Table.DataCell>
 
                             <Table.DataCell>{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
 
                             <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                            <Table.DataCell>{periode.beløp}</Table.DataCell>
+                            <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
                             <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
                         </Table.Row>
                     )}

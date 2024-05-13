@@ -9,6 +9,7 @@ import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { formatterBeløp } from "../../../utils/number-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
@@ -72,7 +73,7 @@ const Totalt = ({
             />
         ) : (
             <div className="h-8 flex items-center justify-end">
-                <BodyShort>{item.beløpMnd.toLocaleString("nb-NO")}</BodyShort>
+                <BodyShort>{formatterBeløp(item.beløpMnd)}</BodyShort>
             </div>
         )}
     </>
@@ -225,7 +226,7 @@ export const Barnetillegg = () => {
                                                         <Table.DataCell>
                                                             <div className="h-8 flex items-center justify-end">
                                                                 <BodyShort>
-                                                                    {(item.beløpMnd * 12).toLocaleString("nb-NO")}
+                                                                    {formatterBeløp(item.beløpMnd * 12)}
                                                                 </BodyShort>
                                                             </div>
                                                         </Table.DataCell>
