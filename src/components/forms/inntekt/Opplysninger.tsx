@@ -15,6 +15,7 @@ import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../hooks/useAp
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormValues } from "../../../types/inntektFormValues";
+import { formatterBeløp } from "../../../utils/number-utils";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { transformInntekt } from "../helpers/inntektFormHelpers";
@@ -160,7 +161,7 @@ export const Opplysninger = ({
                                                     <td width="250px" scope="row">
                                                         {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
                                                     </td>
-                                                    <td width="75px">{beløp}</td>
+                                                    <td width="75px">{formatterBeløp(beløp)}</td>
                                                     <td width="100px">{endringstypeTilVisningsnavn(endringstype)}</td>
                                                 </tr>
                                                 {inntektsposterSomErEndret.map((i, index) => (
@@ -174,7 +175,7 @@ export const Opplysninger = ({
                                                         }
                                                     >
                                                         <td>{i.visningsnavn}</td>
-                                                        <td>{i.beløp}</td>
+                                                        <td>{formatterBeløp(i.beløp)}</td>
                                                         <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
                                                     </tr>
                                                 ))}

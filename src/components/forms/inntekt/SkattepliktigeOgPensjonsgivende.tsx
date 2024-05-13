@@ -9,6 +9,7 @@ import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
+import { formatterBeløp } from "../../../utils/number-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
@@ -64,7 +65,7 @@ const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
                 {item.inntektsposter.map((inntektpost) => (
                     <BodyShort size="small" key={inntektpost.kode}>
                         <dt>{inntektpost.visningsnavn}</dt>
-                        <dd>{inntektpost.beløp}</dd>
+                        <dd>{formatterBeløp(inntektpost.beløp)}</dd>
                     </BodyShort>
                 ))}
             </dl>

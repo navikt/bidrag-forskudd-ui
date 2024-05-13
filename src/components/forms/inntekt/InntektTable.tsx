@@ -19,6 +19,7 @@ import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { formatterBeløp } from "../../../utils/number-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
@@ -77,7 +78,7 @@ export const Totalt = ({
             />
         ) : (
             <div className="h-8 flex items-center justify-end">
-                <BodyShort>{item.beløp.toLocaleString("nb-NO")}</BodyShort>
+                <BodyShort>{formatterBeløp(item.beløp)}</BodyShort>
             </div>
         )}
     </>
