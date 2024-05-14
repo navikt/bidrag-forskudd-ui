@@ -544,10 +544,10 @@ const BarnPerioder = () => {
                 <Fragment key={item.id}>
                     <Box
                         background="surface-subtle"
-                        className="overflow-hidden"
+                        className="overflow-hidden grid gap-2 py-2 px-4"
                         id={`${elementIds.seksjon_boforhold}_${item.id}`}
                     >
-                        <div className="grid grid-cols-[max-content,max-content,auto] py-2 px-4 border-b border-[--a-border-alt-1]">
+                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
                             <div>{item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}</div>
                             <div className="flex items-center gap-4">
                                 <BodyShort size="small" className="font-bold">
@@ -818,7 +818,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
 
     return (
-        <div className="grid gap-2 py-2 px-4">
+        <div className="grid gap-2">
             <BoforholdOpplysninger
                 ident={barn.ident}
                 showResetButton={showResetButton}
@@ -930,7 +930,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Table>
                 </div>
             )}
-            <div className="grid gap-4">
+            <div className="grid gap-2">
                 {showUndoButton && (
                     <Button
                         variant="tertiary"
