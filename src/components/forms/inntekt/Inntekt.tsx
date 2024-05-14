@@ -1,4 +1,4 @@
-import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
+import { BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
@@ -68,9 +68,9 @@ const InntektHeader = ({ ident }: { ident: string }) => {
             </ExpansionCard>
         </div>
     ) : (
-        <Alert variant="info">
+        <ForskuddAlert variant="info">
             <BodyShort>Ingen inntekt funnet</BodyShort>
-        </Alert>
+        </ForskuddAlert>
     );
 };
 const Main = () => {
