@@ -30,8 +30,10 @@ const inntektTypeToOpplysningerMapper = {
 
 export const Opplysninger = ({
     fieldName,
+    ident,
 }: {
     fieldName: "småbarnstillegg" | "utvidetBarnetrygd" | "barnetillegg" | "kontantstøtte" | `årsinntekter.${string}`;
+    ident?: string;
 }) => {
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
@@ -112,7 +114,7 @@ export const Opplysninger = ({
                 return "Endring";
         }
     }
-    if (lesemodus) return null;
+    if (lesemodus || (ident && ikkeAktiverteEndringer[ident].length < 1)) return null;
 
     return (
         <>
