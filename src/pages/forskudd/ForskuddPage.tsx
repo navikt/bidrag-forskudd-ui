@@ -12,7 +12,11 @@ import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
-    const { virkningstidspunkt, erVedtakFattet } = useGetBehandlingV2();
+    const {
+        virkningstidspunkt,
+        erVedtakFattet,
+        inntekter: { valideringsfeil: inntektValideringsfeil },
+    } = useGetBehandlingV2();
     const interactive = !virkningstidspunkt.avslag;
     const activeStepIndex = STEPS[activeStep];
 
@@ -41,7 +45,10 @@ export const ForskuddPage = () => {
                         <Stepper.Step completed={activeStepIndex > 2} interactive={interactive}>
                             {capitalize(ForskuddStepper.BOFORHOLD)}
                         </Stepper.Step>
-                        <Stepper.Step completed={activeStepIndex > 3} interactive={interactive}>
+                        <Stepper.Step
+                            completed={activeStepIndex > 3 && !Object.keys(inntektValideringsfeil).length}
+                            interactive={interactive}
+                        >
                             {capitalize(ForskuddStepper.INNTEKT)}
                         </Stepper.Step>
                         <Stepper.Step completed={erVedtakFattet}>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
