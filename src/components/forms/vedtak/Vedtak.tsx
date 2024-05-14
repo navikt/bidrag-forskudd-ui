@@ -373,6 +373,7 @@ const VedtakTableBody = ({
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
+
                             <Table.DataCell textSize="small">{formatterBeløp(periode.inntekt)}</Table.DataCell>
 
                             <Table.DataCell textSize="small">{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
