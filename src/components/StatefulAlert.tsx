@@ -26,7 +26,7 @@ const AlertWithCloseButton = ({
     };
     return (
         show && (
-            <ForskuddAlert {...alertProps} closeButton onClose={close}>
+            <ForskuddAlert {...alertProps} closeButton={alertProps.closeButton} onClose={close}>
                 {children || "Content"}
             </ForskuddAlert>
         )
