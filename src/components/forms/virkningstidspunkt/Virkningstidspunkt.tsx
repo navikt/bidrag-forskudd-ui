@@ -34,6 +34,8 @@ import {
 } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
+const årsakPrefiks = "ÅRSAK_";
+const avslagPrefiks = "AVSLAG_";
 const årsakListe = [
     TypeArsakstype.ENDRING3MANEDERTILBAKE,
     TypeArsakstype.ENDRING3ARSREGELEN,
@@ -49,7 +51,7 @@ const årsakListe = [
     TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
     TypeArsakstype.TREMANEDERTILBAKE,
     TypeArsakstype.TREARSREGELEN,
-];
+].map((v) => `${årsakPrefiks}${v}`);
 
 const avslagsListe = [
     Resultatkode.PAGRUNNAVBARNEPENSJON,
@@ -62,14 +64,19 @@ const avslagsListe = [
     Resultatkode.MANGLENDE_DOKUMENTASJON,
     Resultatkode.PAGRUNNAVSAMMENFLYTTING,
     Resultatkode.OPPHOLD_I_UTLANDET,
-    Resultatkode.OPPHORPRIVATAVTALE,
+    Resultatkode.PRIVAT_AVTALE,
     Resultatkode.UTENLANDSK_YTELSE,
-];
+].map((v) => `${avslagPrefiks}${v}`);
 
+const årsakAvslagMedPrefiks = (prefiks: string, verdi?: string): string | undefined =>
+    verdi ? `${prefiks}${verdi}` : undefined;
 const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues =>
     ({
         virkningstidspunkt: response.virkningstidspunkt,
-        årsakAvslag: response.årsak ?? response.avslag ?? "",
+        årsakAvslag:
+            årsakAvslagMedPrefiks(årsakPrefiks, response.årsak) ??
+            årsakAvslagMedPrefiks(avslagPrefiks, response.avslag) ??
+            "",
         notat: {
             medIVedtaket: response.notat?.medIVedtaket,
             kunINotat: response.notat?.kunINotat,
@@ -77,8 +84,12 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
     }) as VirkningstidspunktFormValues;
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdaterVirkningstidspunkt => {
-    const årsak = Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag);
-    const avslag = Object.values(Resultatkode).find((value) => value === values.årsakAvslag);
+    const årsak = values.årsakAvslag.startsWith(årsakPrefiks)
+        ? Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag.replace(årsakPrefiks, ""))
+        : null;
+    const avslag = values.årsakAvslag.startsWith(avslagPrefiks)
+        ? Object.values(Resultatkode).find((value) => value === values.årsakAvslag.replace(avslagPrefiks, ""))
+        : null;
     return {
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
@@ -182,7 +193,7 @@ const Main = ({ initialValues, error }) => {
                                 })
                                 .map((value) => (
                                     <option key={value} value={value}>
-                                        {hentVisningsnavn(value)}
+                                        {hentVisningsnavn(value.replace(årsakPrefiks, ""))}
                                     </option>
                                 ))}
                         </optgroup>
@@ -190,7 +201,7 @@ const Main = ({ initialValues, error }) => {
                     <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
                         {avslagsListe.map((value) => (
                             <option key={value} value={value}>
-                                {hentVisningsnavn(value)}
+                                {hentVisningsnavn(value.replace(avslagPrefiks, ""))}
                             </option>
                         ))}
                     </optgroup>
