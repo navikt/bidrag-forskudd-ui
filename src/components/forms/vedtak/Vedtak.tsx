@@ -354,30 +354,32 @@ const VedtakTableBody = ({
                 <>
                     {avslag ? (
                         <Table.Row>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                                 {periode.periode.til
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {opphør ? text.label.opphør : text.label.avslag}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
                         </Table.Row>
                     ) : (
                         <Table.Row>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                                 {periode.periode.til
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.inntekt)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{formatterBeløp(periode.inntekt)}</Table.DataCell>
 
-                            <Table.DataCell>{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
 
-                            <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{periode.antallBarnIHusstanden}</Table.DataCell>
+                            <Table.DataCell textSize="small">{formatterBeløp(periode.beløp)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
                         </Table.Row>
                     )}
                 </>
@@ -398,28 +400,34 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
     <Table.Header>
         {avslag ? (
             <Table.Row>
-                <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.årsak}</Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.periode}
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.resultat}
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.årsak}
+                </Table.HeaderCell>
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     {text.label.inntekt}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     {text.label.sivilstandBM}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     {text.label.antallBarn}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "100px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
                     {text.label.forskudd}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "250px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "250px" }}>
                     {text.label.resultat}
                 </Table.HeaderCell>
             </Table.Row>

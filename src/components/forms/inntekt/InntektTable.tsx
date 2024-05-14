@@ -77,9 +77,7 @@ export const Totalt = ({
                 hideLabel
             />
         ) : (
-            <div className="h-8 flex items-center justify-end">
-                <BodyShort>{formatterBeløp(item.beløp)}</BodyShort>
-            </div>
+            <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
         )}
     </>
 );
@@ -165,7 +163,7 @@ export const Periode = ({
         />
     ) : (
         <div className="h-8 flex items-center">
-            <BodyShort>{item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+            {item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}
         </div>
     );
 };

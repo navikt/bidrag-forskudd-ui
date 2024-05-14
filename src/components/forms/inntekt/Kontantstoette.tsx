@@ -62,19 +62,29 @@ export const Kontantstøtte = () => {
                                                 <Table.Header>
                                                     <Table.Row className="align-baseline">
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="center"
                                                             className="w-[84px]"
                                                         >
                                                             {text.label.taMed}
                                                         </Table.HeaderCell>
-                                                        <Table.HeaderCell scope="col" className="w-[144px]">
+                                                        <Table.HeaderCell
+                                                            textSize="small"
+                                                            scope="col"
+                                                            className="w-[144px]"
+                                                        >
                                                             {text.label.fraOgMed}
                                                         </Table.HeaderCell>
-                                                        <Table.HeaderCell scope="col" className="w-[144px]">
+                                                        <Table.HeaderCell
+                                                            textSize="small"
+                                                            scope="col"
+                                                            className="w-[144px]"
+                                                        >
                                                             {text.label.tilOgMed}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="center"
                                                             className="w-[74px]"
@@ -82,6 +92,7 @@ export const Kontantstøtte = () => {
                                                             {text.label.kilde}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="right"
                                                             className="w-[154px]"
@@ -104,7 +115,7 @@ export const Kontantstøtte = () => {
                                                                     handleOnSelect={handleOnSelect}
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Periode
                                                                     editableRow={editableRow}
                                                                     index={index}
@@ -114,7 +125,7 @@ export const Kontantstøtte = () => {
                                                                     item={item}
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Periode
                                                                     editableRow={editableRow}
                                                                     index={index}
@@ -127,7 +138,7 @@ export const Kontantstøtte = () => {
                                                             <Table.DataCell>
                                                                 <KildeIcon kilde={item.kilde} />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Totalt
                                                                     item={item}
                                                                     field={`kontantstøtte.${barn.ident}.${index}`}

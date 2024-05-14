@@ -42,13 +42,7 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8">
-            {hentVisningsnavn(
-                item.inntektstype,
-                item.opprinneligFom ?? item.datoFom,
-                item.opprinneligTom ?? item.datoTom
-            )}
-        </BodyShort>
+        hentVisningsnavn(item.inntektstype, item.opprinneligFom ?? item.datoFom, item.opprinneligTom ?? item.datoTom)
     );
 };
 
@@ -72,9 +66,7 @@ const Totalt = ({
                 hideLabel
             />
         ) : (
-            <div className="h-8 flex items-center justify-end">
-                <BodyShort>{formatterBeløp(item.beløpMnd)}</BodyShort>
-            </div>
+            <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløpMnd)}</div>
         )}
     </>
 );
@@ -145,29 +137,44 @@ export const Barnetillegg = () => {
                                                 <Table.Header>
                                                     <Table.Row className="align-baseline">
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="center"
                                                             className="w-[84px]"
                                                         >
                                                             {text.label.taMed}
                                                         </Table.HeaderCell>
-                                                        <Table.HeaderCell scope="col" className="w-[134px]">
+                                                        <Table.HeaderCell
+                                                            textSize="small"
+                                                            scope="col"
+                                                            className="w-[134px]"
+                                                        >
                                                             {text.label.fraOgMed}
                                                         </Table.HeaderCell>
-                                                        <Table.HeaderCell scope="col" className="w-[134px]">
+                                                        <Table.HeaderCell
+                                                            textSize="small"
+                                                            scope="col"
+                                                            className="w-[134px]"
+                                                        >
                                                             {text.label.tilOgMed}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="center"
                                                             className="w-[74px]"
                                                         >
                                                             {text.label.kilde}
                                                         </Table.HeaderCell>
-                                                        <Table.HeaderCell scope="col" className="w-[140px]">
+                                                        <Table.HeaderCell
+                                                            textSize="small"
+                                                            scope="col"
+                                                            className="w-[140px]"
+                                                        >
                                                             {text.label.type}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="right"
                                                             className="w-[150px]"
@@ -175,6 +182,7 @@ export const Barnetillegg = () => {
                                                             {text.label.beløpMnd}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             align="right"
                                                             className="w-[150px]"
@@ -182,6 +190,7 @@ export const Barnetillegg = () => {
                                                             {text.label.beløp12Mnd}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
+                                                            textSize="small"
                                                             scope="col"
                                                             className="w-[56px]"
                                                         ></Table.HeaderCell>
@@ -197,7 +206,7 @@ export const Barnetillegg = () => {
                                                                     handleOnSelect={handleOnSelect}
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Periode
                                                                     editableRow={editableRow}
                                                                     index={index}
@@ -207,7 +216,7 @@ export const Barnetillegg = () => {
                                                                     item={item}
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Periode
                                                                     editableRow={editableRow}
                                                                     index={index}
@@ -220,7 +229,7 @@ export const Barnetillegg = () => {
                                                             <Table.DataCell>
                                                                 <KildeIcon kilde={item.kilde} />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Beskrivelse
                                                                     item={item}
                                                                     field={`barnetillegg.${barn.ident}.${index}`}
@@ -230,7 +239,7 @@ export const Barnetillegg = () => {
                                                                     }
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <Totalt
                                                                     item={item}
                                                                     field={`barnetillegg.${barn.ident}.${index}`}
@@ -240,11 +249,9 @@ export const Barnetillegg = () => {
                                                                     }
                                                                 />
                                                             </Table.DataCell>
-                                                            <Table.DataCell>
+                                                            <Table.DataCell textSize="small">
                                                                 <div className="h-8 flex items-center justify-end">
-                                                                    <BodyShort>
-                                                                        {formatterBeløp(item.beløpMnd * 12)}
-                                                                    </BodyShort>
+                                                                    {formatterBeløp(item.beløpMnd * 12)}
                                                                 </div>
                                                             </Table.DataCell>
                                                             <Table.DataCell>

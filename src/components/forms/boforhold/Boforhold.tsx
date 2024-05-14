@@ -156,9 +156,7 @@ const Status = ({
             onSelect={() => clearErrors(`${fieldName}.bostatus`)}
         />
     ) : (
-        <div className="h-8 flex items-center">
-            <BodyShort>{bosstatusToVisningsnavn(item.bostatus)}</BodyShort>
-        </div>
+        <div className="h-8 flex items-center">{bosstatusToVisningsnavn(item.bostatus)}</div>
     );
 };
 
@@ -211,9 +209,7 @@ const Periode = ({
             hideLabel
         />
     ) : (
-        <div className="h-8 flex items-center">
-            <BodyShort>{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
-        </div>
+        <div className="h-8 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
     );
 };
 
@@ -867,16 +863,16 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     <Table size="small" className="table-fixed bg-white">
                         <Table.Header>
                             <Table.Row className="align-baseline">
-                                <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
                                     {text.label.fraOgMed}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
                                     {text.label.tilOgMed}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" align="left" className="w-[290px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[290px]">
                                     {text.label.status}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" align="left" className="w-[54px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
                                     {text.label.kilde}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[50px]"></Table.HeaderCell>
@@ -886,7 +882,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         <Table.Body>
                             {controlledFields.map((item, index) => (
                                 <Table.Row key={item?.id} className="align-top">
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <Periode
                                             editableRow={editableRow === `${barnIndex}.${index}`}
                                             label={text.label.fraOgMed}
@@ -896,7 +892,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             barn={barn}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <Periode
                                             editableRow={editableRow === `${barnIndex}.${index}`}
                                             label={text.label.tilOgMed}
@@ -906,7 +902,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             barn={barn}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <Status
                                             item={item}
                                             editableRow={editableRow === `${barnIndex}.${index}`}

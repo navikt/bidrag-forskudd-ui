@@ -40,25 +40,55 @@ export const BeregnetInntekter = () => {
                                 <Table size="small" className="table-fixed bg-white">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
-                                            <Table.HeaderCell scope="col" className="w-[198px]">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[198px]">
                                                 {text.label.fraOgMed} - {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[138px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[138px]"
+                                            >
                                                 {text.label.skattepliktigeInntekter}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[122px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[122px]"
+                                            >
                                                 {text.label.barnetillegg}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[112px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[112px]"
+                                            >
                                                 {text.label.utvidetBarnetrygd}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[94px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[94px]"
+                                            >
                                                 {text.label.småbarnstillegg}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[132px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[132px]"
+                                            >
                                                 {text.label.kontantstøtte}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[92px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[92px]"
+                                            >
                                                 {text.label.totalt}
                                             </Table.HeaderCell>
                                         </Table.Row>
@@ -66,7 +96,7 @@ export const BeregnetInntekter = () => {
                                     <Table.Body>
                                         {inntektPerBarn.summertInntektListe.map((delberegningSumInntekt, index) => (
                                             <Table.Row key={`${delberegningSumInntekt}-${index}`} className="align-top">
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     {DateToDDMMYYYYString(
                                                         dateOrNull(delberegningSumInntekt.periode.fom)
                                                     )}{" "}
@@ -80,27 +110,27 @@ export const BeregnetInntekter = () => {
                                                           )
                                                         : null}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString(
                                                         "nb-NO"
                                                     ) ?? 0}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.barnetillegg?.toLocaleString("nb-NO") ?? 0}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.utvidetBarnetrygd?.toLocaleString(
                                                         "nb-NO"
                                                     ) ?? 0}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.småbarnstillegg?.toLocaleString("nb-NO") ??
                                                         0}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.kontantstøtte?.toLocaleString("nb-NO") ?? 0}
                                                 </Table.DataCell>
-                                                <Table.DataCell align="left">
+                                                <Table.DataCell textSize="small" align="right">
                                                     {delberegningSumInntekt.totalinntekt.toLocaleString("nb-NO")}
                                                 </Table.DataCell>
                                             </Table.Row>

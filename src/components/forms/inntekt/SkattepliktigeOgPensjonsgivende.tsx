@@ -45,7 +45,7 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8">
+        <BodyShort className="leading-8" size="small">
             {hentVisningsnavn(
                 item.rapporteringstype,
                 item.opprinneligFom ?? item.datoFom,
@@ -121,22 +121,52 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                 <Table size="small" className="table-fixed bg-white">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
-                                            <Table.HeaderCell scope="col" align="left" className="w-[74px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[74px]"
+                                            >
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[134px]"
+                                            >
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[134px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[134px]"
+                                            >
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[290px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[290px]"
+                                            >
                                                 {text.label.beskrivelse}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="left" className="w-[54px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[54px]"
+                                            >
                                                 {text.label.kilde}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[154px]"
+                                            >
                                                 {text.label.beløp}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[50px]"></Table.HeaderCell>
@@ -159,7 +189,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         handleOnSelect={handleOnSelect}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <Periode
                                                         editableRow={editableRow}
                                                         index={index}
@@ -169,7 +199,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         item={item}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <Periode
                                                         editableRow={editableRow}
                                                         index={index}
@@ -179,7 +209,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         item={item}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <Beskrivelse
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
@@ -191,7 +221,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 <Table.DataCell>
                                                     <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
-                                                <Table.DataCell align="right">
+                                                <Table.DataCell align="right" textSize="small">
                                                     <Totalt
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
@@ -200,7 +230,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         }
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <EditOrSaveButton
                                                         index={index}
                                                         erMed={item.taMed}

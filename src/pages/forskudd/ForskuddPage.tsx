@@ -14,6 +14,7 @@ export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
     const { virkningstidspunkt, erVedtakFattet } = useGetBehandlingV2();
     const interactive = !virkningstidspunkt.avslag;
+    const activeStepIndex = STEPS[activeStep];
 
     return (
         <PageWrapper name="tracking-wide">
@@ -29,15 +30,21 @@ export const ForskuddPage = () => {
                 <FlexRow className="justify-center">
                     <Stepper
                         aria-labelledby="stepper-heading"
-                        activeStep={STEPS[activeStep]}
+                        activeStep={activeStepIndex}
                         onStepChange={(x) => setActiveStep(x)}
                         orientation="horizontal"
                         className="mb-8 w-[708px]"
                     >
-                        <Stepper.Step>{capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}</Stepper.Step>
-                        <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.BOFORHOLD)}</Stepper.Step>
-                        <Stepper.Step interactive={interactive}>{capitalize(ForskuddStepper.INNTEKT)}</Stepper.Step>
-                        <Stepper.Step>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
+                        <Stepper.Step completed={activeStepIndex > 1}>
+                            {capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}
+                        </Stepper.Step>
+                        <Stepper.Step completed={activeStepIndex > 2} interactive={interactive}>
+                            {capitalize(ForskuddStepper.BOFORHOLD)}
+                        </Stepper.Step>
+                        <Stepper.Step completed={activeStepIndex > 3} interactive={interactive}>
+                            {capitalize(ForskuddStepper.INNTEKT)}
+                        </Stepper.Step>
+                        <Stepper.Step completed={erVedtakFattet}>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                     </Stepper>
                 </FlexRow>
                 <FormWrapper />
