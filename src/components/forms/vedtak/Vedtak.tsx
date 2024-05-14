@@ -46,13 +46,13 @@ const Vedtak = () => {
         <div className="grid gap-y-8">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
-                <Heading level="2" size="xlarge">
+                <Heading level="2" size="medium">
                     {text.title.vedtak}
                 </Heading>
             </div>
             <div className="grid gap-y-2">
                 {!beregnetForskudd?.feil && (
-                    <Heading level="3" size="medium">
+                    <Heading level="3" size="small">
                         {text.title.oppsummering}
                     </Heading>
                 )}

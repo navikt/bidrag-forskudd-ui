@@ -218,7 +218,7 @@ const Main = () => {
 
     return (
         <>
-            <Heading level="3" size="medium">
+            <Heading level="3" size="small">
                 {text.label.barn}
             </Heading>
             <BarnPerioder />

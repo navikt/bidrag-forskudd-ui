@@ -41,7 +41,7 @@ export const FormLayout = ({
     return (
         <div className="grid gap-2">
             <div className="flex flex-row gap-2">
-                <Heading level="1" size="large">
+                <Heading level="1" size="medium">
                     {title}
                 </Heading>
                 <SaveStatusIndicator mutationKey={listenToMutations} queryClient={queryClient} />

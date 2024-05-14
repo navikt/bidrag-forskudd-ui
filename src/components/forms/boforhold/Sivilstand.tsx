@@ -45,7 +45,7 @@ export const Sivilstand = () => {
     const datoFom = useVirkningsdato();
     return (
         <div className="mt-8">
-            <Heading level="3" size="medium" id="sivilstand">
+            <Heading level="3" size="small" id="sivilstand">
                 {text.label.sivilstand}
             </Heading>
             <SivilistandPerioder virkningstidspunkt={datoFom} />
