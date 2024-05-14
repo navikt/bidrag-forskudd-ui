@@ -175,7 +175,8 @@ export enum Resultatkode {
     PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
     OPPHOLD_I_UTLANDET = "OPPHOLD_I_UTLANDET",
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
-    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    AVSLAG_PRIVAT_AVTALE_BIDRAG = "AVSLAG_PRIVAT_AVTALE_BIDRAG",
+    IKKESOKTOMINNKREVINGAVBIDRAG = "IKKE_SØKT_OM_INNKREVING_AV_BIDRAG",
 }
 
 export enum Rolletype {
@@ -1540,8 +1541,8 @@ export interface NotatResultatPeriodeDto {
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1605,8 +1606,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {

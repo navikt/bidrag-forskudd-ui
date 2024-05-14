@@ -21,7 +21,7 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import environment from "../../../environment";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "../../../hooks/useApiData";
 import useFeatureToogle from "../../../hooks/useFeatureToggle";
-import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
+import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "../../../hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "../../../types/vedtakTypes";
 import { deductDays } from "../../../utils/date-utils";
 import { formatterBeløp } from "../../../utils/number-utils";
@@ -348,6 +348,8 @@ const VedtakTableBody = ({
     avslag: boolean;
     opphør: boolean;
 }) => {
+    const { vedtakstype } = useGetBehandlingV2();
+
     return (
         <Table.Body>
             {resultatBarn.perioder.map((periode) => (
@@ -361,7 +363,9 @@ const VedtakTableBody = ({
                                     : ""}
                             </Table.DataCell>
                             <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                            <Table.DataCell>
+                                {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
+                            </Table.DataCell>
                         </Table.Row>
                     ) : (
                         <Table.Row>
@@ -377,7 +381,9 @@ const VedtakTableBody = ({
 
                             <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
                             <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                            <Table.DataCell>
+                                {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
+                            </Table.DataCell>
                         </Table.Row>
                     )}
                 </>

@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 
-import { Inntektsrapportering } from "../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Resultatkode, Vedtakstype } from "../api/BidragBehandlingApiV1";
 import { BEHANDLING_API_V1 } from "../constants/api";
 import { dateToMMYYYY, getYearFromDate } from "../utils/date-utils";
 
@@ -26,11 +26,22 @@ export function prefetchVisningsnavn() {
             }),
     });
 }
-
-export function hentVisningsnavn(kode: string, datoFom?: Date | string, datoTom?: Date | string) {
+export function hentVisningsnavnVedtakstype(kode: string, vedtakstype?: Vedtakstype) {
+    return hentVisningsnavn(kode, undefined, undefined, vedtakstype);
+}
+export function hentVisningsnavn(
+    kode: string,
+    datoFom?: Date | string,
+    datoTom?: Date | string,
+    vedtakstype?: Vedtakstype
+) {
     const visningsnavnMap = JSON.parse(window.localStorage.getItem("visningsnavn") || "{}");
     const toVisningsnavn = (kode: string) => {
-        return visningsnavnMap[kode] ?? "MANGLER_VISNINGSNAVN";
+        const visningsnavn = (visningsnavnMap[kode] ?? "MANGLER_VISNINGSNAVN") as string;
+        console.log(visningsnavn, vedtakstype);
+        if (kode == Resultatkode.AVSLAG_PRIVAT_AVTALE_BIDRAG && vedtakstype == Vedtakstype.OPPHOR)
+            return visningsnavn.replace("Avslag", "Opphør");
+        return visningsnavn;
     };
     const toVisningsnavnInntekt = (kode: string, datoFom?: Date | string, datoTom?: Date | string) => {
         const årstall = getYearFromDate(datoFom);
