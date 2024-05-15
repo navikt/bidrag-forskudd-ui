@@ -38,7 +38,6 @@ export function hentVisningsnavn(
     const visningsnavnMap = JSON.parse(window.localStorage.getItem("visningsnavn") || "{}");
     const toVisningsnavn = (kode: string) => {
         const visningsnavn = (visningsnavnMap[kode] ?? "MANGLER_VISNINGSNAVN") as string;
-        console.log(visningsnavn, vedtakstype);
         if (kode == Resultatkode.AVSLAG_PRIVAT_AVTALE_BIDRAG && vedtakstype == Vedtakstype.OPPHOR)
             return visningsnavn.replace("Avslag", "Opphør");
         return visningsnavn;
