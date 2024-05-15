@@ -16,8 +16,9 @@ export const ForskuddPage = () => {
     const {
         virkningstidspunkt,
         erVedtakFattet,
+        vedtakstype,
         inntekter: { valideringsfeil: inntektValideringsfeil },
-   , vedtakstype } = useGetBehandlingV2();
+    } = useGetBehandlingV2();
     const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
