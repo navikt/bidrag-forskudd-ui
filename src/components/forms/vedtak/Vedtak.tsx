@@ -386,11 +386,8 @@ const VedtakTableBody = ({
 
                             <Table.DataCell textSize="small">{periode.antallBarnIHusstanden}</Table.DataCell>
                             <Table.DataCell textSize="small">{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
-                            <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell>
-                                {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
+                            <Table.DataCell textSize="small">
+                                {hentVisningsnavnVedtakstype(periode.resultatKode)}
                             </Table.DataCell>
                         </Table.Row>
                     )}
