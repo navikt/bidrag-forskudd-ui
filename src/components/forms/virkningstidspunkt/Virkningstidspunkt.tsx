@@ -35,6 +35,8 @@ import {
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 const årsakListe = [
+    TypeArsakstype.TREMANEDERTILBAKE,
+    TypeArsakstype.TREARSREGELEN,
     TypeArsakstype.FRABARNETSFODSEL,
     TypeArsakstype.FRABARNETSFLYTTEMANED,
     TypeArsakstype.FRA_KRAVFREMSETTELSE,
@@ -45,8 +47,6 @@ const årsakListe = [
     TypeArsakstype.REVURDERINGMANEDENETTER,
     TypeArsakstype.SOKNADSTIDSPUNKTENDRING,
     TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
-    TypeArsakstype.TREMANEDERTILBAKE,
-    TypeArsakstype.TREARSREGELEN,
 ];
 
 const avslagsListe = [
