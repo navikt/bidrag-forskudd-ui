@@ -48,7 +48,10 @@ export const ForskuddPage = () => {
                             {capitalize(ForskuddStepper.BOFORHOLD)}
                         </Stepper.Step>
                         <Stepper.Step
-                            completed={activeStepIndex > 3 && !Object.keys(inntektValideringsfeil).length}
+                            completed={
+                                activeStepIndex > 3 &&
+                                (inntektValideringsfeil == null || !Object.keys(inntektValideringsfeil).length)
+                            }
                             interactive={interactive}
                         >
                             {capitalize(ForskuddStepper.INNTEKT)}
