@@ -2,6 +2,7 @@ import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import React from "react";
 
+import { Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
@@ -11,8 +12,8 @@ import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { activeStep, setActiveStep } = useForskudd();
-    const { virkningstidspunkt, erVedtakFattet } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag;
+    const { virkningstidspunkt, erVedtakFattet, vedtakstype } = useGetBehandlingV2();
+    const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
 
     return (
         <PageWrapper name="tracking-wide">
