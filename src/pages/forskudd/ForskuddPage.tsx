@@ -2,6 +2,7 @@ import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import React from "react";
 
+import { Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { STEPS } from "../../constants/steps";
@@ -16,8 +17,8 @@ export const ForskuddPage = () => {
         virkningstidspunkt,
         erVedtakFattet,
         inntekter: { valideringsfeil: inntektValideringsfeil },
-    } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag;
+   , vedtakstype } = useGetBehandlingV2();
+    const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
     return (

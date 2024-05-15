@@ -175,6 +175,8 @@ export enum Resultatkode {
     PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
     OPPHOLD_I_UTLANDET = "OPPHOLD_I_UTLANDET",
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
+    AVSLAG_PRIVAT_AVTALE_BIDRAG = "AVSLAG_PRIVAT_AVTALE_BIDRAG",
+    IKKESOKTOMINNKREVINGAVBIDRAG = "IKKE_SØKT_OM_INNKREVING_AV_BIDRAG",
 }
 
 export enum Rolletype {
@@ -317,7 +319,7 @@ export interface HusstandsbarnperiodeDto {
 }
 
 export interface OppdaterBehandlingRequestV2 {
-    virkningstidspunkt?: OppdaterVirkningstidspunkt;
+    virkningstidspunkt?: OppdatereVirkningstidspunkt;
     /**
      *
      * For `husstandsbarn` og `sivilstand`
@@ -347,19 +349,6 @@ export interface OppdaterBoforholdRequest {
 
 export interface OppdaterNotat {
     kunINotat?: string;
-    medIVedtaket?: string;
-}
-
-export interface OppdaterVirkningstidspunkt {
-    årsak?: TypeArsakstype;
-    avslag?: Resultatkode;
-    /**
-     * Oppdater virkningsdato. Hvis verdien er satt til null vil virkningsdato bli slettet. Hvis verdien er satt til tom verdi eller ikke er satt vil det ikke bli gjort noe endringer
-     * @format date
-     * @example "2025-01-25"
-     */
-    virkningstidspunkt?: string;
-    notat?: OppdaterNotat;
 }
 
 export interface OppdatereInntekterRequestV2 {
@@ -429,6 +418,18 @@ export interface OppdaterePeriodeInntekt {
     taMedIBeregning: boolean;
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     angittPeriode: Datoperiode;
+}
+
+export interface OppdatereVirkningstidspunkt {
+    årsak?: TypeArsakstype;
+    avslag?: Resultatkode;
+    /**
+     * Oppdater virkningsdato. Hvis verdien er satt til null vil det ikke bli gjort noe endringer
+     * @format date
+     * @example "2025-01-25"
+     */
+    virkningstidspunkt?: string;
+    notat?: OppdaterNotat;
 }
 
 export interface SivilstandDto {
@@ -591,7 +592,7 @@ export interface BoforholdPeriodeseringsfeil {
     manglerPerioder: boolean;
     /** Er sann hvis husstandsbarn ikke har noen løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
-    barn?: HusstandsbarnPeriodiseringsfeilDto;
+    barn: HusstandsbarnPeriodiseringsfeilDto;
 }
 
 export interface BoforholdValideringsfeil {
@@ -653,6 +654,12 @@ export interface HusstandsbarnPeriodiseringsfeilDto {
     fødselsdato: string;
     /**
      * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @format int64
+     */
+    husstandsbarnId: number;
+    /**
+     * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @deprecated
      * @format int64
      */
     tekniskId: number;
@@ -909,6 +916,8 @@ export interface SivilstandPeriodeseringsfeil {
     fremtidigPeriode: boolean;
     /** Er sann hvis det mangler sivilstand perioder." */
     manglerPerioder: boolean;
+    /** Er sann hvis en eller flere perioder har status UKJENT." */
+    ugyldigStatus: boolean;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
 }
@@ -1825,6 +1834,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags behandling-controller-v-2
          * @name OppdatereBehandlingV2
          * @request PUT:/api/v2/behandling/{behandlingsid}
+         * @deprecated
          * @secure
          */
         oppdatereBehandlingV2: (behandlingsid: number, data: OppdaterBehandlingRequestV2, params: RequestParams = {}) =>
@@ -1864,7 +1874,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          */
         oppdatereVirkningstidspunktV2: (
             behandlingsid: number,
-            data: OppdaterVirkningstidspunkt,
+            data: OppdatereVirkningstidspunkt,
             params: RequestParams = {}
         ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
