@@ -20,6 +20,9 @@ export default function useFeatureToogle() {
     useEffect(() => {
         client.updateContext({
             userId,
+            properties: {
+                enhet: "123",
+            },
         });
     }, [userId]);
 
