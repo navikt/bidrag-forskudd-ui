@@ -13,7 +13,29 @@ import { STEPS } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { useBehandlingV2 } from "../hooks/useApiData";
 import { InntektFormValues } from "../types/inntektFormValues";
-import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
+
+export type InntektTables =
+    | "småbarnstillegg"
+    | "utvidetBarnetrygd"
+    | `årsinntekter.${string}`
+    | `barnetillegg.${string}`
+    | `kontantstøtte.${string}`;
+
+type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+
+export type PageErrorsOrUnsavedState = {
+    virkningstidspunkt: { error: boolean };
+    boforhold: {
+        error: boolean;
+        openFields?: { [key in HusstandsbarnTables]: boolean };
+    };
+    inntekt: {
+        error: boolean;
+        openFields?: {
+            [key in InntektTables]: boolean;
+        };
+    };
+};
 
 interface IForskuddContext {
     activeStep: string;
@@ -23,14 +45,14 @@ interface IForskuddContext {
     lesemodus: boolean;
     erVedtakFattet: boolean;
     saksnummer?: string;
-    virkningstidspunktFormValues: VirkningstidspunktFormValues;
-    setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
     setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
     errorMessage: { title: string; text: string };
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
+    pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
+    setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
 }
 
 interface IForskuddContextProps {
@@ -43,8 +65,12 @@ export const ForskuddContext = createContext<IForskuddContext | null>(null);
 function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
+    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState({
+        virkningstidspunkt: { error: false },
+        boforhold: { error: false },
+        inntekt: { error: false },
+    });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
@@ -64,24 +90,24 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
-            virkningstidspunktFormValues,
-            setVirkningstidspunktFormValues,
             inntektFormValues,
             setInntektFormValues,
             errorMessage,
             setErrorMessage,
             errorModalOpen,
             setErrorModalOpen,
+            pageErrorsOrUnsavedState,
+            setPageErrorsOrUnsavedState,
         }),
         [
             activeStep,
             behandlingId,
             vedtakId,
             saksnummer,
-            virkningstidspunktFormValues,
             inntektFormValues,
             errorMessage,
             errorModalOpen,
+            pageErrorsOrUnsavedState,
         ]
     );
 

@@ -1,4 +1,4 @@
-import { capitalize, toISODateString } from "@navikt/bidrag-ui-common";
+import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -194,6 +194,7 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
+    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useForskudd();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
@@ -203,24 +204,12 @@ const VirkningstidspunktForm = () => {
         defaultValues: initialValues,
     });
 
-    const onSave = () => {
-        const values = useFormMethods.getValues();
-        oppdaterBehandling.mutation.mutate(createPayload(values), {
-            onSuccess: (response) => {
-                oppdaterBehandling.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        virkningstidspunkt: response.virkningstidspunkt,
-                        boforhold: response.boforhold,
-                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
-                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
-                    };
-                });
-            },
+    useEffect(() => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            virkningstidspunkt: { error: !ObjectUtils.isEmpty(useFormMethods.formState.errors) },
         });
-    };
-
-    const debouncedOnSave = useDebounce(onSave);
+    }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name }) => {
@@ -254,6 +243,25 @@ const VirkningstidspunktForm = () => {
             setInitialVirkningsdato(virkningstidspunkt.virkningstidspunkt);
         }
     }, [virkningstidspunkt.virkningstidspunkt]);
+
+    const onSave = () => {
+        const values = useFormMethods.getValues();
+        oppdaterBehandling.mutation.mutate(createPayload(values), {
+            onSuccess: (response) => {
+                oppdaterBehandling.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        virkningstidspunkt: response.virkningstidspunkt,
+                        boforhold: response.boforhold,
+                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                    };
+                });
+            },
+        });
+    };
+
+    const debouncedOnSave = useDebounce(onSave);
 
     return (
         <>

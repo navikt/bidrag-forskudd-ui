@@ -8,16 +8,17 @@ export const ConfirmationModal = forwardRef(
             description,
             footer,
         }: {
-            heading: string;
+            heading: ReactNode;
             description: string;
             footer: ReactNode;
         },
         ref: MutableRefObject<HTMLDialogElement>
     ) => {
         return (
-            <Modal ref={ref} header={{ heading }} closeOnBackdropClick>
+            <Modal ref={ref} closeOnBackdropClick aria-labelledby="modal-heading">
+                <Modal.Header>{heading}</Modal.Header>
                 <Modal.Body>
-                    <BodyLong>{description}</BodyLong>
+                    <BodyLong size="small">{description}</BodyLong>
                 </Modal.Body>
                 <Modal.Footer>{footer}</Modal.Footer>
             </Modal>

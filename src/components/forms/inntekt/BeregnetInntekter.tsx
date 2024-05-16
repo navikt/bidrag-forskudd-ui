@@ -15,7 +15,7 @@ export const BeregnetInntekter = () => {
 
     return (
         <Box padding="4" background="surface-subtle">
-            <Heading level="3" size="medium" className="mb-4">
+            <Heading level="2" size="small" className="mb-4">
                 {text.title.beregnetTotalt}
             </Heading>
             <div className="grid gap-y-[24px]">

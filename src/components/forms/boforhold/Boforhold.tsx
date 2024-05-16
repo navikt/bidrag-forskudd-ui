@@ -218,7 +218,7 @@ const Main = () => {
 
     return (
         <>
-            <Heading level="3" size="small">
+            <Heading level="2" size="small">
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
@@ -265,6 +265,7 @@ const AddBarnForm = ({
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { getValues } = useFormContext<BoforholdFormValues>();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -353,6 +354,7 @@ const AddBarnForm = ({
             }
         );
         setOpenAddBarnForm(false);
+        updatedPageErrorState();
     };
 
     const onSearchClick = (value) => {
@@ -381,6 +383,21 @@ const AddBarnForm = ({
         setError(formErrors);
     };
 
+    const updatedPageErrorState = () => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            boforhold: {
+                ...pageErrorsOrUnsavedState.boforhold,
+                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields, newBarn: false },
+            },
+        });
+    };
+
+    const onClose = () => {
+        setOpenAddBarnForm(false);
+        updatedPageErrorState();
+    };
+
     return (
         <Box className="mt-4 mb-4 p-4" borderWidth="1">
             <VStack gap="4">
@@ -389,7 +406,7 @@ const AddBarnForm = ({
                     <div className="ml-auto self-end">
                         <Button
                             type="button"
-                            onClick={() => setOpenAddBarnForm(false)}
+                            onClick={onClose}
                             icon={<TrashIcon aria-hidden />}
                             variant="tertiary"
                             size="small"
@@ -478,13 +495,13 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
             <ConfirmationModal
                 ref={ref}
                 description={text.varsel.ønskerDuÅSletteBarnet}
-                heading={text.varsel.ønskerDuÅSlette}
+                heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
                 footer={
                     <>
-                        <Button type="button" onClick={onConfirm}>
+                        <Button type="button" onClick={onConfirm} size="small">
                             {text.label.jaSlett}
                         </Button>
-                        <Button type="button" variant="secondary" onClick={() => ref.current?.close()}>
+                        <Button type="button" variant="secondary" size="small" onClick={() => ref.current?.close()}>
                             {text.label.avbryt}
                         </Button>
                     </>
@@ -495,11 +512,10 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
 };
 const BarnPerioder = () => {
     const datoFom = useVirkningsdato();
-    const { lesemodus } = useForskudd();
-    const { getValues } = useFormContext<BoforholdFormValues>();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
-    const { control } = useFormContext<BoforholdFormValues>();
+    const { control, getValues } = useFormContext<BoforholdFormValues>();
     const barnFieldArray = useFieldArray({
         control,
         name: "husstandsbarn",
@@ -514,6 +530,13 @@ const BarnPerioder = () => {
 
     const onOpenAddBarnForm = () => {
         setOpenAddBarnForm(true);
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            boforhold: {
+                ...pageErrorsOrUnsavedState.boforhold,
+                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields, newBarn: true },
+            },
+        });
     };
 
     const onRemoveBarn = (index: number) => {
@@ -532,6 +555,17 @@ const BarnPerioder = () => {
                                 husstandsbarn: currentData.boforhold.husstandsbarn.filter((b) => b.id !== barn.id),
                             },
                         };
+                    });
+
+                    const openFields = { ...pageErrorsOrUnsavedState.boforhold.openFields };
+                    delete openFields[`husstandsbarn.${index}`];
+
+                    setPageErrorsOrUnsavedState({
+                        ...pageErrorsOrUnsavedState,
+                        boforhold: {
+                            ...pageErrorsOrUnsavedState.boforhold,
+                            openFields,
+                        },
                     });
                 },
             }
@@ -584,13 +618,13 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
-    const { setErrorMessage, setErrorModalOpen } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, setError, setValue, getFieldState, resetField } =
+    const { control, getValues, clearErrors, setError, setValue, getFieldState, resetField, formState } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
@@ -604,6 +638,19 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
+
+    useEffect(() => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            boforhold: {
+                error: !ObjectUtils.isEmpty(formState.errors),
+                openFields: {
+                    ...pageErrorsOrUnsavedState.boforhold.openFields,
+                    [`husstandsbarn.${barnIndex}`]: !!editableRow,
+                },
+            },
+        });
+    }, [formState.errors, editableRow]);
 
     const onSaveRow = (index: number) => {
         const periodeValues = getValues(`husstandsbarn.${barnIndex}.perioder.${index}`);
@@ -716,6 +763,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     : Bostatuskode.MED_FORELDER,
                 kilde: Kilde.MANUELL,
             });
+
             setEditableRow(`${barnIndex}.${perioderValues.length}`);
         }
     };

@@ -114,7 +114,12 @@ export const Opplysninger = ({
                 return "Endring";
         }
     }
-    if (lesemodus || (ident && ikkeAktiverteEndringer[ident].length < 1)) return null;
+    if (
+        lesemodus ||
+        (ident && ikkeAktiverteEndringer[ident].length < 1) ||
+        Object.values(ikkeAktiverteEndringer).every((ikkeAktiverteEndring) => ikkeAktiverteEndring.length < 1)
+    )
+        return null;
 
     return (
         <>

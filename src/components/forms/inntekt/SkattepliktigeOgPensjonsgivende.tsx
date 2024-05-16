@@ -93,7 +93,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <div className="flex gap-x-4">
-                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_skattepliktig}>
+                <Heading level="2" size="small" id={elementId.seksjon_inntekt_skattepliktig}>
                     {text.title.skattepliktigeogPensjonsgivendeInntekt}
                 </Heading>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}

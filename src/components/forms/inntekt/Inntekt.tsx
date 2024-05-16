@@ -58,7 +58,7 @@ const InntektHeader = ({ ident }: { ident: string }) => {
             <InntektChart inntekt={inntekt} />
             <ExpansionCard aria-label="default-demo" size="small">
                 <ExpansionCard.Header>
-                    <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
+                    <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
                 </ExpansionCard.Header>
                 <ExpansionCard.Content>
                     <QueryErrorWrapper>

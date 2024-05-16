@@ -1,7 +1,7 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useState } from "react";
+import { BodyShort, Button, Heading } from "@navikt/ds-react";
+import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
@@ -13,7 +13,7 @@ import {
     OppdatereInntektResponse,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { useForskudd } from "../../../context/ForskuddContext";
+import { InntektTables, useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
@@ -24,6 +24,7 @@ import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
@@ -173,16 +174,12 @@ export const InntektTabel = ({
     customRowValidation,
     children,
 }: {
-    fieldName:
-        | "småbarnstillegg"
-        | "utvidetBarnetrygd"
-        | `årsinntekter.${string}`
-        | `barnetillegg.${string}`
-        | `kontantstøtte.${string}`;
+    fieldName: InntektTables;
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } =
+        useForskudd();
     const {
         inntekter: { valideringsfeil },
         søktFomDato,
@@ -191,13 +188,24 @@ export const InntektTabel = ({
     const virkningsdato = useVirkningsdato();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
-    const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
+    const { control, getFieldState, getValues, clearErrors, setError, setValue, formState } =
+        useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control,
         name: fieldName,
     });
     const watchFieldArray = useWatch({ control, name: fieldName });
     const [inntektType, ident] = fieldName.split(".");
+
+    useEffect(() => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            inntekt: {
+                error: !ObjectUtils.isEmpty(formState.errors),
+                openFields: { ...pageErrorsOrUnsavedState.inntekt.openFields, [fieldName]: !!editableRow },
+            },
+        });
+    }, [formState.errors, editableRow]);
 
     const unsetEditedRow = (index: number) => {
         if (editableRow === index) {
@@ -345,7 +353,7 @@ export const InntektTabel = ({
     return (
         <>
             {!lesemodus && tableValideringsfeil && (
-                <Alert variant="warning" className="mb-4">
+                <ForskuddAlert variant="warning" className="mb-4">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
@@ -387,7 +395,7 @@ export const InntektTabel = ({
                     {tableValideringsfeil.manglerPerioder && (
                         <BodyShort size="small">{text.error.manglerPerioder}</BodyShort>
                     )}
-                </Alert>
+                </ForskuddAlert>
             )}
             {children({
                 controlledFields,
