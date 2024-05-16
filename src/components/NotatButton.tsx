@@ -1,5 +1,6 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
+import React from "react";
 
 import text from "../constants/texts";
 import { useForskudd } from "../context/ForskuddContext";
