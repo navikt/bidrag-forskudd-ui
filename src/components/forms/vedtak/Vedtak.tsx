@@ -365,9 +365,7 @@ const VedtakTableBody = ({
                             <Table.DataCell textSize="small">
                                 {opphør ? text.label.opphør : text.label.avslag}
                             </Table.DataCell>
-                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
-                            <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
                             </Table.DataCell>
                         </Table.Row>
@@ -386,10 +384,7 @@ const VedtakTableBody = ({
 
                             <Table.DataCell textSize="small">{periode.antallBarnIHusstanden}</Table.DataCell>
                             <Table.DataCell textSize="small">{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
-                            <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
                             </Table.DataCell>
                         </Table.Row>
