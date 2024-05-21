@@ -56,7 +56,11 @@ const Beskrivelse = ({
                     item.opprinneligTom ?? item.datoTom
                 )}
             </p>
-            {alert && <Buildings3FillIcon className="self-center ml-[5px] text-[var(--a-icon-info)]" title={alert} />}
+            {alert && (
+                <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
+                    <Buildings3FillIcon title={alert} />
+                </p>
+            )}
         </BodyShort>
     );
 };
