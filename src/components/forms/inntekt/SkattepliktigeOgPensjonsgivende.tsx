@@ -1,4 +1,4 @@
-import { Buildings3FillIcon } from "@navikt/aksel-icons";
+import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
@@ -49,16 +49,14 @@ const Beskrivelse = ({
         />
     ) : (
         <BodyShort className="leading-8 flex flex-row gap-0 align-center">
-            <p>
-                {hentVisningsnavn(
-                    item.rapporteringstype,
-                    item.opprinneligFom ?? item.datoFom,
-                    item.opprinneligTom ?? item.datoTom
-                )}
-            </p>
+            {hentVisningsnavn(
+                item.rapporteringstype,
+                item.opprinneligFom ?? item.datoFom,
+                item.opprinneligTom ?? item.datoTom
+            )}
             {alert && (
                 <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
-                    <Buildings3FillIcon title={alert} />
+                    <SackKronerFillIcon title={alert} />
                 </p>
             )}
         </BodyShort>
