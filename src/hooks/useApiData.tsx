@@ -209,6 +209,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
     }));
 
     const bmRequests = [
+        GrunnlagRequestType.ARBEIDSFORHOLD,
         GrunnlagRequestType.AINNTEKT,
         GrunnlagRequestType.SKATTEGRUNNLAG,
         GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
@@ -216,6 +217,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
         GrunnlagRequestType.KONTANTSTOTTE,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
+        GrunnlagRequestType.OVERGANGSSTONAD,
     ].map((type) => ({
         type,
         personId: bmIdent,

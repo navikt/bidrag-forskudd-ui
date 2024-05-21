@@ -1,4 +1,5 @@
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { addMonths } from "date-fns";
 
 import { BehandlingDtoV2, TypeArsakstype } from "../../../api/BidragBehandlingApiV1";
 import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "../../../utils/date-utils";
@@ -33,6 +34,8 @@ export const mapÅrsakTilVirkningstidspunkt = (
         : treMaanederTilbakeFraMottatDato;
 
     switch (aarsak) {
+        case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
+            return firstDayOfMonth(addMonths(mottatDato, 1));
         case TypeArsakstype.FRABARNETSFODSEL:
             return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), mottatOrSoktFraDato)
                 ? firstDayOfMonth(new Date(barnsFødselsdato))

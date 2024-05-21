@@ -47,6 +47,7 @@ const årsakListe = [
     TypeArsakstype.REVURDERINGMANEDENETTER,
     TypeArsakstype.SOKNADSTIDSPUNKTENDRING,
     TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
+    TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK,
 ];
 
 const avslagsListe = [
