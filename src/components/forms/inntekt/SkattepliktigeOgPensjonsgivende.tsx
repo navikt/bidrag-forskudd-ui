@@ -1,4 +1,4 @@
-import { ExclamationmarkIcon } from "@navikt/aksel-icons";
+import { Buildings3FillIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
@@ -49,20 +49,14 @@ const Beskrivelse = ({
         />
     ) : (
         <BodyShort className="leading-8 flex flex-row gap-0 align-center">
-            {hentVisningsnavn(
-                item.rapporteringstype,
-                item.opprinneligFom ?? item.datoFom,
-                item.opprinneligTom ?? item.datoTom
-            )}
-            {alert && (
-                <ExclamationmarkIcon
-                    width={"30px"}
-                    height={"30px"}
-                    color="var(--a-icon-info)"
-                    className="self-centers ml-[-5px]"
-                    title={alert}
-                />
-            )}
+            <p>
+                {hentVisningsnavn(
+                    item.rapporteringstype,
+                    item.opprinneligFom ?? item.datoFom,
+                    item.opprinneligTom ?? item.datoTom
+                )}
+            </p>
+            {alert && <Buildings3FillIcon color="var(--a-icon-info)" className="self-center ml-[5px]" title={alert} />}
         </BodyShort>
     );
 };
