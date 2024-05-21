@@ -1,5 +1,6 @@
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
-import { Alert, Heading, Stepper } from "@navikt/ds-react";
+import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
 import React from "react";
 
 import { Vedtakstype } from "../../api/BidragBehandlingApiV1";
@@ -40,6 +41,41 @@ export const ForskuddPage = () => {
                 </Stepper>
                 <FormWrapper />
             </BidragContainer>
+            <LovverkKnapper />
         </PageWrapper>
     );
 };
+
+function LovverkKnapper() {
+    const { activeStep } = useForskudd();
+
+    function renderKnapp(tekst: string, url: string) {
+        return (
+            <div>
+                <Button
+                    title={tekst}
+                    variant="tertiary"
+                    className={`border rounded-xl border-solid`}
+                    size="xsmall"
+                    icon={<ExternalLinkIcon />}
+                    onClick={() => window.open(url, "_blank")}
+                >
+                    {tekst}
+                </Button>
+            </div>
+        );
+    }
+    if (activeStep == ForskuddStepper.VEDTAK) return null;
+    return (
+        <div className="agroup fixed bottom-0 right-0 p-2  flex items-end justify-end w-max h-24 flex flex-row gap-[5px]">
+            {renderKnapp("Lov om bidragsforskudd", "https://lovdata.no/dokument/NL/lov/1989-02-17-2")}
+            {activeStep == ForskuddStepper.BOFORHOLD &&
+                renderKnapp("Rundskriv til forskuddsloven", "https://lovdata.no/nav/rundskriv/r54-00#KAPITTEL_2-3")}
+            {activeStep == ForskuddStepper.INNTEKT &&
+                renderKnapp(
+                    "Forskrift om inntektsprøving av forskudd",
+                    "https://lovdata.no/dokument/SF/forskrift/2003-02-06-125"
+                )}
+        </div>
+    );
+}

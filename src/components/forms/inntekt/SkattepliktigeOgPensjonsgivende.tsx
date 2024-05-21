@@ -1,9 +1,10 @@
+import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Kilde } from "../../../api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Inntektstype, Kilde } from "../../../api/BidragBehandlingApiV1";
 import elementId from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
@@ -20,10 +21,12 @@ const Beskrivelse = ({
     item,
     field,
     erRedigerbart,
+    alert,
 }: {
     item: InntektFormPeriode;
     field: string;
     erRedigerbart: boolean;
+    alert?: string;
 }) => {
     return erRedigerbart ? (
         <FormControlledSelectField
@@ -45,11 +48,16 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8">
+        <BodyShort className="leading-8 flex flex-row gap-0 align-center">
             {hentVisningsnavn(
                 item.rapporteringstype,
                 item.opprinneligFom ?? item.datoFom,
                 item.opprinneligTom ?? item.datoTom
+            )}
+            {alert && (
+                <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
+                    <SackKronerFillIcon title={alert} />
+                </p>
             )}
         </BodyShort>
     );
@@ -183,6 +191,15 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                     <Beskrivelse
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
+                                                        alert={
+                                                            item.inntektsposter.some(
+                                                                (d) =>
+                                                                    d.inntektstype == Inntektstype.NAeRINGSINNTEKT ||
+                                                                    d.kode.toUpperCase().includes("NAERING")
+                                                            )
+                                                                ? "Inntekt inneholder næringsinntekt"
+                                                                : undefined
+                                                        }
                                                         erRedigerbart={
                                                             editableRow === index && item.kilde === Kilde.MANUELL
                                                         }
