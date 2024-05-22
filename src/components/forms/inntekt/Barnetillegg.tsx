@@ -15,6 +15,7 @@ import { FormControlledTextField } from "../../formFields/FormControlledTextFiel
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
+import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -140,7 +141,7 @@ export const Barnetillegg = () => {
                             <>
                                 {controlledFields.length > 0 && (
                                     <div className="overflow-x-auto whitespace-nowrap">
-                                        <Table size="small" className="table-fixed bg-white">
+                                        <Table size="small" className="lg:table-auto table-fixed table bg-white">
                                             <Table.Header>
                                                 <Table.Row className="align-baseline">
                                                     <Table.HeaderCell scope="col" align="center" className="w-[84px]">
@@ -166,13 +167,23 @@ export const Barnetillegg = () => {
                                                     </Table.HeaderCell>
                                                     <Table.HeaderCell
                                                         scope="col"
-                                                        className="w-[56px]"
+                                                        className="w-[50px]"
+                                                    ></Table.HeaderCell>
+                                                    <Table.HeaderCell
+                                                        scope="col"
+                                                        className="w-[25px]"
                                                     ></Table.HeaderCell>
                                                 </Table.Row>
                                             </Table.Header>
                                             <Table.Body>
                                                 {controlledFields.map((item, index) => (
-                                                    <Table.Row key={item.id} className="align-top">
+                                                    <Table.ExpandableRow
+                                                        key={item?.id + item.ident}
+                                                        content={<ExpandableContent item={item} />}
+                                                        togglePlacement="right"
+                                                        className="align-top"
+                                                        expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                    >
                                                         <Table.DataCell>
                                                             <TaMed
                                                                 fieldName={`barnetillegg.${barn.ident}`}
@@ -239,7 +250,7 @@ export const Barnetillegg = () => {
                                                                 onSaveRow={onSaveRow}
                                                             />
                                                         </Table.DataCell>
-                                                    </Table.Row>
+                                                    </Table.ExpandableRow>
                                                 ))}
                                             </Table.Body>
                                         </Table>
