@@ -196,7 +196,7 @@ const opplysningTilElementId = (opplysninger: OpplysningerType) => {
 };
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const {
         virkningstidspunkt: { avslag },
         vedtakstype,
@@ -215,7 +215,7 @@ const VedtakResultat = () => {
                     ? "Virkningstidspunkt: Mangler årsak"
                     : "Virkningstidspunkt";
             feilliste.push(
-                <ErrorSummary.Item href="#" onClick={() => setActiveStep(STEPS.virkningstidspunkt)}>
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(STEPS.virkningstidspunkt)}>
                     {beskrivelse}
                 </ErrorSummary.Item>
             );
@@ -225,7 +225,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementIds.seksjon_boforhold}_${value.barn.tekniskId}`}
-                        onClick={() => setActiveStep(STEPS.boforhold)}
+                        onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}
                     </ErrorSummary.Item>
@@ -236,7 +236,7 @@ const VedtakResultat = () => {
             feilliste.push(
                 <ErrorSummary.Item
                     href={`#${elementIds.seksjon_sivilstand}`}
-                    onClick={() => setActiveStep(STEPS.boforhold)}
+                    onClick={() => onStepChange(STEPS.boforhold)}
                 >
                     Sivilstand
                 </ErrorSummary.Item>
@@ -247,7 +247,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_skattepliktig}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}
                     </ErrorSummary.Item>
@@ -256,7 +256,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_barnetillegg}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.barnetillegg.toLowerCase()}
                     </ErrorSummary.Item>
@@ -265,7 +265,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_kontantstøtte}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.kontantstøtte.toLowerCase()}
                     </ErrorSummary.Item>
@@ -274,7 +274,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_utvidetbarnetrygd}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.utvidetBarnetrygd.toLowerCase()}
                     </ErrorSummary.Item>
@@ -283,7 +283,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_småbarnstillegg}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.småbarnstillegg.toLowerCase()}
                     </ErrorSummary.Item>
@@ -293,7 +293,7 @@ const VedtakResultat = () => {
             feilliste.push(
                 <ErrorSummary.Item
                     href={`#${opplysningTilElementId(value)}`}
-                    onClick={() => setActiveStep(opplysningTilStep(value))}
+                    onClick={() => onStepChange(opplysningTilStep(value))}
                 >
                     {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
                 </ErrorSummary.Item>

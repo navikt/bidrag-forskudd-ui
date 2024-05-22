@@ -15,7 +15,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
-    OppdaterVirkningstidspunkt,
+    OppdatereVirkningstidspunkt,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -231,6 +231,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
     }));
 
     const bmRequests = [
+        GrunnlagRequestType.ARBEIDSFORHOLD,
         GrunnlagRequestType.AINNTEKT,
         GrunnlagRequestType.SKATTEGRUNNLAG,
         GrunnlagRequestType.UTVIDETBARNETRYGDOGSMABARNSTILLEGG,
@@ -238,6 +239,7 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
         GrunnlagRequestType.KONTANTSTOTTE,
         GrunnlagRequestType.HUSSTANDSMEDLEMMER_OG_EGNE_BARN,
         GrunnlagRequestType.SIVILSTAND,
+        GrunnlagRequestType.OVERGANGSSTONAD,
     ].map((type) => ({
         type,
         personId: bmIdent,
@@ -459,7 +461,7 @@ export const useOppdatereVirkningstidspunktV2 = () => {
 
     return useMutation({
         mutationKey: MutationKeys.updateBoforhold(behandlingId),
-        mutationFn: async (payload: OppdaterVirkningstidspunkt): Promise<BehandlingDtoV2> => {
+        mutationFn: async (payload: OppdatereVirkningstidspunkt): Promise<BehandlingDtoV2> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereVirkningstidspunktV2(behandlingId, payload);
             return data;
         },

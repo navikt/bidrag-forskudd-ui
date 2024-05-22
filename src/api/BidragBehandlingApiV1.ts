@@ -265,6 +265,7 @@ export enum TypeArsakstype {
     TIDLIGERE_FEILAKTIG_AVSLAG = "TIDLIGERE_FEILAKTIG_AVSLAG",
     TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
+    FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
 }
 
 export interface AktivereGrunnlagRequest {
@@ -895,7 +896,6 @@ export interface SivilstandGrunnlagDto {
 
 export interface SivilstandIkkeAktivGrunnlagDto {
     sivilstand: SivilstandDto[];
-    status: SivilstandIkkeAktivGrunnlagDtoStatusEnum;
     /** @uniqueItems true */
     grunnlag: SivilstandGrunnlagDto[];
     /** @format date-time */
@@ -1026,7 +1026,7 @@ export interface OppdatereHusstandsmedlem {
 }
 
 export interface OppdatereSivilstand {
-    leggeTilSivilstandsperiode?: Sivilstandsperiode;
+    nyEllerEndretSivilstandsperiode?: Sivilstandsperiode;
     /** @format int64 */
     sletteSivilstandsperiode?: number;
 }
@@ -1045,6 +1045,8 @@ export interface Sivilstandsperiode {
     /** @format date */
     tilOgMed?: string;
     sivilstand: Sivilstandskode;
+    /** @format int64 */
+    id?: number;
 }
 
 export interface OppdatereBoforholdResponse {
@@ -1539,10 +1541,11 @@ export interface NotatResultatPeriodeDto {
     regel: string;
     sivilstand?: Sivilstandskode;
     inntekt: number;
+    vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1606,8 +1609,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1638,14 +1641,6 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum SivilstandIkkeAktivGrunnlagDtoStatusEnum {
-    OK = "OK",
-    MANGLENDE_DATOINFORMASJON = "MANGLENDE_DATOINFORMASJON",
-    LOGISK_FEIL_I_TIDSLINJE = "LOGISK_FEIL_I_TIDSLINJE",
-    ALLE_FOREKOMSTER_ER_HISTORISKE = "ALLE_FOREKOMSTER_ER_HISTORISKE",
-    SIVILSTANDSTYPE_MANGLER = "SIVILSTANDSTYPE_MANGLER",
 }
 
 export enum OppdaterRollerResponseStatusEnum {
