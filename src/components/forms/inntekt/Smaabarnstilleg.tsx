@@ -26,12 +26,10 @@ export const Småbarnstillegg = () => {
                     controlledFields,
                     onSaveRow,
                     handleOnSelect,
-                    editableRow,
                     onEditRow,
                     addPeriod,
                 }: {
                     controlledFields: InntektFormPeriode[];
-                    editableRow: number;
                     onSaveRow: (index: number) => void;
                     handleOnSelect: (value: boolean, index: number) => void;
                     onEditRow: (index: number) => void;
@@ -88,7 +86,6 @@ export const Småbarnstillegg = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.fraOgMed}
                                                         fieldName={fieldName}
@@ -98,7 +95,6 @@ export const Småbarnstillegg = () => {
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.tilOgMed}
                                                         fieldName={fieldName}
@@ -110,19 +106,12 @@ export const Småbarnstillegg = () => {
                                                     <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
-                                                    <Totalt
-                                                        item={item}
-                                                        field={`${fieldName}.${index}`}
-                                                        erRedigerbart={
-                                                            editableRow === index && item.kilde === Kilde.MANUELL
-                                                        }
-                                                    />
+                                                    <Totalt item={item} field={`${fieldName}.${index}`} />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <EditOrSaveButton
                                                         index={index}
-                                                        erMed={item.taMed}
-                                                        editableRow={editableRow}
+                                                        item={item}
                                                         onEditRow={onEditRow}
                                                         onSaveRow={onSaveRow}
                                                     />

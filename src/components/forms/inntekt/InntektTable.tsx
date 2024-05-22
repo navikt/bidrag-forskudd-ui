@@ -1,7 +1,7 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
@@ -58,17 +58,9 @@ export const TaMed = ({
     </div>
 );
 
-export const Totalt = ({
-    item,
-    field,
-    erRedigerbart,
-}: {
-    item: InntektFormPeriode;
-    field: string;
-    erRedigerbart: boolean;
-}) => (
+export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) => (
     <>
-        {erRedigerbart ? (
+        {item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
             <FormControlledTextField
                 name={`${field}.beløp`}
                 label="Totalt"
@@ -83,12 +75,22 @@ export const Totalt = ({
     </>
 );
 
-export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
+export const EditOrSaveButton = ({
+    index,
+    item,
+    onEditRow,
+    onSaveRow,
+}: {
+    item: InntektFormPeriode;
+    index: number;
+    onEditRow: (index: number) => void;
+    onSaveRow: (index: number) => void;
+}) => {
     const { lesemodus } = useForskudd();
 
     return (
         <div className="h-8 flex items-center justify-center">
-            {!lesemodus && erMed && editableRow !== index && (
+            {!lesemodus && item.taMed && !item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onEditRow(index)}
@@ -97,7 +99,7 @@ export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveR
                     size="small"
                 />
             )}
-            {!lesemodus && editableRow === index && (
+            {!lesemodus && item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onSaveRow(index)}
@@ -112,14 +114,12 @@ export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveR
 
 export const Periode = ({
     index,
-    editableRow,
     fieldName,
     field,
     label,
     item,
 }: {
     index: number;
-    editableRow: number;
     fieldName:
         | "småbarnstillegg"
         | "utvidetBarnetrygd"
@@ -149,7 +149,7 @@ export const Periode = ({
         }
     };
 
-    return editableRow === index ? (
+    return item.erRedigerbart ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
@@ -178,15 +178,13 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } =
-        useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } = useForskudd();
     const {
         inntekter: { valideringsfeil },
         søktFomDato,
         virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
-    const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
     const { control, getFieldState, getValues, clearErrors, setError, setValue, formState } =
         useFormContext<InntektFormValues>();
@@ -194,7 +192,14 @@ export const InntektTabel = ({
         control,
         name: fieldName,
     });
+
     const watchFieldArray = useWatch({ control, name: fieldName });
+    const controlledFields = fieldArray.fields.map((field, index) => {
+        return {
+            ...field,
+            ...watchFieldArray?.[index],
+        };
+    });
     const [inntektType, ident] = fieldName.split(".");
 
     useEffect(() => {
@@ -202,34 +207,64 @@ export const InntektTabel = ({
             ...pageErrorsOrUnsavedState,
             inntekt: {
                 error: !ObjectUtils.isEmpty(formState.errors),
-                openFields: { ...pageErrorsOrUnsavedState.inntekt.openFields, [fieldName]: !!editableRow },
+                openFields: {
+                    ...pageErrorsOrUnsavedState.inntekt.openFields,
+                    [fieldName]: getValues(fieldName).some((period) => period.erRedigerbart),
+                },
             },
         });
-    }, [formState.errors, editableRow]);
+    }, [formState.errors, controlledFields]);
 
-    const unsetEditedRow = (index: number) => {
-        if (editableRow === index) {
-            setEditableRow(undefined);
-        }
-    };
-
-    const handleOnSelect = (value: boolean, index: number) => {
+    const handleOnSelect = (taMed: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        if (!value && !erOffentlig) {
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: taMed });
+
+        if (!taMed && !erOffentlig) {
             handleDelete(index);
         } else {
             handleUpdate(index);
         }
     };
 
+    const movePeriods = (index: number, updatedPeriode: InntektFormPeriode, perioder: InntektFormPeriode[]) => {
+        if (updatedPeriode.taMed) {
+            const indexOfFirstMatchingPeriod = perioder.findIndex(
+                (periode) =>
+                    periode.taMed &&
+                    !periode.erRedigerbart &&
+                    periode.id !== updatedPeriode.id &&
+                    isAfterDate(periode.datoFom, updatedPeriode.datoFom)
+            );
+            const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : perioder.length;
+            const newIndex = index > moveToIndex ? moveToIndex : moveToIndex - 1;
+            fieldArray.move(index, newIndex);
+        } else {
+            const indexOfFirstMatchingPeriod = perioder.findIndex(
+                (periode) =>
+                    !periode.taMed &&
+                    !periode.erRedigerbart &&
+                    periode.id !== updatedPeriode.id &&
+                    isAfterDate(periode.opprinneligFom, updatedPeriode.opprinneligFom)
+            );
+            const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : 0;
+            fieldArray.move(index, moveToIndex);
+        }
+    };
+
     const handleUpdate = (index: number) => {
-        const periode = getValues(`${fieldName}.${index}`);
-        const payload = createPayload(periode, virkningsdato);
+        const perioder = getValues(fieldName);
+        const updatedPeriode = perioder[index];
+        const payload = createPayload(updatedPeriode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
         const onSaveSuccess = (response: OppdatereInntektResponse) => {
-            setValue(`${fieldName}.${index}`, transformFn(response.inntekt));
+            setValue(`${fieldName}.${index}`, { ...updatedPeriode, ...transformFn(response.inntekt) });
+
+            if (!updatedPeriode.erRedigerbart) {
+                movePeriods(index, updatedPeriode, perioder);
+            }
+
             saveInntekt.queryClientUpdater((currentData) => {
                 const updatedInntektIndex = currentData.inntekter[inntektType].findIndex(
                     (inntekt: InntektDtoV2) => inntekt.id === response.inntekt.id
@@ -250,7 +285,6 @@ export const InntektTabel = ({
             });
         };
         updatedAndSave(payload, onSaveSuccess);
-        unsetEditedRow(index);
     };
 
     const handleDelete = (index: number) => {
@@ -273,22 +307,10 @@ export const InntektTabel = ({
 
         updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess);
         fieldArray.remove(index);
-
-        if (editableRow === index) {
-            setEditableRow(undefined);
-        } else if (editableRow) {
-            setEditableRow(editableRow - 1);
-        }
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
-        if (checkIfAnotherRowIsEdited()) {
-            showErrorModal();
-        } else {
-            const perioder = getValues(fieldName);
-            fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato });
-            setEditableRow(perioder.length);
-        }
+        fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato, erRedigerbart: true });
     };
     const updatedAndSave = (
         updatedValues: OppdatereInntektRequest,
@@ -311,33 +333,15 @@ export const InntektTabel = ({
 
         const fieldState = getFieldState(`${fieldName}.${index}`);
         if (!fieldState.error) {
+            setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: false });
             handleUpdate(index);
         }
     };
-    const checkIfAnotherRowIsEdited = (index?: number) => {
-        return editableRow !== undefined && Number(editableRow) !== index;
-    };
-    const showErrorModal = () => {
-        setErrorMessage({
-            title: text.alert.fullførRedigering,
-            text: text.alert.periodeUnderRedigering,
-        });
-        setErrorModalOpen(true);
-    };
-    const onEditRow = (index: number) => {
-        if (checkIfAnotherRowIsEdited(index)) {
-            showErrorModal();
-        } else {
-            setEditableRow(index);
-        }
-    };
 
-    const controlledFields = fieldArray.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray?.[index],
-        };
-    });
+    const onEditRow = (index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: true });
+    };
 
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
@@ -402,12 +406,10 @@ export const InntektTabel = ({
             )}
             {children({
                 controlledFields,
-                editableRow,
                 onEditRow,
                 onSaveRow,
                 addPeriod,
                 handleOnSelect,
-                unsetEditedRow,
             })}
         </>
     );

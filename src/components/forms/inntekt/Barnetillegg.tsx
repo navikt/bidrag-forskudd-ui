@@ -18,16 +18,8 @@ import { RolleTag } from "../../RolleTag";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-const Beskrivelse = ({
-    item,
-    field,
-    erRedigerbart,
-}: {
-    item: InntektFormPeriode;
-    field: string;
-    erRedigerbart: boolean;
-}) => {
-    return erRedigerbart ? (
+const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
+    return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
         <FormControlledSelectField
             name={`${field}.inntektstype`}
             label={text.label.beskrivelse}
@@ -46,17 +38,9 @@ const Beskrivelse = ({
     );
 };
 
-const Totalt = ({
-    item,
-    field,
-    erRedigerbart,
-}: {
-    item: InntektFormPeriode;
-    field: string;
-    erRedigerbart: boolean;
-}) => (
+const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) => (
     <>
-        {erRedigerbart ? (
+        {item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
             <FormControlledTextField
                 name={`${field}.beløpMnd`}
                 label="Totalt"
@@ -119,12 +103,10 @@ export const Barnetillegg = () => {
                                 controlledFields,
                                 onSaveRow,
                                 handleOnSelect,
-                                editableRow,
                                 onEditRow,
                                 addPeriod,
                             }: {
                                 controlledFields: InntektFormPeriode[];
-                                editableRow: number;
                                 onSaveRow: (index: number) => void;
                                 handleOnSelect: (value: boolean, index: number) => void;
                                 onEditRow: (index: number) => void;
@@ -208,7 +190,6 @@ export const Barnetillegg = () => {
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Periode
-                                                                    editableRow={editableRow}
                                                                     index={index}
                                                                     label={text.label.fraOgMed}
                                                                     fieldName={`barnetillegg.${barn.ident}`}
@@ -218,7 +199,6 @@ export const Barnetillegg = () => {
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Periode
-                                                                    editableRow={editableRow}
                                                                     index={index}
                                                                     label={text.label.tilOgMed}
                                                                     fieldName={`barnetillegg.${barn.ident}`}
@@ -233,20 +213,12 @@ export const Barnetillegg = () => {
                                                                 <Beskrivelse
                                                                     item={item}
                                                                     field={`barnetillegg.${barn.ident}.${index}`}
-                                                                    erRedigerbart={
-                                                                        editableRow === index &&
-                                                                        item.kilde === Kilde.MANUELL
-                                                                    }
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Totalt
                                                                     item={item}
                                                                     field={`barnetillegg.${barn.ident}.${index}`}
-                                                                    erRedigerbart={
-                                                                        editableRow === index &&
-                                                                        item.kilde === Kilde.MANUELL
-                                                                    }
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
@@ -257,8 +229,7 @@ export const Barnetillegg = () => {
                                                             <Table.DataCell>
                                                                 <EditOrSaveButton
                                                                     index={index}
-                                                                    erMed={item.taMed}
-                                                                    editableRow={editableRow}
+                                                                    item={item}
                                                                     onEditRow={onEditRow}
                                                                     onSaveRow={onSaveRow}
                                                                 />

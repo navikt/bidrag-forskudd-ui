@@ -17,18 +17,8 @@ import AinntektLink from "./AinntektLink";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-const Beskrivelse = ({
-    item,
-    field,
-    erRedigerbart,
-    alert,
-}: {
-    item: InntektFormPeriode;
-    field: string;
-    erRedigerbart: boolean;
-    alert?: string;
-}) => {
-    return erRedigerbart ? (
+const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
+    return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
         <FormControlledSelectField
             name={`${field}.rapporteringstype`}
             label={text.label.beskrivelse}
@@ -112,12 +102,10 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                     controlledFields,
                     onSaveRow,
                     handleOnSelect,
-                    editableRow,
                     onEditRow,
                     addPeriod,
                 }: {
                     controlledFields: InntektFormPeriode[];
-                    editableRow: number;
                     onSaveRow: (index: number) => void;
                     handleOnSelect: (value: boolean, index: number) => void;
                     onEditRow: (index: number) => void;
@@ -199,7 +187,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.fraOgMed}
                                                         fieldName={fieldName}
@@ -209,7 +196,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.tilOgMed}
                                                         fieldName={fieldName}
@@ -230,28 +216,18 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                                 ? "Inntekt inneholder næringsinntekt"
                                                                 : undefined
                                                         }
-                                                        erRedigerbart={
-                                                            editableRow === index && item.kilde === Kilde.MANUELL
-                                                        }
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
                                                 <Table.DataCell align="right" textSize="small">
-                                                    <Totalt
-                                                        item={item}
-                                                        field={`${fieldName}.${index}`}
-                                                        erRedigerbart={
-                                                            editableRow === index && item.kilde === Kilde.MANUELL
-                                                        }
-                                                    />
+                                                    <Totalt item={item} field={`${fieldName}.${index}`} />
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
                                                     <EditOrSaveButton
                                                         index={index}
-                                                        erMed={item.taMed}
-                                                        editableRow={editableRow}
+                                                        item={item}
                                                         onEditRow={onEditRow}
                                                         onSaveRow={onSaveRow}
                                                     />

@@ -1,3 +1,5 @@
+import { FileIcon } from "@navikt/aksel-icons";
+import { Button, Heading } from "@navikt/ds-react";
 import React, {
     createContext,
     Dispatch,
@@ -5,11 +7,14 @@ import React, {
     SetStateAction,
     useCallback,
     useContext,
+    useRef,
     useState,
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
+import { ConfirmationModal } from "../components/modal/ConfirmationModal";
 import { STEPS } from "../constants/steps";
+import text from "../constants/texts";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { useBehandlingV2 } from "../hooks/useApiData";
 import { InntektFormValues } from "../types/inntektFormValues";
@@ -39,7 +44,6 @@ export type PageErrorsOrUnsavedState = {
 
 interface IForskuddContext {
     activeStep: string;
-    setActiveStep: (x: number) => void;
     behandlingId: number;
     vedtakId: number;
     lesemodus: boolean;
@@ -53,6 +57,7 @@ interface IForskuddContext {
     setErrorModalOpen: (open: boolean) => void;
     pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
+    onStepChange: (x: number) => void;
 }
 
 interface IForskuddContextProps {
@@ -81,10 +86,32 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
 
     const queryLesemodus = searchParams.get("lesemodus") == "true";
     const behandling = useBehandlingV2(behandlingId, vedtakId);
+    const [nextStep, setNextStep] = useState<number>(undefined);
+    const ref = useRef<HTMLDialogElement>(null);
+    const onConfirm = () => {
+        ref.current?.close();
+        setActiveStep(nextStep);
+        setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
+    };
+
+    const onStepChange = (x: number) => {
+        const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
+
+        if (
+            currentPageErrors &&
+            (currentPageErrors.error ||
+                (currentPageErrors.openFields && Object.values(currentPageErrors.openFields).some((open) => open)))
+        ) {
+            setNextStep(x);
+            ref.current?.showModal();
+        } else {
+            setActiveStep(x);
+        }
+    };
+
     const value = React.useMemo(
         () => ({
             activeStep,
-            setActiveStep,
             behandlingId,
             vedtakId,
             lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
@@ -98,6 +125,8 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             setErrorModalOpen,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
+            onConfirm,
+            onStepChange,
         }),
         [
             activeStep,
@@ -111,7 +140,31 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         ]
     );
 
-    return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
+    return (
+        <ForskuddContext.Provider value={value}>
+            <ConfirmationModal
+                ref={ref}
+                description={text.varsel.ønskerDuÅGåVidereDescription}
+                heading={
+                    <Heading size="small" className="flex gap-x-1.5 items-center">
+                        <FileIcon title="a11y-title" fontSize="1.5rem" />
+                        {text.varsel.ønskerDuÅGåVidere}
+                    </Heading>
+                }
+                footer={
+                    <>
+                        <Button type="button" onClick={() => ref.current?.close()} size="small">
+                            {text.label.tilbakeTilUtfylling}
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={onConfirm}>
+                            {text.label.gåVidereUtenÅLagre}
+                        </Button>
+                    </>
+                }
+            />
+            {children}
+        </ForskuddContext.Provider>
+    );
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);

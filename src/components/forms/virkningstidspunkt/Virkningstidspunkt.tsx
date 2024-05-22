@@ -176,11 +176,11 @@ const Main = ({ initialValues }) => {
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
-        setActiveStep(
+        onStepChange(
             avslagsListe.includes(årsakAvslag) ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]
         );
 

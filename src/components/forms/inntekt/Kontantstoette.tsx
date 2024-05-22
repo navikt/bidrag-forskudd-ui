@@ -44,12 +44,10 @@ export const Kontantstøtte = () => {
                                 controlledFields,
                                 onSaveRow,
                                 handleOnSelect,
-                                editableRow,
                                 onEditRow,
                                 addPeriod,
                             }: {
                                 controlledFields: InntektFormPeriode[];
-                                editableRow: number;
                                 onSaveRow: (index: number) => void;
                                 handleOnSelect: (value: boolean, index: number) => void;
                                 onEditRow: (index: number) => void;
@@ -117,7 +115,6 @@ export const Kontantstøtte = () => {
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Periode
-                                                                    editableRow={editableRow}
                                                                     index={index}
                                                                     label={text.label.fraOgMed}
                                                                     fieldName={`kontantstøtte.${barn.ident}`}
@@ -127,7 +124,6 @@ export const Kontantstøtte = () => {
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Periode
-                                                                    editableRow={editableRow}
                                                                     index={index}
                                                                     label={text.label.tilOgMed}
                                                                     fieldName={`kontantstøtte.${barn.ident}`}
@@ -142,17 +138,12 @@ export const Kontantstøtte = () => {
                                                                 <Totalt
                                                                     item={item}
                                                                     field={`kontantstøtte.${barn.ident}.${index}`}
-                                                                    erRedigerbart={
-                                                                        editableRow === index &&
-                                                                        item.kilde === Kilde.MANUELL
-                                                                    }
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell>
                                                                 <EditOrSaveButton
                                                                     index={index}
-                                                                    erMed={item.taMed}
-                                                                    editableRow={editableRow}
+                                                                    item={item}
                                                                     onEditRow={onEditRow}
                                                                     onSaveRow={onSaveRow}
                                                                 />

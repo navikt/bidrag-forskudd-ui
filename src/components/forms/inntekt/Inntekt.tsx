@@ -123,7 +123,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
@@ -146,7 +146,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+    const onNext = () => onStepChange(STEPS[ForskuddStepper.VEDTAK]);
 
     const debouncedOnSave = useDebounce(onSave);
 

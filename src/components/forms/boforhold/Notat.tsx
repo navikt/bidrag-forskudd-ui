@@ -12,7 +12,7 @@ import { FormControlledTextarea } from "../../formFields/FormControlledTextArea"
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 export const Notat = () => {
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const { watch, getValues } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const onSave = () =>
@@ -32,7 +32,7 @@ export const Notat = () => {
                 },
             }
         );
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.INNTEKT]);
+    const onNext = () => onStepChange(STEPS[ForskuddStepper.INNTEKT]);
 
     const debouncedOnSave = useDebounce(onSave);
 

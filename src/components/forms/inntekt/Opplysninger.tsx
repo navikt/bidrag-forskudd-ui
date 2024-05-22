@@ -163,8 +163,8 @@ export const Opplysninger = ({
                                             },
                                             i
                                         ) => (
-                                            <>
-                                                <tr key={i + rapporteringstype}>
+                                            <Fragment key={i + rapporteringstype}>
+                                                <tr>
                                                     <td width="250px" scope="row">
                                                         {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
                                                     </td>
@@ -173,6 +173,7 @@ export const Opplysninger = ({
                                                 </tr>
                                                 {inntektsposterSomErEndret.map((i, index) => (
                                                     <tr
+                                                        key={i.visningsnavn + index}
                                                         style={
                                                             index == inntektsposterSomErEndret.length - 1
                                                                 ? {
@@ -186,7 +187,7 @@ export const Opplysninger = ({
                                                         <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
                                                     </tr>
                                                 ))}
-                                            </>
+                                            </Fragment>
                                         )
                                     )}
                                 </tbody>
