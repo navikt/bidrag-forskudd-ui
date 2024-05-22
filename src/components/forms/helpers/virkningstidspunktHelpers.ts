@@ -35,7 +35,7 @@ export const mapÅrsakTilVirkningstidspunkt = (
 
     switch (aarsak) {
         case TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK:
-            return firstDayOfMonth(addMonths(mottatDato, 1));
+            return firstDayOfMonth(addMonths(mottatOrSoktFraDato, 1));
         case TypeArsakstype.FRABARNETSFODSEL:
             return barnsFødselsdato && isAfterDate(new Date(barnsFødselsdato), mottatOrSoktFraDato)
                 ? firstDayOfMonth(new Date(barnsFødselsdato))
