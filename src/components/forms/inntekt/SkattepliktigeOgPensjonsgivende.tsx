@@ -1,5 +1,5 @@
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
-import { dateToDDMMYYYYString, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -10,10 +10,10 @@ import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { formatterBeløp } from "../../../utils/number-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
+import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -62,24 +62,7 @@ const Beskrivelse = ({
         </BodyShort>
     );
 };
-const ExpandableContent = ({ item }: { item: InntektFormPeriode }) => {
-    return (
-        <>
-            <BodyShort size="small">
-                Periode: {item.opprinneligFom && dateToDDMMYYYYString(new Date(item.opprinneligFom))} -{" "}
-                {item.opprinneligTom && dateToDDMMYYYYString(new Date(item.opprinneligTom))}
-            </BodyShort>
-            <dl className="bd_datadisplay">
-                {item.inntektsposter.map((inntektpost) => (
-                    <BodyShort size="small" key={inntektpost.kode}>
-                        <dt>{inntektpost.visningsnavn}</dt>
-                        <dd>{formatterBeløp(inntektpost.beløp)}</dd>
-                    </BodyShort>
-                ))}
-            </dl>
-        </>
-    );
-};
+
 export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
@@ -155,7 +138,13 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                         {controlledFields.map((item, index) => (
                                             <Table.ExpandableRow
                                                 key={item?.id + item.ident}
-                                                content={<ExpandableContent item={item} />}
+                                                content={
+                                                    <ExpandableContent
+                                                        item={item}
+                                                        showInnteksposter
+                                                        showLøpendeTilOgMed
+                                                    />
+                                                }
                                                 togglePlacement="right"
                                                 className="align-top"
                                                 expansionDisabled={item.kilde == Kilde.MANUELL}
