@@ -45,9 +45,9 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
                 item.opprinneligTom ?? item.datoTom
             )}
             {alert && (
-                <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
+                <span className="self-center ml-[5px] text-[var(--a-icon-info)]">
                     <SackKronerFillIcon title={alert} />
-                </p>
+                </span>
             )}
         </BodyShort>
     );
