@@ -25,7 +25,12 @@ import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox"
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import { ForskuddAlert } from "../../ForskuddAlert";
-import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
+import {
+    createPayload,
+    offentligPeriodeHasHigherOrder,
+    periodeHasHigherPriorityOrder,
+    transformInntekt,
+} from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -235,20 +240,22 @@ export const InntektTabel = ({
                     periode.taMed &&
                     !periode.erRedigerbart &&
                     periode.id !== updatedPeriode.id &&
-                    isAfterDate(periode.datoFom, updatedPeriode.datoFom)
+                    (isAfterDate(periode.datoFom, updatedPeriode.datoFom) ||
+                        (periode.datoFom === updatedPeriode.datoFom &&
+                            periodeHasHigherPriorityOrder(updatedPeriode, periode)))
             );
             const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : perioder.length;
-            const newIndex = index > moveToIndex ? moveToIndex : moveToIndex - 1;
+            const newIndex = index >= moveToIndex ? moveToIndex : moveToIndex - 1;
             fieldArray.move(index, newIndex);
         } else {
-            const indexOfFirstMatchingPeriod = perioder.findIndex(
-                (periode) =>
-                    !periode.taMed &&
-                    !periode.erRedigerbart &&
-                    periode.id !== updatedPeriode.id &&
-                    isAfterDate(periode.opprinneligFom, updatedPeriode.opprinneligFom)
+            const notSelectedOrEditedPeriods = perioder.filter(
+                (periode) => !periode.taMed && !periode.erRedigerbart && periode.id !== updatedPeriode.id
             );
-            const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : 0;
+            const indexOfFirstMatchingPeriod = notSelectedOrEditedPeriods.findIndex((periode) =>
+                offentligPeriodeHasHigherOrder(updatedPeriode, periode)
+            );
+            const moveToIndex =
+                indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : notSelectedOrEditedPeriods.length;
             fieldArray.move(index, moveToIndex);
         }
     };

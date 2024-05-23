@@ -197,7 +197,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         item={item}
                                                         field={`${fieldName}.${index}`}
                                                         alert={
-                                                            item.inntektsposter.some(
+                                                            item.inntektsposter?.some(
                                                                 (d) =>
                                                                     d.inntektstype == Inntektstype.NAeRINGSINNTEKT ||
                                                                     d.kode.toUpperCase().includes("NAERING")
