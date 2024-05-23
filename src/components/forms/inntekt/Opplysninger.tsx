@@ -129,6 +129,7 @@ export const Opplysninger = ({
                 borderWidth="1"
                 borderRadius="medium"
                 borderColor="border-default"
+                className="w-[708px]"
             >
                 <Heading size="xsmall" level="6">
                     {text.alert.nyOpplysninger}

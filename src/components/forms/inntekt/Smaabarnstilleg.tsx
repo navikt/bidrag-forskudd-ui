@@ -39,7 +39,7 @@ export const Småbarnstillegg = () => {
                     <>
                         {controlledFields.length > 0 && (
                             <div className="overflow-x-auto whitespace-nowrap">
-                                <Table size="small" className="lg:table-auto table-fixed table bg-white">
+                                <Table size="small" className="table-fixed table bg-white w-fit">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
                                             <Table.HeaderCell
@@ -73,7 +73,7 @@ export const Småbarnstillegg = () => {
                                                 {text.label.beløp}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[25px]"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
