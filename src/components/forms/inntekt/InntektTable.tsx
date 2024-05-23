@@ -281,9 +281,8 @@ export const InntektTabel = ({
                     updatedInntektIndex === -1
                         ? currentData.inntekter[inntektType].concat(response.inntekt)
                         : currentData.inntekter[inntektType].toSpliced(updatedInntektIndex, 1, response.inntekt);
-
                 const sortedUpdatedInntekter = updatedInntekter.toSorted(inntektSorting);
-                console.log("sortedUpdatedInntekter", sortedUpdatedInntekter);
+
                 return {
                     ...currentData,
                     inntekter: {

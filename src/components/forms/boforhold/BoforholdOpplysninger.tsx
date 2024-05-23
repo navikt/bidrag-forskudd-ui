@@ -148,6 +148,7 @@ export const BoforholdOpplysninger = ({
                     borderWidth="1"
                     borderRadius="medium"
                     borderColor="border-default"
+                    className="w-[708px]"
                 >
                     <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
                     <Table size="small" className="table-fixed opplysninger">
