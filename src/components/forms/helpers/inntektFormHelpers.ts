@@ -73,11 +73,12 @@ export const transformInntekt =
     });
 
 export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
-    if (a.erRedigerbart) {
-        return 0;
-    }
     if (a.taMed === b.taMed) {
-        return isAfterDate(a.datoFom, b.datoFom) ? 1 : -1;
+        if (isAfterDate(a.datoFom, b.datoFom)) return 1;
+        if (a.datoFom === b.datoFom) {
+            return periodeHasHigherPriorityOrder(a, b) ? -1 : 1;
+        }
+        return -1;
     }
     if (a.taMed !== b.taMed) {
         return a.taMed ? 1 : -1;
