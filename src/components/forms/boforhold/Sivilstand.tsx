@@ -18,9 +18,9 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
+    useOppdaterBehandlingV2,
     useSivilstandOpplysningerProssesert,
 } from "../../../hooks/useApiData";
-import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -181,7 +181,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
 
-    const saveBoforhold = useOnSaveBoforhold();
+    const saveBoforhold = useOppdaterBehandlingV2();
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const sivilstandOpplysninger = useGetOpplysningerSivilstand();
     const {
@@ -254,7 +254,11 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
     const updatedAndSave = (sivilstand: SivilstandDto[]) => {
         setValue("sivilstand", sivilstand);
-        saveBoforhold.mutation.mutate(updatedValues);
+        saveBoforhold.mutation.mutate({
+            boforhold: {
+                sivilstand: sivilstand,
+            },
+        });
         setShowResetButton(true);
 
         setEditableRow(undefined);
