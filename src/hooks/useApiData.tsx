@@ -137,7 +137,7 @@ export const useUpdateBoforhold = () => {
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av inntekter", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
         },
     });
 };

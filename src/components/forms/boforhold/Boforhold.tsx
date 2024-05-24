@@ -333,12 +333,15 @@ const AddBarnForm = ({
                 !barn.medIBehandling && new Date(barn.fødselsdato).getTime() < new Date(addedBarn.fødselsdato).getTime()
         );
         const insertIndex = indexOfFirstOlderChild === -1 ? getValues("husstandsbarn").length : indexOfFirstOlderChild;
-        barnFieldArray.insert(insertIndex, addedBarn);
 
         saveBoforhold.mutation.mutate(
             { oppdatereHusstandsmedlem: { opprettHusstandsmedlem: addedBarn } },
             {
                 onSuccess: (response) => {
+                    barnFieldArray.insert(insertIndex, { ...addedBarn, ...response.oppdatertHusstandsbarn });
+                    setOpenAddBarnForm(false);
+                    updatedPageErrorState();
+
                     saveBoforhold.queryClientUpdater((currentData) => {
                         return {
                             ...currentData,
@@ -353,8 +356,6 @@ const AddBarnForm = ({
                 },
             }
         );
-        setOpenAddBarnForm(false);
-        updatedPageErrorState();
     };
 
     const onSearchClick = (value) => {
