@@ -1,6 +1,6 @@
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, ReadMore, Table, VStack } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -71,13 +71,62 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
         }
     };
 
+    const hjelpetekstInnhold = () => (
+        <div>
+            <ul className="list-disc pl-3">
+                <li>
+                    Her skal man legge inn den skattepliktige og pensjonsgivende inntekten parten har. Denne tabellen må
+                    være fylt ut for at man skal kunne fatte vedtak.
+                </li>
+                <li>
+                    A-inntekt siste 12 mnd og 3 mnd er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de
+                    siste 3 og 12 måneder omregnet til årsinntekt. Trykker man på pilen til høyre for beløpskolonnen vil
+                    man se spesifiserte detaljer som perioden inntekten er beregnet ut ifra og oppsummering av de ulike
+                    inntektspostene i perioden inntekten er beregnet for.
+                </li>
+
+                <li>
+                    Når man passerer den 05. i hver måned vil de automatisk beregnede inntektsopplysningene fra
+                    a-inntekt oppdatere seg slik at man får med inntekt for forrige måned. Dette er for å ha de nyeste
+                    opplysningene ved beregningen av disse inntektstypene. Man vil da få en melding som viser hvilke
+                    inntektstyper som oppdateres og man må trykke på "oppdater opplysninger".
+                </li>
+                <li>
+                    Inntektstypen overgangsstønad er beregnet som et gjennomsnitt fra mai til og med siste
+                    inntektsperiode omregnet til årsinntekt.
+                </li>
+                <li>
+                    Man kan legge inn ulike type inntektskilder slik at dette løper samtidig. Hvis en part har
+                    arbeidsinntekt og ytelse skal man derfor legge inn en linje for arbeidsinntekt og en annen linje for
+                    ytelse.
+                </li>
+                <li>
+                    Hvis man skal legge inn ytelse og parten har barnetillegg, må man legge inn ytelse uten barnetillegg
+                    fordi det er egen barnetilleggstabell hvor barnetillegget skal føres inn.
+                </li>
+                <li className="flex flex-row gap-1 items-center">
+                    Hvis parten har næringsinntekt i Ligningsinntekten, vil det vises en <SackKronerFillIcon /> ikon ved
+                    siden av beskrivelsen for å indikere dette.
+                </li>
+            </ul>
+        </div>
+    );
+
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <div className="flex gap-x-4">
-                <Heading level="2" size="small" id={elementId.seksjon_inntekt_skattepliktig}>
-                    {text.title.skattepliktigeogPensjonsgivendeInntekt}
-                </Heading>
-                {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+                <VStack gap={"2"}>
+                    <HStack gap={"2"}>
+                        <Heading level="2" size="small" id={elementId.seksjon_inntekt_skattepliktig}>
+                            {text.title.skattepliktigeogPensjonsgivendeInntekt}
+                        </Heading>
+
+                        {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+                    </HStack>
+                    <ReadMore size="small" header="Brukerveiledning">
+                        {hjelpetekstInnhold()}
+                    </ReadMore>
+                </VStack>
             </div>
             <Opplysninger fieldName={fieldName} ident={ident} />
             <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
