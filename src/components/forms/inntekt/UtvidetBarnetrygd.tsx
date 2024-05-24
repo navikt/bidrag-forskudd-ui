@@ -1,4 +1,4 @@
-import { Box, Heading, Table } from "@navikt/ds-react";
+import { Box, Heading, Table, VStack } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -8,6 +8,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { ExpandableContent } from "./ExpandableContent";
+import HjelpetekstTabell from "./HjelpetekstTabell";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -18,9 +19,12 @@ export const UtvidetBarnetrygd = () => {
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
-                {text.title.utvidetBarnetrygd}
-            </Heading>
+            <VStack gap={"2"}>
+                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
+                    {text.title.utvidetBarnetrygd}
+                </Heading>
+                <HjelpetekstTabell innhold={text.hjelpetekst.utvidetBarnetrygd} />
+            </VStack>
             <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName}>
                 {({

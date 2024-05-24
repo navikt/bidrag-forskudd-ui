@@ -133,6 +133,18 @@ const tekster = {
         årsakAvslagPlaceholder: "Velg årsak/avslag",
     },
     skjermbildeNavn: "Søknad om forskudd",
+    hjelpetekst: {
+        beregnetInntekter:
+            "Tabellen under viser periodisert oppsummering av inntekt per barn. Du trenger kun å legge inn de ulike beløpene i tabellene over så vil systemet beregne den totale inntekten per barn. Hvis det skjer endringer i noen av de automatisk innhentede inntektsopplysningene eller det kommer nye inntektsopplysninger, vil man få en melding om dette. Alle opplysninger som legges inn eller hentes inn av systemet vil vises og lagres i notatet.",
+        utvidetBarnetrygd:
+            'Her skal man legge inn beløpet på utvidet barnetrygd som parten eventuelt mottar. Systemet henter inn dette automatisk, men dette kan også legges inn manuelt. <br/> Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        kontantstøtte:
+            'Her skal man legge inn beløpet på kontantstøtte som parten eventuelt mottar. Systemet henter inn dette automatisk, men kan også legges inn manuelt. <br/> Kontantstøtte legges inn per barn. Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        småbarnstillegg:
+            'Her skal man legge inn beløpet på småbarnstillegg som parten eventuelt mottar. Systemet henter inn dette automatisk, men kan også legges inn manuelt. <br/> Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        barnetillegg:
+            'Her skal man legge inn barnetillegg som parten mottar. Systemet henter inn barnetillegg parten mottar i pensjon eller uføretrygd. <br/> Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger". <br/> Man kan legge inn barnetillegg manuelt. Barnetillegg legges inn per barn. Hvis parten har barnetillegg fra ulike inntektskilder skal man legge inn de ulike barnetilleggene',
+    },
     title: {
         arbeidsforhold: "Arbeidsforhold",
         barn: "Barn",
