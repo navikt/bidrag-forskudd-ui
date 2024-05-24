@@ -23,12 +23,8 @@ export const Kontantstøtte = () => {
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
-            <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
-                {text.title.kontantstøtte}
-            </Heading>
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <VStack gap={"2"}>
-                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_kontantstøtte}>
+                <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
                     {text.title.kontantstøtte}
                 </Heading>
                 <HjelpetekstTabell innhold={text.hjelpetekst.kontantstøtte} />
