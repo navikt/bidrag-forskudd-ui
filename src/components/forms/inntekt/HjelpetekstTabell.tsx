@@ -1,14 +1,13 @@
-import { HelpText } from "@navikt/ds-react";
+import { ReadMore } from "@navikt/ds-react";
 import { ReactNode } from "react";
 
 type HjelpetekstTabellProps = {
     innhold: string | ReactNode;
-    tittel: string;
 };
-export default function HjelpetekstTabell({ innhold, tittel }: HjelpetekstTabellProps) {
+export default function HjelpetekstTabell({ innhold }: HjelpetekstTabellProps) {
     return (
-        <HelpText title={tittel} placement="right" wrapperClassName="self-center">
+        <ReadMore size="small" header="Brukerveiledning">
             {typeof innhold == "string" ? <div dangerouslySetInnerHTML={{ __html: innhold }}></div> : innhold}
-        </HelpText>
+        </ReadMore>
     );
 }

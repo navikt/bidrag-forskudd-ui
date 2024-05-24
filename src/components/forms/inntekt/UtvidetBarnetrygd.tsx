@@ -1,4 +1,4 @@
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { Box, Heading, Table, VStack } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -19,12 +19,12 @@ export const UtvidetBarnetrygd = () => {
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <HStack gap={"2"}>
+            <VStack gap={"2"}>
                 <Heading level="3" size="medium" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
                     {text.title.utvidetBarnetrygd}
                 </Heading>
-                <HjelpetekstTabell tittel="Utvidet barnetrygd" innhold={text.hjelpetekst.utvidetBarnetrygd} />
-            </HStack>
+                <HjelpetekstTabell innhold={text.hjelpetekst.utvidetBarnetrygd} />
+            </VStack>
             <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName}>
                 {({

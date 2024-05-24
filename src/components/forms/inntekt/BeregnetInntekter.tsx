@@ -1,4 +1,4 @@
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, Table, VStack } from "@navikt/ds-react";
 import React from "react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -7,6 +7,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { dateOrNull, DateToDDMMYYYYString, deductDays } from "../../../utils/date-utils";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
+import HjelpetekstTabell from "./HjelpetekstTabell";
 
 export const BeregnetInntekter = () => {
     const {
@@ -15,9 +16,12 @@ export const BeregnetInntekter = () => {
 
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
-            <Heading level="3" size="medium">
-                {text.title.beregnetTotalt}
-            </Heading>
+            <VStack gap={"2"}>
+                <Heading level="3" size="medium">
+                    {text.title.beregnetTotalt}
+                </Heading>
+                <HjelpetekstTabell innhold={text.hjelpetekst.beregnetInntekter} />
+            </VStack>
             {beregnetInntekter
                 .filter((inntekt) => inntekt.inntektGjelderBarnIdent != null)
                 .map((inntektPerBarn, index) => (
