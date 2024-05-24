@@ -178,10 +178,10 @@ export const BoforholdOpplysninger = ({
                         </Table.Body>
                     </Table>
                     <HStack gap="2" className="mt-4">
-                        <Button variant="secondary" size="small" onClick={() => onActivate(true)}>
+                        <Button type="button" variant="secondary" size="small" onClick={() => onActivate(true)}>
                             Ja
                         </Button>
-                        <Button variant="secondary" size="small" onClick={() => onActivate(false)}>
+                        <Button type="button" variant="secondary" size="small" onClick={() => onActivate(false)}>
                             Nei
                         </Button>
                     </HStack>

@@ -198,6 +198,7 @@ export const Opplysninger = ({
                 })}
                 <Button
                     size="xsmall"
+                    type="button"
                     variant="secondary"
                     disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
                     loading={aktiverGrunnlagFn.isPending}
