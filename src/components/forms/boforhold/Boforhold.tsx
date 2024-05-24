@@ -907,11 +907,11 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             {controlledFields.length > 0 && (
                 <div
                     className={`${
-                        saveBoforhold.mutation.isPending ? "relative w-fit" : "inherit"
-                    } overflow-x-auto whitespace-nowrap`}
+                        saveBoforhold.mutation.isPending ? "relative" : "inherit"
+                    } block overflow-x-auto whitespace-nowrap`}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
-                    <Table size="small" className="table-fixed table bg-white w-fit">
+                    <Table size="small" className="table-fixed table bg-white w-full">
                         <Table.Header>
                             <Table.Row className="align-baseline">
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
@@ -920,7 +920,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
                                     {text.label.tilOgMed}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[290px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left">
                                     {text.label.status}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
