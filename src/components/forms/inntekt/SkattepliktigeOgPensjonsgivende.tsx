@@ -1,6 +1,6 @@
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -14,6 +14,7 @@ import { FormControlledSelectField } from "../../formFields/FormControlledSelect
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import AinntektLink from "./AinntektLink";
 import { ExpandableContent } from "./ExpandableContent";
+import HjelpetekstTabell from "./HjelpetekstTabell";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -22,11 +23,13 @@ const Beskrivelse = ({
     field,
     erRedigerbart,
     alert,
+    hjelpetekst,
 }: {
     item: InntektFormPeriode;
     field: string;
     erRedigerbart: boolean;
     alert?: string;
+    hjelpetekst?: string;
 }) => {
     return erRedigerbart ? (
         <FormControlledSelectField
@@ -48,18 +51,21 @@ const Beskrivelse = ({
             hideLabel
         />
     ) : (
-        <BodyShort className="leading-8 flex flex-row gap-0 align-center">
-            {hentVisningsnavn(
-                item.rapporteringstype,
-                item.opprinneligFom ?? item.datoFom,
-                item.opprinneligTom ?? item.datoTom
-            )}
-            {alert && (
-                <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
-                    <SackKronerFillIcon title={alert} />
-                </p>
-            )}
-        </BodyShort>
+        <HStack gap={"2"}>
+            <BodyShort className="leading-8 flex flex-row gap-0 align-center">
+                {hentVisningsnavn(
+                    item.rapporteringstype,
+                    item.opprinneligFom ?? item.datoFom,
+                    item.opprinneligTom ?? item.datoTom
+                )}
+                {alert && (
+                    <p className="self-center ml-[5px] text-[var(--a-icon-info)]">
+                        <SackKronerFillIcon title={alert} />
+                    </p>
+                )}
+            </BodyShort>
+            {hjelpetekst ? <HjelpetekstTabell tittel="Beskrivelse" innhold={hjelpetekst} /> : null}
+        </HStack>
     );
 };
 
@@ -81,12 +87,48 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
         }
     };
 
+    const hjelpetekstInnhold = () => (
+        <div className="">
+            <ul className="list-disc pl-3">
+                <li>
+                    A-inntekt siste 12 mnd og 3 mnd er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de
+                    siste 3 og 12 måneder omregnet til årsinntekt. Trykker man på pilen til høyre for beløpskolonnen vil
+                    man se spesifiserte detaljer som perioden inntekten er beregnet ut ifra og oppsummering av de ulike
+                    inntektspostene i perioden inntekten er beregnet for.
+                </li>
+
+                <li>
+                    Inntektstypen overgangsstønad er beregnet som et gjennomsnitt fra mai til og med siste
+                    inntektsperiode omregnet til årsinntekt.
+                </li>
+                <li>
+                    Man kan legge inn ulike type inntektskilder slik at dette løper samtidig. Hvis en part har
+                    arbeidsinntekt og ytelse skal man derfor legge inn en linje for arbeidsinntekt og en annen linje for
+                    ytelse.
+                </li>
+                <li>
+                    Hvis man skal legge inn ytelse og parten har barnetillegg, må man legge inn ytelse uten barnetillegg
+                    fordi det er egen barnetilleggstabell hvor barnetillegget skal føres inn.
+                </li>
+                <li>
+                    Hvis parten har næringsinntekt i Ligningsinntekten, vil det dukke opp et tegn for å indikere dette.
+                </li>
+            </ul>
+        </div>
+    );
+
     return (
         <Box padding="4" background="surface-subtle" className="grid gap-y-4">
             <div className="flex gap-x-4">
-                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_skattepliktig}>
-                    {text.title.skattepliktigeogPensjonsgivendeInntekt}
-                </Heading>
+                <HStack gap={"2"}>
+                    <Heading level="3" size="medium" id={elementId.seksjon_inntekt_skattepliktig}>
+                        {text.title.skattepliktigeogPensjonsgivendeInntekt}
+                    </Heading>
+                    <HjelpetekstTabell
+                        tittel="Skattepliktige og pensjonsgivende inntekter"
+                        innhold={hjelpetekstInnhold()}
+                    />
+                </HStack>
                 {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
             </div>
             <Opplysninger fieldName={fieldName} />
@@ -191,6 +233,14 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         }
                                                         erRedigerbart={
                                                             editableRow === index && item.kilde === Kilde.MANUELL
+                                                        }
+                                                        hjelpetekst={
+                                                            [
+                                                                Inntektsrapportering.AINNTEKTBEREGNET12MND,
+                                                                Inntektsrapportering.AINNTEKTBEREGNET3MND,
+                                                            ].includes(item.rapporteringstype as Inntektsrapportering)
+                                                                ? "A-inntekt siste 12 mnd og 3 mnd er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de siste 3 og 12 måneder omregnet til årsinntekt"
+                                                                : undefined
                                                         }
                                                     />
                                                 </Table.DataCell>

@@ -133,6 +133,31 @@ const tekster = {
         årsakAvslagPlaceholder: "Velg årsak/avslag",
     },
     skjermbildeNavn: "Søknad om forskudd",
+    hjelpetekst: {
+        skattepliktigeOgPensjonsgivende: `<div>
+        Inntektssiden er bygd opp slik at den inneholder 5 ulike tabeller. Den inneholder også en graf som viser inntekt for de 12 siste måneder og man kan se arbeidsforhold parten som er innmeldt i. Hvis man holder musepekeren over inntektsgrafen kan man se spesifikasjon av inntekt og de ulike inntektspostene hver måned.
+Nederst på siden er det en oppsummeringstabell av inntekt per barn, slik at man trenger kun å legge inn de ulike beløpene i tabellene så vil systemet beregne den totale inntekten per barn. Hvis det skjer endringer i noen av de automatisk innhentede inntektsopplysningene eller det kommer nye inntektsopplysninger, vil man få en melding om dette. Alle opplysninger som legges inn eller hentes inn av systemet vil vises og lagres i notatet.
+<br/><br/>
+<ul>
+<li>Her skal man legge inn den skattepliktige og pensjonsgivende inntekten parten har. Denne tabellen må være fylt ut for at man skal kunne fatte vedtak.</li>
+<li>Systemet vil innhente en del inntektsopplysninger automatisk fra Skatteetaten og A-inntekt. A-inntekt siste 12 mnd og 3 mnd er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de siste 3 og 12 måneder omregnet til årsinntekt. Trykker man på pilen til høyre for beløpskolonnen vil man se spesifiserte detaljer som perioden inntekten er beregnet ut ifra og oppsummering av de ulike inntektspostene i perioden inntekten er beregnet for.</li>
+<li>Når man passerer den 05. i hver måned vil de automatisk beregnede inntektsopplysningene fra a-inntekt oppdatere seg slik at man får med inntekt for forrige måned. Dette er for å ha de nyeste opplysningene ved beregningen av disse inntektstypene. Man vil da få en melding som viser hvilke inntektstyper som oppdateres og man må trykke på "oppdater opplysninger".</li>
+<li>Inntektstypen overgangsstønad er beregnet som et gjennomsnitt fra mai til og med siste inntektsperiode omregnet til årsinntekt.</li>
+<li>Man kan legge inn ulike type inntektskilder slik at dette løper samtidig. Hvis en part har arbeidsinntekt og ytelse skal man derfor legge inn en linje for arbeidsinntekt og en annen linje for ytelse.</li>
+<li>Hvis man skal legge inn ytelse og parten har barnetillegg, må man legge inn ytelse uten barnetillegg fordi det er egen barnetilleggstabell hvor barnetillegget skal føres inn.</li>
+<li>Hvis parten har næringsinntekt i Ligningsinntekten, vil det dukke opp et tegn for å indikere dette.</li>
+<ul>
+</div>
+        `,
+        utvidetBarnetrygd:
+            'Her skal man legge inn beløpet på utvidet barnetrygd som parten eventuelt mottar. Systemet skal hente inn dette automatisk, men dette kan også legges inn manuelt. <br/> Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        kontantstøtte:
+            'Her skal man legge inn beløpet på kontantstøtte som parten eventuelt mottar. Systemet skal hente inn dette automatisk, men kan også legges inn manuelt. <br/> Kontantstøtte legges inn per barn. Nye opplysninger hentes inn hver tolvte time. Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        småbarnstillegg:
+            'Her skal man legge inn beløpet på småbarnstillegg som parten eventuelt mottar. Systemet skal hente inn dette automatisk, men kan også legges inn manuelt. <br/> Nye opplysninger hentes inn hver tolvte time. Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger".',
+        barnetillegg:
+            'Her skal man legge inn barnetillegg som parten mottar. Systemet skal hente inn barnetillegg parten mottar i pensjon eller uføretrygd. <br/> Nye opplysninger hentes inn hver tolvte time. Hvis det innhentes nye opplysninger vil man få en melding om hva endringene er og man må trykke på "oppdater opplysninger". <br/> Man kan legge inn barnetillegg manuelt. Barnetillegg legges inn per barn. Hvis parten har barnetillegg fra ulike inntektskilder skal man legge inn de ulike barnetilleggene',
+    },
     title: {
         arbeidsforhold: "Arbeidsforhold",
         barn: "Barn",
