@@ -1,4 +1,4 @@
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -10,6 +10,7 @@ import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { ExpandableContent } from "./ExpandableContent";
+import HjelpetekstTabell from "./HjelpetekstTabell";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -25,6 +26,13 @@ export const Kontantstøtte = () => {
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>
+        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
+            <HStack gap={"2"}>
+                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_kontantstøtte}>
+                    {text.title.kontantstøtte}
+                </Heading>
+                <HjelpetekstTabell tittel="Kontantstøtte" innhold={text.hjelpetekst.kontantstøtte} />
+            </HStack>
             <Opplysninger fieldName={"kontantstøtte"} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
