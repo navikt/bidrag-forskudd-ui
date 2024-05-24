@@ -643,7 +643,9 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
             boforhold: {
-                error: !ObjectUtils.isEmpty(formState.errors),
+                error:
+                    !ObjectUtils.isEmpty(formState.errors?.husstandsbarn) ||
+                    !ObjectUtils.isEmpty(formState.errors?.sivilstand),
                 openFields: {
                     ...pageErrorsOrUnsavedState.boforhold.openFields,
                     [`husstandsbarn.${barnIndex}`]: !!editableRow,

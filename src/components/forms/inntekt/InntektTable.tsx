@@ -212,14 +212,19 @@ export const InntektTabel = ({
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
             inntekt: {
-                error: !ObjectUtils.isEmpty(formState.errors),
+                error:
+                    !ObjectUtils.isEmpty(formState.errors.årsinntekter) ||
+                    !ObjectUtils.isEmpty(formState.errors.barnetillegg) ||
+                    !ObjectUtils.isEmpty(formState.errors.småbarnstillegg) ||
+                    !ObjectUtils.isEmpty(formState.errors.kontantstøtte) ||
+                    !ObjectUtils.isEmpty(formState.errors.utvidetBarnetrygd),
                 openFields: {
                     ...pageErrorsOrUnsavedState.inntekt.openFields,
                     [fieldName]: getValues(fieldName).some((period) => period.erRedigerbart),
                 },
             },
         });
-    }, [formState.errors, controlledFields]);
+    }, [formState.errors]);
 
     const handleOnSelect = (taMed: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
