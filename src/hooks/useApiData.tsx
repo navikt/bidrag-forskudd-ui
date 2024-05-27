@@ -4,13 +4,18 @@ import { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 
 import {
+    AktivereGrunnlagRequestV2,
+    AktivereGrunnlagResponseV2,
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
     HusstandsbarnGrunnlagDto,
     OppdaterBehandlingRequestV2,
+    OppdatereBoforholdRequestV2,
+    OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereVirkningstidspunkt,
     OpplysningerType,
     RolleDto,
     Rolletype,
@@ -28,7 +33,6 @@ import { VedtakBeregningResult } from "../types/vedtakTypes";
 import { deductMonths, toISODateString } from "../utils/date-utils";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],
-    oppdaterBehandlingV2: (behandlingId: number) => ["mutation", "behandlingV2", behandlingId],
     updateBoforhold: (behandlingId: number) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: number) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: number) => ["mutation", "virkningstidspunkt", behandlingId],
@@ -63,18 +67,19 @@ export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
 };
-export const useGetOpplysningerBoforhold = (): HusstandsbarnGrunnlagDto[] => {
+export const useGetOpplysningerBoforhold = (): {
+    aktiveOpplysninger: HusstandsbarnGrunnlagDto[];
+    ikkeAktiverteOpplysninger: HusstandsbarnGrunnlagDto[];
+} => {
     const behandling = useGetBehandlingV2();
-    return behandling.aktiveGrunnlagsdata?.husstandsbarn;
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
 };
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.sivilstand;
-};
-
-export const useGetOpplysningerHentetdato = (): string | undefined => {
-    const opplysninger = useGetOpplysningerBoforhold();
-    return opplysninger.length == 0 ? new Date().toISOString() : opplysninger[0].innhentetTidspunkt;
 };
 
 export const useOppdaterBehandlingV2 = () => {
@@ -116,6 +121,23 @@ export const useUpdateInntekt = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av inntekter", error);
+        },
+    });
+};
+
+export const useUpdateBoforhold = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: OppdatereBoforholdRequestV2): Promise<OppdatereBoforholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereBoforhold(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
         },
     });
 };
@@ -413,6 +435,40 @@ export const useGetBeregningForskudd = () => {
                     };
                 }
             }
+        },
+    });
+};
+
+export const useAktiverGrunnlagsdata = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: AktivereGrunnlagRequestV2): Promise<AktivereGrunnlagResponseV2> => {
+            const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av grunnlag", error);
+        },
+    });
+};
+
+export const useOppdatereVirkningstidspunktV2 = () => {
+    const { behandlingId } = useForskudd();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateBoforhold(behandlingId),
+        mutationFn: async (payload: OppdatereVirkningstidspunkt): Promise<BehandlingDtoV2> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereVirkningstidspunktV2(behandlingId, payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av virkningstidsdpunkt", error);
         },
     });
 };

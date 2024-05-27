@@ -1,4 +1,4 @@
-import { Alert, BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
+import { BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
@@ -10,16 +10,15 @@ import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
-import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYHHMMString, isValidDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYHHMMString } from "../../../utils/date-utils";
 import { scrollToHash } from "../../../utils/window-utils";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
-import UnderArbeidAlert from "../../UnderArbeidAlert";
 import { createInitialValues } from "../helpers/inntektFormHelpers";
 import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
@@ -31,6 +30,26 @@ import { SkattepliktigeOgPensjonsgivende } from "./SkattepliktigeOgPensjonsgiven
 import { Småbarnstillegg } from "./Smaabarnstilleg";
 import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
+const NyOpplysningerAlert = () => {
+    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const ikkeAktiverteEndringer = Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).filter(
+        (i) => i.length > 0
+    );
+
+    if (ikkeAktiverteEndringer.length === 0) return null;
+    return (
+        <ForskuddAlert variant="info">
+            <Heading size="xsmall" level="3">
+                {text.alert.nyOpplysningerInfo}
+            </Heading>
+            <BodyShort size="small">
+                Nye opplysninger fra offentlige register er tilgjengelig. Oppdatert{" "}
+                {DateToDDMMYYYYHHMMString(dateOrNull(ikkeAktiverteEndringer[0][0].innhentetTidspunkt))}.
+            </BodyShort>
+        </ForskuddAlert>
+    );
+};
+
 const InntektHeader = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
     const inntekt = inntekter.månedsinntekter?.filter((inntekt) => inntekt.ident === ident);
@@ -39,7 +58,7 @@ const InntektHeader = ({ ident }: { ident: string }) => {
             <InntektChart inntekt={inntekt} />
             <ExpansionCard aria-label="default-demo" size="small">
                 <ExpansionCard.Header>
-                    <ExpansionCard.Title>{text.title.arbeidsforhold}</ExpansionCard.Title>
+                    <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
                 </ExpansionCard.Header>
                 <ExpansionCard.Content>
                     <QueryErrorWrapper>
@@ -49,18 +68,13 @@ const InntektHeader = ({ ident }: { ident: string }) => {
             </ExpansionCard>
         </div>
     ) : (
-        <Alert variant="info">
+        <ForskuddAlert variant="info">
             <BodyShort>Ingen inntekt funnet</BodyShort>
-        </Alert>
+        </ForskuddAlert>
     );
 };
 const Main = () => {
-    const {
-        virkningstidspunkt: { virkningstidspunkt: virkningsdato },
-        roller: behandlingRoller,
-        ikkeAktiverteEndringerIGrunnlagsdata,
-    } = useGetBehandlingV2();
-    const virkningstidspunkt = dateOrNull(virkningsdato);
+    const { roller: behandlingRoller } = useGetBehandlingV2();
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
@@ -70,31 +84,8 @@ const Main = () => {
         });
     useEffect(scrollToHash, []);
 
-    const ikkeAktiverteEndringer = Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).filter(
-        (i) => i.length > 0
-    );
-
-    function renderNyeOpplysningerAlert() {
-        if (ikkeAktiverteEndringer.length === 0) return null;
-        return (
-            <Alert variant="info" size="small">
-                <Heading size="small">{text.alert.nyOpplysningerInfo}</Heading>
-                <BodyShort>
-                    Nye opplysninger fra offentlige register er tilgjengelig. Oppdatert{" "}
-                    {DateToDDMMYYYYHHMMString(dateOrNull(ikkeAktiverteEndringer[0][0].innhentetTidspunkt))}.
-                </BodyShort>
-            </Alert>
-        );
-    }
-
     return (
-        <div className="grid gap-y-12">
-            {renderNyeOpplysningerAlert()}
-            {!isValidDate(virkningstidspunkt) && (
-                <Alert variant="warning">
-                    <BodyShort>Mangler virkningstidspunkt</BodyShort>
-                </Alert>
-            )}
+        <div className="grid gap-y-2">
             <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
                 <Tabs.List>
                     {roller.map((rolle) => (
@@ -110,7 +101,7 @@ const Main = () => {
                 {roller.map((rolle) => {
                     return (
                         <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
-                            <div className="mt-12">
+                            <div className="mt-4">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
                             <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
@@ -132,7 +123,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
@@ -155,7 +146,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => setActiveStep(STEPS[ForskuddStepper.VEDTAK]);
+    const onNext = () => onStepChange(STEPS[ForskuddStepper.VEDTAK]);
 
     const debouncedOnSave = useDebounce(onSave);
 
@@ -170,12 +161,7 @@ const Side = () => {
 
     return (
         <>
-            <div className="grid gap-y-4">
-                <Heading level="3" size="medium">
-                    {text.title.begrunnelse}
-                </Heading>
-                <FormControlledTextarea name="notat.kunINotat" label="" hideLabel />
-            </div>
+            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -196,18 +182,13 @@ const InntektForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title="Inntekt" main={<Main />} side={<Side />} />
+                <FormLayout title="Inntekt" main={<Main />} side={<Side />} pageAlert={<NyOpplysningerAlert />} />
             </form>
         </FormProvider>
     );
 };
 
 export default () => {
-    const { isInntektSkjermbildeEnabled } = useFeatureToogle();
-
-    if (!isInntektSkjermbildeEnabled) {
-        return <UnderArbeidAlert />;
-    }
     return (
         <QueryErrorWrapper>
             <InntektForm />

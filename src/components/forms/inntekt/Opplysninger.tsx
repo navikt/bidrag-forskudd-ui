@@ -30,8 +30,10 @@ const inntektTypeToOpplysningerMapper = {
 
 export const Opplysninger = ({
     fieldName,
+    ident,
 }: {
     fieldName: "småbarnstillegg" | "utvidetBarnetrygd" | "barnetillegg" | "kontantstøtte" | `årsinntekter.${string}`;
+    ident?: string;
 }) => {
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
@@ -85,7 +87,6 @@ export const Opplysninger = ({
                             ),
                         });
                     } else if (inntektType === "årsinntekter") {
-                        // @ts-ignore
                         resetField(`${inntektType}.${personident}`, {
                             defaultValue: data.inntekter[inntektType]
                                 .filter((v: InntektDtoV2) => v.ident == personident)
@@ -113,13 +114,27 @@ export const Opplysninger = ({
                 return "Endring";
         }
     }
-    if (lesemodus) return null;
+    if (
+        lesemodus ||
+        (ident && ikkeAktiverteEndringer[ident].length < 1) ||
+        Object.values(ikkeAktiverteEndringer).every((ikkeAktiverteEndring) => ikkeAktiverteEndring.length < 1)
+    )
+        return null;
 
     return (
         <>
-            <Box padding="4" background="surface-default" borderWidth="1">
-                <Heading size="small">{text.alert.nyOpplysninger}</Heading>
-                <BodyShort>{text.alert.nyOpplysningerInfomelding}</BodyShort>
+            <Box
+                padding="4"
+                background="surface-default"
+                borderWidth="1"
+                borderRadius="medium"
+                borderColor="border-default"
+                className="w-[708px]"
+            >
+                <Heading size="xsmall" level="6">
+                    {text.alert.nyOpplysninger}
+                </Heading>
+                <BodyShort size="small">{text.alert.nyOpplysningerInfomelding}</BodyShort>
                 {Object.keys(ikkeAktiverteEndringer).map((key) => {
                     if (ikkeAktiverteEndringer[key].length < 1) return null;
                     const rolle = roller.find((rolle) => rolle.ident === key);
@@ -149,8 +164,8 @@ export const Opplysninger = ({
                                             },
                                             i
                                         ) => (
-                                            <>
-                                                <tr key={i + rapporteringstype}>
+                                            <Fragment key={i + rapporteringstype}>
+                                                <tr>
                                                     <td width="250px" scope="row">
                                                         {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
                                                     </td>
@@ -159,6 +174,7 @@ export const Opplysninger = ({
                                                 </tr>
                                                 {inntektsposterSomErEndret.map((i, index) => (
                                                     <tr
+                                                        key={i.visningsnavn + index}
                                                         style={
                                                             index == inntektsposterSomErEndret.length - 1
                                                                 ? {
@@ -172,7 +188,7 @@ export const Opplysninger = ({
                                                         <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
                                                     </tr>
                                                 ))}
-                                            </>
+                                            </Fragment>
                                         )
                                     )}
                                 </tbody>
@@ -182,6 +198,7 @@ export const Opplysninger = ({
                 })}
                 <Button
                     size="xsmall"
+                    type="button"
                     variant="secondary"
                     disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
                     loading={aktiverGrunnlagFn.isPending}

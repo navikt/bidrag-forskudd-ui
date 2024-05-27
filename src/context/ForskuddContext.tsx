@@ -1,3 +1,5 @@
+import { FileIcon } from "@navikt/aksel-icons";
+import { Button, Heading } from "@navikt/ds-react";
 import React, {
     createContext,
     Dispatch,
@@ -5,35 +7,57 @@ import React, {
     SetStateAction,
     useCallback,
     useContext,
+    useRef,
     useState,
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
+import { ConfirmationModal } from "../components/modal/ConfirmationModal";
 import { STEPS } from "../constants/steps";
+import text from "../constants/texts";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { useBehandlingV2 } from "../hooks/useApiData";
-import { BoforholdFormValues } from "../types/boforholdFormValues";
 import { InntektFormValues } from "../types/inntektFormValues";
-import { VirkningstidspunktFormValues } from "../types/virkningstidspunktFormValues";
+
+export type InntektTables =
+    | "småbarnstillegg"
+    | "utvidetBarnetrygd"
+    | `årsinntekter.${string}`
+    | `barnetillegg.${string}`
+    | `kontantstøtte.${string}`;
+
+type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+
+export type PageErrorsOrUnsavedState = {
+    virkningstidspunkt: { error: boolean };
+    boforhold: {
+        error: boolean;
+        openFields?: { [key in HusstandsbarnTables]: boolean };
+    };
+    inntekt: {
+        error: boolean;
+        openFields?: {
+            [key in InntektTables]: boolean;
+        };
+    };
+};
 
 interface IForskuddContext {
     activeStep: string;
-    setActiveStep: (x: number) => void;
     behandlingId: number;
     vedtakId: number;
     lesemodus: boolean;
     erVedtakFattet: boolean;
     saksnummer?: string;
-    virkningstidspunktFormValues: VirkningstidspunktFormValues;
-    setVirkningstidspunktFormValues: (values: VirkningstidspunktFormValues) => void;
     inntektFormValues: InntektFormValues;
     setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
-    boforholdFormValues: BoforholdFormValues;
-    setBoforholdFormValues: Dispatch<SetStateAction<BoforholdFormValues>>;
     errorMessage: { title: string; text: string };
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
+    pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
+    setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
+    onStepChange: (x: number) => void;
 }
 
 interface IForskuddContextProps {
@@ -46,9 +70,12 @@ export const ForskuddContext = createContext<IForskuddContext | null>(null);
 function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [virkningstidspunktFormValues, setVirkningstidspunktFormValues] = useState(undefined);
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
-    const [boforholdFormValues, setBoforholdFormValues] = useState<BoforholdFormValues>(undefined);
+    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState({
+        virkningstidspunkt: { error: false },
+        boforhold: { error: false },
+        inntekt: { error: false },
+    });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
@@ -59,40 +86,85 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
 
     const queryLesemodus = searchParams.get("lesemodus") == "true";
     const behandling = useBehandlingV2(behandlingId, vedtakId);
+    const [nextStep, setNextStep] = useState<number>(undefined);
+    const ref = useRef<HTMLDialogElement>(null);
+    const onConfirm = () => {
+        ref.current?.close();
+        setActiveStep(nextStep);
+        setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
+    };
+
+    const onStepChange = (x: number) => {
+        const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
+
+        if (
+            currentPageErrors &&
+            (currentPageErrors.error ||
+                (currentPageErrors.openFields && Object.values(currentPageErrors.openFields).some((open) => open)))
+        ) {
+            setNextStep(x);
+            ref.current?.showModal();
+        } else {
+            setActiveStep(x);
+        }
+    };
+
     const value = React.useMemo(
         () => ({
             activeStep,
-            setActiveStep,
             behandlingId,
             vedtakId,
             lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
-            virkningstidspunktFormValues,
-            setVirkningstidspunktFormValues,
             inntektFormValues,
             setInntektFormValues,
-            boforholdFormValues,
-            setBoforholdFormValues,
             errorMessage,
             setErrorMessage,
             errorModalOpen,
             setErrorModalOpen,
+            pageErrorsOrUnsavedState,
+            setPageErrorsOrUnsavedState,
+            onConfirm,
+            onStepChange,
         }),
         [
             activeStep,
             behandlingId,
             vedtakId,
             saksnummer,
-            virkningstidspunktFormValues,
             inntektFormValues,
-            boforholdFormValues,
             errorMessage,
             errorModalOpen,
+            pageErrorsOrUnsavedState,
         ]
     );
 
-    return <ForskuddContext.Provider value={value}>{children}</ForskuddContext.Provider>;
+    return (
+        <ForskuddContext.Provider value={value}>
+            <ConfirmationModal
+                ref={ref}
+                description={text.varsel.ønskerDuÅGåVidereDescription}
+                heading={
+                    <Heading size="small" className="flex gap-x-1.5 items-center">
+                        <FileIcon title="a11y-title" fontSize="1.5rem" />
+                        {text.varsel.ønskerDuÅGåVidere}
+                    </Heading>
+                }
+                footer={
+                    <>
+                        <Button type="button" onClick={() => ref.current?.close()} size="small">
+                            {text.label.tilbakeTilUtfylling}
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={onConfirm}>
+                            {text.label.gåVidereUtenÅLagre}
+                        </Button>
+                    </>
+                }
+            />
+            {children}
+        </ForskuddContext.Provider>
+    );
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);

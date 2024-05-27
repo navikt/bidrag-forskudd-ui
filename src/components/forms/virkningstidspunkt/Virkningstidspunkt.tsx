@@ -1,5 +1,5 @@
-import { capitalize, toISODateString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Label } from "@navikt/ds-react";
+import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { BodyShort, Label } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
@@ -16,22 +16,20 @@ import { STEPS } from "../../../constants/steps";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useGetBehandlingV2, useOppdaterBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { hentVisningsnavnVedtakstype } from "../../../hooks/useVisningsnavn";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "../../formFields/FormControlledTextArea";
+import { ForskuddAlert } from "../../ForskuddAlert";
 import { FlexRow } from "../../layout/grid/FlexRow";
 import { FormLayout } from "../../layout/grid/FormLayout";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
-import {
-    aarsakToVirkningstidspunktMapper,
-    getFomAndTomForMonthPicker,
-    getSoktFraOrMottatDato,
-} from "../helpers/virkningstidspunktHelpers";
+import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 const årsakListe = [
@@ -88,12 +86,9 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const Main = ({ initialValues, error }) => {
+const Main = ({ initialValues }) => {
     const behandling = useGetBehandlingV2();
-    const [initialVirkningsdato, setInitialVirkningsdato] = useState(behandling.virkningstidspunkt.virkningstidspunkt);
-    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
     const { setValue, clearErrors, getValues } = useFormContext();
-    const virkningsDato = getValues("virkningstidspunkt");
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
 
     const skalViseÅrsakstyper = behandling.vedtakstype !== Vedtakstype.OPPHOR;
@@ -114,36 +109,10 @@ const Main = ({ initialValues, error }) => {
         [fom]
     );
 
-    useEffect(() => {
-        if (!initialVirkningsdato && behandling) {
-            setInitialVirkningsdato(
-                behandling.virkningstidspunkt.virkningstidspunkt ??
-                    toISODateString(
-                        getSoktFraOrMottatDato(new Date(behandling.søktFomDato), new Date(behandling.mottattdato))
-                    )
-            );
-        }
-    }, [behandling]);
-
-    useEffect(() => {
-        if (initialVirkningsdato && initialVirkningsdato !== virkningsDato) {
-            const boforholdPeriodsExist = behandling.boforhold?.husstandsbarn[0]?.perioder.length;
-            if (boforholdPeriodsExist) {
-                setShowChangedVirkningsDatoAlert(true);
-            }
-        }
-
-        if (initialVirkningsdato && showChangedVirkningsDatoAlert && initialVirkningsdato === virkningsDato) {
-            setShowChangedVirkningsDatoAlert(false);
-        }
-    }, [virkningsDato]);
-
     const erTypeOpphør = behandling.vedtakstype == Vedtakstype.OPPHOR;
     return (
         <>
-            {showChangedVirkningsDatoAlert && <Alert variant="warning">{text.alert.endretVirkningstidspunkt}</Alert>}
-            {error && <Alert variant="error">{error.message}</Alert>}
-            <FlexRow className="gap-x-12 mt-12">
+            <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">
@@ -208,20 +177,17 @@ const Main = ({ initialValues, error }) => {
 };
 
 const Side = () => {
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
-        setActiveStep(
+        onStepChange(
             avslagsListe.includes(årsakAvslag) ? STEPS[ForskuddStepper.VEDTAK] : STEPS[ForskuddStepper.BOFORHOLD]
         );
 
     return (
         <>
-            <Heading level="3" size="medium">
-                {text.title.begrunnelse}
-            </Heading>
-            <FormControlledTextarea name="notat.kunINotat" label="" hideLabel />
+            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -229,36 +195,75 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const oppdaterBehandling = useOppdaterBehandlingV2();
+    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useForskudd();
+    const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
+    const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
+    const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
 
+    useEffect(() => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            virkningstidspunkt: { error: !ObjectUtils.isEmpty(useFormMethods.formState.errors) },
+        });
+    }, [useFormMethods.formState.errors]);
+
+    useEffect(() => {
+        const subscription = useFormMethods.watch((value, { name }) => {
+            if (name === "virkningstidspunkt" && !value.virkningstidspunkt) {
+                return;
+            } else {
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (
+            initialVirkningsdato &&
+            virkningstidspunkt.virkningstidspunkt &&
+            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(true);
+        }
+
+        if (
+            initialVirkningsdato &&
+            showChangedVirkningsDatoAlert &&
+            initialVirkningsdato === virkningstidspunkt.virkningstidspunkt
+        ) {
+            setShowChangedVirkningsDatoAlert(false);
+        }
+
+        if (!initialVirkningsdato && virkningstidspunkt.virkningstidspunkt) {
+            setInitialVirkningsdato(virkningstidspunkt.virkningstidspunkt);
+        }
+    }, [virkningstidspunkt.virkningstidspunkt]);
+
     const onSave = () => {
         const values = useFormMethods.getValues();
-        oppdaterBehandling.mutation.mutate(
-            { virkningstidspunkt: createPayload(values) },
-            {
-                onSuccess: () => {
-                    useFormMethods.reset(values, {
-                        keepValues: true,
-                        keepErrors: true,
-                        keepDefaultValues: true,
-                    });
-                },
-            }
-        );
+        oppdaterBehandling.mutation.mutate(createPayload(values), {
+            onSuccess: (response) => {
+                oppdaterBehandling.queryClientUpdater((currentData) => {
+                    return {
+                        ...currentData,
+                        virkningstidspunkt: response.virkningstidspunkt,
+                        boforhold: response.boforhold,
+                        aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                        inntekter: response.inntekter,
+                        ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                    };
+                });
+            },
+        });
     };
 
     const debouncedOnSave = useDebounce(onSave);
-
-    useEffect(() => {
-        const { unsubscribe } = useFormMethods.watch(() => debouncedOnSave());
-
-        return () => unsubscribe();
-    }, []);
 
     return (
         <>
@@ -266,8 +271,13 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title={text.label.virkningstidspunkt}
-                        main={<Main initialValues={initialValues} error={oppdaterBehandling.error} />}
+                        main={<Main initialValues={initialValues} />}
                         side={<Side />}
+                        pageAlert={
+                            showChangedVirkningsDatoAlert && (
+                                <ForskuddAlert variant="warning">{text.alert.endretVirkningstidspunkt}</ForskuddAlert>
+                            )
+                        }
                     />
                 </form>
             </FormProvider>

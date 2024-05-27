@@ -18,9 +18,9 @@ export const Småbarnstillegg = () => {
     const fieldName = "småbarnstillegg";
 
     return (
-        <Box padding="4" background="surface-subtle" className="grid gap-y-4">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <VStack gap={"2"}>
-                <Heading level="3" size="medium" id={elementId.seksjon_inntekt_småbarnstillegg}>
+                <Heading level="2" size="small" id={elementId.seksjon_inntekt_småbarnstillegg}>
                     {text.title.småbarnstillegg}
                 </Heading>
                 <HjelpetekstTabell innhold={text.hjelpetekst.småbarnstillegg} />
@@ -31,12 +31,10 @@ export const Småbarnstillegg = () => {
                     controlledFields,
                     onSaveRow,
                     handleOnSelect,
-                    editableRow,
                     onEditRow,
                     addPeriod,
                 }: {
                     controlledFields: InntektFormPeriode[];
-                    editableRow: number;
                     onSaveRow: (index: number) => void;
                     handleOnSelect: (value: boolean, index: number) => void;
                     onEditRow: (index: number) => void;
@@ -45,26 +43,41 @@ export const Småbarnstillegg = () => {
                     <>
                         {controlledFields.length > 0 && (
                             <div className="overflow-x-auto whitespace-nowrap">
-                                <Table size="small" className="lg:table-auto table-fixed table bg-white">
+                                <Table size="small" className="table-fixed table bg-white w-fit">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
-                                            <Table.HeaderCell scope="col" align="center" className="w-[84px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="center"
+                                                className="w-[84px]"
+                                            >
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[144px]">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[144px]">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="center" className="w-[74px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="center"
+                                                className="w-[74px]"
+                                            >
                                                 {text.label.kilde}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" align="right" className="w-[154px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[154px]"
+                                            >
                                                 {text.label.beløp}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                                            <Table.HeaderCell scope="col" className="w-[25px]"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
@@ -83,9 +96,8 @@ export const Småbarnstillegg = () => {
                                                         handleOnSelect={handleOnSelect}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.fraOgMed}
                                                         fieldName={fieldName}
@@ -93,9 +105,8 @@ export const Småbarnstillegg = () => {
                                                         item={item}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell textSize="small">
                                                     <Periode
-                                                        editableRow={editableRow}
                                                         index={index}
                                                         label={text.label.tilOgMed}
                                                         fieldName={fieldName}
@@ -106,20 +117,13 @@ export const Småbarnstillegg = () => {
                                                 <Table.DataCell>
                                                     <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
-                                                    <Totalt
-                                                        item={item}
-                                                        field={`${fieldName}.${index}`}
-                                                        erRedigerbart={
-                                                            editableRow === index && item.kilde === Kilde.MANUELL
-                                                        }
-                                                    />
+                                                <Table.DataCell textSize="small">
+                                                    <Totalt item={item} field={`${fieldName}.${index}`} />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
                                                     <EditOrSaveButton
                                                         index={index}
-                                                        erMed={item.taMed}
-                                                        editableRow={editableRow}
+                                                        item={item}
                                                         onEditRow={onEditRow}
                                                         onSaveRow={onSaveRow}
                                                     />

@@ -46,13 +46,13 @@ const Vedtak = () => {
         <div className="grid gap-y-8">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
-                <Heading level="2" size="xlarge">
+                <Heading level="2" size="medium">
                     {text.title.vedtak}
                 </Heading>
             </div>
             <div className="grid gap-y-2">
                 {!beregnetForskudd?.feil && (
-                    <Heading level="3" size="medium">
+                    <Heading level="3" size="small">
                         {text.title.oppsummering}
                     </Heading>
                 )}
@@ -196,7 +196,7 @@ const opplysningTilElementId = (opplysninger: OpplysningerType) => {
 };
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
-    const { setActiveStep } = useForskudd();
+    const { onStepChange } = useForskudd();
     const {
         virkningstidspunkt: { avslag },
         vedtakstype,
@@ -215,7 +215,7 @@ const VedtakResultat = () => {
                     ? "Virkningstidspunkt: Mangler årsak"
                     : "Virkningstidspunkt";
             feilliste.push(
-                <ErrorSummary.Item href="#" onClick={() => setActiveStep(STEPS.virkningstidspunkt)}>
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(STEPS.virkningstidspunkt)}>
                     {beskrivelse}
                 </ErrorSummary.Item>
             );
@@ -225,7 +225,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementIds.seksjon_boforhold}_${value.barn.tekniskId}`}
-                        onClick={() => setActiveStep(STEPS.boforhold)}
+                        onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}
                     </ErrorSummary.Item>
@@ -236,7 +236,7 @@ const VedtakResultat = () => {
             feilliste.push(
                 <ErrorSummary.Item
                     href={`#${elementIds.seksjon_sivilstand}`}
-                    onClick={() => setActiveStep(STEPS.boforhold)}
+                    onClick={() => onStepChange(STEPS.boforhold)}
                 >
                     Sivilstand
                 </ErrorSummary.Item>
@@ -247,7 +247,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_skattepliktig}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}
                     </ErrorSummary.Item>
@@ -256,7 +256,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_barnetillegg}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.barnetillegg.toLowerCase()}
                     </ErrorSummary.Item>
@@ -265,7 +265,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_kontantstøtte}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.kontantstøtte.toLowerCase()}
                     </ErrorSummary.Item>
@@ -274,7 +274,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_utvidetbarnetrygd}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.utvidetBarnetrygd.toLowerCase()}
                     </ErrorSummary.Item>
@@ -283,7 +283,7 @@ const VedtakResultat = () => {
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${elementId.seksjon_inntekt_småbarnstillegg}`}
-                        onClick={() => setActiveStep(STEPS.inntekt)}
+                        onClick={() => onStepChange(STEPS.inntekt)}
                     >
                         Inntekter: Perioder i {texts.title.småbarnstillegg.toLowerCase()}
                     </ErrorSummary.Item>
@@ -293,7 +293,7 @@ const VedtakResultat = () => {
             feilliste.push(
                 <ErrorSummary.Item
                     href={`#${opplysningTilElementId(value)}`}
-                    onClick={() => setActiveStep(opplysningTilStep(value))}
+                    onClick={() => onStepChange(opplysningTilStep(value))}
                 >
                     {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
                 </ErrorSummary.Item>
@@ -356,32 +356,35 @@ const VedtakTableBody = ({
                 <>
                     {avslag ? (
                         <Table.Row>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                                 {periode.periode.til
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{opphør ? text.label.opphør : text.label.avslag}</Table.DataCell>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {opphør ? text.label.opphør : text.label.avslag}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
                             </Table.DataCell>
                         </Table.Row>
                     ) : (
                         <Table.Row>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
                                 {periode.periode.til
                                     ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
                                     : ""}
                             </Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.inntekt)}</Table.DataCell>
 
-                            <Table.DataCell>{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{formatterBeløp(periode.inntekt)}</Table.DataCell>
 
-                            <Table.DataCell>{periode.antallBarnIHusstanden}</Table.DataCell>
-                            <Table.DataCell>{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell>
+                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.sivilstand)}</Table.DataCell>
+
+                            <Table.DataCell textSize="small">{periode.antallBarnIHusstanden}</Table.DataCell>
+                            <Table.DataCell textSize="small">{formatterBeløp(periode.beløp)}</Table.DataCell>
+                            <Table.DataCell textSize="small">
                                 {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
                             </Table.DataCell>
                         </Table.Row>
@@ -404,28 +407,34 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
     <Table.Header>
         {avslag ? (
             <Table.Row>
-                <Table.HeaderCell scope="col">{text.label.periode}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.resultat}</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{text.label.årsak}</Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.periode}
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.resultat}
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col">
+                    {text.label.årsak}
+                </Table.HeaderCell>
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     {text.label.inntekt}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     {text.label.sivilstandBM}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "150px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     {text.label.antallBarn}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "100px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
                     {text.label.forskudd}
                 </Table.HeaderCell>
-                <Table.HeaderCell scope="col" style={{ width: "250px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "250px" }}>
                     {text.label.resultat}
                 </Table.HeaderCell>
             </Table.Row>

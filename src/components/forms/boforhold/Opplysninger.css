@@ -1,6 +1,7 @@
 .opplysninger td.navds-table__data-cell {
     padding-top: 0;
     padding-bottom: 0;
+    border-bottom-width: 0;
 }
 .opplysninger .navds-label {
     font-size: 16px;
@@ -8,4 +9,9 @@
 
 .opplysninger .navds-body-short {
     font-size: 14px;
+}
+
+.opplysninger > .navds-table__header .navds-table__header-cell,
+.navds-table__header .navds-table__data-cell {
+    border-bottom-width: 0;
 }

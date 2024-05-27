@@ -13,6 +13,51 @@ import {
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { isAfterDate } from "../../../utils/date-utils";
 
+export const periodeHasHigherPriorityOrder = (
+    periode: InntektFormPeriode,
+    periodeToCompareWith: InntektFormPeriode
+) => {
+    if (periodeToCompareWith.kilde === periode.kilde) {
+        if (periodeToCompareWith.kilde === Kilde.OFFENTLIG)
+            return offentligPeriodeHasHigherOrder(periode, periodeToCompareWith);
+        if (periodeToCompareWith.kilde === Kilde.MANUELL)
+            return periodeToCompareWith.rapporteringstype >= periode.rapporteringstype;
+    }
+
+    return periode.kilde === Kilde.OFFENTLIG && periodeToCompareWith.kilde === Kilde.MANUELL;
+};
+export const offentligPeriodeHasHigherOrder = (
+    periode: InntektFormPeriode,
+    periodeToCompareWith: InntektFormPeriode
+) => {
+    const periodePriority = OffentligInntektPriorityOrder.findIndex(
+        (inntektsrapportering) => inntektsrapportering === (periode.rapporteringstype as Inntektsrapportering)
+    );
+    const periodeToCompareWithPriority = OffentligInntektPriorityOrder.findIndex(
+        (inntektsrapportering) =>
+            inntektsrapportering === (periodeToCompareWith.rapporteringstype as Inntektsrapportering)
+    );
+
+    return periodeToCompareWithPriority > periodePriority;
+};
+export const OffentligInntektPriorityOrder = [
+    Inntektsrapportering.AINNTEKTBEREGNET3MND,
+    Inntektsrapportering.AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT,
+    Inntektsrapportering.AINNTEKTBEREGNET12MND,
+    Inntektsrapportering.AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT,
+    Inntektsrapportering.OVERGANGSSTONAD,
+    Inntektsrapportering.INTRODUKSJONSSTONAD,
+    Inntektsrapportering.KVALIFISERINGSSTONAD,
+    Inntektsrapportering.SYKEPENGER,
+    Inntektsrapportering.FORELDREPENGER,
+    Inntektsrapportering.DAGPENGER,
+    Inntektsrapportering.AAP,
+    Inntektsrapportering.PENSJON,
+    Inntektsrapportering.AINNTEKT,
+    Inntektsrapportering.KAPITALINNTEKT,
+    Inntektsrapportering.LIGNINGSINNTEKT,
+];
+
 export const transformInntekt =
     (virkningsdato: Date) =>
     (inntekt: InntektDtoV2): InntektFormPeriode => ({
@@ -29,7 +74,11 @@ export const transformInntekt =
 
 export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
     if (a.taMed === b.taMed) {
-        return isAfterDate(a.datoFom, b.datoFom) ? 1 : -1;
+        if (isAfterDate(a.datoFom, b.datoFom)) return 1;
+        if (a.datoFom === b.datoFom) {
+            return periodeHasHigherPriorityOrder(a, b) ? -1 : 1;
+        }
+        return -1;
     }
     if (a.taMed !== b.taMed) {
         return a.taMed ? 1 : -1;

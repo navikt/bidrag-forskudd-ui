@@ -1,7 +1,7 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useState } from "react";
+import { BodyShort, Button, Heading } from "@navikt/ds-react";
+import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import {
@@ -13,18 +13,25 @@ import {
     OppdatereInntektResponse,
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
-import { useForskudd } from "../../../context/ForskuddContext";
+import { InntektTables, useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { formatterBeløp } from "../../../utils/number-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
-import { createPayload, transformInntekt } from "../helpers/inntektFormHelpers";
+import { ForskuddAlert } from "../../ForskuddAlert";
+import {
+    createPayload,
+    inntektSorting,
+    offentligPeriodeHasHigherOrder,
+    periodeHasHigherPriorityOrder,
+    transformInntekt,
+} from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -57,17 +64,9 @@ export const TaMed = ({
     </div>
 );
 
-export const Totalt = ({
-    item,
-    field,
-    erRedigerbart,
-}: {
-    item: InntektFormPeriode;
-    field: string;
-    erRedigerbart: boolean;
-}) => (
+export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) => (
     <>
-        {erRedigerbart ? (
+        {item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
             <FormControlledTextField
                 name={`${field}.beløp`}
                 label="Totalt"
@@ -77,19 +76,27 @@ export const Totalt = ({
                 hideLabel
             />
         ) : (
-            <div className="h-8 flex items-center justify-end">
-                <BodyShort>{formatterBeløp(item.beløp)}</BodyShort>
-            </div>
+            <div className="h-8 flex items-center justify-end">{formatterBeløp(item.beløp)}</div>
         )}
     </>
 );
 
-export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveRow }) => {
+export const EditOrSaveButton = ({
+    index,
+    item,
+    onEditRow,
+    onSaveRow,
+}: {
+    item: InntektFormPeriode;
+    index: number;
+    onEditRow: (index: number) => void;
+    onSaveRow: (index: number) => void;
+}) => {
     const { lesemodus } = useForskudd();
 
     return (
         <div className="h-8 flex items-center justify-center">
-            {!lesemodus && erMed && editableRow !== index && (
+            {!lesemodus && item.taMed && !item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onEditRow(index)}
@@ -98,7 +105,7 @@ export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveR
                     size="small"
                 />
             )}
-            {!lesemodus && editableRow === index && (
+            {!lesemodus && item.erRedigerbart && (
                 <Button
                     type="button"
                     onClick={() => onSaveRow(index)}
@@ -113,14 +120,12 @@ export const EditOrSaveButton = ({ erMed, index, editableRow, onEditRow, onSaveR
 
 export const Periode = ({
     index,
-    editableRow,
     fieldName,
     field,
     label,
     item,
 }: {
     index: number;
-    editableRow: number;
     fieldName:
         | "småbarnstillegg"
         | "utvidetBarnetrygd"
@@ -134,6 +139,8 @@ export const Periode = ({
     const virkningsdato = useVirkningsdato();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
+    const fieldIsDatoTom = field === "datoTom";
+
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -148,22 +155,22 @@ export const Periode = ({
         }
     };
 
-    return editableRow === index ? (
+    return item.erRedigerbart ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
             placeholder="DD.MM.ÅÅÅÅ"
             defaultValue={item[field]}
-            required={item.taMed && field === "datoFom"}
             fromDate={fom}
-            toDate={tom}
             customValidation={validateFomOgTom}
-            lastDayOfMonthPicker={field === "datoTom"}
+            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            lastDayOfMonthPicker={fieldIsDatoTom}
+            required={item.taMed && !fieldIsDatoTom}
             hideLabel
         />
     ) : (
         <div className="h-8 flex items-center">
-            <BodyShort>{item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</BodyShort>
+            {item.taMed && item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}
         </div>
     );
 };
@@ -173,55 +180,104 @@ export const InntektTabel = ({
     customRowValidation,
     children,
 }: {
-    fieldName:
-        | "småbarnstillegg"
-        | "utvidetBarnetrygd"
-        | `årsinntekter.${string}`
-        | `barnetillegg.${string}`
-        | `kontantstøtte.${string}`;
+    fieldName: InntektTables;
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } = useForskudd();
     const {
         inntekter: { valideringsfeil },
         søktFomDato,
         virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
-    const [editableRow, setEditableRow] = useState<number>(undefined);
     const saveInntekt = useOnSaveInntekt();
-    const { control, getFieldState, getValues, clearErrors, setError, setValue } = useFormContext<InntektFormValues>();
+    const { control, getFieldState, getValues, clearErrors, setError, setValue, formState } =
+        useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control,
         name: fieldName,
     });
+
     const watchFieldArray = useWatch({ control, name: fieldName });
+    const controlledFields = fieldArray.fields.map((field, index) => {
+        return {
+            ...field,
+            ...watchFieldArray?.[index],
+        };
+    });
     const [inntektType, ident] = fieldName.split(".");
 
-    const unsetEditedRow = (index: number) => {
-        if (editableRow === index) {
-            setEditableRow(undefined);
-        }
-    };
+    useEffect(() => {
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            inntekt: {
+                error:
+                    !ObjectUtils.isEmpty(formState.errors.årsinntekter) ||
+                    !ObjectUtils.isEmpty(formState.errors.barnetillegg) ||
+                    !ObjectUtils.isEmpty(formState.errors.småbarnstillegg) ||
+                    !ObjectUtils.isEmpty(formState.errors.kontantstøtte) ||
+                    !ObjectUtils.isEmpty(formState.errors.utvidetBarnetrygd),
+                openFields: {
+                    ...pageErrorsOrUnsavedState.inntekt.openFields,
+                    [fieldName]: getValues(fieldName).some((period) => period.erRedigerbart),
+                },
+            },
+        });
+    }, [formState.errors, JSON.stringify(controlledFields)]);
 
-    const handleOnSelect = (value: boolean, index: number) => {
+    const handleOnSelect = (taMed: boolean, index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        if (!value && !erOffentlig) {
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: taMed });
+
+        if (!taMed && !erOffentlig) {
             handleDelete(index);
         } else {
             handleUpdate(index);
         }
     };
 
+    const movePeriods = (index: number, updatedPeriode: InntektFormPeriode, perioder: InntektFormPeriode[]) => {
+        if (updatedPeriode.taMed) {
+            const indexOfFirstMatchingPeriod = perioder.findIndex(
+                (periode) =>
+                    periode.taMed &&
+                    !periode.erRedigerbart &&
+                    periode.id !== updatedPeriode.id &&
+                    (isAfterDate(periode.datoFom, updatedPeriode.datoFom) ||
+                        (periode.datoFom === updatedPeriode.datoFom &&
+                            periodeHasHigherPriorityOrder(updatedPeriode, periode)))
+            );
+            const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : perioder.length;
+            const newIndex = index >= moveToIndex ? moveToIndex : moveToIndex - 1;
+            fieldArray.move(index, newIndex);
+        } else {
+            const notSelectedOrEditedPeriods = perioder.filter(
+                (periode) => !periode.taMed && !periode.erRedigerbart && periode.id !== updatedPeriode.id
+            );
+            const indexOfFirstMatchingPeriod = notSelectedOrEditedPeriods.findIndex((periode) =>
+                offentligPeriodeHasHigherOrder(updatedPeriode, periode)
+            );
+            const moveToIndex =
+                indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : notSelectedOrEditedPeriods.length;
+            fieldArray.move(index, moveToIndex);
+        }
+    };
+
     const handleUpdate = (index: number) => {
-        const periode = getValues(`${fieldName}.${index}`);
-        const payload = createPayload(periode, virkningsdato);
+        const perioder = getValues(fieldName);
+        const updatedPeriode = perioder[index];
+        const payload = createPayload(updatedPeriode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
         const onSaveSuccess = (response: OppdatereInntektResponse) => {
-            setValue(`${fieldName}.${index}`, transformFn(response.inntekt));
+            setValue(`${fieldName}.${index}`, { ...updatedPeriode, ...transformFn(response.inntekt) });
+
+            if (!updatedPeriode.erRedigerbart) {
+                movePeriods(index, updatedPeriode, perioder);
+            }
+
             saveInntekt.queryClientUpdater((currentData) => {
                 const updatedInntektIndex = currentData.inntekter[inntektType].findIndex(
                     (inntekt: InntektDtoV2) => inntekt.id === response.inntekt.id
@@ -230,11 +286,13 @@ export const InntektTabel = ({
                     updatedInntektIndex === -1
                         ? currentData.inntekter[inntektType].concat(response.inntekt)
                         : currentData.inntekter[inntektType].toSpliced(updatedInntektIndex, 1, response.inntekt);
+                const sortedUpdatedInntekter = updatedInntekter.toSorted(inntektSorting);
+
                 return {
                     ...currentData,
                     inntekter: {
                         ...currentData.inntekter,
-                        [inntektType]: updatedInntekter,
+                        [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
                         valideringsfeil: response.valideringsfeil,
                     },
@@ -242,7 +300,6 @@ export const InntektTabel = ({
             });
         };
         updatedAndSave(payload, onSaveSuccess);
-        unsetEditedRow(index);
     };
 
     const handleDelete = (index: number) => {
@@ -265,22 +322,10 @@ export const InntektTabel = ({
 
         updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess);
         fieldArray.remove(index);
-
-        if (editableRow === index) {
-            setEditableRow(undefined);
-        } else if (editableRow) {
-            setEditableRow(editableRow - 1);
-        }
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
-        if (checkIfAnotherRowIsEdited()) {
-            showErrorModal();
-        } else {
-            const perioder = getValues(fieldName);
-            fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato });
-            setEditableRow(perioder.length);
-        }
+        fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato, erRedigerbart: true });
     };
     const updatedAndSave = (
         updatedValues: OppdatereInntektRequest,
@@ -303,33 +348,15 @@ export const InntektTabel = ({
 
         const fieldState = getFieldState(`${fieldName}.${index}`);
         if (!fieldState.error) {
+            setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: false });
             handleUpdate(index);
         }
     };
-    const checkIfAnotherRowIsEdited = (index?: number) => {
-        return editableRow !== undefined && Number(editableRow) !== index;
-    };
-    const showErrorModal = () => {
-        setErrorMessage({
-            title: text.alert.fullførRedigering,
-            text: text.alert.periodeUnderRedigering,
-        });
-        setErrorModalOpen(true);
-    };
-    const onEditRow = (index: number) => {
-        if (checkIfAnotherRowIsEdited(index)) {
-            showErrorModal();
-        } else {
-            setEditableRow(index);
-        }
-    };
 
-    const controlledFields = fieldArray.fields.map((field, index) => {
-        return {
-            ...field,
-            ...watchFieldArray?.[index],
-        };
-    });
+    const onEditRow = (index: number) => {
+        const periode = getValues(`${fieldName}.${index}`);
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: true });
+    };
 
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
         inntektType
@@ -345,8 +372,10 @@ export const InntektTabel = ({
     return (
         <>
             {!lesemodus && tableValideringsfeil && (
-                <Alert variant="warning" className="mb-4">
-                    <Heading size="small">{text.alert.feilIPeriodisering}.</Heading>
+                <ForskuddAlert variant="warning" className="mb-4">
+                    <Heading size="xsmall" level="6">
+                        {text.alert.feilIPeriodisering}.
+                    </Heading>
                     {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
                             {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
@@ -388,16 +417,14 @@ export const InntektTabel = ({
                     {tableValideringsfeil.fremtidigPeriode && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
                     )}
-                </Alert>
+                </ForskuddAlert>
             )}
             {children({
                 controlledFields,
-                editableRow,
                 onEditRow,
                 onSaveRow,
                 addPeriod,
                 handleOnSelect,
-                unsetEditedRow,
             })}
         </>
     );

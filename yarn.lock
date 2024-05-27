@@ -52,13 +52,6 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
-"@babel/runtime@^7.21.0":
-  version "7.23.6"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.6.tgz#c05e610dc228855dc92ef1b53d07389ed8ab521d"
-  integrity sha512-zHd0eUrf5GZoOWVCXp6koAKQTfZV07eit6bGPmJgnZdnSAvvZee6zniW2XMF7Cmc4ISOOnPy3QaSiIJGJkVEDQ==
-  dependencies:
-    regenerator-runtime "^0.14.0"
-
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"
@@ -232,12 +225,27 @@
   resolved "https://registry.npmjs.org/@exodus/schemasafe/-/schemasafe-1.0.0-rc.9.tgz"
   integrity sha512-dGGHpb61hLwifAu7sotuHFDBw6GTdpG8aKC0fsK17EuTzMRvUrH7lEAr6LTJ+sx3AZYed9yZ77rltVDHyg2hRg==
 
+"@floating-ui/core@^1.0.0":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.6.1.tgz#a4e6fef1b069cda533cbc7a4998c083a37f37573"
+  integrity sha512-42UH54oPZHPdRHdw6BgoBD6cg/eVTmVrFcgeRDM3jbO7uxSoipVcmcIGFcA5jmOHO5apcyvBhkSKES3fQJnu7A==
+  dependencies:
+    "@floating-ui/utils" "^0.2.0"
+
 "@floating-ui/core@^1.4.2":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.5.0.tgz#5c05c60d5ae2d05101c3021c1a2a350ddc027f8c"
   integrity sha512-kK1h4m36DQ0UHGj5Ah4db7R0rHemTqqO0QLvUqi1/mUUp3LuAWbWxdxSIf/XsnH9VS6rRVPLJCncjRzUvyCLXg==
   dependencies:
     "@floating-ui/utils" "^0.1.3"
+
+"@floating-ui/dom@^1.0.0":
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.6.5.tgz#323f065c003f1d3ecf0ff16d2c2c4d38979f4cb9"
+  integrity sha512-Nsdud2X65Dz+1RHjAIP0t8z5e2ff/IRbei6BqFrl1urT8sDVzM1HMQ+R0XcU5ceRfyO3I6ayeqIfh+6Wb8LGTw==
+  dependencies:
+    "@floating-ui/core" "^1.0.0"
+    "@floating-ui/utils" "^0.2.0"
 
 "@floating-ui/dom@^1.5.1":
   version "1.5.3"
@@ -261,6 +269,13 @@
   dependencies:
     "@floating-ui/dom" "^1.5.1"
 
+"@floating-ui/react-dom@^2.0.9":
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.0.9.tgz#264ba8b061000baa132b5910f0427a6acf7ad7ce"
+  integrity sha512-q0umO0+LQK4+p6aGyvzASqKbKOJcAHJ7ycE9CuUvfx3s9zTHWmGJTPOIlM/hmSBfUfg/XfY5YhLBLR/LHwShQQ==
+  dependencies:
+    "@floating-ui/dom" "^1.0.0"
+
 "@floating-ui/react@0.24.1":
   version "0.24.1"
   resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.24.1.tgz#9ef81c78045c4b88ac062755826a3daf7cbe23d6"
@@ -283,6 +298,11 @@
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.1.6.tgz#22958c042e10b67463997bd6ea7115fe28cbcaf9"
   integrity sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==
+
+"@floating-ui/utils@^0.2.0":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.2.tgz#d8bae93ac8b815b2bd7a98078cf91e2724ef11e5"
+  integrity sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==
 
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.13"
@@ -395,20 +415,20 @@
     strict-event-emitter "^0.2.4"
     web-encoding "^1.1.5"
 
-"@navikt/aksel-icons@5.12.4", "@navikt/aksel-icons@^5.12.4":
-  version "5.12.4"
-  resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/5.12.4/334dece9ff367bc6285b0781a075fa4f4221e3bc#334dece9ff367bc6285b0781a075fa4f4221e3bc"
-  integrity sha512-fl7obYaXzCELY1NUy66Wl4uS94xROC+aZ/1s8uSy1U0bhfL49tIevkigE1n/sL8ELsrH3DnzBJi6DktdtnE9tg==
+"@navikt/aksel-icons@6.7.1", "@navikt/aksel-icons@^6.7.1":
+  version "6.7.1"
+  resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/6.7.1/6c93069e7c03eba1ffe25634ad0188ddef34853b#6c93069e7c03eba1ffe25634ad0188ddef34853b"
+  integrity sha512-elwinBiLCrspiNIcmh/g2pT20/qJjc7ZRjoeXf5ntFl5pbDbsKe8u+CZz31K3jyhlQmlcTjUmIHtx9VTEgT20A==
 
 "@navikt/aksel-icons@^3.4.2":
   version "3.4.2"
   resolved "https://npm.pkg.github.com/download/@navikt/aksel-icons/3.4.2/fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7#fa858e1a5fb0557d61b62ad7cdf0d75e26fc89d7"
   integrity sha512-9fj+Jb4UrX3SDDzqJpKP3fvizdxtACIFNXgDiPaP/N/61pbeY4tZz/zrtWGtExLpDeg7dAyaiFH/hfo7nBg6nw==
 
-"@navikt/bidrag-ui-common@^1.10.9":
-  version "1.10.9"
-  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.10.9/39635495533cdc36e382bf772097a5357d5c3f80#39635495533cdc36e382bf772097a5357d5c3f80"
-  integrity sha512-zXT+aJZuO9BA2UQ26JOm8SVhaYbofGMojxyQ9Ud52ry9MNqWD5vee/2lomseY1uXp0Vi9kOXQyMqbPrUApTK6A==
+"@navikt/bidrag-ui-common@^1.10.10":
+  version "1.10.10"
+  resolved "https://npm.pkg.github.com/download/@navikt/bidrag-ui-common/1.10.10/9960dcf9c163169fa29e8afeec30f539cc1cdab1#9960dcf9c163169fa29e8afeec30f539cc1cdab1"
+  integrity sha512-Cpj52YrgzN917niThzXPKsPc046z2XKgMkjfiAehbEi2rEFGvSALUv9EUpmmqnEmK69h/7JBRF6pBsXHvtVQXQ==
   dependencies:
     axios "^1.6.3"
     echarts "^5.4.3"
@@ -420,10 +440,10 @@
   resolved "https://npm.pkg.github.com/download/@navikt/ds-css-internal/3.4.3/7c67c4b52264eb7833ca35788a83cc29af01d1ae#7c67c4b52264eb7833ca35788a83cc29af01d1ae"
   integrity sha512-VusM4uwHZoQWiX8N/1zD6ycgNFIzYQ40TXhlP7tqpdH6sVwwzFPWCWXaZtpyjUfHxU9WyNEDYoeRAECkC0qfzg==
 
-"@navikt/ds-css@5.12.4":
-  version "5.12.4"
-  resolved "https://npm.pkg.github.com/download/@navikt/ds-css/5.12.4/d3e0fd76e595088d6d6fc9abb0e85200c0ca0f10#d3e0fd76e595088d6d6fc9abb0e85200c0ca0f10"
-  integrity sha512-bPoqt/8/DF3zz6yGXrKeHeqUnJeMelkBZTC+uHY4wipkpv+yb4SgwQpcc6apQ6LDuhlI2iji/BCWXz9pZdRdWg==
+"@navikt/ds-css@6.7.1":
+  version "6.7.1"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-css/6.7.1/339abde646df6131551b6e960df6e03faf152967#339abde646df6131551b6e960df6e03faf152967"
+  integrity sha512-Y0baI0jdy6cd6zgLhdF/eaBbTlLOue0mO6yEDP/hWDFoawWvAYw6FDxJdWp0ZUN8djG4VEqVlquvpoI5WtHqfA==
 
 "@navikt/ds-react-internal@3.4.3":
   version "3.4.3"
@@ -436,19 +456,18 @@
     clsx "^1.1.1"
     copy-to-clipboard "^3.3.1"
 
-"@navikt/ds-react@5.12.4":
-  version "5.12.4"
-  resolved "https://npm.pkg.github.com/download/@navikt/ds-react/5.12.4/342f7f81229e8b82fd304d26ed09a0185c7430dd#342f7f81229e8b82fd304d26ed09a0185c7430dd"
-  integrity sha512-BkgYQB2CIHCavOzMKjwF7KR1FxtswwzBVzOcUi/ejGR95pqeHTgxBdJ6uCgpYyn32D3Xw834Bj0ABv61/uOnAA==
+"@navikt/ds-react@6.7.1":
+  version "6.7.1"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-react/6.7.1/21374db1bf332e80b8724b2e23e59cfbf6610dd8#21374db1bf332e80b8724b2e23e59cfbf6610dd8"
+  integrity sha512-pTHKQuBQGYjft72yM0n1YJ8BXOVU3Xy4Tx0klGQb+vlG9d1X2DXmDrvMO3W1u4/ZPUO7/8I8ufxCpNSJBI1XsA==
   dependencies:
     "@floating-ui/react" "0.25.4"
-    "@navikt/aksel-icons" "^5.12.4"
-    "@navikt/ds-tokens" "^5.12.4"
-    "@radix-ui/react-tabs" "1.0.0"
-    "@radix-ui/react-toggle-group" "1.0.0"
-    clsx "^1.2.1"
-    date-fns "^2.30.0"
-    react-day-picker "8.3.4"
+    "@floating-ui/react-dom" "^2.0.9"
+    "@navikt/aksel-icons" "^6.7.1"
+    "@navikt/ds-tokens" "^6.7.1"
+    clsx "^2.1.0"
+    date-fns "^3.0.0"
+    react-day-picker "8.10.0"
 
 "@navikt/ds-react@^3.4.2":
   version "3.4.2"
@@ -464,15 +483,15 @@
     react-day-picker "8.3.4"
     react-modal "3.15.1"
 
-"@navikt/ds-tailwind@5.12.4":
-  version "5.12.4"
-  resolved "https://npm.pkg.github.com/download/@navikt/ds-tailwind/5.12.4/088ad135c09aa866d1e830ad5709354090d3c5ef#088ad135c09aa866d1e830ad5709354090d3c5ef"
-  integrity sha512-BrQXI+UKAmWqSSCfDwGDJSu7JBWAlF0QLMHWS6SsBIPh7laODucltiR1MrnJ8J/nPWuPgZj03vXUTXtxtJJxXg==
+"@navikt/ds-tailwind@6.7.1":
+  version "6.7.1"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-tailwind/6.7.1/1ce47f61c848b2c603e2458aac5d70952027f377#1ce47f61c848b2c603e2458aac5d70952027f377"
+  integrity sha512-wz6q9cymi+oeHyoTogRrqoz0H25b6QyJwl87+8UizJ3q9yGj8AN6ZEmWOnyg6fijBq8hGOf9Q3BiMunCmH5BJA==
 
-"@navikt/ds-tokens@^5.12.4":
-  version "5.12.4"
-  resolved "https://npm.pkg.github.com/download/@navikt/ds-tokens/5.12.4/b92a797ba1af3c318f7f0817357da4a239a990df#b92a797ba1af3c318f7f0817357da4a239a990df"
-  integrity sha512-OmNnJ6Co0Ji+RQQVtkgtgYsF6bjtLXZU+nQtVdwBcyX1jrGgoqrkiZxxjEvPX5jmZAPNNp2DIkYMvHc2WHwlCw==
+"@navikt/ds-tokens@^6.7.1":
+  version "6.7.1"
+  resolved "https://npm.pkg.github.com/download/@navikt/ds-tokens/6.7.1/be99a17023a95d99199f904e9e631ae0f3518c4f#be99a17023a95d99199f904e9e631ae0f3518c4f"
+  integrity sha512-eZ9lfhBP+S8WyphxhwthVkf0iXxavTESSJQm+o71SUA5QYOBlo23hWHIjSeVu5g7qrfxdJGW6O2TsUtXX0KdlQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1947,6 +1966,11 @@ clsx@^1.1.1, clsx@^1.2.1:
   resolved "https://registry.npmjs.org/clsx/-/clsx-1.2.1.tgz"
   integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
 
+clsx@^2.1.0:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
+  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
+
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz"
@@ -2233,12 +2257,10 @@ date-fns@2.29.3:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.29.3.tgz#27402d2fc67eb442b511b70bbdf98e6411cd68a8"
   integrity sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==
 
-date-fns@^2.30.0:
-  version "2.30.0"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.30.0.tgz#f367e644839ff57894ec6ac480de40cae4b0f4d0"
-  integrity sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==
-  dependencies:
-    "@babel/runtime" "^7.21.0"
+date-fns@^3.0.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.6.0.tgz#f20ca4fe94f8b754951b24240676e8618c0206bf"
+  integrity sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==
 
 debug@2.6.9:
   version "2.6.9"
@@ -5611,6 +5633,11 @@ raw-body@2.5.1:
     http-errors "2.0.0"
     iconv-lite "0.4.24"
     unpipe "1.0.0"
+
+react-day-picker@8.10.0:
+  version "8.10.0"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.0.tgz#729c5b9564967a924213978fb9c0751884a60595"
+  integrity sha512-mz+qeyrOM7++1NCb1ARXmkjMkzWVh2GL9YiPbRjKe0zHccvekk4HE+0MPOZOrosn8r8zTHIIeOUXTmXRqmkRmg==
 
 react-day-picker@8.3.4:
   version "8.3.4"
