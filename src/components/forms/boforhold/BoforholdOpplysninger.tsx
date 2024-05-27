@@ -77,7 +77,7 @@ export const BoforholdOpplysninger = ({
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
-    const nyeOpplysningerEnabled = false;
+    const nyeOpplysningerEnabled = true;
     const hasNewOpplysningerFraFolkeregistre = nyeOpplysningerEnabled && ikkeAktivertePerioder?.length > 0;
 
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
