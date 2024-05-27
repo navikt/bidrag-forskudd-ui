@@ -734,7 +734,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                   response.oppdatertHusstandsbarn
                               );
 
-                    setValue(`husstandsbarn.${barnIndex}.perioder`, response.oppdatertHusstandsbarn.perioder);
+                    // Set datoTom til null ellers resettes den ikke
+                    setValue(
+                        `husstandsbarn.${barnIndex}.perioder`,
+                        response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                            ...d,
+                            datoTom: d.datoTom ? d.datoTom : null,
+                        }))
+                    );
 
                     return {
                         ...currentData,
@@ -799,9 +806,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                         response.oppdatertHusstandsbarn
                                     );
 
-                                    resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                                        defaultValue: response.oppdatertHusstandsbarn.perioder,
-                                    });
+                                    // Set datoTom til null ellers resettes den ikke
+                                    setValue(
+                                        `husstandsbarn.${barnIndex}.perioder`,
+                                        response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                                            ...d,
+                                            datoTom: d.datoTom ? d.datoTom : null,
+                                        }))
+                                    );
 
                                     return {
                                         ...currentData,
