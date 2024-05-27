@@ -73,12 +73,12 @@ export const BoforholdOpplysninger = ({
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
     const { lesemodus } = useForskudd();
-    const virkningsOrSoktFraDato = useVirkningsdato();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
-    const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
+    const nyeOpplysningerEnabled = false;
+    const hasNewOpplysningerFraFolkeregistre = nyeOpplysningerEnabled && ikkeAktivertePerioder?.length > 0;
 
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
         activateGrunnlag.mutation.mutate(
@@ -142,51 +142,67 @@ export const BoforholdOpplysninger = ({
                 )}
             </div>
             {hasNewOpplysningerFraFolkeregistre && (
-                <Box
-                    padding="4"
-                    background="surface-default"
-                    borderWidth="1"
-                    borderRadius="medium"
-                    borderColor="border-default"
-                    className="w-[708px]"
-                >
-                    <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
-                    <Table size="small" className="table-fixed opplysninger">
-                        <Table.Header>
-                            <Table.Row>
-                                <Table.HeaderCell>{text.label.fraOgMed}</Table.HeaderCell>
-                                <Table.HeaderCell>{text.label.tilOgMed}</Table.HeaderCell>
-                                <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
-                                <Table.HeaderCell>{text.label.kilde}</Table.HeaderCell>
-                            </Table.Row>
-                        </Table.Header>
-                        <Table.Body>
-                            {ikkeAktivertePerioder?.map((periode, index) => (
-                                <Table.Row key={`${periode.bostatus}-${index}`}>
-                                    <Table.DataCell>
-                                        {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
-                                            ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
-                                            : DateToDDMMYYYYString(new Date(periode.datoFom))}
-                                    </Table.DataCell>
-                                    <Table.DataCell>
-                                        {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
-                                    </Table.DataCell>
-                                    <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
-                                    <Table.DataCell>{KildeTexts.OFFENTLIG}</Table.DataCell>
-                                </Table.Row>
-                            ))}
-                        </Table.Body>
-                    </Table>
-                    <HStack gap="2" className="mt-4">
-                        <Button type="button" variant="secondary" size="small" onClick={() => onActivate(true)}>
-                            Ja
-                        </Button>
-                        <Button type="button" variant="secondary" size="small" onClick={() => onActivate(false)}>
-                            Nei
-                        </Button>
-                    </HStack>
-                </Box>
+                <NyOpplysningerFraFolkeregistreTabell
+                    ikkeAktivertePerioder={ikkeAktivertePerioder}
+                    onActivate={onActivate}
+                />
             )}
         </div>
     );
 };
+
+function NyOpplysningerFraFolkeregistreTabell({
+    onActivate,
+    ikkeAktivertePerioder,
+}: {
+    onActivate: (overskriveManuelleOpplysninger: boolean) => void;
+    ikkeAktivertePerioder: HusstandsbarnGrunnlagPeriodeDto[];
+}) {
+    const virkningsOrSoktFraDato = useVirkningsdato();
+    return (
+        <Box
+            padding="4"
+            background="surface-default"
+            borderWidth="1"
+            borderRadius="medium"
+            borderColor="border-default"
+            className="w-[708px]"
+        >
+            <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
+            <Table size="small" className="table-fixed opplysninger">
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell>{text.label.fraOgMed}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.tilOgMed}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
+                        <Table.HeaderCell>{text.label.kilde}</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {ikkeAktivertePerioder?.map((periode, index) => (
+                        <Table.Row key={`${periode.bostatus}-${index}`}>
+                            <Table.DataCell>
+                                {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
+                                    ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
+                                    : DateToDDMMYYYYString(new Date(periode.datoFom))}
+                            </Table.DataCell>
+                            <Table.DataCell>
+                                {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
+                            </Table.DataCell>
+                            <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
+                            <Table.DataCell>{KildeTexts.OFFENTLIG}</Table.DataCell>
+                        </Table.Row>
+                    ))}
+                </Table.Body>
+            </Table>
+            <HStack gap="2" className="mt-4">
+                <Button type="button" variant="secondary" size="small" onClick={() => onActivate(true)}>
+                    Ja
+                </Button>
+                <Button type="button" variant="secondary" size="small" onClick={() => onActivate(false)}>
+                    Nei
+                </Button>
+            </HStack>
+        </Box>
+    );
+}

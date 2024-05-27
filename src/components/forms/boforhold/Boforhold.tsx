@@ -883,6 +883,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         size="small"
                         alertKey={"18åralert" + behandlingId + barn.ident}
                         className="w-fit"
+                        closeButton
                     >
                         <Heading size="small" level="3">
                             {text.title.barnOver18}
