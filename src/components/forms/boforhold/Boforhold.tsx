@@ -625,7 +625,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, setError, setValue, getFieldState, resetField, formState } =
+    const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
