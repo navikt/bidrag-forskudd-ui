@@ -180,6 +180,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
+    const behandling = useGetBehandlingV2();
 
     const saveBoforhold = useOppdaterBehandlingV2();
     const [editableRow, setEditableRow] = useState<number>(undefined);
@@ -205,6 +206,14 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     }));
     const sivilistand = getValues(`sivilstand`);
 
+    useEffect(() => {
+        if (
+            behandling.boforhold.sivilstand.length == 0 &&
+            sivilstandProssesert.status == SivilstandBeregnetStatusEnum.OK
+        ) {
+            updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
+        }
+    }, []);
     useEffect(() => {
         validatePeriods(sivilistand);
     }, [sivilistand]);
