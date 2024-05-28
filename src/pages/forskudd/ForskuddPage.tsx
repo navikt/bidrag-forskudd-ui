@@ -57,8 +57,9 @@ export const ForskuddPage = () => {
                                 activeStepIndex > 2 &&
                                 boforholdValideringsfeil.husstandsbarn.length == 0 &&
                                 boforholdValideringsfeil.sivilstand == null &&
-                                ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn.length == 0 &&
-                                ikkeAktiverteEndringerIGrunnlagsdata.sivilstand == null
+                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn == undefined ||
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length == 0) &&
+                                ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
                             }
                             interactive={interactive}
                         >
