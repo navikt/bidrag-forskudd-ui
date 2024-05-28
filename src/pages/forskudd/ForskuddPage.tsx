@@ -25,9 +25,11 @@ export const ForskuddPage = () => {
     const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
-    const inntekterIkkeAktiveGrunnlag = Object.keys(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).flatMap(
-        (f) => ikkeAktiverteEndringerIGrunnlagsdata.inntekter[f]
-    );
+    const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter
+        ? Object.keys(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).flatMap(
+              (f) => ikkeAktiverteEndringerIGrunnlagsdata.inntekter[f]
+          )
+        : [];
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
