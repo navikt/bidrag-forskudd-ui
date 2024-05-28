@@ -54,7 +54,7 @@ import {
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
-import { BoforholdOpplysninger } from "./BoforholdOpplysninger";
+import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
 
@@ -218,6 +218,7 @@ const Main = () => {
 
     return (
         <>
+            <NyOpplysningerAlert />
             <Heading level="2" size="small">
                 {text.label.barn}
             </Heading>
@@ -885,6 +886,10 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             <BoforholdOpplysninger
                 ident={barn.ident}
                 showResetButton={showResetButton}
+                onActivateOpplysninger={(overskrevetManuelleOpplysninger) => {
+                    setShowUndoButton((prevValue) => prevValue || overskrevetManuelleOpplysninger);
+                    setShowResetButton(!overskrevetManuelleOpplysninger);
+                }}
                 resetTilDataFraFreg={resetTilDataFraFreg}
                 fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />

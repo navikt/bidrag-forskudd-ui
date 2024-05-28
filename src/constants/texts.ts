@@ -1,4 +1,4 @@
-import { OpplysningerType } from "../api/BidragBehandlingApiV1";
+import { MaBekrefteNyeOpplysninger, OpplysningerType } from "../api/BidragBehandlingApiV1";
 
 const tekster = {
     alert: {
@@ -188,8 +188,8 @@ const tekster = {
     resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
     år: "år",
 };
-export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: OpplysningerType) => {
-    switch (opplysningstype) {
+export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: MaBekrefteNyeOpplysninger) => {
+    switch (opplysningstype.type) {
         case OpplysningerType.KONTANTSTOTTE:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
@@ -213,7 +213,9 @@ export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: 
                 tekster.alert.nyeOpplysningerMåBekreftes
             } for ${tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}`;
         case OpplysningerType.BOFORHOLD:
-            return `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
+            return opplysningstype.gjelderBarn
+                ? `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes} for barn ${opplysningstype.gjelderBarn?.navn}`
+                : `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
         case OpplysningerType.SIVILSTAND:
             return `Sivilstand: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
         default:
