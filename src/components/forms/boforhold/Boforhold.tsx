@@ -17,7 +17,7 @@ import { PERSON_API } from "../../../constants/api";
 import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { useGetBehandlingV2, useGrunnlag, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -229,7 +229,7 @@ const Main = () => {
 
 const BoforholdsForm = () => {
     // Behold dette for debugging i prod
-    useGrunnlag();
+    // useGrunnlag();
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
