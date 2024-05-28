@@ -9,7 +9,6 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { KildeTexts } from "../../../enum/KildeTexts";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
@@ -35,7 +34,7 @@ export const NyOpplysningerAlert = () => {
 
     if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand != null) return null;
     const innhentetTidspunkt =
-        ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0].innhentetTidspunkt;
+        ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (
         <ForskuddAlert variant="info">
             <Heading size="xsmall" level="3">
@@ -201,37 +200,36 @@ function NyOpplysningerFraFolkeregistreTabell({
             className="w-[708px]"
         >
             <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
-            <Table size="small" className="table-fixed opplysninger">
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell>{text.label.fraOgMed}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.tilOgMed}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.kilde}</Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
+            <table className="mt-2">
+                <thead>
+                    <tr>
+                        <th align="left">{text.label.fraOgMed}</th>
+                        <th align="left">{text.label.tilOgMed}</th>
+                        <th align="left">{text.label.status}</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {ikkeAktivertePerioder?.map((periode, index) => (
-                        <Table.Row key={`${periode.bostatus}-${index}`}>
-                            <Table.DataCell>
+                        <tr key={index + periode.datoFom}>
+                            <td width="100px" scope="row">
                                 {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
                                     ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
                                     : DateToDDMMYYYYString(new Date(periode.datoFom))}
-                            </Table.DataCell>
-                            <Table.DataCell>
+                            </td>
+                            <td width="100px">
+                                {" "}
                                 {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
-                            </Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
-                            <Table.DataCell>{KildeTexts.OFFENTLIG}</Table.DataCell>
-                        </Table.Row>
+                            </td>
+                            <td width="250px">{hentVisningsnavn(periode.bostatus)}</td>
+                        </tr>
                     ))}
-                </Table.Body>
-            </Table>
-            <HStack gap="2" className="mt-4">
+                </tbody>
+            </table>
+            <HStack gap="6" className="mt-4">
                 <Button
                     type="button"
                     variant="secondary"
-                    size="small"
+                    size="xsmall"
                     onClick={() => onActivate(true)}
                     loading={pendingActivate?.overskriveManuelleOpplysninger == true}
                     disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
@@ -241,7 +239,7 @@ function NyOpplysningerFraFolkeregistreTabell({
                 <Button
                     type="button"
                     variant="secondary"
-                    size="small"
+                    size="xsmall"
                     onClick={() => onActivate(false)}
                     loading={pendingActivate?.overskriveManuelleOpplysninger == false}
                     disabled={pendingActivate?.overskriveManuelleOpplysninger == true}

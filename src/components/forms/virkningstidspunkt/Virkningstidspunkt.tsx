@@ -275,7 +275,11 @@ const VirkningstidspunktForm = () => {
                         side={<Side />}
                         pageAlert={
                             showChangedVirkningsDatoAlert && (
-                                <ForskuddAlert variant="warning">{text.alert.endretVirkningstidspunkt}</ForskuddAlert>
+                                <ForskuddAlert variant="warning" className={"w-[488px]"}>
+                                    <div
+                                        dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}
+                                    ></div>
+                                </ForskuddAlert>
                             )
                         }
                     />

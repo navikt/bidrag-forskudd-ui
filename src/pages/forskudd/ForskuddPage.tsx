@@ -18,11 +18,16 @@ export const ForskuddPage = () => {
         virkningstidspunkt,
         erVedtakFattet,
         vedtakstype,
+        boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
+        ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
     const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
+    const inntekterIkkeAktiveGrunnlag = Object.keys(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).flatMap(
+        (f) => ikkeAktiverteEndringerIGrunnlagsdata.inntekter[f]
+    );
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
@@ -45,13 +50,23 @@ export const ForskuddPage = () => {
                         <Stepper.Step completed={activeStepIndex > 1}>
                             {capitalize(ForskuddStepper.VIRKNINGSTIDSPUNKT)}
                         </Stepper.Step>
-                        <Stepper.Step completed={activeStepIndex > 2} interactive={interactive}>
+                        <Stepper.Step
+                            completed={
+                                activeStepIndex > 2 &&
+                                boforholdValideringsfeil.husstandsbarn.length == 0 &&
+                                boforholdValideringsfeil.sivilstand == null &&
+                                ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn.length == 0 &&
+                                ikkeAktiverteEndringerIGrunnlagsdata.sivilstand == null
+                            }
+                            interactive={interactive}
+                        >
                             {capitalize(ForskuddStepper.BOFORHOLD)}
                         </Stepper.Step>
                         <Stepper.Step
                             completed={
                                 activeStepIndex > 3 &&
-                                (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length)
+                                (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length) &&
+                                inntekterIkkeAktiveGrunnlag.length == 0
                             }
                             interactive={interactive}
                         >
