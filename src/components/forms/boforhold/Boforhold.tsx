@@ -894,20 +894,18 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />
             {barnIsOver18 && !lesemodus && (
-                <div className="mb-4">
-                    <StatefulAlert
-                        variant="info"
-                        size="small"
-                        alertKey={"18åralert" + behandlingId + barn.ident}
-                        className="w-fit"
-                        closeButton
-                    >
-                        <Heading size="small" level="3">
-                            {text.title.barnOver18}
-                        </Heading>
-                        {text.barnetHarFylt18SjekkBostatus}
-                    </StatefulAlert>
-                </div>
+                <StatefulAlert
+                    variant="info"
+                    size="small"
+                    alertKey={"18åralert" + behandlingId + barn.ident}
+                    className="w-[708px] mb-2"
+                    closeButton
+                >
+                    <Heading size="small" level="3">
+                        {text.title.barnOver18}
+                    </Heading>
+                    {text.barnetHarFylt18SjekkBostatus}
+                </StatefulAlert>
             )}
             {valideringsfeilForBarn && (
                 <div className="mb-4">

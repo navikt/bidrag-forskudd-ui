@@ -227,7 +227,8 @@ const VirkningstidspunktForm = () => {
         if (
             initialVirkningsdato &&
             virkningstidspunkt.virkningstidspunkt &&
-            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt
+            initialVirkningsdato !== virkningstidspunkt.virkningstidspunkt &&
+            !virkningstidspunkt.avslag == null
         ) {
             setShowChangedVirkningsDatoAlert(true);
         }

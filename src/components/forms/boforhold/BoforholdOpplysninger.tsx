@@ -1,4 +1,4 @@
-import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table, Tag } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -17,14 +17,9 @@ import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "../../../utils/date-utils";
 import { ForskuddAlert } from "../../ForskuddAlert";
 
-const Header = ({ nyttTag }: { nyttTag: boolean }) => (
+const Header = () => (
     <BodyShort size="small" className="flex h-2">
-        {text.title.opplysningerFraFolkeregistret}{" "}
-        {nyttTag && (
-            <Tag variant="success" size="xsmall" className="w-fit h-1.5 p-1 rounded ml-2">
-                Nytt
-            </Tag>
-        )}
+        {text.title.opplysningerFraFolkeregistret}
     </BodyShort>
 );
 export const NyOpplysningerAlert = () => {
@@ -47,14 +42,14 @@ export const NyOpplysningerAlert = () => {
         </ForskuddAlert>
     );
 };
-const Opplysninger = ({ perioder, nyttTag }: { perioder: HusstandsbarnGrunnlagPeriodeDto[]; nyttTag?: boolean }) => {
+const Opplysninger = ({ perioder }: { perioder: HusstandsbarnGrunnlagPeriodeDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
     if (!perioder) {
         return null;
     }
 
     return (
-        <ReadMore header={<Header nyttTag={nyttTag} />} size="small">
+        <ReadMore header={<Header />} size="small">
             <Table className="w-[350px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
@@ -150,11 +145,7 @@ export const BoforholdOpplysninger = ({
         <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} />
-                {hasNewOpplysningerFraFolkeregistre && (
-                    <div className="justify-end">
-                        <Opplysninger perioder={ikkeAktivertePerioder} nyttTag />
-                    </div>
-                )}
+
                 {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (
                     <div className="flex justify-end">
                         <Button
