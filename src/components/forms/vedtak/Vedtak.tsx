@@ -227,7 +227,7 @@ const VedtakResultat = () => {
             feilInnhold.husstandsbarn.forEach((value) =>
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_boforhold}_${value.barn.tekniskId}`}
+                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsbarnId}`}
                         onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}

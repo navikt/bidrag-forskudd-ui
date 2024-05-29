@@ -879,7 +879,9 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
-    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
+    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find(
+        (feil) => feil.barn.husstandsbarnId === barn.id
+    );
 
     return (
         <div className="grid gap-2">
