@@ -86,7 +86,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const Main = ({ initialValues }) => {
+const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
@@ -172,6 +172,11 @@ const Main = ({ initialValues }) => {
                     required
                 />
             </FlexRow>
+            {showChangedVirkningsDatoAlert && (
+                <ForskuddAlert variant="warning" className={"w-[488px]"}>
+                    <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
+                </ForskuddAlert>
+            )}
         </>
     );
 };
@@ -272,17 +277,13 @@ const VirkningstidspunktForm = () => {
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
                     <FormLayout
                         title={text.label.virkningstidspunkt}
-                        main={<Main initialValues={initialValues} />}
-                        side={<Side />}
-                        pageAlert={
-                            showChangedVirkningsDatoAlert && (
-                                <ForskuddAlert variant="warning" className={"w-[488px]"}>
-                                    <div
-                                        dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}
-                                    ></div>
-                                </ForskuddAlert>
-                            )
+                        main={
+                            <Main
+                                initialValues={initialValues}
+                                showChangedVirkningsDatoAlert={showChangedVirkningsDatoAlert}
+                            />
                         }
+                        side={<Side />}
                     />
                 </form>
             </FormProvider>

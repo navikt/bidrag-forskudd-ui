@@ -48,8 +48,8 @@ export const FormLayout = ({
             </div>
             <BidragGrid className="grid grid-cols-12 gap-6">
                 <BidragCell className="sm:col-span-12 md:col-span-12 xl:col-span-12 2xl:col-span-8 h-fit grid gap-y-4">
-                    {main}
                     {pageAlert}
+                    {main}
                 </BidragCell>
                 <BidragCell className="sm:col-span-12 md:col-span-6 xl:col-span-6 2xl:col-span-4 bg-white">
                     <div className="grid gap-y-4 h-fit lg:sticky lg:top-8 lg:p-0">{side}</div>

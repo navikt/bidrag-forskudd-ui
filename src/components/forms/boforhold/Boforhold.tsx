@@ -176,6 +176,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
@@ -195,7 +196,7 @@ const Periode = ({
         }
     };
 
-    return editableRow ? (
+    return editableRow && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${field}`}
             label={label}
@@ -622,7 +623,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     } = useGetBehandlingV2();
     const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
-    const { behandlingId, lesemodus } = useForskudd();
+    const { behandlingId, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
@@ -1013,7 +1014,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         {text.label.angreSisteSteg}
                     </Button>
                 )}
-                {!lesemodus && (
+                {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
                     <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                         {text.label.leggTilPeriode}
                     </Button>
