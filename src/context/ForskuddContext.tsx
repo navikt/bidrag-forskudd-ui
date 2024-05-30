@@ -65,8 +65,6 @@ interface IForskuddContext {
     setErrorModalOpen: (open: boolean) => void;
     pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
-    visHistoriskeInntekter: boolean;
-    setVisHistoriskeInntekter: Dispatch<SetStateAction<boolean>>;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
     onStepChange: (x: number) => void;
 }
@@ -83,7 +81,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     const [searchParams, setSearchParams] = useSearchParams();
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
-    const [visHistoriskeInntekter, setVisHistoriskeInntekter] = useState<boolean>(false);
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         virkningstidspunkt: { error: false },
         boforhold: { error: false },
@@ -144,8 +141,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             setErrorModalOpen,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
-            setVisHistoriskeInntekter,
-            visHistoriskeInntekter,
             setSaveErrorState,
             onConfirm,
             onStepChange,

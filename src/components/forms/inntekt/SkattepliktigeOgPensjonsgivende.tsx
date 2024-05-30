@@ -1,15 +1,13 @@
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, HStack, ReadMore, Switch, Table, VStack } from "@navikt/ds-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { BodyShort, Box, Heading, HStack, ReadMore, Table, VStack } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde } from "../../../api/BidragBehandlingApiV1";
 import elementId from "../../../constants/elementIds";
 import text from "../../../constants/texts";
-import { useForskudd } from "../../../context/ForskuddContext";
-import { QueryKeys, useGetBehandlingV2 } from "../../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
@@ -56,9 +54,7 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
 };
 
 export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
-    const { inntekter, id } = useGetBehandlingV2();
-    const queryClient = useQueryClient();
-    const { visHistoriskeInntekter, setVisHistoriskeInntekter } = useForskudd();
+    const { inntekter } = useGetBehandlingV2();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
     const fieldName = `årsinntekter.${ident}` as const;
     const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
@@ -133,18 +129,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                 </VStack>
             </div>
             <Opplysninger fieldName={fieldName} ident={ident} />
-            <Switch
-                value={"true"}
-                checked={visHistoriskeInntekter}
-                onChange={(e) => {
-                    console.log(e.target.value, e.target.value == "true", visHistoriskeInntekter);
-                    setVisHistoriskeInntekter((v) => !v);
-                    queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(id) });
-                }}
-                size="small"
-            >
-                Vis historiske
-            </Switch>
             <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,

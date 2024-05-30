@@ -23,8 +23,8 @@ export default function ErrorConfirmationModal({ open, onConfirm, onClose, onCan
         onClose();
     }
     useEffect(() => {
-        if (open) ref.current?.showModal();
-        else ref.current?.close();
+        if (open) ref?.current?.showModal();
+        else ref?.current?.close();
     }, [open]);
     return (
         <ConfirmationModal
