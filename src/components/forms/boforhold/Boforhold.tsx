@@ -267,7 +267,7 @@ const AddBarnForm = ({
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { getValues } = useFormContext<BoforholdFormValues>();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -354,6 +354,13 @@ const AddBarnForm = ({
                                 ),
                             },
                         };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onSaveAddedBarn(),
+                        rollbackFn: () => setOpenAddBarnForm(false),
                     });
                 },
             }
@@ -497,6 +504,7 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
             </div>
             <ConfirmationModal
                 ref={ref}
+                closeable
                 description={text.varsel.ønskerDuÅSletteBarnet}
                 heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
                 footer={
@@ -515,7 +523,7 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
 };
 const BarnPerioder = () => {
     const datoFom = useVirkningsdato();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useForskudd();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control, getValues } = useFormContext<BoforholdFormValues>();
@@ -571,6 +579,13 @@ const BarnPerioder = () => {
                         },
                     });
                 },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onRemoveBarn(index),
+                        rollbackFn: () => {},
+                    });
+                },
             }
         );
     };
@@ -621,11 +636,18 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
-    const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
+    const {
+        setErrorMessage,
+        setErrorModalOpen,
+        setPageErrorsOrUnsavedState,
+        pageErrorsOrUnsavedState,
+        setSaveErrorState,
+    } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
     const { behandlingId, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
+    const behandling = useGetBehandlingV2();
     const saveBoforhold = useOnSaveBoforhold();
     const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
@@ -755,6 +777,21 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     };
                 });
             },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => updateAndSave(payload),
+                    rollbackFn: () => {
+                        setValue(
+                            `husstandsbarn.${barnIndex}`,
+                            behandling.boforhold.husstandsbarn.find((b) => b.id === barn.id)
+                        );
+                        if (payload.oppdatereHusstandsmedlem.tilbakestillPerioderForHusstandsmedlem) {
+                            setShowResetButton(true);
+                        }
+                    },
+                });
+            },
         });
 
         setShowUndoButton(true);
@@ -825,6 +862,17 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             valideringsfeil: response.valideringsfeil,
                                         },
                                     };
+                                });
+                            },
+                            onError: () => {
+                                setSaveErrorState({
+                                    error: true,
+                                    retryFn: () => onRemovePeriode(index),
+                                    rollbackFn: () =>
+                                        setValue(
+                                            `husstandsbarn.${barnIndex}`,
+                                            behandling.boforhold.husstandsbarn.find((b) => b.id === barn.id)
+                                        ),
                                 });
                             },
                         }

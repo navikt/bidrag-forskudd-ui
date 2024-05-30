@@ -185,20 +185,22 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useForskudd();
     const {
-        inntekter: { valideringsfeil },
+        inntekter,
         søktFomDato,
         virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const saveInntekt = useOnSaveInntekt();
-    const { control, getFieldState, getValues, clearErrors, setError, setValue, formState } =
+    const { control, getFieldState, getValues, clearErrors, setError, setValue, resetField, formState } =
         useFormContext<InntektFormValues>();
     const fieldArray = useFieldArray({
         control,
         name: fieldName,
     });
+
+    const { valideringsfeil } = inntekter;
 
     const watchFieldArray = useWatch({ control, name: fieldName });
     const controlledFields = fieldArray.fields.map((field, index) => {
@@ -270,10 +272,13 @@ export const InntektTabel = ({
     const handleUpdate = (index: number) => {
         const perioder = getValues(fieldName);
         const updatedPeriode = perioder[index];
+        if (!updatedPeriode) return;
         const payload = createPayload(updatedPeriode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
         const onSaveSuccess = (response: OppdatereInntektResponse) => {
-            setValue(`${fieldName}.${index}`, { ...updatedPeriode, ...transformFn(response.inntekt) });
+            resetField(`${fieldName}.${index}`, {
+                defaultValue: { ...updatedPeriode, ...transformFn(response.inntekt) },
+            });
 
             if (!updatedPeriode.erRedigerbart) {
                 movePeriods(index, updatedPeriode, perioder);
@@ -300,10 +305,10 @@ export const InntektTabel = ({
                 };
             });
         };
-        updatedAndSave(payload, onSaveSuccess);
+        updatedAndSave(payload, onSaveSuccess, index);
     };
 
-    const handleDelete = (index: number) => {
+    const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         clearErrors(`${fieldName}.${index}`);
         const onSaveSuccess = (response: OppdatereInntektResponse) =>
@@ -321,7 +326,7 @@ export const InntektTabel = ({
                 };
             });
 
-        updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess);
+        updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
         fieldArray.remove(index);
     };
 
@@ -330,10 +335,30 @@ export const InntektTabel = ({
     };
     const updatedAndSave = (
         updatedValues: OppdatereInntektRequest,
-        onSaveSuccess?: (data: OppdatereInntektResponse) => void
+        onSaveSuccess?: (data: OppdatereInntektResponse) => void,
+        index?: number
     ) => {
         saveInntekt.mutation.mutate(updatedValues, {
             onSuccess: (response) => onSaveSuccess?.(response),
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => updatedAndSave(updatedValues, onSaveSuccess, index),
+                    rollbackFn: () => {
+                        const value = getValues(`${fieldName}.${index}`);
+                        if (updatedValues.sletteInntekt) {
+                            const inntekt = inntekter[inntektType].find((val) => val.id == updatedValues.sletteInntekt);
+                            fieldArray.insert(index, { ...inntekt, erRedigerbart: false });
+                        } else if (value.id == null) {
+                            fieldArray.remove(index);
+                        } else {
+                            const valueIndex = getValues(fieldName).findIndex((val) => val.id === value.id);
+                            const inntekt = inntekter[inntektType].find((val) => val.id == value.id);
+                            setValue(`${fieldName}.${valueIndex}`, inntekt);
+                        }
+                    },
+                });
+            },
         });
     };
     const onSaveRow = (index: number) => {

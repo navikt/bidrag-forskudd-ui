@@ -123,7 +123,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { onStepChange } = useForskudd();
+    const { onStepChange, setSaveErrorState } = useForskudd();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues } = useFormContext<InntektFormValues>();
     const onSave = () => {
@@ -135,14 +135,24 @@ const Side = () => {
                 },
             },
             {
-                onSuccess: (response) =>
+                onSuccess: (response) => {
                     saveInntekt.queryClientUpdater((currentData) => ({
                         ...currentData,
                         inntekter: {
                             ...currentData.inntekter,
                             notat: response.notat,
                         },
-                    })),
+                    }));
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onSave(),
+                        rollbackFn: () => {
+                            // resetField("notat.kunINotat");
+                        },
+                    });
+                },
             }
         );
     };

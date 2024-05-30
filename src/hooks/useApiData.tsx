@@ -150,11 +150,15 @@ export const useGetVisningsnavn = () =>
     });
 
 export const useGetBehandlingV2 = (): BehandlingDtoV2 => {
-    const { behandlingId, vedtakId } = useForskudd();
-    return useBehandlingV2(behandlingId, vedtakId);
+    const { behandlingId, vedtakId, visHistoriskeInntekter } = useForskudd();
+    return useBehandlingV2(behandlingId, vedtakId, visHistoriskeInntekter);
 };
 
-export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): BehandlingDtoV2 => {
+export const useBehandlingV2 = (
+    behandlingId?: number,
+    vedtakId?: number,
+    visHistoriskeInntekter?: boolean
+): BehandlingDtoV2 => {
     const { data: behandling } = useSuspenseQuery({
         queryKey: QueryKeys.behandlingV2(behandlingId, vedtakId),
         queryFn: async () => {
@@ -162,7 +166,11 @@ export const useBehandlingV2 = (behandlingId?: number, vedtakId?: number): Behan
                 if (vedtakId) {
                     return (await BEHANDLING_API_V1.api.vedtakLesemodus(vedtakId)).data;
                 }
-                return (await BEHANDLING_API_V1.api.henteBehandlingV2(behandlingId)).data;
+                return (
+                    await BEHANDLING_API_V1.api.henteBehandlingV2(behandlingId, {
+                        inkluderHistoriskeInntekter: visHistoriskeInntekter == true,
+                    })
+                ).data;
             } catch (e) {
                 if (e instanceof AxiosError && e.response.status == 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
