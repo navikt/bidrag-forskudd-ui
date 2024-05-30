@@ -23,8 +23,8 @@ export default function ErrorConfirmationModal({ open, onConfirm, onClose, onCan
         onClose();
     }
     useEffect(() => {
-        if (open) ref.current.showModal();
-        else ref.current.close();
+        if (open) ref.current?.showModal();
+        else ref.current?.close();
     }, [open]);
     return (
         <ConfirmationModal
@@ -49,27 +49,4 @@ export default function ErrorConfirmationModal({ open, onConfirm, onClose, onCan
             }
         />
     );
-}
-{
-    /* <Modal aria-label={tekster.varsel.lagringFeilet} ref={ref}>
-<Modal.Header>
-    <Heading size="small" className="flex gap-x-1.5 items-center">
-        <XMarkOctagonFillIcon title="a11y-title" fontSize="1.5rem" color="var(--a-icon-danger)" />
-        {tekster.varsel.lagringFeilet}
-    </Heading>
-</Modal.Header>
-<Modal.Body>
-    <BodyLong size="small">{tekster.varsel.endringerIkkeLagret}</BodyLong>
-</Modal.Body>
-<Modal.Footer>
-    <>
-        <Button type="button" onClick={rollbackChanges} size="small">
-            {tekster.label.forkastEndringer}
-        </Button>
-        <Button type="button" variant="secondary" size="small" onClick={_onConfirm}>
-            {tekster.label.lagrePåNytt}
-        </Button>
-    </>
-</Modal.Footer>
-</Modal> */
 }
