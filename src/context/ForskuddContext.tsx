@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import ErrorConfirmationModal from "../components/ErrorConfirmationPanel";
+import ErrorConfirmationModal from "../components/ErrorConfirmationModal";
 import { ConfirmationModal } from "../components/modal/ConfirmationModal";
 import { STEPS } from "../constants/steps";
 import text from "../constants/texts";

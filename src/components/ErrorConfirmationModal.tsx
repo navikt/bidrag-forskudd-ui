@@ -1,6 +1,6 @@
 import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { Button, Heading } from "@navikt/ds-react";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import tekster from "../constants/texts";
 import { ConfirmationModal } from "./modal/ConfirmationModal";
