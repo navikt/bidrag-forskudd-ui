@@ -46,9 +46,9 @@ export const FormLayout = ({
                 </Heading>
                 <SaveStatusIndicator mutationKey={listenToMutations} queryClient={queryClient} />
             </div>
-            {pageAlert}
             <BidragGrid className="grid grid-cols-12 gap-6">
                 <BidragCell className="sm:col-span-12 md:col-span-12 xl:col-span-12 2xl:col-span-8 h-fit grid gap-y-4">
+                    {pageAlert}
                     {main}
                 </BidragCell>
                 <BidragCell className="sm:col-span-12 md:col-span-6 xl:col-span-6 2xl:col-span-4 bg-white">

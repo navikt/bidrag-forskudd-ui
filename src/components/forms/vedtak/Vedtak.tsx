@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import {
+    MaBekrefteNyeOpplysninger,
     OpplysningerType,
     ResultatBeregningBarnDto,
     ResultatRolle,
@@ -176,8 +177,8 @@ const opplysningTilStep = (opplysninger: OpplysningerType) => {
             return STEPS.boforhold;
     }
 };
-const opplysningTilElementId = (opplysninger: OpplysningerType) => {
-    switch (opplysninger) {
+const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
+    switch (opplysninger.type) {
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
             return elementId.seksjon_inntekt_skattepliktig;
         case OpplysningerType.SMABARNSTILLEGG:
@@ -189,7 +190,9 @@ const opplysningTilElementId = (opplysninger: OpplysningerType) => {
         case OpplysningerType.KONTANTSTOTTE:
             return elementId.seksjon_inntekt_kontantstøtte;
         case OpplysningerType.BOFORHOLD:
-            return elementId.seksjon_boforhold;
+            return opplysninger.gjelderBarn?.husstandsbarnId
+                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsbarnId}`
+                : `${elementIds.seksjon_boforhold}`;
         case OpplysningerType.SIVILSTAND:
             return elementId.seksjon_sivilstand;
     }
@@ -224,7 +227,7 @@ const VedtakResultat = () => {
             feilInnhold.husstandsbarn.forEach((value) =>
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_boforhold}_${value.barn.tekniskId}`}
+                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsbarnId}`}
                         onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}
@@ -289,16 +292,18 @@ const VedtakResultat = () => {
                     </ErrorSummary.Item>
                 );
         }
-        feilInnhold.måBekrefteNyeOpplysninger?.forEach((value) => {
-            feilliste.push(
-                <ErrorSummary.Item
-                    href={`#${opplysningTilElementId(value)}`}
-                    onClick={() => onStepChange(opplysningTilStep(value))}
-                >
-                    {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
-                </ErrorSummary.Item>
-            );
-        });
+        feilInnhold.måBekrefteNyeOpplysningerV2
+            ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
+            ?.forEach((value) => {
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${opplysningTilElementId(value)}`}
+                        onClick={() => onStepChange(opplysningTilStep(value.type))}
+                    >
+                        {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
+                    </ErrorSummary.Item>
+                );
+            });
         return feilliste;
     }
     if (beregnetForskudd.feil) {

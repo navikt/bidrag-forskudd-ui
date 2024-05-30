@@ -129,6 +129,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato);
     const fieldIsDatoTom = field === "datoTom";
@@ -147,7 +148,7 @@ const Periode = ({
         }
     };
 
-    return editableRow ? (
+    return editableRow && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${field}`}
             label={label}
@@ -177,7 +178,8 @@ export const Sivilstand = () => {
 };
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
-    const { setErrorMessage, setErrorModalOpen, lesemodus } = useForskudd();
+    const { setErrorMessage, setErrorModalOpen, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } =
+        useForskudd();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
     const behandling = useGetBehandlingV2();
@@ -430,7 +432,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Table>
                     </div>
                 )}
-                {!lesemodus && (
+                {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
                     <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
                         {text.label.leggTilPeriode}
                     </Button>

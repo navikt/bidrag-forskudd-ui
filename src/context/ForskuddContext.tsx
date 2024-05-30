@@ -18,6 +18,7 @@ import text from "../constants/texts";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 import { useBehandlingV2 } from "../hooks/useApiData";
 import { InntektFormValues } from "../types/inntektFormValues";
+import { dateOrNull, firstDayOfMonth, isAfterEqualsDate } from "../utils/date-utils";
 
 export type InntektTables =
     | "småbarnstillegg"
@@ -48,6 +49,7 @@ interface IForskuddContext {
     vedtakId: number;
     lesemodus: boolean;
     erVedtakFattet: boolean;
+    erVirkningstidspunktNåværendeMånedEllerFramITid: boolean;
     saksnummer?: string;
     inntektFormValues: InntektFormValues;
     setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
@@ -94,6 +96,11 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
     };
 
+    const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
+        dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
+        firstDayOfMonth(new Date())
+    );
+
     const onStepChange = (x: number) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
 
@@ -114,6 +121,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             activeStep,
             behandlingId,
             vedtakId,
+            erVirkningstidspunktNåværendeMånedEllerFramITid,
             lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,

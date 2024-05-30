@@ -1,36 +1,56 @@
-import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table, Tag } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { HusstandsbarnGrunnlagPeriodeDto, OpplysningerType } from "../../../api/BidragBehandlingApiV1";
+import {
+    AktivereGrunnlagRequestV2,
+    HusstandsbarnGrunnlagPeriodeDto,
+    OpplysningerType,
+} from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { KildeTexts } from "../../../enum/KildeTexts";
-import { useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { DateToDDMMYYYYString, isBeforeDate } from "../../../utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "../../../utils/date-utils";
+import { ForskuddAlert } from "../../ForskuddAlert";
 
-const Header = ({ nyttTag }: { nyttTag: boolean }) => (
+const Header = () => (
     <BodyShort size="small" className="flex h-2">
-        {text.title.opplysningerFraFolkeregistret}{" "}
-        {nyttTag && (
-            <Tag variant="success" size="xsmall" className="w-fit h-1.5 p-1 rounded ml-2">
-                Nytt
-            </Tag>
-        )}
+        {text.title.opplysningerFraFolkeregistret}
     </BodyShort>
 );
-const Opplysninger = ({ perioder, nyttTag }: { perioder: HusstandsbarnGrunnlagPeriodeDto[]; nyttTag?: boolean }) => {
+export const NyOpplysningerAlert = () => {
+    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const ikkeAktiverteEndringerBoforhold = ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn;
+    const ikkeAktiverteEndringerSivilstand = ikkeAktiverteEndringerIGrunnlagsdata.sivilstand;
+
+    if (ikkeAktiverteEndringerBoforhold.length === 0) return null;
+    // if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand == null) return null;
+    const innhentetTidspunkt =
+        ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
+    return (
+        <ForskuddAlert variant="info">
+            <Heading size="xsmall" level="3">
+                {text.alert.nyOpplysningerInfo}
+            </Heading>
+            <BodyShort size="small">
+                Nye opplysninger fra offentlige registre er tilgjengelig. Oppdatert{" "}
+                {DateToDDMMYYYYHHMMString(dateOrNull(innhentetTidspunkt))}
+            </BodyShort>
+        </ForskuddAlert>
+    );
+};
+const Opplysninger = ({ perioder }: { perioder: HusstandsbarnGrunnlagPeriodeDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
     if (!perioder) {
         return null;
     }
 
     return (
-        <ReadMore header={<Header nyttTag={nyttTag} />} size="small">
+        <ReadMore header={<Header />} size="small">
             <Table className="w-[350px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
@@ -63,11 +83,13 @@ export const BoforholdOpplysninger = ({
     ident,
     showResetButton,
     resetTilDataFraFreg,
+    onActivateOpplysninger,
     fieldName,
 }: {
     ident: string;
     showResetButton: boolean;
     resetTilDataFraFreg: () => void;
+    onActivateOpplysninger: (overskriveManuelleOpplysninger: boolean) => void;
     fieldName: `husstandsbarn.${number}.perioder`;
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
@@ -77,7 +99,7 @@ export const BoforholdOpplysninger = ({
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
-    const nyeOpplysningerEnabled = false;
+    const nyeOpplysningerEnabled = true;
     const hasNewOpplysningerFraFolkeregistre = nyeOpplysningerEnabled && ikkeAktivertePerioder?.length > 0;
 
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
@@ -95,6 +117,7 @@ export const BoforholdOpplysninger = ({
                         );
                         setValue(fieldName, oppdatertHusstandsbarn.perioder);
 
+                        onActivateOpplysninger(overskriveManuelleOpplysninger);
                         return {
                             ...currentData,
                             boforhold: {
@@ -103,7 +126,8 @@ export const BoforholdOpplysninger = ({
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
                                     husstandsbarn: currentData.boforhold.valideringsfeil.husstandsbarn.filter(
-                                        (husstandsbarn) => husstandsbarn.barn.tekniskId !== oppdatertHusstandsbarn.id
+                                        (husstandsbarn) =>
+                                            husstandsbarn.barn.husstandsbarnId !== oppdatertHusstandsbarn.id
                                     ),
                                 },
                             },
@@ -122,11 +146,7 @@ export const BoforholdOpplysninger = ({
         <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} />
-                {hasNewOpplysningerFraFolkeregistre && (
-                    <div className="justify-end">
-                        <Opplysninger perioder={ikkeAktivertePerioder} nyttTag />
-                    </div>
-                )}
+
                 {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (
                     <div className="flex justify-end">
                         <Button
@@ -145,6 +165,7 @@ export const BoforholdOpplysninger = ({
                 <NyOpplysningerFraFolkeregistreTabell
                     ikkeAktivertePerioder={ikkeAktivertePerioder}
                     onActivate={onActivate}
+                    pendingActivate={activateGrunnlag.mutation.isPending ? activateGrunnlag.mutation.variables : null}
                 />
             )}
         </div>
@@ -154,9 +175,11 @@ export const BoforholdOpplysninger = ({
 function NyOpplysningerFraFolkeregistreTabell({
     onActivate,
     ikkeAktivertePerioder,
+    pendingActivate,
 }: {
     onActivate: (overskriveManuelleOpplysninger: boolean) => void;
     ikkeAktivertePerioder: HusstandsbarnGrunnlagPeriodeDto[];
+    pendingActivate?: AktivereGrunnlagRequestV2;
 }) {
     const virkningsOrSoktFraDato = useVirkningsdato();
     return (
@@ -169,37 +192,50 @@ function NyOpplysningerFraFolkeregistreTabell({
             className="w-[708px]"
         >
             <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
-            <Table size="small" className="table-fixed opplysninger">
-                <Table.Header>
-                    <Table.Row>
-                        <Table.HeaderCell>{text.label.fraOgMed}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.tilOgMed}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
-                        <Table.HeaderCell>{text.label.kilde}</Table.HeaderCell>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
+            <table className="mt-2">
+                <thead>
+                    <tr>
+                        <th align="left">{text.label.fraOgMed}</th>
+                        <th align="left">{text.label.tilOgMed}</th>
+                        <th align="left">{text.label.status}</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {ikkeAktivertePerioder?.map((periode, index) => (
-                        <Table.Row key={`${periode.bostatus}-${index}`}>
-                            <Table.DataCell>
+                        <tr key={index + periode.datoFom}>
+                            <td width="100px" scope="row">
                                 {virkningsOrSoktFraDato && isBeforeDate(periode.datoFom, virkningsOrSoktFraDato)
                                     ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
                                     : DateToDDMMYYYYString(new Date(periode.datoFom))}
-                            </Table.DataCell>
-                            <Table.DataCell>
+                            </td>
+                            <td width="100px">
+                                {" "}
                                 {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
-                            </Table.DataCell>
-                            <Table.DataCell>{hentVisningsnavn(periode.bostatus)}</Table.DataCell>
-                            <Table.DataCell>{KildeTexts.OFFENTLIG}</Table.DataCell>
-                        </Table.Row>
+                            </td>
+                            <td width="250px">{hentVisningsnavn(periode.bostatus)}</td>
+                        </tr>
                     ))}
-                </Table.Body>
-            </Table>
-            <HStack gap="2" className="mt-4">
-                <Button type="button" variant="secondary" size="small" onClick={() => onActivate(true)}>
+                </tbody>
+            </table>
+            <HStack gap="6" className="mt-4">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(true)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                >
                     Ja
                 </Button>
-                <Button type="button" variant="secondary" size="small" onClick={() => onActivate(false)}>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(false)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                >
                     Nei
                 </Button>
             </HStack>

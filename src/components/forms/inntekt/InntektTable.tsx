@@ -140,6 +140,7 @@ export const Periode = ({
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
 
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -155,7 +156,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}

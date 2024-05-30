@@ -54,7 +54,7 @@ import {
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
-import { BoforholdOpplysninger } from "./BoforholdOpplysninger";
+import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
 
@@ -176,6 +176,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
@@ -195,7 +196,7 @@ const Periode = ({
         }
     };
 
-    return editableRow ? (
+    return editableRow && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${field}`}
             label={label}
@@ -218,6 +219,7 @@ const Main = () => {
 
     return (
         <>
+            <NyOpplysningerAlert />
             <Heading level="2" size="small">
                 {text.label.barn}
             </Heading>
@@ -621,7 +623,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     } = useGetBehandlingV2();
     const { setErrorMessage, setErrorModalOpen, setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState } = useForskudd();
     const [showUndoButton, setShowUndoButton] = useState(false);
-    const { behandlingId, lesemodus } = useForskudd();
+    const { behandlingId, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const saveBoforhold = useOnSaveBoforhold();
@@ -878,31 +880,35 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
-    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find((feil) => feil.barn.tekniskId === barn.id);
+    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find(
+        (feil) => feil.barn.husstandsbarnId === barn.id
+    );
 
     return (
         <div className="grid gap-2">
             <BoforholdOpplysninger
                 ident={barn.ident}
                 showResetButton={showResetButton}
+                onActivateOpplysninger={(overskrevetManuelleOpplysninger) => {
+                    setShowUndoButton((prevValue) => prevValue || overskrevetManuelleOpplysninger);
+                    setShowResetButton(!overskrevetManuelleOpplysninger);
+                }}
                 resetTilDataFraFreg={resetTilDataFraFreg}
                 fieldName={`husstandsbarn.${barnIndex}.perioder`}
             />
             {barnIsOver18 && !lesemodus && (
-                <div className="mb-4">
-                    <StatefulAlert
-                        variant="info"
-                        size="small"
-                        alertKey={"18åralert" + behandlingId + barn.ident}
-                        className="w-fit"
-                        closeButton
-                    >
-                        <Heading size="small" level="3">
-                            {text.title.barnOver18}
-                        </Heading>
-                        {text.barnetHarFylt18SjekkBostatus}
-                    </StatefulAlert>
-                </div>
+                <StatefulAlert
+                    variant="info"
+                    size="small"
+                    alertKey={"18åralert" + behandlingId + barn.ident}
+                    className="w-[708px] mb-2"
+                    closeButton
+                >
+                    <Heading size="small" level="3">
+                        {text.title.barnOver18}
+                    </Heading>
+                    {text.barnetHarFylt18SjekkBostatus}
+                </StatefulAlert>
             )}
             {valideringsfeilForBarn && (
                 <div className="mb-4">
@@ -1008,7 +1014,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         {text.label.angreSisteSteg}
                     </Button>
                 )}
-                {!lesemodus && (
+                {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
                     <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
                         {text.label.leggTilPeriode}
                     </Button>

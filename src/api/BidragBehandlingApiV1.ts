@@ -1029,6 +1029,10 @@ export interface OppdatereSivilstand {
     nyEllerEndretSivilstandsperiode?: Sivilstandsperiode;
     /** @format int64 */
     sletteSivilstandsperiode?: number;
+    /** Tilbakestiller til historikk fra offentlige registre */
+    tilbakestilleHistorikk: boolean;
+    /** Settes til true for å angre siste endring */
+    angreSisteEndring: boolean;
 }
 
 /** Informasjon om husstandsmedlem som skal opprettes */
@@ -1051,7 +1055,8 @@ export interface Sivilstandsperiode {
 
 export interface OppdatereBoforholdResponse {
     oppdatertHusstandsbarn?: HusstandsbarnDtoV2;
-    oppdatertSivilstand?: SivilstandDto;
+    /** @uniqueItems true */
+    oppdatertSivilstandshistorikk: SivilstandDto[];
     oppdatertNotat?: OppdaterNotat;
     valideringsfeil: BoforholdValideringsfeil;
 }
@@ -1232,6 +1237,27 @@ export interface BeregningValideringsfeil {
     sivilstand?: SivilstandPeriodeseringsfeil;
     /** @uniqueItems true */
     måBekrefteNyeOpplysninger: OpplysningerType[];
+    /** @uniqueItems true */
+    måBekrefteNyeOpplysningerV2: MaBekrefteNyeOpplysninger[];
+}
+
+/** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+export interface HusstandsbarnDto {
+    navn?: string;
+    ident?: string;
+    /** @format date */
+    fødselsdato: string;
+    /**
+     * Teknisk id på husstandsbarn som har periodiseringsfeil
+     * @format int64
+     */
+    husstandsbarnId: number;
+}
+
+export interface MaBekrefteNyeOpplysninger {
+    type: OpplysningerType;
+    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+    gjelderBarn?: HusstandsbarnDto;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1544,8 +1570,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
