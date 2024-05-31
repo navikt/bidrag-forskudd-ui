@@ -1,4 +1,4 @@
-import { FileIcon } from "@navikt/aksel-icons";
+import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { Button, Heading } from "@navikt/ds-react";
 import React, {
     createContext,
@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
+import ErrorConfirmationModal from "../components/ErrorConfirmationModal";
 import { ConfirmationModal } from "../components/modal/ConfirmationModal";
 import { STEPS } from "../constants/steps";
 import text from "../constants/texts";
@@ -43,6 +44,11 @@ export type PageErrorsOrUnsavedState = {
     };
 };
 
+interface SaveErrorState {
+    error: boolean;
+    retryFn?: () => void;
+    rollbackFn?: () => void;
+}
 interface IForskuddContext {
     activeStep: string;
     behandlingId: number;
@@ -59,6 +65,7 @@ interface IForskuddContext {
     setErrorModalOpen: (open: boolean) => void;
     pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
+    setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
     onStepChange: (x: number) => void;
 }
 
@@ -73,7 +80,8 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
-    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState({
+    const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
+    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         virkningstidspunkt: { error: false },
         boforhold: { error: false },
         inntekt: { error: false },
@@ -133,6 +141,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             setErrorModalOpen,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
+            setSaveErrorState,
             onConfirm,
             onStepChange,
         }),
@@ -148,15 +157,29 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         ]
     );
 
+    function getPageErrorTexts(): { title: string; description: string } {
+        if (pageErrorsOrUnsavedState.virkningstidspunkt.error) {
+            return {
+                title: "Det er ikke lagt inn dato på virkningstidspunkt",
+                description: "Hvis det ikke settes inn en dato vil virkningsdatoen settes til forrige lagrede dato",
+            };
+        } else {
+            return {
+                title: text.varsel.statusIkkeLagret,
+                description: text.varsel.statusIkkeLagretDescription,
+            };
+        }
+    }
     return (
         <ForskuddContext.Provider value={value}>
             <ConfirmationModal
                 ref={ref}
-                description={text.varsel.ønskerDuÅGåVidereDescription}
+                closeable
+                description={getPageErrorTexts().description}
                 heading={
                     <Heading size="small" className="flex gap-x-1.5 items-center">
-                        <FileIcon title="a11y-title" fontSize="1.5rem" />
-                        {text.varsel.ønskerDuÅGåVidere}
+                        <XMarkOctagonFillIcon title="a11y-title" fontSize="1.5rem" color="var(--a-icon-danger)" />
+                        {getPageErrorTexts().title}
                     </Heading>
                 }
                 footer={
@@ -169,6 +192,12 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
                         </Button>
                     </>
                 }
+            />
+            <ErrorConfirmationModal
+                onConfirm={saveErrorState?.retryFn}
+                onCancel={saveErrorState?.rollbackFn}
+                onClose={() => setSaveErrorState({ error: false })}
+                open={saveErrorState?.error}
             />
             {children}
         </ForskuddContext.Provider>

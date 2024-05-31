@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
@@ -12,9 +12,11 @@ import { FormControlledTextarea } from "../../formFields/FormControlledTextArea"
 import { ActionButtons } from "../inntekt/ActionButtons";
 
 export const Notat = () => {
-    const { onStepChange } = useForskudd();
-    const { watch, getValues } = useFormContext<BoforholdFormValues>();
+    const { onStepChange, setSaveErrorState } = useForskudd();
+    const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
+    const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));
+
     const onSave = () =>
         saveBoforhold.mutation.mutate(
             { oppdatereNotat: { kunINotat: getValues("notat.kunINotat") } },
@@ -29,6 +31,16 @@ export const Notat = () => {
                             },
                         };
                     });
+                    setPreviousValues(response.oppdatertNotat.kunINotat);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onSave(),
+                        rollbackFn: () => {
+                            setValue("notat.kunINotat", previousValues ?? "");
+                        },
+                    });
                 },
             }
         );
@@ -37,8 +49,8 @@ export const Notat = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const subscription = watch((_, { name }) => {
-            if (["notat.kunINotat"].includes(name)) {
+        const subscription = watch((_, { name, type }) => {
+            if (["notat.kunINotat"].includes(name) && type === "change") {
                 debouncedOnSave();
             }
         });

@@ -658,12 +658,6 @@ export interface HusstandsbarnPeriodiseringsfeilDto {
      * @format int64
      */
     husstandsbarnId: number;
-    /**
-     * Teknisk id på husstandsbarn som har periodiseringsfeil
-     * @deprecated
-     * @format int64
-     */
-    tekniskId: number;
 }
 
 export interface IkkeAktivInntektDto {
@@ -1236,9 +1230,7 @@ export interface BeregningValideringsfeil {
     husstandsbarn?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
     /** @uniqueItems true */
-    måBekrefteNyeOpplysninger: OpplysningerType[];
-    /** @uniqueItems true */
-    måBekrefteNyeOpplysningerV2: MaBekrefteNyeOpplysninger[];
+    måBekrefteNyeOpplysninger: MaBekrefteNyeOpplysninger[];
 }
 
 /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
@@ -1635,8 +1627,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1840,10 +1832,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request GET:/api/v2/behandling/{behandlingsid}
          * @secure
          */
-        henteBehandlingV2: (behandlingsid: number, params: RequestParams = {}) =>
+        henteBehandlingV2: (
+            behandlingsid: number,
+            query?: {
+                inkluderHistoriskeInntekter?: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/${behandlingsid}`,
                 method: "GET",
+                query: query,
                 secure: true,
                 format: "json",
                 ...params,
@@ -2239,23 +2238,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
-                method: "GET",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Hente en behandling
-         *
-         * @tags behandling-controller-v-2
-         * @name HenteBoforhold
-         * @request GET:/api/v2/behandling/boforhold/{behandlingsid}
-         * @secure
-         */
-        henteBoforhold: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<BoforholdDtoV2, BoforholdDtoV2>({
-                path: `/api/v2/behandling/boforhold/${behandlingsid}`,
                 method: "GET",
                 secure: true,
                 format: "json",

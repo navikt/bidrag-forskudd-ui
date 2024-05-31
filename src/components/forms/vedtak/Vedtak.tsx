@@ -205,7 +205,6 @@ const VedtakResultat = () => {
         vedtakstype,
     } = useGetBehandlingV2();
     function renderFeilmeldinger() {
-        console.log(beregnetForskudd);
         if (!beregnetForskudd.feil?.detaljer) return null;
         const feilInnhold = beregnetForskudd.feil?.detaljer;
         const feilliste = [];
@@ -292,7 +291,7 @@ const VedtakResultat = () => {
                     </ErrorSummary.Item>
                 );
         }
-        feilInnhold.måBekrefteNyeOpplysningerV2
+        (feilInnhold.måBekrefteNyeOpplysninger ?? feilInnhold["måBekrefteNyeOpplysningerV2"])
             ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
             ?.forEach((value) => {
                 feilliste.push(

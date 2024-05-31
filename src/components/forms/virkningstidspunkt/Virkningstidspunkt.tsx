@@ -200,11 +200,12 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useForskudd();
+    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState, setSaveErrorState } = useForskudd();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
+    const [previousValues, setPreviousValues] = useState<VirkningstidspunktFormValues>(initialValues);
 
     const useFormMethods = useForm({
         defaultValues: initialValues,
@@ -213,13 +214,16 @@ const VirkningstidspunktForm = () => {
     useEffect(() => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
-            virkningstidspunkt: { error: !ObjectUtils.isEmpty(useFormMethods.formState.errors) },
+            virkningstidspunkt: {
+                error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
+                ...useFormMethods.formState.errors,
+            },
         });
     }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
-        const subscription = useFormMethods.watch((value, { name }) => {
-            if (name === "virkningstidspunkt" && !value.virkningstidspunkt) {
+        const subscription = useFormMethods.watch((value, { name, type }) => {
+            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type == undefined) {
                 return;
             } else {
                 debouncedOnSave();
@@ -264,6 +268,20 @@ const VirkningstidspunktForm = () => {
                         inntekter: response.inntekter,
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
+                });
+                setPreviousValues(createInitialValues(response.virkningstidspunkt));
+            },
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => onSave(),
+                    rollbackFn: () => {
+                        useFormMethods.reset(previousValues, {
+                            keepIsSubmitSuccessful: true,
+                            keepDirty: true,
+                            keepIsSubmitted: true,
+                        });
+                    },
                 });
             },
         });
