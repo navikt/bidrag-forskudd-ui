@@ -113,9 +113,6 @@ inntektsopplysninger.
 hentet av løsningen, vil bli vist og lagret i notatet.
 
 <h4 id="tabell_skattepliktig">Tabellen {tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}</h4>
-- Her skal man legge inn den skattepliktige og pensjonsgivende inntekten parten har. Denne tabellen må være fylt ut for at man skal kunne fatte vedtak.
-- Hvis man skal legge inn ytelse og parten har barnetillegg, må man legge inn ytelse uten barnetillegg fordi det er egen barnetilleggstabell hvor barnetillegget skal føres inn.
-- Hvis parten har næringsinntekt i Ligningsinntekten, vil det vises <SackKronerFillIcon style={{color: "var(--a-icon-info)"}}/> ikon ved siden av beskrivelsen for å indikere dette.
 - Løsningen henter inntektsopplysninger fra Skatteetaten og A-inntekt.
 - Du må velge hvilken eller hvilke inntekter som skal være med. Du kan velge flere inntektstyper samtidig. Hvis bm for eksempel både har arbeidsinntekt og en ytelse, skal du legge inn én linje for arbeidsinntekt, og en annen linje for ytelse.
 
@@ -127,8 +124,7 @@ beløpskolonnene, vi du se spesifiserte detaljer.
 Detaljene viser perioden inntekten er beregnet fra, 
 og de ulike inntektspostene i inntektstypen 
 oppsummert. 
-
-For eksempel: 
+<br/>For eksempel: 
 > Fastlønn: 500 000. <br/>
 > Overtid: 40 000
 
@@ -149,8 +145,7 @@ inntektsperiode, omregnet til årsinntekt.
 du legge inn ytelsen uten barnetillegget. 
 Barnetillegget skal du legge inn i en egen 
 barnetilleggstabell.
-- Hvis bm har næringsinntekt, vil det dukke opp et 
-tegn som indikerer dette.
+- Hvis BM har næringsinntekt, vil det vises <SackKronerFillIcon style={{color: "var(--a-icon-info)", verticalAlign: "middle"}}/> ikon som indikerer dette.
 
 <h4 id={elementIds.brukerveildning.tabell_barnetillegg}>Tabellen {tekster.title.barnetillegg.toLowerCase()}</h4>
 
