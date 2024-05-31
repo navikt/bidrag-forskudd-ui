@@ -782,10 +782,17 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     error: true,
                     retryFn: () => updateAndSave(payload),
                     rollbackFn: () => {
-                        setValue(
-                            `husstandsbarn.${barnIndex}`,
-                            behandling.boforhold.husstandsbarn.find((b) => b.id === barn.id)
-                        );
+                        const oppdaterPeriode = payload.oppdatereHusstandsmedlem.oppdaterPeriode;
+                        if (oppdaterPeriode && oppdaterPeriode.idPeriode == null) {
+                            const perioder = getValues(`husstandsbarn.${barnIndex}.perioder`);
+                            barnPerioder.remove(perioder.length - 1);
+                        } else {
+                            setValue(
+                                `husstandsbarn.${barnIndex}`,
+                                behandling.boforhold.husstandsbarn.find((b) => b.id === barn.id)
+                            );
+                        }
+
                         if (payload.oppdatereHusstandsmedlem.tilbakestillPerioderForHusstandsmedlem) {
                             setShowResetButton(true);
                         }
@@ -868,11 +875,12 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                 setSaveErrorState({
                                     error: true,
                                     retryFn: () => onRemovePeriode(index),
-                                    rollbackFn: () =>
+                                    rollbackFn: () => {
                                         setValue(
                                             `husstandsbarn.${barnIndex}`,
                                             behandling.boforhold.husstandsbarn.find((b) => b.id === barn.id)
-                                        ),
+                                        );
+                                    },
                                 });
                             },
                         }

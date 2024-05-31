@@ -9,7 +9,7 @@ import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ErrorModal } from "./components/modal/ErrorModal";
 import text from "./constants/texts";
 import { ForskuddProvider } from "./context/ForskuddContext";
-import Brukerveiledning from "./docs/Brukerveiledning.mdx";
+import BrukerveiledningForskudd from "./docs/BrukerveiledningForskudd.mdx";
 import { prefetchVisningsnavn } from "./hooks/useVisningsnavn";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
 import PageWrapper from "./pages/PageWrapper";
@@ -71,7 +71,7 @@ function ForskuddBrukerveiledningPageWrapper() {
     return (
         <PageWrapper name="Forskudd brukerveiledning">
             <BidragContainer className="container p-6">
-                <Brukerveiledning saksbehandlerNavn={""} />
+                <BrukerveiledningForskudd />
             </BidragContainer>
         </PageWrapper>
     );
