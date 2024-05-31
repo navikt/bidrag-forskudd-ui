@@ -1,11 +1,10 @@
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import elementId from "../../../constants/elementIds";
-import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -14,7 +13,6 @@ import { formatterBeløp } from "../../../utils/number-utils";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
-import HjelpetekstButton from "../../HjelpetekstButton";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { ExpandableContent } from "./ExpandableContent";
@@ -86,12 +84,9 @@ export const Barnetillegg = () => {
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
-            <HStack gap={"2"}>
-                <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
-                    {text.title.barnetillegg}
-                </Heading>
-                <HjelpetekstButton href={elementIds.brukerveildning.tabell_barnetillegg} />
-            </HStack>
+            <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
+                {text.title.barnetillegg}
+            </Heading>
             <Opplysninger fieldName={"barnetillegg"} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (

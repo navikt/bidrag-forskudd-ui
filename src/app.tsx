@@ -70,7 +70,7 @@ function ForskuddBrukerveiledningPageWrapper() {
     useEffect(scrollToHash, []);
     return (
         <PageWrapper name="Forskudd brukerveiledning">
-            <BidragContainer className="container p-6">
+            <BidragContainer className="container p-6 max-w-[60rem]">
                 <BrukerveiledningForskudd />
             </BidragContainer>
         </PageWrapper>

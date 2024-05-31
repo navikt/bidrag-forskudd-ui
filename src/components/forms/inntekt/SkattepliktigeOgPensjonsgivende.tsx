@@ -6,14 +6,12 @@ import { useFormContext } from "react-hook-form";
 
 import { Inntektsrapportering, Inntektstype, Kilde } from "../../../api/BidragBehandlingApiV1";
 import elementId from "../../../constants/elementIds";
-import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
-import HjelpetekstButton from "../../HjelpetekstButton";
 import AinntektLink from "./AinntektLink";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
@@ -82,7 +80,6 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                     </Heading>
 
                     {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
-                    <HjelpetekstButton href={elementIds.brukerveildning.tabell_skattepliktig} />
                 </HStack>
             </div>
             <Opplysninger fieldName={fieldName} ident={ident} />

@@ -1,14 +1,12 @@
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import { Inntektsrapportering, Kilde, Rolletype } from "../../../api/BidragBehandlingApiV1";
 import elementId from "../../../constants/elementIds";
-import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
-import HjelpetekstButton from "../../HjelpetekstButton";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
@@ -20,12 +18,9 @@ export const Småbarnstillegg = () => {
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
-            <HStack gap={"2"}>
-                <Heading level="2" size="small" id={elementId.seksjon_inntekt_småbarnstillegg}>
-                    {text.title.småbarnstillegg}
-                </Heading>
-                <HjelpetekstButton href={elementIds.brukerveildning.tabell_småbarnstillegg} />
-            </HStack>
+            <Heading level="2" size="small" id={elementId.seksjon_inntekt_småbarnstillegg}>
+                {text.title.småbarnstillegg}
+            </Heading>
             <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName}>
                 {({

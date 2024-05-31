@@ -1,4 +1,5 @@
-import { Button } from "@navikt/ds-react";
+import { HelpText } from "@navikt/ds-react";
+import { Link } from "react-router-dom";
 
 import environment from "../environment";
 
@@ -11,12 +12,9 @@ export default function HjelpetekstButton({
     brukerveiledningLenke = environment.url.forskuddBrukerveiledning,
 }: HjelpetekstButtonProps) {
     return (
-        <Button
-            variant="tertiary"
-            icon={<HelptextIcon />}
-            size="xsmall"
-            onClick={() => window.open(brukerveiledningLenke + "#" + href, "_blank")}
-        ></Button>
+        <HelpText>
+            <Link href={() => window.open(brukerveiledningLenke + "#" + href, "_blank")}>Les mer her </Link>
+        </HelpText>
     );
 }
 
