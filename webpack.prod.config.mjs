@@ -1,7 +1,8 @@
-import { EnvironmentPlugin } from "webpack";
+import webpack from "webpack";
 import { merge } from "webpack-merge";
 
 import webpackCommon from "./webpack.common.config.mjs";
+const { EnvironmentPlugin } = webpack;
 
 export default merge(webpackCommon, {
     mode: "production",
