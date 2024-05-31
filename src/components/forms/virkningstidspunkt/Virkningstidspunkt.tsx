@@ -1,6 +1,6 @@
 import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
