@@ -1,12 +1,18 @@
-const path = require("path");
-const webpack = require("webpack");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const { ModuleFederationPlugin } = require("webpack").container;
-const deps = require("./package.json").dependencies;
-const { EsbuildPlugin } = require("esbuild-loader");
+import { fileURLToPath } from "node:url";
 
-module.exports = {
+import { CleanWebpackPlugin } from "clean-webpack-plugin";
+import { EsbuildPlugin } from "esbuild-loader";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import path from "path";
+import rehypeSlug from "rehype-slug";
+import webpack from "webpack";
+
+import deps from "./package.json" assert { type: "json" };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const { ModuleFederationPlugin } = webpack.container;
+export default {
     entry: "./src/index.tsx",
     output: {
         filename: "[name].[fullhash].js",
@@ -40,6 +46,23 @@ module.exports = {
                 test: /\.css$/,
                 exclude: /\.lazy\.css$/i,
                 use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
+            },
+            {
+                test: /\.mdx?$/,
+                use: [
+                    {
+                        loader: "@mdx-js/loader",
+                        /** @type {import('@mdx-js/loader').Options} */
+                        options: {
+                            providerImportSource: "@mdx-js/react",
+                            rehypePlugins: [rehypeSlug],
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.(png|jpg|gif|mov)$/i,
+                type: "asset/inline",
             },
             {
                 test: /\.lazy\.css$/i,
@@ -76,8 +99,8 @@ module.exports = {
                 "./Behandling": "./src/app.tsx",
             },
             shared: {
-                react: { singleton: true, requiredVersion: deps.react },
-                "react-dom": { singleton: true, requiredVersion: deps.react },
+                react: { singleton: true, requiredVersion: deps.dependencies.react },
+                "react-dom": { singleton: true, requiredVersion: deps.dependencies.react },
             },
         }),
     ],

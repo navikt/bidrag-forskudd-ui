@@ -73,7 +73,7 @@ function AdminButtons() {
     if (!isAdminEnabled) return null;
 
     return (
-        <div className="border-t border-solid">
+        <div className="border-t border-b-0 border-r-0 border-l-0 border-solid">
             <Button
                 variant="tertiary-neutral"
                 size="small"

@@ -1,5 +1,5 @@
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, Table, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -16,7 +16,6 @@ import LeggTilPeriodeButton from "../../formFields/FormLeggTilPeriode";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
 import { ExpandableContent } from "./ExpandableContent";
-import HjelpetekstTabell from "./HjelpetekstTabell";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
@@ -85,12 +84,9 @@ export const Barnetillegg = () => {
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
-            <VStack gap={"2"}>
-                <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
-                    {text.title.barnetillegg}
-                </Heading>
-                <HjelpetekstTabell innhold={text.hjelpetekst.barnetillegg} />
-            </VStack>
+            <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
+                {text.title.barnetillegg}
+            </Heading>
             <Opplysninger fieldName={"barnetillegg"} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (

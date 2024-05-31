@@ -1,15 +1,20 @@
+import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddHeader } from "./components/header/ForskuddHeader";
 import { ErrorModal } from "./components/modal/ErrorModal";
 import text from "./constants/texts";
 import { ForskuddProvider } from "./context/ForskuddContext";
+import BrukerveiledningForskudd from "./docs/BrukerveiledningForskudd.mdx";
 import { prefetchVisningsnavn } from "./hooks/useVisningsnavn";
 import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
+import PageWrapper from "./pages/PageWrapper";
+import { scrollToHash } from "./utils/window-utils";
+
 const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
 
 const queryClient = new QueryClient({
@@ -50,6 +55,7 @@ export default function App() {
                             <Route index element={<VedtakLesemodusWrapper />} />
                             <Route path="notat" element={<NotatPageWrapper />} />
                         </Route>
+                        <Route path="/forskudd/brukerveiledning" element={<ForskuddBrukerveiledningPageWrapper />} />
                         <Route path="/forskudd/:behandlingId">
                             <Route index element={<ForskudWrapper />} />
                             <Route path="notat" element={<NotatPageWrapper />} />
@@ -58,6 +64,16 @@ export default function App() {
                 </BrowserRouter>
             </QueryClientProvider>
         </FlagProvider>
+    );
+}
+function ForskuddBrukerveiledningPageWrapper() {
+    useEffect(scrollToHash, []);
+    return (
+        <PageWrapper name="Forskudd brukerveiledning">
+            <BidragContainer className="container p-6 max-w-[60rem]">
+                <BrukerveiledningForskudd />
+            </BidragContainer>
+        </PageWrapper>
     );
 }
 function VedtakLesemodusWrapper() {

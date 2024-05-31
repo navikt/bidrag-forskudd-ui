@@ -6,4 +6,16 @@ export default {
     seksjon_inntekt_skattepliktig: "skattepliktig",
     seksjon_sivilstand: "sivilstand",
     seksjon_boforhold: "boforhold",
+    brukerveildning: {
+        tabell_skattepliktig: "tabell-skattepliktig",
+        tabell_småbarnstillegg: "tabell-smaabarnstillegg",
+        tabell_utvidetbarnetrygd: "tabell-utvidetbarnetrygd",
+        tabell_barnetillegg: "tabell-barnetillegg",
+        tabell_kontantstøtte: "tabell-kontantstotte",
+        tabell_totalt: "tabell-totalt",
+        tittel_virkningstidspunkt: "virkningstidspunkt",
+        tittel_boforhold: "boforhold",
+        tittel_inntekt: "inntekt-generelt",
+        tittel_vedtak: "fatte-vedtak",
+    },
 };

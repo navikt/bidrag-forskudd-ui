@@ -38,9 +38,9 @@ export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
         <div className="h-8 w-full flex items-center justify-center">
             {kilde === Kilde.OFFENTLIG ? (
-                <Buldings2Icon title="a11y-title" fontSize="1.5rem" />
+                <Buldings2Icon title="Offentlig" fontSize="1.5rem" />
             ) : (
-                <PersonIcon title="a11y-title" fontSize="1.5rem" />
+                <PersonIcon title="Manuelt" fontSize="1.5rem" />
             )}
         </div>
     );
