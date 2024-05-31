@@ -272,7 +272,6 @@ export const InntektTabel = ({
     const handleUpdate = (index: number) => {
         const perioder = getValues(fieldName);
         const updatedPeriode = perioder[index];
-        if (!updatedPeriode) return;
         const payload = createPayload(updatedPeriode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
         const onSaveSuccess = (response: OppdatereInntektResponse) => {
