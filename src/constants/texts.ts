@@ -183,6 +183,8 @@ const tekster = {
         ønskerDuÅSlette: "Ønsker du å slette?",
         ønskerDuÅSletteBarnet: "Ønsker du å slette barnet som er lagt til i beregningen?",
         ønskerDuÅGåVidere: "Feil ved utfylling",
+        statusIkkeLagret: "Statusen er ikke lagret",
+        statusIkkeLagretDescription: "Hvis ikke statusen lagres vil ikke endringene tas med i beregningen",
         lagringFeilet: "Noe gikk galt og endringene ble ikke lagret",
         endringerIkkeLagret: "Noe gikk galt og endringene ble ikke lagret",
         ønskerDuÅGåVidereDescription:

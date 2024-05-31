@@ -214,7 +214,10 @@ const VirkningstidspunktForm = () => {
     useEffect(() => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
-            virkningstidspunkt: { error: !ObjectUtils.isEmpty(useFormMethods.formState.errors) },
+            virkningstidspunkt: {
+                error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
+                ...useFormMethods.formState.errors,
+            },
         });
     }, [useFormMethods.formState.errors]);
 

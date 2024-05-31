@@ -157,16 +157,29 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         ]
     );
 
+    function getPageErrorTexts(): { title: string; description: string } {
+        if (pageErrorsOrUnsavedState.virkningstidspunkt.error) {
+            return {
+                title: "Det er ikke lagt inn dato på virkningstidspunkt",
+                description: "Hvis det ikke settes inn en dato vil virkningsdatoen settes til forrige lagrede dato",
+            };
+        } else {
+            return {
+                title: text.varsel.statusIkkeLagret,
+                description: text.varsel.statusIkkeLagretDescription,
+            };
+        }
+    }
     return (
         <ForskuddContext.Provider value={value}>
             <ConfirmationModal
                 ref={ref}
                 closeable
-                description={text.varsel.ønskerDuÅGåVidereDescription}
+                description={getPageErrorTexts().description}
                 heading={
                     <Heading size="small" className="flex gap-x-1.5 items-center">
                         <XMarkOctagonFillIcon title="a11y-title" fontSize="1.5rem" color="var(--a-icon-danger)" />
-                        {text.varsel.ønskerDuÅGåVidere}
+                        {getPageErrorTexts().title}
                     </Heading>
                 }
                 footer={
