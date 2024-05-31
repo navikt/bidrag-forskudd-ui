@@ -9,6 +9,7 @@ export default function useFeatureToogle() {
     const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
+    const enableSivilstandV2 = useFlag("behandling.sivilstandv2");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
         queryKey: ["user"],
@@ -30,7 +31,9 @@ export default function useFeatureToogle() {
             "enableInntektSkjermbilde",
             enableInntektSkjermbilde,
             "enableFatteVedtak",
-            enableFatteVedtak
+            enableFatteVedtak,
+            "enableSivilstandV2",
+            enableSivilstandV2
         );
     }, [enableVedtakSkjermbilde, enableInntektSkjermbilde, enableFatteVedtak]);
     return {
@@ -38,5 +41,6 @@ export default function useFeatureToogle() {
         isInntektSkjermbildeEnabled: true, // enableInntektSkjermbilde,
         isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde,
         isAdminEnabled: enableAdmin,
+        enableSivilstandV2,
     };
 }

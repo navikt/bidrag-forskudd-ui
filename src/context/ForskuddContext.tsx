@@ -36,6 +36,10 @@ export type PageErrorsOrUnsavedState = {
         error: boolean;
         openFields?: { [key in HusstandsbarnTables]: boolean };
     };
+    sivilstand: {
+        error: boolean;
+        openFields?: { [key in HusstandsbarnTables]: boolean };
+    };
     inntekt: {
         error: boolean;
         openFields?: {
@@ -84,6 +88,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         virkningstidspunkt: { error: false },
         boforhold: { error: false },
+        sivilstand: { error: false },
         inntekt: { error: false },
     });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);

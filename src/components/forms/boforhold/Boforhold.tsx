@@ -18,6 +18,7 @@ import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -57,6 +58,7 @@ import { KildeIcon } from "../inntekt/InntektTable";
 import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
+import { SivilstandNy } from "./SivilstandNy";
 
 const DeleteButton = ({
     onRemovePeriode,
@@ -216,6 +218,7 @@ const Periode = ({
 
 const Main = () => {
     useEffect(scrollToHash, []);
+    const { enableSivilstandV2 } = useFeatureToogle();
 
     return (
         <>
@@ -224,7 +227,7 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
-            <Sivilstand />
+            {enableSivilstandV2 ? <SivilstandNy /> : <Sivilstand />}
         </>
     );
 };

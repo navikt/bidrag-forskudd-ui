@@ -61,6 +61,7 @@ const tekster = {
         ingenLoependeInntektPeriode:
             "Det er ingen løpende inntektsperiode. Rediger en av periodene eller legg til en ny periode.",
         ingenLoependePeriode: "Det er ingen løpende status i beregningen.",
+        ugyldigStatus: "En eller flere perioder har status 'UKJENT' som ikke er gyldig status.",
         manglerPerioder: "Ingen inntekstperiode er valgt. Du må velge eller legge til minst en løpende periode.",
         inntektType: "Inntekt type må settes",
         navnMåFyllesUt: "Navn må fylles ut",
