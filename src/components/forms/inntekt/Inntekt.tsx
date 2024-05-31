@@ -1,5 +1,5 @@
 import { BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
@@ -125,7 +125,8 @@ const Main = () => {
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useForskudd();
     const saveInntekt = useOnSaveInntekt();
-    const { watch, getValues } = useFormContext<InntektFormValues>();
+    const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
+    const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));
     const onSave = () => {
         const [kunINotat] = getValues(["notat.kunINotat"]);
         saveInntekt.mutation.mutate(
@@ -143,13 +144,14 @@ const Side = () => {
                             notat: response.notat,
                         },
                     }));
+                    setPreviousValues(response.notat.kunINotat);
                 },
                 onError: () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            // resetField("notat.kunINotat");
+                            setValue("notat.kunINotat", previousValues ?? "");
                         },
                     });
                 },
@@ -161,8 +163,8 @@ const Side = () => {
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        const subscription = watch((_, { name }) => {
-            if (["notat.kunINotat"].includes(name)) {
+        const subscription = watch((_, { name, type }) => {
+            if (["notat.kunINotat"].includes(name) && type === "change") {
                 debouncedOnSave();
             }
         });

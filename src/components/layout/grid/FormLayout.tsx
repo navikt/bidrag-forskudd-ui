@@ -1,4 +1,4 @@
-import { BidragCell, BidragGrid, Broadcast, SaveStatusIndicator, useRQMutationState } from "@navikt/bidrag-ui-common";
+import { BidragCell, BidragGrid, Broadcast, useRQMutationState } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { ReactNode, useEffect } from "react";
@@ -44,7 +44,7 @@ export const FormLayout = ({
                 <Heading level="1" size="medium">
                     {title}
                 </Heading>
-                <SaveStatusIndicator mutationKey={listenToMutations} queryClient={queryClient} />
+                {/* <SaveStatusIndicator mutationKey={listenToMutations} queryClient={queryClient} /> */}
             </div>
             <BidragGrid className="grid grid-cols-12 gap-6">
                 <BidragCell className="sm:col-span-12 md:col-span-12 xl:col-span-12 2xl:col-span-8 h-fit grid gap-y-4">
