@@ -6,6 +6,7 @@ import React from "react";
 import { Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { FlexRow } from "../../components/layout/grid/FlexRow";
+import elementIds from "../../constants/elementIds";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
@@ -100,13 +101,13 @@ function BrukerveiledningKnapp() {
     function renderHref() {
         switch (activeStep) {
             case ForskuddStepper.BOFORHOLD:
-                return "#2-boforhold";
+                return elementIds.brukerveildning.tittel_boforhold;
             case ForskuddStepper.INNTEKT:
-                return "#3-inntekt-generelt";
+                return elementIds.brukerveildning.tittel_inntekt;
             case ForskuddStepper.VEDTAK:
-                return "#4-fatte-vedtak";
+                return elementIds.brukerveildning.tittel_vedtak;
             case ForskuddStepper.VIRKNINGSTIDSPUNKT:
-                return "#virkningstidspunkt";
+                return elementIds.brukerveildning.tittel_virkningstidspunkt;
             default:
                 return "";
         }
@@ -119,7 +120,7 @@ function BrukerveiledningKnapp() {
                 className={`border rounded-xl border-solid`}
                 size="xsmall"
                 icon={<ExternalLinkIcon />}
-                onClick={() => window.open(environment.url.forskuddBrukerveiledning + renderHref(), "_blank")}
+                onClick={() => window.open(environment.url.forskuddBrukerveiledning + "#" + renderHref(), "_blank")}
             >
                 Brukerveiledning
             </Button>

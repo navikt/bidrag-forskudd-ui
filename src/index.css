@@ -39,3 +39,10 @@ figure {
     font-size: var(--a-font-size-heading-small);
     margin-bottom: 5px;
   }
+  .mx-auto h1 {
+    font-size: "var(--a-font-size-heading-xlarge)";
+  }
+  .mx-auto h2 {
+    font-size: "var(--a-font-size-heading-large)";
+    margin-top: 0;
+  }

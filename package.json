@@ -12,7 +12,7 @@
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
     "dev:local": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --env envfile=.env.local.private --config webpack.dev.config.mjs",
-    "build": "webpack --config webpack.prod.config.js",
+    "build": "webpack --config webpack.prod.config.mjs",
     "build:api": "npm-run-all -p api:person api:bidragGrunnlag api:bidragVedtak api:bidragBehandling",
     "api:person": "swagger-typescript-api -p https://bidrag-person.dev.intern.nav.no/bidrag-person/v3/api-docs --axios -n PersonApi.ts -o src/api",
     "api:bidragGrunnlag": "swagger-typescript-api -p https://bidrag-grunnlag.intern.dev.nav.no/v3/api-docs --axios -n BidragGrunnlagApi.ts -o src/api",
