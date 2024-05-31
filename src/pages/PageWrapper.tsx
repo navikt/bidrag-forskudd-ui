@@ -1,7 +1,7 @@
 import "../index.css";
 
 import { MDXProvider, useMDXComponents } from "@mdx-js/react";
-import { ArrowRightIcon } from "@navikt/aksel-icons";
+import { ArrowRightIcon, SackKronerFillIcon } from "@navikt/aksel-icons";
 import { BodyLong, BodyShort, Heading, Label } from "@navikt/ds-react";
 import { useThemedStylesWithMdx } from "@theme-ui/mdx";
 import React, { PropsWithChildren } from "react";
@@ -10,7 +10,7 @@ import { Theme, ThemeUIProvider } from "theme-ui";
 interface PageWrapperProps {
     name: string;
 }
-const mdxComponents = { Heading, BodyShort, ArrowRightIcon, BodyLong, Label };
+const mdxComponents = { Heading, BodyShort, ArrowRightIcon, BodyLong, Label, SackKronerFillIcon };
 
 const theme: Theme = {
     config: {
