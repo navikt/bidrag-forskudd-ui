@@ -1,0 +1,270 @@
+import elementIds from "../constants/elementIds";
+import tekster from "../constants/texts";
+
+# Brukerveiledning forskudd
+
+<h2 id="virkningstidspunkt">1. Virkningstidspunkt</h2>
+
+#### Sette virkningstidspunkt
+Virkningstidspunktet styrer hvilke offentlige registrerte 
+opplysninger (data) som blir hentet inn. 
+Virkningstidspunktet kommer derfor først i flyten.
+- Hvis virkningstidspunktet skal bli endret etter 
+at steg 2 og 3 er fylt ut, må du oppdatere steg 
+2 og 3 på nytt manuelt. Dette vil du få en 
+beskjed om i en melding på skjermen.
+
+
+#### Velge årsak til innvilgelser / avslag / opphør
+- Årsak velger du fra en nedtrekks liste.
+- Dato for virkningstidspunktet blir pre utfylt. 
+Denne datoen baserer seg på opplysninger 
+du har registrert ved journalføring.
+- Du må vurdere om datoen stemmer. Hvis 
+den ikke stemmer, må du endre datoen 
+manuelt.
+
+
+#### Ved avslag og opphør
+Avslags- og opphørkoder sender deg direkte til steg 4 
+«Vedtak».
+
+#### Opplysninger blir automatisk lagret
+Opplysninger blir automatisk og fortløpende lagret, i 
+både skjermbildet og saksbehandlingsnotat.
+
+## 2. Boforhold
+
+### Bidragmottakers barn
+ - Løsningen viser alle bms barn fra offentlige 
+registre, og hvilke av disse barna som er registrert 
+på bms adresse.
+- Opplysningene fra offentlige registre er pre utfylt i 
+tabellen. Hvis det er dokumentert at opplysningene
+ikke stemmer, må du legge inn boforhold manuelt.
+- Opplysningene oppdateres jevnlig, og du vil få 
+melding på skjermen om det har skjedd endringer.
+- Hvis opplysningene er mangelfulle, kan du legge 
+inn barn basert på fødselsnummer. Eller, du kan 
+bruke fritekstfeltet.
+
+### Bidragmottakers sivilstand
+- Løsningen viser hvilken sivilstand bidragsmottaker 
+er registrert med i offentlige registre.
+- Opplysningene fra offentlige registre er pre utfylt i 
+to kategorier: «gift/samboende», eller «alene med 
+barn».
+- Hvis det er dokumentert at opplysningene ikke 
+stemmer, må du legge inn sivilstand manuelt.
+- Opplysningene oppdateres jevnlig. Hvis det har 
+skjedd endringer, vil du få beskjed om dette i en 
+melding på skjermen.
+- Opplysninger blir automatisk og fortløpende lagret, 
+i både skjermbildet og saksbehandlingsnotat.
+
+## 3. Inntekt Generelt
+
+#### Bidragmottakerens inntekt
+- Inntektene er hentet fra A-inntekt/A-ordningen. Du 
+har også mulighet til å legge inn inntekt(er) manuelt.
+- Arbeidsforhold er hentet fra AA-registeret.
+- Kilde-kolonnen til høyre i bildet viser om du har brukt pre utfylte eller manuelle opplysninger. 
+Pre utfylte opplysninger vises med en bygning som symbol, mens manuelle opplysninger vises med en person som symbol.
+- Steget om inntekt inneholder én graf, 5 ulike 
+tabeller og én oppsummeringstabell. Her får du 
+informasjon om de forskjellige:
+
+**Grafen** gir et bilde på hva bm har fått utbetalt 
+måned for måned i de siste 12 månedene. Dette vil
+gi deg et bilde av bm’s inntekt. Er den stabil eller varierende?
+
+
+Hold musepekeren over grafen og du kan se 
+detaljer og spesifikasjoner av inntekt, samt de ulike
+inntektspostene for hver måned. Når inntekten er 
+stabil, kan du bruke 3 eller 12 måneder som er pre 
+utfylt.
+
+
+A-inntekt siste 12 eller 3 måneder er et 
+ferdigberegnet gjennomsnitt av 
+inntektsopplysninger fra de siste 12 eller 3 
+månedene, omregnet til årsinntekt.
+
+
+**Inntektstabellene** viser forskjellige typer inntekt: 
+pensjonsgivende inntekt og skatt, barnetillegg, 
+småbarnstillegg, kontantstøtte og utvidet 
+barnetrygd. I tabellene for barnetillegg og 
+kontantstøtte føres inntekten per barn.
+
+
+**Oppsummeringstabellen** nederst på siden, viser 
+inntekt per barn. Tallene her er basert på hvilken 
+inntekt du har valgt over. Systemet beregner den 
+totale inntekten per barn.
+
+- Hvis det har skjedd endringer i noen av 
+inntektsopplysningene vi henter inn automatisk, vil 
+du få beskjed om dette i en melding på skjermen. 
+Det gjelder også hvis det kommer nye 
+inntektsopplysninger.
+- Alle opplysninger du legger inn, eller som blir 
+hentet av løsningen, vil bli vist og lagret i notatet.
+
+<h4 id="tabell_skattepliktig">Tabellen {tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}</h4>
+- Her skal man legge inn den skattepliktige og pensjonsgivende inntekten parten har. Denne tabellen må være fylt ut for at man skal kunne fatte vedtak.
+- A-inntekt siste 12 mnd og 3 mnd er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de siste 3 og 12 måneder omregnet til årsinntekt. Trykker man på pilen til høyre for beløpskolonnen vil man se spesifiserte detaljer som perioden inntekten er beregnet ut ifra og oppsummering av de ulike inntektspostene i perioden inntekten er beregnet for.
+- Når man passerer den 05. i hver måned vil de automatisk beregnede inntektsopplysningene fra a-inntekt oppdatere seg slik at man får med inntekt for forrige måned. Dette er for å ha de nyeste opplysningene ved beregningen av disse inntektstypene. Man vil da få en melding som viser hvilke inntektstyper som oppdateres og man må trykke på "oppdater opplysninger".
+- Inntektstypen overgangsstønad er beregnet som et gjennomsnitt fra mai til og med siste inntektsperiode omregnet til årsinntekt.
+- Man kan legge inn ulike type inntektskilder slik at dette løper samtidig. Hvis en part har arbeidsinntekt og ytelse skal man derfor legge inn en linje for arbeidsinntekt og en annen linje for ytelse.
+- Hvis man skal legge inn ytelse og parten har barnetillegg, må man legge inn ytelse uten barnetillegg fordi det er egen barnetilleggstabell hvor barnetillegget skal føres inn.
+- Hvis parten har næringsinntekt i Ligningsinntekten, vil det vises enikon ved siden av beskrivelsen for å indikere dette.
+- Løsningen henter inntektsopplysninger fra Skatteetaten og A-inntekt.
+- Du må velge hvilken eller hvilke inntekter som skal være med. Du kan velge flere inntektstyper samtidig. Hvis bm for eksempel både har arbeidsinntekt og en ytelse, skal du legge inn én linje for arbeidsinntekt, og en annen linje for ytelse.
+
+
+A-inntekt siste 12 måneder eller 3 måneder er et 
+ferdigberegnet gjennomsnitt av 
+inntektsopplysninger fra de siste 12 eller 3 
+månedene, omregnet til årsinntekt.
+
+
+Hvis du trykker på pilen til høyre for 
+beløpskolonnene, vi du se spesifiserte detaljer. 
+Detaljene viser perioden inntekten er beregnet fra, 
+og de ulike inntektspostene i inntektstypen 
+oppsummert. For eksempel: Fastlønn: 500 000. 
+Overtid: 40 000 osv.
+
+
+Når vi passerer den 5. i hver måned, vil de 
+automatiske beregnede inntektsopplysningene fra 
+A-inntekt oppdatere seg. Slik får du med inntekt fra
+forrige måned. Dette er for å ha de ferskeste 
+opplysningene ved beregningen av disse 
+inntektstypene.
+Du vil få en melding på skjermen som viser hvilke 
+inntektstyper som oppdateres. Når du får en slik 
+melding, må du trykke på «oppdater opplysninger».
+- Inntektstypen overgangsstønad er beregnet som et
+gjennomsnitt fra mai til og med siste 
+inntektsperiode, omregnet til årsinntekt.
+- Hvis du skal legge inn ytelse med barnetillegg, må 
+du legge inn ytelsen uten barnetillegget. 
+Barnetillegget skal du legge inn i en egen 
+barnetilleggstabell.
+- Hvis bm har næringsinntekt, vil det dukke opp et 
+tegn som indikerer dette.
+
+<h4 id={elementIds.brukerveildning.tabell_barnetillegg}>Tabellen {tekster.title.barnetillegg.toLowerCase()}</h4>
+
+- Her blir alle typer barnetillegg som bm eventuelt 
+mottar registrert. De blir registrert per barn.
+- Løsningen henter automatisk barnetillegg bm 
+mottar i pensjon eller uføretrygd.
+- Hvis bm har andre barnetillegg, må du registrere 
+disse manuelt. Det gjelder barnetillegg fra både 
+offentlige og private aktører.
+- Det blir hentet inn nye opplysninger hver tolvte 
+time. Ved nye opplysninger vil du få en melding på 
+skjermen om hva som er endret. Når du får en slik 
+melding, må du trykke på «oppdater opplysninger».
+
+<h4 id={elementIds.brukerveildning.tabell_utvidetbarnetrygd}>Tabellen {tekster.title.utvidetBarnetrygd.toLowerCase()}</h4>
+- Her blir utvidet barnetrygd som bm eventuelt 
+mottar registrert.
+- Løsningen henter automatisk utvidet barnetrygd, 
+og har allerede valgt denne inntekten slik at den 
+kommer med i beregningen.
+- Hvis denne inntekten ikke skal være med, må du 
+manuelt velge den bort.
+- Du kan også manuelt legge til utvidet barnetrygd, 
+om det som er innhentet er feil eller mangelfullt.
+- Det blir hentet inn nye opplysninger hver tolvte 
+time. Ved nye opplysninger vil du få en melding på 
+skjermen om hva som er endret. Når du får en slik 
+melding, må du trykke på «oppdater opplysninger».
+ 
+ <h4 id={elementIds.brukerveildning.tabell_småbarnstillegg}>Tabellen {tekster.title.småbarnstillegg.toLowerCase()}</h4>
+- Her blir småbarnstillegg som bm eventuelt mottar 
+registrert. Løsningen henter automatisk 
+småbarnstillegg, og har allerede valgt denne 
+inntekten slik at den kommer med i beregningen.
+- Hvis denne inntekten ikke skal være med, må du 
+manuelt velge den bort.
+- Du kan også manuelt legge til småbarnstillegg, om 
+det som er innhentet er feil eller mangelfullt.
+- Det blir hentet inn nye opplysninger hver tolvte 
+time. Ved nye opplysninger vil du få en melding på 
+skjermen om hva som er endret. Når du får en slik 
+melding, må du trykke på «oppdater opplysninger».
+
+ <h4 id={elementIds.brukerveildning.tabell_kontantstøtte}>Tabellen {tekster.title.kontantstøtte.toLowerCase()}</h4>
+- Her blir kontantstøtte som bm eventuelt mottar 
+registrert. De blir registrert per barn.
+- Løsningen henter kontantstøtte, og har allerede 
+valgt denne inntekten slik at den kommer med i 
+beregningen.
+- Hvis denne inntekten ikke skal være med, må du 
+manuelt velge den bort.
+- Du kan også manuelt legge til kontantstøtte, om 
+det som er innhentet er feil eller mangelfullt.
+- Det blir hentet inn nye opplysninger hver tolvte 
+time. Ved nye opplysninger vil du få en melding på 
+skjermen om hva som er endret. Når du får en slik 
+melding, må du trykke på «oppdater opplysninger».
+
+## 4. Fatte vedtak
+Dette er siste steget i løsningen, hvor du skal fatte 
+vedtak. Her ligger oppsummering av verdiene du har 
+lagt til grunn i behandling og notat.
+
+## 5. Etter vedtak
+Når du har fattet vedtak, går du tilbake til sakshistorikk 
+i Bisys. Der kan du se at:
+- Saksreskontro er oppdatert
+- Notat er lagret i pdf i sakshistorikk
+- Forsendelse er opprettet automatisk
+
+## Diverse
+### 1.Begrunnelse
+I alle steg skriver du begrunnelsen direkte i 
+løsningen.
+- Begrunnelsen blir fortløpende speilet i 
+saksbehandlingsnotatet.
+- Alle offentlige registrerte opplysninger blir 
+automatisk lagret i saksbehandlingsnotatet.
+- Du skal ikke skrive inn beløp, beregninger eller 
+kilder. Unntaket er når du legger inn beløp 
+manuelt.
+
+### 2.Saksbehandlingsnotat
+Saksbehandlingsnotatet speiler behandlingen, og 
+bygges fortløpende i saksbehandlingen.
+Notatet
+- inkluderer begrunnelser, samt offentlige- og 
+manuelt registrerte opplysninger.
+- består av én hoveddel og et vedlegg. 
+Hoveddelen består av det du velger at skal inn i 
+beregningen.
+Vedlegget består av alle offentlige opplysninger 
+som har vært tilgjengelig på vedtakstidspunktet.
+- kan bli lest og redigert når som helst i løpet av 
+behandlingen. Men, vær obs på at notatet blir 
+låst for redigering når vedtaket er fattet.
+- gir mulighet for kommentarer i fritekstfelt.
+- blir automatisk lagret i sakshistorikken etter at 
+vedtaket er fattet.
+
+### 3.Feil-/ endringsmeldinger
+Hvis løsningen finner feil eller det er gjort endringer, får
+du beskjed om hva som er feil/endret i en melding som 
+kommer opp på skjermen.
+Meldingen kommer når
+- opplysninger fra offentlige registre blir oppdatert i 
+løsningen.
+- det er feil i perioder på inntekt.
+- virkningstidspunktet blir endret etter at steg 2 og 3
+er fylt ut. I disse tilfellene må du oppdatere steg 2 
+og 3 på nytt

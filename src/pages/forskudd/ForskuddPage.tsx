@@ -9,6 +9,7 @@ import { FlexRow } from "../../components/layout/grid/FlexRow";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import environment from "../../environment";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import { capitalize } from "../../utils/string-utils";
 import PageWrapper from "../PageWrapper";
@@ -81,11 +82,50 @@ export const ForskuddPage = () => {
                 </FlexRow>
                 <FormWrapper />
             </BidragContainer>
-            <LovverkKnapper />
+            <EksterneLenkerKnapper />
         </PageWrapper>
     );
 };
 
+function EksterneLenkerKnapper() {
+    return (
+        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+            <LovverkKnapper />
+            <BrukerveiledningKnapp />
+        </div>
+    );
+}
+function BrukerveiledningKnapp() {
+    const { activeStep } = useForskudd();
+    function renderHref() {
+        switch (activeStep) {
+            case ForskuddStepper.BOFORHOLD:
+                return "#2-boforhold";
+            case ForskuddStepper.INNTEKT:
+                return "#3-inntekt-generelt";
+            case ForskuddStepper.VEDTAK:
+                return "#4-fatte-vedtak";
+            case ForskuddStepper.VIRKNINGSTIDSPUNKT:
+                return "#virkningstidspunkt";
+            default:
+                return "";
+        }
+    }
+    return (
+        <div>
+            <Button
+                title="Brukerveiledning"
+                variant="tertiary"
+                className={`border rounded-xl border-solid`}
+                size="xsmall"
+                icon={<ExternalLinkIcon />}
+                onClick={() => window.open(environment.url.forskuddBrukerveiledning + renderHref(), "_blank")}
+            >
+                Brukerveiledning
+            </Button>
+        </div>
+    );
+}
 function LovverkKnapper() {
     const { activeStep } = useForskudd();
 
@@ -107,7 +147,7 @@ function LovverkKnapper() {
     }
     if (activeStep === ForskuddStepper.VEDTAK) return null;
     return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+        <>
             {renderKnapp("Lov om bidragsforskudd", "https://lovdata.no/dokument/NL/lov/1989-02-17-2")}
             {activeStep === ForskuddStepper.BOFORHOLD &&
                 renderKnapp("Rundskriv til forskuddsloven", "https://lovdata.no/nav/rundskriv/r54-00#KAPITTEL_2-3")}
@@ -116,6 +156,6 @@ function LovverkKnapper() {
                     "Forskrift om inntektsprøving av forskudd",
                     "https://lovdata.no/dokument/SF/forskrift/2003-02-06-125"
                 )}
-        </div>
+        </>
     );
 }

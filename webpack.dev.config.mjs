@@ -1,15 +1,15 @@
-const { merge } = require("webpack-merge");
-const webpackCommon = require("./webpack.common.config.js");
-const Dotenv = require("dotenv-webpack");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { EnvironmentPlugin } = require("webpack");
-const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
-const fs = require("fs");
+import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import Dotenv from "dotenv-webpack";
+import fs from "fs";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import webpack from "webpack";
+import { merge } from "webpack-merge";
 
-module.exports = (env) => {
+import webpackCommon from "./webpack.common.config.mjs";
+const { EnvironmentPlugin } = webpack;
+export default (env) => {
     const customenvfile = `env/${env.envfile}`;
     const envfile = fs.existsSync(customenvfile) ? customenvfile : "env/.env.local";
-    console.log("Using envfile", envfile);
     return merge(webpackCommon, {
         mode: "development",
         devtool: "source-map",

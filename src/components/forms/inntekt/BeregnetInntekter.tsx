@@ -1,13 +1,14 @@
-import { BodyShort, Box, Heading, Table, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
+import elementIds from "../../../constants/elementIds";
 import text from "../../../constants/texts";
 import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { dateOrNull, DateToDDMMYYYYString, deductDays } from "../../../utils/date-utils";
+import HjelpetekstButton from "../../HjelpetekstButton";
 import { PersonNavn } from "../../PersonNavn";
 import { RolleTag } from "../../RolleTag";
-import HjelpetekstTabell from "./HjelpetekstTabell";
 
 export const BeregnetInntekter = () => {
     const {
@@ -16,12 +17,12 @@ export const BeregnetInntekter = () => {
 
     return (
         <Box padding="4" background="surface-subtle">
-            <VStack gap={"2"} className="mb-2">
+            <HStack gap={"2"} className="mb-2">
                 <Heading level="2" size="small">
                     {text.title.beregnetTotalt}
                 </Heading>
-                <HjelpetekstTabell innhold={text.hjelpetekst.beregnetInntekter} />
-            </VStack>
+                <HjelpetekstButton href={elementIds.brukerveildning.tabell_totalt} />
+            </HStack>
             <div className="grid gap-y-[24px]">
                 {beregnetInntekter
                     .filter((inntekt) => inntekt.inntektGjelderBarnIdent != null)

@@ -22,5 +22,14 @@
       "module": "commonjs"
     }
   },
+  "mdx": {
+    "plugins": [
+      [
+        "remark-frontmatter",
+        ["toml", "yaml"]
+      ],
+      "remark-gfm"
+    ]
+  },
   "include": ["src"]
 }
