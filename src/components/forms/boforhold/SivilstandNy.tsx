@@ -13,7 +13,6 @@ import {
     SivilstandDto,
     Sivilstandskode,
 } from "../../../api/BidragBehandlingApiV1";
-import { boforholdPeriodiseringErros } from "../../../constants/error";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import {
@@ -25,13 +24,12 @@ import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../utils/date-utils";
-import { removePlaceholder } from "../../../utils/string-utils";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { FormControlledMonthPicker } from "../../formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "../../formFields/FormControlledSelectField";
 import { ForskuddAlert } from "../../ForskuddAlert";
 import { OverlayLoader } from "../../OverlayLoader";
-import { calculateFraDato, checkPeriodizationErrors, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
+import { calculateFraDato, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
 
@@ -195,7 +193,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         control,
         getValues,
         getFieldState,
-        clearErrors,
         setError,
         setValue,
         formState: { errors },
@@ -210,36 +207,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         ...field,
         ...watchFieldArray[index],
     }));
-    const sivilistand = getValues(`sivilstand`);
 
     useEffect(() => {
-        validatePeriods(sivilistand);
-    }, [sivilistand]);
-
-    const validatePeriods = (perioderValues: SivilstandDto[]) => {
-        const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
-
-        if (errorTypes.length) {
-            setError(`root.sivilstand`, {
-                types: errorTypes.reduce(
-                    (acc, errorType) => ({
-                        ...acc,
-                        [errorType]:
-                            errorType === "hullIPerioder"
-                                ? removePlaceholder(
-                                      boforholdPeriodiseringErros[errorType],
-                                      toDateString(virkningstidspunkt),
-                                      toDateString(new Date(perioderValues[0].datoFom))
-                                  )
-                                : boforholdPeriodiseringErros[errorType],
-                    }),
-                    {}
-                ),
-            });
-        } else {
-            clearErrors(`root.sivilstand`);
-        }
-    };
+        setPageErrorsOrUnsavedState({
+            ...pageErrorsOrUnsavedState,
+            boforhold: {
+                ...pageErrorsOrUnsavedState.boforhold,
+                openFields: {
+                    ...pageErrorsOrUnsavedState.boforhold.openFields,
+                    sivilstand: editableRow != undefined,
+                },
+            },
+        });
+    }, [errors, editableRow]);
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`sivilstand`);
@@ -376,9 +356,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     const updatedPageErrorState = () => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
-            sivilstand: {
-                ...pageErrorsOrUnsavedState.sivilstand,
-                openFields: { ...pageErrorsOrUnsavedState.sivilstand.openFields },
+            boforhold: {
+                ...pageErrorsOrUnsavedState.boforhold,
+                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields },
             },
         });
     };
