@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { BidragContainer } from "@navikt/bidrag-ui-common";
+import { BidragContainer, LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Vedtakstype } from "../../api/BidragBehandlingApiV1";
 import FormWrapper from "../../components/forms/FormWrapper";
@@ -97,7 +97,17 @@ function EksterneLenkerKnapper() {
     );
 }
 function BrukerveiledningKnapp() {
+    const nudgeEnabledName = "brukerveiledningShowNudge";
     const { activeStep } = useForskudd();
+    const [nudge, setNudge] = useState(LocalStorage.get(nudgeEnabledName) !== "false");
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setNudge(false);
+            LocalStorage.set(nudgeEnabledName, "false");
+        }, 5000);
+        return () => clearTimeout(timeoutId);
+    }, []);
     function renderHref() {
         switch (activeStep) {
             case ForskuddStepper.BOFORHOLD:
@@ -117,7 +127,9 @@ function BrukerveiledningKnapp() {
             <Button
                 title="Brukerveiledning"
                 variant="tertiary"
-                className={`border rounded-xl border-solid`}
+                className={`rounded-xl border-solid ${
+                    nudge ? "animate-bounce border-[var(--a-border-success)] border-[2px]" : "border"
+                } `}
                 size="xsmall"
                 icon={<ExternalLinkIcon />}
                 onClick={() => window.open(environment.url.forskuddBrukerveiledning + "#" + renderHref(), "_blank")}
