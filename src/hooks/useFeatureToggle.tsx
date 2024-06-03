@@ -5,8 +5,6 @@ import { useEffect } from "react";
 
 export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK == "true";
-    const enableInntektSkjermbilde = useFlag("behandling.skjermbilde.inntekter");
-    const enableVedtakSkjermbilde = useFlag("behandling.skjermbilde.vedtak");
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
     const enableSivilstandV2 = useFlag("behandling.sivilstandv2");
@@ -26,21 +24,17 @@ export default function useFeatureToogle() {
 
     useEffect(() => {
         console.debug(
-            "enableVedtakSkjermbilde",
-            enableVedtakSkjermbilde,
-            "enableInntektSkjermbilde",
-            enableInntektSkjermbilde,
             "enableFatteVedtak",
             enableFatteVedtak,
             "enableSivilstandV2",
-            enableSivilstandV2
+            enableSivilstandV2,
+            "enableAdmin",
+            enableAdmin
         );
-    }, [enableVedtakSkjermbilde, enableInntektSkjermbilde, enableFatteVedtak]);
+    }, [enableFatteVedtak, enableSivilstandV2, enableAdmin]);
     return {
-        isFatteVedtakEnabled: enableFatteVedtak,
-        isInntektSkjermbildeEnabled: true, // enableInntektSkjermbilde,
-        isVedtakSkjermbildeEnabled: enableVedtakSkjermbilde,
         isAdminEnabled: enableAdmin,
+        isFatteVedtakEnabled: enableFatteVedtak,
         enableSivilstandV2,
     };
 }

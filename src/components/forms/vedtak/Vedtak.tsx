@@ -30,7 +30,6 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 import NotatButton from "../../NotatButton";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
-import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useForskudd();
@@ -447,11 +446,6 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
     </Table.Header>
 );
 export default () => {
-    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
-
-    if (!isVedtakSkjermbildeEnabled) {
-        return <UnderArbeidAlert />;
-    }
     return (
         <QueryErrorWrapper>
             <Vedtak />
