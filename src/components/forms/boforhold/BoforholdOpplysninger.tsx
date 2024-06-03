@@ -10,6 +10,7 @@ import {
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -24,11 +25,15 @@ const Header = () => (
 );
 export const NyOpplysningerAlert = () => {
     const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const { enableSivilstandV2 } = useFeatureToogle();
     const ikkeAktiverteEndringerBoforhold = ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn;
     const ikkeAktiverteEndringerSivilstand = ikkeAktiverteEndringerIGrunnlagsdata.sivilstand;
 
-    if (ikkeAktiverteEndringerBoforhold.length === 0) return null;
-    // if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand == null) return null;
+    if (
+        ikkeAktiverteEndringerBoforhold.length === 0 &&
+        (!enableSivilstandV2 || ikkeAktiverteEndringerSivilstand == null)
+    )
+        return null;
     const innhentetTidspunkt =
         ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (
