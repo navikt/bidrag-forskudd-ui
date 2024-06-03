@@ -2,14 +2,27 @@ import "./Opplysninger.css";
 
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, ReadMore, Table, VStack } from "@navikt/ds-react";
+import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { Kilde, OppdatereSivilstand, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
+import {
+    Kilde,
+    OppdatereSivilstand,
+    OpplysningerType,
+    Rolletype,
+    SivilstandDto,
+    SivilstandGrunnlagDto,
+    Sivilstandskode,
+} from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import { useGetBehandlingV2, useGetOpplysningerSivilstand } from "../../../hooks/useApiData";
+import {
+    useGetBehandlingV2,
+    useGetOpplysningerSivilstand,
+    useGetOpplysningerSivilstandV2,
+} from "../../../hooks/useApiData";
+import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -408,6 +421,12 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </div>
                     )}
                 </div>
+                <NyOpplysningerFraFolkeregistreTabell
+                    onActivateOpplysninger={(overskriveManuelleOpplysninger) => {
+                        setShowUndoButton((prevValue) => prevValue || overskriveManuelleOpplysninger);
+                        setShowResetButton(!overskriveManuelleOpplysninger);
+                    }}
+                />
                 {controlledFields.length > 0 && (
                     <div
                         className={`${
@@ -514,23 +533,23 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    const sivilstandOpplysninger = useGetOpplysningerSivilstand();
+    const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerSivilstandV2();
 
-    if (!sivilstandOpplysninger) {
+    if (!aktiveOpplysninger) {
         return null;
     }
 
-    return (
-        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
-            <Table className="w-[300px] opplysninger" size="small">
+    const renderTable = (opplysninger: SivilstandGrunnlagDto[]) => {
+        return (
+            <Table className="w-[200px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>{text.label.fraDato}</Table.HeaderCell>
+                        <Table.HeaderCell style={{ width: "100px" }}>{text.label.fraDato}</Table.HeaderCell>
                         <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandOpplysninger.grunnlag.map((periode, index) => (
+                    {opplysninger.map((periode, index) => (
                         <Table.Row key={`${periode.type}-${index}`}>
                             <Table.DataCell className="flex justify-start gap-2">
                                 <>{periode.gyldigFom ? DateToDDMMYYYYString(new Date(periode.gyldigFom)) : "\u00A0"}</>
@@ -540,6 +559,142 @@ const Opplysninger = () => {
                     ))}
                 </Table.Body>
             </Table>
+        );
+    };
+
+    const harNyeOpplysninger = ikkeAktiverteOpplysninger && ikkeAktiverteOpplysninger.grunnlag.length > 0;
+    return (
+        <ReadMore
+            header={
+                <HStack gap="2">
+                    {text.title.opplysningerFraFolkeregistret}
+                    {harNyeOpplysninger && (
+                        <Tag size="xsmall" variant="success">
+                            {text.label.nytt}
+                        </Tag>
+                    )}
+                </HStack>
+            }
+            size="small"
+            className="pb-4"
+        >
+            <HStack gap="2" className="w-max">
+                <Box padding="1">{renderTable(aktiveOpplysninger.grunnlag)}</Box>
+                {harNyeOpplysninger && (
+                    <Box padding="1" className="border-[var(--a-border-success)] border-l-2 border-solid">
+                        {renderTable(ikkeAktiverteOpplysninger.grunnlag)}
+                    </Box>
+                )}
+            </HStack>
         </ReadMore>
     );
 };
+
+type NyOpplysningerFraFolkeregistreTabellProps = {
+    onActivateOpplysninger: (overskriveManuelleOpplysninger: boolean) => void;
+};
+function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOpplysningerFraFolkeregistreTabellProps) {
+    const { ikkeAktiverteOpplysninger } = useGetOpplysningerSivilstandV2();
+    const hasNewOpplysningerFraFolkeregistre = ikkeAktiverteOpplysninger != null;
+    const activateGrunnlag = useOnActivateGrunnlag();
+    const { setSaveErrorState } = useForskudd();
+    const { setValue } = useFormContext<BoforholdFormValues>();
+    const behandling = useGetBehandlingV2();
+    const bidragsmottaker = behandling.roller.find((r) => r.rolletype == Rolletype.BM);
+    const onActivate = (overskriveManuelleOpplysninger: boolean) => {
+        activateGrunnlag.mutation.mutate(
+            {
+                overskriveManuelleOpplysninger,
+                personident: bidragsmottaker.ident,
+                grunnlagstype: OpplysningerType.SIVILSTAND,
+            },
+            {
+                onSuccess: (response) => {
+                    activateGrunnlag.queryClientUpdater((currentData) => {
+                        onActivateOpplysninger(overskriveManuelleOpplysninger);
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                sivilstand: response.boforhold.sivilstand,
+                                valideringsfeil: {
+                                    ...currentData.boforhold.valideringsfeil,
+                                    sivilstand: currentData.boforhold.valideringsfeil.sivilstand,
+                                },
+                            },
+                            aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                            ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                        };
+                    });
+
+                    setValue("sivilstand", response.boforhold.sivilstand);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onActivate(overskriveManuelleOpplysninger),
+                    });
+                },
+            }
+        );
+    };
+    const pendingActivate = activateGrunnlag.mutation.isPending ? activateGrunnlag.mutation.variables : null;
+    if (!hasNewOpplysningerFraFolkeregistre) return null;
+    return (
+        <Box
+            padding="4"
+            background="surface-default"
+            borderWidth="1"
+            borderRadius="medium"
+            borderColor="border-default"
+            className="w-[708px]"
+        >
+            <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
+            <table className="mt-2">
+                <thead>
+                    <tr>
+                        <th align="left">{text.label.fraOgMed}</th>
+                        <th align="left">{text.label.tilOgMed}</th>
+                        <th align="left">{text.label.status}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ikkeAktiverteOpplysninger.sivilstand?.map((periode, index) => (
+                        <tr key={index + periode.datoFom}>
+                            <td width="100px" scope="row">
+                                {DateToDDMMYYYYString(new Date(periode.datoFom))}
+                            </td>
+                            <td width="100px">
+                                {" "}
+                                {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
+                            </td>
+                            <td width="250px">{hentVisningsnavn(periode.sivilstand)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <HStack gap="6" className="mt-4">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(true)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                >
+                    Ja
+                </Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(false)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                >
+                    Nei
+                </Button>
+            </HStack>
+        </Box>
+    );
+}
