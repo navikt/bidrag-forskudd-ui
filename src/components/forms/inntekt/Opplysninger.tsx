@@ -38,7 +38,7 @@ export const Opplysninger = ({
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
-    const { lesemodus } = useForskudd();
+    const { lesemodus, setSaveErrorState } = useForskudd();
     const { resetField } = useFormContext<InntektFormValues>();
     const transformFn = transformInntekt(virkningsdato);
     const [inntektType] = fieldName.split(".");
@@ -99,6 +99,12 @@ export const Opplysninger = ({
                                 .map(transformFn),
                         });
                     }
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => aktiverGrunnlag(aktiverForIdent),
+                    });
                 },
             }
         );

@@ -30,7 +30,6 @@ import { FlexRow } from "../../layout/grid/FlexRow";
 import NotatButton from "../../NotatButton";
 import { QueryErrorWrapper } from "../../query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "../../RolleTag";
-import UnderArbeidAlert from "../../UnderArbeidAlert";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useForskudd();
@@ -197,6 +196,7 @@ const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
             return elementId.seksjon_sivilstand;
     }
 };
+
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
     const { onStepChange } = useForskudd();
@@ -240,7 +240,7 @@ const VedtakResultat = () => {
                     href={`#${elementIds.seksjon_sivilstand}`}
                     onClick={() => onStepChange(STEPS.boforhold)}
                 >
-                    Sivilstand
+                    Sivilstand har ugyldige perioder
                 </ErrorSummary.Item>
             );
         }
@@ -291,7 +291,7 @@ const VedtakResultat = () => {
                     </ErrorSummary.Item>
                 );
         }
-        (feilInnhold.måBekrefteNyeOpplysninger ?? feilInnhold["måBekrefteNyeOpplysningerV2"])
+        feilInnhold.måBekrefteNyeOpplysninger
             ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
             ?.forEach((value) => {
                 feilliste.push(
@@ -446,11 +446,6 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
     </Table.Header>
 );
 export default () => {
-    const { isVedtakSkjermbildeEnabled } = useFeatureToogle();
-
-    if (!isVedtakSkjermbildeEnabled) {
-        return <UnderArbeidAlert />;
-    }
     return (
         <QueryErrorWrapper>
             <Vedtak />

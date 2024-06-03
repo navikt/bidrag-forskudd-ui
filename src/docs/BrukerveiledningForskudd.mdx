@@ -10,12 +10,12 @@ import boforhold_nye_opplysninger from "./files/boforhold_nye_opplysninger.png";
 Virkningstidspunktet styrer hvilke offentlige registrerte 
 opplysninger (data) som blir hentet inn. 
 Virkningstidspunktet kommer derfor først i flyten.
-- Hvis virkningstidspunktet skal bli endres etter steg 2 og 3 er fylt ut, må du oppdatere steg 2 og 3 på nytt manuelt. Dette vil du få en beskjed om i en melding på skjermen.
+- Hvis virkningstidspunktet endres etter at steg 2 og 3 er fylt ut, må du oppdatere steg 2 og 3 på nytt manuelt. Dette vil du få en beskjed om i en melding på skjermen.
 
 
 #### Velg årsak til innvilgelser / avslag / opphør
 - Årsak velger du fra en nedtrekksliste.
-- Dato for virkningstidspunkt blir preutfylt. 
+- Dato for virkningstidspunkt blir forhåndsutfylt. 
 Denne datoen baserer seg på opplysninger 
 du har registrert ved journalføring.
 - Du må vurdere om datoen stemmer. Hvis 
@@ -24,7 +24,7 @@ manuelt.
 
 
 #### Ved avslag og opphør
-Avslags- og opphørkoder sender deg direkte til steg 4 «Vedtak».
+Avslags- og opphørskoder sender deg direkte til steg 4 «Vedtak».
 
 #### Opplysninger blir lagret automatisk
 Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og saksbehandlingsnotat.
@@ -32,19 +32,19 @@ Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og sak
 <h2 id={elementIds.brukerveildning.tittel_boforhold}>2. Boforhold</h2>
 
 ### Bidragmottakers barn
- - Løsningen viser alle bms barn fra offentlige registre, og hvilke av disse barna som er registrert på bms adresse.
-- Opplysningene fra offentlige registre er preutfylt i tabellen. Hvis det er dokumentert at opplysningene ikke stemmer, må du legge inn boforhold manuelt.
+ - Løsningen viser alle BMs barn fra offentlige registre, og hvilke av disse barna som er registrert på BMs adresse.
+- Opplysningene fra offentlige registre er forhåndsutfylt i tabellen. Hvis det er dokumentert at opplysningene ikke stemmer, må du legge inn boforhold manuelt.
 - Opplysningene oppdateres jevnlig, og du vil få melding på skjermen om det har skjedd endringer.
 - Hvis opplysningene er mangelfulle, kan du legge inn barn basert på fødselsnummer. Eller, du kan bruke fritekstfeltet.
 
 ### Bidragmottakers sivilstand
 - Løsningen viser hvilken sivilstand bidragsmottaker er registrert med i offentlige registre.
-- Opplysningene fra offentlige registre er preutfylt i tabellen.
+- Opplysningene fra offentlige registre er forhåndsutfylt i tabellen.
     - Opplysningene kan inneholde ulike statuser som du kan finne oversikt over [her](https://www.ssb.no/klass/klassifikasjoner/19 "SSB")
-    - Hvis *Fra dato* er tom betyr det ikke finnes noen informasjon om når sivilstanden ble registrert.
+    - Hvis *Fra dato* er tom betyr det at det ikke finnes noen informasjon om når sivilstanden ble registrert.
 - Hvis det er dokumentert at opplysningene ikke stemmer, må du legge inn sivilstand manuelt.
 - Opplysningene oppdateres jevnlig. Hvis det har skjedd endringer, vil du få beskjed om dette i en melding på skjermen.
-- Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og saksbehandlingsnotat.
+- Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og saksbehandlingsnotatet.
 
 <h2 id={elementIds.brukerveildning.tittel_inntekt}>3. Inntekt generelt</h2>
 
@@ -52,13 +52,13 @@ Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og sak
 - Inntektene er hentet fra A-inntekt/A-ordningen. Du 
 har også mulighet til å legge inn inntekt(er) manuelt.
 - Arbeidsforhold er hentet fra AA-registeret.
-- Kilde-kolonnen til høyre i bildet viser om du har brukt preutfylte eller manuelle opplysninger. 
-preutfylte opplysninger vises med en bygning som symbol, mens manuelle opplysninger vises med en person som symbol.
+- Kilde-kolonnen til høyre i bildet viser om du har brukt forhåndsutfylte eller manuelle opplysninger. 
+Forhåndsutfylte opplysninger vises med en bygning som symbol, mens manuelle opplysninger vises med en person som symbol.
 - Steget om inntekt inneholder én graf, 5 ulike 
 tabeller og én oppsummeringstabell. Her får du 
 informasjon om de forskjellige:
 
-**Grafen** gir et bilde på hva bm har fått utbetalt 
+**Grafen** gir et bilde på hva BM har fått utbetalt 
 måned for måned i de siste 12 månedene. Dette vil
 gi deg et bilde av bm’s inntekt. Er den stabil eller varierende?
 
@@ -66,8 +66,7 @@ gi deg et bilde av bm’s inntekt. Er den stabil eller varierende?
 Hold musepekeren over grafen og du kan se 
 detaljer og spesifikasjoner av inntekt, samt de ulike
 inntektspostene for hver måned. Når inntekten er 
-stabil, kan du bruke 3 eller 12 måneder som er pre 
-utfylt.
+stabil, kan du bruke 3 eller 12 måneder som er forhåndsutfylt.
 
 
 A-inntekt siste 12 eller 3 måneder er et 
@@ -98,7 +97,7 @@ hentet av løsningen, vil bli vist og lagret i notatet.
 
 <h4 id="tabell_skattepliktig">Tabellen {tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}</h4>
 - Løsningen henter inntektsopplysninger fra Skatteetaten og A-inntekt.
-- Du må velge hvilken eller hvilke inntekter som skal være med. Du kan velge flere inntektstyper samtidig. Hvis bm for eksempel både har arbeidsinntekt og en ytelse, skal du legge inn én linje for arbeidsinntekt, og en annen linje for ytelse.
+- Du må velge hvilken eller hvilke inntekter som skal være med. Du kan velge flere inntektstyper samtidig. Hvis BM for eksempel både har arbeidsinntekt og en ytelse, skal du legge inn én linje for arbeidsinntekt, og en annen linje for ytelse.
 
 
 A-inntekt siste 12 måneder eller 3 måneder er et ferdigberegnet gjennomsnitt av inntektsopplysninger fra de siste 12 eller 3 månedene, omregnet til årsinntekt.
@@ -113,12 +112,8 @@ oppsummert.
   Overtid: 40 000
 
 
-Når vi passerer den 5. i hver måned, vil de 
-automatiske beregnede inntektsopplysningene fra 
-A-inntekt oppdatere seg. Slik får du med inntekt fra
-forrige måned. Dette er for å ha de ferskeste 
-opplysningene ved beregningen av disse 
-inntektstypene.
+Når vi passerer den 5. i hver måned (hvis 5. faller på en helg/helligdag vil det være neste arbeidsdag), vil de automatiske beregnede inntektsopplysningene fra A-inntekt oppdatere seg. Slik får du med inntekt fra forrige måned. 
+Dette er for å ha de ferskeste opplysningene ved beregningen av disse inntektstypene.
 Du vil få en melding på skjermen som viser hvilke 
 inntektstyper som oppdateres. Når du får en slik 
 melding, må du trykke på «oppdater opplysninger».
@@ -133,11 +128,11 @@ barnetilleggstabell.
 
 <h4 id={elementIds.brukerveildning.tabell_barnetillegg}>Tabellen {tekster.title.barnetillegg.toLowerCase()}</h4>
 
-- Her blir alle typer barnetillegg som bm eventuelt 
+- Her blir alle typer barnetillegg som BM eventuelt 
 mottar registrert. De blir registrert per barn.
-- Løsningen henter automatisk barnetillegg bm 
+- Løsningen henter automatisk barnetillegg BM 
 mottar i pensjon eller uføretrygd.
-- Hvis bm har andre barnetillegg, må du registrere 
+- Hvis BM har andre barnetillegg, må du registrere 
 disse manuelt. Det gjelder barnetillegg fra både 
 offentlige og private aktører.
 - Det blir hentet inn nye opplysninger hver tolvte 
@@ -146,7 +141,7 @@ skjermen om hva som er endret. Når du får en slik
 melding, må du trykke på «oppdater opplysninger».
 
 <h4 id={elementIds.brukerveildning.tabell_utvidetbarnetrygd}>Tabellen {tekster.title.utvidetBarnetrygd.toLowerCase()}</h4>
-- Her blir utvidet barnetrygd som bm eventuelt 
+- Her blir utvidet barnetrygd som BM eventuelt 
 mottar registrert.
 - Løsningen henter automatisk utvidet barnetrygd, 
 og har allerede valgt denne inntekten slik at den 
@@ -161,7 +156,7 @@ skjermen om hva som er endret. Når du får en slik
 melding, må du trykke på «oppdater opplysninger».
  
  <h4 id={elementIds.brukerveildning.tabell_småbarnstillegg}>Tabellen {tekster.title.småbarnstillegg.toLowerCase()}</h4>
-- Her blir småbarnstillegg som bm eventuelt mottar 
+- Her blir småbarnstillegg som BM eventuelt mottar 
 registrert. Løsningen henter automatisk 
 småbarnstillegg, og har allerede valgt denne 
 inntekten slik at den kommer med i beregningen.
@@ -175,7 +170,7 @@ skjermen om hva som er endret. Når du får en slik
 melding, må du trykke på «oppdater opplysninger».
 
  <h4 id={elementIds.brukerveildning.tabell_kontantstøtte}>Tabellen {tekster.title.kontantstøtte.toLowerCase()}</h4>
-- Her blir kontantstøtte som bm eventuelt mottar 
+- Her blir kontantstøtte som BM eventuelt mottar 
 registrert. De blir registrert per barn.
 - Løsningen henter kontantstøtte, og har allerede 
 valgt denne inntekten slik at den kommer med i 
@@ -201,8 +196,8 @@ i Bisys. Der kan du se at:
 - Notat er lagret i pdf i sakshistorikk
 - Forsendelse er opprettet automatisk
 
-## Diverse
-### 1.Begrunnelse
+## 6. Diverse
+### Begrunnelse
 I alle steg skriver du begrunnelsen direkte i 
 løsningen.
 - Begrunnelsen blir fortløpende speilet i 
@@ -213,7 +208,7 @@ automatisk lagret i saksbehandlingsnotatet.
 kilder. Unntaket er når du legger inn beløp 
 manuelt.
 
-### 2.Saksbehandlingsnotat
+### Saksbehandlingsnotat
 Saksbehandlingsnotatet speiler behandlingen, og 
 bygges fortløpende i saksbehandlingen.
 Notatet
@@ -231,7 +226,7 @@ låst for redigering når vedtaket er fattet.
 - Blir automatisk lagret i sakshistorikken etter at 
 vedtaket er fattet.
 
-### 3.Feil-/ endringsmeldinger
+### Feil-/ endringsmeldinger
 Hvis løsningen finner feil eller det er gjort endringer, får
 du beskjed om hva som er feil/endret i en melding som 
 kommer opp på skjermen.
@@ -249,7 +244,7 @@ Når det kommer nye opplysninger om boforhold fra offentlige registre som avvike
     <img src={boforhold_nye_opplysninger} />
     <figcaption>Varsel om nye opplysninger om boforhold</figcaption>
 </figure>
-Under *Opplysninger fra offentlige registre* ser du de gamle opplysningene. Varselen under viser de nye opplysningene som har kommet inn.
+Under *Opplysninger fra offentlige registre* ser du de gamle opplysningene. Varselet under viser de nye opplysningene som har kommet inn.
 Her kan du sammenligne de nye opplysningene med de gamle og vurdere om du skal oppdatere periodene som er lagt inn.
 
 Hvis du trykker **Ja** vil periodene bli overskrevet med de nye opplysningene.\

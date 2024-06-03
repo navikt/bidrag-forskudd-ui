@@ -22,6 +22,7 @@ import {
     SivilstandAktivGrunnlagDto,
     SivilstandBeregnet,
     SivilstandBeregnetStatusEnum,
+    SivilstandIkkeAktivGrunnlagDto,
 } from "../api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "../api/BidragDokumentProduksjonApi";
 import { GrunnlagRequestType, HentGrunnlagDto, HentGrunnlagRequestDto } from "../api/BidragGrunnlagApi";
@@ -75,6 +76,16 @@ export const useGetOpplysningerBoforhold = (): {
     return {
         aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
         ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
+};
+export const useGetOpplysningerSivilstandV2 = (): {
+    aktiveOpplysninger: SivilstandAktivGrunnlagDto;
+    ikkeAktiverteOpplysninger: SivilstandIkkeAktivGrunnlagDto;
+} => {
+    const behandling = useGetBehandlingV2();
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.sivilstand,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand,
     };
 };
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {

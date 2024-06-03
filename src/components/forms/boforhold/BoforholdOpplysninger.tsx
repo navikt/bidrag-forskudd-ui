@@ -10,6 +10,7 @@ import {
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "../../../hooks/useApiData";
+import useFeatureToogle from "../../../hooks/useFeatureToggle";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -24,11 +25,15 @@ const Header = () => (
 );
 export const NyOpplysningerAlert = () => {
     const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
+    const { enableSivilstandV2 } = useFeatureToogle();
     const ikkeAktiverteEndringerBoforhold = ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn;
     const ikkeAktiverteEndringerSivilstand = ikkeAktiverteEndringerIGrunnlagsdata.sivilstand;
 
-    if (ikkeAktiverteEndringerBoforhold.length === 0) return null;
-    // if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand == null) return null;
+    if (
+        ikkeAktiverteEndringerBoforhold.length === 0 &&
+        (!enableSivilstandV2 || ikkeAktiverteEndringerSivilstand == null)
+    )
+        return null;
     const innhentetTidspunkt =
         ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (
@@ -94,13 +99,12 @@ export const BoforholdOpplysninger = ({
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
-    const { lesemodus } = useForskudd();
+    const { lesemodus, setSaveErrorState } = useForskudd();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
-    const nyeOpplysningerEnabled = true;
-    const hasNewOpplysningerFraFolkeregistre = nyeOpplysningerEnabled && ikkeAktivertePerioder?.length > 0;
+    const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
 
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
         activateGrunnlag.mutation.mutate(
@@ -134,6 +138,12 @@ export const BoforholdOpplysninger = ({
                             aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                             ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                         };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onActivate(overskriveManuelleOpplysninger),
                     });
                 },
             }

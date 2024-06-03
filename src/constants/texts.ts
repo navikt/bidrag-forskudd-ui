@@ -61,6 +61,8 @@ const tekster = {
         ingenLoependeInntektPeriode:
             "Det er ingen løpende inntektsperiode. Rediger en av periodene eller legg til en ny periode.",
         ingenLoependePeriode: "Det er ingen løpende status i beregningen.",
+        ugyldigStatus: "En eller flere perioder har ugyldig status Ukjent",
+        boforholdManglerPerioder: "Mangler perioder. Du må minst legge til en gyldig periode",
         manglerPerioder: "Ingen inntekstperiode er valgt. Du må velge eller legge til minst en løpende periode.",
         inntektType: "Inntekt type må settes",
         navnMåFyllesUt: "Navn må fylles ut",
@@ -78,6 +80,7 @@ const tekster = {
         opphør: "Opphør",
         avbryt: "Avbryt",
         barn: "Barn",
+        nytt: "Nytt",
         barnetillegg: "Barnetillegg",
         begrunnelseKunINotat: "Begrunnelse (kun med i notat)",
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",
