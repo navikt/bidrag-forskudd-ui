@@ -32,35 +32,32 @@ Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og sak
 <h2 id={elementIds.brukerveildning.tittel_boforhold}>2. Boforhold</h2>
 
 ### Bidragmottakers barn
- - Løsningen viser alle BMs barn fra offentlige registre, og hvilke av disse barna som er registrert på BMs adresse.
+- Løsningen viser alle BMs barn fra offentlige registre, og hvilke av disse barna som er registrert på BMs adresse.
 - Opplysningene fra offentlige registre er forhåndsutfylt i tabellen. Hvis det er dokumentert at opplysningene ikke stemmer, må du legge inn boforhold manuelt.
 - Opplysningene oppdateres jevnlig, og du vil få melding på skjermen om det har skjedd endringer.
 - Hvis opplysningene er mangelfulle, kan du legge inn barn basert på fødselsnummer. Eller, du kan bruke fritekstfeltet.
 
 ### Bidragmottakers sivilstand
 - Løsningen viser hvilken sivilstand bidragsmottaker er registrert med i offentlige registre.
-- Opplysningene fra offentlige registre er forhåndsutfylt i tabellen.
     - Opplysningene kan inneholde ulike statuser som du kan finne oversikt over [her](https://www.ssb.no/klass/klassifikasjoner/19 "SSB")
     - Hvis *Fra dato* er tom betyr det at det ikke finnes noen informasjon om når sivilstanden ble registrert.
+- Opplysningene fra offentlige registre er forhåndsutfylt i tabellen.
 - Hvis det er dokumentert at opplysningene ikke stemmer, må du legge inn sivilstand manuelt.
 - Opplysningene oppdateres jevnlig. Hvis det har skjedd endringer, vil du få beskjed om dette i en melding på skjermen.
 - Opplysninger blir automatisk og fortløpende lagret, i både skjermbildet og saksbehandlingsnotatet.
 
 <h2 id={elementIds.brukerveildning.tittel_inntekt}>3. Inntekt generelt</h2>
 
-#### Bidragmottakerens inntekt
+#### Bidragsmottakerens inntekt
 - Inntektene er hentet fra A-inntekt/A-ordningen. Du 
 har også mulighet til å legge inn inntekt(er) manuelt.
 - Arbeidsforhold er hentet fra AA-registeret.
 - Kilde-kolonnen til høyre i bildet viser om du har brukt forhåndsutfylte eller manuelle opplysninger. 
-Forhåndsutfylte opplysninger vises med en bygning som symbol, mens manuelle opplysninger vises med en person som symbol.
-- Steget om inntekt inneholder én graf, 5 ulike 
-tabeller og én oppsummeringstabell. Her får du 
-informasjon om de forskjellige:
+Forhåndsutfylte opplysninger vises som en bygning <Buldings2Icon style={{verticalAlign: "middle"}}/> symbol, mens manuelle opplysninger vises som en person  <PersonIcon style={{verticalAlign: "middle"}}/> symbol.
+- Steget om inntekt inneholder én graf, 5 ulike tabeller og én oppsummeringstabell. Her får du informasjon om de forskjellige:
 
 **Grafen** gir et bilde på hva BM har fått utbetalt 
-måned for måned i de siste 12 månedene. Dette vil
-gi deg et bilde av bm’s inntekt. Er den stabil eller varierende?
+måned for måned i de siste 12 månedene. Dette vil gi deg en indikasjon på BMs inntekt. Er den stabil eller varierende?
 
 
 Hold musepekeren over grafen og du kan se 
@@ -69,10 +66,9 @@ inntektspostene for hver måned. Når inntekten er
 stabil, kan du bruke 3 eller 12 måneder som er forhåndsutfylt.
 
 
-A-inntekt siste 12 eller 3 måneder er et 
+A-inntekt siste 3 eller 12 måneder er et 
 ferdigberegnet gjennomsnitt av 
-inntektsopplysninger fra de siste 12 eller 3 
-månedene, omregnet til årsinntekt.
+inntektsopplysninger fra de siste 3 eller 12 månedene, omregnet til årsinntekt.
 
 
 **Inntektstabellene** viser forskjellige typer inntekt: 
@@ -112,7 +108,7 @@ oppsummert.
   Overtid: 40 000
 
 
-Når vi passerer den 5. i hver måned (hvis 5. faller på en helg/helligdag vil det være neste arbeidsdag), vil de automatiske beregnede inntektsopplysningene fra A-inntekt oppdatere seg. Slik får du med inntekt fra forrige måned. 
+Når vi passerer den 5. i hver måned (hvis 5. faller på en helg/helligdag vil det være neste arbeidsdag), vil de automatiske beregnede inntektsopplysningene fra A-inntekt oppdateres. Slik får du med inntekt fra forrige måned. 
 Dette er for å ha de ferskeste opplysningene ved beregningen av disse inntektstypene.
 Du vil få en melding på skjermen som viser hvilke 
 inntektstyper som oppdateres. Når du får en slik 
@@ -190,10 +186,10 @@ vedtak. Her ligger oppsummering av verdiene du har
 lagt til grunn i behandling og notat.
 
 ## 5. Etter vedtak
-Når du har fattet vedtak, går du tilbake til sakshistorikk 
+Når du har fattet vedtak, går du tilbake til sakshistorikken 
 i Bisys. Der kan du se at:
 - Saksreskontro er oppdatert
-- Notat er lagret i pdf i sakshistorikk
+- Notat er lagret i pdf
 - Forsendelse er opprettet automatisk
 
 ## 6. Diverse
@@ -202,7 +198,7 @@ I alle steg skriver du begrunnelsen direkte i
 løsningen.
 - Begrunnelsen blir fortløpende speilet i 
 saksbehandlingsnotatet.
-- Alle offentlige registrerte opplysninger blir 
+- Alle offentlige og manuelt registrerte opplysninger blir 
 automatisk lagret i saksbehandlingsnotatet.
 - Du skal ikke skrive inn beløp, beregninger eller 
 kilder. Unntaket er når du legger inn beløp 
@@ -219,9 +215,7 @@ Hoveddelen består av det du velger at skal inn i
 beregningen.
 Vedlegget består av alle offentlige opplysninger 
 som har vært tilgjengelig på vedtakstidspunktet.
-- Kan bli lest og redigert når som helst i løpet av 
-behandlingen. Men, vær obs på at notatet blir 
-låst for redigering når vedtaket er fattet.
+- Kan leses og redigeres når som helst i løpet av behandlingen. Men, vær obs på at notatet blir låst for redigering når vedtaket er fattet.
 - Gir mulighet for kommentarer i fritekstfelt.
 - Blir automatisk lagret i sakshistorikken etter at 
 vedtaket er fattet.
@@ -234,7 +228,7 @@ Meldingen kommer når
 - Opplysninger fra offentlige registre blir oppdatert i 
 løsningen.
 - Det er feil i perioder på inntekt.
-- Virkningstidspunktet blir endret etter at steg 2 og 3
+- Virkningstidspunktet blir endret etter at steg 2 og 3.
 er fylt ut. I disse tilfellene må du oppdatere steg 2 
 og 3 på nytt
 
@@ -244,7 +238,7 @@ Når det kommer nye opplysninger om boforhold fra offentlige registre som avvike
     <img src={boforhold_nye_opplysninger} />
     <figcaption>Varsel om nye opplysninger om boforhold</figcaption>
 </figure>
-Under *Opplysninger fra offentlige registre* ser du de gamle opplysningene. Varselet under viser de nye opplysningene som har kommet inn.
+Under *Opplysninger fra offentlige registre* ser du de gamle opplysningene. Varselet viser de nye opplysningene som har kommet inn.
 Her kan du sammenligne de nye opplysningene med de gamle og vurdere om du skal oppdatere periodene som er lagt inn.
 
 Hvis du trykker **Ja** vil periodene bli overskrevet med de nye opplysningene.\
