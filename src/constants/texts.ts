@@ -80,6 +80,7 @@ const tekster = {
         opphør: "Opphør",
         avbryt: "Avbryt",
         barn: "Barn",
+        nytt: "Nytt",
         barnetillegg: "Barnetillegg",
         begrunnelseKunINotat: "Begrunnelse (kun med i notat)",
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",
