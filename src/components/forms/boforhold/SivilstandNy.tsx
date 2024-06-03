@@ -544,7 +544,7 @@ const Opplysninger = () => {
             <Table className="w-[200px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell style={{ width: "100px" }}>{text.label.fraDato}</Table.HeaderCell>
+                        <Table.HeaderCell style={{ width: "120px" }}>{text.label.fraDato}</Table.HeaderCell>
                         <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
