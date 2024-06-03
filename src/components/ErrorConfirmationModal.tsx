@@ -15,12 +15,12 @@ export default function ErrorConfirmationModal({ open, onConfirm, onClose, onCan
     const ref = useRef<HTMLDialogElement>(null);
     function _onConfirm() {
         onConfirm?.();
-        onClose();
+        onClose?.();
     }
 
     function rollbackChanges() {
-        onCancel();
-        onClose();
+        onCancel?.();
+        onClose?.();
     }
     useEffect(() => {
         if (open) ref?.current?.showModal?.();

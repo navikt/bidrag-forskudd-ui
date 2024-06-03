@@ -94,7 +94,7 @@ export const BoforholdOpplysninger = ({
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
-    const { lesemodus } = useForskudd();
+    const { lesemodus, setSaveErrorState } = useForskudd();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
@@ -134,6 +134,12 @@ export const BoforholdOpplysninger = ({
                             aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                             ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                         };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onActivate(overskriveManuelleOpplysninger),
                     });
                 },
             }
