@@ -197,6 +197,7 @@ const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
             return elementId.seksjon_sivilstand;
     }
 };
+
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
     const { onStepChange } = useForskudd();
@@ -240,7 +241,7 @@ const VedtakResultat = () => {
                     href={`#${elementIds.seksjon_sivilstand}`}
                     onClick={() => onStepChange(STEPS.boforhold)}
                 >
-                    Sivilstand
+                    Sivilstand har ugyldige perioder
                 </ErrorSummary.Item>
             );
         }
@@ -291,7 +292,7 @@ const VedtakResultat = () => {
                     </ErrorSummary.Item>
                 );
         }
-        (feilInnhold.måBekrefteNyeOpplysninger ?? feilInnhold["måBekrefteNyeOpplysningerV2"])
+        feilInnhold.måBekrefteNyeOpplysninger
             ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
             ?.forEach((value) => {
                 feilliste.push(

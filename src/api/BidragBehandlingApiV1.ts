@@ -9,6 +9,8 @@
  * ---------------------------------------------------------------
  */
 
+type UtilRequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
 export enum Bostatuskode {
     MED_FORELDER = "MED_FORELDER",
     DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
@@ -234,7 +236,7 @@ export enum Vedtakstype {
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
 }
 
-export interface TypeArManedsperiode {
+export type TypeArManedsperiode = UtilRequiredKeys<PeriodeLocalDate, "fom"> & {
     /**
      * @pattern YYYY-MM
      * @example "2023-01"
@@ -245,7 +247,7 @@ export interface TypeArManedsperiode {
      * @example "2023-01"
      */
     til?: string;
-}
+};
 
 export enum TypeArsakstype {
     ANNET = "ANNET",
@@ -278,13 +280,7 @@ export interface AktivereGrunnlagRequest {
     grunnlagsdatatyper: OpplysningerType[];
 }
 
-/** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
-export interface Datoperiode {
-    /** @format date */
-    fom: string;
-    /** @format date */
-    til?: string;
-}
+export type Datoperiode = UtilRequiredKeys<PeriodeLocalDate, "fom">;
 
 export interface HusstandsbarnDtoV2 {
     /** @format int64 */
@@ -417,7 +413,6 @@ export interface OppdaterePeriodeInntekt {
     id: number;
     /** Anig om inntekten skal inkluderes i beregning */
     taMedIBeregning: boolean;
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     angittPeriode: Datoperiode;
 }
 
@@ -440,7 +435,7 @@ export interface SivilstandDto {
      * @format date
      * @example "2025-01-25"
      */
-    datoFom?: string;
+    datoFom: string;
     /**
      * @format date
      * @example "2025-01-25"
@@ -565,6 +560,8 @@ export interface BehandlingDtoV2 {
     boforhold: BoforholdDtoV2;
     aktiveGrunnlagsdata: AktiveGrunnlagsdata;
     ikkeAktiverteEndringerIGrunnlagsdata: IkkeAktiveGrunnlagsdata;
+    /** @uniqueItems true */
+    feilOppståttVedSisteGrunnlagsinnhenting?: Grunnlagsinnhentingsfeil[];
 }
 
 export interface BehandlingNotatDto {
@@ -619,6 +616,14 @@ export enum GrunnlagInntektEndringstype {
     NY = "NY",
 }
 
+export interface Grunnlagsinnhentingsfeil {
+    /** @format int64 */
+    rolleid: number;
+    grunnlagsdatatype: OpplysningerType;
+    feilmelding: string;
+    periode?: Datoperiode | TypeArManedsperiode;
+}
+
 export interface HusstandsbarnGrunnlagDto {
     /** @uniqueItems true */
     perioder: HusstandsbarnGrunnlagPeriodeDto[];
@@ -642,7 +647,6 @@ export interface HusstandsbarnGrunnlagPeriodeDto {
 }
 
 export interface HusstandsbarnOverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /** @uniqueItems true */
     bosstatus: Bostatuskode[];
@@ -732,6 +736,7 @@ export interface InntektDtoV2 {
     inntektsposter: InntektspostDtoV2[];
     /** @uniqueItems true */
     inntektstyper: Inntektstype[];
+    historisk?: boolean;
 }
 
 /** Periodisert inntekt per barn */
@@ -804,7 +809,6 @@ export interface InntektspostEndringDto {
 }
 
 export interface OverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /**
      * Teknisk id på inntekter som overlapper
@@ -821,6 +825,13 @@ export interface OverlappendePeriode {
      * @uniqueItems true
      */
     inntektstyper: Inntektstype[];
+}
+
+export interface PeriodeLocalDate {
+    /** @format date */
+    fom: string;
+    /** @format date */
+    til?: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -897,7 +908,6 @@ export interface SivilstandIkkeAktivGrunnlagDto {
 }
 
 export interface SivilstandOverlappendePeriode {
-    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     periode: Datoperiode;
     /** @uniqueItems true */
     sivilstandskode: Sivilstandskode[];
@@ -914,6 +924,7 @@ export interface SivilstandPeriodeseringsfeil {
     ugyldigStatus: boolean;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
     ingenLøpendePeriode: boolean;
+    harFeil: boolean;
 }
 
 /** Type sivilstand fra PDL */
@@ -1562,8 +1573,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {

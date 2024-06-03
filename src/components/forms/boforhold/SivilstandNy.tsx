@@ -6,20 +6,10 @@ import { Box, Button, Heading, ReadMore, Table, VStack } from "@navikt/ds-react"
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import {
-    Kilde,
-    OppdatereSivilstand,
-    SivilstandBeregnetStatusEnum,
-    SivilstandDto,
-    Sivilstandskode,
-} from "../../../api/BidragBehandlingApiV1";
+import { Kilde, OppdatereSivilstand, SivilstandDto, Sivilstandskode } from "../../../api/BidragBehandlingApiV1";
 import text from "../../../constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
-import {
-    useGetBehandlingV2,
-    useGetOpplysningerSivilstand,
-    useSivilstandOpplysningerProssesert,
-} from "../../../hooks/useApiData";
+import { useGetBehandlingV2, useGetOpplysningerSivilstand } from "../../../hooks/useApiData";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
@@ -260,6 +250,10 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             boforhold: {
                                 ...currentData.boforhold,
                                 sivilstand: response.oppdatertSivilstandshistorikk,
+                                valideringsfeil: {
+                                    ...currentData.boforhold.valideringsfeil,
+                                    sivilstand: response.valideringsfeil.sivilstand,
+                                },
                             },
                         };
                     });
@@ -304,6 +298,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 kilde: Kilde.MANUELL,
             });
+
             setEditableRow(sivilstandPerioderValues.length);
         }
     };
@@ -313,11 +308,14 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             showErrorModal();
         } else {
             const perioderValues = getValues(`sivilstand`) as SivilstandDto[];
-            updateAndSave({
-                sletteSivilstandsperiode: perioderValues[index].id,
-                tilbakestilleHistorikk: false,
-                angreSisteEndring: false,
-            });
+            if (perioderValues[index]?.id) {
+                updateAndSave({
+                    sletteSivilstandsperiode: perioderValues[index].id,
+                    tilbakestilleHistorikk: false,
+                    angreSisteEndring: false,
+                });
+            }
+            sivilstandPerioder.remove(index);
         }
     };
 
@@ -338,6 +336,10 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             showErrorModal();
         } else {
             setEditableRow(index);
+            const editPeriode = controlledFields[index];
+            if (editPeriode?.sivilstand == Sivilstandskode.UKJENT) {
+                setValue(`sivilstand.${index}.sivilstand`, Sivilstandskode.BOR_ALENE_MED_BARN);
+            }
         }
     };
     const undoAction = () => {
@@ -366,7 +368,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
-                {(errors?.root?.sivilstand as { types: string[] })?.types && (
+                {valideringsfeilSivilstand && valideringsfeilSivilstand.harFeil && (
                     <div className="mb-4">
                         {valideringsfeilSivilstand && (
                             <ForskuddAlert variant="warning">
@@ -378,6 +380,9 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                 )}
                                 {valideringsfeilSivilstand.hullIPerioder.length > 0 && (
                                     <p>{text.error.hullIPerioder}</p>
+                                )}
+                                {valideringsfeilSivilstand.manglerPerioder && (
+                                    <p>{text.error.boforholdManglerPerioder}</p>
                                 )}
                                 {valideringsfeilSivilstand.ingenLøpendePeriode && (
                                     <p>{text.error.ingenLoependePeriode}</p>
@@ -483,7 +488,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             variant="tertiary"
                             type="button"
                             size="small"
-                            className="w-fit"
+                            className="w-fit mt-2"
                             onClick={undoAction}
                             iconPosition="right"
                             icon={<ArrowUndoIcon aria-hidden />}
@@ -509,40 +514,12 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 };
 
 const Opplysninger = () => {
-    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const sivilstandOpplysninger = useGetOpplysningerSivilstand();
 
-    const behandling = useGetBehandlingV2();
     if (!sivilstandOpplysninger) {
         return null;
     }
 
-    const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
-
-    const sivilstandsOpplysningerFiltrert = () => {
-        const opplysningerSortert = sivilstandOpplysninger.grunnlag.sort((a, b) => {
-            if (a.gyldigFom == null) return -1;
-            if (b.gyldigFom == null) return 1;
-            return dateOrNull(a.gyldigFom) > dateOrNull(b.gyldigFom) ? 1 : -1;
-        });
-        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
-            return opplysningerSortert;
-        }
-
-        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand, i) => {
-            const nesteSivilstand = opplysningerSortert[i + 1];
-            return (
-                virkingstidspunkt == null ||
-                dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt ||
-                (nesteSivilstand != null && dateOrNull(nesteSivilstand.gyldigFom) > virkingstidspunkt)
-            );
-        });
-
-        if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
-            return [opplysningerSortert[opplysningerSortert.length - 1]];
-        }
-        return opplysningerFiltrert;
-    };
     return (
         <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
             <Table className="w-[300px] opplysninger" size="small">
@@ -553,7 +530,7 @@ const Opplysninger = () => {
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandsOpplysningerFiltrert().map((periode, index) => (
+                    {sivilstandOpplysninger.grunnlag.map((periode, index) => (
                         <Table.Row key={`${periode.type}-${index}`}>
                             <Table.DataCell className="flex justify-start gap-2">
                                 <>{periode.gyldigFom ? DateToDDMMYYYYString(new Date(periode.gyldigFom)) : "\u00A0"}</>
