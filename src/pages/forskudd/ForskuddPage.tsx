@@ -105,7 +105,7 @@ function BrukerveiledningKnapp() {
         const timeoutId = setTimeout(() => {
             setNudge(false);
             LocalStorage.set(nudgeEnabledName, "false");
-        }, 3000);
+        }, 5000);
         return () => clearTimeout(timeoutId);
     }, []);
     function renderHref() {
