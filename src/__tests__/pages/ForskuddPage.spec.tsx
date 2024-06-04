@@ -13,9 +13,9 @@ import sinon from "sinon";
 
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
 import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
-import { ForskuddProvider } from "../../context/ForskuddContext";
 import environment from "../../environment";
-import { ForskuddPage } from "../../pages/forskudd/ForskuddPage";
+import { ForskuddProvider } from "../../forskudd/context/ForskuddContext";
+import { ForskuddPage } from "../../forskudd/pages/forskudd/ForskuddPage";
 
 const queryClient = new QueryClient();
 const config: IConfig = {

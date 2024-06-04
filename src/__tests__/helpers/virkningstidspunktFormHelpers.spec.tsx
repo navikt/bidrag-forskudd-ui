@@ -8,7 +8,7 @@ import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
     getSoktFraOrMottatDato,
-} from "../../components/forms/helpers/virkningstidspunktHelpers";
+} from "../../forskudd/components/forms/helpers/virkningstidspunktHelpers";
 import { addMonths, deductMonths } from "../../utils/date-utils";
 
 describe("VirkningstidspunktFormHelpers", () => {

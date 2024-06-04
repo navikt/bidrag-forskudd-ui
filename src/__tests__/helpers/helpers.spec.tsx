@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import { periodsAreOverlapping } from "../../components/forms/helpers/helpers";
+import { periodsAreOverlapping } from "../../forskudd/components/forms/helpers/helpers";
 
 describe("Helpers", () => {
     it("should return true for overlapping periods", () => {

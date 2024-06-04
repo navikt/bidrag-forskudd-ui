@@ -19,7 +19,7 @@ import {
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
-} from "../../components/forms/helpers/boforholdFormHelpers";
+} from "../../forskudd/components/forms/helpers/boforholdFormHelpers";
 import { toISODateString } from "../../utils/date-utils";
 
 describe("BoforholdFormHelpers", () => {

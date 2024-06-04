@@ -5,17 +5,17 @@ import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-rea
 import React, { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
-import { ForskuddHeader } from "./components/header/ForskuddHeader";
-import { ErrorModal } from "./components/modal/ErrorModal";
-import text from "./constants/texts";
-import { ForskuddProvider } from "./context/ForskuddContext";
-import BrukerveiledningForskudd from "./docs/BrukerveiledningForskudd.mdx";
-import { prefetchVisningsnavn } from "./hooks/useVisningsnavn";
-import { ForskuddPage } from "./pages/forskudd/ForskuddPage";
-import PageWrapper from "./pages/PageWrapper";
+import { ForskuddHeader } from "./common/components/header/ForskuddHeader";
+import { ErrorModal } from "./common/components/modal/ErrorModal";
+import text from "./common/constants/texts";
+import { prefetchVisningsnavn } from "./common/hooks/useVisningsnavn";
+import { ForskuddProvider } from "./forskudd/context/ForskuddContext";
+import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
+import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
+import PageWrapper from "./forskudd/pages/PageWrapper";
 import { scrollToHash } from "./utils/window-utils";
 
-const NotatPage = lazy(() => import("./pages/notat/NotatPage"));
+const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
 const queryClient = new QueryClient({
     defaultOptions: {

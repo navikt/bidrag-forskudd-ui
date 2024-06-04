@@ -1,6 +1,6 @@
-import { RolleType } from "../../enum/RolleType";
-import { Sakskategori } from "../../enum/Sakskategori";
-import { Saksstatus } from "../../enum/Saksstatus";
+import { RolleType } from "../../forskudd/enum/RolleType";
+import { Sakskategori } from "../../forskudd/enum/Sakskategori";
+import { Saksstatus } from "../../forskudd/enum/Saksstatus";
 import { BidragSakDto } from "../../types/bidragSakTypes";
 
 export const bidragsak: BidragSakDto = {
