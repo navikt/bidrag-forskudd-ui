@@ -53,7 +53,7 @@ export const mapÅrsakTilVirkningstidspunkt = (
             return soktFraDato;
     }
 };
-export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
+export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) => {
     const virkningstidspunktIsInFuture = isAfterDate(
         firstDayOfMonth(new Date(virkningstidspunkt)),
         firstDayOfMonth(new Date())
@@ -62,5 +62,12 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) =>
     const tom = virkningstidspunktIsInFuture
         ? lastDayOfMonth(new Date(virkningstidspunkt))
         : lastDayOfMonth(new Date());
+    return [fom, tom];
+};
+
+export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
+    const fom = firstDayOfMonth(new Date(virkningstidspunkt));
+    const tom = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
+
     return [fom, tom];
 };
