@@ -28,7 +28,7 @@ export const mapÅrsakTilVirkningstidspunkt = (
     const soktFraDato = new Date(behandling.søktFomDato);
     const mottatDato = new Date(behandling.mottattdato);
     const mottatOrSoktFraDato = getSoktFraOrMottatDato(soktFraDato, mottatDato);
-    const treMaanederTilbakeFraMottatDato = firstDayOfMonth(deductMonths(mottatDato, 3));
+    const treMaanederTilbakeFraMottatDato = deductMonths(firstDayOfMonth(mottatDato), 3);
     const treMaanederTilbake = isAfterDate(soktFraDato, treMaanederTilbakeFraMottatDato)
         ? firstDayOfMonth(soktFraDato)
         : treMaanederTilbakeFraMottatDato;
@@ -53,9 +53,21 @@ export const mapÅrsakTilVirkningstidspunkt = (
             return soktFraDato;
     }
 };
+export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) => {
+    const virkningstidspunktIsInFuture = isAfterDate(
+        firstDayOfMonth(new Date(virkningstidspunkt)),
+        firstDayOfMonth(new Date())
+    );
+    const fom = firstDayOfMonth(new Date(virkningstidspunkt));
+    const tom = virkningstidspunktIsInFuture
+        ? lastDayOfMonth(new Date(virkningstidspunkt))
+        : lastDayOfMonth(new Date());
+    return [fom, tom];
+};
+
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) => {
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
-    const tom = lastDayOfMonth(deductMonths(new Date(), 1));
+    const tom = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
 
     return [fom, tom];
 };
