@@ -241,7 +241,7 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        if (inntektType != "årsinntekt" && erOffentlig) {
+        if (inntektType != "årsinntekter" && erOffentlig) {
             periode.datoFom = isAfterDate(virkningsdato, periode.opprinneligFom)
                 ? toISODateString(virkningsdato)
                 : periode.opprinneligFom;
