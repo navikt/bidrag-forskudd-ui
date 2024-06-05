@@ -18,7 +18,7 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
 import { formatterBeløp } from "../../../utils/number-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -164,7 +164,7 @@ export const Periode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={item.taMed && !fieldIsDatoTom}
             hideLabel

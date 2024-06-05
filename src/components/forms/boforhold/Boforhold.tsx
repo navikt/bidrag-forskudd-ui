@@ -24,7 +24,7 @@ import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
-    addMonths,
+    addMonthsIgnoreDay,
     dateOrNull,
     DateToDDMMYYYYString,
     isAfterDate,
@@ -206,7 +206,7 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel
