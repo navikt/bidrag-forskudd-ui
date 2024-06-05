@@ -22,7 +22,7 @@ import { Alert, BodyShort, Button, ConfirmationPanel, ErrorSummary, Heading, Tab
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import environment from "../../../../environment";
@@ -318,7 +318,9 @@ const VedtakResultat = () => {
         }
         return (
             <ErrorSummary heading={text.varsel.beregneFeil} size="small">
-                {renderFeilmeldinger().map((Component) => Component)}
+                {renderFeilmeldinger().map((Component, index) => (
+                    <Fragment key={`feilmelding ${index}`}>{Component}</Fragment>
+                ))}
             </ErrorSummary>
         );
     }
