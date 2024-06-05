@@ -16,7 +16,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "@utils/date-utils";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "@utils/date-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -151,7 +151,7 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel

@@ -28,7 +28,7 @@ import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/ak
 import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
 import {
-    addMonths,
+    addMonthsIgnoreDay,
     dateOrNull,
     DateToDDMMYYYYString,
     isAfterDate,
@@ -206,7 +206,7 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel

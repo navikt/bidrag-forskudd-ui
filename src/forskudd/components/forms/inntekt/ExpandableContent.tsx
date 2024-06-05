@@ -1,6 +1,6 @@
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort } from "@navikt/ds-react";
-import { addMonths, firstDayOfMonth, isAfterDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, firstDayOfMonth, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
@@ -19,7 +19,7 @@ export const ExpandableContent = ({
             return null;
         }
         const tilOgMed = new Date(item.opprinneligTom);
-        const startOfNextMonth = firstDayOfMonth(addMonths(new Date(), 1));
+        const startOfNextMonth = firstDayOfMonth(addMonthsIgnoreDay(new Date(), 1));
         if (!showLøpendeTilOgMed && isAfterDate(tilOgMed, startOfNextMonth)) {
             return null;
         }

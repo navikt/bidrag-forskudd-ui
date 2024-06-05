@@ -248,7 +248,9 @@ export const createInitialValues = (
         ...boforhold,
         husstandsbarn: boforhold.husstandsbarn.sort(compareHusstandsBarn),
         sivilstand:
-            boforhold?.sivilstand?.length > 0 ? boforhold.sivilstand : mapSivilstandProsessert(sivilstandBeregnet),
+            boforhold?.sivilstand?.length > 0
+                ? boforhold.sivilstand?.sort((a, b) => (a.datoFom > b.datoFom ? 1 : -1))
+                : mapSivilstandProsessert(sivilstandBeregnet),
     };
 };
 

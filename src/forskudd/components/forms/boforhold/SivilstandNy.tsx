@@ -22,7 +22,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -151,7 +151,7 @@ const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom ? tom : addMonths(tom, 1)}
+            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel
@@ -257,12 +257,15 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             { oppdatereSivilstand: payload },
             {
                 onSuccess: (response) => {
+                    const nySivilstandHistorikk = response.oppdatertSivilstandshistorikk?.sort((a, b) =>
+                        a.datoFom > b.datoFom ? 1 : -1
+                    );
                     saveBoforhold.queryClientUpdater((currentData) => {
                         return {
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
-                                sivilstand: response.oppdatertSivilstandshistorikk,
+                                sivilstand: nySivilstandHistorikk,
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
                                     sivilstand: response.valideringsfeil.sivilstand,
@@ -272,7 +275,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     });
                     updatedPageErrorState();
                     setShowUndoButton(true);
-                    setValue("sivilstand", response.oppdatertSivilstandshistorikk);
+                    setValue("sivilstand", nySivilstandHistorikk);
                 },
                 onError: () => {
                     setSaveErrorState({
