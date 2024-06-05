@@ -1,5 +1,5 @@
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -18,7 +18,13 @@ import { useGetBehandlingV2 } from "../../../hooks/useApiData";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../utils/date-utils";
+import {
+    addMonthsIgnoreDay,
+    dateOrNull,
+    DateToDDMMYYYYString,
+    isAfterDate,
+    maxOfDate,
+} from "../../../utils/date-utils";
 import { formatterBeløp } from "../../../utils/number-utils";
 import { removePlaceholder } from "../../../utils/string-utils";
 import { FormControlledCheckbox } from "../../formFields/FormControlledCheckbox";
@@ -141,7 +147,9 @@ export const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const [inntektType] = fieldName.split(".");
 
+    const erRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -156,7 +164,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erRedigerbar ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
@@ -233,6 +241,13 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
+        if (inntektType != "årsinntekt" && erOffentlig) {
+            periode.datoFom = isAfterDate(virkningsdato, periode.opprinneligFom)
+                ? toISODateString(virkningsdato)
+                : periode.opprinneligFom;
+            const compareWithDate = maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1));
+            periode.datoTom = isAfterDate(periode.opprinneligTom, compareWithDate) ? null : periode.opprinneligTom;
+        }
         setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: taMed });
 
         if (!taMed && !erOffentlig) {
