@@ -149,7 +149,7 @@ export const Periode = ({
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [inntektType] = fieldName.split(".");
 
-    const erRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
+    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -164,7 +164,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erRedigerbar ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erPeriodeRedigerbar ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
