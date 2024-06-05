@@ -1,4 +1,4 @@
-import { BehandlingNotatDto, RolleDto, Rolletype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
 
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];

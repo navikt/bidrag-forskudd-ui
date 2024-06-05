@@ -1,9 +1,3 @@
-import { dateToDDMMYYYYString, RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ConfirmationPanel, ErrorSummary, Heading, Table } from "@navikt/ds-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-
 import {
     MaBekrefteNyeOpplysninger,
     OpplysningerType,
@@ -11,21 +5,27 @@ import {
     ResultatRolle,
     Rolletype,
     Vedtakstype,
-} from "../../../../api/BidragBehandlingApiV1";
-import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
-import NotatButton from "../../../../common/components/NotatButton";
-import { QueryErrorWrapper } from "../../../../common/components/query-error-boundary/QueryErrorWrapper";
-import { RolleTag } from "../../../../common/components/RolleTag";
-import { BEHANDLING_API_V1 } from "../../../../common/constants/api";
-import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "../../../../common/constants/texts";
-import texts from "../../../../common/constants/texts";
-import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "../../../../common/hooks/useApiData";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
-import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "../../../../common/hooks/useVisningsnavn";
+} from "@api/BidragBehandlingApiV1";
+import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import NotatButton from "@common/components/NotatButton";
+import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "@common/components/RolleTag";
+import { BEHANDLING_API_V1 } from "@common/constants/api";
+import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "@common/constants/texts";
+import texts from "@common/constants/texts";
+import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
+import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
+import { dateToDDMMYYYYString, RedirectTo } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Button, ConfirmationPanel, ErrorSummary, Heading, Table } from "@navikt/ds-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deductDays } from "@utils/date-utils";
+import { formatterBeløp } from "@utils/number-utils";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import environment from "../../../../environment";
-import { VedtakBeregningResult } from "../../../../types/vedtakTypes";
-import { deductDays } from "../../../../utils/date-utils";
-import { formatterBeløp } from "../../../../utils/number-utils";
 import elementId from "../../../constants/elementIds";
 import elementIds from "../../../constants/elementIds";
 import { STEPS } from "../../../constants/steps";

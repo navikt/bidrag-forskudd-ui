@@ -1,9 +1,9 @@
 import { MonthValidationT } from "@navikt/ds-react";
+import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "@utils/date-utils";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 import { useForskudd } from "../../../forskudd/context/ForskuddContext";
-import { isFirstDayOfMonth, isLastDayOfMonth, toISODateString } from "../../../utils/date-utils";
 import text from "../../constants/texts";
 import { MonthPicker } from "../date-picker/MonthPicker";
 interface FormControlledDatePickerProps {

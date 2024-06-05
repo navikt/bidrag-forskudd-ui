@@ -1,5 +1,3 @@
-import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
-
 import {
     BoforholdDtoV2,
     Bostatuskode,
@@ -11,13 +9,10 @@ import {
     SivilstandDto,
     Sivilstandskode,
     SivilstandV1,
-} from "../../../../api/BidragBehandlingApiV1";
-import {
-    RelatertPersonGrunnlagDto,
-    SivilstandGrunnlagDto,
-    SivilstandskodePDL,
-} from "../../../../api/BidragGrunnlagApi";
-import text from "../../../../common/constants/texts";
+} from "@api/BidragBehandlingApiV1";
+import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
+import text from "@common/constants/texts";
+import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     addDays,
     dateOrNull,
@@ -29,8 +24,9 @@ import {
     lastDayOfMonth,
     periodCoversMinOneFullCalendarMonth,
     toISODateString,
-} from "../../../../utils/date-utils";
-import { removePlaceholder } from "../../../../utils/string-utils";
+} from "@utils/date-utils";
+import { removePlaceholder } from "@utils/string-utils";
+
 import {
     BoforholdFormValues,
     BoforholdOpplysninger,

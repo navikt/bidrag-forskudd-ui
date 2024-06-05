@@ -24,7 +24,7 @@ export const Header = memo(() => {
     );
 });
 
-export const ForskuddHeader = () => (
+export const BidragBehandlingHeader = () => (
     <Suspense
         fallback={
             <div className="flex justify-center">

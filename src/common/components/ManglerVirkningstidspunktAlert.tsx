@@ -1,7 +1,7 @@
 import { isValidDate } from "@navikt/bidrag-ui-common";
+import { dateOrNull } from "@utils/date-utils";
 import React from "react";
 
-import { dateOrNull } from "../../utils/date-utils";
 import text from "../constants/texts";
 import { useGetBehandlingV2 } from "../hooks/useApiData";
 import { ForskuddAlert } from "./ForskuddAlert";

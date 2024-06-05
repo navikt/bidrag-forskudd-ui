@@ -1,18 +1,18 @@
+import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
+import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
+import { PersonNavn } from "@common/components/PersonNavn";
+import { RolleTag } from "@common/components/RolleTag";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { FormControlledTextField } from "../../../../common/components/formFields/FormControlledTextField";
-import LeggTilPeriodeButton from "../../../../common/components/formFields/FormLeggTilPeriode";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { RolleTag } from "../../../../common/components/RolleTag";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { formatterBeløp } from "../../../../utils/number-utils";
 import elementId from "../../../constants/elementIds";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import { ExpandableContent } from "./ExpandableContent";

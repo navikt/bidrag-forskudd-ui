@@ -1,10 +1,10 @@
+import { Api as BidragBehandlingApiV1 } from "@api/BidragBehandlingApiV1";
+import { Api as BidragDokumentProduksjonApi } from "@api/BidragDokumentProduksjonApi";
+import { Api as BidragGrunnlagApi } from "@api/BidragGrunnlagApi";
+import { Api as BidragVedtakApi } from "@api/BidragVedtakApi";
+import { Api as PersonApi } from "@api/PersonApi";
 import { useApi } from "@navikt/bidrag-ui-common";
 
-import { Api as BidragBehandlingApiV1 } from "../../api/BidragBehandlingApiV1";
-import { Api as BidragDokumentProduksjonApi } from "../../api/BidragDokumentProduksjonApi";
-import { Api as BidragGrunnlagApi } from "../../api/BidragGrunnlagApi";
-import { Api as BidragVedtakApi } from "../../api/BidragVedtakApi";
-import { Api as PersonApi } from "../../api/PersonApi";
 import environment from "../../environment";
 
 export const PERSON_API = useApi(new PersonApi({ baseURL: process.env.BIDRAG_PERSON_URL }), "bidrag-person", "fss");

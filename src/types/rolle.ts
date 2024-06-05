@@ -1,4 +1,4 @@
-import { RolleDto, Rolletype } from "../api/BidragBehandlingApiV1";
+import { RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
 
 export interface IRolleUI extends RolleDto {
     navn: string;

@@ -1,8 +1,3 @@
-import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
-import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
-import { AxiosError } from "axios";
-
 import {
     AktivereGrunnlagRequestV2,
     AktivereGrunnlagResponseV2,
@@ -23,14 +18,19 @@ import {
     SivilstandBeregnet,
     SivilstandBeregnetStatusEnum,
     SivilstandIkkeAktivGrunnlagDto,
-} from "../../api/BidragBehandlingApiV1";
-import { NotatDto as NotatPayload } from "../../api/BidragDokumentProduksjonApi";
-import { GrunnlagRequestType, HentGrunnlagDto, HentGrunnlagRequestDto } from "../../api/BidragGrunnlagApi";
-import { PersonDto } from "../../api/PersonApi";
+} from "@api/BidragBehandlingApiV1";
+import { NotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
+import { GrunnlagRequestType, HentGrunnlagDto, HentGrunnlagRequestDto } from "@api/BidragGrunnlagApi";
+import { PersonDto } from "@api/PersonApi";
+import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";
+import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
+import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
+import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { deductMonths, toISODateString } from "@utils/date-utils";
+import { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
+
 import { useForskudd } from "../../forskudd/context/ForskuddContext";
-import { FantIkkeVedtakEllerBehandlingError } from "../../types/apiStatus";
-import { VedtakBeregningResult } from "../../types/vedtakTypes";
-import { deductMonths, toISODateString } from "../../utils/date-utils";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, BIDRAG_GRUNNLAG_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: number) => ["mutation", "behandling", behandlingId],

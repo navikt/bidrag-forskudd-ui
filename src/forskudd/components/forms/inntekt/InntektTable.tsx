@@ -1,9 +1,3 @@
-import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Button, Heading } from "@navikt/ds-react";
-import React, { useEffect } from "react";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-
 import {
     BehandlingDtoV2,
     InntektDtoV2,
@@ -11,16 +5,22 @@ import {
     Kilde,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
-} from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledCheckbox } from "../../../../common/components/formFields/FormControlledCheckbox";
-import { FormControlledMonthPicker } from "../../../../common/components/formFields/FormControlledMonthPicker";
-import { FormControlledTextField } from "../../../../common/components/formFields/FormControlledTextField";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../../utils/date-utils";
-import { formatterBeløp } from "../../../../utils/number-utils";
-import { removePlaceholder } from "../../../../utils/string-utils";
+} from "@api/BidragBehandlingApiV1";
+import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
+import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { BodyShort, Button, Heading } from "@navikt/ds-react";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { formatterBeløp } from "@utils/number-utils";
+import { removePlaceholder } from "@utils/string-utils";
+import React, { useEffect } from "react";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+
 import { InntektTables, useForskudd } from "../../../context/ForskuddContext";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";

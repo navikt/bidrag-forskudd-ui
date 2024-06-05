@@ -1,4 +1,4 @@
-import { SoktAvType } from "../../api/BidragBehandlingApiV1";
+import { SoktAvType } from "@api/BidragBehandlingApiV1";
 
 export const SOKNAD_LABELS = {
     [SoktAvType.BIDRAGSMOTTAKER]: "Bidragsmottaker",

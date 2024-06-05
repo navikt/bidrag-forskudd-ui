@@ -1,12 +1,12 @@
+import { Inntektsrapportering, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
+import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
+import { PersonNavn } from "@common/components/PersonNavn";
+import { RolleTag } from "@common/components/RolleTag";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import { Inntektsrapportering, Kilde, Rolletype } from "../../../../api/BidragBehandlingApiV1";
-import LeggTilPeriodeButton from "../../../../common/components/formFields/FormLeggTilPeriode";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { RolleTag } from "../../../../common/components/RolleTag";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
 import elementId from "../../../constants/elementIds";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 import { ExpandableContent } from "./ExpandableContent";

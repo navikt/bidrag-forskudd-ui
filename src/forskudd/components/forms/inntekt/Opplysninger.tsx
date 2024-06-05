@@ -1,20 +1,20 @@
-import { BodyShort, Box, Button, Heading } from "@navikt/ds-react";
-import React, { Fragment } from "react";
-import { useFormContext } from "react-hook-form";
-
 import {
     GrunnlagInntektEndringstype,
     IkkeAktivInntektDto,
     InntektDtoV2,
     OpplysningerType,
     Rolletype,
-} from "../../../../api/BidragBehandlingApiV1";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { RolleTag } from "../../../../common/components/RolleTag";
-import text from "../../../../common/constants/texts";
-import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { formatterBeløp } from "../../../../utils/number-utils";
+} from "@api/BidragBehandlingApiV1";
+import { PersonNavn } from "@common/components/PersonNavn";
+import { RolleTag } from "@common/components/RolleTag";
+import text from "@common/constants/texts";
+import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { BodyShort, Box, Button, Heading } from "@navikt/ds-react";
+import { formatterBeløp } from "@utils/number-utils";
+import React, { Fragment } from "react";
+import { useFormContext } from "react-hook-form";
+
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";

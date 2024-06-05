@@ -1,15 +1,15 @@
+import { TypeArsakstype } from "@api/BidragBehandlingApiV1";
 import { firstDayOfMonth, lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { addMonths, deductMonths } from "@utils/date-utils";
 import { expect } from "chai";
 import { describe } from "mocha";
 
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
-import { TypeArsakstype } from "../../api/BidragBehandlingApiV1";
 import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
     getSoktFraOrMottatDato,
 } from "../../forskudd/components/forms/helpers/virkningstidspunktHelpers";
-import { addMonths, deductMonths } from "../../utils/date-utils";
 
 describe("VirkningstidspunktFormHelpers", () => {
     it("should return later date of the two - soktFraDato or mottatoDato", () => {

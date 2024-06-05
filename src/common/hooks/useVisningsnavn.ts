@@ -1,7 +1,7 @@
+import { Inntektsrapportering, Resultatkode, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { dateToMMYYYY, getYearFromDate } from "@utils/date-utils";
 
-import { Inntektsrapportering, Resultatkode, Vedtakstype } from "../../api/BidragBehandlingApiV1";
-import { dateToMMYYYY, getYearFromDate } from "../../utils/date-utils";
 import { BEHANDLING_API_V1 } from "../constants/api";
 
 const inntekskodeMedÅrstall = [

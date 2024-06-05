@@ -1,8 +1,3 @@
-import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
-import { BodyShort, Label } from "@navikt/ds-react";
-import React, { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-
 import {
     OppdatereVirkningstidspunkt,
     Resultatkode,
@@ -10,20 +5,25 @@ import {
     TypeArsakstype,
     Vedtakstype,
     VirkningstidspunktDto,
-} from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledMonthPicker } from "../../../../common/components/formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "../../../../common/components/formFields/FormControlledTextArea";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
-import { FormLayout } from "../../../../common/components/layout/grid/FormLayout";
-import { QueryErrorWrapper } from "../../../../common/components/query-error-boundary/QueryErrorWrapper";
-import { SOKNAD_LABELS } from "../../../../common/constants/soknadFraLabels";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { useDebounce } from "../../../../common/hooks/useDebounce";
-import { hentVisningsnavnVedtakstype } from "../../../../common/hooks/useVisningsnavn";
-import { addMonths, dateOrNull, DateToDDMMYYYYString } from "../../../../utils/date-utils";
+} from "@api/BidragBehandlingApiV1";
+import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useDebounce } from "@common/hooks/useDebounce";
+import { hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
+import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { BodyShort, Label } from "@navikt/ds-react";
+import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import React, { useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
+
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";

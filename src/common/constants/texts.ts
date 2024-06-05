@@ -1,4 +1,4 @@
-import { MaBekrefteNyeOpplysninger, OpplysningerType } from "../../api/BidragBehandlingApiV1";
+import { MaBekrefteNyeOpplysninger, OpplysningerType } from "@api/BidragBehandlingApiV1";
 
 const tekster = {
     alert: {

@@ -1,8 +1,7 @@
+import { BehandlingDtoV2, TypeArsakstype } from "@api/BidragBehandlingApiV1";
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
+import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "@utils/date-utils";
 import { addMonths } from "date-fns";
-
-import { BehandlingDtoV2, TypeArsakstype } from "../../../../api/BidragBehandlingApiV1";
-import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "../../../../utils/date-utils";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
     return isAfterDate(soktFraDato, mottatDato) ? soktFraDato : mottatDato;

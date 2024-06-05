@@ -1,11 +1,5 @@
 import "./Opplysninger.css";
 
-import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-
 import {
     Kilde,
     OppdatereSivilstand,
@@ -14,19 +8,25 @@ import {
     SivilstandDto,
     SivilstandGrunnlagDto,
     Sivilstandskode,
-} from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledMonthPicker } from "../../../../common/components/formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import { OverlayLoader } from "../../../../common/components/OverlayLoader";
-import text from "../../../../common/constants/texts";
+} from "@api/BidragBehandlingApiV1";
+import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
     useGetOpplysningerSivilstandV2,
-} from "../../../../common/hooks/useApiData";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "../../../../utils/date-utils";
+} from "@common/hooks/useApiData";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import React, { useEffect, useState } from "react";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+
+import text from "../../../../common/constants/texts";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";

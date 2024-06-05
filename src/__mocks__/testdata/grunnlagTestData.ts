@@ -1,12 +1,13 @@
-import { BehandlingDto, Rolletype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDto, Rolletype } from "@api/BidragBehandlingApiV1";
 import {
     ArbeidsforholdGrunnlagDto,
     HentGrunnlagDto,
     SivilstandskodePDL,
     SkattegrunnlagGrunnlagDto,
-} from "../../api/BidragGrunnlagApi";
+} from "@api/BidragGrunnlagApi";
+import { deductMonths, toISODateString } from "@utils/date-utils";
+
 import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
-import { deductMonths, toISODateString } from "../../utils/date-utils";
 
 const randomSalary = () => {
     const min = 2e5;

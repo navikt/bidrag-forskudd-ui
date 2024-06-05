@@ -1,4 +1,4 @@
-import text from "../../common/constants/texts";
+import text from "@common/constants/texts";
 
 export const boforholdPeriodiseringErros = {
     kunneIkkeBeregneSivilstandPerioder: text.error.kunneIkkeBeregneSivilstandPerioder,

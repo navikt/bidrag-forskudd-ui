@@ -1,6 +1,3 @@
-import { expect } from "chai";
-import { describe } from "mocha";
-
 import {
     Bostatuskode,
     HusstandsbarnperiodeDto,
@@ -8,8 +5,12 @@ import {
     RolleDto,
     Rolletype,
     SivilstandGrunnlagDto,
-} from "../../api/BidragBehandlingApiV1";
-import { RelatertPersonGrunnlagDto, SivilstandskodePDL } from "../../api/BidragGrunnlagApi";
+} from "@api/BidragBehandlingApiV1";
+import { RelatertPersonGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
+import { toISODateString } from "@utils/date-utils";
+import { expect } from "chai";
+import { describe } from "mocha";
+
 import {
     checkOverlappingPeriods,
     compareOpplysninger,
@@ -20,7 +21,6 @@ import {
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
 } from "../../forskudd/components/forms/helpers/boforholdFormHelpers";
-import { toISODateString } from "../../utils/date-utils";
 
 describe("BoforholdFormHelpers", () => {
     it("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {

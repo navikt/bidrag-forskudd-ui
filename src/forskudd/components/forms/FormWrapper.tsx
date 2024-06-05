@@ -1,7 +1,7 @@
+import text from "@common/constants/texts";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
-import text from "../../../common/constants/texts";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import Boforhold from "./boforhold/Boforhold";

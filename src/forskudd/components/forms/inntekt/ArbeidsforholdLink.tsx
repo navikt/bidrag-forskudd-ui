@@ -1,8 +1,7 @@
+import { BEHANDLING_API_V1 } from "@common/constants/api";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { BEHANDLING_API_V1 } from "../../../../common/constants/api";
 
 type AinntektButtonProps = {
     ident: string;

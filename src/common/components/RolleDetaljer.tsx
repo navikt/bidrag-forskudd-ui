@@ -1,8 +1,8 @@
+import { IRolleUI } from "@commonTypes/rolle";
 import { CopyButton } from "@navikt/ds-react";
+import { removePlaceholder } from "@utils/string-utils";
 import React from "react";
 
-import { IRolleUI } from "../../types/rolle";
-import { removePlaceholder } from "../../utils/string-utils";
 import text from "../constants/texts";
 import { RolleTag } from "./RolleTag";
 

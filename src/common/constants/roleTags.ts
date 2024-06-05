@@ -1,4 +1,4 @@
-import { Rolletype } from "../../api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 
 export const ROLE_TAGS = {
     [Rolletype.BM]: "success",

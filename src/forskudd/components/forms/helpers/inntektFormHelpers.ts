@@ -1,5 +1,3 @@
-import { toISODateString } from "@navikt/bidrag-ui-common";
-
 import {
     InntektDtoV2,
     InntekterDtoV2,
@@ -9,8 +7,10 @@ import {
     OppdatereManuellInntekt,
     RolleDto,
     Rolletype,
-} from "../../../../api/BidragBehandlingApiV1";
-import { isAfterDate } from "../../../../utils/date-utils";
+} from "@api/BidragBehandlingApiV1";
+import { toISODateString } from "@navikt/bidrag-ui-common";
+import { isAfterDate } from "@utils/date-utils";
+
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 
 export const periodeHasHigherPriorityOrder = (

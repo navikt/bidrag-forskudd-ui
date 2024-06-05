@@ -1,35 +1,32 @@
-import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
-import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
-
 import {
     Bostatuskode,
     HusstandsbarnDtoV2,
     HusstandsbarnperiodeDto,
     Kilde,
     OppdatereBoforholdRequestV2,
-} from "../../../../api/BidragBehandlingApiV1";
-import { Rolletype } from "../../../../api/BidragDokumentProduksjonApi";
-import { PersonDto } from "../../../../api/PersonApi";
-import { DatePickerInput } from "../../../../common/components/date-picker/DatePickerInput";
-import { FormControlledMonthPicker } from "../../../../common/components/formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
-import { FormLayout } from "../../../../common/components/layout/grid/FormLayout";
-import { ConfirmationModal } from "../../../../common/components/modal/ConfirmationModal";
-import { OverlayLoader } from "../../../../common/components/OverlayLoader";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { QueryErrorWrapper } from "../../../../common/components/query-error-boundary/QueryErrorWrapper";
-import { RolleTag } from "../../../../common/components/RolleTag";
-import StatefulAlert from "../../../../common/components/StatefulAlert";
-import { PERSON_API } from "../../../../common/constants/api";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "../../../../common/hooks/useApiData";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
+} from "@api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragDokumentProduksjonApi";
+import { PersonDto } from "@api/PersonApi";
+import { DatePickerInput } from "@common/components/date-picker/DatePickerInput";
+import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
+import { OverlayLoader } from "@common/components/OverlayLoader";
+import { PersonNavn } from "@common/components/PersonNavn";
+import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "@common/components/RolleTag";
+import StatefulAlert from "@common/components/StatefulAlert";
+import { PERSON_API } from "@common/constants/api";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "@common/hooks/useApiData";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
 import {
     addMonths,
     dateOrNull,
@@ -37,9 +34,12 @@ import {
     isAfterDate,
     isAfterEqualsDate,
     toISODateString,
-} from "../../../../utils/date-utils";
-import { removePlaceholder } from "../../../../utils/string-utils";
-import { scrollToHash } from "../../../../utils/window-utils";
+} from "@utils/date-utils";
+import { removePlaceholder } from "@utils/string-utils";
+import { scrollToHash } from "@utils/window-utils";
+import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
+
 import elementIds from "../../../constants/elementIds";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";

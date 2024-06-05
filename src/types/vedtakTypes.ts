@@ -1,4 +1,4 @@
-import { BeregningValideringsfeil, ResultatBeregningBarnDto } from "../api/BidragBehandlingApiV1";
+import { BeregningValideringsfeil, ResultatBeregningBarnDto } from "@api/BidragBehandlingApiV1";
 
 export interface VedtakBeregningResult {
     resultat?: ResultatBeregningBarnDto[];

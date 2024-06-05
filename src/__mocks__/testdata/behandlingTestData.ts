@@ -1,4 +1,4 @@
-import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 
 export const behandlingMockApiData: BehandlingDtoV2 = {
     id: 1,

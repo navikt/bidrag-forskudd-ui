@@ -1,19 +1,19 @@
+import { Vedtakstype } from "@api/BidragBehandlingApiV1";
+import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import PageWrapper from "@common/PageWrapper";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { BidragContainer, LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
+import { capitalize } from "@utils/string-utils";
 import React, { useEffect, useState } from "react";
 
-import { Vedtakstype } from "../../../api/BidragBehandlingApiV1";
-import { FlexRow } from "../../../common/components/layout/grid/FlexRow";
-import { useGetBehandlingV2 } from "../../../common/hooks/useApiData";
 import environment from "../../../environment";
-import { capitalize } from "../../../utils/string-utils";
 import FormWrapper from "../../components/forms/FormWrapper";
 import elementIds from "../../constants/elementIds";
 import { STEPS } from "../../constants/steps";
 import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import PageWrapper from "../PageWrapper";
 export const ForskuddPage = () => {
     const { onStepChange, activeStep } = useForskudd();
     const {

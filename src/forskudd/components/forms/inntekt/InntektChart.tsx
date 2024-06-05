@@ -1,11 +1,10 @@
+import { InntektDtoV2 } from "@api/BidragBehandlingApiV1";
+import { EChartsOption, ReactECharts } from "@common/components/e-charts/ReactECharts";
+import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "@utils/date-utils";
+import { roundDown, roundUp } from "@utils/number-utils";
+import { capitalize } from "@utils/string-utils";
 import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
 import React, { memo } from "react";
-
-import { InntektDtoV2 } from "../../../../api/BidragBehandlingApiV1";
-import { EChartsOption, ReactECharts } from "../../../../common/components/e-charts/ReactECharts";
-import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "../../../../utils/date-utils";
-import { roundDown, roundUp } from "../../../../utils/number-utils";
-import { capitalize } from "../../../../utils/string-utils";
 
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 

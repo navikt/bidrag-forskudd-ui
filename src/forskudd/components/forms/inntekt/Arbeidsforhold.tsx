@@ -1,11 +1,11 @@
+import { ArbeidsforholdGrunnlagDto } from "@api/BidragBehandlingApiV1";
+import text from "@common/constants/texts";
+import { useGetArbeidsforhold } from "@common/hooks/useApiData";
 import { capitalize } from "@navikt/bidrag-ui-common";
 import { Label } from "@navikt/ds-react";
+import { ISODateTimeStringToDDMMYYYYString } from "@utils/date-utils";
 import React from "react";
 
-import { ArbeidsforholdGrunnlagDto } from "../../../../api/BidragBehandlingApiV1";
-import text from "../../../../common/constants/texts";
-import { useGetArbeidsforhold } from "../../../../common/hooks/useApiData";
-import { ISODateTimeStringToDDMMYYYYString } from "../../../../utils/date-utils";
 import ArbeidsforholdLink from "./ArbeidsforholdLink";
 
 interface ArbeidsforholdTabledata {

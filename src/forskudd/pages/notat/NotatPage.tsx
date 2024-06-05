@@ -1,14 +1,14 @@
 //@ts-ignore
 import styles from "./NotatPage.lazy.css";
 styles.use();
+import text from "@common/constants/texts";
+import { QueryKeys, useNotat, useNotatPdf } from "@common/hooks/useApiData";
 import { FileIcon, FilePdfIcon } from "@navikt/aksel-icons";
 import { Broadcast } from "@navikt/bidrag-ui-common";
 import { Alert, Loader, Tabs } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { Suspense, useEffect, useMemo, useRef } from "react";
 
-import text from "../../../common/constants/texts";
-import { QueryKeys, useNotat, useNotatPdf } from "../../../common/hooks/useApiData";
 import { notatBroadcastName } from "../../constants/notat";
 
 type NotatProps = { behandlingId?: number; vedtakId?: number };
@@ -76,7 +76,7 @@ const RenderNotatPdf = ({ behandlingId, vedtakId }: NotatProps) => {
     }
 
     function getUrl() {
-        const fileBlob = new Blob([notatPdf], { type: "application/pdf" });
+        const fileBlob = new Blob([notatPdf as BlobPart], { type: "application/pdf" });
         return URL.createObjectURL(fileBlob);
     }
     return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="85%" />;

@@ -1,9 +1,9 @@
+import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
+import text from "@common/constants/texts";
+import { useDebounce } from "@common/hooks/useDebounce";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { FormControlledTextarea } from "../../../../common/components/formFields/FormControlledTextArea";
-import text from "../../../../common/constants/texts";
-import { useDebounce } from "../../../../common/hooks/useDebounce";
 import { STEPS } from "../../../constants/steps";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";

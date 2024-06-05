@@ -1,18 +1,18 @@
-import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
-import React from "react";
-import { useFormContext } from "react-hook-form";
-
 import {
     AktivereGrunnlagRequestV2,
     HusstandsbarnGrunnlagPeriodeDto,
     OpplysningerType,
-} from "../../../../api/BidragBehandlingApiV1";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "../../../../common/hooks/useApiData";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "../../../../utils/date-utils";
+} from "@api/BidragBehandlingApiV1";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/useApiData";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
+import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";

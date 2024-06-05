@@ -18,7 +18,7 @@ import React, {
 import { useParams, useSearchParams } from "react-router-dom";
 
 import { STEPS } from "../constants/steps";
-import { ForskuddStepper } from "../enum/ForskuddStepper";
+import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 import { InntektFormValues } from "../types/inntektFormValues";
 
 export type InntektTables =
@@ -31,7 +31,7 @@ export type InntektTables =
 type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
 
 export type PageErrorsOrUnsavedState = {
-    virkningstidspunkt: { error: boolean };
+    utgifter: { error: boolean };
     boforhold: {
         error: boolean;
         openFields?: { [key in HusstandsbarnTables]: boolean };
@@ -49,7 +49,7 @@ interface SaveErrorState {
     retryFn?: () => void;
     rollbackFn?: () => void;
 }
-interface IForskuddContext {
+interface ISærligeutgifterContext {
     activeStep: string;
     behandlingId: number;
     vedtakId: number;
@@ -74,21 +74,21 @@ interface IForskuddContextProps {
     behandlingId?: number;
 }
 
-export const ForskuddContext = createContext<IForskuddContext | null>(null);
+export const SærligeutgifterContext = createContext<ISærligeutgifterContext | null>(null);
 
-function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
+function SærligeutgifterProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
     const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [inntektFormValues, setInntektFormValues] = useState(undefined);
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
-        virkningstidspunkt: { error: false },
+        utgifter: { error: false },
         boforhold: { error: false },
         inntekt: { error: false },
     });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
-    const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
+    const activeStep = searchParams.get("steg") ?? SærligeutgifterStepper.UTGIFTER;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
@@ -158,20 +158,13 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     );
 
     function getPageErrorTexts(): { title: string; description: string } {
-        if (pageErrorsOrUnsavedState.virkningstidspunkt.error) {
-            return {
-                title: "Det er ikke lagt inn dato på virkningstidspunkt",
-                description: "Hvis det ikke settes inn en dato vil virkningsdatoen settes til forrige lagrede dato",
-            };
-        } else {
-            return {
-                title: text.varsel.statusIkkeLagret,
-                description: text.varsel.statusIkkeLagretDescription,
-            };
-        }
+        return {
+            title: text.varsel.statusIkkeLagret,
+            description: text.varsel.statusIkkeLagretDescription,
+        };
     }
     return (
-        <ForskuddContext.Provider value={value}>
+        <SærligeutgifterContext.Provider value={value}>
             <ConfirmationModal
                 ref={ref}
                 closeable
@@ -200,15 +193,15 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
                 open={saveErrorState?.error}
             />
             {children}
-        </ForskuddContext.Provider>
+        </SærligeutgifterContext.Provider>
     );
 }
-function useForskudd() {
-    const context = useContext(ForskuddContext);
+function useSærligeutgifter() {
+    const context = useContext(SærligeutgifterContext);
     if (context === undefined) {
         throw new Error("useForskudd must be used within a ForskuddProvider");
     }
     return context;
 }
 
-export { ForskuddProvider, useForskudd };
+export { SærligeutgifterProvider, useSærligeutgifter };

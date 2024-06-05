@@ -1,31 +1,26 @@
 import "./Opplysninger.css";
 
-import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
-import React, { useEffect, useState } from "react";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-
-import {
-    Kilde,
-    SivilstandBeregnetStatusEnum,
-    SivilstandDto,
-    Sivilstandskode,
-} from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledMonthPicker } from "../../../../common/components/formFields/FormControlledMonthPicker";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { ForskuddAlert } from "../../../../common/components/ForskuddAlert";
-import { OverlayLoader } from "../../../../common/components/OverlayLoader";
-import text from "../../../../common/constants/texts";
+import { Kilde, SivilstandBeregnetStatusEnum, SivilstandDto, Sivilstandskode } from "@api/BidragBehandlingApiV1";
+import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { OverlayLoader } from "@common/components/OverlayLoader";
+import text from "@common/constants/texts";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
     useOppdaterBehandlingV2,
     useSivilstandOpplysningerProssesert,
-} from "../../../../common/hooks/useApiData";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "../../../../utils/date-utils";
-import { removePlaceholder } from "../../../../utils/string-utils";
+} from "@common/hooks/useApiData";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
+import { addMonths, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "@utils/date-utils";
+import { removePlaceholder } from "@utils/string-utils";
+import React, { useEffect, useState } from "react";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+
 import { boforholdPeriodiseringErros } from "../../../constants/error";
 import { useForskudd } from "../../../context/ForskuddContext";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";

@@ -1,4 +1,4 @@
-import "../../index.css";
+import "../index.css";
 
 import { MDXProvider, useMDXComponents } from "@mdx-js/react";
 import { ArrowRightIcon, Buldings2Icon, PersonIcon, SackKronerFillIcon } from "@navikt/aksel-icons";

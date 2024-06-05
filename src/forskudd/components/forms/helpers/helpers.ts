@@ -1,4 +1,4 @@
-import { isAfterEqualsDate, isBeforeOrEqualsDate } from "../../../../utils/date-utils";
+import { isAfterEqualsDate, isBeforeOrEqualsDate } from "@utils/date-utils";
 
 export const periodsAreOverlapping = (
     periodeA: { datoFom: string; datoTom?: string },

@@ -1,10 +1,9 @@
+import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import text from "@common/constants/texts";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Button, Link } from "@navikt/ds-react";
 import React from "react";
 import { useParams } from "react-router-dom";
-
-import { FlexRow } from "../../../../common/components/layout/grid/FlexRow";
-import text from "../../../../common/constants/texts";
 
 export const ActionButtons = ({ onNext }) => {
     const { behandlingId, vedtakId, saksnummer } = useParams<{

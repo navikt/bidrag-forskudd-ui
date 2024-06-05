@@ -1,8 +1,8 @@
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { BodyShort } from "@navikt/ds-react";
+import { addMonths, firstDayOfMonth, isAfterDate } from "@utils/date-utils";
+import { formatterBeløp } from "@utils/number-utils";
 
-import { addMonths, firstDayOfMonth, isAfterDate } from "../../../../utils/date-utils";
-import { formatterBeløp } from "../../../../utils/number-utils";
 import { InntektFormPeriode } from "../../../types/inntektFormValues";
 
 export const ExpandableContent = ({

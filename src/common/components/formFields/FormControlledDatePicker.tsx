@@ -1,8 +1,8 @@
 import { DateValidationT } from "@navikt/ds-react";
+import { toISODateString } from "@utils/date-utils";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
-import { toISODateString } from "../../../utils/date-utils";
 import text from "../../constants/texts";
 import { DatePickerInput } from "../date-picker/DatePickerInput";
 interface FormControlledDatePickerProps {

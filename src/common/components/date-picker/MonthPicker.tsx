@@ -1,7 +1,6 @@
 import { MonthPicker as NavMonthPicker, MonthValidationT, useMonthpicker } from "@navikt/ds-react";
+import { dateOrNull, isValidDate, lastDayOfMonth } from "@utils/date-utils";
 import React, { useEffect } from "react";
-
-import { dateOrNull, isValidDate, lastDayOfMonth } from "../../../utils/date-utils";
 
 interface MonthPickerInputProps {
     onChange: (selectedDay: Date | undefined) => void;

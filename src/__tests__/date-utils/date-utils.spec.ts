@@ -1,7 +1,6 @@
+import { isValidDate, periodCoversMinOneFullCalendarMonth } from "@utils/date-utils";
 import { expect } from "chai";
 import { describe } from "mocha";
-
-import { isValidDate, periodCoversMinOneFullCalendarMonth } from "../../utils/date-utils";
 
 describe("DateUtils", () => {
     it("isValidDate should return false for null", () => {

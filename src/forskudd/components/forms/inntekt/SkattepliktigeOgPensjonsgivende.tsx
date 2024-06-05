@@ -1,15 +1,15 @@
+import { Inntektsrapportering, Inntektstype, Kilde } from "@api/BidragBehandlingApiV1";
+import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
+import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { Inntektsrapportering, Inntektstype, Kilde } from "../../../../api/BidragBehandlingApiV1";
-import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import LeggTilPeriodeButton from "../../../../common/components/formFields/FormLeggTilPeriode";
-import text from "../../../../common/constants/texts";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import elementId from "../../../constants/elementIds";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 import AinntektLink from "./AinntektLink";

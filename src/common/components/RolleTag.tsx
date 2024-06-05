@@ -1,7 +1,7 @@
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { Tag } from "@navikt/ds-react";
 import React from "react";
 
-import { Rolletype } from "../../api/BidragBehandlingApiV1";
 import { ROLE_FORKORTELSER, ROLE_TAGS } from "../constants/roleTags";
 
 export const RolleTag = ({ rolleType }: { rolleType: Rolletype }) => {

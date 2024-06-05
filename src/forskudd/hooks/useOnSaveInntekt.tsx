@@ -1,7 +1,7 @@
+import { BehandlingDtoV2 } from "@api/BidragBehandlingApiV1";
+import { QueryKeys, useUpdateInntekt } from "@common/hooks/useApiData";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { BehandlingDtoV2 } from "../../api/BidragBehandlingApiV1";
-import { QueryKeys, useUpdateInntekt } from "../../common/hooks/useApiData";
 import { useForskudd } from "../context/ForskuddContext";
 
 export const useOnSaveInntekt = () => {
