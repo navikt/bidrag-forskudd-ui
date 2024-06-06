@@ -205,7 +205,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
 }
 function useForskudd() {
     const context = useContext(ForskuddContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error("useForskudd must be used within a ForskuddProvider");
     }
     return context;
