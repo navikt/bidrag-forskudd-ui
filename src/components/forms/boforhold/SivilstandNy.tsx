@@ -180,7 +180,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         erVirkningstidspunktNåværendeMånedEllerFramITid,
         setSaveErrorState,
         setPageErrorsOrUnsavedState,
-        pageErrorsOrUnsavedState,
     } = useForskudd();
     const {
         boforhold: { valideringsfeil, sivilstand: sivilstandBehandling },
