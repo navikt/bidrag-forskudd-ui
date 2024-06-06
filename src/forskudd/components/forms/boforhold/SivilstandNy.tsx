@@ -196,6 +196,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         control,
         getValues,
         getFieldState,
+        resetField,
         setError,
         setValue,
         formState: { errors },
@@ -275,7 +276,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     });
                     updatedPageErrorState();
                     setShowUndoButton(true);
-                    setValue("sivilstand", nySivilstandHistorikk);
+                    resetField("sivilstand", { defaultValue: nySivilstandHistorikk });
                 },
                 onError: () => {
                     setSaveErrorState({
@@ -299,7 +300,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             }
         );
         setShowResetButton(true);
-
         setEditableRow(undefined);
     };
 
@@ -613,8 +613,8 @@ function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOppl
             },
             {
                 onSuccess: (response) => {
+                    onActivateOpplysninger(overskriveManuelleOpplysninger);
                     activateGrunnlag.queryClientUpdater((currentData) => {
-                        onActivateOpplysninger(overskriveManuelleOpplysninger);
                         return {
                             ...currentData,
                             boforhold: {

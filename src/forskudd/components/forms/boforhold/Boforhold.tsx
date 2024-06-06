@@ -652,7 +652,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const behandling = useGetBehandlingV2();
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
+    const { control, getValues, clearErrors, resetField, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
@@ -747,6 +747,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const updateAndSave = (payload: OppdatereBoforholdRequestV2) => {
         saveBoforhold.mutation.mutate(payload, {
             onSuccess: (response) => {
+                // Set datoTom til null ellers resettes den ikke
+                resetField(`husstandsbarn.${barnIndex}.perioder`, {
+                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                        ...d,
+                        datoTom: d.datoTom ? d.datoTom : null,
+                    })),
+                });
+
                 saveBoforhold.queryClientUpdater((currentData) => {
                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
                         (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
@@ -760,15 +768,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                   1,
                                   response.oppdatertHusstandsbarn
                               );
-
-                    // Set datoTom til null ellers resettes den ikke
-                    setValue(
-                        `husstandsbarn.${barnIndex}.perioder`,
-                        response.oppdatertHusstandsbarn.perioder.map((d) => ({
-                            ...d,
-                            datoTom: d.datoTom ? d.datoTom : null,
-                        }))
-                    );
 
                     return {
                         ...currentData,
@@ -845,6 +844,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
                         {
                             onSuccess: (response) => {
+                                // Set datoTom til null ellers resettes den ikke
+                                resetField(`husstandsbarn.${barnIndex}.perioder`, {
+                                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                                        ...d,
+                                        datoTom: d.datoTom ? d.datoTom : null,
+                                    })),
+                                });
+
                                 saveBoforhold.queryClientUpdater((currentData) => {
                                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
                                         (husstandsbarn) => husstandsbarn.id === response.oppdatertHusstandsbarn.id
@@ -853,15 +860,6 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                         updatedHusstandsbarnIndex,
                                         1,
                                         response.oppdatertHusstandsbarn
-                                    );
-
-                                    // Set datoTom til null ellers resettes den ikke
-                                    setValue(
-                                        `husstandsbarn.${barnIndex}.perioder`,
-                                        response.oppdatertHusstandsbarn.perioder.map((d) => ({
-                                            ...d,
-                                            datoTom: d.datoTom ? d.datoTom : null,
-                                        }))
                                     );
 
                                     return {
