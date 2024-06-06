@@ -212,16 +212,16 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     }));
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((prevStae) => ({
+            ...prevStae,
             boforhold: {
-                ...pageErrorsOrUnsavedState.boforhold,
+                ...prevStae.boforhold,
                 openFields: {
-                    ...pageErrorsOrUnsavedState.boforhold.openFields,
+                    ...prevStae.boforhold.openFields,
                     sivilstand: editableRow != undefined,
                 },
             },
-        });
+        }));
     }, [errors, editableRow]);
 
     const onSaveRow = (index: number) => {
@@ -273,7 +273,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             },
                         };
                     });
-                    updatedPageErrorState();
                     setShowUndoButton(true);
                     setValue("sivilstand", nySivilstandHistorikk);
                 },
@@ -332,6 +331,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 });
             }
             sivilstandPerioder.remove(index);
+            setEditableRow(undefined);
         }
     };
 

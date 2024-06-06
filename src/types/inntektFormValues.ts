@@ -9,6 +9,7 @@ export interface InntektFormPeriode extends Omit<InntektDtoV2, "rapporteringstyp
     rapporteringstype: Inntektsrapportering | "";
     beløpMnd?: number;
     erRedigerbart?: boolean;
+    kanRedigeres?: boolean;
 }
 export interface InntektFormValues {
     årsinntekter: { [key: string]: InntektFormPeriode[] };

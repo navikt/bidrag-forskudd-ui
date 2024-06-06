@@ -95,11 +95,13 @@ export const EditOrSaveButton = ({
 }: {
     item: InntektFormPeriode;
     index: number;
+
     onEditRow: (index: number) => void;
     onSaveRow: (index: number) => void;
 }) => {
     const { lesemodus } = useForskudd();
 
+    if (item.kanRedigeres === false) return null;
     return (
         <div className="h-8 flex items-center justify-center">
             {!lesemodus && item.taMed && !item.erRedigerbart && (
@@ -241,14 +243,16 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        if (inntektType != "årsinntekter" && erOffentlig) {
+        const erOffentligEkplisittYtelse = inntektType != "årsinntekter" && erOffentlig;
+        const erRedigerbart = !erOffentligEkplisittYtelse && taMed;
+        if (erOffentligEkplisittYtelse && taMed) {
             periode.datoFom = isAfterDate(virkningsdato, periode.opprinneligFom)
                 ? toISODateString(virkningsdato)
                 : periode.opprinneligFom;
             const compareWithDate = maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1));
             periode.datoTom = isAfterDate(periode.opprinneligTom, compareWithDate) ? null : periode.opprinneligTom;
         }
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: taMed });
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: erRedigerbart });
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);
@@ -324,23 +328,26 @@ export const InntektTabel = ({
 
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        clearErrors(`${fieldName}.${index}`);
-        const onSaveSuccess = (response: OppdatereInntektResponse) =>
-            saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
-                return {
-                    ...currentData,
-                    inntekter: {
-                        ...currentData.inntekter,
-                        [inntektType]: currentData.inntekter[inntektType].filter(
-                            (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
-                        ),
-                        beregnetInntekter: response.beregnetInntekter,
-                        valideringsfeil: response.valideringsfeil,
-                    },
-                };
-            });
+        if (periode.id != null) {
+            clearErrors(`${fieldName}.${index}`);
+            const onSaveSuccess = (response: OppdatereInntektResponse) =>
+                saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
+                    return {
+                        ...currentData,
+                        inntekter: {
+                            ...currentData.inntekter,
+                            [inntektType]: currentData.inntekter[inntektType].filter(
+                                (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
+                            ),
+                            beregnetInntekter: response.beregnetInntekter,
+                            valideringsfeil: response.valideringsfeil,
+                        },
+                    };
+                });
 
-        updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
+            updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
+        }
+
         fieldArray.remove(index);
     };
 

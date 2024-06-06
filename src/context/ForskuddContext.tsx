@@ -112,7 +112,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     const onStepChange = (x: number) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
 
-        console.log(pageErrorsOrUnsavedState);
         if (
             currentPageErrors &&
             (currentPageErrors.error ||
