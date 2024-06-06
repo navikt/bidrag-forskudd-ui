@@ -371,15 +371,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         });
         setShowResetButton(false);
     };
-    const updatedPageErrorState = () => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
-            boforhold: {
-                ...pageErrorsOrUnsavedState.boforhold,
-                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields },
-            },
-        });
-    };
+
     const valideringsfeilSivilstand = valideringsfeil?.sivilstand;
     return (
         <div>
