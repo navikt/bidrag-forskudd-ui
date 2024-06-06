@@ -197,6 +197,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         getFieldState,
         setError,
         setValue,
+        clearErrors,
         formState: { errors },
     } = useFormContext<BoforholdFormValues>();
     const sivilstandPerioder = useFieldArray({
@@ -329,6 +330,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     angreSisteEndring: false,
                 });
             }
+            clearErrors(`sivilstand.${index}.datoFom`);
             sivilstandPerioder.remove(index);
             setEditableRow(undefined);
         }

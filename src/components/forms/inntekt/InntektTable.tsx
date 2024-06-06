@@ -329,7 +329,6 @@ export const InntektTabel = ({
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         if (periode.id != null) {
-            clearErrors(`${fieldName}.${index}`);
             const onSaveSuccess = (response: OppdatereInntektResponse) =>
                 saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
                     return {
@@ -347,7 +346,7 @@ export const InntektTabel = ({
 
             updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
         }
-
+        clearErrors(`${fieldName}.${index}`);
         fieldArray.remove(index);
     };
 
