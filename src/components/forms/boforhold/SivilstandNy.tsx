@@ -211,12 +211,12 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
     }));
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState((prevStae) => ({
-            ...prevStae,
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
             boforhold: {
-                ...prevStae.boforhold,
+                ...prevState.boforhold,
                 openFields: {
-                    ...prevStae.boforhold.openFields,
+                    ...prevState.boforhold.openFields,
                     sivilstand: editableRow != undefined,
                 },
             },
