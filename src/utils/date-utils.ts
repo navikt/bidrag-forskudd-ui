@@ -113,6 +113,9 @@ export const periodCoversMinOneFullCalendarMonth = (startDate: Date, endDate: Da
     return endDateIsLastDayOfMonth || monthDiff + 12 > 1;
 };
 
+export const maxOfDate = (date: Date | string, comparedWith: Date | string) => {
+    return isAfterDate(date, comparedWith) ? date : comparedWith;
+};
 export const isAfterDate = (date: Date | string, comparedWith: Date | string = new Date()) => {
     const d = new Date(date);
     d.setHours(0, 0, 0);

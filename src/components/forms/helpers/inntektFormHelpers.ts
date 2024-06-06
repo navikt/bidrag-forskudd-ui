@@ -58,6 +58,13 @@ export const OffentligInntektPriorityOrder = [
     Inntektsrapportering.LIGNINGSINNTEKT,
 ];
 
+export const ekplisitteYtelser = [
+    Inntektsrapportering.KONTANTSTOTTE,
+    Inntektsrapportering.UTVIDET_BARNETRYGD,
+    Inntektsrapportering.SMABARNSTILLEGG,
+    Inntektsrapportering.BARNETILLEGG,
+];
+
 export const transformInntekt =
     (virkningsdato: Date) =>
     (inntekt: InntektDtoV2): InntektFormPeriode => ({
@@ -70,6 +77,7 @@ export const transformInntekt =
         datoTom: inntekt.datoTom ?? null,
         inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
         beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
+        kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
     });
 
 export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
@@ -130,16 +138,17 @@ export const createInitialValues = (
 
 export const createPayload = (periode: InntektFormPeriode, virkningsdato: Date): OppdatereInntektRequest => {
     const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
-
     if (erOffentlig) {
         return {
             oppdatereInntektsperiode: {
                 id: periode.id,
                 taMedIBeregning: periode.taMed,
-                angittPeriode: {
-                    fom: periode.taMed ? periode.datoFom : toISODateString(virkningsdato),
-                    til: periode.taMed ? periode.datoTom : null,
-                },
+                angittPeriode: !ekplisitteYtelser.includes(periode.rapporteringstype as Inntektsrapportering)
+                    ? {
+                          fom: periode.taMed ? periode.datoFom : toISODateString(virkningsdato),
+                          til: periode.taMed ? periode.datoTom : null,
+                      }
+                    : null,
             },
         };
     }
