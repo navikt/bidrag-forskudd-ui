@@ -13,9 +13,9 @@ import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
+import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate, maxOfDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
@@ -89,11 +89,13 @@ export const EditOrSaveButton = ({
 }: {
     item: InntektFormPeriode;
     index: number;
+
     onEditRow: (index: number) => void;
     onSaveRow: (index: number) => void;
 }) => {
     const { lesemodus } = useForskudd();
 
+    if (item.kanRedigeres === false) return null;
     return (
         <div className="h-8 flex items-center justify-center">
             {!lesemodus && item.taMed && !item.erRedigerbart && (
@@ -141,7 +143,9 @@ export const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const [inntektType] = fieldName.split(".");
 
+    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -156,7 +160,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erPeriodeRedigerbar ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
@@ -233,7 +237,16 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: taMed });
+        const erOffentligEkplisittYtelse = inntektType != "årsinntekter" && erOffentlig;
+        const erRedigerbart = !erOffentligEkplisittYtelse && taMed;
+        if (erOffentligEkplisittYtelse && taMed) {
+            periode.datoFom = isAfterDate(virkningsdato, periode.opprinneligFom)
+                ? toISODateString(virkningsdato)
+                : periode.opprinneligFom;
+            const compareWithDate = maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1));
+            periode.datoTom = isAfterDate(periode.opprinneligTom, compareWithDate) ? null : periode.opprinneligTom;
+        }
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: erRedigerbart });
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);
@@ -309,23 +322,25 @@ export const InntektTabel = ({
 
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        clearErrors(`${fieldName}.${index}`);
-        const onSaveSuccess = (response: OppdatereInntektResponse) =>
-            saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
-                return {
-                    ...currentData,
-                    inntekter: {
-                        ...currentData.inntekter,
-                        [inntektType]: currentData.inntekter[inntektType].filter(
-                            (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
-                        ),
-                        beregnetInntekter: response.beregnetInntekter,
-                        valideringsfeil: response.valideringsfeil,
-                    },
-                };
-            });
+        if (periode.id != null) {
+            const onSaveSuccess = (response: OppdatereInntektResponse) =>
+                saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
+                    return {
+                        ...currentData,
+                        inntekter: {
+                            ...currentData.inntekter,
+                            [inntektType]: currentData.inntekter[inntektType].filter(
+                                (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
+                            ),
+                            beregnetInntekter: response.beregnetInntekter,
+                            valideringsfeil: response.valideringsfeil,
+                        },
+                    };
+                });
 
-        updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
+            updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
+        }
+        clearErrors(`${fieldName}.${index}`);
         fieldArray.remove(index);
     };
 
