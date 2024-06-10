@@ -75,14 +75,15 @@ export const transformInntekt =
                 til: inntekt.datoTom ?? null,
             },
             datoFom:
-                inntekt.datoFom ?? isAfterDate(virkningsdato, inntekt.opprinneligFom)
+                inntekt.datoFom ??
+                (isAfterDate(virkningsdato, inntekt.opprinneligFom)
                     ? toISODateString(virkningsdato)
-                    : inntekt.opprinneligFom,
+                    : inntekt.opprinneligFom),
             datoTom:
                 inntekt.datoTom ??
-                isAfterDate(inntekt.opprinneligTom, maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1)))
+                (isAfterDate(inntekt.opprinneligTom, maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1)))
                     ? null
-                    : inntekt.opprinneligTom,
+                    : inntekt.opprinneligTom),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
             beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
             kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
