@@ -9,7 +9,7 @@ import {
     Rolletype,
 } from "@api/BidragBehandlingApiV1";
 import { toISODateString } from "@navikt/bidrag-ui-common";
-import { isAfterDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, isAfterDate, maxOfDate } from "@utils/date-utils";
 
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 
@@ -67,18 +67,27 @@ export const ekplisitteYtelser = [
 
 export const transformInntekt =
     (virkningsdato: Date) =>
-    (inntekt: InntektDtoV2): InntektFormPeriode => ({
-        ...inntekt,
-        angittPeriode: {
-            fom: inntekt.datoFom ?? toISODateString(virkningsdato),
-            til: inntekt.datoTom ?? null,
-        },
-        datoFom: inntekt.datoFom ?? toISODateString(virkningsdato),
-        datoTom: inntekt.datoTom ?? null,
-        inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
-        beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
-        kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
-    });
+    (inntekt: InntektDtoV2): InntektFormPeriode => {
+        return {
+            ...inntekt,
+            angittPeriode: {
+                fom: inntekt.datoFom ?? toISODateString(virkningsdato),
+                til: inntekt.datoTom ?? null,
+            },
+            datoFom:
+                inntekt.datoFom ?? isAfterDate(virkningsdato, inntekt.opprinneligFom)
+                    ? toISODateString(virkningsdato)
+                    : inntekt.opprinneligFom,
+            datoTom:
+                inntekt.datoTom ??
+                isAfterDate(inntekt.opprinneligTom, maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1)))
+                    ? null
+                    : inntekt.opprinneligTom,
+            inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
+            beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
+            kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
+        };
+    };
 
 export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => {
     if (a.taMed === b.taMed) {

@@ -408,6 +408,7 @@ export const useAktiveGrunnlagsdata = () => {
                     inntekter: {
                         ...currentData.inntekter,
                         [opplysningTypeInntektTypeMapper[type]]: data.inntekter[opplysningTypeInntektTypeMapper[type]],
+                        månedsinntekter: data.inntekter.månedsinntekter,
                         beregnetInntekter: data.inntekter.beregnetInntekter,
                         valideringsfeil: data.inntekter.valideringsfeil,
                     },

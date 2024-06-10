@@ -13,9 +13,9 @@ import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
-import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate, maxOfDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
@@ -237,16 +237,7 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        const erOffentligEkplisittYtelse = inntektType != "årsinntekter" && erOffentlig;
-        const erRedigerbart = !erOffentligEkplisittYtelse && taMed;
-        if (erOffentligEkplisittYtelse && taMed) {
-            periode.datoFom = isAfterDate(virkningsdato, periode.opprinneligFom)
-                ? toISODateString(virkningsdato)
-                : periode.opprinneligFom;
-            const compareWithDate = maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1));
-            periode.datoTom = isAfterDate(periode.opprinneligTom, compareWithDate) ? null : periode.opprinneligTom;
-        }
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: erRedigerbart });
+        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: periode.kanRedigeres && taMed });
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);

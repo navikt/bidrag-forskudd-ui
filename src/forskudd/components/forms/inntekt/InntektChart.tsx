@@ -67,15 +67,15 @@ const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
     };
 };
 
-const arePropsEqual = (oldProps, newProps) => {
+const arePropsEqual = (oldProps: { inntekt: InntektDtoV2[] }, newProps: { inntekt: InntektDtoV2[] }) => {
     return (
         oldProps.inntekt.length === newProps.inntekt.length &&
         oldProps.inntekt.every((oldInntekt, index) => {
             const newInntekt = newProps.inntekt[index];
             return (
-                oldInntekt.periode === newInntekt.periode &&
-                oldInntekt.visningsnavn === newInntekt.visningsnavn &&
-                oldInntekt.inntektPostListe?.length === newInntekt.inntektPostListe?.length
+                oldInntekt.beløp === newInntekt.beløp &&
+                oldInntekt.rapporteringstype === newInntekt.rapporteringstype &&
+                oldInntekt.inntektsposter?.length === newInntekt.inntektsposter?.length
             );
         })
     );

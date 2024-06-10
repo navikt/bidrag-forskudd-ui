@@ -52,10 +52,10 @@ const NyOpplysningerAlert = () => {
 
 const InntektHeader = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
-    const inntekt = inntekter.månedsinntekter?.filter((inntekt) => inntekt.ident === ident);
-    return inntekt?.length > 0 ? (
+    const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
+    return månedsinntekter?.length > 0 ? (
         <div className="grid w-full max-w-[65ch] gap-y-8">
-            <InntektChart inntekt={inntekt} />
+            <InntektChart inntekt={månedsinntekter} />
             <ExpansionCard aria-label="default-demo" size="small">
                 <ExpansionCard.Header>
                     <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
