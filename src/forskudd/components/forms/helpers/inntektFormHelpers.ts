@@ -8,8 +8,8 @@ import {
     RolleDto,
     Rolletype,
 } from "@api/BidragBehandlingApiV1";
-import { toISODateString } from "@navikt/bidrag-ui-common";
-import { addMonthsIgnoreDay, isAfterDate, maxOfDate } from "@utils/date-utils";
+import { firstDayOfMonth, toISODateString } from "@navikt/bidrag-ui-common";
+import { addMonthsIgnoreDay, dateOrNull, isAfterDate, maxOfDate } from "@utils/date-utils";
 
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 
@@ -83,7 +83,10 @@ export const transformInntekt =
             datoTom:
                 inntekt.datoTom ??
                 (ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
-                isAfterDate(maxOfDate(virkningsdato, addMonthsIgnoreDay(new Date(), 1)), inntekt.opprinneligTom)
+                isAfterDate(
+                    maxOfDate(virkningsdato, firstDayOfMonth(new Date())),
+                    addMonthsIgnoreDay(dateOrNull(inntekt.opprinneligTom), 1)
+                )
                     ? inntekt.opprinneligTom
                     : null),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
