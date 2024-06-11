@@ -1,16 +1,14 @@
 import { rest, RestHandler } from "msw";
 
 import {
-    AddOpplysningerRequest,
-    BehandlingDto,
-    GrunnlagsdataDto,
-    OppdaterBehandlingRequest,
+    BehandlingDtoV2,
+    OppdaterBehandlingRequestV2,
     SivilstandBeregnet,
     SivilstandBeregnetStatusEnum,
     Sivilstandskode,
+    SivilstandV1,
 } from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
-import { SivilstandBeregnetInnhold } from "../../forskudd/types/boforholdFormValues";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 import { behandlingMockApiDataV2 } from "../testdata/behandlingTestDataV2";
 
@@ -21,7 +19,7 @@ export function behandlingMock(): RestHandler[] {
             (req, res, ctx) => {
                 const behandling = JSON.parse(
                     localStorage.getItem(`behandling-${req.params.behandlingId}`)
-                ) as BehandlingDto;
+                ) as BehandlingDtoV2;
                 const virkningstidspunkt = behandling?.virkningstidspunkt?.virkningstidspunkt;
                 const data: SivilstandBeregnet = {
                     status: SivilstandBeregnetStatusEnum.OK,
@@ -30,7 +28,7 @@ export function behandlingMock(): RestHandler[] {
                             periodeFom: virkningstidspunkt?.length > 0 ? virkningstidspunkt : "2022-01-01",
                             sivilstandskode: Sivilstandskode.BOR_ALENE_MED_BARN,
                         },
-                    ] as SivilstandBeregnetInnhold[],
+                    ] as SivilstandV1[],
                 };
                 return res(ctx.set("Content-Type", "application/json"), ctx.json(data));
             }
@@ -68,12 +66,11 @@ export function behandlingMock(): RestHandler[] {
             const body = await req.json();
             const behandling = JSON.parse(
                 localStorage.getItem(`behandling-${req.params.behandlingId}`)
-            ) as BehandlingDto;
-            const oppdater = body as OppdaterBehandlingRequest;
-            const updatedBehandling: BehandlingDto = {
+            ) as BehandlingDtoV2;
+            const oppdater = body as OppdaterBehandlingRequestV2;
+            const updatedBehandling: BehandlingDtoV2 = {
                 ...behandling,
                 ...oppdater,
-                grunnlagspakkeid: oppdater.grunnlagspakkeId,
                 inntekter: {
                     ...behandling?.inntekter,
                     ...oppdater?.inntekter,
@@ -90,8 +87,6 @@ export function behandlingMock(): RestHandler[] {
                 },
                 id: Number(req.params.behandlingId),
             };
-            // @ts-ignore
-            delete updatedBehandling.grunnlagspakkeId;
 
             const sucessHeaders = [
                 ctx.set("Content-Type", "application/json"),
@@ -116,44 +111,5 @@ export function behandlingMock(): RestHandler[] {
 
             return res(...response[index]);
         }),
-
-        rest.post(
-            `${environment.url.bidragBehandling}/api/v1/behandling/:behandlingId/opplysninger`,
-            async (req, res, ctx) => {
-                const data = (await req.json()) as AddOpplysningerRequest;
-                const response: GrunnlagsdataDto = {
-                    ...data,
-                    id: 1,
-                    grunnlagsdatatype: data.grunnlagstype,
-                    innhentet: data.hentetDato,
-                    behandlingsid: req.params.behandlingId as unknown as number,
-                };
-                const behandling = JSON.parse(
-                    localStorage.getItem(`behandling-${req.params.behandlingId}`)
-                ) as BehandlingDto;
-                const opplysningerExists = behandling.opplysninger.some(
-                    (opplysning) => opplysning.grunnlagsdatatype == data.grunnlagstype
-                );
-                const opplysninger = opplysningerExists
-                    ? behandling.opplysninger.map((saved) => {
-                          if (saved.grunnlagsdatatype == response.grunnlagsdatatype) {
-                              return response;
-                          }
-                          return saved;
-                      })
-                    : [...behandling.opplysninger, response];
-                const updatedBehandling: BehandlingDto = {
-                    ...behandling,
-                    opplysninger,
-                };
-                localStorage.setItem(`behandling-${req.params.behandlingId}`, JSON.stringify(updatedBehandling));
-
-                return res(
-                    ctx.set("Content-Type", "application/json"),
-                    ctx.status(200),
-                    ctx.body(JSON.stringify(response))
-                );
-            }
-        ),
     ];
 }
