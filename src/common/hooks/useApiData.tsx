@@ -287,11 +287,7 @@ export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
             if (lesemodus) {
                 return { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
             }
-            const grunnlagSivilstand =
-                opplysninger.grunnlag.filter((g) => g.gyldigFom != null && g.historisk == false).length > 0
-                    ? opplysninger.grunnlag.filter((g) => g.gyldigFom != null)
-                    : opplysninger.grunnlag;
-            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, grunnlagSivilstand)).data;
+            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, opplysninger.grunnlag)).data;
         },
         staleTime: Infinity,
     });
