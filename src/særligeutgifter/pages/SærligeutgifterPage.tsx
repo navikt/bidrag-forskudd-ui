@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
@@ -9,10 +10,9 @@ import React from "react";
 
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
-import { useSærligeutgifter } from "../context/SærligeutgifterContext";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 export const SærligeufgifterPage = () => {
-    const { onStepChange, activeStep } = useSærligeutgifter();
+    const { onStepChange, activeStep } = useBehandlingProvider();
     const {
         virkningstidspunkt,
         erVedtakFattet,

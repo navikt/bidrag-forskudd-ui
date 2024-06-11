@@ -1,3 +1,4 @@
+import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import ErrorConfirmationModal from "@common/components/ErrorConfirmationModal";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import text from "@common/constants/texts";
@@ -17,9 +18,10 @@ import React, {
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import { STEPS } from "../constants/steps";
-import { ForskuddStepper } from "../enum/ForskuddStepper";
-import { InntektFormValues } from "../types/inntektFormValues";
+import { STEPS as ForskuddSteps } from "../../forskudd/constants/steps";
+import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
+import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants/steps";
+import { SærligeutgifterStepper } from "../../særligeutgifter/enum/SærligeutgifterStepper";
 
 export type InntektTables =
     | "småbarnstillegg"
@@ -49,16 +51,14 @@ interface SaveErrorState {
     retryFn?: () => void;
     rollbackFn?: () => void;
 }
-interface IForskuddContext {
+interface IBehandlingContext {
     activeStep: string;
-    behandlingId: number;
-    vedtakId: number;
+    behandlingId: string;
+    vedtakId: string;
     lesemodus: boolean;
     erVedtakFattet: boolean;
     erVirkningstidspunktNåværendeMånedEllerFramITid: boolean;
     saksnummer?: string;
-    inntektFormValues: InntektFormValues;
-    setInntektFormValues: Dispatch<SetStateAction<InntektFormValues>>;
     errorMessage: { title: string; text: string };
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
@@ -69,17 +69,24 @@ interface IForskuddContext {
     onStepChange: (x: number) => void;
 }
 
-interface IForskuddContextProps {
-    vedtakId?: number;
-    behandlingId?: number;
-}
+export const BehandlingContext = createContext<IBehandlingContext | null>(null);
 
-export const ForskuddContext = createContext<IForskuddContext | null>(null);
+const getStepsConfByBehandling = (behandlingType: TypeBehandling) => {
+    switch (behandlingType) {
+        case TypeBehandling.FORSKUDD:
+            return { defaultStep: ForskuddStepper.VIRKNINGSTIDSPUNKT, steps: ForskuddSteps };
+        case TypeBehandling.SAeRLIGEUTGIFTER:
+            return { defaultStep: SærligeutgifterStepper.UTGIFTER, steps: SærligeutgifterSteps };
+    }
+};
 
-function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildren<IForskuddContextProps>) {
-    const { saksnummer } = useParams<{ behandlingId?: string; saksnummer?: string }>();
+function BehandlingProvider({ children }: PropsWithChildren) {
+    const { behandlingId, saksnummer, vedtakId } = useParams<{
+        behandlingId?: string;
+        saksnummer?: string;
+        vedtakId?: string;
+    }>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [inntektFormValues, setInntektFormValues] = useState(undefined);
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         virkningstidspunkt: { error: false },
@@ -88,26 +95,26 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
     });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
-    const activeStep = searchParams.get("steg") ?? ForskuddStepper.VIRKNINGSTIDSPUNKT;
+    const behandling = useBehandlingV2(behandlingId, vedtakId);
+    const { defaultStep, steps } = getStepsConfByBehandling(behandling.type);
+    const activeStep = searchParams.get("steg") ?? defaultStep;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
-        setSearchParams([...searchParams.entries(), ["steg", Object.keys(STEPS).find((k) => STEPS[k] === x)]]);
+        setSearchParams([...searchParams.entries(), ["steg", Object.keys(steps).find((k) => steps[k] === x)]]);
     }, []);
 
     const queryLesemodus = searchParams.get("lesemodus") == "true";
-    const behandling = useBehandlingV2(behandlingId, vedtakId);
     const [nextStep, setNextStep] = useState<number>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
+    const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
+        dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
+        firstDayOfMonth(new Date())
+    );
     const onConfirm = () => {
         ref.current?.close();
         setActiveStep(nextStep);
         setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
     };
-
-    const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
-        dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
-        firstDayOfMonth(new Date())
-    );
 
     const onStepChange = (x: number) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
@@ -133,8 +140,6 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
-            inntektFormValues,
-            setInntektFormValues,
             errorMessage,
             setErrorMessage,
             errorModalOpen,
@@ -145,16 +150,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
             onConfirm,
             onStepChange,
         }),
-        [
-            activeStep,
-            behandlingId,
-            vedtakId,
-            saksnummer,
-            inntektFormValues,
-            errorMessage,
-            errorModalOpen,
-            pageErrorsOrUnsavedState,
-        ]
+        [activeStep, behandlingId, vedtakId, saksnummer, errorMessage, errorModalOpen, pageErrorsOrUnsavedState]
     );
 
     function getPageErrorTexts(): { title: string; description: string } {
@@ -171,7 +167,7 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
         }
     }
     return (
-        <ForskuddContext.Provider value={value}>
+        <BehandlingContext.Provider value={value}>
             <ConfirmationModal
                 ref={ref}
                 closeable
@@ -200,15 +196,15 @@ function ForskuddProvider({ behandlingId, children, vedtakId }: PropsWithChildre
                 open={saveErrorState?.error}
             />
             {children}
-        </ForskuddContext.Provider>
+        </BehandlingContext.Provider>
     );
 }
-function useForskudd() {
-    const context = useContext(ForskuddContext);
+function useBehandlingProvider() {
+    const context = useContext(BehandlingContext);
     if (!context) {
-        throw new Error("useForskudd must be used within a ForskuddProvider");
+        throw new Error("useBehandlingProvider must be used within a BehandlingProvider");
     }
     return context;
 }
 
-export { ForskuddProvider, useForskudd };
+export { BehandlingProvider, useBehandlingProvider };

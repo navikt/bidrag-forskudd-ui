@@ -1,3 +1,4 @@
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { MutationKeys } from "@common/hooks/useApiData";
 import { BidragCell, BidragGrid, Broadcast, useRQMutationState } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
@@ -5,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { ReactNode, useEffect } from "react";
 
 import { notatBroadcastName } from "../../../../forskudd/constants/notat";
-import { useForskudd } from "../../../../forskudd/context/ForskuddContext";
 
 export const FormLayout = ({
     title,
@@ -18,7 +18,7 @@ export const FormLayout = ({
     side?: ReactNode;
     pageAlert?: ReactNode;
 }) => {
-    const { behandlingId } = useForskudd();
+    const { behandlingId } = useBehandlingProvider();
     const queryClient = useQueryClient();
     const listenToMutations = [
         MutationKeys.oppdaterBehandling(behandlingId),

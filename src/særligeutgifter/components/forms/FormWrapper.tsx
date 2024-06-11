@@ -1,8 +1,8 @@
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
-import { useSærligeutgifter } from "../../context/SærligeutgifterContext";
 import { SærligeutgifterStepper } from "../../enum/SærligeutgifterStepper";
 
 const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
@@ -21,7 +21,7 @@ const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
 });
 
 export default function FormWrapper() {
-    const { activeStep } = useSærligeutgifter();
+    const { activeStep } = useBehandlingProvider();
 
     return (
         <Suspense

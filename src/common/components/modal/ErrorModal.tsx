@@ -1,13 +1,12 @@
 import "./errorModal.css";
 
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { BodyLong, Heading, Modal } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
-import { useForskudd } from "../../../forskudd/context/ForskuddContext";
-
 export const ErrorModal = () => {
-    const { errorMessage, setErrorMessage, errorModalOpen, setErrorModalOpen } = useForskudd();
+    const { errorMessage, setErrorMessage, errorModalOpen, setErrorModalOpen } = useBehandlingProvider();
 
     useEffect(() => {
         return () => {

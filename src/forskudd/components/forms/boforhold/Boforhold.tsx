@@ -21,6 +21,7 @@ import { RolleTag } from "@common/components/RolleTag";
 import StatefulAlert from "@common/components/StatefulAlert";
 import { PERSON_API } from "@common/constants/api";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
@@ -41,7 +42,6 @@ import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, 
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import elementIds from "../../../constants/elementIds";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -69,7 +69,7 @@ const DeleteButton = ({
     barn: HusstandsbarnDtoV2;
     index: number;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const firstOver18PeriodIndex = barn.perioder.findIndex((period) => boststatusOver18År.includes(period.bostatus));
     const showDeleteButton = barnIsOver18 && index === firstOver18PeriodIndex ? false : !!index;
@@ -98,7 +98,7 @@ const EditOrSaveButton = ({
     onSaveRow: (index: number) => void;
     onEditRow: (index: number) => void;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     if (lesemodus) return null;
 
@@ -178,7 +178,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
@@ -270,7 +270,7 @@ const AddBarnForm = ({
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { getValues } = useFormContext<BoforholdFormValues>();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -526,7 +526,8 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
 };
 const BarnPerioder = () => {
     const datoFom = useVirkningsdato();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
+        useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control, getValues } = useFormContext<BoforholdFormValues>();
@@ -640,14 +641,16 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
     const {
+        behandlingId,
+        lesemodus,
+        erVirkningstidspunktNåværendeMånedEllerFramITid,
         setErrorMessage,
         setErrorModalOpen,
         setPageErrorsOrUnsavedState,
         pageErrorsOrUnsavedState,
         setSaveErrorState,
-    } = useForskudd();
+    } = useBehandlingProvider();
     const [showUndoButton, setShowUndoButton] = useState(false);
-    const { behandlingId, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const behandling = useGetBehandlingV2();

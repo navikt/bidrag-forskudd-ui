@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
@@ -12,10 +13,9 @@ import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
 import elementIds from "../../constants/elementIds";
 import { STEPS } from "../../constants/steps";
-import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 export const ForskuddPage = () => {
-    const { onStepChange, activeStep } = useForskudd();
+    const { onStepChange, activeStep } = useBehandlingProvider();
     const {
         virkningstidspunkt,
         erVedtakFattet,
@@ -98,7 +98,7 @@ function EksterneLenkerKnapper() {
 }
 function BrukerveiledningKnapp() {
     const nudgeEnabledName = "brukerveiledningShowNudge";
-    const { activeStep } = useForskudd();
+    const { activeStep } = useBehandlingProvider();
     const [nudge, setNudge] = useState(LocalStorage.get(nudgeEnabledName) !== "false");
 
     useEffect(() => {
@@ -140,7 +140,7 @@ function BrukerveiledningKnapp() {
     );
 }
 function LovverkKnapper() {
-    const { activeStep } = useForskudd();
+    const { activeStep } = useBehandlingProvider();
 
     function renderKnapp(tekst: string, url: string) {
         return (

@@ -13,6 +13,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { OverlayLoader } from "@common/components/OverlayLoader";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
@@ -27,7 +28,6 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import text from "../../../../common/constants/texts";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
@@ -37,7 +37,7 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 import { KildeIcon } from "../inntekt/InntektTable";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     return index && !lesemodus ? (
         <Button
@@ -62,7 +62,7 @@ const EditOrSaveButton = ({
     onSaveRow: (index: number) => void;
     onEditRow: (index: number) => void;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     if (lesemodus) return null;
 
@@ -124,7 +124,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato);
     const fieldIsDatoTom = field === "datoTom";
@@ -180,7 +180,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         erVirkningstidspunktNåværendeMånedEllerFramITid,
         setSaveErrorState,
         setPageErrorsOrUnsavedState,
-    } = useForskudd();
+    } = useBehandlingProvider();
     const {
         boforhold: { valideringsfeil, sivilstand: sivilstandBehandling },
     } = useGetBehandlingV2();
@@ -593,7 +593,7 @@ function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOppl
     const { ikkeAktiverteOpplysninger } = useGetOpplysningerSivilstandV2();
     const hasNewOpplysningerFraFolkeregistre = ikkeAktiverteOpplysninger != null;
     const activateGrunnlag = useOnActivateGrunnlag();
-    const { setSaveErrorState } = useForskudd();
+    const { setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const behandling = useGetBehandlingV2();
     const bidragsmottaker = behandling.roller.find((r) => r.rolletype == Rolletype.BM);

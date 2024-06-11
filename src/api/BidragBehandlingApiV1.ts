@@ -19,6 +19,9 @@ export enum Bostatuskode {
     ALENE = "ALENE",
     DELT_BOSTED = "DELT_BOSTED",
     REGNES_IKKE_SOM_BARN = "REGNES_IKKE_SOM_BARN",
+    UNNTAK_HOS_ANDRE = "UNNTAK_HOS_ANDRE",
+    UNNTAK_ALENE = "UNNTAK_ALENE",
+    UNNTAKENSLIGASYLSOKER = "UNNTAK_ENSLIG_ASYLSØKER",
 }
 
 export enum Engangsbeloptype {
@@ -29,9 +32,12 @@ export enum Engangsbeloptype {
     GEBYR_MOTTAKER = "GEBYR_MOTTAKER",
     GEBYR_SKYLDNER = "GEBYR_SKYLDNER",
     INNKREVING_GJELD = "INNKREVING_GJELD",
+    TILBAKEKREVING = "TILBAKEKREVING",
     SAERTILSKUDD = "SAERTILSKUDD",
     SAeRTILSKUDD = "SÆRTILSKUDD",
-    TILBAKEKREVING = "TILBAKEKREVING",
+    SAeRTILSKUDDKONFIRMASJON = "SÆRTILSKUDD_KONFIRMASJON",
+    SAeRTILSKUDDTANNREGULERING = "SÆRTILSKUDD_TANNREGULERING",
+    SAeRTILSKUDDOPTIKK = "SÆRTILSKUDD_OPTIKK",
 }
 
 /** Inntektsrapportering typer på inntekter som overlapper */
@@ -64,26 +70,22 @@ export enum Inntektsrapportering {
     LONNMANUELTBEREGNET = "LØNN_MANUELT_BEREGNET",
     NAeRINGSINNTEKTMANUELTBEREGNET = "NÆRINGSINNTEKT_MANUELT_BEREGNET",
     YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET = "YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET",
-    AINNTEKT_KORRIGERT_BARNETILLEGG = "AINNTEKT_KORRIGERT_BARNETILLEGG",
+    AINNTEKT_KORRIGERT_FOR_BARNETILLEGG = "AINNTEKT_KORRIGERT_FOR_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
     DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
-    FORDELSKATTEKLASSE2 = "FORDEL_SKATTEKLASSE2",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
     FODSELADOPSJON = "FØDSEL_ADOPSJON",
-    INNTEKTSOPPLYSNINGER_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_ARBEIDSGIVER",
-    KAPITALINNTEKT_SKE = "KAPITALINNTEKT_SKE",
+    INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER",
     LIGNINGSOPPLYSNINGER_MANGLER = "LIGNINGSOPPLYSNINGER_MANGLER",
-    LIGNING_SKE = "LIGNING_SKE",
-    LONNSKE = "LØNN_SKE",
-    LONNSKEKORRIGERTBARNETILLEGG = "LØNN_SKE_KORRIGERT_BARNETILLEGG",
-    LONNTREKK = "LØNN_TREKK",
-    MANGLENDEBRUKEVNESKJONN = "MANGLENDE_BRUK_EVNE_SKJØNN",
+    LIGNING_FRA_SKATTEETATEN = "LIGNING_FRA_SKATTEETATEN",
+    LONNSOPPGAVEFRASKATTEETATEN = "LØNNSOPPGAVE_FRA_SKATTEETATEN",
+    LONNSOPPGAVEFRASKATTEETATENKORRIGERTFORBARNETILLEGG = "LØNNSOPPGAVE_FRA_SKATTEETATEN_KORRIGERT_FOR_BARNETILLEGG",
+    MANGLENDEBRUKAVEVNESKJONN = "MANGLENDE_BRUK_AV_EVNE_SKJØNN",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
-    PENSJON_KORRIGERT_BARNETILLEGG = "PENSJON_KORRIGERT_BARNETILLEGG",
+    PENSJON_KORRIGERT_FOR_BARNETILLEGG = "PENSJON_KORRIGERT_FOR_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
-    SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_BARNETILLEGG",
-    SKATTEGRUNNLAG_SKE = "SKATTEGRUNNLAG_SKE",
+    SKATTEGRUNNLAG_KORRIGERT_FOR_BARNETILLEGG = "SKATTEGRUNNLAG_KORRIGERT_FOR_BARNETILLEGG",
 }
 
 /** Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper. */
@@ -179,6 +181,10 @@ export enum Resultatkode {
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
     AVSLAG_PRIVAT_AVTALE_BIDRAG = "AVSLAG_PRIVAT_AVTALE_BIDRAG",
     IKKESOKTOMINNKREVINGAVBIDRAG = "IKKE_SØKT_OM_INNKREVING_AV_BIDRAG",
+    UTGIFTER_DEKKES_AV_BARNEBIDRAGET = "UTGIFTER_DEKKES_AV_BARNEBIDRAGET",
+    IKKENODVENDIGEUTGIFTER = "IKKE_NØDVENDIGE_UTGIFTER",
+    PRIVATAVTALEOMSAeRLIGEUTGIFTER = "PRIVAT_AVTALE_OM_SÆRLIGE_UTGIFTER",
+    ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
 }
 
 export enum Rolletype {
@@ -413,7 +419,7 @@ export interface OppdaterePeriodeInntekt {
     id: number;
     /** Anig om inntekten skal inkluderes i beregning */
     taMedIBeregning: boolean;
-    angittPeriode: Datoperiode;
+    angittPeriode?: Datoperiode;
 }
 
 export interface OppdatereVirkningstidspunkt {
@@ -531,6 +537,7 @@ export interface ArbeidsforholdGrunnlagDto {
 export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
+    type: TypeBehandling;
     vedtakstype: Vedtakstype;
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
@@ -553,8 +560,6 @@ export interface BehandlingDtoV2 {
     behandlerenhet: string;
     /** @uniqueItems true */
     roller: RolleDto[];
-    /** @format int64 */
-    grunnlagspakkeid?: number;
     virkningstidspunkt: VirkningstidspunktDto;
     inntekter: InntekterDtoV2;
     boforhold: BoforholdDtoV2;
@@ -562,6 +567,8 @@ export interface BehandlingDtoV2 {
     ikkeAktiverteEndringerIGrunnlagsdata: IkkeAktiveGrunnlagsdata;
     /** @uniqueItems true */
     feilOppståttVedSisteGrunnlagsinnhenting?: Grunnlagsinnhentingsfeil[];
+    /** Utgiftsgrunnlag for særtilskudd. Vil alltid være null for forskudd og bidrag */
+    utgift?: SaertilskuddUtgifterDto;
 }
 
 export interface BehandlingNotatDto {
@@ -941,6 +948,50 @@ export enum SivilstandskodePDL {
     GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
 }
 
+/** Utgiftsgrunnlag for særtilskudd. Vil alltid være null for forskudd og bidrag */
+export interface SaertilskuddUtgifterDto {
+    beregning?: UtgiftBeregningDto;
+    notat: BehandlingNotatDto;
+    utgifter: UtgiftspostDto[];
+}
+
+export enum TypeBehandling {
+    FORSKUDD = "FORSKUDD",
+    SAeRLIGEUTGIFTER = "SÆRLIGE_UTGIFTER",
+    BIDRAG = "BIDRAG",
+}
+
+export interface UtgiftBeregningDto {
+    /** Beløp som er direkte betalt av BP */
+    beløpDirekteBetaltAvBp: number;
+    /** Summen av godkjent beløp for utgifter BP har betalt og beløp som er direkte betalt av BP */
+    totalBeløpBetaltAvBp?: number;
+    /** Summen av godkjente beløp som brukes for beregningen */
+    totalGodkjentBeløp: number;
+    /** Summen av godkjente beløp som brukes for beregningen */
+    totalGodkjentBeløpBp?: number;
+}
+
+export interface UtgiftspostDto {
+    /**
+     * Når utgifter gjelder. Kan være feks dato på kvittering
+     * @format date
+     */
+    dato: string;
+    /** Beskrivelse av utgiften. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+    beskrivelse: string;
+    /** Beløp som er betalt for utgiften det gjelder */
+    kravbeløp: number;
+    /** Beløp som er godkjent for beregningen */
+    godkjentBeløp: number;
+    /** Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp */
+    begrunnelse: string;
+    /** Om utgiften er betalt av BP */
+    betaltAvBp: boolean;
+    /** @format int64 */
+    id: number;
+}
+
 export interface VirkningstidspunktDto {
     /** @format date */
     virkningstidspunkt?: string;
@@ -949,6 +1000,49 @@ export interface VirkningstidspunktDto {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: BehandlingNotatDto;
+}
+
+/** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
+export interface OppdatereUtgift {
+    /**
+     * Når utgifter gjelder. Kan være feks dato på kvittering
+     * @format date
+     */
+    dato: string;
+    /** Beskrivelse av utgiften. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+    beskrivelse: string;
+    /** Beløp som er betalt for utgiften det gjelder */
+    kravbeløp: number;
+    /** Beløp som er godkjent for beregningen */
+    godkjentBeløp: number;
+    /** Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp */
+    begrunnelse?: string;
+    /** Om utgiften er betalt av BP */
+    betaltAvBp: boolean;
+    /** @format int64 */
+    id?: number;
+}
+
+export interface OppdatereUtgiftRequest {
+    avslag?: Resultatkode;
+    beløpDirekteBetaltAvBp?: number;
+    /** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
+    nyEllerEndretUtgift?: OppdatereUtgift;
+    /**
+     * Slette en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt
+     * @format int64
+     */
+    sletteUtgift?: number;
+    /** Angre siste endring som ble gjort. Siste endring kan ikke angres hvis avslag er satt */
+    angreSisteEndring: boolean;
+    notat?: OppdaterNotat;
+}
+
+export interface OppdatereUtgiftResponse {
+    oppdatertUtgiftspost?: UtgiftspostDto;
+    utgiftposter: UtgiftspostDto[];
+    notat: BehandlingNotatDto;
+    beregning?: UtgiftBeregningDto;
 }
 
 export interface OppdatereInntektRequest {
@@ -1639,8 +1733,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1914,6 +2008,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/${behandlingsid}/virkningstidspunkt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere utgift for behandling. Returnerer oppdatert behandling detaljer. L
+         *
+         * @tags behandling-controller-v-2
+         * @name OppdatereUtgift
+         * @request PUT:/api/v2/behandling/{behandlingsid}/utgift
+         * @secure
+         */
+        oppdatereUtgift: (behandlingsid: number, data: OppdatereUtgiftRequest, params: RequestParams = {}) =>
+            this.request<OppdatereUtgiftResponse, any>({
+                path: `/api/v2/behandling/${behandlingsid}/utgift`,
                 method: "PUT",
                 body: data,
                 secure: true,

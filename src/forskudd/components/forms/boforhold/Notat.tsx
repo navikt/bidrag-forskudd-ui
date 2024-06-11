@@ -1,18 +1,18 @@
+import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useDebounce } from "@common/hooks/useDebounce";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { ActionButtons } from "../inntekt/ActionButtons";
 
 export const Notat = () => {
-    const { onStepChange, setSaveErrorState } = useForskudd();
+    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
     const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));

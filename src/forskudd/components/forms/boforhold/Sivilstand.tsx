@@ -6,6 +6,7 @@ import { FormControlledSelectField } from "@common/components/formFields/FormCon
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
@@ -22,7 +23,6 @@ import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { boforholdPeriodiseringErros } from "../../../constants/error";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
@@ -37,7 +37,7 @@ import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers
 import { KildeIcon } from "../inntekt/InntektTable";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     return index && !lesemodus ? (
         <Button
@@ -62,7 +62,7 @@ const EditOrSaveButton = ({
     onSaveRow: (index: number) => void;
     onEditRow: (index: number) => void;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     if (lesemodus) return null;
 
@@ -124,7 +124,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato);
     const fieldIsDatoTom = field === "datoTom";
@@ -174,7 +174,7 @@ export const Sivilstand = () => {
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
     const { setErrorMessage, setErrorModalOpen, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } =
-        useForskudd();
+        useBehandlingProvider();
     const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const [showResetButton, setShowResetButton] = useState(false);
     const behandling = useGetBehandlingV2();

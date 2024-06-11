@@ -1,7 +1,8 @@
-import { Stonadstype } from "@api/BidragBehandlingApiV1";
+import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { BidragBehandlingHeader } from "@common/components/header/BidragBehandlingHeader";
 import { ErrorModal } from "@common/components/modal/ErrorModal";
 import text from "@common/constants/texts";
+import { BehandlingProvider } from "@common/context/BehandlingContext";
 import { useBehandlingV2 } from "@common/hooks/useApiData";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
@@ -10,10 +11,9 @@ import { Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
-import { ForskuddProvider } from "./forskudd/context/ForskuddContext";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
 import { SærligeufgifterPage } from "./særligeutgifter/pages/SærligeutgifterPage";
@@ -58,11 +58,25 @@ export default function App() {
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
                             <Route path="/sak/:saksnummer/vedtak/:vedtakId">
-                                <Route index element={<VedtakLesemodusWrapper />} />
+                                <Route
+                                    index
+                                    element={
+                                        <BehandlingPageWrapper>
+                                            <ForskuddBehandling />
+                                        </BehandlingPageWrapper>
+                                    }
+                                />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
                             <Route path="/vedtak/:behandlingId">
-                                <Route index element={<VedtakLesemodusWrapper />} />
+                                <Route
+                                    index
+                                    element={
+                                        <BehandlingPageWrapper>
+                                            <ForskuddBehandling />
+                                        </BehandlingPageWrapper>
+                                    }
+                                />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
                             <Route
@@ -70,7 +84,14 @@ export default function App() {
                                 element={<ForskuddBrukerveiledningPageWrapper />}
                             />
                             <Route path="/forskudd/:behandlingId">
-                                <Route index element={<ForskuddBehandlingWrapper />} />
+                                <Route
+                                    index
+                                    element={
+                                        <BehandlingPageWrapper>
+                                            <ForskuddBehandling />
+                                        </BehandlingPageWrapper>
+                                    }
+                                />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
                         </Routes>
@@ -90,11 +111,27 @@ function ForskuddBrukerveiledningPageWrapper() {
         </PageWrapper>
     );
 }
-function VedtakLesemodusWrapper() {
-    const { vedtakId } = useParams<{ vedtakId?: string }>();
+
+const ForskuddBehandling = () => (
+    <BehandlingProvider>
+        <BidragBehandlingHeader />
+        <ForskuddPage />
+        <ErrorModal />
+    </BehandlingProvider>
+);
+
+const SærligeutgifterBehandling = () => (
+    <BehandlingProvider>
+        <BidragBehandlingHeader />
+        <SærligeufgifterPage />
+        <ErrorModal />
+    </BehandlingProvider>
+);
+
+const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
+    prefetchVisningsnavn();
     const { flagsReady, flagsError } = useFlagsStatus();
 
-    prefetchVisningsnavn();
     if (!flagsReady && flagsError == false) {
         return (
             <div className="flex justify-center">
@@ -102,72 +139,28 @@ function VedtakLesemodusWrapper() {
             </div>
         );
     }
-    return (
-        <>
-            <ForskuddProvider vedtakId={Number(vedtakId)}>
-                <BidragBehandlingHeader />
-                <ForskuddPage />
-                <ErrorModal />
-            </ForskuddProvider>
-        </>
-    );
-}
+
+    return children;
+};
 const BidragBehandlingWrapper = () => {
-    prefetchVisningsnavn();
     const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { stønadstype } = useBehandlingV2(Number(behandlingId));
+    const { type } = useBehandlingV2(behandlingId);
 
-    switch (stønadstype) {
-        case Stonadstype.FORSKUDD:
-            return <ForskuddBehandlingWrapper />;
-        default:
-            return <SærligeutgifterBehandlingWrapper />;
-    }
-};
+    const getBehandling = (type: TypeBehandling) => {
+        switch (type) {
+            case TypeBehandling.FORSKUDD:
+                return <ForskuddBehandling />;
+            case TypeBehandling.SAeRLIGEUTGIFTER:
+                return <SærligeutgifterBehandling />;
+            default:
+                return null;
+        }
+    };
 
-const ForskuddBehandlingWrapper = () => {
-    const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { flagsReady, flagsError } = useFlagsStatus();
-
-    if (!flagsReady && flagsError == false) {
-        return (
-            <div className="flex justify-center">
-                <Loader size="3xlarge" title={text.loading} variant="interaction" />
-            </div>
-        );
-    }
-
-    return (
-        <ForskuddProvider behandlingId={Number(behandlingId)}>
-            <BidragBehandlingHeader />
-            <ForskuddPage />
-            <ErrorModal />
-        </ForskuddProvider>
-    );
-};
-
-const SærligeutgifterBehandlingWrapper = () => {
-    const { behandlingId } = useParams<{ behandlingId?: string }>();
-    const { flagsReady, flagsError } = useFlagsStatus();
-
-    if (!flagsReady && flagsError == false) {
-        return (
-            <div className="flex justify-center">
-                <Loader size="3xlarge" title={text.loading} variant="interaction" />
-            </div>
-        );
-    }
-
-    return (
-        <ForskuddProvider behandlingId={Number(behandlingId)}>
-            <BidragBehandlingHeader />
-            <SærligeufgifterPage />
-            <ErrorModal />
-        </ForskuddProvider>
-    );
+    return <BehandlingPageWrapper>{getBehandling(type)}</BehandlingPageWrapper>;
 };
 
 const NotatPageWrapper = () => {
     const { behandlingId, vedtakId } = useParams<{ behandlingId?: string; vedtakId?: string }>();
-    return <NotatPage behandlingId={Number(behandlingId)} vedtakId={Number(vedtakId)} />;
+    return <NotatPage behandlingId={behandlingId} vedtakId={vedtakId} />;
 };

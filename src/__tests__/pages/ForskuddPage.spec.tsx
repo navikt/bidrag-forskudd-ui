@@ -1,3 +1,4 @@
+import { BehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -14,7 +15,6 @@ import sinon from "sinon";
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
 import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
 import environment from "../../environment";
-import { ForskuddProvider } from "../../forskudd/context/ForskuddContext";
 import { ForskuddPage } from "../../forskudd/pages/forskudd/ForskuddPage";
 
 const queryClient = new QueryClient();
@@ -172,9 +172,9 @@ describe("ForskuddPage", () => {
     it("should render Virkningstidspunkt", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={Number(1)}>
+                <BehandlingProvider>
                     <ForskuddPage />
-                </ForskuddProvider>
+                </BehandlingProvider>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=virkningstidspunkt" }
         );
@@ -188,9 +188,9 @@ describe("ForskuddPage", () => {
     it("should render Boforhold", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={1}>
+                <BehandlingProvider>
                     <ForskuddPage />
-                </ForskuddProvider>
+                </BehandlingProvider>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=boforhold" }
         );
@@ -204,9 +204,9 @@ describe("ForskuddPage", () => {
     it("should render Vedtak", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <ForskuddProvider behandlingId={1}>
+                <BehandlingProvider>
                     <ForskuddPage />
-                </ForskuddProvider>
+                </BehandlingProvider>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=vedtak" }
         );
