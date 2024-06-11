@@ -10,7 +10,7 @@ import {
     Sivilstandskode,
 } from "../../api/BidragBehandlingApiV1";
 import environment from "../../environment";
-import { SivilstandBeregnetInnhold } from "../../types/boforholdFormValues";
+import { SivilstandBeregnetInnhold } from "../../forskudd/types/boforholdFormValues";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 import { behandlingMockApiDataV2 } from "../testdata/behandlingTestDataV2";
 

@@ -1,4 +1,4 @@
-import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 
 export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     id: 1,
@@ -11,6 +11,8 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     saksnummer: "2300138",
     behandlerenhet: "4806",
     søktAv: SoktAvType.BIDRAGSMOTTAKER,
+    erKlageEllerOmgjøring: false,
+    opprettetTidspunkt: "2019-04-01",
     roller: [
         {
             id: 1,
@@ -64,6 +66,12 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
             medIVedtaket: "",
         },
     },
-    aktiveGrunnlagsdata: [],
-    ikkeAktiverteEndringerIGrunnlagsdata: [],
+    aktiveGrunnlagsdata: {
+        arbeidsforhold: [],
+        husstandsbarn: [],
+    },
+    ikkeAktiverteEndringerIGrunnlagsdata: {
+        inntekter: null,
+        husstandsbarn: [],
+    },
 };

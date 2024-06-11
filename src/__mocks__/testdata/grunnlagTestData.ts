@@ -1,50 +1,11 @@
-import { BehandlingDto, Rolletype } from "../../api/BidragBehandlingApiV1";
+import { BehandlingDtoV2, Rolletype } from "@api/BidragBehandlingApiV1";
 import {
     ArbeidsforholdGrunnlagDto,
     HentGrunnlagDto,
     SivilstandskodePDL,
     SkattegrunnlagGrunnlagDto,
-} from "../../api/BidragGrunnlagApi";
-import { HentSkattegrunnlagResponse } from "../../types/bidragGrunnlagTypes";
-import { deductMonths, toISODateString } from "../../utils/date-utils";
-
-const randomSalary = () => {
-    const min = 2e5;
-    const max = 1.5e6;
-
-    return Math.round(min + Math.random() * (max - min));
-};
-
-export const createSkattegrunnlag = () =>
-    [
-        {
-            grunnlag: [
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "skattegrunnlag",
-                },
-            ],
-            skatteoppgjoersdato: "2022",
-        },
-        {
-            grunnlag: [
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "loenn_og_trekk",
-                },
-            ],
-            skatteoppgjoersdato: "2021",
-        },
-        {
-            grunnlag: [
-                {
-                    beloep: randomSalary().toString(),
-                    tekniskNavn: "skattegrunnlag",
-                },
-            ],
-            skatteoppgjoersdato: "2020",
-        },
-    ] as HentSkattegrunnlagResponse[];
+} from "@api/BidragGrunnlagApi";
+import { deductMonths, toISODateString } from "@utils/date-utils";
 
 export const createHustandsmedlemmer = () => {
     const behandlingId = JSON.parse(localStorage.getItem(`behandlingId`));
@@ -90,7 +51,7 @@ export const createHustandsmedlemmer = () => {
     };
 };
 
-export const createGrunnlagspakkeOppdaterData = (behandling: BehandlingDto) => {
+export const createGrunnlagspakkeOppdaterData = (behandling: BehandlingDtoV2) => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const periodeFra = toISODateString(deductMonths(new Date(), 36));
@@ -276,7 +237,7 @@ const createSkattegrunnlagListe = (bmIdent, barn): SkattegrunnlagGrunnlagDto[] =
             .flat()
     );
 
-export const createGrunnlagsdata = (behandling: BehandlingDto): HentGrunnlagDto => {
+export const createGrunnlagsdata = (behandling: BehandlingDtoV2): HentGrunnlagDto => {
     const bmIdent = behandling?.roller?.find((rolle) => rolle.rolletype === Rolletype.BM).ident;
     const barn = behandling?.roller?.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const today = toISODateString(new Date());
