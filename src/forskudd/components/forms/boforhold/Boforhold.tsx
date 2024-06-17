@@ -21,8 +21,7 @@ import { RolleTag } from "@common/components/RolleTag";
 import StatefulAlert from "@common/components/StatefulAlert";
 import { PERSON_API } from "@common/constants/api";
 import text from "@common/constants/texts";
-import { useGetBehandlingV2, useSivilstandOpplysningerProssesert } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -58,7 +57,6 @@ import { KildeIcon } from "../inntekt/InntektTable";
 import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
-import { SivilstandNy } from "./SivilstandNy";
 
 const DeleteButton = ({
     onRemovePeriode,
@@ -218,7 +216,6 @@ const Periode = ({
 
 const Main = () => {
     useEffect(scrollToHash, []);
-    const { enableSivilstandV2 } = useFeatureToogle();
 
     return (
         <>
@@ -227,7 +224,7 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
-            {enableSivilstandV2 ? <SivilstandNy /> : <Sivilstand />}
+            <Sivilstand />
         </>
     );
 };
@@ -237,11 +234,10 @@ const BoforholdsForm = () => {
     // useGrunnlag();
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
-        () => createInitialValues(boforhold, sivilstandProssesert.sivilstandListe),
-        [boforhold, sivilstandProssesert, virkningsOrSoktFraDato, barnMedISaken]
+        () => createInitialValues(boforhold),
+        [boforhold, virkningsOrSoktFraDato, barnMedISaken]
     );
 
     const useFormMethods = useForm({
