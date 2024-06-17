@@ -5,7 +5,6 @@ import {
     BehandlingDtoV2,
     BeregningValideringsfeil,
     HusstandsbarnGrunnlagDto,
-    OppdaterBehandlingRequestV2,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
@@ -15,8 +14,6 @@ import {
     RolleDto,
     Rolletype,
     SivilstandAktivGrunnlagDto,
-    SivilstandBeregnet,
-    SivilstandBeregnetStatusEnum,
     SivilstandIkkeAktivGrunnlagDto,
 } from "@api/BidragBehandlingApiV1";
 import { NotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
@@ -52,13 +49,6 @@ export const QueryKeys = {
         behandlingId,
         vedtakId,
     ],
-    sivilstandBeregning: (behandlingId: number, virkningstidspunkt: string) => [
-        "behandling",
-        QueryKeys.behandlingVersion,
-        behandlingId,
-        "sivilstandBeregning",
-        virkningstidspunkt,
-    ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: number) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
     person: (ident: string) => ["person", ident],
@@ -91,32 +81,6 @@ export const useGetOpplysningerSivilstandV2 = (): {
 export const useGetOpplysningerSivilstand = (): SivilstandAktivGrunnlagDto => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.sivilstand;
-};
-
-export const useOppdaterBehandlingV2 = () => {
-    const { behandlingId } = useForskudd();
-
-    const mutation = oppdaterBehandlingMutationV2(behandlingId);
-
-    return { mutation, error: mutation.isError };
-};
-export const oppdaterBehandlingMutationV2 = (behandlingId: number) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
-        mutationFn: async (payload: OppdaterBehandlingRequestV2): Promise<BehandlingDtoV2> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(behandlingId, payload);
-            return data;
-        },
-        networkMode: "always",
-        onSuccess: (data) => {
-            queryClient.setQueryData(QueryKeys.behandlingV2(behandlingId), data);
-        },
-        onError: (error) => {
-            console.log("onError", error);
-        },
-    });
 };
 
 export const useUpdateInntekt = () => {
@@ -274,24 +238,6 @@ const createGrunnlagRequest = (behandling: BehandlingDtoV2): HentGrunnlagRequest
     };
 
     return grunnlagRequest;
-};
-
-export const useSivilstandOpplysningerProssesert = (): SivilstandBeregnet => {
-    const behandling = useGetBehandlingV2();
-    const opplysninger = useGetOpplysningerSivilstand();
-
-    const { lesemodus } = useForskudd();
-    const { data: beregnet } = useSuspenseQuery({
-        queryKey: QueryKeys.sivilstandBeregning(behandling.id, behandling.virkningstidspunkt.virkningstidspunkt),
-        queryFn: async () => {
-            if (lesemodus) {
-                return { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
-            }
-            return (await BEHANDLING_API_V1.api.konverterSivilstand(behandling.id, opplysninger.grunnlag)).data;
-        },
-        staleTime: Infinity,
-    });
-    return beregnet ?? { status: SivilstandBeregnetStatusEnum.OK, sivilstandListe: [] };
 };
 
 export const useGrunnlag = (): HentGrunnlagDto | null => {

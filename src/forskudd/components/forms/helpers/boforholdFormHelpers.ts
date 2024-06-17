@@ -240,17 +240,11 @@ export const getSivilstandPerioder = (
     return result;
 };
 
-export const createInitialValues = (
-    boforhold: BoforholdDtoV2,
-    sivilstandBeregnet: SivilstandV1[]
-): BoforholdFormValues => {
+export const createInitialValues = (boforhold: BoforholdDtoV2): BoforholdFormValues => {
     return {
         ...boforhold,
         husstandsbarn: boforhold.husstandsbarn.sort(compareHusstandsBarn),
-        sivilstand:
-            boforhold?.sivilstand?.length > 0
-                ? boforhold.sivilstand?.sort((a, b) => (a.datoFom > b.datoFom ? 1 : -1))
-                : mapSivilstandProsessert(sivilstandBeregnet),
+        sivilstand: boforhold.sivilstand,
     };
 };
 
