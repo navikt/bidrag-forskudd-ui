@@ -1,5 +1,3 @@
-import { rest, RestHandler } from "msw";
-
 import {
     BehandlingDtoV2,
     OppdaterBehandlingRequestV2,
@@ -7,7 +5,9 @@ import {
     SivilstandBeregnetStatusEnum,
     Sivilstandskode,
     SivilstandV1,
-} from "../../api/BidragBehandlingApiV1";
+} from "@api/BidragBehandlingApiV1";
+import { rest, RestHandler } from "msw";
+
 import environment from "../../environment";
 import { behandlingMockApiData } from "../testdata/behandlingTestData";
 import { behandlingMockApiDataV2 } from "../testdata/behandlingTestDataV2";

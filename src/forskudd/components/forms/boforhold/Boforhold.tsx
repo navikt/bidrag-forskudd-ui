@@ -244,19 +244,19 @@ const BoforholdsForm = () => {
         [boforhold, sivilstandProssesert, virkningsOrSoktFraDato, barnMedISaken]
     );
 
+    console.log("initialValues", initialValues);
+
     const useFormMethods = useForm({
         defaultValues: initialValues,
         criteriaMode: "all",
     });
 
     return (
-        <>
-            <FormProvider {...useFormMethods}>
-                <form onSubmit={(e) => e.preventDefault()}>
-                    <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
-                </form>
-            </FormProvider>
-        </>
+        <FormProvider {...useFormMethods}>
+            <form onSubmit={(e) => e.preventDefault()}>
+                <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
+            </form>
+        </FormProvider>
     );
 };
 
@@ -655,7 +655,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const behandling = useGetBehandlingV2();
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, resetField, setError, setValue, getFieldState, formState } =
+    const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
@@ -751,12 +751,12 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         saveBoforhold.mutation.mutate(payload, {
             onSuccess: (response) => {
                 // Set datoTom til null ellers resettes den ikke
-                resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                barnPerioder.replace(
+                    response.oppdatertHusstandsbarn.perioder.map((d) => ({
                         ...d,
-                        datoTom: d.datoTom ? d.datoTom : null,
-                    })),
-                });
+                        datoTom: d.datoTom ?? null,
+                    }))
+                );
 
                 saveBoforhold.queryClientUpdater((currentData) => {
                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
@@ -847,13 +847,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
                         {
                             onSuccess: (response) => {
-                                // Set datoTom til null ellers resettes den ikke
-                                resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                                barnPerioder.replace(
+                                    response.oppdatertHusstandsbarn.perioder.map((d) => ({
                                         ...d,
-                                        datoTom: d.datoTom ? d.datoTom : null,
-                                    })),
-                                });
+                                        datoTom: d.datoTom ?? null,
+                                    }))
+                                );
+                                clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
+                                setEditableRow(undefined);
 
                                 saveBoforhold.queryClientUpdater((currentData) => {
                                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(

@@ -195,7 +195,6 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         control,
         getValues,
         getFieldState,
-        resetField,
         setError,
         setValue,
         clearErrors,
@@ -275,7 +274,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         };
                     });
                     setShowUndoButton(true);
-                    resetField("sivilstand", { defaultValue: nySivilstandHistorikk });
+                    sivilstandPerioder.replace(nySivilstandHistorikk);
                 },
                 onError: () => {
                     setSaveErrorState({
@@ -329,9 +328,10 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                     tilbakestilleHistorikk: false,
                     angreSisteEndring: false,
                 });
+            } else {
+                sivilstandPerioder.remove(index);
             }
             clearErrors(`sivilstand.${index}.datoFom`);
-            sivilstandPerioder.remove(index);
             setEditableRow(undefined);
         }
     };
