@@ -4,11 +4,9 @@ import {
     HusstandsbarnDtoV2,
     HusstandsbarnperiodeDto,
     Kilde,
-    OppdaterBehandlingRequestV2,
     RolleDto,
     SivilstandDto,
     Sivilstandskode,
-    SivilstandV1,
 } from "@api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
 import text from "@common/constants/texts";
@@ -240,38 +238,13 @@ export const getSivilstandPerioder = (
     return result;
 };
 
-export const createInitialValues = (
-    boforhold: BoforholdDtoV2,
-    sivilstandBeregnet: SivilstandV1[]
-): BoforholdFormValues => {
+export const createInitialValues = (boforhold: BoforholdDtoV2): BoforholdFormValues => {
     return {
         ...boforhold,
         husstandsbarn: boforhold.husstandsbarn.sort(compareHusstandsBarn),
-        sivilstand:
-            boforhold?.sivilstand?.length > 0
-                ? boforhold.sivilstand?.sort((a, b) => (a.datoFom > b.datoFom ? 1 : -1))
-                : mapSivilstandProsessert(sivilstandBeregnet),
+        sivilstand: boforhold.sivilstand,
     };
 };
-
-export const mapSivilstandProsessert = (sivilstandBeregnet: SivilstandV1[]): SivilstandDto[] =>
-    sivilstandBeregnet.map((v) => ({
-        kilde: Kilde.OFFENTLIG,
-        //@ts-ignore
-        datoFom: v.periodeFom,
-        //@ts-ignore
-        datoTom: v.periodeTom,
-        //@ts-ignore
-        sivilstand: v.sivilstandskode,
-    }));
-
-export const createPayload = (values: BoforholdFormValues): OppdaterBehandlingRequestV2 => ({
-    boforhold: {
-        ...values,
-        husstandsbarn: values.husstandsbarn,
-        sivilstand: values.sivilstand,
-    },
-});
 
 export const checkOverlappingPeriods = (perioder: { datoFom?: string; datoTom?: string }[]) => {
     const overlappingPeriods = [];

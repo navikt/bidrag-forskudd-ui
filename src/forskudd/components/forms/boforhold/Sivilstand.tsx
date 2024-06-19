@@ -1,6 +1,14 @@
 import "./Opplysninger.css";
 
-import { Kilde, SivilstandBeregnetStatusEnum, SivilstandDto, Sivilstandskode } from "@api/BidragBehandlingApiV1";
+import {
+    Kilde,
+    OppdatereSivilstand,
+    OpplysningerType,
+    Rolletype,
+    SivilstandDto,
+    SivilstandGrunnlagDto,
+    Sivilstandskode,
+} from "@api/BidragBehandlingApiV1";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
@@ -10,29 +18,21 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
-    useOppdaterBehandlingV2,
-    useSivilstandOpplysningerProssesert,
+    useGetOpplysningerSivilstandV2,
 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
-import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate, toDateString } from "@utils/date-utils";
-import { removePlaceholder } from "@utils/string-utils";
+import { Box, Button, Heading, HStack, ReadMore, Table, Tag, VStack } from "@navikt/ds-react";
+import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { boforholdPeriodiseringErros } from "../../../constants/error";
+import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
+import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import {
-    calculateFraDato,
-    checkPeriodizationErrors,
-    editPeriods,
-    mapSivilstandProsessert,
-    removeAndEditPeriods,
-    sivilstandForskuddOptions,
-} from "../helpers/boforholdFormHelpers";
+import { calculateFraDato, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 import { KildeIcon } from "../inntekt/InntektTable";
 
@@ -164,7 +164,7 @@ export const Sivilstand = () => {
     const datoFom = useVirkningsdato();
     return (
         <div className="mt-8">
-            <Heading level="2" size="small" id="sivilstand" title="Sivilstand gammelt">
+            <Heading level="2" size="small" id="sivilstand" title="Sivilstand V2">
                 {text.label.sivilstand}
             </Heading>
             <SivilistandPerioder virkningstidspunkt={datoFom} />
@@ -173,22 +173,31 @@ export const Sivilstand = () => {
 };
 
 const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date }) => {
-    const { setErrorMessage, setErrorModalOpen, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } =
-        useBehandlingProvider();
-    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
-    const [showResetButton, setShowResetButton] = useState(false);
-    const behandling = useGetBehandlingV2();
+    const {
+        setErrorMessage,
+        setErrorModalOpen,
+        lesemodus,
+        erVirkningstidspunktNåværendeMånedEllerFramITid,
+        setSaveErrorState,
+        setPageErrorsOrUnsavedState,
+    } = useBehandlingProvider();
+    const {
+        boforhold: { valideringsfeil, sivilstand: sivilstandBehandling },
+    } = useGetBehandlingV2();
+    const saveBoforhold = useOnSaveBoforhold();
 
-    const saveBoforhold = useOppdaterBehandlingV2();
+    const [showResetButton, setShowResetButton] = useState(false);
+    const [showUndoButton, setShowUndoButton] = useState(false);
+
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const sivilstandOpplysninger = useGetOpplysningerSivilstand();
     const {
         control,
         getValues,
         getFieldState,
-        clearErrors,
         setError,
         setValue,
+        clearErrors,
         formState: { errors },
     } = useFormContext<BoforholdFormValues>();
     const sivilstandPerioder = useFieldArray({
@@ -201,47 +210,19 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         ...field,
         ...watchFieldArray[index],
     }));
-    const sivilistand = getValues(`sivilstand`);
 
     useEffect(() => {
-        if (
-            behandling.boforhold.sivilstand.length == 0 &&
-            sivilstandProssesert.status == SivilstandBeregnetStatusEnum.OK
-        ) {
-            updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
-        }
-    }, []);
-    useEffect(() => {
-        validatePeriods(sivilistand);
-    }, [sivilistand]);
-
-    const validatePeriods = (perioderValues: SivilstandDto[]) => {
-        const errorTypes = checkPeriodizationErrors(perioderValues, virkningstidspunkt);
-
-        if (sivilstandProssesert.status != SivilstandBeregnetStatusEnum.OK && controlledFields.length == 0) {
-            errorTypes.push("kunneIkkeBeregneSivilstandPerioder");
-        }
-        if (errorTypes.length) {
-            setError(`root.sivilstand`, {
-                types: errorTypes.reduce(
-                    (acc, errorType) => ({
-                        ...acc,
-                        [errorType]:
-                            errorType === "hullIPerioder"
-                                ? removePlaceholder(
-                                      boforholdPeriodiseringErros[errorType],
-                                      toDateString(virkningstidspunkt),
-                                      toDateString(new Date(perioderValues[0].datoFom))
-                                  )
-                                : boforholdPeriodiseringErros[errorType],
-                    }),
-                    {}
-                ),
-            });
-        } else {
-            clearErrors(`root.sivilstand`);
-        }
-    };
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
+            boforhold: {
+                ...prevState.boforhold,
+                openFields: {
+                    ...prevState.boforhold.openFields,
+                    sivilstand: editableRow !== undefined,
+                },
+            },
+        }));
+    }, [errors, editableRow]);
 
     const onSaveRow = (index: number) => {
         const perioderValues = getValues(`sivilstand`);
@@ -254,19 +235,69 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
 
         const fieldState = getFieldState(`sivilstand.${index}`);
         if (!fieldState.error) {
-            updatedAndSave(editPeriods(perioderValues, index));
+            const updatedSivilstand = perioderValues[index];
+            updateAndSave(
+                {
+                    nyEllerEndretSivilstandsperiode: {
+                        fraOgMed: updatedSivilstand.datoFom,
+                        tilOgMed: updatedSivilstand.datoTom,
+                        sivilstand: updatedSivilstand.sivilstand,
+                        id: updatedSivilstand.id,
+                    },
+                    tilbakestilleHistorikk: false,
+                    angreSisteEndring: false,
+                },
+                index
+            );
         }
     };
 
-    const updatedAndSave = (sivilstand: SivilstandDto[]) => {
-        setValue("sivilstand", sivilstand);
-        saveBoforhold.mutation.mutate({
-            boforhold: {
-                sivilstand: sivilstand,
-            },
-        });
+    const updateAndSave = (payload: OppdatereSivilstand, index?: number) => {
+        saveBoforhold.mutation.mutate(
+            { oppdatereSivilstand: payload },
+            {
+                onSuccess: (response) => {
+                    const nySivilstandHistorikk = response.oppdatertSivilstandshistorikk?.sort((a, b) =>
+                        a.datoFom > b.datoFom ? 1 : -1
+                    );
+                    saveBoforhold.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                sivilstand: nySivilstandHistorikk,
+                                valideringsfeil: {
+                                    ...currentData.boforhold.valideringsfeil,
+                                    sivilstand: response.valideringsfeil.sivilstand,
+                                },
+                            },
+                        };
+                    });
+                    setShowUndoButton(true);
+                    sivilstandPerioder.replace(nySivilstandHistorikk);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateAndSave(payload),
+                        rollbackFn: () => {
+                            if (
+                                payload.nyEllerEndretSivilstandsperiode &&
+                                payload.nyEllerEndretSivilstandsperiode.id == null
+                            ) {
+                                sivilstandPerioder.remove(index);
+                            } else {
+                                setValue("sivilstand", sivilstandBehandling);
+                            }
+                            if (payload.tilbakestilleHistorikk) {
+                                setShowResetButton(true);
+                            }
+                        },
+                    });
+                },
+            }
+        );
         setShowResetButton(true);
-
         setEditableRow(undefined);
     };
 
@@ -281,6 +312,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 sivilstand: Sivilstandskode.BOR_ALENE_MED_BARN,
                 kilde: Kilde.MANUELL,
             });
+
             setEditableRow(sivilstandPerioderValues.length);
         }
     };
@@ -290,8 +322,17 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             showErrorModal();
         } else {
             const perioderValues = getValues(`sivilstand`) as SivilstandDto[];
-            const updatedPeriods = removeAndEditPeriods(perioderValues, index);
-            updatedAndSave(updatedPeriods);
+            if (perioderValues[index]?.id) {
+                updateAndSave({
+                    sletteSivilstandsperiode: perioderValues[index].id,
+                    tilbakestilleHistorikk: false,
+                    angreSisteEndring: false,
+                });
+            } else {
+                sivilstandPerioder.remove(index);
+            }
+            clearErrors(`sivilstand.${index}.datoFom`);
+            setEditableRow(undefined);
         }
     };
 
@@ -312,29 +353,52 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
             showErrorModal();
         } else {
             setEditableRow(index);
+            const editPeriode = controlledFields[index];
+            if (editPeriode?.sivilstand == Sivilstandskode.UKJENT) {
+                setValue(`sivilstand.${index}.sivilstand`, Sivilstandskode.BOR_ALENE_MED_BARN);
+            }
         }
     };
-
+    const undoAction = () => {
+        updateAndSave({
+            angreSisteEndring: true,
+            tilbakestilleHistorikk: false,
+        });
+    };
     const resetTilDataFraFreg = () => {
-        updatedAndSave(mapSivilstandProsessert(sivilstandProssesert.sivilstandListe));
+        updateAndSave({
+            tilbakestilleHistorikk: true,
+            angreSisteEndring: false,
+        });
         setShowResetButton(false);
     };
 
+    const valideringsfeilSivilstand = valideringsfeil?.sivilstand;
     return (
         <div>
             <Box padding="4" background="surface-subtle" className="overflow-hidden">
-                {(errors?.root?.sivilstand as { types: string[] })?.types && (
+                {valideringsfeilSivilstand && valideringsfeilSivilstand.harFeil && (
                     <div className="mb-4">
-                        <ForskuddAlert variant="warning">
-                            <Heading spacing size="xsmall" level="3">
-                                {text.alert.feilIPeriodisering}
-                            </Heading>
-                            {Object.values((errors.root.sivilstand as { types: string[] }).types).map(
-                                (type: string) => (
-                                    <p key={type}>{type}</p>
-                                )
-                            )}
-                        </ForskuddAlert>
+                        {valideringsfeilSivilstand && (
+                            <ForskuddAlert variant="warning">
+                                <Heading spacing size="small" level="3">
+                                    {text.alert.feilIPeriodisering}
+                                </Heading>
+                                {valideringsfeilSivilstand.fremtidigPeriode && (
+                                    <p>{text.error.framoverPeriodisering}</p>
+                                )}
+                                {valideringsfeilSivilstand.hullIPerioder.length > 0 && (
+                                    <p>{text.error.hullIPerioder}</p>
+                                )}
+                                {valideringsfeilSivilstand.manglerPerioder && (
+                                    <p>{text.error.boforholdManglerPerioder}</p>
+                                )}
+                                {valideringsfeilSivilstand.ingenLøpendePeriode && (
+                                    <p>{text.error.ingenLoependePeriode}</p>
+                                )}
+                                {valideringsfeilSivilstand.ugyldigStatus && <p>{text.error.ugyldigStatus}</p>}
+                            </ForskuddAlert>
+                        )}
                     </div>
                 )}
                 <div className="grid grid-cols-2 gap-4">
@@ -353,6 +417,12 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </div>
                     )}
                 </div>
+                <NyOpplysningerFraFolkeregistreTabell
+                    onActivateOpplysninger={(overskriveManuelleOpplysninger) => {
+                        setShowUndoButton((prevValue) => prevValue || overskriveManuelleOpplysninger);
+                        setShowResetButton(!overskriveManuelleOpplysninger);
+                    }}
+                />
                 {controlledFields.length > 0 && (
                     <div
                         className={`${
@@ -427,62 +497,55 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         </Table>
                     </div>
                 )}
-                {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
-                    <Button variant="tertiary" type="button" size="small" className="w-fit mt-4" onClick={addPeriode}>
-                        {text.label.leggTilPeriode}
-                    </Button>
-                )}
+                <VStack gap="2">
+                    {showUndoButton && (
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit mt-2"
+                            onClick={undoAction}
+                            iconPosition="right"
+                            icon={<ArrowUndoIcon aria-hidden />}
+                        >
+                            {text.label.angreSisteSteg}
+                        </Button>
+                    )}
+                    {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit mt-4"
+                            onClick={addPeriode}
+                        >
+                            {text.label.leggTilPeriode}
+                        </Button>
+                    )}
+                </VStack>
             </Box>
         </div>
     );
 };
 
 const Opplysninger = () => {
-    const sivilstandProssesert = useSivilstandOpplysningerProssesert();
-    const sivilstandOpplysninger = useGetOpplysningerSivilstand();
+    const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerSivilstandV2();
 
-    const behandling = useGetBehandlingV2();
-    if (!sivilstandOpplysninger) {
+    if (!aktiveOpplysninger) {
         return null;
     }
 
-    const virkingstidspunkt = dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt);
-
-    const sivilstandsOpplysningerFiltrert = () => {
-        const opplysningerSortert = sivilstandOpplysninger.grunnlag.sort((a, b) => {
-            if (a.gyldigFom == null) return -1;
-            if (b.gyldigFom == null) return 1;
-            return dateOrNull(a.gyldigFom) > dateOrNull(b.gyldigFom) ? 1 : -1;
-        });
-        if (sivilstandProssesert.status !== SivilstandBeregnetStatusEnum.OK) {
-            return opplysningerSortert;
-        }
-
-        const opplysningerFiltrert = opplysningerSortert.filter((sivilstand, i) => {
-            const nesteSivilstand = opplysningerSortert[i + 1];
-            return (
-                virkingstidspunkt == null ||
-                dateOrNull(sivilstand.gyldigFom) >= virkingstidspunkt ||
-                (nesteSivilstand != null && dateOrNull(nesteSivilstand.gyldigFom) > virkingstidspunkt)
-            );
-        });
-
-        if (opplysningerFiltrert.length === 0 && opplysningerSortert.length > 0) {
-            return [opplysningerSortert[opplysningerSortert.length - 1]];
-        }
-        return opplysningerFiltrert;
-    };
-    return (
-        <ReadMore header={text.title.opplysningerFraFolkeregistret} size="small" className="pb-4">
-            <Table className="w-[300px] opplysninger" size="small">
+    const renderTable = (opplysninger: SivilstandGrunnlagDto[]) => {
+        return (
+            <Table className="w-[200px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>{text.label.fraDato}</Table.HeaderCell>
+                        <Table.HeaderCell style={{ width: "120px" }}>{text.label.fraDato}</Table.HeaderCell>
                         <Table.HeaderCell>{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {sivilstandsOpplysningerFiltrert().map((periode, index) => (
+                    {opplysninger.map((periode, index) => (
                         <Table.Row key={`${periode.type}-${index}`}>
                             <Table.DataCell className="flex justify-start gap-2">
                                 <>{periode.gyldigFom ? DateToDDMMYYYYString(new Date(periode.gyldigFom)) : "\u00A0"}</>
@@ -492,6 +555,142 @@ const Opplysninger = () => {
                     ))}
                 </Table.Body>
             </Table>
+        );
+    };
+
+    const harNyeOpplysninger = ikkeAktiverteOpplysninger && ikkeAktiverteOpplysninger.grunnlag.length > 0;
+    return (
+        <ReadMore
+            header={
+                <HStack gap="2">
+                    {text.title.opplysningerFraFolkeregistret}
+                    {harNyeOpplysninger && (
+                        <Tag size="xsmall" variant="success">
+                            {text.label.nytt}
+                        </Tag>
+                    )}
+                </HStack>
+            }
+            size="small"
+            className="pb-4"
+        >
+            <HStack gap="2" className="w-max">
+                <Box padding="1">{renderTable(aktiveOpplysninger.grunnlag)}</Box>
+                {harNyeOpplysninger && (
+                    <Box padding="1" className="border-[var(--a-border-success)] border-l-2 border-solid">
+                        {renderTable(ikkeAktiverteOpplysninger.grunnlag)}
+                    </Box>
+                )}
+            </HStack>
         </ReadMore>
     );
 };
+
+type NyOpplysningerFraFolkeregistreTabellProps = {
+    onActivateOpplysninger: (overskriveManuelleOpplysninger: boolean) => void;
+};
+function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOpplysningerFraFolkeregistreTabellProps) {
+    const { ikkeAktiverteOpplysninger } = useGetOpplysningerSivilstandV2();
+    const hasNewOpplysningerFraFolkeregistre = ikkeAktiverteOpplysninger != null;
+    const activateGrunnlag = useOnActivateGrunnlag();
+    const { setSaveErrorState } = useBehandlingProvider();
+    const { setValue } = useFormContext<BoforholdFormValues>();
+    const behandling = useGetBehandlingV2();
+    const bidragsmottaker = behandling.roller.find((r) => r.rolletype == Rolletype.BM);
+    const onActivate = (overskriveManuelleOpplysninger: boolean) => {
+        activateGrunnlag.mutation.mutate(
+            {
+                overskriveManuelleOpplysninger,
+                personident: bidragsmottaker.ident,
+                grunnlagstype: OpplysningerType.SIVILSTAND,
+            },
+            {
+                onSuccess: (response) => {
+                    onActivateOpplysninger(overskriveManuelleOpplysninger);
+                    activateGrunnlag.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            boforhold: {
+                                ...currentData.boforhold,
+                                sivilstand: response.boforhold.sivilstand,
+                                valideringsfeil: {
+                                    ...currentData.boforhold.valideringsfeil,
+                                    sivilstand: currentData.boforhold.valideringsfeil.sivilstand,
+                                },
+                            },
+                            aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
+                            ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
+                        };
+                    });
+
+                    setValue("sivilstand", response.boforhold.sivilstand);
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onActivate(overskriveManuelleOpplysninger),
+                    });
+                },
+            }
+        );
+    };
+    const pendingActivate = activateGrunnlag.mutation.isPending ? activateGrunnlag.mutation.variables : null;
+    if (!hasNewOpplysningerFraFolkeregistre) return null;
+    return (
+        <Box
+            padding="4"
+            background="surface-default"
+            borderWidth="1"
+            borderRadius="medium"
+            borderColor="border-default"
+            className="w-[708px]"
+        >
+            <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
+            <table className="mt-2">
+                <thead>
+                    <tr>
+                        <th align="left">{text.label.fraOgMed}</th>
+                        <th align="left">{text.label.tilOgMed}</th>
+                        <th align="left">{text.label.status}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ikkeAktiverteOpplysninger.sivilstand?.map((periode, index) => (
+                        <tr key={index + periode.datoFom}>
+                            <td width="100px" scope="row">
+                                {DateToDDMMYYYYString(new Date(periode.datoFom))}
+                            </td>
+                            <td width="100px">
+                                {" "}
+                                {periode.datoTom ? DateToDDMMYYYYString(new Date(periode.datoTom)) : ""}
+                            </td>
+                            <td width="250px">{hentVisningsnavn(periode.sivilstand)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <HStack gap="6" className="mt-4">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(true)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                >
+                    Ja
+                </Button>
+                <Button
+                    type="button"
+                    variant="secondary"
+                    size="xsmall"
+                    onClick={() => onActivate(false)}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                >
+                    Nei
+                </Button>
+            </HStack>
+        </Box>
+    );
+}
