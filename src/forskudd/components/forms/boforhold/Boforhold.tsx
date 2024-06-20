@@ -310,7 +310,7 @@ const AddBarnForm = ({
         const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
 
         const addedBarn: OpprettHusstandsstandsmedlem = {
-            personident: val === "dnummer" ? ident : "",
+            personident: val === "dnummer" ? ident : null,
             navn: navn,
             fødselsdato: fd,
         };
