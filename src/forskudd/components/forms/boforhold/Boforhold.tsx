@@ -4,6 +4,7 @@ import {
     HusstandsbarnperiodeDto,
     Kilde,
     OppdatereBoforholdRequestV2,
+    OpprettHusstandsstandsmedlem,
 } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -25,7 +26,7 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
 import {
     addMonthsIgnoreDay,
@@ -310,22 +311,10 @@ const AddBarnForm = ({
 
         const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
 
-        const addedBarn: HusstandsbarnDtoV2 = {
-            ident: val === "dnummer" ? ident : "",
-            medIBehandling: false,
+        const addedBarn: OpprettHusstandsstandsmedlem = {
+            personident: val === "dnummer" ? ident : "",
             navn: navn,
             fødselsdato: fd,
-            kilde: Kilde.MANUELL,
-            perioder: [
-                {
-                    datoFom: isAfterDate(fd, datoFom)
-                        ? toISODateString(firstDayOfMonth(new Date(fd)))
-                        : toISODateString(datoFom),
-                    datoTom: null,
-                    bostatus: Bostatuskode.MED_FORELDER,
-                    kilde: Kilde.MANUELL,
-                },
-            ],
         };
         const indexOfFirstOlderChild = getValues("husstandsbarn").findIndex(
             (barn) =>
@@ -337,7 +326,7 @@ const AddBarnForm = ({
             { oppdatereHusstandsmedlem: { opprettHusstandsmedlem: addedBarn } },
             {
                 onSuccess: (response) => {
-                    barnFieldArray.insert(insertIndex, { ...addedBarn, ...response.oppdatertHusstandsbarn });
+                    barnFieldArray.insert(insertIndex, { ...response.oppdatertHusstandsbarn });
                     setOpenAddBarnForm(false);
                     updatedPageErrorState();
 

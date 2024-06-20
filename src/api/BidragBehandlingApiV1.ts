@@ -950,6 +950,7 @@ export enum SivilstandskodePDL {
 
 /** Utgiftsgrunnlag for særtilskudd. Vil alltid være null for forskudd og bidrag */
 export interface SaertilskuddUtgifterDto {
+    avslag?: Resultatkode;
     beregning?: UtgiftBeregningDto;
     notat: BehandlingNotatDto;
     utgifter: UtgiftspostDto[];
@@ -978,8 +979,8 @@ export interface UtgiftspostDto {
      * @format date
      */
     dato: string;
-    /** Beskrivelse av utgiften. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
-    beskrivelse: string;
+    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+    type: UtgiftspostDtoTypeEnum;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
@@ -1009,8 +1010,8 @@ export interface OppdatereUtgift {
      * @format date
      */
     dato: string;
-    /** Beskrivelse av utgiften. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
-    beskrivelse: string;
+    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc). Skal bare settes for kategori konfirmasjon */
+    type?: OppdatereUtgiftTypeEnum;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
@@ -1043,6 +1044,7 @@ export interface OppdatereUtgiftResponse {
     utgiftposter: UtgiftspostDto[];
     notat: BehandlingNotatDto;
     beregning?: UtgiftBeregningDto;
+    avslag?: Resultatkode;
 }
 
 export interface OppdatereInntektRequest {
@@ -1573,6 +1575,38 @@ export interface VedtakPeriodeDto {
     grunnlagReferanseListe: string[];
 }
 
+export interface BehandlingDetaljerDtoV2 {
+    /** @format int64 */
+    id: number;
+    type: TypeBehandling;
+    vedtakstype: Vedtakstype;
+    stønadstype?: Stonadstype;
+    engangsbeløptype?: Engangsbeloptype;
+    erVedtakFattet: boolean;
+    erKlageEllerOmgjøring: boolean;
+    /** @format date-time */
+    opprettetTidspunkt: string;
+    /** @format date */
+    søktFomDato: string;
+    /** @format date */
+    mottattdato: string;
+    søktAv: SoktAvType;
+    saksnummer: string;
+    /** @format int64 */
+    søknadsid: number;
+    /** @format int64 */
+    søknadRefId?: number;
+    /** @format int64 */
+    vedtakRefId?: number;
+    behandlerenhet: string;
+    /** @uniqueItems true */
+    roller: RolleDto[];
+    /** @format date */
+    virkningstidspunkt?: string;
+    årsak?: TypeArsakstype;
+    avslag?: Resultatkode;
+}
+
 export interface Arbeidsforhold {
     periode: TypeArManedsperiode;
     arbeidsgiver: string;
@@ -1733,8 +1767,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1765,6 +1799,28 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
+}
+
+/** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+export enum UtgiftspostDtoTypeEnum {
+    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
+    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
+    SELSKAP = "SELSKAP",
+    KLAeR = "KLÆR",
+    REISEUTGIFT = "REISEUTGIFT",
+    TANNREGULERING = "TANNREGULERING",
+    OPTIKK = "OPTIKK",
+}
+
+/** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc). Skal bare settes for kategori konfirmasjon */
+export enum OppdatereUtgiftTypeEnum {
+    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
+    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
+    SELSKAP = "SELSKAP",
+    KLAeR = "KLÆR",
+    REISEUTGIFT = "REISEUTGIFT",
+    TANNREGULERING = "TANNREGULERING",
+    OPTIKK = "OPTIKK",
 }
 
 export enum OppdaterRollerResponseStatusEnum {
@@ -2366,6 +2422,40 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente behandling detaljer for bruk i Bisys
+         *
+         * @tags behandling-controller-v-2
+         * @name HenteBehandlingDetaljer
+         * @request GET:/api/v2/behandling/detaljer/{behandlingsid}
+         * @secure
+         */
+        henteBehandlingDetaljer: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<BehandlingDetaljerDtoV2, BehandlingDetaljerDtoV2>({
+                path: `/api/v2/behandling/detaljer/${behandlingsid}`,
+                method: "GET",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Hente behandling detaljer for søknadsid bruk i Bisys
+         *
+         * @tags behandling-controller-v-2
+         * @name HenteBehandlingDetaljerForSoknadsid
+         * @request GET:/api/v2/behandling/detaljer/soknad/{søknadsid}
+         * @secure
+         */
+        henteBehandlingDetaljerForSoknadsid: (soknadsid: number, params: RequestParams = {}) =>
+            this.request<BehandlingDetaljerDtoV2, BehandlingDetaljerDtoV2>({
+                path: `/api/v2/behandling/detaljer/soknad/{søknadsid}`,
                 method: "GET",
                 secure: true,
                 format: "json",

@@ -1,4 +1,4 @@
-import { VirkningstidspunktDto } from "@api/BidragBehandlingApiV1";
+import { SaertilskuddUtgifterDto } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
@@ -19,9 +19,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
-const createInitialValues = (response: VirkningstidspunktDto) => ({
-    virkningstidspunkt: response.virkningstidspunkt,
-    årsakAvslag: response.årsak ?? response.avslag ?? "",
+const createInitialValues = (response: SaertilskuddUtgifterDto) => ({
+    beregning: response.beregning,
     notat: {
         kunINotat: response.notat?.kunINotat,
     },
@@ -89,7 +88,7 @@ const UtgifterForm = () => {
     useEffect(() => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
-            virkningstidspunkt: {
+            utgift: {
                 error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
                 ...useFormMethods.formState.errors,
             },
@@ -98,7 +97,7 @@ const UtgifterForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type == undefined) {
+            if (type == undefined) {
                 return;
             } else {
                 debouncedOnSave();
