@@ -1,14 +1,15 @@
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
-import { useSærligeutgifter } from "../../context/SærligeutgifterContext";
 import { SærligeutgifterStepper } from "../../enum/SærligeutgifterStepper";
+import Utgifter from "./utgifter/Utgifter";
 
 const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
     switch (activeStep) {
         case SærligeutgifterStepper.UTGIFTER:
-            return null;
+            return <Utgifter />;
         case SærligeutgifterStepper.INNTEKT:
             return null;
         case SærligeutgifterStepper.BOFORHOLD:
@@ -21,7 +22,7 @@ const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
 });
 
 export default function FormWrapper() {
-    const { activeStep } = useSærligeutgifter();
+    const { activeStep } = useBehandlingProvider();
 
     return (
         <Suspense

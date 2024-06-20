@@ -11,7 +11,7 @@ import React, { Suspense, useEffect, useMemo, useRef } from "react";
 
 import { notatBroadcastName } from "../../constants/notat";
 
-type NotatProps = { behandlingId?: number; vedtakId?: number };
+type NotatProps = { behandlingId?: string; vedtakId?: string };
 export default (props: NotatProps) => {
     const [showTab, setShowTab] = React.useState<string>("html");
     return (

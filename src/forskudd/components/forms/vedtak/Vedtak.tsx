@@ -13,6 +13,7 @@ import { RolleTag } from "@common/components/RolleTag";
 import { BEHANDLING_API_V1 } from "@common/constants/api";
 import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "@common/constants/texts";
 import texts from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
@@ -29,10 +30,9 @@ import environment from "../../../../environment";
 import elementId from "../../../constants/elementIds";
 import elementIds from "../../../constants/elementIds";
 import { STEPS } from "../../../constants/steps";
-import { useForskudd } from "../../../context/ForskuddContext";
 
 const Vedtak = () => {
-    const { behandlingId, activeStep, lesemodus } = useForskudd();
+    const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
     const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
@@ -68,7 +68,7 @@ const Vedtak = () => {
 
 function AdminButtons() {
     const { isAdminEnabled } = useFeatureToogle();
-    const { behandlingId } = useForskudd();
+    const { behandlingId } = useBehandlingProvider();
     if (!isAdminEnabled) return null;
 
     return (
@@ -95,7 +95,7 @@ class MåBekrefteOpplysningerStemmerError extends Error {
 const FatteVedtakButtons = () => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { isFatteVedtakEnabled } = useFeatureToogle();
-    const { behandlingId } = useForskudd();
+    const { behandlingId } = useBehandlingProvider();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const queryClient = useQueryClient();
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status == "error";
@@ -104,7 +104,7 @@ const FatteVedtakButtons = () => {
             if (!bekreftetVedtak) {
                 throw new MåBekrefteOpplysningerStemmerError();
             }
-            return BEHANDLING_API_V1.api.fatteVedtak(behandlingId);
+            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId));
         },
         onSuccess: () => {
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
@@ -199,7 +199,7 @@ const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
 
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
-    const { onStepChange } = useForskudd();
+    const { onStepChange } = useBehandlingProvider();
     const {
         virkningstidspunkt: { avslag },
         vedtakstype,

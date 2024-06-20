@@ -6,6 +6,7 @@ import {
     Vedtakstype,
     VirkningstidspunktDto,
 } from "@api/BidragBehandlingApiV1";
+import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
@@ -15,6 +16,7 @@ import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
@@ -25,12 +27,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { ActionButtons } from "../inntekt/ActionButtons";
 
 const årsakListe = [
     TypeArsakstype.TREMANEDERTILBAKE,
@@ -182,7 +182,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 };
 
 const Side = () => {
-    const { onStepChange } = useForskudd();
+    const { onStepChange } = useBehandlingProvider();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
@@ -200,7 +200,7 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState, setSaveErrorState } = useForskudd();
+    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);

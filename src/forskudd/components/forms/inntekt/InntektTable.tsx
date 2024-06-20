@@ -11,6 +11,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
+import { InntektTables, useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -21,7 +22,6 @@ import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektTables, useForskudd } from "../../../context/ForskuddContext";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
@@ -93,7 +93,7 @@ export const EditOrSaveButton = ({
     onEditRow: (index: number) => void;
     onSaveRow: (index: number) => void;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     if (item.kanRedigeres === false) return null;
     return (
@@ -142,7 +142,7 @@ export const Periode = ({
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const [inntektType] = fieldName.split(".");
 
     const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
@@ -189,7 +189,8 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
+        useBehandlingProvider();
     const {
         inntekter,
         søktFomDato,

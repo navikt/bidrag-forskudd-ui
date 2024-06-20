@@ -1,10 +1,12 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
+import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { BodyShort, ExpansionCard, Heading, Tabs } from "@navikt/ds-react";
@@ -14,13 +16,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormValues } from "../../../types/inntektFormValues";
 import { createInitialValues } from "../helpers/inntektFormHelpers";
-import { ActionButtons } from "./ActionButtons";
 import { Arbeidsforhold } from "./Arbeidsforhold";
 import { Barnetillegg } from "./Barnetillegg";
 import { BeregnetInntekter } from "./BeregnetInntekter";
@@ -123,7 +123,7 @@ const Main = () => {
 };
 
 const Side = () => {
-    const { onStepChange, setSaveErrorState } = useForskudd();
+    const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
     const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));

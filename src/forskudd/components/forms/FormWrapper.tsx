@@ -1,8 +1,8 @@
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
-import { useForskudd } from "../../context/ForskuddContext";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import Boforhold from "./boforhold/Boforhold";
 import Inntekt from "./inntekt/Inntekt";
@@ -25,7 +25,7 @@ const ForskuddForm = memo(({ activeStep }: { activeStep: string }) => {
 });
 
 export default function FormWrapper() {
-    const { activeStep } = useForskudd();
+    const { activeStep } = useBehandlingProvider();
 
     return (
         <Suspense

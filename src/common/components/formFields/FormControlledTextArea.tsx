@@ -1,8 +1,7 @@
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Textarea } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
-
-import { useForskudd } from "../../../forskudd/context/ForskuddContext";
 
 export const FormControlledTextarea = ({
     name,
@@ -14,7 +13,7 @@ export const FormControlledTextarea = ({
     hideLabel?: boolean;
 }) => {
     const { control } = useFormContext();
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     const { field } = useController({ name, control });
 

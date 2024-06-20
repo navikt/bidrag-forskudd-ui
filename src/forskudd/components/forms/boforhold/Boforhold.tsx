@@ -4,6 +4,7 @@ import {
     HusstandsbarnperiodeDto,
     Kilde,
     OppdatereBoforholdRequestV2,
+    OpprettHusstandsstandsmedlem,
 } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -21,10 +22,11 @@ import { RolleTag } from "@common/components/RolleTag";
 import StatefulAlert from "@common/components/StatefulAlert";
 import { PERSON_API } from "@common/constants/api";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { firstDayOfMonth, isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Radio, RadioGroup, Search, Table, TextField, VStack } from "@navikt/ds-react";
 import {
     addMonthsIgnoreDay,
@@ -40,7 +42,6 @@ import React, { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useRef, 
 import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import elementIds from "../../../constants/elementIds";
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -67,7 +68,7 @@ const DeleteButton = ({
     barn: HusstandsbarnDtoV2;
     index: number;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const firstOver18PeriodIndex = barn.perioder.findIndex((period) => boststatusOver18År.includes(period.bostatus));
     const showDeleteButton = barnIsOver18 && index === firstOver18PeriodIndex ? false : !!index;
@@ -96,7 +97,7 @@ const EditOrSaveButton = ({
     onSaveRow: (index: number) => void;
     onEditRow: (index: number) => void;
 }) => {
-    const { lesemodus } = useForskudd();
+    const { lesemodus } = useBehandlingProvider();
 
     if (lesemodus) return null;
 
@@ -176,7 +177,7 @@ const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
+    const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
     const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
@@ -246,27 +247,23 @@ const BoforholdsForm = () => {
     });
 
     return (
-        <>
-            <FormProvider {...useFormMethods}>
-                <form onSubmit={(e) => e.preventDefault()}>
-                    <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
-                </form>
-            </FormProvider>
-        </>
+        <FormProvider {...useFormMethods}>
+            <form onSubmit={(e) => e.preventDefault()}>
+                <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
+            </form>
+        </FormProvider>
     );
 };
 
 const AddBarnForm = ({
-    datoFom,
     setOpenAddBarnForm,
     barnFieldArray,
 }: {
-    datoFom: Date;
     setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { getValues } = useFormContext<BoforholdFormValues>();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -312,22 +309,10 @@ const AddBarnForm = ({
 
         const fd = val === "dnummer" ? person.fødselsdato : toISODateString(foedselsdato);
 
-        const addedBarn: HusstandsbarnDtoV2 = {
-            ident: val === "dnummer" ? ident : "",
-            medIBehandling: false,
+        const addedBarn: OpprettHusstandsstandsmedlem = {
+            personident: val === "dnummer" ? ident : null,
             navn: navn,
             fødselsdato: fd,
-            kilde: Kilde.MANUELL,
-            perioder: [
-                {
-                    datoFom: isAfterDate(fd, datoFom)
-                        ? toISODateString(firstDayOfMonth(new Date(fd)))
-                        : toISODateString(datoFom),
-                    datoTom: null,
-                    bostatus: Bostatuskode.MED_FORELDER,
-                    kilde: Kilde.MANUELL,
-                },
-            ],
         };
         const indexOfFirstOlderChild = getValues("husstandsbarn").findIndex(
             (barn) =>
@@ -339,7 +324,7 @@ const AddBarnForm = ({
             { oppdatereHusstandsmedlem: { opprettHusstandsmedlem: addedBarn } },
             {
                 onSuccess: (response) => {
-                    barnFieldArray.insert(insertIndex, { ...addedBarn, ...response.oppdatertHusstandsbarn });
+                    barnFieldArray.insert(insertIndex, { ...response.oppdatertHusstandsbarn });
                     setOpenAddBarnForm(false);
                     updatedPageErrorState();
 
@@ -521,8 +506,8 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
     );
 };
 const BarnPerioder = () => {
-    const datoFom = useVirkningsdato();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useForskudd();
+    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
+        useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control, getValues } = useFormContext<BoforholdFormValues>();
@@ -615,13 +600,7 @@ const BarnPerioder = () => {
                     </Box>
                 </Fragment>
             ))}
-            {openAddBarnForm && (
-                <AddBarnForm
-                    datoFom={datoFom}
-                    setOpenAddBarnForm={setOpenAddBarnForm}
-                    barnFieldArray={barnFieldArray}
-                />
-            )}
+            {openAddBarnForm && <AddBarnForm setOpenAddBarnForm={setOpenAddBarnForm} barnFieldArray={barnFieldArray} />}
             {!openAddBarnForm && !lesemodus && (
                 <Button variant="secondary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
                     + Legg til barn
@@ -636,19 +615,21 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         boforhold: { valideringsfeil },
     } = useGetBehandlingV2();
     const {
+        behandlingId,
+        lesemodus,
+        erVirkningstidspunktNåværendeMånedEllerFramITid,
         setErrorMessage,
         setErrorModalOpen,
         setPageErrorsOrUnsavedState,
         pageErrorsOrUnsavedState,
         setSaveErrorState,
-    } = useForskudd();
+    } = useBehandlingProvider();
     const [showUndoButton, setShowUndoButton] = useState(false);
-    const { behandlingId, lesemodus, erVirkningstidspunktNåværendeMånedEllerFramITid } = useForskudd();
     const [showResetButton, setShowResetButton] = useState(false);
     const [editableRow, setEditableRow] = useState<`${number}.${number}`>(undefined);
     const behandling = useGetBehandlingV2();
     const saveBoforhold = useOnSaveBoforhold();
-    const { control, getValues, clearErrors, resetField, setError, setValue, getFieldState, formState } =
+    const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
     const barnPerioder = useFieldArray({
         control,
@@ -744,12 +725,12 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         saveBoforhold.mutation.mutate(payload, {
             onSuccess: (response) => {
                 // Set datoTom til null ellers resettes den ikke
-                resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                barnPerioder.replace(
+                    response.oppdatertHusstandsbarn.perioder.map((d) => ({
                         ...d,
-                        datoTom: d.datoTom ? d.datoTom : null,
-                    })),
-                });
+                        datoTom: d.datoTom ?? null,
+                    }))
+                );
 
                 saveBoforhold.queryClientUpdater((currentData) => {
                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(
@@ -840,13 +821,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
                         {
                             onSuccess: (response) => {
-                                // Set datoTom til null ellers resettes den ikke
-                                resetField(`husstandsbarn.${barnIndex}.perioder`, {
-                                    defaultValue: response.oppdatertHusstandsbarn.perioder.map((d) => ({
+                                barnPerioder.replace(
+                                    response.oppdatertHusstandsbarn.perioder.map((d) => ({
                                         ...d,
-                                        datoTom: d.datoTom ? d.datoTom : null,
-                                    })),
-                                });
+                                        datoTom: d.datoTom ?? null,
+                                    }))
+                                );
+                                clearErrors(`husstandsbarn.${barnIndex}.perioder.${index}`);
+                                setEditableRow(undefined);
 
                                 saveBoforhold.queryClientUpdater((currentData) => {
                                     const updatedHusstandsbarnIndex = currentData.boforhold.husstandsbarn.findIndex(

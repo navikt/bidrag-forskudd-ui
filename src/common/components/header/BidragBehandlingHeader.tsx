@@ -1,13 +1,13 @@
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { SakHeader } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
-import { useForskudd } from "../../../forskudd/context/ForskuddContext";
 import text from "../../constants/texts";
 import { useGetBehandlingV2, usePersonsQueries } from "../../hooks/useApiData";
 
 export const Header = memo(() => {
-    const { behandlingId, vedtakId } = useForskudd();
+    const { behandlingId, vedtakId } = useBehandlingProvider();
     const { roller, saksnummer } = useGetBehandlingV2();
     const personsQueries = usePersonsQueries(roller);
     const rollerMedPersonNavn = personsQueries.map(({ data }) => data);

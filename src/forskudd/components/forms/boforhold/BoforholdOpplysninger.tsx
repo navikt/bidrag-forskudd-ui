@@ -5,6 +5,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
@@ -13,7 +14,6 @@ import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDat
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { useForskudd } from "../../../context/ForskuddContext";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
@@ -99,7 +99,7 @@ export const BoforholdOpplysninger = ({
 }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
-    const { lesemodus, setSaveErrorState } = useForskudd();
+    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;

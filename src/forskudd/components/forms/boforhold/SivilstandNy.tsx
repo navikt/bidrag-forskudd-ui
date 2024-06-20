@@ -13,7 +13,6 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { OverlayLoader } from "@common/components/OverlayLoader";
-import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
     useGetBehandlingV2,
@@ -28,6 +27,7 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import text from "../../../../common/constants/texts";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
@@ -160,7 +160,7 @@ const Periode = ({
         <div className="h-8 flex items-center">{item[field] && DateToDDMMYYYYString(dateOrNull(item[field]))}</div>
     );
 };
-export const Sivilstand = () => {
+export const SivilstandNy = () => {
     const datoFom = useVirkningsdato();
     return (
         <div className="mt-8">
@@ -218,7 +218,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 ...prevState.boforhold,
                 openFields: {
                     ...prevState.boforhold.openFields,
-                    sivilstand: editableRow !== undefined,
+                    sivilstand: editableRow != undefined,
                 },
             },
         }));

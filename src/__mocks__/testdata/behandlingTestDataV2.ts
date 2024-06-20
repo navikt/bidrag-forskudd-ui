@@ -1,7 +1,15 @@
-import { BehandlingDtoV2, Rolletype, SoktAvType, Stonadstype, Vedtakstype } from "@api/BidragBehandlingApiV1";
+import {
+    BehandlingDtoV2,
+    Rolletype,
+    SoktAvType,
+    Stonadstype,
+    TypeBehandling,
+    Vedtakstype,
+} from "@api/BidragBehandlingApiV1";
 
 export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     id: 1,
+    type: TypeBehandling.FORSKUDD,
     søknadsid: 1234,
     erVedtakFattet: false,
     vedtakstype: Vedtakstype.FASTSETTELSE,
