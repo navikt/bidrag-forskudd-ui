@@ -256,11 +256,9 @@ const BoforholdsForm = () => {
 };
 
 const AddBarnForm = ({
-    datoFom,
     setOpenAddBarnForm,
     barnFieldArray,
 }: {
-    datoFom: Date;
     setOpenAddBarnForm: Dispatch<SetStateAction<boolean>>;
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
@@ -508,7 +506,6 @@ const RemoveButton = ({ index, onRemoveBarn }: { index: number; onRemoveBarn: (i
     );
 };
 const BarnPerioder = () => {
-    const datoFom = useVirkningsdato();
     const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
         useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
@@ -603,13 +600,7 @@ const BarnPerioder = () => {
                     </Box>
                 </Fragment>
             ))}
-            {openAddBarnForm && (
-                <AddBarnForm
-                    datoFom={datoFom}
-                    setOpenAddBarnForm={setOpenAddBarnForm}
-                    barnFieldArray={barnFieldArray}
-                />
-            )}
+            {openAddBarnForm && <AddBarnForm setOpenAddBarnForm={setOpenAddBarnForm} barnFieldArray={barnFieldArray} />}
             {!openAddBarnForm && !lesemodus && (
                 <Button variant="secondary" type="button" size="small" className="w-fit" onClick={onOpenAddBarnForm}>
                     + Legg til barn

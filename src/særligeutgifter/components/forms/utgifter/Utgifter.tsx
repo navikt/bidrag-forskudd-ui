@@ -10,7 +10,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { capitalize } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
 import { DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect } from "react";
@@ -88,16 +88,12 @@ const UtgifterForm = () => {
     useEffect(() => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
-            utgift: {
-                error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
-                ...useFormMethods.formState.errors,
-            },
         });
     }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (type == undefined) {
+            if (name === undefined || type == undefined) {
                 return;
             } else {
                 debouncedOnSave();
