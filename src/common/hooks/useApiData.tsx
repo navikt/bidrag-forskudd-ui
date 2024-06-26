@@ -255,16 +255,15 @@ export const useAktiveGrunnlagsdata = () => {
     const queryClient = useQueryClient();
 
     return useMutation<
-        { data: BehandlingDtoV2; type: OpplysningerType },
-        { data: BehandlingDtoV2; type: OpplysningerType },
+        { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
+        { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
         { personident: string; type: OpplysningerType }
     >({
         mutationFn: async ({ personident, type }) => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(Number(behandlingId), {
-                aktivereGrunnlagForPerson: {
-                    personident,
-                    grunnlagsdatatyper: [type],
-                },
+            const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(Number(behandlingId), {
+                personident,
+                grunnlagstype: type,
+                overskriveManuelleOpplysninger: false,
             });
             return { data, type };
         },
