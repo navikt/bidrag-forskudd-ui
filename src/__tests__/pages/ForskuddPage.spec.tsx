@@ -1,4 +1,3 @@
-import { BehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -15,6 +14,7 @@ import sinon from "sinon";
 import { behandlingMockApiData } from "../../__mocks__/testdata/behandlingTestData";
 import { boforholdData } from "../../__mocks__/testdata/boforholdTestData";
 import environment from "../../environment";
+import { ForskuddBehandlingProviderWrapper } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddPage } from "../../forskudd/pages/forskudd/ForskuddPage";
 
 const queryClient = new QueryClient();
@@ -24,6 +24,7 @@ const config: IConfig = {
     refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
     appName: "bidrag-behandling-ui",
 };
+
 const RouterWrapper = ({ children }: PropsWithChildren<unknown>) => {
     return (
         <FlagProvider config={config}>
@@ -172,9 +173,9 @@ describe("ForskuddPage", () => {
     it("should render Virkningstidspunkt", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <BehandlingProvider>
+                <ForskuddBehandlingProviderWrapper>
                     <ForskuddPage />
-                </BehandlingProvider>
+                </ForskuddBehandlingProviderWrapper>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=virkningstidspunkt" }
         );
@@ -188,9 +189,9 @@ describe("ForskuddPage", () => {
     it("should render Boforhold", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <BehandlingProvider>
+                <ForskuddBehandlingProviderWrapper>
                     <ForskuddPage />
-                </BehandlingProvider>
+                </ForskuddBehandlingProviderWrapper>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=boforhold" }
         );
@@ -204,9 +205,9 @@ describe("ForskuddPage", () => {
     it("should render Vedtak", async () => {
         renderWithRouter(
             <QueryClientProvider client={queryClient}>
-                <BehandlingProvider>
+                <ForskuddBehandlingProviderWrapper>
                     <ForskuddPage />
-                </BehandlingProvider>
+                </ForskuddBehandlingProviderWrapper>
             </QueryClientProvider>,
             { route: "/forskudd/1?steg=vedtak" }
         );

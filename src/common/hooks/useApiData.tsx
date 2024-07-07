@@ -4,11 +4,13 @@ import {
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
-    HusstandsbarnGrunnlagDto,
+    HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUtgiftRequest,
+    OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
     OpplysningerType,
     RolleDto,
@@ -30,6 +32,7 @@ export const MutationKeys = {
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
+    updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
 };
 
 export const QueryKeys = {
@@ -54,8 +57,8 @@ export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
 };
 export const useGetOpplysningerBoforhold = (): {
-    aktiveOpplysninger: HusstandsbarnGrunnlagDto[];
-    ikkeAktiverteOpplysninger: HusstandsbarnGrunnlagDto[];
+    aktiveOpplysninger: HusstandsmedlemGrunnlagDto[];
+    ikkeAktiverteOpplysninger: HusstandsmedlemGrunnlagDto[];
 } => {
     const behandling = useGetBehandlingV2();
     return {
@@ -255,16 +258,15 @@ export const useAktiveGrunnlagsdata = () => {
     const queryClient = useQueryClient();
 
     return useMutation<
-        { data: BehandlingDtoV2; type: OpplysningerType },
-        { data: BehandlingDtoV2; type: OpplysningerType },
+        { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
+        { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
         { personident: string; type: OpplysningerType }
     >({
         mutationFn: async ({ personident, type }) => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereBehandlingV2(Number(behandlingId), {
-                aktivereGrunnlagForPerson: {
-                    personident,
-                    grunnlagsdatatyper: [type],
-                },
+            const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(Number(behandlingId), {
+                personident,
+                grunnlagstype: type,
+                overskriveManuelleOpplysninger: true,
             });
             return { data, type };
         },
@@ -360,6 +362,23 @@ export const useOppdatereVirkningstidspunktV2 = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av virkningstidsdpunkt", error);
+        },
+    });
+};
+
+export const useUpdateUtgifter = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateUtgifter(behandlingId),
+        mutationFn: async (payload: OppdatereUtgiftRequest): Promise<OppdatereUtgiftResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereUtgift(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av utgifter", error);
         },
     });
 };

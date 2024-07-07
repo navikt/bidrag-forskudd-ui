@@ -1,4 +1,3 @@
-import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import ErrorConfirmationModal from "@common/components/ErrorConfirmationModal";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import text from "@common/constants/texts";
@@ -18,33 +17,10 @@ import React, {
 } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
-import { STEPS as ForskuddSteps } from "../../forskudd/constants/steps";
+import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
-import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants/steps";
+import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særligeutgifter/context/SærligeugifterProviderWrapper";
 import { SærligeutgifterStepper } from "../../særligeutgifter/enum/SærligeutgifterStepper";
-
-export type InntektTables =
-    | "småbarnstillegg"
-    | "utvidetBarnetrygd"
-    | `årsinntekter.${string}`
-    | `barnetillegg.${string}`
-    | `kontantstøtte.${string}`;
-
-type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
-
-export type PageErrorsOrUnsavedState = {
-    virkningstidspunkt: { error: boolean };
-    boforhold: {
-        error: boolean;
-        openFields?: { [key in HusstandsbarnTables]: boolean };
-    };
-    inntekt: {
-        error: boolean;
-        openFields?: {
-            [key in InntektTables]: boolean;
-        };
-    };
-};
 
 interface SaveErrorState {
     error: boolean;
@@ -63,24 +39,44 @@ interface IBehandlingContext {
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
-    pageErrorsOrUnsavedState: PageErrorsOrUnsavedState;
-    setPageErrorsOrUnsavedState: Dispatch<SetStateAction<PageErrorsOrUnsavedState>>;
+    pageErrorsOrUnsavedState: ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState;
+    setPageErrorsOrUnsavedState: Dispatch<
+        SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
+    >;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
     onStepChange: (x: number) => void;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
 
-const getStepsConfByBehandling = (behandlingType: TypeBehandling) => {
-    switch (behandlingType) {
-        case TypeBehandling.FORSKUDD:
-            return { defaultStep: ForskuddStepper.VIRKNINGSTIDSPUNKT, steps: ForskuddSteps };
-        case TypeBehandling.SAeRLIGEUTGIFTER:
-            return { defaultStep: SærligeutgifterStepper.UTGIFTER, steps: SærligeutgifterSteps };
-    }
+type ForskuddSteps = {
+    defaultStep: ForskuddStepper;
+    steps: { [key in ForskuddStepper]: number };
 };
 
-function BehandlingProvider({ children }: PropsWithChildren) {
+type SærligeutgifterSteps = {
+    defaultStep: SærligeutgifterStepper;
+    steps: { [key in SærligeutgifterStepper]: number };
+};
+
+export type BehandlingProviderProps = {
+    props: {
+        getPageErrorTexts: () => { title: string; description: string };
+        formSteps: ForskuddSteps | SærligeutgifterSteps;
+        pageErrorsOrUnsavedState: ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState;
+        setPageErrorsOrUnsavedState: Dispatch<
+            SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
+        >;
+    };
+};
+
+function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingProviderProps>) {
+    const {
+        formSteps: { defaultStep, steps },
+        getPageErrorTexts,
+        pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState,
+    } = props;
     const { behandlingId, saksnummer, vedtakId } = useParams<{
         behandlingId?: string;
         saksnummer?: string;
@@ -88,15 +84,9 @@ function BehandlingProvider({ children }: PropsWithChildren) {
     }>();
     const [searchParams, setSearchParams] = useSearchParams();
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
-    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
-        virkningstidspunkt: { error: false },
-        boforhold: { error: false },
-        inntekt: { error: false },
-    });
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
-    const { defaultStep, steps } = getStepsConfByBehandling(behandling.type);
     const activeStep = searchParams.get("steg") ?? defaultStep;
     const setActiveStep = useCallback((x: number) => {
         searchParams.delete("steg");
@@ -153,19 +143,6 @@ function BehandlingProvider({ children }: PropsWithChildren) {
         [activeStep, behandlingId, vedtakId, saksnummer, errorMessage, errorModalOpen, pageErrorsOrUnsavedState]
     );
 
-    function getPageErrorTexts(): { title: string; description: string } {
-        if (pageErrorsOrUnsavedState.virkningstidspunkt.error) {
-            return {
-                title: "Det er ikke lagt inn dato på virkningstidspunkt",
-                description: "Hvis det ikke settes inn en dato vil virkningsdatoen settes til forrige lagrede dato",
-            };
-        } else {
-            return {
-                title: text.varsel.statusIkkeLagret,
-                description: text.varsel.statusIkkeLagretDescription,
-            };
-        }
-    }
     return (
         <BehandlingContext.Provider value={value}>
             <ConfirmationModal

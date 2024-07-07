@@ -189,8 +189,8 @@ const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
         case OpplysningerType.KONTANTSTOTTE:
             return elementId.seksjon_inntekt_kontantstøtte;
         case OpplysningerType.BOFORHOLD:
-            return opplysninger.gjelderBarn?.husstandsbarnId
-                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsbarnId}`
+            return opplysninger.gjelderBarn?.husstandsmedlemId
+                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsmedlemId}`
                 : `${elementIds.seksjon_boforhold}`;
         case OpplysningerType.SIVILSTAND:
             return elementId.seksjon_sivilstand;
@@ -222,11 +222,11 @@ const VedtakResultat = () => {
                 </ErrorSummary.Item>
             );
         }
-        if (feilInnhold.husstandsbarn != null) {
-            feilInnhold.husstandsbarn.forEach((value) =>
+        if (feilInnhold.husstandsmedlem != null) {
+            feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsbarnId}`}
+                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsmedlemId}`}
                         onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}

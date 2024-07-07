@@ -11,7 +11,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
-import { InntektTables, useBehandlingProvider } from "@common/context/BehandlingContext";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -22,6 +22,7 @@ import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { InntektTables } from "../../../context/ForskuddBehandlingProviderWrapper";
 import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";

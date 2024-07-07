@@ -1,8 +1,4 @@
-import {
-    AktivereGrunnlagRequestV2,
-    HusstandsbarnGrunnlagPeriodeDto,
-    OpplysningerType,
-} from "@api/BidragBehandlingApiV1";
+import { AktivereGrunnlagRequestV2, BostatusperiodeGrunnlagDto, OpplysningerType } from "@api/BidragBehandlingApiV1";
 import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -48,7 +44,7 @@ export const NyOpplysningerAlert = () => {
         </ForskuddAlert>
     );
 };
-const Opplysninger = ({ perioder }: { perioder: HusstandsbarnGrunnlagPeriodeDto[] }) => {
+const Opplysninger = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
     if (!perioder) {
         return null;
@@ -129,9 +125,9 @@ export const BoforholdOpplysninger = ({
                                 husstandsbarn: response.boforhold.husstandsbarn,
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
-                                    husstandsbarn: currentData.boforhold.valideringsfeil.husstandsbarn.filter(
+                                    husstandsbarn: currentData.boforhold.valideringsfeil.husstandsmedlem.filter(
                                         (husstandsbarn) =>
-                                            husstandsbarn.barn.husstandsbarnId !== oppdatertHusstandsbarn.id
+                                            husstandsbarn.barn.husstandsmedlemId !== oppdatertHusstandsbarn.id
                                     ),
                                 },
                             },
@@ -188,7 +184,7 @@ function NyOpplysningerFraFolkeregistreTabell({
     pendingActivate,
 }: {
     onActivate: (overskriveManuelleOpplysninger: boolean) => void;
-    ikkeAktivertePerioder: HusstandsbarnGrunnlagPeriodeDto[];
+    ikkeAktivertePerioder: BostatusperiodeGrunnlagDto[];
     pendingActivate?: AktivereGrunnlagRequestV2;
 }) {
     const virkningsOrSoktFraDato = useVirkningsdato();

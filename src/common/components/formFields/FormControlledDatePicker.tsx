@@ -14,6 +14,7 @@ interface FormControlledDatePickerProps {
     className?: string;
     required?: boolean;
     onChange?: (date: Date | undefined) => void;
+    toDate?: Date;
 }
 
 export const FormControlledDatePicker = ({
@@ -25,6 +26,7 @@ export const FormControlledDatePicker = ({
     className,
     required,
     onChange,
+    toDate,
 }: FormControlledDatePickerProps) => {
     const { control, setError, clearErrors } = useFormContext();
     const { field, fieldState } = useController({
@@ -63,6 +65,7 @@ export const FormControlledDatePicker = ({
             error={fieldState?.error?.message}
             onValidate={onValidate}
             fieldValue={field.value}
+            toDate={toDate}
         />
     );
 };

@@ -1,7 +1,7 @@
 import {
     Bostatuskode,
-    HusstandsbarnDtoV2,
-    HusstandsbarnperiodeDto,
+    BostatusperiodeDto,
+    HusstandsmedlemDtoV2,
     Kilde,
     OppdatereBoforholdRequestV2,
     OpprettHusstandsstandsmedlem,
@@ -65,7 +65,7 @@ const DeleteButton = ({
     index,
 }: {
     onRemovePeriode: (index) => void;
-    barn: HusstandsbarnDtoV2;
+    barn: HusstandsmedlemDtoV2;
     index: number;
 }) => {
     const { lesemodus } = useBehandlingProvider();
@@ -128,8 +128,8 @@ const Status = ({
 }: {
     editableRow: boolean;
     fieldName: `husstandsbarn.${number}.perioder.${number}`;
-    barn: HusstandsbarnDtoV2;
-    item: HusstandsbarnperiodeDto;
+    barn: HusstandsmedlemDtoV2;
+    item: BostatusperiodeDto;
 }) => {
     const { clearErrors } = useFormContext<BoforholdFormValues>();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
@@ -170,10 +170,10 @@ const Periode = ({
     label,
 }: {
     editableRow: boolean;
-    item: HusstandsbarnperiodeDto;
+    item: BostatusperiodeDto;
     fieldName: `husstandsbarn.${number}.perioder.${number}`;
     field: "datoFom" | "datoTom";
-    barn: HusstandsbarnDtoV2;
+    barn: HusstandsmedlemDtoV2;
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
@@ -703,6 +703,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 oppdatereHusstandsmedlem: {
                     oppdaterPeriode: {
                         idHusstandsbarn: barn.id,
+                        idHusstandsmedlem: barn.id,
                         idPeriode: selectedPeriodeId,
                         datoFom: selectedDatoFom,
                         datoTom: selectedDatoTom,
@@ -871,6 +872,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         oppdatereHusstandsmedlem: {
                             oppdaterPeriode: {
                                 idHusstandsbarn: barn.id,
+                                idHusstandsmedlem: barn.id,
                                 idPeriode: periode.id,
                                 datoFom: periode.datoFom,
                                 datoTom: periode.datoTom,
@@ -915,8 +917,8 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
-    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find(
-        (feil) => feil.barn.husstandsbarnId === barn.id
+    const valideringsfeilForBarn = valideringsfeil?.husstandsmedlem?.find(
+        (feil) => feil.barn.husstandsmedlemId === barn.id
     );
 
     return (
