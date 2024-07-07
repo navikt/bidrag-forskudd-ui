@@ -2,7 +2,6 @@ import { Inntektsrapportering, Inntektstype, Kilde } from "@api/BidragBehandling
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import text from "@common/constants/texts";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -54,10 +53,8 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
 };
 
 export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
-    const { inntekter } = useGetBehandlingV2();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
     const fieldName = `årsinntekter.${ident}` as const;
-    const årsinntekter = inntekter.årsinntekter?.filter((inntekt) => inntekt.ident === ident);
 
     const customRowValidation = (fieldName: `årsinntekter.${string}.${number}`) => {
         const periode = getValues(fieldName);
@@ -79,7 +76,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                         {text.title.skattepliktigeogPensjonsgivendeInntekt}
                     </Heading>
 
-                    {årsinntekter?.length > 0 && <AinntektLink ident={ident} />}
+                    <AinntektLink ident={ident} />
                 </HStack>
             </div>
             <Opplysninger fieldName={fieldName} ident={ident} />
