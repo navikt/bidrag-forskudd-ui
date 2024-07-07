@@ -2,8 +2,8 @@ import text from "@common/constants/texts";
 import { BehandlingProvider } from "@common/context/BehandlingContext";
 import React, { PropsWithChildren, useState } from "react";
 
-import { STEPS as ForskuddSteps } from "../../forskudd/constants/steps";
-import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
+import { STEPS as ForskuddSteps } from "../constants/steps";
+import { ForskuddStepper } from "../enum/ForskuddStepper";
 
 export type InntektTables =
     | "småbarnstillegg"

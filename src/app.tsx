@@ -1,3 +1,4 @@
+import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { BidragBehandlingHeader } from "@common/components/header/BidragBehandlingHeader";
 import { ErrorModal } from "@common/components/modal/ErrorModal";
 import text from "@common/constants/texts";
@@ -145,19 +146,16 @@ const BidragBehandlingWrapper = () => {
     const { behandlingId } = useParams<{ behandlingId?: string }>();
     const { type } = useBehandlingV2(behandlingId);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const getBehandling = (type) => <SærligeutgifterBehandling />;
-
-    // const getBehandling = (type: TypeBehandling) => {
-    //     switch (type) {
-    //         case TypeBehandling.FORSKUDD:
-    //             return <ForskuddBehandling />;
-    //         case TypeBehandling.SAeRLIGEUTGIFTER:
-    //             return <SærligeutgifterBehandling />;
-    //         default:
-    //             return null;
-    //     }
-    // };
+    const getBehandling = (type: TypeBehandling) => {
+        switch (type) {
+            case TypeBehandling.FORSKUDD:
+                return <ForskuddBehandling />;
+            case TypeBehandling.SAeRBIDRAG:
+                return <SærligeutgifterBehandling />;
+            default:
+                return null;
+        }
+    };
 
     return <BehandlingPageWrapper>{getBehandling(type)}</BehandlingPageWrapper>;
 };
