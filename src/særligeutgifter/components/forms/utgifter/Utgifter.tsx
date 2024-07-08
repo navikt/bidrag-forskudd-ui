@@ -1,10 +1,10 @@
 import {
-    Inntektstype,
     OppdatereUtgiftRequest,
-    OppdatereUtgiftTypeEnum,
+    Resultatkode,
     SaerbidragKategoriDtoKategoriEnum,
     SaerbidragUtgifterDto,
-    UtgiftspostDtoTypeEnum,
+    UtgiftspostDto,
+    Utgiftstype,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
@@ -28,7 +28,7 @@ import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect } from "react";
-import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
+import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { AvslagListe } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
@@ -39,18 +39,21 @@ import { UtgiftFormValues, Utgiftspost } from "../../../types/utgifterFormValues
 const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues => ({
     beregning: response.beregning,
     avslag: response.avslag ?? "",
-    utgifter: response.utgifter,
+    utgifter: response.utgifter.map((v) => ({
+        ...v,
+        erRedigerbart: false,
+    })),
     notat: {
         kunINotat: response.notat?.kunINotat,
     },
 });
 
-const getUtgiftType = (kategori: SaerbidragKategoriDtoKategoriEnum): UtgiftspostDtoTypeEnum | "" => {
+const getUtgiftType = (kategori: SaerbidragKategoriDtoKategoriEnum): Utgiftstype | "" => {
     switch (kategori) {
         case SaerbidragKategoriDtoKategoriEnum.OPTIKK:
-            return UtgiftspostDtoTypeEnum.OPTIKK;
+            return Utgiftstype.OPTIKK;
         case SaerbidragKategoriDtoKategoriEnum.TANNREGULERING:
-            return UtgiftspostDtoTypeEnum.TANNREGULERING;
+            return Utgiftstype.TANNREGULERING;
         default:
             return "";
     }
@@ -84,15 +87,22 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
             behandling.utgift.kategori.kategori
         );
 
+    const utgifstyperKonfirmasjon = [
+        Utgiftstype.KONFIRMASJONSAVGIFT,
+        Utgiftstype.KONFIRMASJONSLEIR,
+        Utgiftstype.KLAeR,
+        Utgiftstype.REISEUTGIFT,
+        Utgiftstype.SELSKAP,
+    ];
     return item.erRedigerbart && !readOnly ? (
         <FormControlledSelectField
             className="w-fit"
             name={`utgifter.${index}.type`}
             label={text.label.utgift}
             options={[{ value: "", text: text.select.typePlaceholder }].concat(
-                Object.entries(UtgiftspostDtoTypeEnum).map(([value, text]) => ({
-                    value: Inntektstype[value],
-                    text: hentVisningsnavn(text),
+                utgifstyperKonfirmasjon.map((value) => ({
+                    value: Utgiftstype[value],
+                    text: hentVisningsnavn(value),
                 }))
             )}
             hideLabel
@@ -159,7 +169,7 @@ const EditOrSaveButton = ({
 const Main = () => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
-    const erAvslagIkkeValgt = getValues("avslag") == "";
+    const erAvslagValgt = getValues("avslag") != "";
 
     return (
         <>
@@ -184,13 +194,8 @@ const Main = () => {
                 </div>
             </FlexRow>
             <FlexRow>
-                <FormControlledSelectField
-                    name="årsakAvslag"
-                    label={text.label.avslagsGrunn}
-                    onSelect={() => {}}
-                    className="w-max"
-                >
-                    {erAvslagIkkeValgt && <option value="">{text.select.avslagPlaceholder}</option>}
+                <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
+                    {<option value="">{text.select.avslagPlaceholder}</option>}
                     {AvslagListe.map((value) => (
                         <option key={value} value={value}>
                             {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -198,37 +203,41 @@ const Main = () => {
                     ))}
                 </FormControlledSelectField>
             </FlexRow>
-            <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
-                <FlexRow>
-                    <Heading level="2" size="small">
-                        {text.title.oversiktOverUtgifter}
-                    </Heading>
-                </FlexRow>
-                <UtgifterListe />
-            </Box>
-            <FlexRow>
-                <Label size="small">{text.label.godkjentBeløp}:</Label>
-                <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
-            </FlexRow>
-            <hr className="w-full bg-[var(--a-border-divider)] h-px" />
-            <FlexRow>
-                <Heading level="2" size="small">
-                    {text.title.betaltAvBp}
-                </Heading>
-            </FlexRow>
-            <FlexRow>
-                <FormControlledTextField
-                    name={`utgifter.beløpDirekteBetaltAvBp`}
-                    label={text.label.direkteBetalt}
-                    type="number"
-                    min="1"
-                    inputMode="numeric"
-                />
-            </FlexRow>
-            <FlexRow>
-                <Label size="small">{text.label.totalt}:</Label>
-                <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
-            </FlexRow>
+            {!erAvslagValgt && (
+                <>
+                    <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
+                        <FlexRow>
+                            <Heading level="2" size="small">
+                                {text.title.oversiktOverUtgifter}
+                            </Heading>
+                        </FlexRow>
+                        <UtgifterListe />
+                    </Box>
+                    <FlexRow>
+                        <Label size="small">{text.label.godkjentBeløp}:</Label>
+                        <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
+                    </FlexRow>
+                    <hr className="w-full bg-[var(--a-border-divider)] h-px" />
+                    <FlexRow>
+                        <Heading level="2" size="small">
+                            {text.title.betaltAvBp}
+                        </Heading>
+                    </FlexRow>
+                    <FlexRow>
+                        <FormControlledTextField
+                            name={`beregning.beløpDirekteBetaltAvBp`}
+                            label={text.label.direkteBetalt}
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                        />
+                    </FlexRow>
+                    <FlexRow>
+                        <Label size="small">{text.label.totalt}:</Label>
+                        <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
+                    </FlexRow>
+                </>
+            )}
         </>
     );
 };
@@ -281,33 +290,61 @@ const UtgifterListe = () => {
             });
         }
 
+        if (utgift.godkjentBeløp > utgift.kravbeløp) {
+            setError(`utgifter.${index}.godkjentBeløp`, {
+                type: "notValid",
+                message: text.error.godkjentBeløpKanIkkeVæreHøyereEnnKravbeløp,
+            });
+        } else {
+            clearErrors(`utgifter.${index}.godkjentBeløp`);
+        }
+
+        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse)) {
+            setError(`utgifter.${index}.begrunnelse`, {
+                type: "notValid",
+                message: text.error.begrunnelseMåFyllesUt,
+            });
+        }
+
         const fieldState = getFieldState(`utgifter.${index}`);
 
         if (!fieldState.error) {
-            updateAndSave({
-                angreSisteEndring: false,
-                nyEllerEndretUtgift: {
-                    dato: utgift.dato,
-                    type: utgift.type as OppdatereUtgiftTypeEnum,
-                    kravbeløp: utgift.kravbeløp,
-                    godkjentBeløp: utgift.godkjentBeløp,
-                    begrunnelse: utgift.begrunnelse,
-                    betaltAvBp: utgift.betaltAvBp,
-                    id: utgift.id ?? undefined,
+            updateAndSave(
+                {
+                    angreSisteEndring: false,
+                    nyEllerEndretUtgift: {
+                        dato: utgift.dato,
+                        type: utgift.type as Utgiftstype,
+                        kravbeløp: utgift.kravbeløp,
+                        godkjentBeløp: utgift.godkjentBeløp,
+                        begrunnelse: utgift.begrunnelse,
+                        betaltAvBp: utgift.betaltAvBp,
+                        id: utgift.id ?? undefined,
+                    },
                 },
-            });
-
-            setValue(`utgifter.${index}`, { ...utgift, erRedigerbart: false });
+                (updatedValue) => {
+                    setValue(`utgifter.${index}`, {
+                        ...utgift,
+                        id: updatedValue?.id,
+                        erRedigerbart: false,
+                    });
+                }
+            );
         }
     };
 
-    const updateAndSave = (payload: OppdatereUtgiftRequest) => {
+    const updateAndSave = (
+        payload: OppdatereUtgiftRequest,
+        onUpdateSuccess?: (updatedValue: UtgiftspostDto) => void
+    ) => {
         saveUtgifter.mutation.mutate(payload, {
             onSuccess: (response) => {
                 saveUtgifter.queryClientUpdater((currentData) => {
                     const updatedUtgiftIndex = currentData.utgift.utgifter.findIndex(
-                        (utgift) => utgift.id === response.oppdatertUtgiftspost.id
+                        (utgift) => utgift?.id === response?.oppdatertUtgiftspost?.id
                     );
+
+                    onUpdateSuccess?.(response.oppdatertUtgiftspost);
 
                     const updatedUtgiftListe =
                         updatedUtgiftIndex === -1
@@ -322,6 +359,7 @@ const UtgifterListe = () => {
                         ...currentData,
                         utgift: {
                             ...currentData.utgift,
+                            beregning: response.beregning,
                             utgifter: updatedUtgiftListe,
                         },
                     };
@@ -337,7 +375,10 @@ const UtgifterListe = () => {
                             const utgifterListe = getValues(`utgifter`);
                             utgifter.remove(utgifterListe.length - 1);
                         } else {
-                            setValue(`utgifter`, behandling.utgift.utgifter);
+                            setValue(
+                                `utgifter`,
+                                behandling.utgift.utgifter.map((u) => ({ ...u, erRedigerbart: false }))
+                            );
                         }
                     },
                 });
@@ -349,6 +390,7 @@ const UtgifterListe = () => {
         const utgift = getValues(`utgifter.${index}`);
 
         if (utgift.id) {
+            utgifter.remove(index);
             saveUtgifter.mutation.mutate(
                 { angreSisteEndring: false, sletteUtgift: utgift.id },
                 {
@@ -356,7 +398,7 @@ const UtgifterListe = () => {
                         clearErrors(`utgifter.${index}`);
                         saveUtgifter.queryClientUpdater((currentData) => {
                             const updatedUgiftIndex = currentData.utgift.utgifter.findIndex(
-                                (utgift) => utgift.id === response.oppdatertUtgiftspost.id
+                                (u) => u?.id === response.oppdatertUtgiftspost?.id
                             );
                             const updatedUtgiftListe = currentData.utgift.utgifter.toSpliced(
                                 updatedUgiftIndex,
@@ -378,7 +420,10 @@ const UtgifterListe = () => {
                             error: true,
                             retryFn: () => onRemoveUtgift(index),
                             rollbackFn: () => {
-                                setValue(`utgifter`, behandling.utgift.utgifter);
+                                setValue(
+                                    `utgifter`,
+                                    behandling.utgift.utgifter.map((u) => ({ ...u, erRedigerbart: false }))
+                                );
                             },
                         });
                     },
@@ -438,6 +483,7 @@ const UtgifterListe = () => {
                                                 <FormControlledCheckbox
                                                     name={`utgifter.${index}.betaltAvBp`}
                                                     legend=""
+                                                    onChange={() => onSaveRow(index)}
                                                 />
                                             </div>
                                         </Table.DataCell>
@@ -456,6 +502,7 @@ const UtgifterListe = () => {
                                             min="1"
                                             inputMode="numeric"
                                             hideLabel
+                                            editable={item.erRedigerbart}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
@@ -466,6 +513,7 @@ const UtgifterListe = () => {
                                             min="1"
                                             inputMode="numeric"
                                             hideLabel
+                                            editable={item.erRedigerbart}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
@@ -473,6 +521,7 @@ const UtgifterListe = () => {
                                             name={`utgifter.${index}.begrunnelse`}
                                             label={text.label.begrunnelse}
                                             hideLabel
+                                            editable={item.erRedigerbart}
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
@@ -527,11 +576,12 @@ const UtgifterForm = () => {
     const { utgift } = useGetBehandlingV2();
     const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const initialValues = createInitialValues(utgift);
-
-    const useFormMethods = useForm({
+    const saveUtgifter = useOnSaveUtgifter();
+    const { setSaveErrorState } = useBehandlingProvider();
+    const useFormMethods = useForm<UtgiftFormValues>({
         defaultValues: initialValues,
     });
-
+    const { setValue, getValues } = useFormMethods;
     useEffect(() => {
         setPageErrorsOrUnsavedState({
             ...pageErrorsOrUnsavedState,
@@ -543,18 +593,86 @@ const UtgifterForm = () => {
             if (name === undefined || type == undefined) {
                 return;
             } else {
-                debouncedOnSave();
+                debouncedOnSave(name);
             }
         });
         return () => subscription.unsubscribe();
     }, []);
 
-    const onSave = () => {
-        console.log("saving");
+    const onSave = (name?: FieldPath<UtgiftFormValues>) => {
+        if (name == "beregning.beløpDirekteBetaltAvBp") {
+            onSaveBeløpBp();
+        }
+        if (name == "avslag") {
+            onSaveAvslag();
+        }
     };
 
     const debouncedOnSave = useDebounce(onSave);
+    const onSaveAvslag = () => {
+        const avslag = getValues(`avslag`);
 
+        saveUtgifter.mutation.mutate(
+            {
+                angreSisteEndring: false,
+                avslag: avslag == "" ? null : (avslag as Resultatkode),
+            },
+            {
+                onSuccess: (response) => {
+                    saveUtgifter.queryClientUpdater((currentData) => {
+                        setValue("utgifter", response.utgiftposter);
+                        return {
+                            ...currentData,
+                            utgift: {
+                                ...currentData.utgift,
+                                beregning: response.beregning,
+                                utgifter: response.utgiftposter.map((u) => ({ ...u, erRedigerbart: false })),
+                            },
+                        };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onSaveAvslag(),
+                        rollbackFn: () => {},
+                    });
+                },
+            }
+        );
+    };
+
+    const onSaveBeløpBp = () => {
+        const beløpBp = getValues(`beregning.beløpDirekteBetaltAvBp`);
+
+        saveUtgifter.mutation.mutate(
+            {
+                angreSisteEndring: false,
+                beløpDirekteBetaltAvBp: beløpBp,
+            },
+            {
+                onSuccess: (response) => {
+                    saveUtgifter.queryClientUpdater((currentData) => {
+                        setValue("beregning", response.beregning);
+                        return {
+                            ...currentData,
+                            utgift: {
+                                ...currentData.utgift,
+                                beregning: response.beregning,
+                            },
+                        };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => onSaveAvslag(),
+                        rollbackFn: () => {},
+                    });
+                },
+            }
+        );
+    };
     return (
         <>
             <FormProvider {...useFormMethods}>

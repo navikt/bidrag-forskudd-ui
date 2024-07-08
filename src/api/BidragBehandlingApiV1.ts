@@ -15,8 +15,6 @@ export enum Bostatuskode {
     MED_FORELDER = "MED_FORELDER",
     DOKUMENTERT_SKOLEGANG = "DOKUMENTERT_SKOLEGANG",
     IKKE_MED_FORELDER = "IKKE_MED_FORELDER",
-    MED_VERGE = "MED_VERGE",
-    ALENE = "ALENE",
     DELT_BOSTED = "DELT_BOSTED",
     REGNES_IKKE_SOM_BARN = "REGNES_IKKE_SOM_BARN",
     BOR_MED_ANDRE_VOKSNE = "BOR_MED_ANDRE_VOKSNE",
@@ -24,6 +22,8 @@ export enum Bostatuskode {
     UNNTAK_HOS_ANDRE = "UNNTAK_HOS_ANDRE",
     UNNTAK_ALENE = "UNNTAK_ALENE",
     UNNTAKENSLIGASYLSOKER = "UNNTAK_ENSLIG_ASYLSØKER",
+    MED_VERGE = "MED_VERGE",
+    ALENE = "ALENE",
 }
 
 export enum Engangsbeloptype {
@@ -162,7 +162,9 @@ export enum Resultatkode {
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
+    SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
+    SAeRBIDRAGIKKEFULLBIDRAGSEVNE = "SÆRBIDRAG_IKKE_FULL_BIDRAGSEVNE",
     AVSLAG = "AVSLAG",
     AVSLAG2 = "AVSLAG2",
     PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
@@ -183,7 +185,7 @@ export enum Resultatkode {
     IKKESOKTOMINNKREVINGAVBIDRAG = "IKKE_SØKT_OM_INNKREVING_AV_BIDRAG",
     UTGIFTER_DEKKES_AV_BARNEBIDRAGET = "UTGIFTER_DEKKES_AV_BARNEBIDRAGET",
     IKKENODVENDIGEUTGIFTER = "IKKE_NØDVENDIGE_UTGIFTER",
-    PRIVATAVTALEOMSAeRLIGEUTGIFTER = "PRIVAT_AVTALE_OM_SÆRLIGE_UTGIFTER",
+    PRIVATAVTALEOMSAeRBIDRAG = "PRIVAT_AVTALE_OM_SÆRBIDRAG",
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
 }
 
@@ -227,6 +229,17 @@ export enum SoktAvType {
     TRYGDEETATEN_INNKREVING = "TRYGDEETATEN_INNKREVING",
     KLAGE_ANKE = "KLAGE_ANKE",
     KONVERTERING = "KONVERTERING",
+}
+
+export enum Utgiftstype {
+    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
+    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
+    SELSKAP = "SELSKAP",
+    KLAeR = "KLÆR",
+    REISEUTGIFT = "REISEUTGIFT",
+    TANNREGULERING = "TANNREGULERING",
+    OPTIKK = "OPTIKK",
+    ANNET = "ANNET",
 }
 
 export enum Vedtakstype {
@@ -807,6 +820,8 @@ export interface SivilstandGrunnlagDto {
      * @format date
      */
     gyldigFom?: string;
+    /** Personid som kun er satt om personen er ektefelle eller separert ektefelle */
+    relatertVedSivilstand?: string;
     /**
      * Dato NAV tidligst har fått bekreftet sivilstanden
      * @format date
@@ -902,8 +917,7 @@ export interface UtgiftspostDto {
      * @format date
      */
     dato: string;
-    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
-    type: UtgiftspostDtoTypeEnum;
+    type: Utgiftstype;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
@@ -940,8 +954,7 @@ export interface OppdatereUtgift {
      * @format date
      */
     dato: string;
-    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc). Skal bare settes for kategori konfirmasjon */
-    type?: OppdatereUtgiftTypeEnum;
+    type?: Utgiftstype;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
@@ -1409,6 +1422,11 @@ export interface EngangsbelopDto {
     eksternReferanse?: string;
     /** Liste over alle grunnlag som inngår i beregningen */
     grunnlagReferanseListe: string[];
+    /**
+     * Beløp BP allerede har betalt. Kan være 0 eller høyere.
+     * @min 0
+     */
+    betaltBeløp?: number;
 }
 
 /** Grunnlag */
@@ -1457,6 +1475,9 @@ export enum Grunnlagstype {
     SOKNAD = "SØKNAD",
     VIRKNINGSTIDSPUNKT = "VIRKNINGSTIDSPUNKT",
     NOTAT = "NOTAT",
+    SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
+    UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
+    UTGIFTSPOST = "UTGIFTSPOST",
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
@@ -1714,8 +1735,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1779,8 +1800,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1818,28 +1839,6 @@ export enum SaerbidragKategoriDtoKategoriEnum {
     TANNREGULERING = "TANNREGULERING",
     OPTIKK = "OPTIKK",
     ANNET = "ANNET",
-}
-
-/** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
-export enum UtgiftspostDtoTypeEnum {
-    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
-    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
-    SELSKAP = "SELSKAP",
-    KLAeR = "KLÆR",
-    REISEUTGIFT = "REISEUTGIFT",
-    TANNREGULERING = "TANNREGULERING",
-    OPTIKK = "OPTIKK",
-}
-
-/** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc). Skal bare settes for kategori konfirmasjon */
-export enum OppdatereUtgiftTypeEnum {
-    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
-    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
-    SELSKAP = "SELSKAP",
-    KLAeR = "KLÆR",
-    REISEUTGIFT = "REISEUTGIFT",
-    TANNREGULERING = "TANNREGULERING",
-    OPTIKK = "OPTIKK",
 }
 
 export enum OppdaterRollerResponseStatusEnum {
@@ -1904,10 +1903,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -1996,7 +1992,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

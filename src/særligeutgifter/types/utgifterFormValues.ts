@@ -1,13 +1,8 @@
-import {
-    BehandlingNotatDto,
-    Resultatkode,
-    UtgiftBeregningDto,
-    UtgiftspostDtoTypeEnum,
-} from "@api/BidragBehandlingApiV1";
+import { BehandlingNotatDto, Resultatkode, UtgiftBeregningDto, Utgiftstype } from "@api/BidragBehandlingApiV1";
 
 export interface Utgiftspost {
     dato: string | null;
-    type: UtgiftspostDtoTypeEnum | "";
+    type: Utgiftstype | "";
     kravbeløp: number;
     godkjentBeløp: number;
     begrunnelse: string;

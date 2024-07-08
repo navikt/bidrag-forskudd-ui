@@ -181,9 +181,6 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                     visningsnavn: data.visningsnavn,
                 };
             },
-            staleTime: Infinity,
-
-            enabled: !!rolle,
         })),
     });
 

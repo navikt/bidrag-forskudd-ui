@@ -4,6 +4,6 @@ export const AvslagListe = [
     Resultatkode.UTGIFTER_DEKKES_AV_BARNEBIDRAGET,
     Resultatkode.MANGLENDE_DOKUMENTASJON,
     Resultatkode.IKKENODVENDIGEUTGIFTER,
-    Resultatkode.PRIVATAVTALEOMSAeRLIGEUTGIFTER,
+    Resultatkode.PRIVATAVTALEOMSAeRBIDRAG,
     Resultatkode.ALLE_UTGIFTER_ER_FORELDET,
 ];
