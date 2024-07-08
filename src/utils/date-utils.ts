@@ -41,6 +41,12 @@ export const deductMonths = (date: Date, months: number) => {
     return newDate;
 };
 
+export const deductMonthsIgnoreday = (date: Date, months: number) => {
+    const newDate = firstDayOfMonth(new Date(date));
+    newDate.setMonth(newDate.getMonth() - months);
+    return newDate;
+};
+
 export const lastDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
 export const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
 export const isValidDate = (date: unknown | Date): boolean =>

@@ -26,7 +26,7 @@ import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/use
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
-import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
@@ -278,6 +278,7 @@ const UtgifterListe = () => {
     const onSaveRow = (index: number) => {
         const utgift = getValues(`utgifter.${index}`);
 
+        const erUtgiftForeldet = isBeforeDate(utgift.dato, deductMonths(dateOrNull(behandling.mottattdato), 12));
         if (utgift?.dato === null) {
             setError(`utgifter.${index}.dato`, {
                 type: "notValid",
@@ -300,7 +301,7 @@ const UtgifterListe = () => {
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse)) {
+        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !erUtgiftForeldet) {
             setError(`utgifter.${index}.begrunnelse`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
@@ -317,7 +318,7 @@ const UtgifterListe = () => {
                         dato: utgift.dato,
                         type: utgift.type as Utgiftstype,
                         kravbeløp: utgift.kravbeløp,
-                        godkjentBeløp: utgift.godkjentBeløp,
+                        godkjentBeløp: erUtgiftForeldet ? 0 : utgift.godkjentBeløp,
                         begrunnelse: utgift.begrunnelse,
                         betaltAvBp: utgift.betaltAvBp,
                         id: utgift.id ?? undefined,
@@ -325,7 +326,7 @@ const UtgifterListe = () => {
                 },
                 (updatedValue) => {
                     setValue(`utgifter.${index}`, {
-                        ...utgift,
+                        ...updatedValue,
                         id: updatedValue?.id,
                         erRedigerbart: false,
                     });
