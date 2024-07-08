@@ -50,7 +50,7 @@ export const QueryKeys = {
     ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
-    person: (ident: string) => ["person", ident],
+    person: (ident: string) => ["person2", ident],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();

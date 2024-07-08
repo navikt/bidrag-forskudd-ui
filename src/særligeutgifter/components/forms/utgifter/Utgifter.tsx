@@ -94,6 +94,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
         Utgiftstype.REISEUTGIFT,
         Utgiftstype.SELSKAP,
     ];
+
     return item.erRedigerbart && !readOnly ? (
         <FormControlledSelectField
             className="w-fit"
@@ -101,7 +102,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
             label={text.label.utgift}
             options={[{ value: "", text: text.select.typePlaceholder }].concat(
                 utgifstyperKonfirmasjon.map((value) => ({
-                    value: Utgiftstype[value],
+                    value,
                     text: hentVisningsnavn(value),
                 }))
             )}

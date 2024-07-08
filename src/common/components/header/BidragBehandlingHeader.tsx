@@ -1,7 +1,6 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { SakHeader } from "@navikt/bidrag-ui-common";
-import { Loader } from "@navikt/ds-react";
-import React, { memo, Suspense } from "react";
+import React, { memo } from "react";
 
 import text from "../../constants/texts";
 import { useGetBehandlingV2, usePersonsQueries } from "../../hooks/useApiData";
@@ -24,14 +23,4 @@ export const Header = memo(() => {
     );
 });
 
-export const BidragBehandlingHeader = () => (
-    <Suspense
-        fallback={
-            <div className="flex justify-center">
-                <Loader size="3xlarge" title={text.loading} variant="interaction" />
-            </div>
-        }
-    >
-        <Header />
-    </Suspense>
-);
+export const BidragBehandlingHeader = () => <Header />;
