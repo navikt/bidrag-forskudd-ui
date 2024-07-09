@@ -60,9 +60,11 @@ const avslagsListe = [
     Resultatkode.PAGRUNNAVSAMMENFLYTTING,
     Resultatkode.OPPHOLD_I_UTLANDET,
     Resultatkode.AVSLAG_PRIVAT_AVTALE_BIDRAG,
-    Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG,
+    Resultatkode.IKKE_INNKREVING_AV_BIDRAG,
     Resultatkode.UTENLANDSK_YTELSE,
 ];
+
+const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
 const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues =>
     ({
@@ -160,6 +162,15 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                                 {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                             </option>
                         ))}
+                        {avslagsListeDeprekert.includes(getValues("årsakAvslag")) && (
+                            <>
+                                {avslagsListeDeprekert.map((value) => (
+                                    <option key={value} value={value} disabled>
+                                        {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                                    </option>
+                                ))}
+                            </>
+                        )}
                     </optgroup>
                 </FormControlledSelectField>
                 <FormControlledMonthPicker

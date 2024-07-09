@@ -183,6 +183,7 @@ export enum Resultatkode {
     UTENLANDSK_YTELSE = "UTENLANDSK_YTELSE",
     AVSLAG_PRIVAT_AVTALE_BIDRAG = "AVSLAG_PRIVAT_AVTALE_BIDRAG",
     IKKESOKTOMINNKREVINGAVBIDRAG = "IKKE_SØKT_OM_INNKREVING_AV_BIDRAG",
+    IKKE_INNKREVING_AV_BIDRAG = "IKKE_INNKREVING_AV_BIDRAG",
     UTGIFTER_DEKKES_AV_BARNEBIDRAGET = "UTGIFTER_DEKKES_AV_BARNEBIDRAGET",
     IKKENODVENDIGEUTGIFTER = "IKKE_NØDVENDIGE_UTGIFTER",
     PRIVATAVTALEOMSAeRBIDRAG = "PRIVAT_AVTALE_OM_SÆRBIDRAG",
@@ -881,7 +882,7 @@ export enum SivilstandskodePDL {
 }
 
 export interface SaerbidragKategoriDto {
-    kategori: SaerbidragKategoriDtoKategoriEnum;
+    kategori: Saerbidragskategori;
     beskrivelse?: string;
 }
 
@@ -892,6 +893,13 @@ export interface SaerbidragUtgifterDto {
     beregning?: UtgiftBeregningDto;
     notat: BehandlingNotatDto;
     utgifter: UtgiftspostDto[];
+}
+
+export enum Saerbidragskategori {
+    KONFIRMASJON = "KONFIRMASJON",
+    TANNREGULERING = "TANNREGULERING",
+    OPTIKK = "OPTIKK",
+    ANNET = "ANNET",
 }
 
 export enum TypeBehandling {
@@ -1447,7 +1455,6 @@ export interface GrunnlagDto {
 export enum Grunnlagstype {
     SAeRFRADRAG = "SÆRFRADRAG",
     SKATTEKLASSE = "SKATTEKLASSE",
-    NETTOSAeRTILSKUDD = "NETTO_SÆRTILSKUDD",
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
     SAMVAeRSFRADRAG = "SAMVÆRSFRADRAG",
@@ -1463,7 +1470,6 @@ export enum Grunnlagstype {
     BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
     TILLEGGSBIDRAG = "TILLEGGSBIDRAG",
     MAKS_BIDRAG_PER_BARN = "MAKS_BIDRAG_PER_BARN",
-    BPSANDELSAeRTILSKUDD = "BPS_ANDEL_SÆRTILSKUDD",
     MAKSGRENSE25INNTEKT = "MAKS_GRENSE_25_INNTEKT",
     GEBYRFRITAK = "GEBYRFRITAK",
     INNBETALTBELOP = "INNBETALT_BELØP",
@@ -1481,12 +1487,11 @@ export enum Grunnlagstype {
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
-    SLUTTBEREGNINGSAeRTILSKUDD = "SLUTTBEREGNING_SÆRTILSKUDD",
+    SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
-    DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRTILSKUDD = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRTILSKUDD",
+    DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
-    DELBEREGNINGSAMVAeRSFRADRAGSAeRTILSKUDD = "DELBEREGNING_SAMVÆRSFRADRAG_SÆRTILSKUDD",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
     PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
@@ -1735,8 +1740,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1800,8 +1805,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -1832,13 +1837,6 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum SaerbidragKategoriDtoKategoriEnum {
-    KONFIRMASJON = "KONFIRMASJON",
-    TANNREGULERING = "TANNREGULERING",
-    OPTIKK = "OPTIKK",
-    ANNET = "ANNET",
 }
 
 export enum OppdaterRollerResponseStatusEnum {

@@ -1,7 +1,7 @@
 import {
     OppdatereUtgiftRequest,
     Resultatkode,
-    SaerbidragKategoriDtoKategoriEnum,
+    Saerbidragskategori,
     SaerbidragUtgifterDto,
     UtgiftspostDto,
     Utgiftstype,
@@ -48,11 +48,11 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     },
 });
 
-const getUtgiftType = (kategori: SaerbidragKategoriDtoKategoriEnum): Utgiftstype | "" => {
+const getUtgiftType = (kategori: Saerbidragskategori): Utgiftstype | "" => {
     switch (kategori) {
-        case SaerbidragKategoriDtoKategoriEnum.OPTIKK:
+        case Saerbidragskategori.OPTIKK:
             return Utgiftstype.OPTIKK;
-        case SaerbidragKategoriDtoKategoriEnum.TANNREGULERING:
+        case Saerbidragskategori.TANNREGULERING:
             return Utgiftstype.TANNREGULERING;
         default:
             return "";
@@ -83,9 +83,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
     const { clearErrors } = useFormContext<UtgiftFormValues>();
     const readOnly =
         lesemodus ||
-        [SaerbidragKategoriDtoKategoriEnum.OPTIKK, SaerbidragKategoriDtoKategoriEnum.TANNREGULERING].includes(
-            behandling.utgift.kategori.kategori
-        );
+        [Saerbidragskategori.OPTIKK, Saerbidragskategori.TANNREGULERING].includes(behandling.utgift.kategori.kategori);
 
     const utgifstyperKonfirmasjon = [
         Utgiftstype.KONFIRMASJONSAVGIFT,
@@ -443,7 +441,7 @@ const UtgifterListe = () => {
     };
 
     const defaultUtgiftType = getUtgiftType(behandling.utgift.kategori.kategori);
-    const erKonfirmasjon = behandling.utgift.kategori.kategori === SaerbidragKategoriDtoKategoriEnum.KONFIRMASJON;
+    const erKonfirmasjon = behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON;
 
     return (
         <>
