@@ -24,7 +24,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { capitalize, deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect } from "react";
@@ -68,7 +68,7 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
             label={text.label.forfallsdato}
             placeholder="DD.MM.ÅÅÅÅ"
             defaultValue={item["dato"]}
-            toDate={new Date()}
+            toDate={deductDays(new Date(), 1)}
             required
             hideLabel
         />
