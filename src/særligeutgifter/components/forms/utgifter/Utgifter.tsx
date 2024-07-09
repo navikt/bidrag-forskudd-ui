@@ -314,7 +314,11 @@ const UtgifterListe = () => {
                     angreSisteEndring: false,
                     nyEllerEndretUtgift: {
                         dato: utgift.dato,
-                        type: utgift.type as Utgiftstype,
+                        type: [Saerbidragskategori.KONFIRMASJON, Saerbidragskategori.ANNET].includes(
+                            behandling.utgift.kategori.kategori
+                        )
+                            ? (utgift.type as Utgiftstype)
+                            : undefined,
                         kravbeløp: utgift.kravbeløp,
                         godkjentBeløp: erUtgiftForeldet ? 0 : utgift.godkjentBeløp,
                         begrunnelse: utgift.begrunnelse,
