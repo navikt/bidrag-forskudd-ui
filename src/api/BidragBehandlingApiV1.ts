@@ -988,7 +988,7 @@ export interface OppdatereUtgiftRequest {
      */
     sletteUtgift?: number;
     /** Angre siste endring som ble gjort. Siste endring kan ikke angres hvis avslag er satt */
-    angreSisteEndring: boolean;
+    angreSisteEndring?: boolean;
     notat?: OppdaterNotat;
 }
 

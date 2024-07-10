@@ -1,5 +1,6 @@
 import {
     OppdatereUtgiftRequest,
+    OppdatereUtgiftResponse,
     Resultatkode,
     Saerbidragskategori,
     SaerbidragUtgifterDto,
@@ -27,7 +28,7 @@ import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import { AvslagListe } from "../../../constants/avslag";
@@ -39,15 +40,21 @@ import { UtgiftFormValues, Utgiftspost } from "../../../types/utgifterFormValues
 const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues => ({
     beregning: response.beregning,
     avslag: response.avslag ?? "",
-    utgifter: response.utgifter.map((v) => ({
-        ...v,
-        erRedigerbart: false,
-    })),
+    utgifter: mapUtgifter(response.utgifter),
     notat: {
         kunINotat: response.notat?.kunINotat,
     },
 });
 
+const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
+    return utgifter.map((v) => ({
+        ...v,
+        erRedigerbart: false,
+    }));
+};
+
+const erUtgiftForeldet = (mottatDato: string, utgiftDato: string): boolean =>
+    utgiftDato && isBeforeDate(utgiftDato, deductMonths(dateOrNull(mottatDato), 12));
 const getUtgiftType = (kategori: Saerbidragskategori): Utgiftstype | "" => {
     switch (kategori) {
         case Saerbidragskategori.OPTIKK:
@@ -74,6 +81,41 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
         />
     ) : (
         <div className="h-8 flex items-center">{item.dato && DateToDDMMYYYYString(dateOrNull(item.dato))}</div>
+    );
+};
+
+const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
+    const behandling = useGetBehandlingV2();
+
+    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
+        return <div className="h-8 flex items-center">0</div>;
+    }
+    return (
+        <FormControlledTextField
+            name={`utgifter.${index}.godkjentBeløp`}
+            label={text.label.godkjentBeløp}
+            type="number"
+            min="0"
+            inputMode="numeric"
+            hideLabel
+            editable={item.erRedigerbart}
+        />
+    );
+};
+
+const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
+    const behandling = useGetBehandlingV2();
+
+    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
+        return <div className="h-8 flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
+    }
+    return (
+        <FormControlledTextField
+            name={`utgifter.${index}.begrunnelse`}
+            label={text.label.begrunnelse}
+            hideLabel
+            editable={item.erRedigerbart}
+        />
     );
 };
 
@@ -302,7 +344,7 @@ const UtgifterListe = () => {
     const onSaveRow = (index: number) => {
         const utgift = getValues(`utgifter.${index}`);
 
-        const erUtgiftForeldet = isBeforeDate(utgift.dato, deductMonths(dateOrNull(behandling.mottattdato), 12));
+        const utgiftErForeldet = erUtgiftForeldet(behandling.mottattdato, utgift.dato);
         if (utgift?.dato === null) {
             setError(`utgifter.${index}.dato`, {
                 type: "notValid",
@@ -312,7 +354,7 @@ const UtgifterListe = () => {
         if (!utgift?.type) {
             setError(`utgifter.${index}.type`, {
                 type: "notValid",
-                message: text.error.statusMåFyllesUt,
+                message: text.error.utgiftstypeMåFyllesUt,
             });
         }
 
@@ -325,7 +367,7 @@ const UtgifterListe = () => {
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !erUtgiftForeldet) {
+        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !utgiftErForeldet) {
             setError(`utgifter.${index}.begrunnelse`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
@@ -337,7 +379,6 @@ const UtgifterListe = () => {
         if (!fieldState.error) {
             updateAndSave(
                 {
-                    angreSisteEndring: false,
                     nyEllerEndretUtgift: {
                         dato: utgift.dato,
                         type: [Saerbidragskategori.KONFIRMASJON, Saerbidragskategori.ANNET].includes(
@@ -346,18 +387,15 @@ const UtgifterListe = () => {
                             ? (utgift.type as Utgiftstype)
                             : undefined,
                         kravbeløp: utgift.kravbeløp,
-                        godkjentBeløp: erUtgiftForeldet ? 0 : utgift.godkjentBeløp,
+                        godkjentBeløp: utgiftErForeldet ? 0 : utgift.godkjentBeløp,
                         begrunnelse: utgift.begrunnelse,
                         betaltAvBp: utgift.betaltAvBp,
                         id: utgift.id ?? undefined,
                     },
                 },
                 (updatedValue) => {
-                    setValue(`utgifter.${index}`, {
-                        ...updatedValue,
-                        id: updatedValue?.id,
-                        erRedigerbart: false,
-                    });
+                    setValue(`utgifter`, mapUtgifter(updatedValue));
+                    // resetField(`utgifter`, { defaultValue: mapUtgifter(updatedValue) });
                 }
             );
         }
@@ -365,7 +403,7 @@ const UtgifterListe = () => {
 
     const updateAndSave = (
         payload: OppdatereUtgiftRequest,
-        onUpdateSuccess?: (updatedValue: UtgiftspostDto) => void
+        onUpdateSuccess?: (updatedValue: UtgiftspostDto[]) => void
     ) => {
         saveUtgifter.mutation.mutate(payload, {
             onSuccess: (response) => {
@@ -374,7 +412,7 @@ const UtgifterListe = () => {
                         (utgift) => utgift?.id === response?.oppdatertUtgiftspost?.id
                     );
 
-                    onUpdateSuccess?.(response.oppdatertUtgiftspost);
+                    onUpdateSuccess?.(response.utgiftposter);
 
                     const updatedUtgiftListe =
                         updatedUtgiftIndex === -1
@@ -405,10 +443,7 @@ const UtgifterListe = () => {
                             const utgifterListe = getValues(`utgifter`);
                             utgifter.remove(utgifterListe.length - 1);
                         } else {
-                            setValue(
-                                `utgifter`,
-                                behandling.utgift.utgifter.map((u) => ({ ...u, erRedigerbart: false }))
-                            );
+                            setValue(`utgifter`, mapUtgifter(behandling.utgift.utgifter));
                         }
                     },
                 });
@@ -422,7 +457,7 @@ const UtgifterListe = () => {
         if (utgift.id) {
             utgifter.remove(index);
             saveUtgifter.mutation.mutate(
-                { angreSisteEndring: false, sletteUtgift: utgift.id },
+                { sletteUtgift: utgift.id },
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
@@ -450,10 +485,7 @@ const UtgifterListe = () => {
                             error: true,
                             retryFn: () => onRemoveUtgift(index),
                             rollbackFn: () => {
-                                setValue(
-                                    `utgifter`,
-                                    behandling.utgift.utgifter.map((u) => ({ ...u, erRedigerbart: false }))
-                                );
+                                setValue(`utgifter`, mapUtgifter(behandling.utgift.utgifter));
                             },
                         });
                     },
@@ -506,7 +538,7 @@ const UtgifterListe = () => {
                         </Table.Header>
                         <Table.Body>
                             {controlledFields.map((item, index) => (
-                                <Table.Row key={item.id + index}>
+                                <Table.Row key={item.id + "-" + index}>
                                     {erKonfirmasjon && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
@@ -536,23 +568,10 @@ const UtgifterListe = () => {
                                         />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
-                                        <FormControlledTextField
-                                            name={`utgifter.${index}.godkjentBeløp`}
-                                            label={text.label.godkjentBeløp}
-                                            type="number"
-                                            min="1"
-                                            inputMode="numeric"
-                                            hideLabel
-                                            editable={item.erRedigerbart}
-                                        />
+                                        <GodkjentBeløp item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
-                                        <FormControlledTextField
-                                            name={`utgifter.${index}.begrunnelse`}
-                                            label={text.label.begrunnelse}
-                                            hideLabel
-                                            editable={item.erRedigerbart}
-                                        />
+                                        <Begrunnelse item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
                                         <EditOrSaveButton
@@ -607,6 +626,8 @@ const UtgifterForm = () => {
     const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const initialValues = createInitialValues(utgift);
     const saveUtgifter = useOnSaveUtgifter();
+    const prevState = useRef<UtgiftFormValues>(initialValues);
+
     const { setSaveErrorState } = useBehandlingProvider();
     const useFormMethods = useForm<UtgiftFormValues>({
         defaultValues: initialValues,
@@ -631,82 +652,68 @@ const UtgifterForm = () => {
 
     const onSave = (name?: FieldPath<UtgiftFormValues>) => {
         if (name == "beregning.beløpDirekteBetaltAvBp") {
-            onSaveBeløpBp();
-        }
-        if (name == "avslag") {
-            onSaveAvslag();
+            const beløpBp = getValues(`beregning.beløpDirekteBetaltAvBp`);
+            updateAndSave(
+                {
+                    beløpDirekteBetaltAvBp: beløpBp,
+                },
+                (response) => setValue("beregning", response.beregning)
+            );
+        } else if (name == "avslag") {
+            const avslag = getValues(`avslag`);
+            updateAndSave(
+                {
+                    avslag: avslag == "" ? null : (avslag as Resultatkode),
+                },
+                (response) => setValue("utgifter", mapUtgifter(response.utgiftposter))
+            );
+        } else if (name == "notat.kunINotat") {
+            updateAndSave({
+                notat: {
+                    kunINotat: getValues(`notat.kunINotat`),
+                },
+            });
         }
     };
 
     const debouncedOnSave = useDebounce(onSave);
-    const onSaveAvslag = () => {
-        const avslag = getValues(`avslag`);
 
-        saveUtgifter.mutation.mutate(
-            {
-                angreSisteEndring: false,
-                avslag: avslag == "" ? null : (avslag as Resultatkode),
+    const updateAndSave = (
+        payload: OppdatereUtgiftRequest,
+        onSuccess?: (response: OppdatereUtgiftResponse) => void
+    ) => {
+        saveUtgifter.mutation.mutate(payload, {
+            onSuccess: (response) => {
+                saveUtgifter.queryClientUpdater((currentData) => {
+                    onSuccess?.(response);
+                    prevState.current = JSON.parse(JSON.stringify(getValues()));
+                    return {
+                        ...currentData,
+                        utgift: {
+                            ...currentData.utgift,
+                            beregning: response.beregning,
+                            notat: response.notat,
+                            utgifter: mapUtgifter(response.utgiftposter),
+                        },
+                    };
+                });
             },
-            {
-                onSuccess: (response) => {
-                    saveUtgifter.queryClientUpdater((currentData) => {
-                        setValue("utgifter", response.utgiftposter);
-                        return {
-                            ...currentData,
-                            utgift: {
-                                ...currentData.utgift,
-                                beregning: response.beregning,
-                                utgifter: response.utgiftposter.map((u) => ({ ...u, erRedigerbart: false })),
-                            },
-                        };
-                    });
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => onSaveAvslag(),
-                        rollbackFn: () => {},
-                    });
-                },
-            }
-        );
+            onError: () => {
+                setSaveErrorState({
+                    error: true,
+                    retryFn: () => updateAndSave(payload),
+                    rollbackFn: () => {
+                        useFormMethods.reset(prevState.current);
+                    },
+                });
+            },
+        });
     };
 
-    const onSaveBeløpBp = () => {
-        const beløpBp = getValues(`beregning.beløpDirekteBetaltAvBp`);
-
-        saveUtgifter.mutation.mutate(
-            {
-                angreSisteEndring: false,
-                beløpDirekteBetaltAvBp: beløpBp,
-            },
-            {
-                onSuccess: (response) => {
-                    saveUtgifter.queryClientUpdater((currentData) => {
-                        setValue("beregning", response.beregning);
-                        return {
-                            ...currentData,
-                            utgift: {
-                                ...currentData.utgift,
-                                beregning: response.beregning,
-                            },
-                        };
-                    });
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => onSaveAvslag(),
-                        rollbackFn: () => {},
-                    });
-                },
-            }
-        );
-    };
     return (
         <>
             <FormProvider {...useFormMethods}>
-                <form onSubmit={useFormMethods.handleSubmit(onSave)}>
+                <form>
                     <FormLayout title={text.label.utgift} main={<Main />} side={<Side />} />
                 </form>
             </FormProvider>
