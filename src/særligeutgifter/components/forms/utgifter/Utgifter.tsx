@@ -393,8 +393,18 @@ const UtgifterListe = () => {
                         id: utgift.id ?? undefined,
                     },
                 },
-                (updatedValue) => {
-                    setValue(`utgifter`, mapUtgifter(updatedValue));
+                (updatedValue, oppdatertUtgiftspost) => {
+                    const eksistingUtgifter = getValues(`utgifter`);
+                    setValue(
+                        `utgifter`,
+                        updatedValue.map((v) => ({
+                            ...v,
+                            erRedigerbart:
+                                oppdatertUtgiftspost.id === v.id
+                                    ? false
+                                    : eksistingUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
+                        }))
+                    );
                     // resetField(`utgifter`, { defaultValue: mapUtgifter(updatedValue) });
                 }
             );
@@ -403,7 +413,7 @@ const UtgifterListe = () => {
 
     const updateAndSave = (
         payload: OppdatereUtgiftRequest,
-        onUpdateSuccess?: (updatedValue: UtgiftspostDto[]) => void
+        onUpdateSuccess?: (updatedValue: UtgiftspostDto[], oppdatertUtgiftspost?: UtgiftspostDto) => void
     ) => {
         saveUtgifter.mutation.mutate(payload, {
             onSuccess: (response) => {
@@ -412,7 +422,7 @@ const UtgifterListe = () => {
                         (utgift) => utgift?.id === response?.oppdatertUtgiftspost?.id
                     );
 
-                    onUpdateSuccess?.(response.utgiftposter);
+                    onUpdateSuccess?.(response.utgiftposter, response.oppdatertUtgiftspost);
 
                     const updatedUtgiftListe =
                         updatedUtgiftIndex === -1
