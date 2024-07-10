@@ -2,7 +2,7 @@ import { BehandlingNotatDto, Resultatkode, UtgiftBeregningDto, Utgiftstype } fro
 
 export interface Utgiftspost {
     dato: string | null;
-    type: Utgiftstype | "";
+    type: Utgiftstype | "" | string;
     kravbeløp: number;
     godkjentBeløp: number;
     begrunnelse: string;

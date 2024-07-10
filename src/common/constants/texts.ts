@@ -110,6 +110,7 @@ const tekster = {
         inntekt: "Inntekt",
         jaSlett: "Ja, slett",
         kategori: "Kategori",
+        kategoriGjelder: "Gjelder",
         kilde: "Kilde",
         kontantstøtte: "Kontantstøtte",
         kravbeløp: "Kravbeløp",

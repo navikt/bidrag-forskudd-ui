@@ -232,17 +232,6 @@ export enum SoktAvType {
     KONVERTERING = "KONVERTERING",
 }
 
-export enum Utgiftstype {
-    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
-    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
-    SELSKAP = "SELSKAP",
-    KLAeR = "KLÆR",
-    REISEUTGIFT = "REISEUTGIFT",
-    TANNREGULERING = "TANNREGULERING",
-    OPTIKK = "OPTIKK",
-    ANNET = "ANNET",
-}
-
 export enum Vedtakstype {
     INDEKSREGULERING = "INDEKSREGULERING",
     ALDERSJUSTERING = "ALDERSJUSTERING",
@@ -925,7 +914,8 @@ export interface UtgiftspostDto {
      * @format date
      */
     dato: string;
-    type: Utgiftstype;
+    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+    type: Utgiftstype | string;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
@@ -936,6 +926,17 @@ export interface UtgiftspostDto {
     betaltAvBp: boolean;
     /** @format int64 */
     id: number;
+}
+
+export enum Utgiftstype {
+    KONFIRMASJONSAVGIFT = "KONFIRMASJONSAVGIFT",
+    KONFIRMASJONSLEIR = "KONFIRMASJONSLEIR",
+    SELSKAP = "SELSKAP",
+    KLAeR = "KLÆR",
+    REISEUTGIFT = "REISEUTGIFT",
+    TANNREGULERING = "TANNREGULERING",
+    OPTIKK = "OPTIKK",
+    ANNET = "ANNET",
 }
 
 export interface VirkningstidspunktDto {
@@ -962,7 +963,8 @@ export interface OppdatereUtgift {
      * @format date
      */
     dato: string;
-    type?: Utgiftstype;
+    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc). Skal bare settes for kategori konfirmasjon */
+    type?: Utgiftstype | string;
     /** Beløp som er betalt for utgiften det gjelder */
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */

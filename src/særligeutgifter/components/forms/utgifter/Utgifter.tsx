@@ -85,6 +85,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
         lesemodus ||
         [Saerbidragskategori.OPTIKK, Saerbidragskategori.TANNREGULERING].includes(behandling.utgift.kategori.kategori);
 
+    const erKategoriAnnet = [Saerbidragskategori.ANNET].includes(behandling.utgift.kategori.kategori);
     const utgifstyperKonfirmasjon = [
         Utgiftstype.KONFIRMASJONSAVGIFT,
         Utgiftstype.KONFIRMASJONSLEIR,
@@ -93,7 +94,21 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
         Utgiftstype.SELSKAP,
     ];
 
-    return item.erRedigerbart && !readOnly ? (
+    if (readOnly || !item.erRedigerbart) {
+        return <div className="h-8 flex items-center">{erKategoriAnnet ? item.type : hentVisningsnavn(item.type)}</div>;
+    }
+    if (erKategoriAnnet) {
+        return (
+            <FormControlledTextField
+                name={`utgifter.${index}.type`}
+                label={text.label.utgift}
+                type="text"
+                inputMode="text"
+                hideLabel
+            />
+        );
+    }
+    return (
         <FormControlledSelectField
             className="w-fit"
             name={`utgifter.${index}.type`}
@@ -107,8 +122,6 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
             hideLabel
             onSelect={() => clearErrors(`utgifter.${index}.type`)}
         />
-    ) : (
-        <div className="h-8 flex items-center">{hentVisningsnavn(item.type)}</div>
     );
 };
 
@@ -179,10 +192,22 @@ const Main = () => {
                         {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
                     </BodyShort>
                 </div>
-                <div className="flex gap-x-2">
-                    <Label size="small">{text.label.kategori}:</Label>
-                    <BodyShort size="small">{hentVisningsnavn(behandling.utgift.kategori.kategori)}</BodyShort>
-                </div>
+                {behandling.utgift.kategori.kategori != Saerbidragskategori.ANNET && (
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.kategori}:</Label>
+                        <BodyShort size="small">{hentVisningsnavn(behandling.utgift.kategori.kategori)}</BodyShort>
+                    </div>
+                )}
+                {behandling.utgift.kategori.kategori == Saerbidragskategori.ANNET && (
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.kategori}:</Label>
+                        <BodyShort size="small">
+                            {hentVisningsnavn(behandling.utgift.kategori.kategori) +
+                                ": " +
+                                behandling.utgift?.kategori?.beskrivelse}
+                        </BodyShort>
+                    </div>
+                )}
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
                     <BodyShort size="small">{SOKNAD_LABELS[behandling.søktAv]}</BodyShort>
@@ -192,6 +217,7 @@ const Main = () => {
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
             </FlexRow>
+
             <FlexRow>
                 <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
                     {<option value="">{text.select.avslagPlaceholder}</option>}
