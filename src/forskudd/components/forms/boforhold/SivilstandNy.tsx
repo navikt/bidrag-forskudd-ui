@@ -1,4 +1,4 @@
-import "./Opplysninger.css";
+import "@common/components/boforhold/Opplysninger.css";
 
 import {
     Kilde,
@@ -15,11 +15,14 @@ import { FormControlledSelectField } from "@common/components/formFields/FormCon
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { calculateFraDato, sivilstandForskuddOptions } from "@common/helpers/boforholdFormHelpers";
+import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHelpers";
 import {
     useGetBehandlingV2,
     useGetOpplysningerSivilstand,
     useGetOpplysningerSivilstandV2,
 } from "@common/hooks/useApiData";
+import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
@@ -31,10 +34,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import text from "../../../../common/constants/texts";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
-import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
-import { calculateFraDato, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
-import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
     const { lesemodus } = useBehandlingProvider();

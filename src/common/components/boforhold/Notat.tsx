@@ -3,13 +3,13 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useDebounce } from "@common/hooks/useDebounce";
+import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { STEPS } from "../../../constants/steps";
-import { ForskuddStepper } from "../../../enum/ForskuddStepper";
-import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
-import { BoforholdFormValues } from "../../../types/boforholdFormValues";
+import { STEPS } from "../../../forskudd/constants/steps";
+import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
+import { BoforholdFormValues } from "../../../forskudd/types/boforholdFormValues";
 
 export const Notat = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();

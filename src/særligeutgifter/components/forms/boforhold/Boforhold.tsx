@@ -13,8 +13,6 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Sivilstand } from "./Sivilstand";
-
 const Main = () => {
     useEffect(scrollToHash, []);
 
@@ -25,7 +23,6 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
-            <Sivilstand />
         </>
     );
 };

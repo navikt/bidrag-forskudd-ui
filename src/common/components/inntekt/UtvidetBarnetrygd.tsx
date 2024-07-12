@@ -6,7 +6,7 @@ import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import elementId from "../../../forskudd/constants/elementIds";
+import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";

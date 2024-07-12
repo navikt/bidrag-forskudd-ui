@@ -7,10 +7,6 @@ import {
     SivilstandGrunnlagDto,
 } from "@api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
-import { toISODateString } from "@utils/date-utils";
-import { expect } from "chai";
-import { describe } from "mocha";
-
 import {
     checkOverlappingPeriods,
     compareOpplysninger,
@@ -20,7 +16,10 @@ import {
     getSivilstandPerioder,
     mapGrunnlagSivilstandToBehandlingSivilstandType,
     mapHusstandsMedlemmerToBarn,
-} from "../../forskudd/components/forms/helpers/boforholdFormHelpers";
+} from "@common/helpers/boforholdFormHelpers";
+import { toISODateString } from "@utils/date-utils";
+import { expect } from "chai";
+import { describe } from "mocha";
 
 describe("BoforholdFormHelpers", () => {
     it("should merge periods if there is no gap between 2 periods in Folkeregistre", () => {

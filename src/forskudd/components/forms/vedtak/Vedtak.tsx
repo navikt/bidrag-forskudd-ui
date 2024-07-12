@@ -11,6 +11,8 @@ import NotatButton from "@common/components/NotatButton";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import { BEHANDLING_API_V1 } from "@common/constants/api";
+import elementId from "@common/constants/elementIds";
+import elementIds from "@common/constants/elementIds";
 import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "@common/constants/texts";
 import texts from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -27,8 +29,6 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import environment from "../../../../environment";
-import elementId from "../../../constants/elementIds";
-import elementIds from "../../../constants/elementIds";
 import { STEPS } from "../../../constants/steps";
 
 const Vedtak = () => {

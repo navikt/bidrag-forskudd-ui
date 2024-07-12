@@ -14,7 +14,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import elementId from "../../../forskudd/constants/elementIds";
+import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";

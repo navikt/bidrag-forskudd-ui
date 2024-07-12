@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import elementIds from "@common/constants/elementIds";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
@@ -11,7 +12,6 @@ import React, { useEffect, useState } from "react";
 
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
-import elementIds from "../../constants/elementIds";
 import { STEPS } from "../../constants/steps";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 export const ForskuddPage = () => {

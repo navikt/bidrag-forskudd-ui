@@ -11,8 +11,8 @@ import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDat
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
-import { BoforholdFormValues } from "../../../types/boforholdFormValues";
+import { useOnActivateGrunnlag } from "../../../forskudd/hooks/useOnActivateGrunnlag";
+import { BoforholdFormValues } from "../../../forskudd/types/boforholdFormValues";
 
 const Header = () => (
     <BodyShort size="small" className="flex h-2">

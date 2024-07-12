@@ -33,7 +33,7 @@ import {
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
     SivilstandOpplysninger,
-} from "../../../types/boforholdFormValues";
+} from "../../forskudd/types/boforholdFormValues";
 export const boststatusOver18År = [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG];
 export const boforholdForskuddOptions = {
     under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
