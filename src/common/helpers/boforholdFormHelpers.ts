@@ -39,6 +39,10 @@ export const boforholdForskuddOptions = {
     under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
     likEllerOver18År: [...boststatusOver18År, Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
 };
+export const andreVoksneIHusstandenBoforholdOptions = [
+    Bostatuskode.BOR_MED_ANDRE_VOKSNE,
+    Bostatuskode.BOR_IKKE_MED_ANDRE_VOKSNE,
+];
 export const sivilstandForskuddOptions = [Sivilstandskode.GIFT_SAMBOER, Sivilstandskode.BOR_ALENE_MED_BARN];
 export const calculateFraDato = (
     fieldArrayValues: BostatusperiodeDto[] | SivilstandDto[],

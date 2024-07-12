@@ -13,6 +13,7 @@ import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { Notat } from "../../../../forskudd/components/forms/boforhold/Notat";
+import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
 
 const Main = () => {
     useEffect(scrollToHash, []);
@@ -24,6 +25,10 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
+            <Heading level="2" size="small">
+                {text.title.andreVoksneIHusstanden}
+            </Heading>
+            <AndreVoksneIHusstanden />
         </>
     );
 };

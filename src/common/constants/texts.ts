@@ -160,6 +160,7 @@ const tekster = {
     },
     skjermbildeNavn: "Søknad om forskudd",
     title: {
+        andreVoksneIHusstanden: "Andre voksne i husstanden",
         arbeidsforhold: "Arbeidsforhold",
         barn: "Barn",
         barnetillegg: "Barnetillegg",

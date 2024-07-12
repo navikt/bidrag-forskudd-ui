@@ -12,7 +12,7 @@ export type InntektTables =
     | `barnetillegg.${string}`
     | `kontantstøtte.${string}`;
 
-type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
 
 export type PageErrorsOrUnsavedState = {
     virkningstidspunkt: { error: boolean };
