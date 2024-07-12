@@ -4,7 +4,6 @@ import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpply
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import text from "@common/constants/texts";
-import { createInitialValues } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { Heading } from "@navikt/ds-react";
@@ -13,6 +12,7 @@ import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { Notat } from "../../../../forskudd/components/forms/boforhold/Notat";
+import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
 
 const Main = () => {
