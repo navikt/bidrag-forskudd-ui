@@ -35,6 +35,7 @@ module.exports = {
             "warn",
             { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" },
         ],
+        eqeqeq: ["error", "smart"],
     },
     overrides: [
         {

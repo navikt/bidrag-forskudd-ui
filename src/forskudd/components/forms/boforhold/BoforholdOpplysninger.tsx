@@ -1,9 +1,10 @@
 import { AktivereGrunnlagRequestV2, BostatusperiodeGrunnlagDto, OpplysningerType } from "@api/BidragBehandlingApiV1";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
@@ -11,7 +12,6 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const Header = () => (
@@ -33,7 +33,7 @@ export const NyOpplysningerAlert = () => {
     const innhentetTidspunkt =
         ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (
-        <ForskuddAlert variant="info">
+        <BehandlingAlert variant="info">
             <Heading size="xsmall" level="3">
                 {text.alert.nyOpplysningerInfo}
             </Heading>
@@ -41,7 +41,7 @@ export const NyOpplysningerAlert = () => {
                 Nye opplysninger fra offentlige registre er tilgjengelig. Oppdatert{" "}
                 {DateToDDMMYYYYHHMMString(dateOrNull(innhentetTidspunkt))}
             </BodyShort>
-        </ForskuddAlert>
+        </BehandlingAlert>
     );
 };
 const Opplysninger = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {

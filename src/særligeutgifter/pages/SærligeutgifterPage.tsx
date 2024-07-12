@@ -20,7 +20,7 @@ export const SærligeufgifterPage = () => {
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = vedtakstype != Vedtakstype.OPPHOR;
+    const interactive = vedtakstype !== Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
     const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter
@@ -54,7 +54,7 @@ export const SærligeufgifterPage = () => {
                             completed={
                                 activeStepIndex > 2 &&
                                 (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length) &&
-                                inntekterIkkeAktiveGrunnlag.length == 0
+                                inntekterIkkeAktiveGrunnlag.length === 0
                             }
                             interactive={interactive}
                         >
@@ -63,11 +63,11 @@ export const SærligeufgifterPage = () => {
                         <Stepper.Step
                             completed={
                                 activeStepIndex > 3 &&
-                                (boforholdValideringsfeil?.husstandsmedlem == undefined ||
-                                    boforholdValideringsfeil?.husstandsmedlem?.length == 0) &&
-                                boforholdValideringsfeil?.sivilstand == null &&
-                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn == undefined ||
-                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length == 0)
+                                (boforholdValideringsfeil?.husstandsmedlem === undefined ||
+                                    boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
+                                boforholdValideringsfeil?.sivilstand === null &&
+                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn === undefined ||
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0)
                                 // ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
                             }
                             interactive={interactive}

@@ -24,7 +24,7 @@ export const ForskuddPage = () => {
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
+    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
     const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter
@@ -57,11 +57,11 @@ export const ForskuddPage = () => {
                         <Stepper.Step
                             completed={
                                 activeStepIndex > 2 &&
-                                (boforholdValideringsfeil?.husstandsmedlem == undefined ||
-                                    boforholdValideringsfeil?.husstandsmedlem?.length == 0) &&
-                                boforholdValideringsfeil?.sivilstand == null &&
-                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn == undefined ||
-                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length == 0)
+                                (boforholdValideringsfeil?.husstandsmedlem === undefined ||
+                                    boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
+                                boforholdValideringsfeil?.sivilstand === null &&
+                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn === undefined ||
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0)
                                 // ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
                             }
                             interactive={interactive}
@@ -72,7 +72,7 @@ export const ForskuddPage = () => {
                             completed={
                                 activeStepIndex > 3 &&
                                 (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length) &&
-                                inntekterIkkeAktiveGrunnlag.length == 0
+                                inntekterIkkeAktiveGrunnlag.length === 0
                             }
                             interactive={interactive}
                         >

@@ -1,7 +1,7 @@
 import { AlertProps } from "@navikt/ds-react";
 import React from "react";
 
-import { ForskuddAlert } from "./ForskuddAlert";
+import { BehandlingAlert } from "./BehandlingAlert";
 
 type StatefulAlertProps = {
     children?: React.ReactNode;
@@ -26,9 +26,9 @@ const AlertWithCloseButton = ({
     };
     return (
         show && (
-            <ForskuddAlert size="small" {...alertProps} closeButton={alertProps.closeButton} onClose={close}>
+            <BehandlingAlert size="small" {...alertProps} closeButton={alertProps.closeButton} onClose={close}>
                 {children || "Content"}
-            </ForskuddAlert>
+            </BehandlingAlert>
         )
     );
 };

@@ -7,17 +7,23 @@ import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import elementId from "../../../constants/elementIds";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
-import { Opplysninger } from "./Opplysninger";
+import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
+import {
+    EditOrSaveButton,
+    InntektTabel,
+    KildeIcon,
+    Periode,
+    TaMed,
+} from "../../../forskudd/components/forms/inntekt/InntektTable";
+import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
+import elementId from "../../../forskudd/constants/elementIds";
 
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
@@ -196,7 +202,7 @@ export const Barnetillegg = () => {
                                                             content={<ExpandableContent item={item} />}
                                                             togglePlacement="right"
                                                             className="align-top"
-                                                            expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                            expansionDisabled={item.kilde === Kilde.MANUELL}
                                                         >
                                                             <Table.DataCell>
                                                                 <TaMed

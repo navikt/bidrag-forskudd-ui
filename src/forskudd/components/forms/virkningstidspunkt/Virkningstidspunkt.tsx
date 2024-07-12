@@ -7,10 +7,10 @@ import {
     VirkningstidspunktDto,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -184,9 +184,9 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                 />
             </FlexRow>
             {showChangedVirkningsDatoAlert && (
-                <ForskuddAlert variant="warning" className={"w-[488px]"}>
+                <BehandlingAlert variant="warning" className={"w-[488px]"}>
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
-                </ForskuddAlert>
+                </BehandlingAlert>
             )}
         </>
     );

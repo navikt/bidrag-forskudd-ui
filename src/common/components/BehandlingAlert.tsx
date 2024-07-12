@@ -5,7 +5,7 @@ type ForskuddAlertProps = {
     children?: React.ReactNode;
 };
 
-export const ForskuddAlert = ({ children, ...alertProps }: ForskuddAlertProps & AlertProps) => {
+export const BehandlingAlert = ({ children, ...alertProps }: ForskuddAlertProps & AlertProps) => {
     return (
         <Alert {...alertProps} size="small" className={alertProps.className ?? "w-[708px]"}>
             {children}

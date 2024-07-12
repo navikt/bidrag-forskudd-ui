@@ -4,7 +4,7 @@ import React from "react";
 
 import text from "../constants/texts";
 import { useGetBehandlingV2 } from "../hooks/useApiData";
-import { ForskuddAlert } from "./ForskuddAlert";
+import { BehandlingAlert } from "./BehandlingAlert";
 
 export const ManglerVirkningstidspunktAlert = () => {
     const {
@@ -16,7 +16,7 @@ export const ManglerVirkningstidspunktAlert = () => {
 
     return (
         !virkningstidspunktIsValid && (
-            <ForskuddAlert variant="warning">{text.alert.manglerVirkningstidspunkt}</ForskuddAlert>
+            <BehandlingAlert variant="warning">{text.alert.manglerVirkningstidspunkt}</BehandlingAlert>
         )
     );
 };

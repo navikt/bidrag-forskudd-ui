@@ -4,14 +4,21 @@ import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import elementId from "../../../constants/elementIds";
-import { InntektFormPeriode } from "../../../types/inntektFormValues";
-import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
-import { Opplysninger } from "./Opplysninger";
+import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
+import {
+    EditOrSaveButton,
+    InntektTabel,
+    KildeIcon,
+    Periode,
+    TaMed,
+    Totalt,
+} from "../../../forskudd/components/forms/inntekt/InntektTable";
+import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
+import elementId from "../../../forskudd/constants/elementIds";
 
 export const Kontantstøtte = () => {
     const { roller } = useGetBehandlingV2();
@@ -115,7 +122,7 @@ export const Kontantstøtte = () => {
                                                             content={<ExpandableContent item={item} />}
                                                             togglePlacement="right"
                                                             className="align-top"
-                                                            expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                            expansionDisabled={item.kilde === Kilde.MANUELL}
                                                         >
                                                             <Table.DataCell>
                                                                 <TaMed

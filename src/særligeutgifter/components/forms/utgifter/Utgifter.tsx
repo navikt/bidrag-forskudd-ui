@@ -223,7 +223,7 @@ const EditOrSaveButton = ({
 const Main = () => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
-    const erAvslagValgt = getValues("avslag") != "";
+    const erAvslagValgt = getValues("avslag") !== "";
 
     return (
         <>
@@ -234,13 +234,13 @@ const Main = () => {
                         {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
                     </BodyShort>
                 </div>
-                {behandling.utgift.kategori.kategori != Saerbidragskategori.ANNET && (
+                {behandling.utgift.kategori.kategori !== Saerbidragskategori.ANNET && (
                     <div className="flex gap-x-2">
                         <Label size="small">{text.label.kategori}:</Label>
                         <BodyShort size="small">{hentVisningsnavn(behandling.utgift.kategori.kategori)}</BodyShort>
                     </div>
                 )}
-                {behandling.utgift.kategori.kategori == Saerbidragskategori.ANNET && (
+                {behandling.utgift.kategori.kategori === Saerbidragskategori.ANNET && (
                     <div className="flex gap-x-2">
                         <Label size="small">{text.label.kategori}:</Label>
                         <BodyShort size="small">
@@ -367,7 +367,7 @@ const UtgifterListe = () => {
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp != utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !utgiftErForeldet) {
+        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !utgiftErForeldet) {
             setError(`utgifter.${index}.begrunnelse`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
@@ -405,7 +405,6 @@ const UtgifterListe = () => {
                                     : eksistingUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
                         }))
                     );
-                    // resetField(`utgifter`, { defaultValue: mapUtgifter(updatedValue) });
                 }
             );
         }
@@ -651,7 +650,7 @@ const UtgifterForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (name === undefined || type == undefined) {
+            if (name === undefined || type === undefined) {
                 return;
             } else {
                 debouncedOnSave(name);
@@ -661,7 +660,7 @@ const UtgifterForm = () => {
     }, []);
 
     const onSave = (name?: FieldPath<UtgiftFormValues>) => {
-        if (name == "beregning.beløpDirekteBetaltAvBp") {
+        if (name === "beregning.beløpDirekteBetaltAvBp") {
             const beløpBp = getValues(`beregning.beløpDirekteBetaltAvBp`);
             updateAndSave(
                 {
@@ -669,15 +668,15 @@ const UtgifterForm = () => {
                 },
                 (response) => setValue("beregning", response.beregning)
             );
-        } else if (name == "avslag") {
+        } else if (name === "avslag") {
             const avslag = getValues(`avslag`);
             updateAndSave(
                 {
-                    avslag: avslag == "" ? null : (avslag as Resultatkode),
+                    avslag: avslag === "" ? null : (avslag as Resultatkode),
                 },
                 (response) => setValue("utgifter", mapUtgifter(response.utgiftposter))
             );
-        } else if (name == "notat.kunINotat") {
+        } else if (name === "notat.kunINotat") {
             updateAndSave({
                 notat: {
                     kunINotat: getValues(`notat.kunINotat`),

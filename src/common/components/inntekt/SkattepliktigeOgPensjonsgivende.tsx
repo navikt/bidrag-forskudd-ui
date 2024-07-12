@@ -1,20 +1,27 @@
 import { Inntektsrapportering, Inntektstype, Kilde } from "@api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
+import AinntektLink from "@common/components/inntekt/AinntektLink";
 import text from "@common/constants/texts";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import elementId from "../../../constants/elementIds";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import AinntektLink from "./AinntektLink";
-import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
-import { Opplysninger } from "./Opplysninger";
+import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
+import {
+    EditOrSaveButton,
+    InntektTabel,
+    KildeIcon,
+    Periode,
+    TaMed,
+    Totalt,
+} from "../../../forskudd/components/forms/inntekt/InntektTable";
+import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
+import elementId from "../../../forskudd/constants/elementIds";
 
 const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (

@@ -9,9 +9,9 @@ import {
     SivilstandGrunnlagDto,
     Sivilstandskode,
 } from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
@@ -19,6 +19,7 @@ import {
     useGetOpplysningerSivilstand,
     useGetOpplysningerSivilstandV2,
 } from "@common/hooks/useApiData";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { capitalize, ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -30,7 +31,6 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import text from "../../../../common/constants/texts";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { calculateFraDato, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
@@ -380,7 +380,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                 {valideringsfeilSivilstand && valideringsfeilSivilstand.harFeil && (
                     <div className="mb-4">
                         {valideringsfeilSivilstand && (
-                            <ForskuddAlert variant="warning">
+                            <BehandlingAlert variant="warning">
                                 <Heading spacing size="small" level="3">
                                     {text.alert.feilIPeriodisering}
                                 </Heading>
@@ -397,7 +397,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                                     <p>{text.error.ingenLoependePeriode}</p>
                                 )}
                                 {valideringsfeilSivilstand.ugyldigStatus && <p>{text.error.ugyldigStatus}</p>}
-                            </ForskuddAlert>
+                            </BehandlingAlert>
                         )}
                     </div>
                 )}

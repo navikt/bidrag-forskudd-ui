@@ -2,7 +2,7 @@ export const dateOrNull = (dateString?: string): Date | null => (dateString ? ne
 export const toISODateString = (date?: Date): string | null =>
     date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) ?? null;
 export const toISODateTimeString = (date?: Date): string | null =>
-    date == undefined
+    date === undefined
         ? null
         : date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) +
           "T" +

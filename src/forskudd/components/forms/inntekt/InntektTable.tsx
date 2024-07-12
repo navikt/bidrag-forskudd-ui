@@ -6,13 +6,23 @@ import {
     OppdatereInntektRequest,
     OppdatereInntektResponse,
 } from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import {
+    createPayload,
+    inntektSorting,
+    offentligPeriodeHasHigherOrder,
+    periodeHasHigherPriorityOrder,
+    transformInntekt,
+} from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
+import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
@@ -23,16 +33,6 @@ import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { InntektTables } from "../../../context/ForskuddBehandlingProviderWrapper";
-import { useOnSaveInntekt } from "../../../hooks/useOnSaveInntekt";
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import {
-    createPayload,
-    inntektSorting,
-    offentligPeriodeHasHigherOrder,
-    periodeHasHigherPriorityOrder,
-    transformInntekt,
-} from "../helpers/inntektFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
@@ -146,7 +146,7 @@ export const Periode = ({
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const [inntektType] = fieldName.split(".");
 
-    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde == Kilde.MANUELL;
+    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde === Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -354,13 +354,15 @@ export const InntektTabel = ({
                     rollbackFn: () => {
                         const value = getValues(`${fieldName}.${index}`);
                         if (updatedValues.sletteInntekt) {
-                            const inntekt = inntekter[inntektType].find((val) => val.id == updatedValues.sletteInntekt);
+                            const inntekt = inntekter[inntektType].find(
+                                (val) => val.id === updatedValues.sletteInntekt
+                            );
                             fieldArray.insert(index, { ...inntekt, erRedigerbart: false });
                         } else if (value.id == null) {
                             fieldArray.remove(index);
                         } else {
                             const valueIndex = getValues(fieldName).findIndex((val) => val.id === value.id);
-                            const inntekt = inntekter[inntektType].find((val) => val.id == value.id);
+                            const inntekt = inntekter[inntektType].find((val) => val.id === value.id);
                             setValue(`${fieldName}.${valueIndex}`, inntekt);
                         }
                     },
@@ -405,7 +407,7 @@ export const InntektTabel = ({
     return (
         <>
             {!lesemodus && tableValideringsfeil && (
-                <ForskuddAlert variant="warning" className="mb-4">
+                <BehandlingAlert variant="warning" className="mb-4">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
@@ -450,7 +452,7 @@ export const InntektTabel = ({
                     {tableValideringsfeil.fremtidigPeriode && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
                     )}
-                </ForskuddAlert>
+                </BehandlingAlert>
             )}
             {children({
                 controlledFields,
