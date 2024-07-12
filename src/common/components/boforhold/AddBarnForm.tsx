@@ -14,7 +14,7 @@ import { removePlaceholder } from "@utils/string-utils";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { UseFieldArrayReturn, useFormContext } from "react-hook-form";
 
-import { BoforholdFormValues } from "../../../særligeutgifter/types/boforholdFormValues";
+import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 export const AddBarnForm = ({
     setOpenAddBarnForm,

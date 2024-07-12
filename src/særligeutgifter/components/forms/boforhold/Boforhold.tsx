@@ -1,7 +1,6 @@
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { BarnPerioder } from "@common/components/boforhold/BarnPerioder";
 import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpplysninger";
-import { Notat } from "@common/components/boforhold/Notat";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import text from "@common/constants/texts";
@@ -12,6 +11,8 @@ import { Heading } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+
+import { Notat } from "../../../../forskudd/components/forms/boforhold/Notat";
 
 const Main = () => {
     useEffect(scrollToHash, []);

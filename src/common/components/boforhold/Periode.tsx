@@ -10,7 +10,7 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { BoforholdFormValues } from "../../../særligeutgifter/types/boforholdFormValues";
+import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 export const Periode = ({
     editableRow,

@@ -23,6 +23,7 @@ import {
     useGetOpplysningerSivilstand,
     useGetOpplysningerSivilstandV2,
 } from "@common/hooks/useApiData";
+import { useOnActivateGrunnlag } from "@common/hooks/useOnActivateGrunnlag";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
@@ -33,7 +34,6 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {

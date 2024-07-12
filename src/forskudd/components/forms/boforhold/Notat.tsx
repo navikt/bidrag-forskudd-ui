@@ -4,12 +4,12 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
+import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { STEPS } from "../../../forskudd/constants/steps";
-import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
-import { BoforholdFormValues } from "../../../forskudd/types/boforholdFormValues";
+import { STEPS } from "../../../constants/steps";
+import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
 export const Notat = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();

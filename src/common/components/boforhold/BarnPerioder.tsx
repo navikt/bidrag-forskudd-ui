@@ -13,7 +13,7 @@ import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { Fragment, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { BoforholdFormValues } from "../../../særligeutgifter/types/boforholdFormValues";
+import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 export const BarnPerioder = () => {
     const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =

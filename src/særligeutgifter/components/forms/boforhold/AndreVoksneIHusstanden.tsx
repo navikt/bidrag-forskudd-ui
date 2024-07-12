@@ -23,14 +23,13 @@ import {
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Button, Heading, Table } from "@navikt/ds-react";
 import { isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-
-import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 const DeleteButton = ({
     onRemovePeriode,
