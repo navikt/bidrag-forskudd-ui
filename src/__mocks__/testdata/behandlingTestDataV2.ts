@@ -45,6 +45,8 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     ],
     boforhold: {
         husstandsbarn: [],
+        andreVoksneIHusstanden: [],
+        husstandsmedlem: [],
         sivilstand: [],
         notat: {
             kunINotat: "",
@@ -77,9 +79,11 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     aktiveGrunnlagsdata: {
         arbeidsforhold: [],
         husstandsbarn: [],
+        husstandsmedlem: [],
     },
     ikkeAktiverteEndringerIGrunnlagsdata: {
         inntekter: null,
         husstandsbarn: [],
+        husstandsmedlem: [],
     },
 };

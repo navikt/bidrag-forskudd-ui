@@ -32,15 +32,13 @@ export const DatePickerInput = ({
     fieldValue,
 }: DatePickerInputProps) => {
     const { datepickerProps, inputProps, setSelected } = useDatepicker({
-        onDateChange: (date) => {
-            onChange(date);
-        },
-        onValidate: (val) => {
-            if (onValidate) onValidate(val);
-        },
         fromDate,
         toDate,
         defaultSelected: isValidDate(new Date(defaultValue)) ? dateOrNull(defaultValue) : null,
+        onDateChange: (date) => {
+            onChange(date);
+        },
+        onValidate: (val) => onValidate?.(val),
     });
     datepickerProps.strategy = strategy;
 

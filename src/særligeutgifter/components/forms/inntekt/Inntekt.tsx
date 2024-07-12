@@ -1,11 +1,9 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
-import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
 import { Barnetillegg } from "@common/components/inntekt/Barnetillegg";
 import { BeregnetInntekter } from "@common/components/inntekt/BeregnetInntekter";
-import { InntektChart } from "@common/components/inntekt/InntektChart";
+import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { Kontantstøtte } from "@common/components/inntekt/Kontantstoette";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { SkattepliktigeOgPensjonsgivende } from "@common/components/inntekt/SkattepliktigeOgPensjonsgivende";
@@ -22,46 +20,21 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { BodyShort, ExpansionCard, Tabs } from "@navikt/ds-react";
+import { Tabs } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
-import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
-const InntektHeader = ({ ident }: { ident: string }) => {
-    const { inntekter } = useGetBehandlingV2();
-    const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
-    return månedsinntekter?.length > 0 ? (
-        <div className="grid w-full max-w-[65ch] gap-y-8">
-            <InntektChart inntekt={månedsinntekter} />
-            <ExpansionCard aria-label="default-demo" size="small">
-                <ExpansionCard.Header>
-                    <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
-                </ExpansionCard.Header>
-                <ExpansionCard.Content>
-                    <QueryErrorWrapper>
-                        <Arbeidsforhold ident={ident} />
-                    </QueryErrorWrapper>
-                </ExpansionCard.Content>
-            </ExpansionCard>
-        </div>
-    ) : (
-        <BehandlingAlert variant="info">
-            <BodyShort>Ingen inntekt funnet</BodyShort>
-        </BehandlingAlert>
-    );
-};
 const Main = () => {
     const { roller: behandlingRoller } = useGetBehandlingV2();
-    const roller = behandlingRoller
-        .filter((rolle) => rolle.rolletype !== Rolletype.BP)
-        .sort((a, b) => {
-            if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
-            if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
-            return 0;
-        });
+    const roller = behandlingRoller.sort((a, b) => {
+        if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
+        if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
+        return 0;
+    });
     useEffect(scrollToHash, []);
 
     return (
@@ -73,7 +46,7 @@ const Main = () => {
                             key={rolle.ident}
                             value={rolle.ident}
                             label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                                rolle.rolletype === Rolletype.BM ? "" : rolle.ident
+                                [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
                             }`}
                         />
                     ))}
@@ -94,6 +67,7 @@ const Main = () => {
                                     <BeregnetInntekter />
                                 </>
                             )}
+                            {rolle.rolletype === Rolletype.BP && <Barnetillegg />}
                         </Tabs.Panel>
                     );
                 })}
@@ -138,7 +112,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[ForskuddStepper.VEDTAK]);
+    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD]);
 
     const debouncedOnSave = useDebounce(onSave);
 
@@ -162,10 +136,9 @@ const Side = () => {
 const InntektForm = () => {
     const { inntekter, roller } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
-    const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialValues(bmOgBarn, inntekter, virkningsdato),
-        [bmOgBarn, inntekter, virkningsdato]
+        () => createInitialValues(roller, inntekter, virkningsdato),
+        [roller, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({
         defaultValues: initialValues,

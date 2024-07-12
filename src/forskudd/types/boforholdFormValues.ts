@@ -1,7 +1,7 @@
 import {
     BehandlingNotatDto,
     Bostatuskode,
-    HusstandsbarnDtoV2,
+    HusstandsmedlemDtoV2,
     SivilstandDto,
     SivilstandGrunnlagDto,
     Sivilstandskode,
@@ -14,7 +14,7 @@ export interface SivilstandBeregnetInnhold {
 }
 
 export interface BoforholdFormValues {
-    husstandsbarn?: HusstandsbarnDtoV2[];
+    husstandsbarn?: HusstandsmedlemDtoV2[];
     sivilstand?: SivilstandDto[];
     notat?: BehandlingNotatDto;
 }

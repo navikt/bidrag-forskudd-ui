@@ -2,7 +2,7 @@ export const dateOrNull = (dateString?: string): Date | null => (dateString ? ne
 export const toISODateString = (date?: Date): string | null =>
     date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) ?? null;
 export const toISODateTimeString = (date?: Date): string | null =>
-    date == undefined
+    date === undefined
         ? null
         : date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) +
           "T" +
@@ -37,6 +37,12 @@ export const addMonthsIgnoreDay = (date: Date, months: number) => {
 
 export const deductMonths = (date: Date, months: number) => {
     const newDate = new Date(date);
+    newDate.setMonth(newDate.getMonth() - months);
+    return newDate;
+};
+
+export const deductMonthsIgnoreday = (date: Date, months: number) => {
+    const newDate = firstDayOfMonth(new Date(date));
     newDate.setMonth(newDate.getMonth() - months);
     return newDate;
 };

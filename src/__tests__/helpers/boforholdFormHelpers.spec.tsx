@@ -1,6 +1,6 @@
 import {
     Bostatuskode,
-    HusstandsbarnperiodeDto,
+    BostatusperiodeDto,
     Kilde,
     RolleDto,
     Rolletype,
@@ -472,7 +472,7 @@ describe("BoforholdFormHelpers", () => {
                 fødselsdato: "2002-06-05",
             },
         ];
-        const expectedResult: HusstandsbarnperiodeDto[] = [
+        const expectedResult: BostatusperiodeDto[] = [
             {
                 datoFom: "2019-04-01",
                 datoTom: "2020-06-30",
@@ -537,7 +537,7 @@ describe("BoforholdFormHelpers", () => {
                 fødselsdato: "2002-06-05",
             },
         ];
-        const expectedResult: HusstandsbarnperiodeDto[] = [
+        const expectedResult: BostatusperiodeDto[] = [
             {
                 datoFom: "2020-08-01",
                 datoTom: null,

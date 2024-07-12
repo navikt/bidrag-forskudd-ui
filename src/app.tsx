@@ -2,7 +2,6 @@ import { TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { BidragBehandlingHeader } from "@common/components/header/BidragBehandlingHeader";
 import { ErrorModal } from "@common/components/modal/ErrorModal";
 import text from "@common/constants/texts";
-import { BehandlingProvider } from "@common/context/BehandlingContext";
 import { useBehandlingV2 } from "@common/hooks/useApiData";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
@@ -14,8 +13,10 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
+import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
+import { SærligeugifterProviderWrapper } from "./særligeutgifter/context/SærligeugifterProviderWrapper";
 import { SærligeufgifterPage } from "./særligeutgifter/pages/SærligeutgifterPage";
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
@@ -113,26 +114,25 @@ function ForskuddBrukerveiledningPageWrapper() {
 }
 
 const ForskuddBehandling = () => (
-    <BehandlingProvider>
+    <ForskuddBehandlingProviderWrapper>
         <BidragBehandlingHeader />
         <ForskuddPage />
         <ErrorModal />
-    </BehandlingProvider>
+    </ForskuddBehandlingProviderWrapper>
 );
-
 const SærligeutgifterBehandling = () => (
-    <BehandlingProvider>
+    <SærligeugifterProviderWrapper>
         <BidragBehandlingHeader />
         <SærligeufgifterPage />
         <ErrorModal />
-    </BehandlingProvider>
+    </SærligeugifterProviderWrapper>
 );
 
 const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
     prefetchVisningsnavn();
     const { flagsReady, flagsError } = useFlagsStatus();
 
-    if (!flagsReady && flagsError == false) {
+    if (!flagsReady && flagsError === false) {
         return (
             <div className="flex justify-center">
                 <Loader size="3xlarge" title={text.loading} variant="interaction" />
@@ -150,7 +150,7 @@ const BidragBehandlingWrapper = () => {
         switch (type) {
             case TypeBehandling.FORSKUDD:
                 return <ForskuddBehandling />;
-            case TypeBehandling.SAeRLIGEUTGIFTER:
+            case TypeBehandling.SAeRBIDRAG:
                 return <SærligeutgifterBehandling />;
             default:
                 return null;

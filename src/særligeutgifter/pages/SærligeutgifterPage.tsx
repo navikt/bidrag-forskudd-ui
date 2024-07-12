@@ -14,14 +14,13 @@ import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 export const SærligeufgifterPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
-        virkningstidspunkt,
         erVedtakFattet,
         vedtakstype,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = !virkningstidspunkt.avslag && vedtakstype != Vedtakstype.OPPHOR;
+    const interactive = vedtakstype !== Vedtakstype.OPPHOR;
     const activeStepIndex = STEPS[activeStep];
 
     const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter
@@ -54,26 +53,26 @@ export const SærligeufgifterPage = () => {
                         <Stepper.Step
                             completed={
                                 activeStepIndex > 2 &&
-                                (boforholdValideringsfeil?.husstandsbarn == undefined ||
-                                    boforholdValideringsfeil?.husstandsbarn?.length == 0) &&
-                                boforholdValideringsfeil?.sivilstand == null &&
-                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn == undefined ||
-                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length == 0)
+                                (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length) &&
+                                inntekterIkkeAktiveGrunnlag.length === 0
+                            }
+                            interactive={interactive}
+                        >
+                            {capitalize(SærligeutgifterStepper.INNTEKT)}
+                        </Stepper.Step>
+                        <Stepper.Step
+                            completed={
+                                activeStepIndex > 3 &&
+                                (boforholdValideringsfeil?.husstandsmedlem === undefined ||
+                                    boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
+                                boforholdValideringsfeil?.sivilstand === null &&
+                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn === undefined ||
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0)
                                 // ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
                             }
                             interactive={interactive}
                         >
                             {capitalize(SærligeutgifterStepper.BOFORHOLD)}
-                        </Stepper.Step>
-                        <Stepper.Step
-                            completed={
-                                activeStepIndex > 3 &&
-                                (!inntektValideringsfeil || !Object.keys(inntektValideringsfeil).length) &&
-                                inntekterIkkeAktiveGrunnlag.length == 0
-                            }
-                            interactive={interactive}
-                        >
-                            {capitalize(SærligeutgifterStepper.INNTEKT)}
                         </Stepper.Step>
                         <Stepper.Step completed={erVedtakFattet}>
                             {capitalize(SærligeutgifterStepper.VEDTAK)}

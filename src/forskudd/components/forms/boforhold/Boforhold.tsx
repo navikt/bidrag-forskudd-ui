@@ -1,17 +1,18 @@
 import {
     Bostatuskode,
-    HusstandsbarnDtoV2,
-    HusstandsbarnperiodeDto,
+    BostatusperiodeDto,
+    HusstandsmedlemDtoV2,
     Kilde,
     OppdatereBoforholdRequestV2,
     OpprettHusstandsstandsmedlem,
 } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { DatePickerInput } from "@common/components/date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
@@ -24,6 +25,7 @@ import { PERSON_API } from "@common/constants/api";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { isValidDate, ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -43,7 +45,6 @@ import { FormProvider, useFieldArray, UseFieldArrayReturn, useForm, useFormConte
 
 import elementIds from "../../../constants/elementIds";
 import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import {
     boforholdForskuddOptions,
@@ -54,7 +55,6 @@ import {
     isOver18YearsOld,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { KildeIcon } from "../inntekt/InntektTable";
 import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";
@@ -65,7 +65,7 @@ const DeleteButton = ({
     index,
 }: {
     onRemovePeriode: (index) => void;
-    barn: HusstandsbarnDtoV2;
+    barn: HusstandsmedlemDtoV2;
     index: number;
 }) => {
     const { lesemodus } = useBehandlingProvider();
@@ -128,8 +128,8 @@ const Status = ({
 }: {
     editableRow: boolean;
     fieldName: `husstandsbarn.${number}.perioder.${number}`;
-    barn: HusstandsbarnDtoV2;
-    item: HusstandsbarnperiodeDto;
+    barn: HusstandsmedlemDtoV2;
+    item: BostatusperiodeDto;
 }) => {
     const { clearErrors } = useFormContext<BoforholdFormValues>();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
@@ -170,10 +170,10 @@ const Periode = ({
     label,
 }: {
     editableRow: boolean;
-    item: HusstandsbarnperiodeDto;
+    item: BostatusperiodeDto;
     fieldName: `husstandsbarn.${number}.perioder.${number}`;
     field: "datoFom" | "datoTom";
-    barn: HusstandsbarnDtoV2;
+    barn: HusstandsmedlemDtoV2;
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
@@ -703,6 +703,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                 oppdatereHusstandsmedlem: {
                     oppdaterPeriode: {
                         idHusstandsbarn: barn.id,
+                        idHusstandsmedlem: barn.id,
                         idPeriode: selectedPeriodeId,
                         datoFom: selectedDatoFom,
                         datoTom: selectedDatoTom,
@@ -871,6 +872,7 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         oppdatereHusstandsmedlem: {
                             oppdaterPeriode: {
                                 idHusstandsbarn: barn.id,
+                                idHusstandsmedlem: barn.id,
                                 idPeriode: periode.id,
                                 datoFom: periode.datoFom,
                                 datoTom: periode.datoTom,
@@ -915,8 +917,8 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
     };
 
-    const valideringsfeilForBarn = valideringsfeil?.husstandsbarn?.find(
-        (feil) => feil.barn.husstandsbarnId === barn.id
+    const valideringsfeilForBarn = valideringsfeil?.husstandsmedlem?.find(
+        (feil) => feil.barn.husstandsmedlemId === barn.id
     );
 
     return (
@@ -947,14 +949,14 @@ const Perioder = ({ barnIndex }: { barnIndex: number }) => {
             )}
             {valideringsfeilForBarn && (
                 <div className="mb-4">
-                    <ForskuddAlert variant="warning">
+                    <BehandlingAlert variant="warning">
                         <Heading spacing size="small" level="3">
                             {text.alert.feilIPeriodisering}
                         </Heading>
                         {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
                         {valideringsfeilForBarn.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
                         {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
-                    </ForskuddAlert>
+                    </BehandlingAlert>
                 </div>
             )}
 

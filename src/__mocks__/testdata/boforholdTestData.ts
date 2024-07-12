@@ -1,4 +1,4 @@
-import { HusstandsbarnDto } from "@api/BidragBehandlingApiV1";
+import { HusstandsmedlemDtoV2 } from "@api/BidragBehandlingApiV1";
 
 interface Sivilstand {
     gyldigFraOgMed: string;
@@ -8,7 +8,7 @@ interface Sivilstand {
 }
 
 export interface BoforholdData {
-    husstandsBarn: HusstandsbarnDto[];
+    husstandsBarn: HusstandsmedlemDtoV2[];
     sivilstand: Sivilstand[];
     boforholdBegrunnelseMedIVedtakNotat: string;
     boforholdBegrunnelseKunINotat: string;

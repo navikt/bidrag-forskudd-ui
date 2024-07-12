@@ -1,86 +1,28 @@
-import { Inntektsrapportering, Inntektstype, Kilde } from "@api/BidragBehandlingApiV1";
-import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { Inntektsrapportering, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import text from "@common/constants/texts";
-import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
-import { SackKronerFillIcon } from "@navikt/aksel-icons";
-import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { InntektFormPeriode } from "@common/types/inntektFormValues";
+import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
-import { useFormContext } from "react-hook-form";
 
-import elementId from "../../../constants/elementIds";
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
-import AinntektLink from "./AinntektLink";
+import elementId from "../../../forskudd/constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
-    return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
-        <FormControlledSelectField
-            name={`${field}.rapporteringstype`}
-            label={text.label.beskrivelse}
-            options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
-                [
-                    Inntektsrapportering.LONNMANUELTBEREGNET,
-                    Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
-                    Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
-                    Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
-                    Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
-                    Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
-                ].map((value) => ({
-                    value,
-                    text: hentVisningsnavn(value),
-                }))
-            )}
-            hideLabel
-        />
-    ) : (
-        <BodyShort className="leading-8 flex flex-row gap-0 align-center" size="small">
-            {hentVisningsnavn(
-                item.rapporteringstype,
-                item.opprinneligFom ?? item.datoFom,
-                item.opprinneligTom ?? item.datoTom
-            )}
-            {alert && (
-                <span className="self-center ml-[5px] text-[var(--a-icon-info)]">
-                    <SackKronerFillIcon title={alert} />
-                </span>
-            )}
-        </BodyShort>
-    );
-};
-
-export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
-    const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
-    const fieldName = `årsinntekter.${ident}` as const;
-
-    const customRowValidation = (fieldName: `årsinntekter.${string}.${number}`) => {
-        const periode = getValues(fieldName);
-        if (ObjectUtils.isEmpty(periode.rapporteringstype)) {
-            setError(`${fieldName}.rapporteringstype`, {
-                type: "notValid",
-                message: text.error.inntektType,
-            });
-        } else {
-            clearErrors(`${fieldName}.rapporteringstype`);
-        }
-    };
+export const Småbarnstillegg = () => {
+    const { roller } = useGetBehandlingV2();
+    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
+    const fieldName = "småbarnstillegg";
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
-            <div className="flex gap-x-4">
-                <HStack gap={"2"}>
-                    <Heading level="2" size="small" id={elementId.seksjon_inntekt_skattepliktig}>
-                        {text.title.skattepliktigeogPensjonsgivendeInntekt}
-                    </Heading>
-
-                    <AinntektLink ident={ident} />
-                </HStack>
-            </div>
-            <Opplysninger fieldName={fieldName} ident={ident} />
-            <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
+            <Heading level="2" size="small" id={elementId.seksjon_inntekt_småbarnstillegg}>
+                {text.title.småbarnstillegg}
+            </Heading>
+            <Opplysninger fieldName={fieldName} />
+            <InntektTabel fieldName={fieldName}>
                 {({
                     controlledFields,
                     onSaveRow,
@@ -103,40 +45,22 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
-                                                align="left"
-                                                className="w-[74px]"
+                                                align="center"
+                                                className="w-[84px]"
                                             >
                                                 {text.label.taMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell
-                                                textSize="small"
-                                                scope="col"
-                                                align="left"
-                                                className="w-[134px]"
-                                            >
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                                 {text.label.fraOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell
-                                                textSize="small"
-                                                scope="col"
-                                                align="left"
-                                                className="w-[134px]"
-                                            >
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
-                                                align="left"
-                                                className="w-[290px]"
-                                            >
-                                                {text.label.beskrivelse}
-                                            </Table.HeaderCell>
-                                            <Table.HeaderCell
-                                                textSize="small"
-                                                scope="col"
-                                                align="left"
-                                                className="w-[54px]"
+                                                align="center"
+                                                className="w-[74px]"
                                             >
                                                 {text.label.kilde}
                                             </Table.HeaderCell>
@@ -156,16 +80,10 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                         {controlledFields.map((item, index) => (
                                             <Table.ExpandableRow
                                                 key={item?.id + item.ident}
-                                                content={
-                                                    <ExpandableContent
-                                                        item={item}
-                                                        showInnteksposter
-                                                        showLøpendeTilOgMed
-                                                    />
-                                                }
+                                                content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
                                                 className="align-top"
-                                                expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                expansionDisabled={item.kilde === Kilde.MANUELL}
                                             >
                                                 <Table.DataCell>
                                                     <TaMed
@@ -192,28 +110,13 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         item={item}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Beskrivelse
-                                                        item={item}
-                                                        field={`${fieldName}.${index}`}
-                                                        alert={
-                                                            item.inntektsposter?.some(
-                                                                (d) =>
-                                                                    d.inntektstype == Inntektstype.NAeRINGSINNTEKT ||
-                                                                    d.kode.toUpperCase().includes("NAERING")
-                                                            )
-                                                                ? "Inntekt inneholder næringsinntekt"
-                                                                : undefined
-                                                        }
-                                                    />
-                                                </Table.DataCell>
                                                 <Table.DataCell>
                                                     <KildeIcon kilde={item.kilde} />
                                                 </Table.DataCell>
-                                                <Table.DataCell align="right" textSize="small">
+                                                <Table.DataCell textSize="small">
                                                     <Totalt item={item} field={`${fieldName}.${index}`} />
                                                 </Table.DataCell>
-                                                <Table.DataCell textSize="small">
+                                                <Table.DataCell>
                                                     <EditOrSaveButton
                                                         index={index}
                                                         item={item}
@@ -234,7 +137,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                     datoFom: null,
                                     datoTom: null,
                                     beløp: 0,
-                                    rapporteringstype: "",
+                                    rapporteringstype: Inntektsrapportering.SMABARNSTILLEGG,
                                     taMed: true,
                                     kilde: Kilde.MANUELL,
                                     inntektsposter: [],

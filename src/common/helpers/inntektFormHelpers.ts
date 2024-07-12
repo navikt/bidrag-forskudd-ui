@@ -8,10 +8,9 @@ import {
     RolleDto,
     Rolletype,
 } from "@api/BidragBehandlingApiV1";
+import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { toISODateString } from "@navikt/bidrag-ui-common";
 import { isAfterDate } from "@utils/date-utils";
-
-import { InntektFormPeriode, InntektFormValues } from "../../../types/inntektFormValues";
 
 export const periodeHasHigherPriorityOrder = (
     periode: InntektFormPeriode,
@@ -104,15 +103,15 @@ export const inntektSorting = (a: InntektFormPeriode, b: InntektFormPeriode) => 
     }
 };
 export const createInitialValues = (
-    bmOgBarn: RolleDto[],
+    roller: RolleDto[],
     inntekter: InntekterDtoV2,
     virkningsdato: Date
 ): InntektFormValues => {
-    const barn = bmOgBarn.filter((rolle) => rolle.rolletype === Rolletype.BA);
+    const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const transformFn = transformInntekt(virkningsdato);
 
     return {
-        årsinntekter: bmOgBarn.reduce(
+        årsinntekter: roller.reduce(
             (acc, rolle) => ({
                 ...acc,
                 [rolle.ident]: inntekter.årsinntekter

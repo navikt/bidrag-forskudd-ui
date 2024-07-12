@@ -1,13 +1,10 @@
-import {
-    AktivereGrunnlagRequestV2,
-    HusstandsbarnGrunnlagPeriodeDto,
-    OpplysningerType,
-} from "@api/BidragBehandlingApiV1";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
+import { AktivereGrunnlagRequestV2, BostatusperiodeGrunnlagDto, OpplysningerType } from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
@@ -15,7 +12,6 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const Header = () => (
@@ -37,7 +33,7 @@ export const NyOpplysningerAlert = () => {
     const innhentetTidspunkt =
         ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (
-        <ForskuddAlert variant="info">
+        <BehandlingAlert variant="info">
             <Heading size="xsmall" level="3">
                 {text.alert.nyOpplysningerInfo}
             </Heading>
@@ -45,10 +41,10 @@ export const NyOpplysningerAlert = () => {
                 Nye opplysninger fra offentlige registre er tilgjengelig. Oppdatert{" "}
                 {DateToDDMMYYYYHHMMString(dateOrNull(innhentetTidspunkt))}
             </BodyShort>
-        </ForskuddAlert>
+        </BehandlingAlert>
     );
 };
-const Opplysninger = ({ perioder }: { perioder: HusstandsbarnGrunnlagPeriodeDto[] }) => {
+const Opplysninger = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
     if (!perioder) {
         return null;
@@ -101,8 +97,8 @@ export const BoforholdOpplysninger = ({
     const activateGrunnlag = useOnActivateGrunnlag();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
-    const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
-    const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
+    const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
+    const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
     const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
 
@@ -129,9 +125,9 @@ export const BoforholdOpplysninger = ({
                                 husstandsbarn: response.boforhold.husstandsbarn,
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
-                                    husstandsbarn: currentData.boforhold.valideringsfeil.husstandsbarn.filter(
+                                    husstandsbarn: currentData.boforhold.valideringsfeil.husstandsmedlem.filter(
                                         (husstandsbarn) =>
-                                            husstandsbarn.barn.husstandsbarnId !== oppdatertHusstandsbarn.id
+                                            husstandsbarn.barn.husstandsmedlemId !== oppdatertHusstandsbarn.id
                                     ),
                                 },
                             },
@@ -188,7 +184,7 @@ function NyOpplysningerFraFolkeregistreTabell({
     pendingActivate,
 }: {
     onActivate: (overskriveManuelleOpplysninger: boolean) => void;
-    ikkeAktivertePerioder: HusstandsbarnGrunnlagPeriodeDto[];
+    ikkeAktivertePerioder: BostatusperiodeGrunnlagDto[];
     pendingActivate?: AktivereGrunnlagRequestV2;
 }) {
     const virkningsOrSoktFraDato = useVirkningsdato();
@@ -233,8 +229,8 @@ function NyOpplysningerFraFolkeregistreTabell({
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(true)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === false}
                 >
                     Ja
                 </Button>
@@ -243,8 +239,8 @@ function NyOpplysningerFraFolkeregistreTabell({
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(false)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === true}
                 >
                     Nei
                 </Button>

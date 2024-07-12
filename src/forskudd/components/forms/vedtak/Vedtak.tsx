@@ -98,7 +98,7 @@ const FatteVedtakButtons = () => {
     const { behandlingId } = useBehandlingProvider();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const queryClient = useQueryClient();
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status == "error";
+    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
             if (!bekreftetVedtak) {
@@ -189,8 +189,8 @@ const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
         case OpplysningerType.KONTANTSTOTTE:
             return elementId.seksjon_inntekt_kontantstøtte;
         case OpplysningerType.BOFORHOLD:
-            return opplysninger.gjelderBarn?.husstandsbarnId
-                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsbarnId}`
+            return opplysninger.gjelderBarn?.husstandsmedlemId
+                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsmedlemId}`
                 : `${elementIds.seksjon_boforhold}`;
         case OpplysningerType.SIVILSTAND:
             return elementId.seksjon_sivilstand;
@@ -222,11 +222,11 @@ const VedtakResultat = () => {
                 </ErrorSummary.Item>
             );
         }
-        if (feilInnhold.husstandsbarn != null) {
-            feilInnhold.husstandsbarn.forEach((value) =>
+        if (feilInnhold.husstandsmedlem != null) {
+            feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsbarnId}`}
+                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsmedlemId}`}
                         onClick={() => onStepChange(STEPS.boforhold)}
                     >
                         Boforhold: Perioder for barn {value.barn.navn}
@@ -292,7 +292,7 @@ const VedtakResultat = () => {
                 );
         }
         feilInnhold.måBekrefteNyeOpplysninger
-            ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
+            ?.filter((a) => a.type !== OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
             ?.forEach((value) => {
                 feilliste.push(
                     <ErrorSummary.Item
@@ -336,7 +336,7 @@ const VedtakResultat = () => {
                         <VedtakTableBody
                             resultatBarn={r}
                             avslag={erAvslag}
-                            opphør={vedtakstype == Vedtakstype.OPPHOR}
+                            opphør={vedtakstype === Vedtakstype.OPPHOR}
                         />
                     </Table>
                 </div>

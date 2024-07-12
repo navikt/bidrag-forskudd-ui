@@ -9,16 +9,15 @@ import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { transformInntekt } from "@common/helpers/inntektFormHelpers";
 import { useAktiveGrunnlagsdata, useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { InntektFormValues } from "@common/types/inntektFormValues";
 import { BodyShort, Box, Button, Heading } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
-
-import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
-import { InntektFormValues } from "../../../types/inntektFormValues";
-import { transformInntekt } from "../helpers/inntektFormHelpers";
 
 const inntektTypeToOpplysningerMapper = {
     småbarnstillegg: OpplysningerType.SMABARNSTILLEGG,
@@ -89,13 +88,13 @@ export const Opplysninger = ({
                     } else if (inntektType === "årsinntekter") {
                         resetField(`${inntektType}.${personident}`, {
                             defaultValue: data.inntekter[inntektType]
-                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .filter((v: InntektDtoV2) => v.ident === personident)
                                 .map(transformFn),
                         });
                     } else {
                         resetField(fieldName, {
                             defaultValue: data.inntekter[inntektType]
-                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .filter((v: InntektDtoV2) => v.ident === personident)
                                 .map(transformFn),
                         });
                     }
@@ -182,7 +181,7 @@ export const Opplysninger = ({
                                                     <tr
                                                         key={i.visningsnavn + index}
                                                         style={
-                                                            index == inntektsposterSomErEndret.length - 1
+                                                            index === inntektsposterSomErEndret.length - 1
                                                                 ? {
                                                                       borderBottom: "1px solid black",
                                                                   }

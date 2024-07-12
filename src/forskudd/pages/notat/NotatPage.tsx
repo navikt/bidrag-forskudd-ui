@@ -145,7 +145,7 @@ if (customElements.get("notat-view") == null) {
             }
 
             attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-                if (name == "html") {
+                if (name === "html") {
                     this.html = newValue;
                     this.render();
                 }

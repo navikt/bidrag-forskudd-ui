@@ -4,7 +4,7 @@ import { useFlag, useUnleashClient } from "@unleash/proxy-client-react";
 import { useEffect } from "react";
 
 export default function useFeatureToogle() {
-    const isMockEnabled = process.env.ENABLE_MOCK == "true";
+    const isMockEnabled = process.env.ENABLE_MOCK === "true";
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
     const enableSivilstandV2 = useFlag("behandling.sivilstandv2");

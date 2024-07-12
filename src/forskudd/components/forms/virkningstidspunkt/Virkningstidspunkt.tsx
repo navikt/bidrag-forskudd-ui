@@ -7,10 +7,10 @@ import {
     VirkningstidspunktDto,
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { ForskuddAlert } from "@common/components/ForskuddAlert";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -102,7 +102,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
         setValue("virkningstidspunkt", date ? toISODateString(date) : null);
         clearErrors("virkningstidspunkt");
     };
-    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") == "";
+    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") === "";
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
@@ -111,7 +111,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
         [fom]
     );
 
-    const erTypeOpphør = behandling.vedtakstype == Vedtakstype.OPPHOR;
+    const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -184,9 +184,9 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                 />
             </FlexRow>
             {showChangedVirkningsDatoAlert && (
-                <ForskuddAlert variant="warning" className={"w-[488px]"}>
+                <BehandlingAlert variant="warning" className={"w-[488px]"}>
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
-                </ForskuddAlert>
+                </BehandlingAlert>
             )}
         </>
     );
@@ -234,7 +234,7 @@ const VirkningstidspunktForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type == undefined) {
+            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type === undefined) {
                 return;
             } else {
                 debouncedOnSave();

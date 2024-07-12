@@ -23,7 +23,7 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
     const arbeidsforholdOpplysninger = useGetArbeidsforhold();
 
     const arbeidsforholdTableData =
-        arbeidsforholdOpplysninger?.filter((af) => af.partPersonId == ident)?.map(mapToTabledata) ?? [];
+        arbeidsforholdOpplysninger?.filter((af) => af.partPersonId === ident)?.map(mapToTabledata) ?? [];
     return (
         <div className="grid gap-y-2">
             <div className="inline-flex items-center gap-x-4">
@@ -40,7 +40,7 @@ export const Arbeidsforhold = ({ ident }: ArbeidsforholdProps) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {arbeidsforholdTableData.length == 0 ? (
+                    {arbeidsforholdTableData.length === 0 ? (
                         <tr>
                             <td colSpan={4}>
                                 <i>Ingen arbeidsforhold</i>

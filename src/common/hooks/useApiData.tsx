@@ -4,11 +4,13 @@ import {
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
-    HusstandsbarnGrunnlagDto,
+    HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUtgiftRequest,
+    OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
     OpplysningerType,
     RolleDto,
@@ -30,6 +32,7 @@ export const MutationKeys = {
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
+    updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
 };
 
 export const QueryKeys = {
@@ -47,15 +50,15 @@ export const QueryKeys = {
     ],
     grunnlag: () => ["grunnlag", QueryKeys.behandlingVersion],
     arbeidsforhold: (behandlingId: string) => ["arbeidsforhold", behandlingId, QueryKeys.behandlingVersion],
-    person: (ident: string) => ["person", ident],
+    person: (ident: string) => ["person2", ident],
 };
 export const useGetArbeidsforhold = (): ArbeidsforholdGrunnlagDto[] => {
     const behandling = useGetBehandlingV2();
     return behandling.aktiveGrunnlagsdata?.arbeidsforhold;
 };
 export const useGetOpplysningerBoforhold = (): {
-    aktiveOpplysninger: HusstandsbarnGrunnlagDto[];
-    ikkeAktiverteOpplysninger: HusstandsbarnGrunnlagDto[];
+    aktiveOpplysninger: HusstandsmedlemGrunnlagDto[];
+    ikkeAktiverteOpplysninger: HusstandsmedlemGrunnlagDto[];
 } => {
     const behandling = useGetBehandlingV2();
     return {
@@ -131,7 +134,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                     })
                 ).data;
             } catch (e) {
-                if (e instanceof AxiosError && e.response.status == 404) {
+                if (e instanceof AxiosError && e.response.status === 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
                         `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
                     );
@@ -178,9 +181,6 @@ export const usePersonsQueries = (roller: RolleDto[]) =>
                     visningsnavn: data.visningsnavn,
                 };
             },
-            staleTime: Infinity,
-
-            enabled: !!rolle,
         })),
     });
 
@@ -263,7 +263,7 @@ export const useAktiveGrunnlagsdata = () => {
             const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(Number(behandlingId), {
                 personident,
                 grunnlagstype: type,
-                overskriveManuelleOpplysninger: false,
+                overskriveManuelleOpplysninger: true,
             });
             return { data, type };
         },
@@ -309,7 +309,7 @@ export const useGetBeregningForskudd = () => {
                 return { resultat: response.data };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
-                if (error instanceof AxiosError && error.response.status == 400) {
+                if (error instanceof AxiosError && error.response.status === 400) {
                     if (error.response?.data) {
                         return {
                             feil: {
@@ -359,6 +359,23 @@ export const useOppdatereVirkningstidspunktV2 = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av virkningstidsdpunkt", error);
+        },
+    });
+};
+
+export const useUpdateUtgifter = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateUtgifter(behandlingId),
+        mutationFn: async (payload: OppdatereUtgiftRequest): Promise<OppdatereUtgiftResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereUtgift(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av utgifter", error);
         },
     });
 };
