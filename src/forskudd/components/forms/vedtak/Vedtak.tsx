@@ -98,7 +98,7 @@ const FatteVedtakButtons = () => {
     const { behandlingId } = useBehandlingProvider();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const queryClient = useQueryClient();
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status == "error";
+    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
             if (!bekreftetVedtak) {
@@ -292,7 +292,7 @@ const VedtakResultat = () => {
                 );
         }
         feilInnhold.måBekrefteNyeOpplysninger
-            ?.filter((a) => a.type != OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
+            ?.filter((a) => a.type !== OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
             ?.forEach((value) => {
                 feilliste.push(
                     <ErrorSummary.Item
@@ -336,7 +336,7 @@ const VedtakResultat = () => {
                         <VedtakTableBody
                             resultatBarn={r}
                             avslag={erAvslag}
-                            opphør={vedtakstype == Vedtakstype.OPPHOR}
+                            opphør={vedtakstype === Vedtakstype.OPPHOR}
                         />
                     </Table>
                 </div>

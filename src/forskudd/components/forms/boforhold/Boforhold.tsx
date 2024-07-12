@@ -12,6 +12,7 @@ import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { DatePickerInput } from "@common/components/date-picker/DatePickerInput";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
@@ -54,7 +55,6 @@ import {
     isOver18YearsOld,
 } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { KildeIcon } from "../inntekt/InntektTable";
 import { BoforholdOpplysninger, NyOpplysningerAlert } from "./BoforholdOpplysninger";
 import { Notat } from "./Notat";
 import { Sivilstand } from "./Sivilstand";

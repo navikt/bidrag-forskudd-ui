@@ -14,16 +14,10 @@ import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
-import {
-    EditOrSaveButton,
-    InntektTabel,
-    KildeIcon,
-    Periode,
-    TaMed,
-} from "../../../forskudd/components/forms/inntekt/InntektTable";
-import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
 import elementId from "../../../forskudd/constants/elementIds";
+import { ExpandableContent } from "./ExpandableContent";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (

@@ -1,11 +1,11 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
-import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { Barnetillegg } from "@common/components/inntekt/Barnetillegg";
 import { BeregnetInntekter } from "@common/components/inntekt/BeregnetInntekter";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { Kontantstøtte } from "@common/components/inntekt/Kontantstoette";
+import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { SkattepliktigeOgPensjonsgivende } from "@common/components/inntekt/SkattepliktigeOgPensjonsgivende";
 import { Småbarnstillegg } from "@common/components/inntekt/Smaabarnstilleg";
 import { UtvidetBarnetrygd } from "@common/components/inntekt/UtvidetBarnetrygd";
@@ -20,34 +20,13 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
-import { dateOrNull, DateToDDMMYYYYHHMMString } from "@utils/date-utils";
+import { Tabs } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
-
-const NyOpplysningerAlert = () => {
-    const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
-    const ikkeAktiverteEndringer = Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).filter(
-        (i) => i.length > 0
-    );
-
-    if (ikkeAktiverteEndringer.length === 0) return null;
-    return (
-        <BehandlingAlert variant="info">
-            <Heading size="xsmall" level="3">
-                {text.alert.nyOpplysningerInfo}
-            </Heading>
-            <BodyShort size="small">
-                Nye opplysninger fra offentlige register er tilgjengelig. Oppdatert{" "}
-                {DateToDDMMYYYYHHMMString(dateOrNull(ikkeAktiverteEndringer[0][0].innhentetTidspunkt))}.
-            </BodyShort>
-        </BehandlingAlert>
-    );
-};
 
 const Main = () => {
     const { roller: behandlingRoller } = useGetBehandlingV2();

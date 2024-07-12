@@ -32,8 +32,8 @@ import { removePlaceholder } from "@utils/string-utils";
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import { InntektTables } from "../../../context/ForskuddBehandlingProviderWrapper";
-import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
+import { getFomAndTomForMonthPicker } from "../../../forskudd/components/forms/helpers/virkningstidspunktHelpers";
+import { InntektTables } from "../../../forskudd/context/ForskuddBehandlingProviderWrapper";
 
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (

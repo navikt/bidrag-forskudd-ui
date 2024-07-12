@@ -12,6 +12,7 @@ import {
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -34,7 +35,6 @@ import { useOnSaveBoforhold } from "../../../hooks/useOnSaveBoforhold";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 import { calculateFraDato, sivilstandForskuddOptions } from "../helpers/boforholdFormHelpers";
 import { getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
-import { KildeIcon } from "../inntekt/InntektTable";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
     const { lesemodus } = useBehandlingProvider();
@@ -354,7 +354,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
         } else {
             setEditableRow(index);
             const editPeriode = controlledFields[index];
-            if (editPeriode?.sivilstand == Sivilstandskode.UKJENT) {
+            if (editPeriode?.sivilstand === Sivilstandskode.UKJENT) {
                 setValue(`sivilstand.${index}.sivilstand`, Sivilstandskode.BOR_ALENE_MED_BARN);
             }
         }
@@ -596,7 +596,7 @@ function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOppl
     const { setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const behandling = useGetBehandlingV2();
-    const bidragsmottaker = behandling.roller.find((r) => r.rolletype == Rolletype.BM);
+    const bidragsmottaker = behandling.roller.find((r) => r.rolletype === Rolletype.BM);
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
         activateGrunnlag.mutation.mutate(
             {
@@ -675,8 +675,8 @@ function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOppl
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(true)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === false}
                 >
                     Ja
                 </Button>
@@ -685,8 +685,8 @@ function NyOpplysningerFraFolkeregistreTabell({ onActivateOpplysninger }: NyOppl
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(false)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === true}
                 >
                     Nei
                 </Button>

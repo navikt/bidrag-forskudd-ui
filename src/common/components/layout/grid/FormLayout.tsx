@@ -29,7 +29,7 @@ export const FormLayout = ({
     const saveState = useRQMutationState(listenToMutations, queryClient);
 
     useEffect(() => {
-        if (saveState == "success") {
+        if (saveState === "success") {
             console.debug("Sending broadcast", notatBroadcastName, behandlingId);
             Broadcast.sendBroadcast(notatBroadcastName, {
                 id: behandlingId.toString(),

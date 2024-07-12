@@ -132,7 +132,7 @@ const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
     prefetchVisningsnavn();
     const { flagsReady, flagsError } = useFlagsStatus();
 
-    if (!flagsReady && flagsError == false) {
+    if (!flagsReady && flagsError === false) {
         return (
             <div className="flex justify-center">
                 <Loader size="3xlarge" title={text.loading} variant="interaction" />

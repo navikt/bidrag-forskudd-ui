@@ -11,17 +11,10 @@ import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
-import {
-    EditOrSaveButton,
-    InntektTabel,
-    KildeIcon,
-    Periode,
-    TaMed,
-    Totalt,
-} from "../../../forskudd/components/forms/inntekt/InntektTable";
-import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
 import elementId from "../../../forskudd/constants/elementIds";
+import { ExpandableContent } from "./ExpandableContent";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
@@ -172,7 +165,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                 }
                                                 togglePlacement="right"
                                                 className="align-top"
-                                                expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                expansionDisabled={item.kilde === Kilde.MANUELL}
                                             >
                                                 <Table.DataCell>
                                                     <TaMed
@@ -206,7 +199,7 @@ export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) =>
                                                         alert={
                                                             item.inntektsposter?.some(
                                                                 (d) =>
-                                                                    d.inntektstype == Inntektstype.NAeRINGSINNTEKT ||
+                                                                    d.inntektstype === Inntektstype.NAeRINGSINNTEKT ||
                                                                     d.kode.toUpperCase().includes("NAERING")
                                                             )
                                                                 ? "Inntekt inneholder næringsinntekt"

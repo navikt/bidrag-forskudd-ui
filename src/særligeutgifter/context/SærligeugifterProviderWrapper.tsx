@@ -3,7 +3,7 @@ import { BehandlingProvider } from "@common/context/BehandlingContext";
 import React, { PropsWithChildren, useState } from "react";
 
 import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants/steps";
-import { SærligeutgifterStepper } from "../../særligeutgifter/enum/SærligeutgifterStepper";
+import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export type InntektTables =
     | "småbarnstillegg"

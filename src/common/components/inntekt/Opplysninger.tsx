@@ -88,13 +88,13 @@ export const Opplysninger = ({
                     } else if (inntektType === "årsinntekter") {
                         resetField(`${inntektType}.${personident}`, {
                             defaultValue: data.inntekter[inntektType]
-                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .filter((v: InntektDtoV2) => v.ident === personident)
                                 .map(transformFn),
                         });
                     } else {
                         resetField(fieldName, {
                             defaultValue: data.inntekter[inntektType]
-                                .filter((v: InntektDtoV2) => v.ident == personident)
+                                .filter((v: InntektDtoV2) => v.ident === personident)
                                 .map(transformFn),
                         });
                     }
@@ -181,7 +181,7 @@ export const Opplysninger = ({
                                                     <tr
                                                         key={i.visningsnavn + index}
                                                         style={
-                                                            index == inntektsposterSomErEndret.length - 1
+                                                            index === inntektsposterSomErEndret.length - 1
                                                                 ? {
                                                                       borderBottom: "1px solid black",
                                                                   }

@@ -97,8 +97,8 @@ export const BoforholdOpplysninger = ({
     const activateGrunnlag = useOnActivateGrunnlag();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
-    const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
-    const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident == ident)?.perioder;
+    const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
+    const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
     const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
 
@@ -229,8 +229,8 @@ function NyOpplysningerFraFolkeregistreTabell({
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(true)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == true}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == false}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === true}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === false}
                 >
                     Ja
                 </Button>
@@ -239,8 +239,8 @@ function NyOpplysningerFraFolkeregistreTabell({
                     variant="secondary"
                     size="xsmall"
                     onClick={() => onActivate(false)}
-                    loading={pendingActivate?.overskriveManuelleOpplysninger == false}
-                    disabled={pendingActivate?.overskriveManuelleOpplysninger == true}
+                    loading={pendingActivate?.overskriveManuelleOpplysninger === false}
+                    disabled={pendingActivate?.overskriveManuelleOpplysninger === true}
                 >
                     Nei
                 </Button>

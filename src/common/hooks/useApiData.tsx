@@ -134,7 +134,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                     })
                 ).data;
             } catch (e) {
-                if (e instanceof AxiosError && e.response.status == 404) {
+                if (e instanceof AxiosError && e.response.status === 404) {
                     throw new FantIkkeVedtakEllerBehandlingError(
                         `Fant ikke ${vedtakId ? "vedtak" : "behandling"} med id ${vedtakId ?? behandlingId}`
                     );
@@ -309,7 +309,7 @@ export const useGetBeregningForskudd = () => {
                 return { resultat: response.data };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
-                if (error instanceof AxiosError && error.response.status == 400) {
+                if (error instanceof AxiosError && error.response.status === 400) {
                     if (error.response?.data) {
                         return {
                             feil: {

@@ -6,17 +6,10 @@ import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import { ExpandableContent } from "../../../forskudd/components/forms/inntekt/ExpandableContent";
-import {
-    EditOrSaveButton,
-    InntektTabel,
-    KildeIcon,
-    Periode,
-    TaMed,
-    Totalt,
-} from "../../../forskudd/components/forms/inntekt/InntektTable";
-import { Opplysninger } from "../../../forskudd/components/forms/inntekt/Opplysninger";
 import elementId from "../../../forskudd/constants/elementIds";
+import { ExpandableContent } from "./ExpandableContent";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { Opplysninger } from "./Opplysninger";
 
 export const UtvidetBarnetrygd = () => {
     const { roller } = useGetBehandlingV2();
@@ -91,7 +84,7 @@ export const UtvidetBarnetrygd = () => {
                                                 content={<ExpandableContent item={item} />}
                                                 togglePlacement="right"
                                                 className="align-top"
-                                                expansionDisabled={item.kilde == Kilde.MANUELL}
+                                                expansionDisabled={item.kilde === Kilde.MANUELL}
                                             >
                                                 <Table.DataCell>
                                                     <TaMed

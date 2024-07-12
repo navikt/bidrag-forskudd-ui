@@ -102,7 +102,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
         setValue("virkningstidspunkt", date ? toISODateString(date) : null);
         clearErrors("virkningstidspunkt");
     };
-    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") == "";
+    const erÅrsakAvslagIkkeValgt = getValues("årsakAvslag") === "";
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
@@ -111,7 +111,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
         [fom]
     );
 
-    const erTypeOpphør = behandling.vedtakstype == Vedtakstype.OPPHOR;
+    const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -234,7 +234,7 @@ const VirkningstidspunktForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type == undefined) {
+            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type === undefined) {
                 return;
             } else {
                 debouncedOnSave();

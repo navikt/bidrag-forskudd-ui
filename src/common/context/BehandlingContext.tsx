@@ -93,7 +93,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         setSearchParams([...searchParams.entries(), ["steg", Object.keys(steps).find((k) => steps[k] === x)]]);
     }, []);
 
-    const queryLesemodus = searchParams.get("lesemodus") == "true";
+    const queryLesemodus = searchParams.get("lesemodus") === "true";
     const [nextStep, setNextStep] = useState<number>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
     const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
