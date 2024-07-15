@@ -5,6 +5,7 @@ import {
     RolleDto,
     Rolletype,
     SivilstandGrunnlagDto,
+    TypeBehandling,
 } from "@api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
 import {
@@ -423,7 +424,12 @@ describe("BoforholdFormHelpers", () => {
 
         const datoFom = new Date("2023-06-01");
         const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        const result = getBarnPerioderFromHusstandsListe(
+            husstandsOpplysningerFraFolkRegistre,
+            datoFom,
+            barnMedISaken,
+            TypeBehandling.FORSKUDD
+        );
         expect(result[0].perioder.length).equals(2);
         expect(result[0].perioder[0].datoFom).equals("2023-06-01");
         expect(result[0].perioder[0].datoTom).equals("2023-08-31");
@@ -488,7 +494,12 @@ describe("BoforholdFormHelpers", () => {
 
         const datoFom = new Date("2019-04-01");
         const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        const result = getBarnPerioderFromHusstandsListe(
+            husstandsOpplysningerFraFolkRegistre,
+            datoFom,
+            barnMedISaken,
+            TypeBehandling.FORSKUDD
+        );
         result.forEach((barn) => {
             barn.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[j].datoFom);
@@ -547,7 +558,12 @@ describe("BoforholdFormHelpers", () => {
 
         const datoFom = new Date("2020-08-01");
         const husstandsOpplysningerFraFolkRegistre = mapHusstandsMedlemmerToBarn(husstandmedlemmerOgEgneBarnListe);
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        const result = getBarnPerioderFromHusstandsListe(
+            husstandsOpplysningerFraFolkRegistre,
+            datoFom,
+            barnMedISaken,
+            TypeBehandling.FORSKUDD
+        );
         result.forEach((barn) => {
             barn.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[j].datoFom);
@@ -655,7 +671,12 @@ describe("BoforholdFormHelpers", () => {
                 medISaken: true,
             },
         ];
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        const result = getBarnPerioderFromHusstandsListe(
+            husstandsOpplysningerFraFolkRegistre,
+            datoFom,
+            barnMedISaken,
+            TypeBehandling.FORSKUDD
+        );
         result.forEach((r, i) => {
             r.perioder.forEach((periode, j) => {
                 expect(periode.datoFom).equals(expectedResult[i].perioder[j].datoFom);
@@ -734,7 +755,12 @@ describe("BoforholdFormHelpers", () => {
                 medISaken: true,
             },
         ];
-        const result = getBarnPerioderFromHusstandsListe(husstandsOpplysningerFraFolkRegistre, datoFom, barnMedISaken);
+        const result = getBarnPerioderFromHusstandsListe(
+            husstandsOpplysningerFraFolkRegistre,
+            datoFom,
+            barnMedISaken,
+            TypeBehandling.FORSKUDD
+        );
         expect(result[0].perioder.length).equals(expectedResult[0].perioder.length);
         result.forEach((r, i) => {
             r.perioder.forEach((periode, j) => {
@@ -1203,7 +1229,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 1);
+        const updatedPeriods = editPeriods(testPeriods, 1, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(2);
         updatedPeriods.forEach((period, index) => {
             expect(period.datoFom).equals(expectedResult[index].datoFom);
@@ -1249,7 +1275,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 2);
+        const updatedPeriods = editPeriods(testPeriods, 2, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(1);
         expect(updatedPeriods[0].datoFom).equals(expectedResult[0].datoFom);
         expect(updatedPeriods[0].datoTom).equals(expectedResult[0].datoTom);
@@ -1318,7 +1344,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 5);
+        const updatedPeriods = editPeriods(testPeriods, 5, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1374,7 +1400,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 5);
+        const updatedPeriods = editPeriods(testPeriods, 5, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1430,7 +1456,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 3);
+        const updatedPeriods = editPeriods(testPeriods, 3, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1480,7 +1506,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 1);
+        const updatedPeriods = editPeriods(testPeriods, 1, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1518,7 +1544,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 1);
+        const updatedPeriods = editPeriods(testPeriods, 1, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1568,7 +1594,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 1);
+        const updatedPeriods = editPeriods(testPeriods, 1, TypeBehandling.FORSKUDD);
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
             expect(JSON.stringify(period)).equals(JSON.stringify(expectedResult[index]))
@@ -1612,7 +1638,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 3);
+        const updatedPeriods = editPeriods(testPeriods, 3, TypeBehandling.FORSKUDD);
 
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
@@ -1681,7 +1707,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 3);
+        const updatedPeriods = editPeriods(testPeriods, 3, TypeBehandling.FORSKUDD);
 
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
@@ -1732,7 +1758,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 0);
+        const updatedPeriods = editPeriods(testPeriods, 0, TypeBehandling.FORSKUDD);
 
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
@@ -1771,7 +1797,7 @@ describe("BoforholdFormHelpers", () => {
             },
         ];
 
-        const updatedPeriods = editPeriods(testPeriods, 0);
+        const updatedPeriods = editPeriods(testPeriods, 0, TypeBehandling.FORSKUDD);
 
         expect(updatedPeriods.length).equals(expectedResult.length);
         updatedPeriods.forEach((period, index) =>
