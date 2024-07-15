@@ -16,8 +16,8 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
-import { SærligeugifterProviderWrapper } from "./særligeutgifter/context/SærligeugifterProviderWrapper";
-import { SærligeufgifterPage } from "./særligeutgifter/pages/SærligeutgifterPage";
+import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
+import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
@@ -123,7 +123,7 @@ const ForskuddBehandling = () => (
 const SærligeutgifterBehandling = () => (
     <SærligeugifterProviderWrapper>
         <BidragBehandlingHeader />
-        <SærligeufgifterPage />
+        <SærbidragPage />
         <ErrorModal />
     </SærligeugifterProviderWrapper>
 );

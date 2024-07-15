@@ -2,7 +2,7 @@ import text from "@common/constants/texts";
 import { BehandlingProvider } from "@common/context/BehandlingContext";
 import React, { PropsWithChildren, useState } from "react";
 
-import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants/steps";
+import { STEPS as SærligeutgifterSteps } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export type InntektTables =

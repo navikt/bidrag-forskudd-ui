@@ -11,7 +11,7 @@ import React from "react";
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
-export const SærligeufgifterPage = () => {
+export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
         erVedtakFattet,

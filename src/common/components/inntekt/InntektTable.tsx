@@ -92,7 +92,6 @@ export const EditOrSaveButton = ({
 }: {
     item: InntektFormPeriode;
     index: number;
-
     onEditRow: (index: number) => void;
     onSaveRow: (index: number) => void;
 }) => {
