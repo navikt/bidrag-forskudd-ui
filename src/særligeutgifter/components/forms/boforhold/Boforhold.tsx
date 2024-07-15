@@ -34,8 +34,6 @@ const Main = () => {
 };
 
 const BoforholdsForm = () => {
-    // Behold dette for debugging i prod
-    // useGrunnlag();
     const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);

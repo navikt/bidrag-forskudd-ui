@@ -50,7 +50,7 @@ export const BeregnetInntekter = ({ rolle }: { rolle: RolleDto }) => {
     const behandlingColumnWitdhRules = columnWitdhRules[type][rolle.rolletype] as { [key in InntektTableType]: string };
 
     return (
-        <Box padding="4" background="surface-subtle">
+        <Box padding="4" background="surface-subtle" key={`beregnet-inntekter-${rolle.id}`}>
             <Heading level="2" size="small">
                 {text.title.beregnetTotalt}
             </Heading>
@@ -64,7 +64,10 @@ export const BeregnetInntekter = ({ rolle }: { rolle: RolleDto }) => {
                     )
                     .map((inntektPerBarn, index) => (
                         <>
-                            <div className="grid gap-y-2" key={`${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}>
+                            <div
+                                className="grid gap-y-2"
+                                key={`${rolle.id}-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
+                            >
                                 {inntektPerBarn.inntektGjelderBarnIdent && rolle.rolletype !== Rolletype.BA && (
                                     <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
                                         <div className="w-8 mr-2 h-max">
@@ -78,7 +81,10 @@ export const BeregnetInntekter = ({ rolle }: { rolle: RolleDto }) => {
                                         </div>
                                     </div>
                                 )}
-                                <div className="overflow-x-auto whitespace-nowrap">
+                                <div
+                                    className="overflow-x-auto whitespace-nowrap"
+                                    key={`table-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
+                                >
                                     <Table size="small" className="table-fixed bg-white">
                                         <Table.Header>
                                             <Table.Row className="align-baseline">
@@ -160,7 +166,7 @@ export const BeregnetInntekter = ({ rolle }: { rolle: RolleDto }) => {
                                         <Table.Body>
                                             {inntektPerBarn.summertInntektListe.map((delberegningSumInntekt, index) => (
                                                 <Table.Row
-                                                    key={`${delberegningSumInntekt}-${index}`}
+                                                    key={`body-${delberegningSumInntekt}-${index}`}
                                                     className="align-top"
                                                 >
                                                     <Table.DataCell textSize="small">

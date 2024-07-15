@@ -1,6 +1,7 @@
 import {
     AktivereGrunnlagRequestV2,
     AktivereGrunnlagResponseV2,
+    AndreVoksneIHusstandenGrunnlagDto,
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
@@ -64,6 +65,17 @@ export const useGetOpplysningerBoforhold = (): {
     return {
         aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
         ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
+};
+
+export const useGetOpplysningeAndreVoksneIHusstand = (): {
+    aktiveOpplysninger: AndreVoksneIHusstandenGrunnlagDto;
+    ikkeAktiverteOpplysninger: AndreVoksneIHusstandenGrunnlagDto;
+} => {
+    const behandling = useGetBehandlingV2();
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.andreVoksneIHusstanden,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden,
     };
 };
 export const useGetOpplysningerSivilstandV2 = (): {

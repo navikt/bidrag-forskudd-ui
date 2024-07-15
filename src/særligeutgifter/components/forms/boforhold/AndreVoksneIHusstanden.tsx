@@ -14,10 +14,13 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Button, Table } from "@navikt/ds-react";
+import { Box, Button, Table } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+
+import elementIds from "../../../../common/constants/elementIds";
+import { AndreVoksneIHusstandOpplysninger } from "./AndreVoksneIHusstandOpplysninger";
 
 export const Periode = ({
     editableRow,
@@ -163,6 +166,7 @@ export const AndreVoksneIHusstanden = () => {
     const [showUndoButton, setShowUndoButton] = useState(false);
     const [editableRow, setEditableRow] = useState<number>(undefined);
     const behandling = useGetBehandlingV2();
+    const [showResetButton, setShowResetButton] = useState(false);
     const saveBoforhold = useOnSaveBoforhold();
     const { control, getValues, clearErrors, setError, setValue, getFieldState, formState } =
         useFormContext<BoforholdFormValues>();
@@ -353,11 +357,11 @@ export const AndreVoksneIHusstanden = () => {
     };
 
     // TODO: fix when we get BP's id
-    // const resetTilDataFraFreg = () => {
-    //     const bp = getValues(`andreVoksneIHusstanden`);
-    //     updateAndSave({ oppdatereHusstandsmedlem: { tilbakestillPerioderForHusstandsmedlem: bp.id } });
-    //     setShowResetButton(false);
-    // };
+    const resetTilDataFraFreg = () => {
+        // const bp = getValues(`andreVoksneIHusstanden`);
+        updateAndSave({ oppdatereHusstandsmedlem: { tilbakestillPerioderForHusstandsmedlem: 1 } });
+        setShowResetButton(false);
+    };
 
     const checkIfAnotherRowIsEdited = (index?: number) => {
         return editableRow && Number(editableRow) !== index;
@@ -380,101 +384,115 @@ export const AndreVoksneIHusstanden = () => {
     };
 
     return (
-        <div className="grid gap-2">
-            {controlledFields.length > 0 && (
-                <div
-                    className={`${
-                        saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                    } block overflow-x-auto whitespace-nowrap`}
-                >
-                    <OverlayLoader loading={saveBoforhold.mutation.isPending} />
-                    <Table size="small" className="table-fixed table bg-white w-full">
-                        <Table.Header>
-                            <Table.Row className="align-baseline">
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
-                                    {text.label.fraOgMed}
-                                </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
-                                    {text.label.tilOgMed}
-                                </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left">
-                                    {text.label.status}
-                                </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
-                                    {text.label.kilde}
-                                </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                            </Table.Row>
-                        </Table.Header>
-                        <Table.Body>
-                            {controlledFields.map((item, index) => (
-                                <Table.Row key={item?.id} className="align-top">
-                                    <Table.DataCell textSize="small">
-                                        <Periode
-                                            editableRow={editableRow === index}
-                                            label={text.label.fraOgMed}
-                                            fieldName={`andreVoksneIHusstanden.${index}`}
-                                            field="datoFom"
-                                            item={item}
-                                        />
-                                    </Table.DataCell>
-                                    <Table.DataCell textSize="small">
-                                        <Periode
-                                            editableRow={editableRow === index}
-                                            label={text.label.tilOgMed}
-                                            fieldName={`andreVoksneIHusstanden.${index}`}
-                                            field="datoTom"
-                                            item={item}
-                                        />
-                                    </Table.DataCell>
-                                    <Table.DataCell textSize="small">
-                                        <Status
-                                            item={item}
-                                            editableRow={editableRow === index}
-                                            fieldName={`andreVoksneIHusstanden.${index}`}
-                                        />
-                                    </Table.DataCell>
-                                    <Table.DataCell>
-                                        <KildeIcon kilde={item.kilde} />
-                                    </Table.DataCell>
-                                    <Table.DataCell>
-                                        <EditOrSaveButton
-                                            index={index}
-                                            editableRow={editableRow === index}
-                                            onEditRow={onEditRow}
-                                            onSaveRow={onSaveRow}
-                                        />
-                                    </Table.DataCell>
-                                    <Table.DataCell>
-                                        <DeleteButton index={index} onRemovePeriode={onRemovePeriode} />
-                                    </Table.DataCell>
-                                </Table.Row>
-                            ))}
-                        </Table.Body>
-                    </Table>
-                </div>
-            )}
+        <Box
+            background="surface-subtle"
+            className="overflow-hidden grid gap-2 py-2 px-4"
+            id={`${elementIds.seksjon_andreVoksneIHusstand}`}
+        >
             <div className="grid gap-2">
-                {showUndoButton && (
-                    <Button
-                        variant="tertiary"
-                        type="button"
-                        size="small"
-                        className="w-fit"
-                        onClick={undoAction}
-                        iconPosition="right"
-                        icon={<ArrowUndoIcon aria-hidden />}
+                <AndreVoksneIHusstandOpplysninger
+                    showResetButton={showResetButton}
+                    onActivateOpplysninger={(overskrevetManuelleOpplysninger) => {
+                        setShowUndoButton((prevValue) => prevValue || overskrevetManuelleOpplysninger);
+                        setShowResetButton(!overskrevetManuelleOpplysninger);
+                    }}
+                    resetTilDataFraFreg={resetTilDataFraFreg}
+                />
+                {controlledFields.length > 0 && (
+                    <div
+                        className={`${
+                            saveBoforhold.mutation.isPending ? "relative" : "inherit"
+                        } block overflow-x-auto whitespace-nowrap`}
                     >
-                        {text.label.angreSisteSteg}
-                    </Button>
+                        <OverlayLoader loading={saveBoforhold.mutation.isPending} />
+                        <Table size="small" className="table-fixed table bg-white w-full">
+                            <Table.Header>
+                                <Table.Row className="align-baseline">
+                                    <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
+                                        {text.label.fraOgMed}
+                                    </Table.HeaderCell>
+                                    <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
+                                        {text.label.tilOgMed}
+                                    </Table.HeaderCell>
+                                    <Table.HeaderCell textSize="small" scope="col" align="left">
+                                        {text.label.status}
+                                    </Table.HeaderCell>
+                                    <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
+                                        {text.label.kilde}
+                                    </Table.HeaderCell>
+                                    <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                    <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                                {controlledFields.map((item, index) => (
+                                    <Table.Row key={item?.id} className="align-top">
+                                        <Table.DataCell textSize="small">
+                                            <Periode
+                                                editableRow={editableRow === index}
+                                                label={text.label.fraOgMed}
+                                                fieldName={`andreVoksneIHusstanden.${index}`}
+                                                field="datoFom"
+                                                item={item}
+                                            />
+                                        </Table.DataCell>
+                                        <Table.DataCell textSize="small">
+                                            <Periode
+                                                editableRow={editableRow === index}
+                                                label={text.label.tilOgMed}
+                                                fieldName={`andreVoksneIHusstanden.${index}`}
+                                                field="datoTom"
+                                                item={item}
+                                            />
+                                        </Table.DataCell>
+                                        <Table.DataCell textSize="small">
+                                            <Status
+                                                item={item}
+                                                editableRow={editableRow === index}
+                                                fieldName={`andreVoksneIHusstanden.${index}`}
+                                            />
+                                        </Table.DataCell>
+                                        <Table.DataCell>
+                                            <KildeIcon kilde={item.kilde} />
+                                        </Table.DataCell>
+                                        <Table.DataCell>
+                                            <EditOrSaveButton
+                                                index={index}
+                                                editableRow={editableRow === index}
+                                                onEditRow={onEditRow}
+                                                onSaveRow={onSaveRow}
+                                            />
+                                        </Table.DataCell>
+                                        <Table.DataCell>
+                                            <DeleteButton index={index} onRemovePeriode={onRemovePeriode} />
+                                        </Table.DataCell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </div>
                 )}
-                {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
-                    <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                        {text.label.leggTilPeriode}
-                    </Button>
-                )}
+                <div className="grid gap-2">
+                    {showUndoButton && (
+                        <Button
+                            variant="tertiary"
+                            type="button"
+                            size="small"
+                            className="w-fit"
+                            onClick={undoAction}
+                            iconPosition="right"
+                            icon={<ArrowUndoIcon aria-hidden />}
+                        >
+                            {text.label.angreSisteSteg}
+                        </Button>
+                    )}
+                    {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
+                        <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
+                            {text.label.leggTilPeriode}
+                        </Button>
+                    )}
+                </div>
             </div>
-        </div>
+        </Box>
     );
 };
