@@ -13,6 +13,7 @@ export const inntekterTablesViewRules = {
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: [
             InntektTableType.SKATTEPLIKTIG,
+            InntektTableType.BARNETILLEGG,
             InntektTableType.UTVIDET_BARNETRYGD,
             InntektTableType.SMÅBARNSTILLEGG,
             InntektTableType.KONTANTSTØTTE,

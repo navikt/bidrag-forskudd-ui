@@ -42,6 +42,7 @@ const Main = () => {
             case Rolletype.BM:
                 return (
                     <>
+                        <Barnetillegg ident={rolle.ident} />
                         <UtvidetBarnetrygd ident={rolle.ident} />
                         <Småbarnstillegg ident={rolle.ident} />
                         <Kontantstøtte ident={rolle.ident} />
