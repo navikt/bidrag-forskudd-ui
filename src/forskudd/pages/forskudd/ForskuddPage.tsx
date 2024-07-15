@@ -56,13 +56,13 @@ export const ForskuddPage = () => {
                         </Stepper.Step>
                         <Stepper.Step
                             completed={
-                                activeStepIndex > 2 &&
-                                (boforholdValideringsfeil?.husstandsmedlem === undefined ||
-                                    boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
-                                boforholdValideringsfeil?.sivilstand === null &&
-                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn === undefined ||
-                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0)
-                                // ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
+                                (activeStepIndex > 2 &&
+                                    (boforholdValideringsfeil?.husstandsmedlem === undefined ||
+                                        boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
+                                    boforholdValideringsfeil?.sivilstand === null &&
+                                    (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem === undefined ||
+                                        ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length === 0)) ||
+                                ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
                             }
                             interactive={interactive}
                         >

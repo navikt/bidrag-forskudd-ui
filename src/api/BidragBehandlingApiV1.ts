@@ -919,12 +919,12 @@ export enum TypeBehandling {
 export interface UtgiftBeregningDto {
     /** Beløp som er direkte betalt av BP */
     beløpDirekteBetaltAvBp: number;
+    /** Summen av godkjent beløp for utgifter BP har betalt og beløp som er direkte betalt av BP */
+    totalBeløpBetaltAvBp?: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløp: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløpBp?: number;
-    /** Summen av godkjent beløp for utgifter BP har betalt plus beløp som er direkte betalt av BP */
-    totalBeløpBetaltAvBp: number;
 }
 
 export interface UtgiftspostDto {
@@ -1083,8 +1083,33 @@ export interface OppdatereInntektResponse {
     valideringsfeil: InntektValideringsfeilDto;
 }
 
+export interface OppdatereAndreVoksneIHusstanden {
+    /** Oppdatere bor-med-andre-voksne-status på periode */
+    oppdatereAndreVoksneIHusstandenperiode?: OppdatereAndreVoksneIHusstandenperiode;
+    /**
+     * Id til perioden som skal slettes
+     * @format int64
+     */
+    slettePeriode?: number;
+    /** Angi om historikken skal tilbakestilles til siste aktiverte grunnlagsdata */
+    tilbakestilleHistorikk: boolean;
+    /** Angi om siste endring skal angres */
+    angreSisteEndring: boolean;
+}
+
+/** Oppdatere bor-med-andre-voksne-status på periode */
+export interface OppdatereAndreVoksneIHusstandenperiode {
+    /**
+     * Id til bostatusperioden som skal oppdateres, oppretter ny hvis null
+     * @format int64
+     */
+    idPeriode?: number;
+    borMedAndreVoksne: boolean;
+}
+
 /** Oppdaterer husstandsmedlem, sivilstand, eller notat */
 export interface OppdatereBoforholdRequestV2 {
+    oppdaterePeriodeMedAndreVoksneIHusstand?: OppdatereAndreVoksneIHusstanden;
     oppdatereHusstandsmedlem?: OppdatereHusstandsmedlem;
     oppdatereSivilstand?: OppdatereSivilstand;
     oppdatereNotat?: OppdaterNotat;
@@ -1175,6 +1200,11 @@ export interface Sivilstandsperiode {
 }
 
 export interface OppdatereBoforholdResponse {
+    /**
+     * Oppdaterte perioder med andre voksne i Bps husstand
+     * @uniqueItems true
+     */
+    oppdatertePerioderMedAndreVoksne: BostatusperiodeDto[];
     oppdatertHusstandsmedlem?: HusstandsmedlemDtoV2;
     /** @uniqueItems true */
     oppdatertSivilstandshistorikk: SivilstandDto[];
@@ -1287,38 +1317,6 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
-export interface DelberegningBidragspliktigesAndelSaerbidrag {
-    periode: TypeArManedsperiode;
-    andelProsent: number;
-    andelBeløp: number;
-    barnetErSelvforsørget: boolean;
-}
-
-export interface DelberegningUtgift {
-    periode: TypeArManedsperiode;
-    sumBetaltAvBp: number;
-    sumGodkjent: number;
-}
-
-export interface ResultatSaerbidragsberegningDto {
-    periode: TypeArManedsperiode;
-    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
-    beregning?: UtgiftBeregningDto;
-    inntekter?: ResultatSaerbidragsberegningInntekterDto;
-    delberegningUtgift?: DelberegningUtgift;
-    resultat: number;
-    resultatKode: Resultatkode;
-    /** @format double */
-    antallBarnIHusstanden?: number;
-    voksenIHusstanden?: boolean;
-}
-
-export interface ResultatSaerbidragsberegningInntekterDto {
-    inntektBM?: number;
-    inntektBP?: number;
-    inntektBarn?: number;
-}
-
 export interface ResultatBeregningBarnDto {
     barn: ResultatRolle;
     perioder: ResultatPeriodeDto[];
@@ -1380,7 +1378,6 @@ export interface InitalizeForsendelseRequest {
 
 export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
-    utgift?: UtgiftFeilDto;
     inntekter?: InntektValideringsfeilDto;
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
@@ -1405,10 +1402,6 @@ export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
-}
-
-export interface UtgiftFeilDto {
-    manglerUtgifter: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1857,8 +1850,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 /**
@@ -1969,7 +1962,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2058,7 +2054,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2247,45 +2243,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
-         * @name HentVedtakBeregningResultatSaerbidrag
-         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/sarbidrag
-         * @secure
-         */
-        hentVedtakBeregningResultatSaerbidrag: (vedtaksId: number, params: RequestParams = {}) =>
-            this.request<ResultatSaerbidragsberegningDto, any>({
-                path: `/api/v1/vedtak/${vedtaksId}/beregn/sarbidrag`,
-                method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Beregn forskudd
-         *
-         * @tags behandling-beregn-controller
          * @name HentVedtakBeregningResultat
-         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/forskudd
-         * @secure
-         */
-        hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], any>({
-                path: `/api/v1/vedtak/${vedtaksId}/beregn/forskudd`,
-                method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Beregn forskudd
-         *
-         * @tags behandling-beregn-controller
-         * @name HentVedtakBeregningResultat1
          * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
          * @secure
          */
-        hentVedtakBeregningResultat1: (vedtaksId: number, params: RequestParams = {}) =>
+        hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], any>({
                 path: `/api/v1/vedtak/${vedtaksId}/beregn`,
                 method: "POST",
@@ -2347,48 +2309,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Beregn særbidrag
-         *
-         * @tags behandling-beregn-controller
-         * @name BeregnSaerbidrag
-         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/sarbidrag
-         * @secure
-         */
-        beregnSaerbidrag: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatSaerbidragsberegningDto, BeregningValideringsfeil>({
-                path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag`,
-                method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
          * @name BeregnForskudd
-         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/forskudd
-         * @secure
-         */
-        beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
-            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
-                path: `/api/v1/behandling/${behandlingsid}/beregn/forskudd`,
-                method: "POST",
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Beregn forskudd
-         *
-         * @tags behandling-beregn-controller
-         * @name BeregnForskudd1
          * @request POST:/api/v1/behandling/{behandlingsid}/beregn
          * @secure
          */
-        beregnForskudd1: (behandlingsid: number, params: RequestParams = {}) =>
+        beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",

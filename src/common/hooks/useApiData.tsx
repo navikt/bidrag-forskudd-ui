@@ -317,7 +317,7 @@ export const useGetBeregningForskudd = () => {
                     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultat(Number(vedtakId));
                     return { resultat: response.data };
                 }
-                const response = await BEHANDLING_API_V1.api.beregnForskudd1(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnForskudd(Number(behandlingId));
                 return { resultat: response.data };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];

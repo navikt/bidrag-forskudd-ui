@@ -206,23 +206,22 @@ export const AndreVoksneIHusstanden = () => {
 
         const selectedPeriodeId = periodeValues.id;
         const selectedStatus = periodeValues.bostatus;
-        const selectedDatoFom = periodeValues?.datoFom;
-        const selectedDatoTom = periodeValues?.datoTom;
+        // const selectedDatoFom = periodeValues?.datoFom;
+        // const selectedDatoTom = periodeValues?.datoTom;
 
         const fieldState = getFieldState(`andreVoksneIHusstanden.${index}`);
 
         if (!fieldState.error) {
             updateAndSave({
-                oppdatereHusstandsmedlem: {
-                    oppdaterPeriode: {
-                        // TODO: fix api to get BP's id
-                        idHusstandsbarn: 1234,
-                        idHusstandsmedlem: 1234,
+                oppdaterePeriodeMedAndreVoksneIHusstand: {
+                    oppdatereAndreVoksneIHusstandenperiode: {
                         idPeriode: selectedPeriodeId,
-                        datoFom: selectedDatoFom,
-                        datoTom: selectedDatoTom,
-                        bostatus: selectedStatus,
+                        // datoFom: selectedDatoFom,
+                        // datoTom: selectedDatoTom,
+                        borMedAndreVoksne: selectedStatus === Bostatuskode.BOR_MED_ANDRE_VOKSNE,
                     },
+                    tilbakestilleHistorikk: false,
+                    angreSisteEndring: false,
                 },
             });
         }
@@ -230,8 +229,9 @@ export const AndreVoksneIHusstanden = () => {
 
     const undoAction = () => {
         updateAndSave({
-            oppdatereHusstandsmedlem: {
-                // angreSisteStegForHusstandsmedlem: bp.id,
+            oppdaterePeriodeMedAndreVoksneIHusstand: {
+                angreSisteEndring: true,
+                tilbakestilleHistorikk: false,
             },
         });
     };
@@ -248,11 +248,11 @@ export const AndreVoksneIHusstanden = () => {
                 );
 
                 saveBoforhold.queryClientUpdater((currentData) => {
-                    // TODO update query client with response data
                     return {
                         ...currentData,
                         boforhold: {
                             ...currentData.boforhold,
+                            andreVoksneIHusstanden: response.oppdatertePerioderMedAndreVoksne,
                         },
                     };
                 });
@@ -261,13 +261,15 @@ export const AndreVoksneIHusstanden = () => {
                 setSaveErrorState({
                     error: true,
                     retryFn: () => updateAndSave(payload),
-                    rollbackFn: () => {},
+                    rollbackFn: () => {
+                        setValue(`andreVoksneIHusstanden`, behandling.boforhold.andreVoksneIHusstanden);
+                    },
                 });
             },
         });
 
         setShowUndoButton(true);
-        // setShowResetButton(true);
+        setShowResetButton(true);
         setEditableRow(undefined);
     };
 
@@ -305,18 +307,21 @@ export const AndreVoksneIHusstanden = () => {
                         { oppdatereHusstandsmedlem: { slettPeriode: periode.id } },
                         {
                             onSuccess: (response) => {
-                                perioder.replace(
-                                    response.oppdatertHusstandsmedlem.perioder.map((d) => ({
-                                        ...d,
-                                        datoTom: d.datoTom ?? null,
-                                    }))
-                                );
-                                clearErrors(`andreVoksneIHusstanden.${index}`);
+                                clearErrors(`andreVoksneIHusstanden`);
                                 setEditableRow(undefined);
 
                                 saveBoforhold.queryClientUpdater((currentData) => {
-                                    // TODO update query client with response data
-                                    return currentData;
+                                    return {
+                                        ...currentData,
+                                        boforhold: {
+                                            ...currentData.boforhold,
+                                            andreVoksneIHusstanden: response.oppdatertePerioderMedAndreVoksne,
+                                            // valideringsfeil: {
+                                            //     ...currentData.boforhold.valideringsfeil,
+                                            //     andreVoksneIHusstanden: response.valideringsfeil,
+                                            // }
+                                        },
+                                    };
                                 });
                             },
                             onError: () => {
@@ -334,19 +339,13 @@ export const AndreVoksneIHusstanden = () => {
 
                 if (periode.kilde === Kilde.OFFENTLIG) {
                     updateAndSave({
-                        oppdatereHusstandsmedlem: {
-                            // TODO: fix when we get BP's id
-                            // oppdaterPeriode: {
-                            //     idHusstandsbarn: bp.id,
-                            //     idHusstandsmedlem: bp.id,
-                            //     idPeriode: periode.id,
-                            //     datoFom: periode.datoFom,
-                            //     datoTom: periode.datoTom,
-                            //     bostatus:
-                            //         periode.bostatus === Bostatuskode.MED_FORELDER
-                            //             ? Bostatuskode.IKKE_MED_FORELDER
-                            //             : Bostatuskode.MED_FORELDER,
-                            // },
+                        oppdaterePeriodeMedAndreVoksneIHusstand: {
+                            oppdatereAndreVoksneIHusstandenperiode: {
+                                idPeriode: periode.id,
+                                borMedAndreVoksne: periode.bostatus === Bostatuskode.BOR_MED_ANDRE_VOKSNE,
+                            },
+                            tilbakestilleHistorikk: false,
+                            angreSisteEndring: false,
                         },
                     });
                 }
@@ -356,10 +355,10 @@ export const AndreVoksneIHusstanden = () => {
         }
     };
 
-    // TODO: fix when we get BP's id
     const resetTilDataFraFreg = () => {
-        // const bp = getValues(`andreVoksneIHusstanden`);
-        updateAndSave({ oppdatereHusstandsmedlem: { tilbakestillPerioderForHusstandsmedlem: 1 } });
+        updateAndSave({
+            oppdaterePeriodeMedAndreVoksneIHusstand: { tilbakestilleHistorikk: true, angreSisteEndring: false },
+        });
         setShowResetButton(false);
     };
 
