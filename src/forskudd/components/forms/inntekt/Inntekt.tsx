@@ -87,11 +87,11 @@ const Main = () => {
                             <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
                             {rolle.rolletype === Rolletype.BM && (
                                 <>
-                                    <Barnetillegg />
-                                    <UtvidetBarnetrygd />
-                                    <Småbarnstillegg />
-                                    <Kontantstøtte />
-                                    <BeregnetInntekter />
+                                    <Barnetillegg ident={rolle.ident} />
+                                    <UtvidetBarnetrygd ident={rolle.ident} />
+                                    <Småbarnstillegg ident={rolle.ident} />
+                                    <Kontantstøtte ident={rolle.ident} />
+                                    <BeregnetInntekter rolle={rolle} />
                                 </>
                             )}
                         </Tabs.Panel>

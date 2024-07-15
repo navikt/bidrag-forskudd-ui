@@ -6,13 +6,13 @@ import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/u
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
+import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { BodyShort, Box, Button, Heading, HStack, ReadMore, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
-import { BoforholdFormValues } from "../../../types/boforholdFormValues";
+import { useOnActivateGrunnlag } from "../../hooks/useOnActivateGrunnlag";
 
 const Header = () => (
     <BodyShort size="small" className="flex h-2">

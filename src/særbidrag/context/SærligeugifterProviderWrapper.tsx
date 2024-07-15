@@ -2,17 +2,17 @@ import text from "@common/constants/texts";
 import { BehandlingProvider } from "@common/context/BehandlingContext";
 import React, { PropsWithChildren, useState } from "react";
 
-import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants/steps";
+import { STEPS as SærligeutgifterSteps } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export type InntektTables =
-    | "småbarnstillegg"
-    | "utvidetBarnetrygd"
+    | `småbarnstillegg.${string}`
+    | `utvidetBarnetrygd.${string}`
     | `årsinntekter.${string}`
     | `barnetillegg.${string}`
     | `kontantstøtte.${string}`;
 
-type HusstandsbarnTables = "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
 
 export type PageErrorsOrUnsavedState = {
     utgifter: { error: boolean; openFields?: boolean };

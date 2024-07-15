@@ -1,4 +1,4 @@
-import { Rolletype } from "@api/BidragBehandlingApiV1";
+import { RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { Barnetillegg } from "@common/components/inntekt/Barnetillegg";
@@ -37,6 +37,35 @@ const Main = () => {
     });
     useEffect(scrollToHash, []);
 
+    function renderInntektTables(rolle: RolleDto) {
+        switch (rolle.rolletype) {
+            case Rolletype.BM:
+                return (
+                    <>
+                        <Barnetillegg ident={rolle.ident} />
+                        <UtvidetBarnetrygd ident={rolle.ident} />
+                        <Småbarnstillegg ident={rolle.ident} />
+                        <Kontantstøtte ident={rolle.ident} />
+                        <BeregnetInntekter rolle={rolle} />
+                    </>
+                );
+            case Rolletype.BP:
+                return (
+                    <>
+                        <Barnetillegg ident={rolle.ident} />
+                        <BeregnetInntekter rolle={rolle} />
+                    </>
+                );
+
+            case Rolletype.BA:
+                return (
+                    <>
+                        <BeregnetInntekter rolle={rolle} />
+                    </>
+                );
+        }
+    }
+
     return (
         <div className="grid gap-y-2">
             <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
@@ -58,16 +87,7 @@ const Main = () => {
                                 <InntektHeader ident={rolle.ident} />
                             </div>
                             <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
-                            {rolle.rolletype === Rolletype.BM && (
-                                <>
-                                    <Barnetillegg />
-                                    <UtvidetBarnetrygd />
-                                    <Småbarnstillegg />
-                                    <Kontantstøtte />
-                                    <BeregnetInntekter />
-                                </>
-                            )}
-                            {rolle.rolletype === Rolletype.BP && <Barnetillegg />}
+                            {renderInntektTables(rolle)}
                         </Tabs.Panel>
                     );
                 })}

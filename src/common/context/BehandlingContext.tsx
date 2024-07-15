@@ -19,8 +19,8 @@ import { useParams, useSearchParams } from "react-router-dom";
 
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
-import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særligeutgifter/context/SærligeugifterProviderWrapper";
-import { SærligeutgifterStepper } from "../../særligeutgifter/enum/SærligeutgifterStepper";
+import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særbidrag/context/SærligeugifterProviderWrapper";
+import { SærligeutgifterStepper } from "../../særbidrag/enum/SærligeutgifterStepper";
 
 interface SaveErrorState {
     error: boolean;

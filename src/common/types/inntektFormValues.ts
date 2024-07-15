@@ -13,9 +13,9 @@ export interface InntektFormPeriode extends Omit<InntektDtoV2, "rapporteringstyp
 }
 export interface InntektFormValues {
     årsinntekter: { [key: string]: InntektFormPeriode[] };
-    barnetillegg: { [key: string]: InntektFormPeriode[] };
-    småbarnstillegg: InntektFormPeriode[];
-    kontantstøtte: { [key: string]: InntektFormPeriode[] };
-    utvidetBarnetrygd: InntektFormPeriode[];
+    barnetillegg: { [key: string]: { [key: string]: InntektFormPeriode[] } };
+    småbarnstillegg: { [key: string]: InntektFormPeriode[] };
+    kontantstøtte: { [key: string]: { [key: string]: InntektFormPeriode[] } };
+    utvidetBarnetrygd: { [key: string]: InntektFormPeriode[] };
     notat?: BehandlingNotatDto;
 }

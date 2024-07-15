@@ -8,24 +8,23 @@ import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import elementId from "../../../forskudd/constants/elementIds";
+import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-export const Kontantstøtte = () => {
+export const Kontantstøtte = ({ ident }: InntektTableProps) => {
     const { roller } = useGetBehandlingV2();
     const barna = roller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)
         .sort((a, b) => a.navn.localeCompare(b.navn));
-    const bmIdent = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>
-            <Opplysninger fieldName={"kontantstøtte"} />
+            <Opplysninger fieldName={`kontantstøtte.${ident}`} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
                     <div className="grid gap-y-2" key={barn.ident}>
@@ -40,7 +39,7 @@ export const Kontantstøtte = () => {
                                 <BodyShort size="small">{barn.ident}</BodyShort>
                             </div>
                         </div>
-                        <InntektTabel fieldName={`kontantstøtte.${barn.ident}` as const}>
+                        <InntektTabel fieldName={`kontantstøtte.${ident}.${barn.ident}` as const}>
                             {({
                                 controlledFields,
                                 onSaveRow,
@@ -119,7 +118,7 @@ export const Kontantstøtte = () => {
                                                         >
                                                             <Table.DataCell>
                                                                 <TaMed
-                                                                    fieldName={`kontantstøtte.${barn.ident}`}
+                                                                    fieldName={`kontantstøtte.${ident}.${barn.ident}`}
                                                                     index={index}
                                                                     handleOnSelect={handleOnSelect}
                                                                 />
@@ -128,7 +127,7 @@ export const Kontantstøtte = () => {
                                                                 <Periode
                                                                     index={index}
                                                                     label={text.label.fraOgMed}
-                                                                    fieldName={`kontantstøtte.${barn.ident}`}
+                                                                    fieldName={`kontantstøtte.${ident}.${barn.ident}`}
                                                                     field="datoFom"
                                                                     item={item}
                                                                 />
@@ -137,7 +136,7 @@ export const Kontantstøtte = () => {
                                                                 <Periode
                                                                     index={index}
                                                                     label={text.label.tilOgMed}
-                                                                    fieldName={`kontantstøtte.${barn.ident}`}
+                                                                    fieldName={`kontantstøtte.${ident}.${barn.ident}`}
                                                                     field="datoTom"
                                                                     item={item}
                                                                 />
@@ -148,7 +147,7 @@ export const Kontantstøtte = () => {
                                                             <Table.DataCell textSize="small">
                                                                 <Totalt
                                                                     item={item}
-                                                                    field={`kontantstøtte.${barn.ident}.${index}`}
+                                                                    field={`kontantstøtte.${ident}.${barn.ident}.${index}`}
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell>
@@ -169,7 +168,7 @@ export const Kontantstøtte = () => {
                                     <LeggTilPeriodeButton
                                         addPeriode={() =>
                                             addPeriod({
-                                                ident: bmIdent,
+                                                ident,
                                                 datoFom: null,
                                                 datoTom: null,
                                                 gjelderBarn: barn.ident,

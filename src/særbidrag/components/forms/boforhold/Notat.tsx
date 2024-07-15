@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { STEPS } from "../../../constants/steps";
-import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 export const Notat = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
@@ -44,7 +44,7 @@ export const Notat = () => {
                 },
             }
         );
-    const onNext = () => onStepChange(STEPS[ForskuddStepper.INNTEKT]);
+    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.VEDTAK]);
 
     const debouncedOnSave = useDebounce(onSave);
 

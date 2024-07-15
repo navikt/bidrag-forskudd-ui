@@ -7,6 +7,7 @@ import {
     RolleDto,
     SivilstandDto,
     Sivilstandskode,
+    TypeBehandling,
 } from "@api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
 import text from "@common/constants/texts";
@@ -33,12 +34,41 @@ import {
     ParsedBoforholdOpplysninger,
     SavedOpplysningFraFolkeRegistrePeriode,
     SivilstandOpplysninger,
-} from "../../../types/boforholdFormValues";
-export const boststatusOver18År = [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG];
+} from "../../forskudd/types/boforholdFormValues";
+export const gyldigBostatusOver18År = {
+    [TypeBehandling.FORSKUDD]: [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG],
+    [TypeBehandling.SAeRBIDRAG]: [
+        Bostatuskode.REGNES_IKKE_SOM_BARN,
+        Bostatuskode.DOKUMENTERT_SKOLEGANG,
+        Bostatuskode.IKKE_MED_FORELDER,
+    ],
+};
 export const boforholdForskuddOptions = {
     under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
-    likEllerOver18År: [...boststatusOver18År, Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
+    likEllerOver18År: [
+        ...gyldigBostatusOver18År[TypeBehandling.FORSKUDD],
+        Bostatuskode.MED_FORELDER,
+        Bostatuskode.IKKE_MED_FORELDER,
+    ],
 };
+export const boforholdOptions = {
+    [TypeBehandling.FORSKUDD]: {
+        under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER],
+        likEllerOver18År: [
+            ...gyldigBostatusOver18År[TypeBehandling.FORSKUDD],
+            Bostatuskode.MED_FORELDER,
+            Bostatuskode.IKKE_MED_FORELDER,
+        ],
+    },
+    [TypeBehandling.SAeRBIDRAG]: {
+        under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.DELT_BOSTED],
+        likEllerOver18År: [...gyldigBostatusOver18År[TypeBehandling.SAeRBIDRAG]],
+    },
+};
+export const andreVoksneIHusstandenBoforholdOptions = [
+    Bostatuskode.BOR_MED_ANDRE_VOKSNE,
+    Bostatuskode.BOR_IKKE_MED_ANDRE_VOKSNE,
+];
 export const sivilstandForskuddOptions = [Sivilstandskode.GIFT_SAMBOER, Sivilstandskode.BOR_ALENE_MED_BARN];
 export const calculateFraDato = (
     fieldArrayValues: BostatusperiodeDto[] | SivilstandDto[],
@@ -277,11 +307,17 @@ const getOppositeBostatus = (bostatus: Bostatuskode): Bostatuskode => {
 };
 function addPeriodIfThereIsNoRunningPeriod(
     periodsList: BostatusperiodeDto[],
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[];
-function addPeriodIfThereIsNoRunningPeriod(periodsList: SivilstandDto[], monthAfter18?: Date): SivilstandDto[];
+function addPeriodIfThereIsNoRunningPeriod(
+    periodsList: SivilstandDto[],
+    typeBehandling: TypeBehandling,
+    monthAfter18?: Date
+): SivilstandDto[];
 function addPeriodIfThereIsNoRunningPeriod(
     periodsList: BostatusperiodeDto[] | SivilstandDto[],
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[] | SivilstandDto[] {
     const lastPeriod = periodsList[periodsList.length - 1];
@@ -295,7 +331,8 @@ function addPeriodIfThereIsNoRunningPeriod(
                 datoFom: firstDayOfNextPeriod,
                 datoTom: null,
                 bostatus:
-                    firstDayOfNextPeriodIsAfterOrEqualToMonthOf18 && !boststatusOver18År.includes(lastPeriodBostatus)
+                    firstDayOfNextPeriodIsAfterOrEqualToMonthOf18 &&
+                    !gyldigBostatusOver18År[typeBehandling].includes(lastPeriodBostatus)
                         ? Bostatuskode.REGNES_IKKE_SOM_BARN
                         : getOppositeBostatus(lastPeriodBostatus),
                 kilde: Kilde.MANUELL,
@@ -323,6 +360,7 @@ function spliceAndInsertPeriods(
     deleteCount: number,
     periodsToInsert: BostatusperiodeDto[] | SivilstandDto[],
     statusField: "bostatus" | "sivilstand",
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[] | SivilstandDto[] {
     if (statusField === "bostatus") {
@@ -331,23 +369,30 @@ function spliceAndInsertPeriods(
             deleteCount,
             ...(periodsToInsert as BostatusperiodeDto[])
         );
-        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as BostatusperiodeDto[], monthAfter18);
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as BostatusperiodeDto[], typeBehandling, monthAfter18);
     }
 
     if (statusField === "sivilstand") {
         const editedPeriods = periodsList.toSpliced(startIndex, deleteCount, ...(periodsToInsert as SivilstandDto[]));
-        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as SivilstandDto[]);
+        return addPeriodIfThereIsNoRunningPeriod(editedPeriods as SivilstandDto[], typeBehandling);
     }
 }
 export function editPeriods(
     periodsList: BostatusperiodeDto[],
     periodeIndex: number,
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[];
-export function editPeriods(periodsList: SivilstandDto[], periodeIndex: number, monthAfter18?: Date): SivilstandDto[];
+export function editPeriods(
+    periodsList: SivilstandDto[],
+    periodeIndex: number,
+    typeBehandling: TypeBehandling,
+    monthAfter18?: Date
+): SivilstandDto[];
 export function editPeriods(
     periodsList: BostatusperiodeDto[] | SivilstandDto[],
     periodeIndex: number,
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[] | SivilstandDto[] {
     const editedPeriod = { ...periodsList[periodeIndex], kilde: Kilde.MANUELL };
@@ -400,6 +445,7 @@ export function editPeriods(
                 1,
                 periodsToInsert as BostatusperiodeDto[] | SivilstandDto[],
                 statusField,
+                typeBehandling,
                 monthAfter18
             );
         }
@@ -415,7 +461,9 @@ export function editPeriods(
         } else {
             const isHusstandPerioder = statusField === "bostatus";
             const datoFomIsAfter18 = isAfterDate(editedPeriod.datoFom, monthAfter18);
-            const prevPeriodStatusIsNotOver18 = !boststatusOver18År.includes(prevPeriod[statusField]);
+            const prevPeriodStatusIsNotOver18 = !gyldigBostatusOver18År[typeBehandling].includes(
+                prevPeriod[statusField]
+            );
             const limitPrevPeriodDatoTomToUnder18 =
                 isHusstandPerioder && datoFomIsAfter18 && prevPeriodStatusIsNotOver18;
             const dayBeforeEditedFom = toISODateString(deductDays(new Date(editedPeriod.datoFom), 1));
@@ -447,7 +495,7 @@ export function editPeriods(
         } else {
             const isHusstandPerioder = statusField === "bostatus";
             const datoTomIsBefore18 = isBeforeDate(editedPeriod.datoTom, monthAfter18);
-            const postPeriodStatusIsOver18 = boststatusOver18År.includes(postPeriod[statusField]);
+            const postPeriodStatusIsOver18 = gyldigBostatusOver18År[typeBehandling].includes(postPeriod[statusField]);
             const limitPostPeriodDatoFomToOver18 = isHusstandPerioder && datoTomIsBefore18 && postPeriodStatusIsOver18;
             const dayAfterEditedTom = toISODateString(addDays(new Date(editedPeriod.datoTom), 1));
             const updatedPostPeriodDatoFom = limitPostPeriodDatoFomToOver18 ? postPeriod.datoFom : dayAfterEditedTom;
@@ -475,6 +523,7 @@ export function editPeriods(
         deleteCount,
         periodsToInsert as BostatusperiodeDto[] | SivilstandDto[],
         statusField,
+        typeBehandling,
         monthAfter18
     );
 }
@@ -482,12 +531,19 @@ export function editPeriods(
 export function removeAndEditPeriods(
     periodsList: BostatusperiodeDto[],
     index: number,
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[];
-export function removeAndEditPeriods(periodsList: SivilstandDto[], index: number, monthAfter18?: Date): SivilstandDto[];
+export function removeAndEditPeriods(
+    periodsList: SivilstandDto[],
+    index: number,
+    typeBehandling: TypeBehandling,
+    monthAfter18?: Date
+): SivilstandDto[];
 export function removeAndEditPeriods(
     periodsList: BostatusperiodeDto[] | SivilstandDto[],
     index: number,
+    typeBehandling: TypeBehandling,
     monthAfter18?: Date
 ): BostatusperiodeDto[] | SivilstandDto[] {
     const periodToRemove = periodsList[index];
@@ -497,8 +553,8 @@ export function removeAndEditPeriods(
     if ("bostatus" in periodToRemove) {
         if (
             postPeriod &&
-            !boststatusOver18År.includes((prevPeriod as BostatusperiodeDto).bostatus) &&
-            boststatusOver18År.includes((postPeriod as BostatusperiodeDto).bostatus)
+            !gyldigBostatusOver18År[typeBehandling].includes((prevPeriod as BostatusperiodeDto).bostatus) &&
+            gyldigBostatusOver18År[typeBehandling].includes((postPeriod as BostatusperiodeDto).bostatus)
         ) {
             prevPeriod.datoTom = toISODateString(deductDays(monthAfter18, 1));
             prevPeriod.kilde = Kilde.MANUELL;
@@ -647,7 +703,8 @@ export const checkPeriodizationErrors = (perioderValues: BostatusperiodeDto[] | 
 export const getBarnPerioder = (
     perioder: HusstandOpplysningPeriode[] | SavedOpplysningFraFolkeRegistrePeriode[],
     virkningsOrSoktFraDato: Date,
-    barnsFoedselsDato: string
+    barnsFoedselsDato: string,
+    typeBehandling: TypeBehandling
 ): BostatusperiodeDto[] => {
     const virkingsdato = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barnsFoedselsDato, virkningsOrSoktFraDato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barnsFoedselsDato));
@@ -680,7 +737,7 @@ export const getBarnPerioder = (
         const datoTom = tilDato ? toISODateString(lastDayOfMonth(new Date(tilDato))) : null;
         const isPeriodAfter18YearOld = isDateAfter18(datoFom) || datoTom == null || isDateAfter18(datoTom);
 
-        if (boststatusOver18År.includes(prevPeriode?.bostatus)) {
+        if (gyldigBostatusOver18År[typeBehandling].includes(prevPeriode?.bostatus)) {
             return;
         }
 
@@ -734,13 +791,14 @@ export const getBarnPerioder = (
 export const getBarnPerioderFromHusstandsListe = (
     opplysningerFraFolkRegistre: HusstandOpplysningFraFolkeRegistre[],
     virkningsOrSoktFraDato: Date,
-    barnMedISaken: RolleDto[]
+    barnMedISaken: RolleDto[],
+    typeBehandling: TypeBehandling
 ): HusstandsmedlemDtoV2[] => {
     return opplysningerFraFolkRegistre.map((barn) => ({
         ...barn,
         kilde: Kilde.OFFENTLIG,
         fødselsdato: barn.foedselsdato,
         medIBehandling: barnMedISaken.some((b) => b.ident === barn.ident),
-        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato),
+        perioder: getBarnPerioder(barn.perioder, virkningsOrSoktFraDato, barn.foedselsdato, typeBehandling),
     }));
 };

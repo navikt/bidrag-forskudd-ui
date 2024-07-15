@@ -4,6 +4,7 @@ import { Loader } from "@navikt/ds-react";
 import React, { memo, Suspense } from "react";
 
 import { SærligeutgifterStepper } from "../../enum/SærligeutgifterStepper";
+import Boforhold from "./boforhold/Boforhold";
 import Inntekt from "./inntekt/Inntekt";
 import Utgifter from "./utgifter/Utgifter";
 
@@ -14,7 +15,7 @@ const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
         case SærligeutgifterStepper.INNTEKT:
             return <Inntekt />;
         case SærligeutgifterStepper.BOFORHOLD:
-            return null;
+            return <Boforhold />;
         case SærligeutgifterStepper.VEDTAK:
             return null;
         default:

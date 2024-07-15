@@ -17,6 +17,10 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import {
+    aarsakToVirkningstidspunktMapper,
+    getFomAndTomForMonthPicker,
+} from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
@@ -30,7 +34,6 @@ import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
-import { aarsakToVirkningstidspunktMapper, getFomAndTomForMonthPicker } from "../helpers/virkningstidspunktHelpers";
 
 const årsakListe = [
     TypeArsakstype.TREMANEDERTILBAKE,

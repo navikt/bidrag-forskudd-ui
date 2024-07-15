@@ -14,9 +14,9 @@ import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import elementId from "../../../forskudd/constants/elementIds";
+import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
@@ -62,15 +62,14 @@ const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) =>
     </>
 );
 
-export const Barnetillegg = () => {
+export const Barnetillegg = ({ ident }: InntektTableProps) => {
     const { roller } = useGetBehandlingV2();
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const barna = roller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)
         .sort((a, b) => a.navn.localeCompare(b.navn));
-    const bmIdent = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
 
-    const customRowValidation = (fieldName: `barnetillegg.${string}.${number}`) => {
+    const customRowValidation = (fieldName: `barnetillegg.${string}.${string}.${number}`) => {
         const periode = getValues(fieldName);
         if (ObjectUtils.isEmpty(periode.inntektstype)) {
             setError(`${fieldName}.inntektstype`, {
@@ -87,7 +86,7 @@ export const Barnetillegg = () => {
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
                 {text.title.barnetillegg}
             </Heading>
-            <Opplysninger fieldName={"barnetillegg"} />
+            <Opplysninger fieldName={`barnetillegg.${ident}`} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
                     <div className="grid gap-y-2" key={barn.ident}>
@@ -103,7 +102,7 @@ export const Barnetillegg = () => {
                             </div>
                         </div>
                         <InntektTabel
-                            fieldName={`barnetillegg.${barn.ident}` as const}
+                            fieldName={`barnetillegg.${ident}.${barn.ident}` as const}
                             customRowValidation={customRowValidation}
                         >
                             {({
@@ -200,7 +199,7 @@ export const Barnetillegg = () => {
                                                         >
                                                             <Table.DataCell>
                                                                 <TaMed
-                                                                    fieldName={`barnetillegg.${barn.ident}`}
+                                                                    fieldName={`barnetillegg.${ident}.${barn.ident}`}
                                                                     index={index}
                                                                     handleOnSelect={handleOnSelect}
                                                                 />
@@ -209,7 +208,7 @@ export const Barnetillegg = () => {
                                                                 <Periode
                                                                     index={index}
                                                                     label={text.label.fraOgMed}
-                                                                    fieldName={`barnetillegg.${barn.ident}`}
+                                                                    fieldName={`barnetillegg.${ident}.${barn.ident}`}
                                                                     field="datoFom"
                                                                     item={item}
                                                                 />
@@ -218,7 +217,7 @@ export const Barnetillegg = () => {
                                                                 <Periode
                                                                     index={index}
                                                                     label={text.label.tilOgMed}
-                                                                    fieldName={`barnetillegg.${barn.ident}`}
+                                                                    fieldName={`barnetillegg.${ident}.${barn.ident}`}
                                                                     field="datoTom"
                                                                     item={item}
                                                                 />
@@ -229,13 +228,13 @@ export const Barnetillegg = () => {
                                                             <Table.DataCell textSize="small">
                                                                 <Beskrivelse
                                                                     item={item}
-                                                                    field={`barnetillegg.${barn.ident}.${index}`}
+                                                                    field={`barnetillegg.${ident}.${barn.ident}.${index}`}
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <Totalt
                                                                     item={item}
-                                                                    field={`barnetillegg.${barn.ident}.${index}`}
+                                                                    field={`barnetillegg.${ident}.${barn.ident}.${index}`}
                                                                 />
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
@@ -261,7 +260,7 @@ export const Barnetillegg = () => {
                                     <LeggTilPeriodeButton
                                         addPeriode={() => {
                                             addPeriod({
-                                                ident: bmIdent,
+                                                ident,
                                                 datoFom: null,
                                                 datoTom: null,
                                                 gjelderBarn: barn.ident,

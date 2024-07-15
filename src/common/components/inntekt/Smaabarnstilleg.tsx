@@ -1,20 +1,17 @@
-import { Inntektsrapportering, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde } from "@api/BidragBehandlingApiV1";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import text from "@common/constants/texts";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
-import elementId from "../../../forskudd/constants/elementIds";
+import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-export const Småbarnstillegg = () => {
-    const { roller } = useGetBehandlingV2();
-    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-    const fieldName = "småbarnstillegg";
+export const Småbarnstillegg = ({ ident }: InntektTableProps) => {
+    const fieldName = `småbarnstillegg.${ident}` as const;
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">

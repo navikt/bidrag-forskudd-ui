@@ -1,6 +1,7 @@
 import {
     AktivereGrunnlagRequestV2,
     AktivereGrunnlagResponseV2,
+    AndreVoksneIHusstandenGrunnlagDto,
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
@@ -64,6 +65,17 @@ export const useGetOpplysningerBoforhold = (): {
     return {
         aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
         ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
+};
+
+export const useGetOpplysningeAndreVoksneIHusstand = (): {
+    aktiveOpplysninger: AndreVoksneIHusstandenGrunnlagDto;
+    ikkeAktiverteOpplysninger: AndreVoksneIHusstandenGrunnlagDto;
+} => {
+    const behandling = useGetBehandlingV2();
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.andreVoksneIHusstanden,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden,
     };
 };
 export const useGetOpplysningerSivilstandV2 = (): {
@@ -305,7 +317,7 @@ export const useGetBeregningForskudd = () => {
                     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultat(Number(vedtakId));
                     return { resultat: response.data };
                 }
-                const response = await BEHANDLING_API_V1.api.beregnForskudd(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnForskudd1(Number(behandlingId));
                 return { resultat: response.data };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];

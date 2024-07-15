@@ -31,7 +31,12 @@ export const Opplysninger = ({
     fieldName,
     ident,
 }: {
-    fieldName: "småbarnstillegg" | "utvidetBarnetrygd" | "barnetillegg" | "kontantstøtte" | `årsinntekter.${string}`;
+    fieldName:
+        | `småbarnstillegg.${string}`
+        | `utvidetBarnetrygd.${string}`
+        | `barnetillegg.${string}`
+        | `kontantstøtte.${string}`
+        | `årsinntekter.${string}`;
     ident?: string;
 }) => {
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
