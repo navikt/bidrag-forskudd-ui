@@ -6,11 +6,11 @@ import { STEPS as ForskuddSteps } from "../constants/steps";
 import { ForskuddStepper } from "../enum/ForskuddStepper";
 
 export type InntektTables =
-    | "småbarnstillegg"
-    | "utvidetBarnetrygd"
+    | `småbarnstillegg.${string}`
+    | `utvidetBarnetrygd.${string}`
     | `årsinntekter.${string}`
-    | `barnetillegg.${string}`
-    | `kontantstøtte.${string}`;
+    | `barnetillegg.${string}.${string}`
+    | `kontantstøtte.${string}.${string}`;
 
 type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
 

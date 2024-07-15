@@ -130,7 +130,7 @@ const tekster = {
         sivilstand: "Sivilstand",
         sivilstandBM: "Sivilstand til BM",
         skattepliktigeInntekter: "Skattepliktige inntekter",
-        småbarnstillegg: "Småbarns- tillegg",
+        småbarnstillegg: "Småbarnstillegg",
         stilling: "Stilling",
         sum: "Sum",
         status: "Status",

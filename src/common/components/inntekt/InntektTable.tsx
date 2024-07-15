@@ -35,6 +35,8 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { InntektTables } from "../../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { getFomAndTomForMonthPicker } from "../../helpers/virkningstidspunktHelpers";
 
+export type InntektTableProps = { ident: string };
+
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
         <div className="h-8 w-full flex items-center justify-center">
@@ -130,11 +132,11 @@ export const Periode = ({
 }: {
     index: number;
     fieldName:
-        | "småbarnstillegg"
-        | "utvidetBarnetrygd"
+        | `småbarnstillegg.${string}`
+        | `utvidetBarnetrygd.${string}`
         | `årsinntekter.${string}`
-        | `barnetillegg.${string}`
-        | `kontantstøtte.${string}`;
+        | `barnetillegg.${string}.${string}`
+        | `kontantstøtte.${string}.${string}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: InntektFormPeriode;
@@ -305,6 +307,7 @@ export const InntektTabel = ({
                         ...currentData.inntekter,
                         [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
+                        beregnetInntekterV2: response.beregnetInntekterV2,
                         valideringsfeil: response.valideringsfeil,
                     },
                 };
@@ -326,6 +329,7 @@ export const InntektTabel = ({
                                 (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
                             ),
                             beregnetInntekter: response.beregnetInntekter,
+                            beregnetInntekterV2: response.beregnetInntekterV2,
                             valideringsfeil: response.valideringsfeil,
                         },
                     };

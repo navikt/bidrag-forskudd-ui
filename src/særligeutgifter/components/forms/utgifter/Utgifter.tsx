@@ -653,13 +653,15 @@ const UtgifterForm = () => {
             if (name === undefined || type === undefined) {
                 return;
             } else {
+                console.log("Update", name, value);
                 debouncedOnSave(name);
             }
         });
         return () => subscription.unsubscribe();
     }, []);
 
-    const onSave = (name?: FieldPath<UtgiftFormValues>) => {
+    const onSave = (_name?: FieldPath<UtgiftFormValues>) => {
+        const name = _name.toString();
         if (name === "beregning.beløpDirekteBetaltAvBp") {
             const beløpBp = getValues(`beregning.beløpDirekteBetaltAvBp`);
             updateAndSave(

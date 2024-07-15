@@ -6,6 +6,7 @@ export default {
     seksjon_inntekt_skattepliktig: "skattepliktig",
     seksjon_sivilstand: "sivilstand",
     seksjon_boforhold: "boforhold",
+    seksjon_andreVoksneIHusstand: "andre_voksne_i_husstand",
     brukerveildning: {
         tabell_skattepliktig: "tabell-skattepliktig",
         tabell_småbarnstillegg: "tabell-smaabarnstillegg",

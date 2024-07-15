@@ -127,6 +127,7 @@ export enum OpplysningerType {
     BARNETILLEGG = "BARNETILLEGG",
     BARNETILSYN = "BARNETILSYN",
     BOFORHOLD = "BOFORHOLD",
+    BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
     KONTANTSTOTTE = "KONTANTSTØTTE",
     SIVILSTAND = "SIVILSTAND",
     UTVIDET_BARNETRYGD = "UTVIDET_BARNETRYGD",
@@ -306,6 +307,18 @@ export interface AktiveGrunnlagsdata {
     husstandsbarn: HusstandsmedlemGrunnlagDto[];
 }
 
+export interface AndreVoksneIHusstandenDetaljerDto {
+    navn: string;
+    /** @format date */
+    fødselsdato?: string;
+    harRelasjonTilBp: boolean;
+    /**
+     * Relasjon til BP. Brukes for debugging
+     * @deprecated
+     */
+    relasjon: AndreVoksneIHusstandenDetaljerDtoRelasjonEnum;
+}
+
 export interface AndreVoksneIHusstandenGrunnlagDto {
     /** @uniqueItems true */
     perioder: PeriodeAndreVoksneIHusstanden[];
@@ -428,6 +441,12 @@ export interface BehandlingDtoV2 {
 export interface BehandlingNotatDto {
     kunINotat?: string;
     medIVedtaket?: string;
+}
+
+export interface BeregnetInntekterDto {
+    ident: string;
+    rolle: Rolletype;
+    inntekter: InntektPerBarn[];
 }
 
 export interface BoforholdDtoV2 {
@@ -684,6 +703,7 @@ export interface InntekterDtoV2 {
     /** @uniqueItems true */
     årsinntekter: InntektDtoV2[];
     beregnetInntekter: InntektPerBarn[];
+    beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
 }
@@ -733,8 +753,7 @@ export interface OverlappendePeriode {
 export interface PeriodeAndreVoksneIHusstanden {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
-    /** @uniqueItems true */
-    husstandsmedlemmer: VoksenIHusstand[];
+    husstandsmedlemmer: AndreVoksneIHusstandenDetaljerDto[];
 }
 
 export interface PeriodeLocalDate {
@@ -900,12 +919,12 @@ export enum TypeBehandling {
 export interface UtgiftBeregningDto {
     /** Beløp som er direkte betalt av BP */
     beløpDirekteBetaltAvBp: number;
-    /** Summen av godkjent beløp for utgifter BP har betalt og beløp som er direkte betalt av BP */
-    totalBeløpBetaltAvBp?: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløp: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløpBp?: number;
+    /** Summen av godkjent beløp for utgifter BP har betalt plus beløp som er direkte betalt av BP */
+    totalBeløpBetaltAvBp: number;
 }
 
 export interface UtgiftspostDto {
@@ -947,13 +966,6 @@ export interface VirkningstidspunktDto {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: BehandlingNotatDto;
-}
-
-export interface VoksenIHusstand {
-    navn: string;
-    /** @format date */
-    fødselsdato: string;
-    harRelasjonTilBmBp: boolean;
 }
 
 /** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
@@ -1066,6 +1078,7 @@ export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
     beregnetInntekter: InntektPerBarn[];
+    beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
 }
@@ -1274,6 +1287,38 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
+export interface DelberegningBidragspliktigesAndelSaerbidrag {
+    periode: TypeArManedsperiode;
+    andelProsent: number;
+    andelBeløp: number;
+    barnetErSelvforsørget: boolean;
+}
+
+export interface DelberegningUtgift {
+    periode: TypeArManedsperiode;
+    sumBetaltAvBp: number;
+    sumGodkjent: number;
+}
+
+export interface ResultatSaerbidragsberegningDto {
+    periode: TypeArManedsperiode;
+    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
+    beregning?: UtgiftBeregningDto;
+    inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    delberegningUtgift?: DelberegningUtgift;
+    resultat: number;
+    resultatKode: Resultatkode;
+    /** @format double */
+    antallBarnIHusstanden?: number;
+    voksenIHusstanden?: boolean;
+}
+
+export interface ResultatSaerbidragsberegningInntekterDto {
+    inntektBM?: number;
+    inntektBP?: number;
+    inntektBarn?: number;
+}
+
 export interface ResultatBeregningBarnDto {
     barn: ResultatRolle;
     perioder: ResultatPeriodeDto[];
@@ -1335,6 +1380,7 @@ export interface InitalizeForsendelseRequest {
 
 export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
+    utgift?: UtgiftFeilDto;
     inntekter?: InntektValideringsfeilDto;
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
@@ -1359,6 +1405,10 @@ export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
+}
+
+export interface UtgiftFeilDto {
+    manglerUtgifter: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1742,8 +1792,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1807,8 +1857,24 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
+}
+
+/**
+ * Relasjon til BP. Brukes for debugging
+ * @deprecated
+ */
+export enum AndreVoksneIHusstandenDetaljerDtoRelasjonEnum {
+    BARN = "BARN",
+    FAR = "FAR",
+    MEDMOR = "MEDMOR",
+    MOR = "MOR",
+    INGEN = "INGEN",
+    FORELDER = "FORELDER",
+    EKTEFELLE = "EKTEFELLE",
+    MOTPART_TIL_FELLES_BARN = "MOTPART_TIL_FELLES_BARN",
+    UKJENT = "UKJENT",
 }
 
 export enum AnsettelsesdetaljerMonthEnum {
@@ -2181,11 +2247,45 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultatSaerbidrag
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/sarbidrag
+         * @secure
+         */
+        hentVedtakBeregningResultatSaerbidrag: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatSaerbidragsberegningDto, any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
          * @name HentVedtakBeregningResultat
-         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/forskudd
          * @secure
          */
         hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn/forskudd`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultat1
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @secure
+         */
+        hentVedtakBeregningResultat1: (vedtaksId: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], any>({
                 path: `/api/v1/vedtak/${vedtaksId}/beregn`,
                 method: "POST",
@@ -2247,14 +2347,48 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Beregn særbidrag
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregnSaerbidrag
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/sarbidrag
+         * @secure
+         */
+        beregnSaerbidrag: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<ResultatSaerbidragsberegningDto, BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
          * @name BeregnForskudd
-         * @request POST:/api/v1/behandling/{behandlingsid}/beregn
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/forskudd
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/forskudd`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregnForskudd1
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn
+         * @secure
+         */
+        beregnForskudd1: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",

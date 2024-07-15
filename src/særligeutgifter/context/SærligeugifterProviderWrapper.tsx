@@ -6,8 +6,8 @@ import { STEPS as SærligeutgifterSteps } from "../../særligeutgifter/constants
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export type InntektTables =
-    | "småbarnstillegg"
-    | "utvidetBarnetrygd"
+    | `småbarnstillegg.${string}`
+    | `utvidetBarnetrygd.${string}`
     | `årsinntekter.${string}`
     | `barnetillegg.${string}`
     | `kontantstøtte.${string}`;

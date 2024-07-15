@@ -107,7 +107,7 @@ export const createInitialValues = (
     inntekter: InntekterDtoV2,
     virkningsdato: Date
 ): InntektFormValues => {
-    const barn = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
+    const barnListe = roller.filter((rolle) => rolle.rolletype === Rolletype.BA);
     const transformFn = transformInntekt(virkningsdato);
 
     return {
@@ -120,26 +120,54 @@ export const createInitialValues = (
             }),
             {}
         ),
-        barnetillegg: barn.reduce(
+        barnetillegg: roller.reduce(
             (acc, rolle) => ({
                 ...acc,
-                [rolle.ident]: inntekter.barnetillegg
-                    ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
+                [rolle.ident]: barnListe.reduce(
+                    (acc, barn) => ({
+                        ...acc,
+                        [barn.ident]: inntekter.barnetillegg
+                            ?.filter((inntekt) => inntekt.gjelderBarn === barn.ident && inntekt.ident === rolle.ident)
+                            .map(transformFn),
+                    }),
+                    {}
+                ),
+            }),
+            {}
+        ),
+        kontantstøtte: roller.reduce(
+            (acc, rolle) => ({
+                ...acc,
+                [rolle.ident]: barnListe.reduce(
+                    (acc, barn) => ({
+                        ...acc,
+                        [barn.ident]: inntekter.kontantstøtte
+                            ?.filter((inntekt) => inntekt.gjelderBarn === barn.ident && inntekt.ident === rolle.ident)
+                            .map(transformFn),
+                    }),
+                    {}
+                ),
+            }),
+            {}
+        ),
+        småbarnstillegg: roller.reduce(
+            (acc, rolle) => ({
+                ...acc,
+                [rolle.ident]: inntekter.småbarnstillegg
+                    ?.filter((inntekt) => inntekt.ident === rolle.ident)
                     .map(transformFn),
             }),
             {}
         ),
-        kontantstøtte: barn.reduce(
+        utvidetBarnetrygd: roller.reduce(
             (acc, rolle) => ({
                 ...acc,
-                [rolle.ident]: inntekter.kontantstøtte
-                    ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
+                [rolle.ident]: inntekter.utvidetBarnetrygd
+                    ?.filter((inntekt) => inntekt.ident === rolle.ident)
                     .map(transformFn),
             }),
             {}
         ),
-        småbarnstillegg: inntekter.småbarnstillegg?.map(transformFn),
-        utvidetBarnetrygd: inntekter.utvidetBarnetrygd?.map(transformFn),
         notat: {
             kunINotat: inntekter.notat.kunINotat,
         },

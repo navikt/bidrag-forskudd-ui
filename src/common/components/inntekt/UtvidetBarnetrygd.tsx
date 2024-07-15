@@ -1,20 +1,17 @@
-import { Inntektsrapportering, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Kilde } from "@api/BidragBehandlingApiV1";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import text from "@common/constants/texts";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { InntektFormPeriode } from "@common/types/inntektFormValues";
 import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { Opplysninger } from "./Opplysninger";
 
-export const UtvidetBarnetrygd = () => {
-    const { roller } = useGetBehandlingV2();
-    const ident = roller?.find((rolle) => rolle.rolletype === Rolletype.BM)?.ident;
-    const fieldName = "utvidetBarnetrygd";
+export const UtvidetBarnetrygd = ({ ident }: InntektTableProps) => {
+    const fieldName = `utvidetBarnetrygd.${ident}` as const;
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
@@ -78,55 +75,57 @@ export const UtvidetBarnetrygd = () => {
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
-                                        {controlledFields.map((item, index) => (
-                                            <Table.ExpandableRow
-                                                key={item?.id + item.ident}
-                                                content={<ExpandableContent item={item} />}
-                                                togglePlacement="right"
-                                                className="align-top"
-                                                expansionDisabled={item.kilde === Kilde.MANUELL}
-                                            >
-                                                <Table.DataCell>
-                                                    <TaMed
-                                                        fieldName={fieldName}
-                                                        index={index}
-                                                        handleOnSelect={handleOnSelect}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Periode
-                                                        index={index}
-                                                        label={text.label.fraOgMed}
-                                                        fieldName={fieldName}
-                                                        field="datoFom"
-                                                        item={item}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Periode
-                                                        index={index}
-                                                        label={text.label.tilOgMed}
-                                                        fieldName={fieldName}
-                                                        field="datoTom"
-                                                        item={item}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell>
-                                                    <KildeIcon kilde={item.kilde} />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Totalt item={item} field={`${fieldName}.${index}`} />
-                                                </Table.DataCell>
-                                                <Table.DataCell>
-                                                    <EditOrSaveButton
-                                                        index={index}
-                                                        item={item}
-                                                        onEditRow={onEditRow}
-                                                        onSaveRow={onSaveRow}
-                                                    />
-                                                </Table.DataCell>
-                                            </Table.ExpandableRow>
-                                        ))}
+                                        {controlledFields
+                                            .filter((item) => item.ident === ident)
+                                            .map((item, index) => (
+                                                <Table.ExpandableRow
+                                                    key={item?.id + item.ident}
+                                                    content={<ExpandableContent item={item} />}
+                                                    togglePlacement="right"
+                                                    className="align-top"
+                                                    expansionDisabled={item.kilde === Kilde.MANUELL}
+                                                >
+                                                    <Table.DataCell>
+                                                        <TaMed
+                                                            fieldName={fieldName}
+                                                            index={index}
+                                                            handleOnSelect={handleOnSelect}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Periode
+                                                            index={index}
+                                                            label={text.label.fraOgMed}
+                                                            fieldName={fieldName}
+                                                            field="datoFom"
+                                                            item={item}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Periode
+                                                            index={index}
+                                                            label={text.label.tilOgMed}
+                                                            fieldName={fieldName}
+                                                            field="datoTom"
+                                                            item={item}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell>
+                                                        <KildeIcon kilde={item.kilde} />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Totalt item={item} field={`${fieldName}.${index}`} />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell>
+                                                        <EditOrSaveButton
+                                                            index={index}
+                                                            item={item}
+                                                            onEditRow={onEditRow}
+                                                            onSaveRow={onSaveRow}
+                                                        />
+                                                    </Table.DataCell>
+                                                </Table.ExpandableRow>
+                                            ))}
                                     </Table.Body>
                                 </Table>
                             </div>
