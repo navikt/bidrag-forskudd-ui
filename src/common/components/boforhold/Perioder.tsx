@@ -15,9 +15,9 @@ import StatefulAlert from "@common/components/StatefulAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
-    boforholdForskuddOptions,
-    boststatusOver18År,
+    boforholdOptions,
     getFirstDayOfMonthAfterEighteenYears,
+    gyldigBostatusOver18År,
     isOver18YearsOld,
 } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
@@ -42,8 +42,11 @@ const DeleteButton = ({
     index: number;
 }) => {
     const { lesemodus } = useBehandlingProvider();
+    const { type } = useGetBehandlingV2();
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
-    const firstOver18PeriodIndex = barn.perioder.findIndex((period) => boststatusOver18År.includes(period.bostatus));
+    const firstOver18PeriodIndex = barn.perioder.findIndex((period) =>
+        gyldigBostatusOver18År[type].includes(period.bostatus)
+    );
     const showDeleteButton = barnIsOver18 && index === firstOver18PeriodIndex ? false : !!index;
 
     return showDeleteButton && !lesemodus ? (
@@ -105,24 +108,25 @@ const Status = ({
     item: BostatusperiodeDto;
 }) => {
     const { clearErrors } = useFormContext<BoforholdFormValues>();
+    const { type } = useGetBehandlingV2();
     const bosstatusToVisningsnavn = (bostsatus: Bostatuskode): string => {
         const visningsnavn = hentVisningsnavn(bostsatus);
-        if (boststatusOver18År.includes(bostsatus)) {
+        if (gyldigBostatusOver18År[type].includes(bostsatus) && isOver18YearsOld(barn.fødselsdato)) {
             return `18 ${text.år}: ${visningsnavn}`;
         }
         return visningsnavn;
     };
 
-    const boforholdOptions = isOver18YearsOld(barn.fødselsdato)
-        ? boforholdForskuddOptions.likEllerOver18År
-        : boforholdForskuddOptions.under18År;
+    const boforholdStatusOptions = isOver18YearsOld(barn.fødselsdato)
+        ? boforholdOptions[type].likEllerOver18År
+        : boforholdOptions[type].under18År;
 
     return editableRow ? (
         <FormControlledSelectField
             name={`${fieldName}.bostatus`}
             className="w-fit"
             label={text.label.status}
-            options={boforholdOptions.map((value) => ({
+            options={boforholdStatusOptions.map((value) => ({
                 value,
                 text: bosstatusToVisningsnavn(value),
             }))}
@@ -197,7 +201,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         const selectedDatoTom = periodeValues?.datoTom;
 
         if (barnIsOver18) {
-            const selectedStatusIsOver18 = boststatusOver18År.includes(selectedStatus);
+            const selectedStatusIsOver18 = gyldigBostatusOver18År[behandling.type].includes(selectedStatus);
             const selectedDatoFomIsAfterOrSameAsMonthOver18 = isAfterEqualsDate(selectedDatoFom, monthAfter18);
             const isInvalidStatusOver18 =
                 !selectedStatusIsOver18 &&
