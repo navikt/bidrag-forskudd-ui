@@ -3,14 +3,9 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
-import { Barnetillegg } from "@common/components/inntekt/Barnetillegg";
-import { BeregnetInntekter } from "@common/components/inntekt/BeregnetInntekter";
 import { InntektChart } from "@common/components/inntekt/InntektChart";
-import { Kontantstøtte } from "@common/components/inntekt/Kontantstoette";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { SkattepliktigeOgPensjonsgivende } from "@common/components/inntekt/SkattepliktigeOgPensjonsgivende";
-import { Småbarnstillegg } from "@common/components/inntekt/Smaabarnstilleg";
-import { UtvidetBarnetrygd } from "@common/components/inntekt/UtvidetBarnetrygd";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -27,6 +22,8 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
+import { InntektTableComponent } from "../../../../common/components/inntekt/InntektTableContext";
+import { inntekterTablesViewRules } from "../../../../common/constants/behandlingViewRules";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
@@ -54,7 +51,7 @@ const InntektHeader = ({ ident }: { ident: string }) => {
     );
 };
 const Main = () => {
-    const { roller: behandlingRoller } = useGetBehandlingV2();
+    const { roller: behandlingRoller, type } = useGetBehandlingV2();
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
@@ -84,16 +81,11 @@ const Main = () => {
                             <div className="mt-4">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
-                            <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
-                            {rolle.rolletype === Rolletype.BM && (
-                                <>
-                                    <Barnetillegg ident={rolle.ident} />
-                                    <UtvidetBarnetrygd ident={rolle.ident} />
-                                    <Småbarnstillegg ident={rolle.ident} />
-                                    <Kontantstøtte ident={rolle.ident} />
-                                    <BeregnetInntekter rolle={rolle} />
-                                </>
-                            )}
+                            <SkattepliktigeOgPensjonsgivende />
+                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => {
+                                const Component = InntektTableComponent[tableType]();
+                                return <Component />;
+                            })}
                         </Tabs.Panel>
                     );
                 })}

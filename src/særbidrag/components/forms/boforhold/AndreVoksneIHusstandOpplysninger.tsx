@@ -55,9 +55,6 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                             <Table.DataCell>
                                 <div className="flex flex-row gap-[10px]">
                                     {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
-                                    {periode.husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && (
-                                        <PersonTallShortIcon style={{ scale: "1.7" }} />
-                                    )}
                                     <VoksneIHusstandPeriodePersonerButton
                                         husstandsmedlemmer={periode.husstandsmedlemmer}
                                     />
@@ -78,8 +75,10 @@ const VoksneIHusstandPeriodePersonerButton = ({
 }) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [openState, setOpenState] = useState(false);
+    if (husstandsmedlemmer.length === 0) return null;
     return (
         <>
+            {husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && <PersonTallShortIcon style={{ scale: "1.7" }} />}
             <Button variant="tertiary" size="xsmall" onClick={() => setOpenState(!openState)} ref={buttonRef}>
                 Hvem bor på adresse?
             </Button>
@@ -235,9 +234,6 @@ function NyOpplysningerFraFolkeregistreTabell({
                             </td>
                             <td width="400px" className="flex flex-row gap-[10px]">
                                 {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
-                                {periode.husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && (
-                                    <PersonTallShortIcon style={{ scale: "1.7" }} />
-                                )}
                                 <VoksneIHusstandPeriodePersonerButton husstandsmedlemmer={periode.husstandsmedlemmer} />
                             </td>
                         </tr>

@@ -39,12 +39,3 @@ export const inntekterTablesViewRules = {
         [Rolletype.BA]: [InntektTableType.SKATTEPLIKTIG],
     },
 };
-
-// export const InntektTableComponent = {
-//     [InntektTableType.SKATTEPLIKTIG]: (ident: string) => <SkattepliktigeOgPensjonsgivende ident={ident} />,
-//     [InntektTableType.UTVIDET_BARNETRYGD]: () => <UtvidetBarnetrygd />,
-//     [InntektTableType.SMÅBARNSTILLEGG]: <Småbarnstillegg />,
-//     [InntektTableType.KONTANTSTØTTE]: <Kontantstøtte />,
-//     [InntektTableType.BARNETILLEGG]: <Barnetillegg />,
-//     [InntektTableType.BEREGNET_INNTEKTER]: "BeregnetInntekter",
-// };

@@ -26,7 +26,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Button, Heading, Table } from "@navikt/ds-react";
-import { isAfterEqualsDate } from "@utils/date-utils";
+import { formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -232,6 +232,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         idHusstandsbarn: barn.id,
                         idHusstandsmedlem: barn.id,
                         idPeriode: selectedPeriodeId,
+                        periode: {
+                            fom: formatDateToYearMonth(selectedDatoFom),
+                            til: formatDateToYearMonth(selectedDatoTom),
+                        },
                         datoFom: selectedDatoFom,
                         datoTom: selectedDatoTom,
                         bostatus: selectedStatus,
@@ -403,6 +407,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                 idPeriode: periode.id,
                                 datoFom: periode.datoFom,
                                 datoTom: periode.datoTom,
+                                periode: {
+                                    fom: formatDateToYearMonth(periode.datoFom),
+                                    til: formatDateToYearMonth(periode.datoTom),
+                                },
                                 bostatus:
                                     periode.bostatus === Bostatuskode.MED_FORELDER
                                         ? Bostatuskode.IKKE_MED_FORELDER

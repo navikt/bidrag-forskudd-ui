@@ -307,6 +307,26 @@ export interface AktiveGrunnlagsdata {
     husstandsbarn: HusstandsmedlemGrunnlagDto[];
 }
 
+export interface AndreVoksneIHusstandOverlappendePeriode {
+    periode: Datoperiode;
+    /** @uniqueItems true */
+    bostatuskode: Bostatuskode[];
+}
+
+export interface AndreVoksneIHusstandPeriodseringsfeil {
+    hullIPerioder: Datoperiode[];
+    overlappendePerioder: AndreVoksneIHusstandOverlappendePeriode[];
+    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
+    fremtidigPeriode: boolean;
+    /** Er sann hvis det mangler sivilstand perioder." */
+    manglerPerioder: boolean;
+    /** Er sann hvis en eller flere perioder har status UKJENT." */
+    ugyldigStatus: boolean;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
+    ingenLøpendePeriode: boolean;
+    harFeil: boolean;
+}
+
 export interface AndreVoksneIHusstandenDetaljerDto {
     navn: string;
     /** @format date */
@@ -480,6 +500,7 @@ export interface BoforholdPeriodeseringsfeil {
 export interface BoforholdValideringsfeil {
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
+    andreVoksneIHusstand?: AndreVoksneIHusstandPeriodseringsfeil;
 }
 
 export interface BostatusperiodeDto {
@@ -758,9 +779,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1085,7 +1106,7 @@ export interface OppdatereInntektResponse {
 
 export interface OppdatereAndreVoksneIHusstanden {
     /** Oppdatere bor-med-andre-voksne-status på periode */
-    oppdatereAndreVoksneIHusstandenperiode?: OppdatereAndreVoksneIHusstandenperiode;
+    oppdaterePeriode?: OppdatereAndreVoksneIHusstandenperiode;
     /**
      * Id til perioden som skal slettes
      * @format int64
@@ -1104,6 +1125,7 @@ export interface OppdatereAndreVoksneIHusstandenperiode {
      * @format int64
      */
     idPeriode?: number;
+    periode: TypeArManedsperiode;
     borMedAndreVoksne: boolean;
 }
 
@@ -1141,6 +1163,7 @@ export interface OppdatereBostatusperiode {
      * @example "2025-01-25"
      */
     datoTom?: string;
+    periode: TypeArManedsperiode;
     bostatus: Bostatuskode;
 }
 
@@ -1785,8 +1808,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -1962,10 +1985,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2054,7 +2074,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

@@ -16,7 +16,8 @@ import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
+import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
@@ -62,8 +63,9 @@ const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) =>
     </>
 );
 
-export const Barnetillegg = ({ ident }: InntektTableProps) => {
+export const Barnetillegg = () => {
     const { roller } = useGetBehandlingV2();
+    const { ident } = useInntektTableProvider();
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const barna = roller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)

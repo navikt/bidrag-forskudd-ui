@@ -1,14 +1,8 @@
-import { RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { Barnetillegg } from "@common/components/inntekt/Barnetillegg";
-import { BeregnetInntekter } from "@common/components/inntekt/BeregnetInntekter";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
-import { Kontantstøtte } from "@common/components/inntekt/Kontantstoette";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
-import { SkattepliktigeOgPensjonsgivende } from "@common/components/inntekt/SkattepliktigeOgPensjonsgivende";
-import { Småbarnstillegg } from "@common/components/inntekt/Smaabarnstilleg";
-import { UtvidetBarnetrygd } from "@common/components/inntekt/UtvidetBarnetrygd";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -25,46 +19,19 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
+import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
+import { inntekterTablesViewRules } from "../../../../common/constants/behandlingViewRules";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
-    const { roller: behandlingRoller } = useGetBehandlingV2();
+    const { roller: behandlingRoller, type } = useGetBehandlingV2();
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
         if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
         return 0;
     });
     useEffect(scrollToHash, []);
-
-    function renderInntektTables(rolle: RolleDto) {
-        switch (rolle.rolletype) {
-            case Rolletype.BM:
-                return (
-                    <>
-                        <Barnetillegg ident={rolle.ident} />
-                        <UtvidetBarnetrygd ident={rolle.ident} />
-                        <Småbarnstillegg ident={rolle.ident} />
-                        <Kontantstøtte ident={rolle.ident} />
-                        <BeregnetInntekter rolle={rolle} />
-                    </>
-                );
-            case Rolletype.BP:
-                return (
-                    <>
-                        <Barnetillegg ident={rolle.ident} />
-                        <BeregnetInntekter rolle={rolle} />
-                    </>
-                );
-
-            case Rolletype.BA:
-                return (
-                    <>
-                        <BeregnetInntekter rolle={rolle} />
-                    </>
-                );
-        }
-    }
 
     return (
         <div className="grid gap-y-2">
@@ -82,13 +49,17 @@ const Main = () => {
                 </Tabs.List>
                 {roller.map((rolle) => {
                     return (
-                        <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
-                            <div className="mt-4">
-                                <InntektHeader ident={rolle.ident} />
-                            </div>
-                            <SkattepliktigeOgPensjonsgivende ident={rolle.ident} />
-                            {renderInntektTables(rolle)}
-                        </Tabs.Panel>
+                        <InntektTableProvider rolle={rolle} type={type}>
+                            <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
+                                <div className="mt-4">
+                                    <InntektHeader ident={rolle.ident} />
+                                </div>
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => {
+                                    const Component = InntektTableComponent[tableType]();
+                                    return <Component />;
+                                })}
+                            </Tabs.Panel>
+                        </InntektTableProvider>
                     );
                 })}
             </Tabs>

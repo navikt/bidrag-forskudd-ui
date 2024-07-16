@@ -1,3 +1,5 @@
+import { StringUtils } from "@navikt/bidrag-ui-common";
+
 export const dateOrNull = (dateString?: string): Date | null => (dateString ? new Date(dateString) : null);
 export const toISODateString = (date?: Date): string | null =>
     date?.toLocaleDateString("sv-SV", { year: "numeric", month: "2-digit", day: "2-digit" }) ?? null;
@@ -168,4 +170,19 @@ export const dateToMMYYYY = (date?: Date | string): string | undefined => {
 };
 export function minOfDates(date1: Date, date2: Date) {
     return isAfterDate(date1, date2) ? date2 : date1;
+}
+
+export function formatDateToYearMonth(dateString?: string): string {
+    if (StringUtils.isEmpty(dateString)) return dateString;
+    // Ensure the input date string is in the expected format (basic validation)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        throw new Error("Invalid date format. Expected yyyy-MM-dd.");
+    }
+
+    // Extract the year and month parts of the date string
+    const year = dateString.substring(0, 4);
+    const month = dateString.substring(5, 7);
+
+    // Combine and return the year and month in yyyy-MM format
+    return `${year}-${month}`;
 }
