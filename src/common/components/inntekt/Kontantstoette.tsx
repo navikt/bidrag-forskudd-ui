@@ -10,10 +10,12 @@ import React from "react";
 
 import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
-export const Kontantstøtte = ({ ident }: InntektTableProps) => {
+export const Kontantstøtte = () => {
+    const { ident } = useInntektTableProvider();
     const { roller } = useGetBehandlingV2();
     const barna = roller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)

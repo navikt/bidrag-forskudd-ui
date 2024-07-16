@@ -1,4 +1,4 @@
-import { RolleDto, Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
+import { Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
@@ -8,7 +8,8 @@ import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils"
 import React from "react";
 
 import { hasValue } from "../../../utils/array-utils";
-import { inntekterTablesViewRules, InntektTableType } from "../../constants/viewRules";
+import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntektFormHelpers";
+import { useInntektTableProvider } from "./InntektTableContext";
 
 export const columnWitdhRules = {
     [TypeBehandling.SAeRBIDRAG]: {
@@ -40,7 +41,8 @@ export const columnWitdhRules = {
         },
     },
 };
-export const BeregnetInntekter = ({ rolle }: { rolle: RolleDto }) => {
+export const BeregnetInntekter = () => {
+    const { rolle } = useInntektTableProvider();
     const {
         inntekter: { beregnetInntekterV2 },
         type,

@@ -14,6 +14,7 @@ import { useFormContext } from "react-hook-form";
 import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
@@ -52,7 +53,8 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
     );
 };
 
-export const SkattepliktigeOgPensjonsgivende = ({ ident }: { ident: string }) => {
+export const SkattepliktigeOgPensjonsgivende = () => {
+    const { ident } = useInntektTableProvider();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
     const fieldName = `årsinntekter.${ident}` as const;
 

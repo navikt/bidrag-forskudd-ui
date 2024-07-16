@@ -7,10 +7,12 @@ import React from "react";
 
 import elementId from "../../constants/elementIds";
 import { ExpandableContent } from "./ExpandableContent";
-import { EditOrSaveButton, InntektTabel, InntektTableProps, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
+import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
-export const UtvidetBarnetrygd = ({ ident }: InntektTableProps) => {
+export const UtvidetBarnetrygd = () => {
+    const { ident } = useInntektTableProvider();
     const fieldName = `utvidetBarnetrygd.${ident}` as const;
 
     return (

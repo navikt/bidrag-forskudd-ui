@@ -484,6 +484,7 @@ const UtgifterListe = () => {
                                 ...currentData,
                                 utgift: {
                                     ...currentData.utgift,
+                                    beregning: response.beregning,
                                     utgifter: updatedUtgiftListe,
                                 },
                             };

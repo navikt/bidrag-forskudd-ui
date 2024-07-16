@@ -36,8 +36,7 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell className="w-[150px]">{text.label.periode}</Table.HeaderCell>
-                        <Table.HeaderCell className="w-[180px]">{text.label.status}</Table.HeaderCell>
-                        <Table.HeaderCell className="w-[180px]">{}</Table.HeaderCell>
+                        <Table.HeaderCell className="w-[400px]">{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -54,14 +53,13 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                                 </>
                             </Table.DataCell>
                             <Table.DataCell>
-                                <div className="flex flex-row gap-2">
+                                <div className="flex flex-row gap-[10px]">
                                     {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
-                                    {periode.husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && (
-                                        <PersonTallShortIcon style={{ scale: "1.7" }} />
-                                    )}
+                                    <VoksneIHusstandPeriodePersonerButton
+                                        husstandsmedlemmer={periode.husstandsmedlemmer}
+                                    />
                                 </div>
                             </Table.DataCell>
-                            <VoksneIHusstandPeriodePersonerButton husstandsmedlemmer={periode.husstandsmedlemmer} />
                         </Table.Row>
                     ))}
                 </Table.Body>
@@ -77,13 +75,15 @@ const VoksneIHusstandPeriodePersonerButton = ({
 }) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [openState, setOpenState] = useState(false);
+    if (husstandsmedlemmer.length === 0) return null;
     return (
         <>
+            {husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && <PersonTallShortIcon style={{ scale: "1.7" }} />}
             <Button variant="tertiary" size="xsmall" onClick={() => setOpenState(!openState)} ref={buttonRef}>
                 Hvem bor på adresse?
             </Button>
             <Popover open={openState} aria-label="" onClose={() => setOpenState(false)} anchorEl={buttonRef.current}>
-                <Popover.Content style={{ padding: "5px" }}>
+                <Popover.Content style={{ padding: "8px" }}>
                     <ul className="list-decimal">
                         {husstandsmedlemmer.map((husstandsmedlem, index) => {
                             return (
@@ -232,11 +232,9 @@ function NyOpplysningerFraFolkeregistreTabell({
                                 {" "}
                                 {periode.periode.til ? DateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
                             </td>
-                            <td width="250px">
-                                {hentVisningsnavn(periode.status)}
-                                {periode.husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && (
-                                    <PersonTallShortIcon style={{ scale: "1.7" }} />
-                                )}
+                            <td width="400px" className="flex flex-row gap-[10px]">
+                                {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
+                                <VoksneIHusstandPeriodePersonerButton husstandsmedlemmer={periode.husstandsmedlemmer} />
                             </td>
                         </tr>
                     ))}
