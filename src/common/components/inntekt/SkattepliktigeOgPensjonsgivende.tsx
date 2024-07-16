@@ -56,6 +56,8 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
 export const SkattepliktigeOgPensjonsgivende = () => {
     const { ident } = useInntektTableProvider();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
+    const { viewOnly } = useInntektTableProvider();
+
     const fieldName = `årsinntekter.${ident}` as const;
 
     const customRowValidation = (fieldName: `årsinntekter.${string}.${number}`) => {
@@ -108,7 +110,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                 align="left"
                                                 className="w-[74px]"
                                             >
-                                                {text.label.taMed}
+                                                {viewOnly ? "" : text.label.taMed}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
@@ -215,6 +217,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                 <Table.DataCell align="right" textSize="small">
                                                     <Totalt item={item} field={`${fieldName}.${index}`} />
                                                 </Table.DataCell>
+
                                                 <Table.DataCell textSize="small">
                                                     <EditOrSaveButton
                                                         index={index}

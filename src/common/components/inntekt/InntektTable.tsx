@@ -34,6 +34,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { InntektTables } from "../../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { getFomAndTomForMonthPicker } from "../../helpers/virkningstidspunktHelpers";
+import { useInntektTableProvider } from "./InntektTableContext";
 
 export type InntektTableProps = { ident: string };
 
@@ -57,15 +58,20 @@ export const TaMed = ({
     fieldName: string;
     handleOnSelect: (checked: boolean, index: number) => void;
     index: number;
-}) => (
-    <div className="h-8 w-full flex items-center justify-center">
-        <FormControlledCheckbox
-            name={`${fieldName}.${index}.taMed`}
-            onChange={(checked) => handleOnSelect(checked, index)}
-            legend=""
-        />
-    </div>
-);
+}) => {
+    const { viewOnly } = useInntektTableProvider();
+
+    if (viewOnly) return null;
+    return (
+        <div className="h-8 w-full flex items-center justify-center">
+            <FormControlledCheckbox
+                name={`${fieldName}.${index}.taMed`}
+                onChange={(checked) => handleOnSelect(checked, index)}
+                legend=""
+            />
+        </div>
+    );
+};
 
 export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: string }) => (
     <>
@@ -96,8 +102,9 @@ export const EditOrSaveButton = ({
     onSaveRow: (index: number) => void;
 }) => {
     const { lesemodus } = useBehandlingProvider();
+    const { viewOnly } = useInntektTableProvider();
 
-    if (item.kanRedigeres === false) return null;
+    if (item.kanRedigeres === false || viewOnly) return null;
     return (
         <div className="h-8 flex items-center justify-center">
             {!lesemodus && item.taMed && !item.erRedigerbart && (
