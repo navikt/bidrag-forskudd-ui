@@ -8,7 +8,7 @@ import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils"
 import React from "react";
 
 import { hasValue } from "../../../utils/array-utils";
-import { inntekterTablesViewRules, InntektTableType } from "../../constants/behandlingViewRules";
+import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntektFormHelpers";
 import { useInntektTableProvider } from "./InntektTableContext";
 
 export const columnWitdhRules = {

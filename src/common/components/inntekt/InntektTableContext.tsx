@@ -1,7 +1,7 @@
 import React, { createContext, PropsWithChildren, useContext } from "react";
 
 import { RolleDto, TypeBehandling } from "../../../api/BidragBehandlingApiV1";
-import { InntektTableType } from "../../constants/behandlingViewRules";
+import { InntektTableType } from "../../helpers/inntektFormHelpers";
 import { Barnetillegg } from "./Barnetillegg";
 import { BeregnetInntekter } from "./BeregnetInntekter";
 import { Kontantstøtte } from "./Kontantstoette";
