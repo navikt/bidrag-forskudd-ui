@@ -232,21 +232,23 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                 </Table>
                             </div>
                         )}
-                        <LeggTilPeriodeButton
-                            addPeriode={() =>
-                                addPeriod({
-                                    ident,
-                                    datoFom: null,
-                                    datoTom: null,
-                                    beløp: 0,
-                                    rapporteringstype: "",
-                                    taMed: true,
-                                    kilde: Kilde.MANUELL,
-                                    inntektsposter: [],
-                                    inntektstyper: [],
-                                })
-                            }
-                        />
+                        {!viewOnly && (
+                            <LeggTilPeriodeButton
+                                addPeriode={() =>
+                                    addPeriod({
+                                        ident,
+                                        datoFom: null,
+                                        datoTom: null,
+                                        beløp: 0,
+                                        rapporteringstype: "",
+                                        taMed: true,
+                                        kilde: Kilde.MANUELL,
+                                        inntektsposter: [],
+                                        inntektstyper: [],
+                                    })
+                                }
+                            />
+                        )}
                     </>
                 )}
             </InntektTabel>
