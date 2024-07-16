@@ -32,6 +32,7 @@ export const ForskuddPage = () => {
               (f) => ikkeAktiverteEndringerIGrunnlagsdata.inntekter[f]
           )
         : [];
+
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
@@ -56,13 +57,13 @@ export const ForskuddPage = () => {
                         </Stepper.Step>
                         <Stepper.Step
                             completed={
-                                (activeStepIndex > 2 &&
-                                    (boforholdValideringsfeil?.husstandsmedlem === undefined ||
-                                        boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
-                                    boforholdValideringsfeil?.sivilstand === null &&
-                                    (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem === undefined ||
-                                        ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length === 0)) ||
-                                ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
+                                activeStepIndex > 2 &&
+                                (boforholdValideringsfeil?.husstandsmedlem === undefined ||
+                                    boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
+                                (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem === undefined ||
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length === 0) &&
+                                ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null &&
+                                boforholdValideringsfeil?.sivilstand == null
                             }
                             interactive={interactive}
                         >
