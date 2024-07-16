@@ -54,10 +54,9 @@ const Main = () => {
                                 <div className="mt-4">
                                     <InntektHeader ident={rolle.ident} />
                                 </div>
-                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => {
-                                    const Component = InntektTableComponent[tableType]();
-                                    return <Component />;
-                                })}
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
+                                    InntektTableComponent[tableType]()
+                                )}
                             </Tabs.Panel>
                         </InntektTableProvider>
                     );

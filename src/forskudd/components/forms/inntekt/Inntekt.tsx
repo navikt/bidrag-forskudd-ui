@@ -5,7 +5,6 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
 import { InntektChart } from "@common/components/inntekt/InntektChart";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
-import { SkattepliktigeOgPensjonsgivende } from "@common/components/inntekt/SkattepliktigeOgPensjonsgivende";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
@@ -22,7 +21,7 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { InntektTableComponent } from "../../../../common/components/inntekt/InntektTableContext";
+import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
 import { inntekterTablesViewRules } from "../../../../common/constants/behandlingViewRules";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -77,16 +76,16 @@ const Main = () => {
                 </Tabs.List>
                 {roller.map((rolle) => {
                     return (
-                        <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
-                            <div className="mt-4">
-                                <InntektHeader ident={rolle.ident} />
-                            </div>
-                            <SkattepliktigeOgPensjonsgivende />
-                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => {
-                                const Component = InntektTableComponent[tableType]();
-                                return <Component />;
-                            })}
-                        </Tabs.Panel>
+                        <InntektTableProvider rolle={rolle} type={type}>
+                            <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
+                                <div className="mt-4">
+                                    <InntektHeader ident={rolle.ident} />
+                                </div>
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
+                                    InntektTableComponent[tableType]()
+                                )}
+                            </Tabs.Panel>
+                        </InntektTableProvider>
                     );
                 })}
             </Tabs>

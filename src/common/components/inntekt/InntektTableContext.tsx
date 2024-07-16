@@ -10,12 +10,12 @@ import { Småbarnstillegg } from "./Smaabarnstilleg";
 import { UtvidetBarnetrygd } from "./UtvidetBarnetrygd";
 
 export const InntektTableComponent = {
-    [InntektTableType.SKATTEPLIKTIG]: () => SkattepliktigeOgPensjonsgivende,
-    [InntektTableType.UTVIDET_BARNETRYGD]: () => UtvidetBarnetrygd,
-    [InntektTableType.SMÅBARNSTILLEGG]: () => Småbarnstillegg,
-    [InntektTableType.KONTANTSTØTTE]: () => Kontantstøtte,
-    [InntektTableType.BARNETILLEGG]: () => Barnetillegg,
-    [InntektTableType.BEREGNET_INNTEKTER]: () => BeregnetInntekter,
+    [InntektTableType.SKATTEPLIKTIG]: () => <SkattepliktigeOgPensjonsgivende />,
+    [InntektTableType.UTVIDET_BARNETRYGD]: () => <UtvidetBarnetrygd />,
+    [InntektTableType.SMÅBARNSTILLEGG]: () => <Småbarnstillegg />,
+    [InntektTableType.KONTANTSTØTTE]: () => <Kontantstøtte />,
+    [InntektTableType.BARNETILLEGG]: () => <Barnetillegg />,
+    [InntektTableType.BEREGNET_INNTEKTER]: () => <BeregnetInntekter />,
 };
 
 interface IInntektTableContext {
