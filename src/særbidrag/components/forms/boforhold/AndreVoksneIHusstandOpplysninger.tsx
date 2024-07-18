@@ -7,6 +7,7 @@ import { useFormContext } from "react-hook-form";
 import {
     AktivereGrunnlagRequestV2,
     AndreVoksneIHusstandenDetaljerDto,
+    Bostatuskode,
     OpplysningerType,
     PeriodeAndreVoksneIHusstanden,
     Rolletype,
@@ -54,7 +55,9 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                             </Table.DataCell>
                             <Table.DataCell>
                                 <div className="flex flex-row gap-[10px]">
-                                    {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
+                                    {hentVisningsnavn(periode.status)}{" "}
+                                    {periode.status === Bostatuskode.BOR_MED_ANDRE_VOKSNE &&
+                                        `(${periode.husstandsmedlemmer.length})`}
                                     <VoksneIHusstandPeriodePersonerButton
                                         husstandsmedlemmer={periode.husstandsmedlemmer}
                                     />
@@ -233,7 +236,9 @@ function NyOpplysningerFraFolkeregistreTabell({
                                 {periode.periode.til ? DateToDDMMYYYYString(new Date(periode.periode.til)) : ""}
                             </td>
                             <td width="400px" className="flex flex-row gap-[10px]">
-                                {hentVisningsnavn(periode.status)} ({periode.husstandsmedlemmer.length})
+                                {hentVisningsnavn(periode.status)}{" "}
+                                {periode.status === Bostatuskode.BOR_MED_ANDRE_VOKSNE &&
+                                    `(${periode.husstandsmedlemmer.length})`}
                                 <VoksneIHusstandPeriodePersonerButton husstandsmedlemmer={periode.husstandsmedlemmer} />
                             </td>
                         </tr>

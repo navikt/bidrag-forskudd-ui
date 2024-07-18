@@ -16,11 +16,12 @@ export const SærbidragPage = () => {
     const {
         erVedtakFattet,
         vedtakstype,
+        utgift: { avslag },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
     } = useGetBehandlingV2();
-    const interactive = vedtakstype !== Vedtakstype.OPPHOR;
+    const interactive = vedtakstype !== Vedtakstype.OPPHOR && avslag === undefined;
     const activeStepIndex = STEPS[activeStep];
 
     const inntekterIkkeAktiveGrunnlag = ikkeAktiverteEndringerIGrunnlagsdata?.inntekter

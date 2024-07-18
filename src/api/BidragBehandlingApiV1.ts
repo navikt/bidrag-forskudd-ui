@@ -40,6 +40,11 @@ export enum Engangsbeloptype {
     SAeRBIDRAG = "SÆRBIDRAG",
 }
 
+export enum Innkrevingstype {
+    MED_INNKREVING = "MED_INNKREVING",
+    UTEN_INNKREVING = "UTEN_INNKREVING",
+}
+
 /** Inntektsrapportering typer på inntekter som overlapper */
 export enum Inntektsrapportering {
     AINNTEKT = "AINNTEKT",
@@ -307,26 +312,6 @@ export interface AktiveGrunnlagsdata {
     husstandsbarn: HusstandsmedlemGrunnlagDto[];
 }
 
-export interface AndreVoksneIHusstandOverlappendePeriode {
-    periode: Datoperiode;
-    /** @uniqueItems true */
-    bostatuskode: Bostatuskode[];
-}
-
-export interface AndreVoksneIHusstandPeriodseringsfeil {
-    hullIPerioder: Datoperiode[];
-    overlappendePerioder: AndreVoksneIHusstandOverlappendePeriode[];
-    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
-    fremtidigPeriode: boolean;
-    /** Er sann hvis det mangler sivilstand perioder." */
-    manglerPerioder: boolean;
-    /** Er sann hvis en eller flere perioder har status UKJENT." */
-    ugyldigStatus: boolean;
-    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
-    ingenLøpendePeriode: boolean;
-    harFeil: boolean;
-}
-
 export interface AndreVoksneIHusstandenDetaljerDto {
     navn: string;
     /** @format date */
@@ -344,6 +329,18 @@ export interface AndreVoksneIHusstandenGrunnlagDto {
     perioder: PeriodeAndreVoksneIHusstanden[];
     /** @format date-time */
     innhentet: string;
+}
+
+export interface AndreVoksneIHusstandenPeriodeseringsfeil {
+    hullIPerioder: Datoperiode[];
+    overlappendePerioder: OverlappendeBostatusperiode[];
+    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
+    fremtidigPeriode: boolean;
+    /** Er sann hvis det mangler sivilstand perioder." */
+    manglerPerioder: boolean;
+    /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null */
+    ingenLøpendePeriode: boolean;
+    harFeil: boolean;
 }
 
 /** Liste av ansettelsesdetaljer, med eventuell historikk */
@@ -425,6 +422,7 @@ export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
     type: TypeBehandling;
+    innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
@@ -498,9 +496,9 @@ export interface BoforholdPeriodeseringsfeil {
 }
 
 export interface BoforholdValideringsfeil {
+    andreVoksneIHusstanden?: AndreVoksneIHusstandenPeriodeseringsfeil;
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     sivilstand?: SivilstandPeriodeseringsfeil;
-    andreVoksneIHusstand?: AndreVoksneIHusstandPeriodseringsfeil;
 }
 
 export interface BostatusperiodeDto {
@@ -940,12 +938,12 @@ export enum TypeBehandling {
 export interface UtgiftBeregningDto {
     /** Beløp som er direkte betalt av BP */
     beløpDirekteBetaltAvBp: number;
-    /** Summen av godkjent beløp for utgifter BP har betalt og beløp som er direkte betalt av BP */
-    totalBeløpBetaltAvBp?: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløp: number;
     /** Summen av godkjente beløp som brukes for beregningen */
     totalGodkjentBeløpBp?: number;
+    /** Summen av godkjent beløp for utgifter BP har betalt plus beløp som er direkte betalt av BP */
+    totalBeløpBetaltAvBp: number;
 }
 
 export interface UtgiftspostDto {
@@ -1304,6 +1302,7 @@ export interface OpprettBehandlingRequest {
     /** @format int64 */
     søknadsreferanseid?: number;
     kategori?: OpprettKategoriRequestDto;
+    innkrevingstype?: Innkrevingstype;
 }
 
 export interface OpprettKategoriRequestDto {
@@ -1338,6 +1337,40 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsid: number;
     /** @format int64 */
     søknadsreferanseid?: number;
+}
+
+export interface DelberegningBidragspliktigesAndelSaerbidrag {
+    periode: TypeArManedsperiode;
+    andelProsent: number;
+    andelBeløp: number;
+    barnetErSelvforsørget: boolean;
+}
+
+export interface DelberegningUtgift {
+    periode: TypeArManedsperiode;
+    sumBetaltAvBp: number;
+    sumGodkjent: number;
+}
+
+export interface ResultatSaerbidragsberegningDto {
+    periode: TypeArManedsperiode;
+    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
+    beregning?: UtgiftBeregningDto;
+    inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    delberegningUtgift?: DelberegningUtgift;
+    resultat: number;
+    resultatKode: Resultatkode;
+    /** @format double */
+    antallBarnIHusstanden?: number;
+    voksenIHusstanden?: boolean;
+    erDirekteAvslag: boolean;
+    beløpSomInnkreves: number;
+}
+
+export interface ResultatSaerbidragsberegningInntekterDto {
+    inntektBM?: number;
+    inntektBP?: number;
+    inntektBarn?: number;
 }
 
 export interface ResultatBeregningBarnDto {
@@ -1401,8 +1434,10 @@ export interface InitalizeForsendelseRequest {
 
 export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
+    utgift?: UtgiftFeilDto;
     inntekter?: InntektValideringsfeilDto;
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
+    andreVoksneIHusstanden?: AndreVoksneIHusstandenPeriodeseringsfeil;
     sivilstand?: SivilstandPeriodeseringsfeil;
     /** @uniqueItems true */
     måBekrefteNyeOpplysninger: MaBekrefteNyeOpplysninger[];
@@ -1425,6 +1460,10 @@ export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
+}
+
+export interface UtgiftFeilDto {
+    manglerUtgifter: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1481,7 +1520,6 @@ export interface EngangsbelopDto {
     valutakode: string;
     /** Resultatkoden tilhørende engangsbeløpet */
     resultatkode: string;
-    /** Angir om engangsbeløpet skal innkreves */
     innkreving: Innkrevingstype;
     /** Angir om søknaden om engangsbeløp er besluttet avvist, stadfestet eller skal medføre endringGyldige verdier er 'AVVIST', 'STADFESTELSE' og 'ENDRING' */
     beslutning: Beslutningstype;
@@ -1581,12 +1619,6 @@ export enum Grunnlagstype {
     UNNTAK = "UNNTAK",
 }
 
-/** Angir om engangsbeløpet skal innkreves */
-export enum Innkrevingstype {
-    MED_INNKREVING = "MED_INNKREVING",
-    UTEN_INNKREVING = "UTEN_INNKREVING",
-}
-
 /** Grunnlagsinnhold (generisk) */
 export type JsonNode = object;
 
@@ -1606,7 +1638,6 @@ export interface StonadsendringDto {
      * @format int32
      */
     førsteIndeksreguleringsår?: number;
-    /** Angir om engangsbeløpet skal innkreves */
     innkreving: Innkrevingstype;
     /** Angir om søknaden om engangsbeløp er besluttet avvist, stadfestet eller skal medføre endringGyldige verdier er 'AVVIST', 'STADFESTELSE' og 'ENDRING' */
     beslutning: Beslutningstype;
@@ -1684,6 +1715,7 @@ export interface BehandlingDetaljerDtoV2 {
     /** @format int64 */
     id: number;
     type: TypeBehandling;
+    innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
@@ -1808,8 +1840,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -2263,11 +2295,45 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultatSaerbidrag
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/sarbidrag
+         * @secure
+         */
+        hentVedtakBeregningResultatSaerbidrag: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatSaerbidragsberegningDto, any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
          * @name HentVedtakBeregningResultat
-         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn/forskudd
          * @secure
          */
         hentVedtakBeregningResultat: (vedtaksId: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], any>({
+                path: `/api/v1/vedtak/${vedtaksId}/beregn/forskudd`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name HentVedtakBeregningResultat1
+         * @request POST:/api/v1/vedtak/{vedtaksId}/beregn
+         * @secure
+         */
+        hentVedtakBeregningResultat1: (vedtaksId: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], any>({
                 path: `/api/v1/vedtak/${vedtaksId}/beregn`,
                 method: "POST",
@@ -2329,14 +2395,48 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Beregn særbidrag
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregnSaerbidrag
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/sarbidrag
+         * @secure
+         */
+        beregnSaerbidrag: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<ResultatSaerbidragsberegningDto, BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Beregn forskudd
          *
          * @tags behandling-beregn-controller
          * @name BeregnForskudd
-         * @request POST:/api/v1/behandling/{behandlingsid}/beregn
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/forskudd
          * @secure
          */
         beregnForskudd: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/forskudd`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn forskudd
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregnForskudd1
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn
+         * @secure
+         */
+        beregnForskudd1: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<ResultatBeregningBarnDto[], BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn`,
                 method: "POST",

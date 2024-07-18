@@ -74,6 +74,8 @@ const arePropsEqual = (oldProps: { inntekt: InntektDtoV2[] }, newProps: { inntek
             const newInntekt = newProps.inntekt[index];
             return (
                 oldInntekt.beløp === newInntekt.beløp &&
+                oldInntekt.ident === newInntekt.ident &&
+                oldInntekt.gjelderBarn === newInntekt.gjelderBarn &&
                 oldInntekt.rapporteringstype === newInntekt.rapporteringstype &&
                 oldInntekt.inntektsposter?.length === newInntekt.inntektsposter?.length
             );

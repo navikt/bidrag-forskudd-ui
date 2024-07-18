@@ -11,9 +11,9 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Notat } from "../../../../forskudd/components/forms/boforhold/Notat";
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
+import { Notat } from "./Notat";
 
 const Main = () => {
     useEffect(scrollToHash, []);

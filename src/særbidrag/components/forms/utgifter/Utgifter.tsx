@@ -621,7 +621,14 @@ const UtgifterListe = () => {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD]);
+    const {
+        utgift: { avslag },
+    } = useGetBehandlingV2();
+    console.log(avslag);
+    const onNext = () =>
+        onStepChange(
+            avslag === undefined ? STEPS[SærligeutgifterStepper.INNTEKT] : STEPS[SærligeutgifterStepper.VEDTAK]
+        );
 
     return (
         <>
@@ -654,7 +661,6 @@ const UtgifterForm = () => {
             if (name === undefined || type === undefined) {
                 return;
             } else {
-                console.log("Update", name, value);
                 debouncedOnSave(name);
             }
         });
@@ -703,6 +709,7 @@ const UtgifterForm = () => {
                         ...currentData,
                         utgift: {
                             ...currentData.utgift,
+                            avslag: response.avslag,
                             beregning: response.beregning,
                             notat: response.notat,
                             utgifter: mapUtgifter(response.utgiftposter),
