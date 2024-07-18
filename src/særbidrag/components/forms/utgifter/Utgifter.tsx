@@ -654,7 +654,6 @@ const UtgifterForm = () => {
             if (name === undefined || type === undefined) {
                 return;
             } else {
-                console.log("Update", name, value);
                 debouncedOnSave(name);
             }
         });
@@ -703,6 +702,7 @@ const UtgifterForm = () => {
                         ...currentData,
                         utgift: {
                             ...currentData.utgift,
+                            avslag: response.avslag,
                             beregning: response.beregning,
                             notat: response.notat,
                             utgifter: mapUtgifter(response.utgiftposter),

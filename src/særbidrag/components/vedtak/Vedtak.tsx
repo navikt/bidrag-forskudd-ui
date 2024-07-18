@@ -65,7 +65,7 @@ const VedtakResultat = () => {
                 <div>
                     {erBeregningeAvslag ? (
                         <Heading spacing size="small">
-                            {hentVisningsnavn(resultat.resultatKode)}
+                            Avslag: {hentVisningsnavn(resultat.resultatKode)}
                         </Heading>
                     ) : (
                         <Heading spacing size="small">
