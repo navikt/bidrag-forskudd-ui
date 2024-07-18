@@ -28,7 +28,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-4">
+        <div className="grid gap-y-4 m-auto w-[830px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <Heading level="2" size="medium">
                 {text.title.vedtak}
@@ -73,7 +73,7 @@ const VedtakResultat = () => {
                         </Heading>
                     )}
                     <div>
-                        <HStack gap={"12"} style={{ width: "max-content" }}>
+                        <HStack gap={"24"} style={{ width: "max-content" }}>
                             <ResultatTabell
                                 title="Inntekter"
                                 data={[
