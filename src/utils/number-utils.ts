@@ -26,7 +26,23 @@ export const getRandomInt = () => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-export const formatterBeløp = (beløp: number | string | undefined): string => {
-    if (!beløp) return "0";
-    return beløp.toLocaleString("nb-NO");
+export const formatterBeløp = (beløp: number | string | undefined, visSymbol = false): string => {
+    return (beløp ?? 0).toLocaleString("nb-NO", {
+        style: visSymbol ? "currency" : undefined,
+        currency: "NOK",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+        currencyDisplay: visSymbol ? "symbol" : undefined,
+    });
+};
+
+export const formatterProsent = (value: number | string | undefined): string => {
+    if (!value) return "0%";
+    const asNumber = typeof value == "string" ? parseInt(value) : value;
+    const percentageAsFraction = asNumber > 1 ? asNumber / 100 : asNumber;
+    return percentageAsFraction.toLocaleString("nb-NO", {
+        style: "percent",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    });
 };

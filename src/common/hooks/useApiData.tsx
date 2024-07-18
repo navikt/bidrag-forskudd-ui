@@ -22,7 +22,7 @@ import { NotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";
-import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
+import { VedtakBeregningResult, VedtakSærbidragBeregningResult } from "@commonTypes/vedtakTypes";
 import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -41,6 +41,7 @@ export const QueryKeys = {
     virkningstidspunkt: (behandlingId: string) => ["virkningstidspunkt", QueryKeys.behandlingVersion, behandlingId],
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
+    beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
     behandlingV2: (behandlingId: string, vedtakId?: string) => [
@@ -306,6 +307,42 @@ export const useAktiveGrunnlagsdata = () => {
         },
     });
 };
+export const useGetBeregningSærbidrag = () => {
+    const { behandlingId, vedtakId } = useBehandlingProvider();
+
+    return useSuspenseQuery<VedtakSærbidragBeregningResult>({
+        queryKey: QueryKeys.beregningSærbidrag(),
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatSaerbidrag(
+                        Number(vedtakId)
+                    );
+                    return { resultat: response.data };
+                }
+                const response = await BEHANDLING_API_V1.api.beregnSaerbidrag(Number(behandlingId));
+                return { resultat: response.data };
+            } catch (error) {
+                const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
+                if (error instanceof AxiosError && error.response.status === 400) {
+                    if (error.response?.data) {
+                        return {
+                            feil: {
+                                melding: feilmelding,
+                                detaljer: error.response.data as BeregningValideringsfeil,
+                            },
+                        };
+                    }
+                    return {
+                        feil: {
+                            melding: feilmelding,
+                        },
+                    };
+                }
+            }
+        },
+    });
+};
 export const useGetBeregningForskudd = () => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 
@@ -317,7 +354,7 @@ export const useGetBeregningForskudd = () => {
                     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultat(Number(vedtakId));
                     return { resultat: response.data };
                 }
-                const response = await BEHANDLING_API_V1.api.beregnForskudd(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnForskudd1(Number(behandlingId));
                 return { resultat: response.data };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
