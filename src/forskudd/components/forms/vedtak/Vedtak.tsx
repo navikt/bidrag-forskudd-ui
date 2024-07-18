@@ -1,34 +1,21 @@
-import {
-    MaBekrefteNyeOpplysninger,
-    OpplysningerType,
-    ResultatBeregningBarnDto,
-    ResultatRolle,
-    Rolletype,
-    Vedtakstype,
-} from "@api/BidragBehandlingApiV1";
-import { FlexRow } from "@common/components/layout/grid/FlexRow";
-import NotatButton from "@common/components/NotatButton";
+import { ResultatBeregningBarnDto, ResultatRolle, Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
-import { BEHANDLING_API_V1 } from "@common/constants/api";
-import elementId from "@common/constants/elementIds";
-import elementIds from "@common/constants/elementIds";
-import text, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "@common/constants/texts";
-import texts from "@common/constants/texts";
+import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
-import { dateToDDMMYYYYString, RedirectTo } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Button, ConfirmationPanel, ErrorSummary, Heading, Table } from "@navikt/ds-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { dateToDDMMYYYYString, useRQMutationState } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Heading, Loader, Table } from "@navikt/ds-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
-import React, { Fragment, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect } from "react";
 
-import environment from "../../../../environment";
+import { AdminButtons } from "../../../../common/components/vedtak/AdminButtons";
+import { FatteVedtakButtons } from "../../../../common/components/vedtak/FatteVedtakButtons";
+import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";
 import { STEPS } from "../../../constants/steps";
 
 const Vedtak = () => {
@@ -36,12 +23,17 @@ const Vedtak = () => {
     const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
+    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
+    const beregningState = useRQMutationState(QueryKeys.beregningForskudd());
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         queryClient.resetQueries({ queryKey: QueryKeys.beregningForskudd() });
     }, [activeStep]);
 
+    if (beregningState === "pending") {
+        return <Loader size="3xlarge" title={text.loading} variant="interaction" />;
+    }
     return (
         <div className="grid gap-y-8">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
@@ -60,274 +52,22 @@ const Vedtak = () => {
                 <VedtakResultat />
             </div>
 
-            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons />}
+            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons isBeregningError={isBeregningError} />}
             <AdminButtons />
         </div>
     );
 };
 
-function AdminButtons() {
-    const { isAdminEnabled } = useFeatureToogle();
-    const { behandlingId } = useBehandlingProvider();
-    if (!isAdminEnabled) return null;
-
-    return (
-        <div className="border-t border-b-0 border-r-0 border-l-0 border-solid">
-            <Button
-                variant="tertiary-neutral"
-                size="small"
-                onClick={() =>
-                    window.open(
-                        `${window.location.origin}/admin/vedtak/explorer/?erBehandlingId=true&id=${behandlingId}&graftype=flowchart`
-                    )
-                }
-            >
-                Vis vedtaksgraf
-            </Button>
-        </div>
-    );
-}
-class MåBekrefteOpplysningerStemmerError extends Error {
-    constructor() {
-        super("Bekreft at opplysningene stemmer");
-    }
-}
-const FatteVedtakButtons = () => {
-    const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
-    const { isFatteVedtakEnabled } = useFeatureToogle();
-    const { behandlingId } = useBehandlingProvider();
-    const { saksnummer } = useParams<{ saksnummer?: string }>();
-    const queryClient = useQueryClient();
-    const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
-    const fatteVedtakFn = useMutation({
-        mutationFn: () => {
-            if (!bekreftetVedtak) {
-                throw new MåBekrefteOpplysningerStemmerError();
-            }
-            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId));
-        },
-        onSuccess: () => {
-            RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
-        },
-    });
-
-    const måBekrefteAtOpplysningerStemmerFeil =
-        fatteVedtakFn.isError && fatteVedtakFn.error instanceof MåBekrefteOpplysningerStemmerError;
-
-    return (
-        <div>
-            <ConfirmationPanel
-                className="pb-2"
-                checked={bekreftetVedtak}
-                label={text.varsel.bekreftFatteVedtak}
-                onChange={() => {
-                    setBekreftetVedtak((x) => !x);
-                    fatteVedtakFn.reset();
-                }}
-                error={måBekrefteAtOpplysningerStemmerFeil ? "Du må bekrefte at opplysningene stemmer" : undefined}
-            >
-                <Heading spacing level="2" size="xsmall">
-                    {text.title.sjekkNotatOgOpplysninger}
-                </Heading>
-                <div>
-                    {text.varsel.vedtakNotat} <NotatButton />
-                </div>
-            </ConfirmationPanel>
-            {fatteVedtakFn.isError && !måBekrefteAtOpplysningerStemmerFeil && (
-                <Alert variant="error" className="mt-2 mb-2">
-                    <Heading spacing size="small" level="3">
-                        {text.error.kunneIkkFatteVedtak}
-                    </Heading>
-                    <BodyShort>{text.error.fatteVedtak}</BodyShort>
-                </Alert>
-            )}
-            {fatteVedtakFn.isSuccess && (
-                <Alert variant="success" size="small" className={"mt-2 mb-2"}>
-                    <Heading size="small" level="3">
-                        {text.title.vedtakFattet}
-                    </Heading>
-                    <BodyShort>{text.varsel.vedtakFattet}</BodyShort>
-                </Alert>
-            )}
-            <FlexRow>
-                <Button
-                    loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || !isFatteVedtakEnabled || fatteVedtakFn.isSuccess}
-                    onClick={() => fatteVedtakFn.mutate()}
-                    className="w-max"
-                    size="small"
-                >
-                    {text.label.fatteVedtakButton}
-                </Button>
-            </FlexRow>
-        </div>
-    );
-};
-const opplysningTilStep = (opplysninger: OpplysningerType) => {
-    switch (opplysninger) {
-        case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
-        case OpplysningerType.SMABARNSTILLEGG:
-        case OpplysningerType.UTVIDET_BARNETRYGD:
-        case OpplysningerType.BARNETILLEGG:
-        case OpplysningerType.KONTANTSTOTTE:
-            return STEPS.inntekt;
-        case OpplysningerType.SIVILSTAND:
-        case OpplysningerType.BOFORHOLD:
-            return STEPS.boforhold;
-    }
-};
-const opplysningTilElementId = (opplysninger: MaBekrefteNyeOpplysninger) => {
-    switch (opplysninger.type) {
-        case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
-            return elementId.seksjon_inntekt_skattepliktig;
-        case OpplysningerType.SMABARNSTILLEGG:
-            return elementId.seksjon_inntekt_småbarnstillegg;
-        case OpplysningerType.UTVIDET_BARNETRYGD:
-            return elementId.seksjon_inntekt_utvidetbarnetrygd;
-        case OpplysningerType.BARNETILLEGG:
-            return elementId.seksjon_inntekt_barnetillegg;
-        case OpplysningerType.KONTANTSTOTTE:
-            return elementId.seksjon_inntekt_kontantstøtte;
-        case OpplysningerType.BOFORHOLD:
-            return opplysninger.gjelderBarn?.husstandsmedlemId
-                ? `${elementIds.seksjon_boforhold}_${opplysninger.gjelderBarn?.husstandsmedlemId}`
-                : `${elementIds.seksjon_boforhold}`;
-        case OpplysningerType.SIVILSTAND:
-            return elementId.seksjon_sivilstand;
-    }
-};
-
 const VedtakResultat = () => {
     const { data: beregnetForskudd } = useGetBeregningForskudd();
-    const { onStepChange } = useBehandlingProvider();
     const {
         virkningstidspunkt: { avslag },
         vedtakstype,
     } = useGetBehandlingV2();
-    function renderFeilmeldinger() {
-        if (!beregnetForskudd.feil?.detaljer) return null;
-        const feilInnhold = beregnetForskudd.feil?.detaljer;
-        const feilliste = [];
-        if (feilInnhold.virkningstidspunkt != null) {
-            const beskrivelse = feilInnhold.virkningstidspunkt.virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig
-                ? "Virkningstidspunkt kan ikke være senere enn opprinnelig virkningstidspunkt"
-                : feilInnhold.virkningstidspunkt.manglerVirkningstidspunkt
-                  ? "Mangler virkningstidspunkt"
-                  : feilInnhold.virkningstidspunkt.manglerÅrsakEllerAvslag
-                    ? "Virkningstidspunkt: Mangler årsak"
-                    : "Virkningstidspunkt";
-            feilliste.push(
-                <ErrorSummary.Item href="#" onClick={() => onStepChange(STEPS.virkningstidspunkt)}>
-                    {beskrivelse}
-                </ErrorSummary.Item>
-            );
-        }
-        if (feilInnhold.husstandsmedlem != null) {
-            feilInnhold.husstandsmedlem.forEach((value) =>
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_boforhold}_${value.barn.husstandsmedlemId}`}
-                        onClick={() => onStepChange(STEPS.boforhold)}
-                    >
-                        Boforhold: Perioder for barn {value.barn.navn}
-                    </ErrorSummary.Item>
-                )
-            );
-        }
-        if (feilInnhold.sivilstand != null) {
-            feilliste.push(
-                <ErrorSummary.Item
-                    href={`#${elementIds.seksjon_sivilstand}`}
-                    onClick={() => onStepChange(STEPS.boforhold)}
-                >
-                    Sivilstand har ugyldige perioder
-                </ErrorSummary.Item>
-            );
-        }
-        if (feilInnhold.inntekter != null) {
-            feilInnhold.inntekter.årsinntekter &&
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementId.seksjon_inntekt_skattepliktig}`}
-                        onClick={() => onStepChange(STEPS.inntekt)}
-                    >
-                        Inntekter: Perioder i {texts.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}
-                    </ErrorSummary.Item>
-                );
-            feilInnhold.inntekter.barnetillegg &&
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementId.seksjon_inntekt_barnetillegg}`}
-                        onClick={() => onStepChange(STEPS.inntekt)}
-                    >
-                        Inntekter: Perioder i {texts.title.barnetillegg.toLowerCase()}
-                    </ErrorSummary.Item>
-                );
-            feilInnhold.inntekter.kontantstøtte &&
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementId.seksjon_inntekt_kontantstøtte}`}
-                        onClick={() => onStepChange(STEPS.inntekt)}
-                    >
-                        Inntekter: Perioder i {texts.title.kontantstøtte.toLowerCase()}
-                    </ErrorSummary.Item>
-                );
-            feilInnhold.inntekter.utvidetBarnetrygd &&
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementId.seksjon_inntekt_utvidetbarnetrygd}`}
-                        onClick={() => onStepChange(STEPS.inntekt)}
-                    >
-                        Inntekter: Perioder i {texts.title.utvidetBarnetrygd.toLowerCase()}
-                    </ErrorSummary.Item>
-                );
-            feilInnhold.inntekter.småbarnstillegg &&
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${elementId.seksjon_inntekt_småbarnstillegg}`}
-                        onClick={() => onStepChange(STEPS.inntekt)}
-                    >
-                        Inntekter: Perioder i {texts.title.småbarnstillegg.toLowerCase()}
-                    </ErrorSummary.Item>
-                );
-        }
-        feilInnhold.måBekrefteNyeOpplysninger
-            ?.filter((a) => a.type !== OpplysningerType.BOFORHOLD || a.gjelderBarn != null)
-            ?.forEach((value) => {
-                feilliste.push(
-                    <ErrorSummary.Item
-                        href={`#${opplysningTilElementId(value)}`}
-                        onClick={() => onStepChange(opplysningTilStep(value.type))}
-                    >
-                        {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
-                    </ErrorSummary.Item>
-                );
-            });
-        return feilliste;
-    }
-    if (beregnetForskudd.feil) {
-        if (!beregnetForskudd.feil?.detaljer) {
-            return (
-                <Alert variant={"error"} size="small">
-                    <Heading spacing size="small" level="3">
-                        {text.error.ukjentfeil}
-                    </Heading>
-                    <BodyShort>{text.error.beregning}</BodyShort>
-                </Alert>
-            );
-        }
-        return (
-            <ErrorSummary heading={text.varsel.beregneFeil} size="small">
-                {renderFeilmeldinger().map((Component, index) => (
-                    <Fragment key={`feilmelding ${index}`}>{Component}</Fragment>
-                ))}
-            </ErrorSummary>
-        );
-    }
 
     const erAvslag = avslag != null;
     return (
-        <>
+        <VedtakWrapper feil={beregnetForskudd.feil} steps={STEPS}>
             {beregnetForskudd.resultat?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
@@ -341,7 +81,7 @@ const VedtakResultat = () => {
                     </Table>
                 </div>
             ))}
-        </>
+        </VedtakWrapper>
     );
 };
 

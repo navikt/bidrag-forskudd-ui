@@ -1363,6 +1363,7 @@ export interface ResultatSaerbidragsberegningDto {
     /** @format double */
     antallBarnIHusstanden?: number;
     voksenIHusstanden?: boolean;
+    erDirekteAvslag: boolean;
     beløpSomInnkreves: number;
 }
 
@@ -1904,8 +1905,8 @@ export interface Virkningstidspunkt {
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
     notat: Notat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 /**

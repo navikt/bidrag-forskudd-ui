@@ -2,13 +2,13 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningSærbidrag } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
-import { Alert, BodyShort, Button, Heading, HStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, HStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
+import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "../../../common/components/vedtak/VedtakWrapper";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -21,6 +21,7 @@ const Vedtak = () => {
     const queryClient = useQueryClient();
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningSærbidrag())?.status === "error";
+
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         queryClient.resetQueries({ queryKey: QueryKeys.beregningSærbidrag() });
@@ -34,47 +35,18 @@ const Vedtak = () => {
             </Heading>
             <VedtakResultat />
 
-            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons isBeregningError={isBeregningError} />}
+            {!beregnetForskudd?.feil && !lesemodus && (
+                <FatteVedtakButtons isBeregningError={isBeregningError} disabled />
+            )}
             <AdminButtons />
         </div>
     );
 };
 
-function AdminButtons() {
-    const { isAdminEnabled } = useFeatureToogle();
-    const { behandlingId, vedtakId } = useBehandlingProvider();
-    if (!isAdminEnabled) return null;
-
-    return (
-        <div className="border-t border-b-0 border-r-0 border-l-0 border-solid">
-            <Button
-                variant="tertiary-neutral"
-                size="small"
-                onClick={() => {
-                    if (vedtakId) {
-                        window.open(
-                            `${window.location.origin}/admin/vedtak/explorer/?erBehandlingId=false&id=${vedtakId}&graftype=flowchart`
-                        );
-                    } else {
-                        window.open(
-                            `${window.location.origin}/admin/vedtak/explorer/?erBehandlingId=true&id=${behandlingId}&graftype=flowchart`
-                        );
-                    }
-                }}
-            >
-                Vis vedtaksgraf
-            </Button>
-        </div>
-    );
-}
-
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
-    const {
-        virkningstidspunkt: { avslag },
-    } = useGetBehandlingV2();
 
-    const erDirekteAvslag = avslag != null;
+    const erDirekteAvslag = beregnetSærbidrag.resultat.erDirekteAvslag;
     const erBeregningeAvslag = beregnetSærbidrag.resultat.resultatKode !== Resultatkode.SAeRBIDRAGINNVILGET;
     const resultat = beregnetSærbidrag.resultat;
     return (
@@ -85,7 +57,7 @@ const VedtakResultat = () => {
                     <BodyShort size="small">
                         <dl className="bd_datadisplay">
                             <dt>Årsak</dt>
-                            <dd>{hentVisningsnavn(beregnetSærbidrag.resultat.resultatKode)}</dd>
+                            <dd>{hentVisningsnavn(resultat.resultatKode)}</dd>
                         </dl>
                     </BodyShort>
                 </div>
@@ -93,7 +65,7 @@ const VedtakResultat = () => {
                 <div>
                     {erBeregningeAvslag ? (
                         <Heading spacing size="small">
-                            {hentVisningsnavn(beregnetSærbidrag.resultat.resultatKode)}
+                            {hentVisningsnavn(resultat.resultatKode)}
                         </Heading>
                     ) : (
                         <Heading spacing size="small">
@@ -136,7 +108,7 @@ const VedtakResultat = () => {
                                     },
                                     {
                                         label: "BP's andel",
-                                        value: formatterProsent(resultat.bpsAndel.andelProsent),
+                                        value: formatterProsent(resultat.bpsAndel?.andelProsent),
                                     },
                                     {
                                         label: "Resultat",

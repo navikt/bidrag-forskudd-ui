@@ -16,7 +16,13 @@ export class MåBekrefteOpplysningerStemmerError extends Error {
         super("Bekreft at opplysningene stemmer");
     }
 }
-export const FatteVedtakButtons = ({ isBeregningError }: { isBeregningError: boolean }) => {
+export const FatteVedtakButtons = ({
+    isBeregningError,
+    disabled = false,
+}: {
+    isBeregningError: boolean;
+    disabled?: boolean;
+}) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { isFatteVedtakEnabled } = useFeatureToogle();
     const { behandlingId } = useBehandlingProvider();
@@ -74,7 +80,7 @@ export const FatteVedtakButtons = ({ isBeregningError }: { isBeregningError: boo
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || !isFatteVedtakEnabled || fatteVedtakFn.isSuccess}
+                    disabled={isBeregningError || !isFatteVedtakEnabled || fatteVedtakFn.isSuccess || disabled}
                     onClick={() => fatteVedtakFn.mutate()}
                     className="w-max"
                     size="small"
