@@ -621,7 +621,14 @@ const UtgifterListe = () => {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const onNext = () => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD]);
+    const {
+        utgift: { avslag },
+    } = useGetBehandlingV2();
+    console.log(avslag);
+    const onNext = () =>
+        onStepChange(
+            avslag === undefined ? STEPS[SærligeutgifterStepper.INNTEKT] : STEPS[SærligeutgifterStepper.VEDTAK]
+        );
 
     return (
         <>
