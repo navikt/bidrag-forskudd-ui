@@ -6,8 +6,8 @@ import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
-import { dateToDDMMYYYYString, useRQMutationState } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Loader, Table } from "@navikt/ds-react";
+import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
+import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
@@ -24,16 +24,12 @@ const Vedtak = () => {
     const queryClient = useQueryClient();
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningForskudd());
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningForskudd())?.status === "error";
-    const beregningState = useRQMutationState(QueryKeys.beregningForskudd());
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
         queryClient.resetQueries({ queryKey: QueryKeys.beregningForskudd() });
     }, [activeStep]);
 
-    if (beregningState === "pending") {
-        return <Loader size="3xlarge" title={text.loading} variant="interaction" />;
-    }
     return (
         <div className="grid gap-y-8">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
