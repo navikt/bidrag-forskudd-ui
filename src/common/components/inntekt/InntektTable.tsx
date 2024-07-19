@@ -313,7 +313,6 @@ export const InntektTabel = ({
                         ...currentData.inntekter,
                         [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
-                        beregnetInntekterV2: response.beregnetInntekterV2,
                         valideringsfeil: response.valideringsfeil,
                     },
                 };
@@ -335,7 +334,6 @@ export const InntektTabel = ({
                                 (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
                             ),
                             beregnetInntekter: response.beregnetInntekter,
-                            beregnetInntekterV2: response.beregnetInntekterV2,
                             valideringsfeil: response.valideringsfeil,
                         },
                     };

@@ -46,6 +46,7 @@ export const NyOpplysningerAlert = () => {
 };
 const Opplysninger = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
+    console.log("HERER", perioder);
     if (!perioder) {
         return null;
     }
@@ -146,28 +147,29 @@ export const BoforholdOpplysninger = ({
         );
     };
 
-    if (lesemodus) return null;
-
     return (
         <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} />
 
-                {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (
-                    <div className="flex justify-end">
-                        <Button
-                            variant="tertiary"
-                            type="button"
-                            size="small"
-                            className="w-fit h-fit"
-                            onClick={resetTilDataFraFreg}
-                        >
-                            {text.resetTilOpplysninger}
-                        </Button>
-                    </div>
-                )}
+                {!hasNewOpplysningerFraFolkeregistre &&
+                    hasOpplysningerFraFolkeregistre &&
+                    showResetButton &&
+                    !lesemodus && (
+                        <div className="flex justify-end">
+                            <Button
+                                variant="tertiary"
+                                type="button"
+                                size="small"
+                                className="w-fit h-fit"
+                                onClick={resetTilDataFraFreg}
+                            >
+                                {text.resetTilOpplysninger}
+                            </Button>
+                        </div>
+                    )}
             </div>
-            {hasNewOpplysningerFraFolkeregistre && (
+            {hasNewOpplysningerFraFolkeregistre && !lesemodus && (
                 <NyOpplysningerFraFolkeregistreTabell
                     ikkeAktivertePerioder={ikkeAktivertePerioder}
                     onActivate={onActivate}
