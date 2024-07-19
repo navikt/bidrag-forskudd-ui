@@ -725,7 +725,7 @@ export interface InntekterDtoV2 {
     småbarnstillegg: InntektDtoV2[];
     /** @uniqueItems true */
     årsinntekter: InntektDtoV2[];
-    beregnetInntekter: InntektPerBarn[];
+    beregnetInntekter: BeregnetInntekterDto[];
     beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
@@ -1100,7 +1100,7 @@ export interface OppdaterePeriodeInntekt {
 export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
-    beregnetInntekter: InntektPerBarn[];
+    beregnetInntekter: BeregnetInntekterDto[];
     beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
