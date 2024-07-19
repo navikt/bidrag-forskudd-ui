@@ -462,6 +462,9 @@ export const InntektTabel = ({
                     {tableValideringsfeil.fremtidigPeriode && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
                     )}
+                    {tableValideringsfeil.perioderFørVirkningstidspunkt && (
+                        <BodyShort size="small">{text.error.periodeFørVirkningstidspunkt}</BodyShort>
+                    )}
                 </BehandlingAlert>
             )}
             {children({

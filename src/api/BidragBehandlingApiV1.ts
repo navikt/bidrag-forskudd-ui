@@ -594,6 +594,7 @@ export interface HusstandsmedlemPeriodiseringsfeilDto {
      * @format int64
      */
     husstandsmedlemId: number;
+    erSøknadsbarn: boolean;
 }
 
 export interface IkkeAktivInntektDto {
@@ -690,9 +691,12 @@ export interface InntektValideringsfeil {
     hullIPerioder: Datoperiode[];
     /** Er sann hvis det ikke finnes noen valgte inntekter. Vil alltid være false hvis det er ytelse */
     manglerPerioder: boolean;
+    /** Hvis det er inntekter som har periode som starter før virkningstidspunkt */
+    perioderFørVirkningstidspunkt: boolean;
     ident: string;
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
+    rolle?: Rolletype;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
 }
@@ -1464,6 +1468,7 @@ export interface MaBekrefteNyeOpplysninger {
 
 export interface UtgiftFeilDto {
     manglerUtgifter: boolean;
+    ugyldigUtgiftspost: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1840,8 +1845,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
