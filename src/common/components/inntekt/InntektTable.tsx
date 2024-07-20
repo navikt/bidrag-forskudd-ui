@@ -223,7 +223,7 @@ export const InntektTabel = ({
             ...watchFieldArray?.[index],
         };
     });
-    const [inntektType, ident] = fieldName.split(".");
+    const [inntektType, ident, barnIdent] = fieldName.split(".");
 
     useEffect(() => {
         setPageErrorsOrUnsavedState({
@@ -407,7 +407,7 @@ export const InntektTabel = ({
         ? valideringsfeil[inntektType]
         : valideringsfeil[inntektType]?.find((feil) => {
               if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                  return feil.gjelderBarn === ident;
+                  return feil.gjelderBarn === barnIdent && feil.ident === ident;
               }
               return feil.ident === ident;
           });
