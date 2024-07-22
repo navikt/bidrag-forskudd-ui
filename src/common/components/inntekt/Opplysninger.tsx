@@ -19,6 +19,8 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { useInntektTableProvider } from "./InntektTableContext";
+
 const inntektTypeToOpplysningerMapper = {
     småbarnstillegg: OpplysningerType.SMABARNSTILLEGG,
     utvidetBarnetrygd: OpplysningerType.UTVIDET_BARNETRYGD,
@@ -29,24 +31,23 @@ const inntektTypeToOpplysningerMapper = {
 
 export const Opplysninger = ({
     fieldName,
-    ident,
 }: {
     fieldName:
         | `småbarnstillegg.${string}`
         | `utvidetBarnetrygd.${string}`
-        | `barnetillegg.${string}`
-        | `kontantstøtte.${string}`
-        | `årsinntekter.${string}`;
-    ident?: string;
+        | `årsinntekter.${string}`
+        | `barnetillegg.${string}.${string}`
+        | `kontantstøtte.${string}.${string}`;
 }) => {
+    const { ident } = useInntektTableProvider();
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { resetField } = useFormContext<InntektFormValues>();
     const transformFn = transformInntekt(virkningsdato);
-    const [inntektType] = fieldName.split(".");
 
+    const [inntektType] = fieldName.split(".");
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
     const ikkeAktiverteEndringer: { [p: string]: IkkeAktivInntektDto[] } = roller.reduce(
@@ -63,16 +64,19 @@ export const Opplysninger = ({
     );
 
     const onUpdate = async () => {
-        for (const personident in ikkeAktiverteEndringer) {
-            if (ikkeAktiverteEndringer[personident].length > 0) {
-                await aktiverGrunnlag(personident);
+        for (const gjelderIdent in ikkeAktiverteEndringer) {
+            if (ikkeAktiverteEndringer[gjelderIdent].length > 0) {
+                await aktiverGrunnlag(ident, gjelderIdent);
+                //Bare ta den første da aktivering av ett barn aktiverer alle
+                return;
             }
         }
     };
-    const aktiverGrunnlag = (aktiverForIdent: string): Promise<unknown> => {
+    const aktiverGrunnlag = (aktiverForIdent: string, aktiverForBarn?: string): Promise<unknown> => {
         return aktiverGrunnlagFn.mutateAsync(
             {
                 personident: aktiverForIdent,
+                gjelderIdent: aktiverForBarn,
                 type: inntektTypeToOpplysningerMapper[inntektType],
             },
             {
@@ -83,9 +87,13 @@ export const Opplysninger = ({
                             defaultValue: barn.reduce(
                                 (acc, rolle) => ({
                                     ...acc,
-                                    [rolle.ident]: data.inntekter[inntektType]
-                                        ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
-                                        .map(transformFn),
+                                    [ident]: {
+                                        ...acc[ident],
+                                        [rolle.ident]:
+                                            data.inntekter[inntektType]
+                                                ?.filter((inntekt) => inntekt.gjelderBarn === rolle.ident)
+                                                .map(transformFn) ?? [],
+                                    },
                                 }),
                                 {}
                             ),
@@ -126,7 +134,7 @@ export const Opplysninger = ({
     }
     if (
         lesemodus ||
-        (ident && ikkeAktiverteEndringer[ident].length < 1) ||
+        (inntektType === "årsinntekter" && ident && ikkeAktiverteEndringer[ident].length < 1) ||
         Object.values(ikkeAktiverteEndringer).every((ikkeAktiverteEndring) => ikkeAktiverteEndring.length < 1)
     )
         return null;

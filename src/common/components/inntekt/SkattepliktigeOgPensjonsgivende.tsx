@@ -83,7 +83,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                     <AinntektLink ident={ident} />
                 </HStack>
             </div>
-            <Opplysninger fieldName={fieldName} ident={ident} />
+            <Opplysninger fieldName={fieldName} />
             <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,

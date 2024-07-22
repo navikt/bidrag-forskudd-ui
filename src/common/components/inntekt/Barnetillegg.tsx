@@ -88,7 +88,7 @@ export const Barnetillegg = () => {
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_barnetillegg}>
                 {text.title.barnetillegg}
             </Heading>
-            <Opplysninger fieldName={`barnetillegg.${ident}`} />
+            <Opplysninger fieldName={`barnetillegg.${ident}.${ident}`} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
                     <div className="grid gap-y-2" key={barn.ident}>

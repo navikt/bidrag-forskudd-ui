@@ -26,7 +26,7 @@ export const Kontantstøtte = () => {
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>
-            <Opplysninger fieldName={`kontantstøtte.${ident}`} />
+            <Opplysninger fieldName={`kontantstøtte.${ident}.${ident}`} />
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
                     <div className="grid gap-y-2" key={barn.ident}>
@@ -114,7 +114,7 @@ export const Kontantstøtte = () => {
                                                 <Table.Body>
                                                     {controlledFields.map((item, index) => (
                                                         <Table.ExpandableRow
-                                                            key={item?.id + item.ident}
+                                                            key={item?.id + "-" + item.ident}
                                                             content={<ExpandableContent item={item} />}
                                                             togglePlacement="right"
                                                             className="align-top"

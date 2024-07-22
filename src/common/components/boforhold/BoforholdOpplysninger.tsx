@@ -1,4 +1,10 @@
-import { AktivereGrunnlagRequestV2, BostatusperiodeGrunnlagDto, OpplysningerType } from "@api/BidragBehandlingApiV1";
+import {
+    AktivereGrunnlagRequestV2,
+    BostatusperiodeGrunnlagDto,
+    OpplysningerType,
+    Rolletype,
+    TypeBehandling,
+} from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -46,7 +52,7 @@ export const NyOpplysningerAlert = () => {
 };
 const Opplysninger = ({ perioder }: { perioder: BostatusperiodeGrunnlagDto[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    console.log("HERER", perioder);
+
     if (!perioder) {
         return null;
     }
@@ -97,17 +103,21 @@ export const BoforholdOpplysninger = ({
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBoforhold();
     const activateGrunnlag = useOnActivateGrunnlag();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { roller, type } = useGetBehandlingV2();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger.find((opplysning) => opplysning.ident === ident)?.perioder;
     const hasOpplysningerFraFolkeregistre = aktivePerioder?.length > 0;
     const hasNewOpplysningerFraFolkeregistre = ikkeAktivertePerioder?.length > 0;
 
+    const finnRolleGrunnlagTilhører = () =>
+        roller.find((rolle) => rolle.rolletype === (type === TypeBehandling.FORSKUDD ? Rolletype.BM : Rolletype.BP));
     const onActivate = (overskriveManuelleOpplysninger: boolean) => {
         activateGrunnlag.mutation.mutate(
             {
                 overskriveManuelleOpplysninger,
-                personident: ident,
+                personident: finnRolleGrunnlagTilhører()?.ident,
+                gjelderIdent: ident,
                 grunnlagstype: OpplysningerType.BOFORHOLD,
             },
             {

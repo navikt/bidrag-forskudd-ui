@@ -270,11 +270,12 @@ export const useAktiveGrunnlagsdata = () => {
     return useMutation<
         { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
         { data: AktivereGrunnlagResponseV2; type: OpplysningerType },
-        { personident: string; type: OpplysningerType }
+        { personident: string; gjelderIdent?: string; type: OpplysningerType }
     >({
-        mutationFn: async ({ personident, type }) => {
+        mutationFn: async ({ personident, gjelderIdent, type }) => {
             const { data } = await BEHANDLING_API_V1.api.aktivereGrunnlag(Number(behandlingId), {
                 personident,
+                gjelderIdent,
                 grunnlagstype: type,
                 overskriveManuelleOpplysninger: true,
             });

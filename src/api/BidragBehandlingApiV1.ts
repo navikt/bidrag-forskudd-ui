@@ -1244,6 +1244,8 @@ export interface AktivereGrunnlagRequestV2 {
     grunnlagstype: OpplysningerType;
     /** Angi om manuelle opplysninger skal overskrives */
     overskriveManuelleOpplysninger: boolean;
+    /** Ident på person grunnlag gjelder. Er relevant for blant annet Barnetillegg, Kontantstøtte og Boforhold */
+    gjelderIdent?: string;
 }
 
 export interface AktivereGrunnlagResponseV2 {
