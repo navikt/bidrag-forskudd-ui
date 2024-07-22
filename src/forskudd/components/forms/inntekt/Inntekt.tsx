@@ -17,16 +17,18 @@ import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
 import { BodyShort, ExpansionCard, Tabs } from "@navikt/ds-react";
-import { scrollToHash } from "@utils/window-utils";
+import { getSearchParam, scrollToHash, updateUrlSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
+import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 
 const InntektHeader = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
+
     const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
     return månedsinntekter?.length > 0 ? (
         <div className="grid w-full max-w-[65ch] gap-y-8">
@@ -53,20 +55,35 @@ const Main = () => {
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
-            if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
-            if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
+            if (a.rolletype === Rolletype.BM) return -1;
+            if (b.rolletype === Rolletype.BM) return 1;
+
+            if (a.rolletype === Rolletype.BA || b.rolletype === Rolletype.BA) {
+                return a.ident.localeCompare(b.ident);
+            }
+
             return 0;
         });
     useEffect(scrollToHash, []);
+    function updateSearchparamForTab(currentTabId: string) {
+        updateUrlSearchParam(urlSearchParams.inntektTab, currentTabId);
+    }
+
+    const defaultTab = useMemo(() => {
+        const roleId = roller
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+            ?.id?.toString();
+        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
+    }, []);
 
     return (
         <div className="grid gap-y-2">
-            <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
+            <Tabs defaultValue={defaultTab} onChange={updateSearchparamForTab}>
                 <Tabs.List>
                     {roller.map((rolle) => (
                         <Tabs.Tab
                             key={rolle.ident}
-                            value={rolle.ident}
+                            value={rolle.id.toString()}
                             label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
                                 rolle.rolletype === Rolletype.BM ? "" : rolle.ident
                             }`}
@@ -76,7 +93,7 @@ const Main = () => {
                 {roller.map((rolle) => {
                     return (
                         <InntektTableProvider rolle={rolle} type={type}>
-                            <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
+                            <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
                                 <div className="mt-4">
                                     <InntektHeader ident={rolle.ident} />
                                 </div>

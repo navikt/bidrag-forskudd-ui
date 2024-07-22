@@ -63,7 +63,7 @@ export default function App() {
                                     index
                                     element={
                                         <BehandlingPageWrapper>
-                                            <ForskuddBehandling />
+                                            <VedtakLesemodus />
                                         </BehandlingPageWrapper>
                                     }
                                 />
@@ -112,7 +112,26 @@ function ForskuddBrukerveiledningPageWrapper() {
         </PageWrapper>
     );
 }
+const VedtakLesemodus = () => {
+    return <BehandlingPage />;
+};
 
+const BehandlingPage = () => {
+    const { behandlingId, vedtakId } = useParams<{
+        behandlingId?: string;
+        vedtakId?: string;
+    }>();
+    const { type } = useBehandlingV2(behandlingId, vedtakId);
+
+    switch (type) {
+        case TypeBehandling.FORSKUDD:
+            return <ForskuddBehandling />;
+        case TypeBehandling.SAeRBIDRAG:
+            return <SærligeutgifterBehandling />;
+        default:
+            return null;
+    }
+};
 const ForskuddBehandling = () => (
     <ForskuddBehandlingProviderWrapper>
         <BidragBehandlingHeader />

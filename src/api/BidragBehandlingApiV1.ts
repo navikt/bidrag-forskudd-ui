@@ -693,12 +693,14 @@ export interface InntektValideringsfeil {
     manglerPerioder: boolean;
     /** Hvis det er inntekter som har periode som starter før virkningstidspunkt */
     perioderFørVirkningstidspunkt: boolean;
-    ident: string;
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
-    rolle?: Rolletype;
+    ident?: string;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
+    /** @format int64 */
+    rolleId?: number;
+    rolletype?: Rolletype;
 }
 
 export interface InntektValideringsfeilDto {
@@ -1594,7 +1596,7 @@ export enum Grunnlagstype {
     NOTAT = "NOTAT",
     SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
     UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
-    UTGIFTSPOST = "UTGIFTSPOST",
+    UTGIFTSPOSTER = "UTGIFTSPOSTER",
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
@@ -1611,6 +1613,7 @@ export enum Grunnlagstype {
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
+    INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
     INNHENTET_SIVILSTAND = "INNHENTET_SIVILSTAND",
     INNHENTET_ARBEIDSFORHOLD = "INNHENTET_ARBEIDSFORHOLD",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
@@ -1845,8 +1848,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {

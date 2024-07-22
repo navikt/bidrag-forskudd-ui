@@ -15,31 +15,42 @@ import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
 import { Tabs } from "@navikt/ds-react";
-import { scrollToHash } from "@utils/window-utils";
+import { getSearchParam, scrollToHash, updateUrlSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
+import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
+
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
         if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
         return 0;
     });
-    useEffect(scrollToHash, []);
+    const defaultTab = useMemo(() => {
+        const roleId = roller
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+            ?.id?.toString();
+        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
+    }, []);
 
+    useEffect(scrollToHash, []);
+    function updateSearchparamForTab(currentTabId: string) {
+        updateUrlSearchParam(urlSearchParams.inntektTab, currentTabId);
+    }
     return (
         <div className="grid gap-y-2">
-            <Tabs defaultValue={roller.find((rolle) => rolle.rolletype === Rolletype.BM).ident}>
+            <Tabs defaultValue={defaultTab} onChange={updateSearchparamForTab}>
                 <Tabs.List>
                     {roller.map((rolle) => (
                         <Tabs.Tab
                             key={rolle.ident}
-                            value={rolle.ident}
+                            value={rolle.id.toString()}
                             label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
                                 [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
                             }`}
@@ -49,7 +60,7 @@ const Main = () => {
                 {roller.map((rolle) => {
                     return (
                         <InntektTableProvider rolle={rolle} type={type}>
-                            <Tabs.Panel key={rolle.ident} value={rolle.ident} className="grid gap-y-4">
+                            <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
                                 <div className="mt-4">
                                     <InntektHeader ident={rolle.ident} />
                                 </div>

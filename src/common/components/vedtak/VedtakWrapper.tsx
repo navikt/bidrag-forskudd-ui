@@ -11,6 +11,7 @@ import {
 import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
 import { SærligeutgifterStepper } from "../../../særbidrag/enum/SærligeutgifterStepper";
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
+import behandlingQueryKeys from "../../constants/behandlingQueryKeys";
 import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
@@ -136,20 +137,35 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         const feilliste = [];
         if (!inntektvalideringsfeil) return feilliste;
         if (Array.isArray(inntektvalideringsfeil)) {
-            validerForRoller[type].forEach((rolle) => {
-                inntektvalideringsfeil.some((a) => a.rolle === rolle) &&
+            validerForRoller[type].forEach((rolletype) => {
+                const rolle = inntektvalideringsfeil.find((a) => a.rolletype === rolletype);
+                rolle &&
                     feilliste.push(
-                        <ErrorSummary.Item href={`#${elementId}`} onClick={() => onStepChange(steps.inntekt)}>
+                        <ErrorSummary.Item
+                            href={`#${elementId}`}
+                            onClick={() =>
+                                onStepChange(steps.inntekt, {
+                                    [behandlingQueryKeys.inntektTab]: rolle.rolleId?.toString(),
+                                })
+                            }
+                        >
                             Inntekter: Perioder i {tekst.toLowerCase()}{" "}
-                            {type !== TypeBehandling.FORSKUDD ? ` for ${rolle}` : ""}
+                            {type !== TypeBehandling.FORSKUDD ? ` for ${rolletype}` : ""}
                         </ErrorSummary.Item>
                     );
             });
         } else {
             feilliste.push(
-                <ErrorSummary.Item href={`#${elementId}`} onClick={() => onStepChange(steps.inntekt)}>
+                <ErrorSummary.Item
+                    href={`#${elementId}`}
+                    onClick={() =>
+                        onStepChange(steps.inntekt, {
+                            [behandlingQueryKeys.inntektTab]: inntektvalideringsfeil.rolleId?.toString(),
+                        })
+                    }
+                >
                     Inntekter: Perioder i {tekst.toLowerCase()}{" "}
-                    {type !== TypeBehandling.FORSKUDD ? ` for ${inntektvalideringsfeil.rolle}` : ""}
+                    {type !== TypeBehandling.FORSKUDD ? ` for ${inntektvalideringsfeil.rolletype}` : ""}
                 </ErrorSummary.Item>
             );
         }

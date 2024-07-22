@@ -2,6 +2,8 @@ import { TextField } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
+import { useBehandlingProvider } from "../../context/BehandlingContext";
+
 export const FormControlledTextField = ({
     name,
     label,
@@ -23,6 +25,7 @@ export const FormControlledTextField = ({
 }) => {
     const { control, clearErrors } = useFormContext();
     const { field, fieldState } = useController({ name, control });
+    const { lesemodus } = useBehandlingProvider();
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         clearErrors(name);
@@ -44,6 +47,7 @@ export const FormControlledTextField = ({
             value={field.value?.toString()}
             onChange={(value) => onChange(value)}
             hideLabel={hideLabel}
+            readOnly={lesemodus}
             disabled={disabled}
             error={fieldState?.error?.message}
             min={min}

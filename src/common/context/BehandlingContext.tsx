@@ -21,6 +21,8 @@ import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "..
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
 import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særbidrag/context/SærligeugifterProviderWrapper";
 import { SærligeutgifterStepper } from "../../særbidrag/enum/SærligeutgifterStepper";
+import { getAllSearchParamsExcludingKeys } from "../../utils/window-utils";
+import behandlingQueryKeys from "../constants/behandlingQueryKeys";
 
 interface SaveErrorState {
     error: boolean;
@@ -44,7 +46,7 @@ interface IBehandlingContext {
         SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
     >;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
-    onStepChange: (x: number) => void;
+    onStepChange: (x: number, query?: Record<string, string>) => void;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
@@ -87,13 +89,17 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
-    const activeStep = searchParams.get("steg") ?? defaultStep;
-    const setActiveStep = useCallback((x: number) => {
-        searchParams.delete("steg");
-        setSearchParams([...searchParams.entries(), ["steg", Object.keys(steps).find((k) => steps[k] === x)]]);
+    const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
+    const setActiveStep = useCallback((x: number, query?: Record<string, string>) => {
+        console.log("query", query);
+        setSearchParams([
+            ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.inntektTab).entries(),
+            ...(query ? Object.entries(query) : []),
+            [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
+        ]);
     }, []);
 
-    const queryLesemodus = searchParams.get("lesemodus") === "true";
+    const queryLesemodus = searchParams.get(behandlingQueryKeys.lesemodus) === "true";
     const [nextStep, setNextStep] = useState<number>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
     const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
@@ -106,7 +112,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
     };
 
-    const onStepChange = (x: number) => {
+    const onStepChange = (x: number, query?: Record<string, string>) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
 
         if (
@@ -117,7 +123,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             setNextStep(x);
             ref.current?.showModal();
         } else {
-            setActiveStep(x);
+            setActiveStep(x, query);
         }
     };
 

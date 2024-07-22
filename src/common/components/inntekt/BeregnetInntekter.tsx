@@ -68,7 +68,7 @@ export const BeregnetInntekter = () => {
     }
     return (
         <Box padding="4" background="surface-subtle" key={`beregnet-inntekter-${rolle.id}`}>
-            <Heading level="2" size="small">
+            <Heading level="2" size="small" spacing>
                 {text.title.beregnetTotalt}
             </Heading>
             <div className="grid gap-y-[24px]">
@@ -78,19 +78,21 @@ export const BeregnetInntekter = () => {
                             className="grid gap-y-2"
                             key={`${rolle.id}-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
                         >
-                            {inntektPerBarn.inntektGjelderBarnIdent && rolle.rolletype !== Rolletype.BA && (
-                                <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
-                                    <div className="w-8 mr-2 h-max">
-                                        <RolleTag rolleType={Rolletype.BA} />
+                            {inntektPerBarn.inntektGjelderBarnIdent &&
+                                rolle.rolletype !== Rolletype.BA &&
+                                beregnetInntekterForRolle.length > 1 && (
+                                    <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
+                                        <div className="w-8 mr-2 h-max">
+                                            <RolleTag rolleType={Rolletype.BA} />
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <BodyShort size="small" className="font-bold">
+                                                <PersonNavn ident={inntektPerBarn.inntektGjelderBarnIdent}></PersonNavn>
+                                            </BodyShort>
+                                            <BodyShort size="small">{inntektPerBarn.inntektGjelderBarnIdent}</BodyShort>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <BodyShort size="small" className="font-bold">
-                                            <PersonNavn ident={inntektPerBarn.inntektGjelderBarnIdent}></PersonNavn>
-                                        </BodyShort>
-                                        <BodyShort size="small">{inntektPerBarn.inntektGjelderBarnIdent}</BodyShort>
-                                    </div>
-                                </div>
-                            )}
+                                )}
                             <div
                                 className="overflow-x-auto whitespace-nowrap"
                                 key={`table-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
