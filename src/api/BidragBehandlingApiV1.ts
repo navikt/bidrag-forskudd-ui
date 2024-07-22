@@ -594,6 +594,7 @@ export interface HusstandsmedlemPeriodiseringsfeilDto {
      * @format int64
      */
     husstandsmedlemId: number;
+    erSøknadsbarn: boolean;
 }
 
 export interface IkkeAktivInntektDto {
@@ -690,9 +691,12 @@ export interface InntektValideringsfeil {
     hullIPerioder: Datoperiode[];
     /** Er sann hvis det ikke finnes noen valgte inntekter. Vil alltid være false hvis det er ytelse */
     manglerPerioder: boolean;
-    ident: string;
+    /** Hvis det er inntekter som har periode som starter før virkningstidspunkt */
+    perioderFørVirkningstidspunkt: boolean;
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
+    ident?: string;
+    rolle?: RolleDto;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
 }
@@ -721,7 +725,7 @@ export interface InntekterDtoV2 {
     småbarnstillegg: InntektDtoV2[];
     /** @uniqueItems true */
     årsinntekter: InntektDtoV2[];
-    beregnetInntekter: InntektPerBarn[];
+    beregnetInntekter: BeregnetInntekterDto[];
     beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
@@ -1096,7 +1100,7 @@ export interface OppdaterePeriodeInntekt {
 export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
-    beregnetInntekter: InntektPerBarn[];
+    beregnetInntekter: BeregnetInntekterDto[];
     beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
@@ -1464,6 +1468,7 @@ export interface MaBekrefteNyeOpplysninger {
 
 export interface UtgiftFeilDto {
     manglerUtgifter: boolean;
+    ugyldigUtgiftspost: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1589,7 +1594,7 @@ export enum Grunnlagstype {
     NOTAT = "NOTAT",
     SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
     UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
-    UTGIFTSPOST = "UTGIFTSPOST",
+    UTGIFTSPOSTER = "UTGIFTSPOSTER",
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
@@ -1606,6 +1611,7 @@ export enum Grunnlagstype {
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
+    INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
     INNHENTET_SIVILSTAND = "INNHENTET_SIVILSTAND",
     INNHENTET_ARBEIDSFORHOLD = "INNHENTET_ARBEIDSFORHOLD",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
@@ -1840,8 +1846,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {

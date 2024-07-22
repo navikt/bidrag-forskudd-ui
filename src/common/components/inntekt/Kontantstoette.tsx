@@ -30,17 +30,19 @@ export const Kontantstøtte = () => {
             <div className="grid gap-y-[24px]">
                 {barna.map((barn) => (
                     <div className="grid gap-y-2" key={barn.ident}>
-                        <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
-                            <div className="w-8 mr-2 h-max">
-                                <RolleTag rolleType={Rolletype.BA} />
+                        {barna.length > 1 && (
+                            <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
+                                <div className="w-8 mr-2 h-max">
+                                    <RolleTag rolleType={Rolletype.BA} />
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <BodyShort size="small" className="font-bold">
+                                        <PersonNavn ident={barn.ident}></PersonNavn>
+                                    </BodyShort>
+                                    <BodyShort size="small">{barn.ident}</BodyShort>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <BodyShort size="small" className="font-bold">
-                                    <PersonNavn ident={barn.ident}></PersonNavn>
-                                </BodyShort>
-                                <BodyShort size="small">{barn.ident}</BodyShort>
-                            </div>
-                        </div>
+                        )}
                         <InntektTabel fieldName={`kontantstøtte.${ident}.${barn.ident}` as const}>
                             {({
                                 controlledFields,

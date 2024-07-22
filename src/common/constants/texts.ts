@@ -48,6 +48,7 @@ const tekster = {
         datoMåVæreDenSisteIMåneden: "Dato må være den siste i måneden",
         datoMåVæreDenFørsteIMåneden: "Dato må være den første i måneden",
         framoverPeriodisering: "Det kan ikke periodiseres fremover i tid.",
+        periodeFørVirkningstidspunkt: "Det kan ikke periodisere før virkningstidspunkt.",
         ukjentfeil: "Det skjedde en ukjent feil",
         kunneIkkFatteVedtak: "Kunne ikke fatte vedtak",
         beregning: "Det skjedde en feil ved beregning. Prøv å laste siden på nytt",

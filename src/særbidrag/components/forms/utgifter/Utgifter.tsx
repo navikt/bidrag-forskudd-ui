@@ -170,7 +170,7 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
 const DeleteButton = ({ onRemoveUtgift, index }: { onRemoveUtgift: (index) => void; index: number }) => {
     const { lesemodus } = useBehandlingProvider();
 
-    return index && !lesemodus ? (
+    return !lesemodus ? (
         <Button
             type="button"
             onClick={() => onRemoveUtgift(index)}
@@ -299,10 +299,12 @@ const Main = () => {
                             inputMode="numeric"
                         />
                     </FlexRow>
-                    <FlexRow>
-                        <Label size="small">{text.label.totalt}:</Label>
-                        <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
-                    </FlexRow>
+                    {behandling.utgift?.kategori?.kategori === Saerbidragskategori.KONFIRMASJON && (
+                        <FlexRow>
+                            <Label size="small">{text.label.totalt}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
+                        </FlexRow>
+                    )}
                 </>
             )}
         </>
@@ -624,7 +626,6 @@ const Side = () => {
     const {
         utgift: { avslag },
     } = useGetBehandlingV2();
-    console.log(avslag);
     const onNext = () =>
         onStepChange(
             avslag === undefined ? STEPS[SærligeutgifterStepper.INNTEKT] : STEPS[SærligeutgifterStepper.VEDTAK]

@@ -44,33 +44,43 @@ export const columnWitdhRules = {
 export const BeregnetInntekter = () => {
     const { rolle } = useInntektTableProvider();
     const {
-        inntekter: { beregnetInntekterV2 },
+        inntekter: { beregnetInntekter },
         type,
     } = useGetBehandlingV2();
 
     const behandlingViewRules = inntekterTablesViewRules[type][rolle.rolletype] as InntektTableType[];
     const behandlingColumnWitdhRules = columnWitdhRules[type][rolle.rolletype] as { [key in InntektTableType]: string };
 
+    const beregnetInntekterForRolle = beregnetInntekter
+        .find((inntekt) => inntekt.ident === rolle.ident)
+        ?.inntekter?.filter((inntekt) =>
+            rolle.rolletype === Rolletype.BA
+                ? inntekt.inntektGjelderBarnIdent == null
+                : inntekt.inntektGjelderBarnIdent != null
+        );
+
+    if (
+        !beregnetInntekterForRolle ||
+        beregnetInntekterForRolle.length === 0 ||
+        beregnetInntekterForRolle.every((v) => v.summertInntektListe.length === 0)
+    ) {
+        return null;
+    }
     return (
         <Box padding="4" background="surface-subtle" key={`beregnet-inntekter-${rolle.id}`}>
-            <Heading level="2" size="small">
+            <Heading level="2" size="small" spacing>
                 {text.title.beregnetTotalt}
             </Heading>
             <div className="grid gap-y-[24px]">
-                {beregnetInntekterV2
-                    .find((inntekt) => inntekt.ident === rolle.ident)
-                    ?.inntekter?.filter((inntekt) =>
-                        rolle.rolletype === Rolletype.BA
-                            ? inntekt.inntektGjelderBarnIdent == null
-                            : inntekt.inntektGjelderBarnIdent != null
-                    )
-                    .map((inntektPerBarn, index) => (
-                        <>
-                            <div
-                                className="grid gap-y-2"
-                                key={`${rolle.id}-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
-                            >
-                                {inntektPerBarn.inntektGjelderBarnIdent && rolle.rolletype !== Rolletype.BA && (
+                {beregnetInntekterForRolle.map((inntektPerBarn, index) => (
+                    <>
+                        <div
+                            className="grid gap-y-2"
+                            key={`${rolle.id}-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
+                        >
+                            {inntektPerBarn.inntektGjelderBarnIdent &&
+                                rolle.rolletype !== Rolletype.BA &&
+                                beregnetInntekterForRolle.length > 1 && (
                                     <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
                                         <div className="w-8 mr-2 h-max">
                                             <RolleTag rolleType={Rolletype.BA} />
@@ -83,159 +93,146 @@ export const BeregnetInntekter = () => {
                                         </div>
                                     </div>
                                 )}
-                                <div
-                                    className="overflow-x-auto whitespace-nowrap"
-                                    key={`table-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
-                                >
-                                    <Table size="small" className="table-fixed bg-white">
-                                        <Table.Header>
-                                            <Table.Row className="align-baseline">
-                                                <Table.HeaderCell textSize="small" scope="col" className="w-[198px]">
-                                                    {text.label.fraOgMed} - {text.label.tilOgMed}
-                                                </Table.HeaderCell>
+                            <div
+                                className="overflow-x-auto whitespace-nowrap"
+                                key={`table-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
+                            >
+                                <Table size="small" className="table-fixed bg-white">
+                                    <Table.Header>
+                                        <Table.Row className="align-baseline">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[198px]">
+                                                {text.label.fraOgMed} - {text.label.tilOgMed}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className={behandlingColumnWitdhRules[InntektTableType.SKATTEPLIKTIG]}
+                                            >
+                                                {text.label.skattepliktigeInntekter}
+                                            </Table.HeaderCell>
+                                            {hasValue(behandlingViewRules, InntektTableType.BARNETILLEGG) && (
                                                 <Table.HeaderCell
                                                     textSize="small"
                                                     scope="col"
                                                     align="right"
                                                     className={
-                                                        behandlingColumnWitdhRules[InntektTableType.SKATTEPLIKTIG]
+                                                        behandlingColumnWitdhRules[InntektTableType.BARNETILLEGG]
                                                     }
                                                 >
-                                                    {text.label.skattepliktigeInntekter}
+                                                    {text.label.barnetillegg}
                                                 </Table.HeaderCell>
+                                            )}
+                                            {hasValue(behandlingViewRules, InntektTableType.UTVIDET_BARNETRYGD) && (
+                                                <Table.HeaderCell
+                                                    textSize="small"
+                                                    scope="col"
+                                                    align="right"
+                                                    className={
+                                                        behandlingColumnWitdhRules[InntektTableType.UTVIDET_BARNETRYGD]
+                                                    }
+                                                >
+                                                    {text.label.utvidetBarnetrygd}
+                                                </Table.HeaderCell>
+                                            )}
+                                            {hasValue(behandlingViewRules, InntektTableType.SMÅBARNSTILLEGG) && (
+                                                <Table.HeaderCell
+                                                    textSize="small"
+                                                    scope="col"
+                                                    align="right"
+                                                    className={
+                                                        behandlingColumnWitdhRules[InntektTableType.SMÅBARNSTILLEGG]
+                                                    }
+                                                >
+                                                    {text.label.småbarnstillegg}
+                                                </Table.HeaderCell>
+                                            )}
+                                            {hasValue(behandlingViewRules, InntektTableType.KONTANTSTØTTE) && (
+                                                <Table.HeaderCell
+                                                    textSize="small"
+                                                    scope="col"
+                                                    align="right"
+                                                    className={
+                                                        behandlingColumnWitdhRules[InntektTableType.KONTANTSTØTTE]
+                                                    }
+                                                >
+                                                    {text.label.kontantstøtte}
+                                                </Table.HeaderCell>
+                                            )}
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className={behandlingColumnWitdhRules[InntektTableType.TOTAL_INNTEKTER]}
+                                            >
+                                                {text.label.totalt}
+                                            </Table.HeaderCell>
+                                        </Table.Row>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {inntektPerBarn.summertInntektListe.map((delberegningSumInntekt, index) => (
+                                            <Table.Row
+                                                key={`body-${delberegningSumInntekt}-${index}`}
+                                                className="align-top"
+                                            >
+                                                <Table.DataCell textSize="small">
+                                                    {DateToDDMMYYYYString(
+                                                        dateOrNull(delberegningSumInntekt.periode.fom)
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {delberegningSumInntekt.periode.til
+                                                        ? DateToDDMMYYYYString(
+                                                              deductDays(
+                                                                  dateOrNull(delberegningSumInntekt.periode.til),
+                                                                  1
+                                                              )
+                                                          )
+                                                        : null}
+                                                </Table.DataCell>
+
+                                                <Table.DataCell textSize="small" align="right">
+                                                    {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString(
+                                                        "nb-NO"
+                                                    ) ?? 0}
+                                                </Table.DataCell>
                                                 {hasValue(behandlingViewRules, InntektTableType.BARNETILLEGG) && (
-                                                    <Table.HeaderCell
-                                                        textSize="small"
-                                                        scope="col"
-                                                        align="right"
-                                                        className={
-                                                            behandlingColumnWitdhRules[InntektTableType.BARNETILLEGG]
-                                                        }
-                                                    >
-                                                        {text.label.barnetillegg}
-                                                    </Table.HeaderCell>
+                                                    <Table.DataCell textSize="small" align="right">
+                                                        {delberegningSumInntekt.barnetillegg?.toLocaleString("nb-NO") ??
+                                                            0}
+                                                    </Table.DataCell>
                                                 )}
                                                 {hasValue(behandlingViewRules, InntektTableType.UTVIDET_BARNETRYGD) && (
-                                                    <Table.HeaderCell
-                                                        textSize="small"
-                                                        scope="col"
-                                                        align="right"
-                                                        className={
-                                                            behandlingColumnWitdhRules[
-                                                                InntektTableType.UTVIDET_BARNETRYGD
-                                                            ]
-                                                        }
-                                                    >
-                                                        {text.label.utvidetBarnetrygd}
-                                                    </Table.HeaderCell>
-                                                )}
-                                                {hasValue(behandlingViewRules, InntektTableType.SMÅBARNSTILLEGG) && (
-                                                    <Table.HeaderCell
-                                                        textSize="small"
-                                                        scope="col"
-                                                        align="right"
-                                                        className={
-                                                            behandlingColumnWitdhRules[InntektTableType.SMÅBARNSTILLEGG]
-                                                        }
-                                                    >
-                                                        {text.label.småbarnstillegg}
-                                                    </Table.HeaderCell>
-                                                )}
-                                                {hasValue(behandlingViewRules, InntektTableType.KONTANTSTØTTE) && (
-                                                    <Table.HeaderCell
-                                                        textSize="small"
-                                                        scope="col"
-                                                        align="right"
-                                                        className={
-                                                            behandlingColumnWitdhRules[InntektTableType.KONTANTSTØTTE]
-                                                        }
-                                                    >
-                                                        {text.label.kontantstøtte}
-                                                    </Table.HeaderCell>
-                                                )}
-                                                <Table.HeaderCell
-                                                    textSize="small"
-                                                    scope="col"
-                                                    align="right"
-                                                    className={
-                                                        behandlingColumnWitdhRules[InntektTableType.TOTAL_INNTEKTER]
-                                                    }
-                                                >
-                                                    {text.label.totalt}
-                                                </Table.HeaderCell>
-                                            </Table.Row>
-                                        </Table.Header>
-                                        <Table.Body>
-                                            {inntektPerBarn.summertInntektListe.map((delberegningSumInntekt, index) => (
-                                                <Table.Row
-                                                    key={`body-${delberegningSumInntekt}-${index}`}
-                                                    className="align-top"
-                                                >
-                                                    <Table.DataCell textSize="small">
-                                                        {DateToDDMMYYYYString(
-                                                            dateOrNull(delberegningSumInntekt.periode.fom)
-                                                        )}{" "}
-                                                        -{" "}
-                                                        {delberegningSumInntekt.periode.til
-                                                            ? DateToDDMMYYYYString(
-                                                                  deductDays(
-                                                                      dateOrNull(delberegningSumInntekt.periode.til),
-                                                                      1
-                                                                  )
-                                                              )
-                                                            : null}
-                                                    </Table.DataCell>
-
                                                     <Table.DataCell textSize="small" align="right">
-                                                        {delberegningSumInntekt.skattepliktigInntekt?.toLocaleString(
+                                                        {delberegningSumInntekt.utvidetBarnetrygd?.toLocaleString(
                                                             "nb-NO"
                                                         ) ?? 0}
                                                     </Table.DataCell>
-                                                    {hasValue(behandlingViewRules, InntektTableType.BARNETILLEGG) && (
-                                                        <Table.DataCell textSize="small" align="right">
-                                                            {delberegningSumInntekt.barnetillegg?.toLocaleString(
-                                                                "nb-NO"
-                                                            ) ?? 0}
-                                                        </Table.DataCell>
-                                                    )}
-                                                    {hasValue(
-                                                        behandlingViewRules,
-                                                        InntektTableType.UTVIDET_BARNETRYGD
-                                                    ) && (
-                                                        <Table.DataCell textSize="small" align="right">
-                                                            {delberegningSumInntekt.utvidetBarnetrygd?.toLocaleString(
-                                                                "nb-NO"
-                                                            ) ?? 0}
-                                                        </Table.DataCell>
-                                                    )}
-                                                    {hasValue(
-                                                        behandlingViewRules,
-                                                        InntektTableType.SMÅBARNSTILLEGG
-                                                    ) && (
-                                                        <Table.DataCell textSize="small" align="right">
-                                                            {delberegningSumInntekt.småbarnstillegg?.toLocaleString(
-                                                                "nb-NO"
-                                                            ) ?? 0}
-                                                        </Table.DataCell>
-                                                    )}
-                                                    {hasValue(behandlingViewRules, InntektTableType.KONTANTSTØTTE) && (
-                                                        <Table.DataCell textSize="small" align="right">
-                                                            {delberegningSumInntekt.kontantstøtte?.toLocaleString(
-                                                                "nb-NO"
-                                                            ) ?? 0}
-                                                        </Table.DataCell>
-                                                    )}
+                                                )}
+                                                {hasValue(behandlingViewRules, InntektTableType.SMÅBARNSTILLEGG) && (
                                                     <Table.DataCell textSize="small" align="right">
-                                                        {delberegningSumInntekt.totalinntekt.toLocaleString("nb-NO")}
+                                                        {delberegningSumInntekt.småbarnstillegg?.toLocaleString(
+                                                            "nb-NO"
+                                                        ) ?? 0}
                                                     </Table.DataCell>
-                                                </Table.Row>
-                                            ))}
-                                        </Table.Body>
-                                    </Table>
-                                </div>
+                                                )}
+                                                {hasValue(behandlingViewRules, InntektTableType.KONTANTSTØTTE) && (
+                                                    <Table.DataCell textSize="small" align="right">
+                                                        {delberegningSumInntekt.kontantstøtte?.toLocaleString(
+                                                            "nb-NO"
+                                                        ) ?? 0}
+                                                    </Table.DataCell>
+                                                )}
+                                                <Table.DataCell textSize="small" align="right">
+                                                    {delberegningSumInntekt.totalinntekt.toLocaleString("nb-NO")}
+                                                </Table.DataCell>
+                                            </Table.Row>
+                                        ))}
+                                    </Table.Body>
+                                </Table>
                             </div>
-                        </>
-                    ))}
+                        </div>
+                    </>
+                ))}
             </div>
         </Box>
     );

@@ -223,7 +223,7 @@ export const InntektTabel = ({
             ...watchFieldArray?.[index],
         };
     });
-    const [inntektType, ident] = fieldName.split(".");
+    const [inntektType, ident, barnIdent] = fieldName.split(".");
 
     useEffect(() => {
         setPageErrorsOrUnsavedState({
@@ -313,7 +313,6 @@ export const InntektTabel = ({
                         ...currentData.inntekter,
                         [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
-                        beregnetInntekterV2: response.beregnetInntekterV2,
                         valideringsfeil: response.valideringsfeil,
                     },
                 };
@@ -335,7 +334,6 @@ export const InntektTabel = ({
                                 (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
                             ),
                             beregnetInntekter: response.beregnetInntekter,
-                            beregnetInntekterV2: response.beregnetInntekterV2,
                             valideringsfeil: response.valideringsfeil,
                         },
                     };
@@ -409,7 +407,7 @@ export const InntektTabel = ({
         ? valideringsfeil[inntektType]
         : valideringsfeil[inntektType]?.find((feil) => {
               if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                  return feil.gjelderBarn === ident;
+                  return feil.gjelderBarn === barnIdent && feil.ident === ident;
               }
               return feil.ident === ident;
           });
@@ -461,6 +459,9 @@ export const InntektTabel = ({
                     )}
                     {tableValideringsfeil.fremtidigPeriode && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
+                    )}
+                    {tableValideringsfeil.perioderFørVirkningstidspunkt && (
+                        <BodyShort size="small">{text.error.periodeFørVirkningstidspunkt}</BodyShort>
                     )}
                 </BehandlingAlert>
             )}
