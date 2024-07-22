@@ -91,7 +91,6 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const behandling = useBehandlingV2(behandlingId, vedtakId);
     const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
     const setActiveStep = useCallback((x: number, query?: Record<string, string>) => {
-        console.log("query", query);
         setSearchParams([
             ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.inntektTab).entries(),
             ...(query ? Object.entries(query) : []),
