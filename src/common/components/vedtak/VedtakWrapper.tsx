@@ -5,6 +5,7 @@ import {
     InntektValideringsfeil,
     MaBekrefteNyeOpplysninger,
     OpplysningerType,
+    RolleDto,
     Rolletype,
     TypeBehandling,
 } from "../../../api/BidragBehandlingApiV1";
@@ -138,19 +139,21 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (!inntektvalideringsfeil) return feilliste;
         if (Array.isArray(inntektvalideringsfeil)) {
             validerForRoller[type].forEach((rolletype) => {
-                const rolle = inntektvalideringsfeil.find((a) => a.rolletype === rolletype);
-                rolle &&
+                const valideringsfeil = inntektvalideringsfeil.find((a) => a.rolle.rolletype === rolletype);
+                valideringsfeil &&
                     feilliste.push(
                         <ErrorSummary.Item
                             href={`#${elementId}`}
                             onClick={() =>
                                 onStepChange(steps.inntekt, {
-                                    [behandlingQueryKeys.inntektTab]: rolle.rolleId?.toString(),
+                                    [behandlingQueryKeys.inntektTab]: valideringsfeil.rolle?.id?.toString(),
                                 })
                             }
                         >
                             Inntekter: Perioder i {tekst.toLowerCase()}{" "}
-                            {type !== TypeBehandling.FORSKUDD ? ` for ${rolletype}` : ""}
+                            {type !== TypeBehandling.FORSKUDD
+                                ? ` for ${rolletypeTilVisningsnavn(valideringsfeil.rolle)}`
+                                : ""}
                         </ErrorSummary.Item>
                     );
             });
@@ -160,12 +163,14 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     href={`#${elementId}`}
                     onClick={() =>
                         onStepChange(steps.inntekt, {
-                            [behandlingQueryKeys.inntektTab]: inntektvalideringsfeil.rolleId?.toString(),
+                            [behandlingQueryKeys.inntektTab]: inntektvalideringsfeil.rolle?.id?.toString(),
                         })
                     }
                 >
                     Inntekter: Perioder i {tekst.toLowerCase()}{" "}
-                    {type !== TypeBehandling.FORSKUDD ? ` for ${inntektvalideringsfeil.rolletype}` : ""}
+                    {type !== TypeBehandling.FORSKUDD
+                        ? ` for ${rolletypeTilVisningsnavn(inntektvalideringsfeil.rolle)}`
+                        : ""}
                 </ErrorSummary.Item>
             );
         }
@@ -175,6 +180,19 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
     return <>{children}</>;
 }
 
+const rolletypeTilVisningsnavn = (rolle?: RolleDto): string => {
+    if (!rolle) return "";
+    switch (rolle.rolletype) {
+        case Rolletype.BM:
+            return "Bidragsmottaker";
+        case Rolletype.BA:
+            return "Barn";
+        case Rolletype.BP:
+            return "Bidragspliktig";
+        default:
+            return rolle.rolletype;
+    }
+};
 const opplysningTilStep = (opplysninger: OpplysningerType, steps: STEPSTYPE) => {
     switch (opplysninger) {
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:

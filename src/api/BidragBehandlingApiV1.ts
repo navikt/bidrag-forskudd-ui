@@ -696,11 +696,9 @@ export interface InntektValideringsfeil {
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
     ident?: string;
+    rolle?: RolleDto;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
-    /** @format int64 */
-    rolleId?: number;
-    rolletype?: Rolletype;
 }
 
 export interface InntektValideringsfeilDto {
@@ -1848,8 +1846,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
