@@ -35,7 +35,9 @@ const Vedtak = () => {
             </Heading>
             <VedtakResultat />
 
-            {!beregnetForskudd?.feil && !lesemodus && <FatteVedtakButtons isBeregningError={isBeregningError} />}
+            {!beregnetForskudd?.feil && !lesemodus && (
+                <FatteVedtakButtons isBeregningError={isBeregningError} disabled />
+            )}
             <AdminButtons />
         </div>
     );
