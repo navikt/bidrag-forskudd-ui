@@ -29,6 +29,7 @@ export const SærbidragPage = () => {
               (f) => ikkeAktiverteEndringerIGrunnlagsdata.inntekter[f]
           )
         : [];
+
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
@@ -66,10 +67,10 @@ export const SærbidragPage = () => {
                                 activeStepIndex > 3 &&
                                 (boforholdValideringsfeil?.husstandsmedlem === undefined ||
                                     boforholdValideringsfeil?.husstandsmedlem?.length === 0) &&
-                                boforholdValideringsfeil?.sivilstand === null &&
                                 (ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn === undefined ||
-                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0)
-                                // ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand == null
+                                    ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn?.length === 0) &&
+                                ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden === undefined &&
+                                boforholdValideringsfeil?.andreVoksneIHusstanden === undefined
                             }
                             interactive={interactive}
                         >

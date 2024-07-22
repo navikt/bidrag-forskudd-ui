@@ -55,7 +55,7 @@ export const Opplysninger = ({
             ...acc,
             [rolle.ident]: ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType]?.filter((v) => {
                 if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                    return v.gjelderBarn === rolle.ident;
+                    return v.gjelderBarn === rolle.ident && v.ident === ident;
                 }
                 return v.ident === rolle.ident;
             }),
