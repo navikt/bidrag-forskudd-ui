@@ -695,8 +695,8 @@ export interface InntektValideringsfeil {
     perioderFørVirkningstidspunkt: boolean;
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
-    ident?: string;
     rolle?: RolleDto;
+    ident?: string;
     /** Er sann hvis det ikke finnes noe løpende periode. Det vil si en periode hvor datoTom er null. Er bare relevant for årsinntekter */
     ingenLøpendePeriode: boolean;
 }
@@ -1462,6 +1462,7 @@ export interface HusstandsmedlemDto {
 
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
+    rolle: RolleDto;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
 }

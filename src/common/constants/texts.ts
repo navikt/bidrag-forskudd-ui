@@ -1,4 +1,10 @@
-import { MaBekrefteNyeOpplysninger, OpplysningerType } from "@api/BidragBehandlingApiV1";
+import {
+    MaBekrefteNyeOpplysninger,
+    OpplysningerType,
+    RolleDto,
+    Rolletype,
+    TypeBehandling,
+} from "@api/BidragBehandlingApiV1";
 
 const tekster = {
     alert: {
@@ -208,30 +214,35 @@ const tekster = {
     resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
     år: "år",
 };
-export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: MaBekrefteNyeOpplysninger) => {
+export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
+    opplysningstype: MaBekrefteNyeOpplysninger,
+    behandlingType: TypeBehandling
+) => {
+    const forRolle =
+        behandlingType !== TypeBehandling.FORSKUDD ? ` (${rolletypeTilVisningsnavn(opplysningstype.rolle)})` : "";
     switch (opplysningstype.type) {
         case OpplysningerType.KONTANTSTOTTE:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
-            } for ${tekster.title.kontantstøtte.toLowerCase()}`;
+            } for ${tekster.title.kontantstøtte.toLowerCase()}${forRolle}`;
         case OpplysningerType.SMABARNSTILLEGG:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
-            } for ${tekster.title.småbarnstillegg.toLowerCase()}`;
+            } for ${tekster.title.småbarnstillegg.toLowerCase()}${forRolle}`;
         case OpplysningerType.UTVIDET_BARNETRYGD:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
-            } for ${tekster.title.utvidetBarnetrygd.toLowerCase()}`;
+            } for ${tekster.title.utvidetBarnetrygd.toLowerCase()}${forRolle}`;
         case OpplysningerType.BARNETILLEGG:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
-            } for ${tekster.title.barnetillegg.toLowerCase()}`;
+            } for ${tekster.title.barnetillegg.toLowerCase()}${forRolle}`;
         case OpplysningerType.BARNETILSYN:
-            return `Inntekter: ${tekster.alert.nyeOpplysningerMåBekreftes} for barnetilsyn`;
+            return `Inntekter: ${tekster.alert.nyeOpplysningerMåBekreftes} for barnetilsyn ${forRolle}`;
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
-            } for ${tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}`;
+            } for ${tekster.title.skattepliktigeogPensjonsgivendeInntekt.toLowerCase()}${forRolle}`;
         case OpplysningerType.BOFORHOLD:
             return opplysningstype.gjelderBarn
                 ? `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes} for barn ${opplysningstype.gjelderBarn?.navn}`
@@ -242,5 +253,17 @@ export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (opplysningstype: 
             return tekster.alert.nyeOpplysningerMåBekreftes;
     }
 };
-
+export const rolletypeTilVisningsnavn = (rolle?: RolleDto): string => {
+    if (!rolle) return "";
+    switch (rolle.rolletype) {
+        case Rolletype.BM:
+            return "Bidragsmottaker";
+        case Rolletype.BA:
+            return "Barn";
+        case Rolletype.BP:
+            return "Bidragspliktig";
+        default:
+            return rolle.rolletype;
+    }
+};
 export default tekster;
