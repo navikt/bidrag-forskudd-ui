@@ -5,7 +5,6 @@ import {
     InntektValideringsfeil,
     MaBekrefteNyeOpplysninger,
     OpplysningerType,
-    RolleDto,
     Rolletype,
     TypeBehandling,
 } from "../../../api/BidragBehandlingApiV1";
@@ -14,7 +13,7 @@ import { SærligeutgifterStepper } from "../../../særbidrag/enum/Særligeutgift
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
 import behandlingQueryKeys from "../../constants/behandlingQueryKeys";
 import elementIds from "../../constants/elementIds";
-import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding } from "../../constants/texts";
+import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
 type STEPSTYPE = { [key in ForskuddStepper]: number } | { [key in SærligeutgifterStepper]: number };
@@ -102,9 +101,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 feilliste.push(
                     <ErrorSummary.Item
                         href={`#${opplysningTilElementId(value)}`}
-                        onClick={() => onStepChange(opplysningTilStep(value.type, steps))}
+                        onClick={() =>
+                            onStepChange(opplysningTilStep(value, steps), {
+                                [behandlingQueryKeys.inntektTab]: value.rolle?.id?.toString(),
+                            })
+                        }
                     >
-                        {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value)}
+                        {mapOpplysningtypeSomMåBekreftesTilFeilmelding(value, type)}
                     </ErrorSummary.Item>
                 );
             });
@@ -180,21 +183,8 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
     return <>{children}</>;
 }
 
-const rolletypeTilVisningsnavn = (rolle?: RolleDto): string => {
-    if (!rolle) return "";
-    switch (rolle.rolletype) {
-        case Rolletype.BM:
-            return "Bidragsmottaker";
-        case Rolletype.BA:
-            return "Barn";
-        case Rolletype.BP:
-            return "Bidragspliktig";
-        default:
-            return rolle.rolletype;
-    }
-};
-const opplysningTilStep = (opplysninger: OpplysningerType, steps: STEPSTYPE) => {
-    switch (opplysninger) {
+const opplysningTilStep = (opplysningstype: MaBekrefteNyeOpplysninger, steps: STEPSTYPE) => {
+    switch (opplysningstype.type) {
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
         case OpplysningerType.SMABARNSTILLEGG:
         case OpplysningerType.UTVIDET_BARNETRYGD:
