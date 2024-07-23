@@ -9,7 +9,6 @@ import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2, useGetOpplysningerBoforhold } from "@common/hooks/useApiData";
-import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
@@ -27,15 +26,10 @@ const Header = () => (
 );
 export const NyOpplysningerAlert = () => {
     const { ikkeAktiverteEndringerIGrunnlagsdata } = useGetBehandlingV2();
-    const { enableSivilstandV2 } = useFeatureToogle();
     const ikkeAktiverteEndringerBoforhold = ikkeAktiverteEndringerIGrunnlagsdata.husstandsbarn;
     const ikkeAktiverteEndringerSivilstand = ikkeAktiverteEndringerIGrunnlagsdata.sivilstand;
 
-    if (
-        ikkeAktiverteEndringerBoforhold.length === 0 &&
-        (!enableSivilstandV2 || ikkeAktiverteEndringerSivilstand == null)
-    )
-        return null;
+    if (ikkeAktiverteEndringerBoforhold.length === 0 && ikkeAktiverteEndringerSivilstand == null) return null;
     const innhentetTidspunkt =
         ikkeAktiverteEndringerSivilstand?.innhentetTidspunkt ?? ikkeAktiverteEndringerBoforhold[0]?.innhentetTidspunkt;
     return (

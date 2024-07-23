@@ -247,6 +247,8 @@ export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
             return opplysningstype.gjelderBarn
                 ? `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes} for barn ${opplysningstype.gjelderBarn?.navn}`
                 : `Boforhold: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
+        case OpplysningerType.BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN:
+            return `Andre voksne i husstanden: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
         case OpplysningerType.SIVILSTAND:
             return `Sivilstand: ${tekster.alert.nyeOpplysningerMåBekreftes}`;
         default:

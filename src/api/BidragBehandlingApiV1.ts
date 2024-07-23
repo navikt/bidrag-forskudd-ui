@@ -726,7 +726,6 @@ export interface InntekterDtoV2 {
     /** @uniqueItems true */
     årsinntekter: InntektDtoV2[];
     beregnetInntekter: BeregnetInntekterDto[];
-    beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
 }
@@ -1101,7 +1100,6 @@ export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
     /** Periodiserte inntekter per barn */
     beregnetInntekter: BeregnetInntekterDto[];
-    beregnetInntekterV2: BeregnetInntekterDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: InntektValideringsfeilDto;
 }
@@ -1240,7 +1238,7 @@ export interface OppdatereBoforholdResponse {
 
 export interface AktivereGrunnlagRequestV2 {
     /** Personident tilhørende rolle i behandling grunnlag skal aktiveres for */
-    personident: string;
+    personident?: string;
     grunnlagstype: OpplysningerType;
     /** Angi om manuelle opplysninger skal overskrives */
     overskriveManuelleOpplysninger: boolean;
@@ -1849,8 +1847,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {

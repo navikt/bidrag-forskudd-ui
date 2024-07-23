@@ -8,7 +8,6 @@ import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
-import useFeatureToogle from "../../hooks/useFeatureToggle";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
@@ -24,7 +23,6 @@ export const FatteVedtakButtons = ({
     disabled?: boolean;
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const { behandlingId } = useBehandlingProvider();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const fatteVedtakFn = useMutation({
@@ -80,7 +78,7 @@ export const FatteVedtakButtons = ({
             <FlexRow>
                 <Button
                     loading={fatteVedtakFn.isPending}
-                    disabled={isBeregningError || !isFatteVedtakEnabled || fatteVedtakFn.isSuccess || disabled}
+                    disabled={isBeregningError || fatteVedtakFn.isSuccess || disabled}
                     onClick={() => fatteVedtakFn.mutate()}
                     className="w-max"
                     size="small"
