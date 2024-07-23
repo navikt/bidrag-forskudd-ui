@@ -105,7 +105,11 @@ const VedtakResultat = () => {
                                         },
                                         {
                                             label: "Voksne i husstanden",
-                                            value: resultat.voksenIHusstanden ? "Ja" : "Nei",
+                                            value: resultat.voksenIHusstanden
+                                                ? resultat.enesteVoksenIHusstandenErEgetBarn
+                                                    ? "Ja (barn over 18 år)"
+                                                    : "Ja"
+                                                : "Nei",
                                         },
                                     ]}
                                 />

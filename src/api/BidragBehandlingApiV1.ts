@@ -1374,6 +1374,7 @@ export interface ResultatSaerbidragsberegningDto {
     /** @format double */
     antallBarnIHusstanden?: number;
     voksenIHusstanden?: boolean;
+    enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     beløpSomInnkreves: number;
 }
