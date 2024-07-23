@@ -31,6 +31,7 @@ import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@u
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { AvslagListe } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -224,7 +225,9 @@ const Main = () => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
     const erAvslagValgt = getValues("avslag") !== "";
-
+    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
+    const visBetaltAvBpValg =
+        behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -278,7 +281,7 @@ const Main = () => {
                                 {text.title.oversiktOverUtgifter}
                             </Heading>
                         </FlexRow>
-                        <UtgifterListe />
+                        <UtgifterListe visBetaltAvBpValg={visBetaltAvBpValg} />
                     </Box>
                     <FlexRow>
                         <Label size="small">{text.label.godkjentBeløp}:</Label>
@@ -299,7 +302,7 @@ const Main = () => {
                             inputMode="numeric"
                         />
                     </FlexRow>
-                    {behandling.utgift?.kategori?.kategori === Saerbidragskategori.KONFIRMASJON && (
+                    {visBetaltAvBpValg && (
                         <FlexRow>
                             <Label size="small">{text.label.totalt}:</Label>
                             <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
@@ -311,7 +314,7 @@ const Main = () => {
     );
 };
 
-const UtgifterListe = () => {
+const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) => {
     const { pageErrorsOrUnsavedState, setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const saveUtgifter = useOnSaveUtgifter();
@@ -515,7 +518,6 @@ const UtgifterListe = () => {
     };
 
     const defaultUtgiftType = getUtgiftType(behandling.utgift.kategori.kategori);
-    const erKonfirmasjon = behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON;
 
     return (
         <>
@@ -524,7 +526,7 @@ const UtgifterListe = () => {
                     <Table size="small" className="table-fixed table bg-white w-fit">
                         <Table.Header>
                             <Table.Row className="align-baseline">
-                                {erKonfirmasjon && (
+                                {visBetaltAvBpValg && (
                                     <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[84px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
@@ -551,7 +553,7 @@ const UtgifterListe = () => {
                         <Table.Body>
                             {controlledFields.map((item, index) => (
                                 <Table.Row key={item.id + "-" + index}>
-                                    {erKonfirmasjon && (
+                                    {visBetaltAvBpValg && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
                                                 <FormControlledCheckbox
