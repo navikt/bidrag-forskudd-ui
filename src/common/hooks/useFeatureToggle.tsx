@@ -7,7 +7,6 @@ export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK === "true";
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
-    const enableSivilstandV2 = useFlag("behandling.sivilstandv2");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
         queryKey: ["user"],
@@ -23,18 +22,10 @@ export default function useFeatureToogle() {
     }, [userId]);
 
     useEffect(() => {
-        console.debug(
-            "enableFatteVedtak",
-            enableFatteVedtak,
-            "enableSivilstandV2",
-            enableSivilstandV2,
-            "enableAdmin",
-            enableAdmin
-        );
-    }, [enableFatteVedtak, enableSivilstandV2, enableAdmin]);
+        console.debug("enableFatteVedtak", enableFatteVedtak, "enableAdmin", enableAdmin);
+    }, [enableFatteVedtak, enableAdmin]);
     return {
         isAdminEnabled: enableAdmin,
         isFatteVedtakEnabled: enableFatteVedtak,
-        enableSivilstandV2,
     };
 }

@@ -11,6 +11,7 @@ import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "../../../common/components/vedtak/VedtakWrapper";
+import useFeatureToogle from "../../../common/hooks/useFeatureToggle";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløp, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
@@ -19,6 +20,7 @@ const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
     const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
+    const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningSærbidrag())?.status === "error";
 
@@ -36,7 +38,7 @@ const Vedtak = () => {
             <VedtakResultat />
 
             {!beregnetForskudd?.feil && !lesemodus && (
-                <FatteVedtakButtons isBeregningError={isBeregningError} disabled />
+                <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!isFatteVedtakEnabled} />
             )}
             <AdminButtons />
         </div>
