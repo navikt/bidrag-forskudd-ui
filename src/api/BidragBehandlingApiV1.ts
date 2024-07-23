@@ -923,6 +923,7 @@ export interface SaerbidragUtgifterDto {
     beregning?: UtgiftBeregningDto;
     notat: BehandlingNotatDto;
     utgifter: UtgiftspostDto[];
+    valideringsfeil?: UtgiftValideringsfeilDto;
 }
 
 export enum Saerbidragskategori {
@@ -947,6 +948,11 @@ export interface UtgiftBeregningDto {
     totalGodkjentBeløpBp?: number;
     /** Summen av godkjent beløp for utgifter BP har betalt plus beløp som er direkte betalt av BP */
     totalBeløpBetaltAvBp: number;
+}
+
+export interface UtgiftValideringsfeilDto {
+    manglerUtgifter: boolean;
+    ugyldigUtgiftspost: boolean;
 }
 
 export interface UtgiftspostDto {
@@ -1032,6 +1038,7 @@ export interface OppdatereUtgiftResponse {
     notat: BehandlingNotatDto;
     beregning?: UtgiftBeregningDto;
     avslag?: Resultatkode;
+    valideringsfeil?: UtgiftValideringsfeilDto;
 }
 
 export interface OppdatereInntektRequest {
@@ -1438,7 +1445,7 @@ export interface InitalizeForsendelseRequest {
 
 export interface BeregningValideringsfeil {
     virkningstidspunkt?: VirkningstidspunktFeilDto;
-    utgift?: UtgiftFeilDto;
+    utgift?: UtgiftValideringsfeilDto;
     inntekter?: InntektValideringsfeilDto;
     husstandsmedlem?: BoforholdPeriodeseringsfeil[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenPeriodeseringsfeil;
@@ -1465,11 +1472,6 @@ export interface MaBekrefteNyeOpplysninger {
     rolle: RolleDto;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
-}
-
-export interface UtgiftFeilDto {
-    manglerUtgifter: boolean;
-    ugyldigUtgiftspost: boolean;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -1762,22 +1764,23 @@ export interface Arbeidsforhold {
 
 export interface Boforhold {
     barn: BoforholdBarn[];
-    sivilstand: SivilstandNotat;
-    notat: Notat;
+    andreVoksneIHusstanden?: NotatAndreVoksneIHusstanden;
+    sivilstand: NotatSivilstand;
+    notat: SaksbehandlerNotat;
 }
 
 export interface BoforholdBarn {
     gjelder: PersonNotatDto;
     medIBehandling: boolean;
     kilde: Kilde;
-    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretBostatuskode[];
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeUnit[];
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
 
 export interface Inntekter {
     inntekterPerRolle: InntekterPerRolle[];
     offentligeInntekterPerRolle: InntekterPerRolle[];
-    notat: Notat;
+    notat: SaksbehandlerNotat;
 }
 
 export interface InntekterPerRolle {
@@ -1791,9 +1794,31 @@ export interface InntekterPerRolle {
     beregnetInntekter: NotatBeregnetInntektDto[];
 }
 
-export interface Notat {
-    medIVedtaket?: string;
-    intern?: string;
+export interface NotatAndreVoksneIHusstanden {
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeListAndreVoksneIHusstandenDetaljerDto[];
+    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
+}
+
+export interface NotatBehandlingDetaljer {
+    søknadstype?: string;
+    vedtakstype?: Vedtakstype;
+    kategori?: NotatSaerbidragKategoriDto;
+    søktAv?: SoktAvType;
+    /** @format date */
+    mottattDato?: string;
+    søktFraDato?: {
+        /** @format int32 */
+        year?: number;
+        month?: NotatBehandlingDetaljerMonthEnum;
+        /** @format int32 */
+        monthValue?: number;
+        leapYear?: boolean;
+    };
+    /** @format date */
+    virkningstidspunkt?: string;
+    avslag?: Resultatkode;
+    avslagVisningsnavn?: string;
+    kategoriVisningsnavn?: Visningsnavn;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -1802,9 +1827,12 @@ export interface NotatBeregnetInntektDto {
 }
 
 export interface NotatDto {
+    type: NotatDtoTypeEnum;
     saksnummer: string;
+    behandling: NotatBehandlingDetaljer;
     saksbehandlerNavn?: string;
     virkningstidspunkt: Virkningstidspunkt;
+    utgift?: NotatSaerbidragUtgifterDto;
     boforhold: Boforhold;
     roller: PersonNotatDto[];
     inntekter: Inntekter;
@@ -1851,6 +1879,52 @@ export interface NotatResultatPeriodeDto {
     sivilstandVisningsnavn?: string;
 }
 
+export interface NotatSivilstand {
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit[];
+    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
+}
+
+export interface NotatSaerbidragKategoriDto {
+    kategori: Saerbidragskategori;
+    beskrivelse?: string;
+}
+
+export interface NotatSaerbidragUtgifterDto {
+    beregning?: NotatUtgiftBeregningDto;
+    notat: SaksbehandlerNotat;
+    utgifter: NotatUtgiftspostDto[];
+}
+
+export interface NotatUtgiftBeregningDto {
+    /** Beløp som er direkte betalt av BP */
+    beløpDirekteBetaltAvBp: number;
+    /** Summen av godkjente beløp som brukes for beregningen */
+    totalGodkjentBeløp: number;
+    /** Summen av godkjente beløp som brukes for beregningen */
+    totalGodkjentBeløpBp?: number;
+    /** Summen av godkjent beløp for utgifter BP har betalt plus beløp som er direkte betalt av BP */
+    totalBeløpBetaltAvBp: number;
+}
+
+export interface NotatUtgiftspostDto {
+    /**
+     * Når utgifter gjelder. Kan være feks dato på kvittering
+     * @format date
+     */
+    dato: string;
+    /** Type utgift. Kan feks være hva som ble kjøpt for kravbeløp (bugnad, klær, sko, etc) */
+    type: Utgiftstype | string;
+    /** Beløp som er betalt for utgiften det gjelder */
+    kravbeløp: number;
+    /** Beløp som er godkjent for beregningen */
+    godkjentBeløp: number;
+    /** Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp */
+    begrunnelse?: string;
+    /** Om utgiften er betalt av BP */
+    betaltAvBp: boolean;
+    utgiftstypeVisningsnavn: string;
+}
+
 export interface OpplysningerBruktTilBeregningBostatuskode {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
@@ -1865,16 +1939,25 @@ export interface OpplysningerBruktTilBeregningSivilstandskode {
     statusVisningsnavn?: string;
 }
 
-export interface OpplysningerFraFolkeregisteretBostatuskode {
+export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeListAndreVoksneIHusstandenDetaljerDto {
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
+    detaljer?: AndreVoksneIHusstandenDetaljerDto[];
     statusVisningsnavn?: string;
 }
 
-export interface OpplysningerFraFolkeregisteretSivilstandskodePDL {
+export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeUnit {
+    periode: TypeArManedsperiode;
+    status?: Bostatuskode;
+    detaljer?: Unit;
+    statusVisningsnavn?: string;
+}
+
+export interface OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit {
     periode: TypeArManedsperiode;
     /** Type sivilstand fra PDL */
     status?: SivilstandskodePDL;
+    detaljer?: Unit;
     statusVisningsnavn?: string;
 }
 
@@ -1886,10 +1969,12 @@ export interface PersonNotatDto {
     ident?: string;
 }
 
-export interface SivilstandNotat {
-    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretSivilstandskodePDL[];
-    opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
+export interface SaksbehandlerNotat {
+    medIVedtaket?: string;
+    intern?: string;
 }
+
+export type Unit = object;
 
 export interface Vedtak {
     erFattet: boolean;
@@ -1909,11 +1994,16 @@ export interface Virkningstidspunkt {
     søktFraDato?: string;
     /** @format date */
     virkningstidspunkt?: string;
-    årsak?: TypeArsakstype;
     avslag?: Resultatkode;
-    notat: Notat;
+    årsak?: TypeArsakstype;
+    notat: SaksbehandlerNotat;
     årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+}
+
+export interface Visningsnavn {
+    intern: string;
+    bruker: Record<string, string>;
 }
 
 /**
@@ -1977,6 +2067,27 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
 export enum VedtakDtoKildeEnum {
     MANUELT = "MANUELT",
     AUTOMATISK = "AUTOMATISK",
+}
+
+export enum NotatBehandlingDetaljerMonthEnum {
+    JANUARY = "JANUARY",
+    FEBRUARY = "FEBRUARY",
+    MARCH = "MARCH",
+    APRIL = "APRIL",
+    MAY = "MAY",
+    JUNE = "JUNE",
+    JULY = "JULY",
+    AUGUST = "AUGUST",
+    SEPTEMBER = "SEPTEMBER",
+    OCTOBER = "OCTOBER",
+    NOVEMBER = "NOVEMBER",
+    DECEMBER = "DECEMBER",
+}
+
+export enum NotatDtoTypeEnum {
+    FORSKUDD = "FORSKUDD",
+    SAeRBIDRAG = "SÆRBIDRAG",
+    BIDRAG = "BIDRAG",
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";

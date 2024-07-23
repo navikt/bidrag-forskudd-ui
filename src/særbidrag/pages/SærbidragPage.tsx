@@ -16,7 +16,7 @@ export const SærbidragPage = () => {
     const {
         erVedtakFattet,
         vedtakstype,
-        utgift: { avslag },
+        utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -49,7 +49,7 @@ export const SærbidragPage = () => {
                         orientation="horizontal"
                         className="mb-8 w-[708px]"
                     >
-                        <Stepper.Step completed={activeStepIndex > 1}>
+                        <Stepper.Step completed={activeStepIndex > 1 && utgiftValideringsfeil === undefined}>
                             {capitalize(SærligeutgifterStepper.UTGIFTER)}
                         </Stepper.Step>
                         <Stepper.Step

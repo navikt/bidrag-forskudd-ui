@@ -443,6 +443,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             ...currentData.utgift,
                             beregning: response.beregning,
                             utgifter: updatedUtgiftListe,
+                            valideringsfeil: response.valideringsfeil,
                         },
                     };
                 });
@@ -491,6 +492,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                     ...currentData.utgift,
                                     beregning: response.beregning,
                                     utgifter: updatedUtgiftListe,
+                                    valideringsfeil: response.valideringsfeil,
                                 },
                             };
                         });
@@ -715,6 +717,7 @@ const UtgifterForm = () => {
                             avslag: response.avslag,
                             beregning: response.beregning,
                             notat: response.notat,
+                            valideringsfeil: response.valideringsfeil,
                             utgifter: mapUtgifter(response.utgiftposter),
                         },
                     };
