@@ -94,6 +94,7 @@ export const AddBarnForm = ({
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
+                                egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                                 husstandsbarn: currentData.boforhold.husstandsbarn.concat(
                                     response.oppdatertHusstandsbarn
                                 ),
