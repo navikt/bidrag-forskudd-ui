@@ -128,6 +128,7 @@ export const BoforholdOpplysninger = ({
                             boforhold: {
                                 ...currentData.boforhold,
                                 husstandsbarn: response.boforhold.husstandsbarn,
+                                egetBarnErEnesteVoksenIHusstanden: response.boforhold.egetBarnErEnesteVoksenIHusstanden,
                                 valideringsfeil: {
                                     ...currentData.boforhold.valideringsfeil,
                                     husstandsbarn: currentData.boforhold.valideringsfeil.husstandsmedlem.filter(

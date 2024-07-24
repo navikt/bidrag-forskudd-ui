@@ -284,6 +284,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                             ...currentData.boforhold,
                             husstandsbarn: updatedHusstandsbarnListe,
                             valideringsfeil: response.valideringsfeil,
+                            egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                         },
                     };
                 });
@@ -378,6 +379,8 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             ...currentData.boforhold,
                                             husstandsbarn: updatedHusstandsbarnListe,
                                             valideringsfeil: response.valideringsfeil,
+                                            egetBarnErEnesteVoksenIHusstanden:
+                                                response.egetBarnErEnesteVoksenIHusstanden,
                                         },
                                     };
                                 });

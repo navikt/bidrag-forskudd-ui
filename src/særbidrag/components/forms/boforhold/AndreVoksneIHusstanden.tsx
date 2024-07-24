@@ -14,7 +14,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Button, Table } from "@navikt/ds-react";
+import { Alert, Box, Button, Heading, Table } from "@navikt/ds-react";
 import {
     addMonthsIgnoreDay,
     dateOrNull,
@@ -261,6 +261,7 @@ export const AndreVoksneIHusstanden = () => {
                         boforhold: {
                             ...currentData.boforhold,
                             andreVoksneIHusstanden: response.oppdatertePerioderMedAndreVoksne,
+                            egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                         },
                     };
                 });
@@ -360,6 +361,16 @@ export const AndreVoksneIHusstanden = () => {
             className="overflow-hidden grid gap-2 py-2 px-4"
             id={`${elementIds.seksjon_andreVoksneIHusstand}`}
         >
+            {behandling.boforhold?.egetBarnErEnesteVoksenIHusstanden && (
+                <Alert variant="info" size="small" className="w-[708px]">
+                    <Heading size="xsmall" level="4">
+                        18-åring regnes som voksen
+                    </Heading>
+                    Det legges til grunn at BP deler bolig med voksne, uavhengig av status som legges til grunn i
+                    tabellen under
+                </Alert>
+            )}
+
             <div className="grid gap-2">
                 <AndreVoksneIHusstandOpplysninger
                     showResetButton={showResetButton}
