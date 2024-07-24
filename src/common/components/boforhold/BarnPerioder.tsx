@@ -50,13 +50,14 @@ export const BarnPerioder = () => {
         saveBoforhold.mutation.mutate(
             { oppdatereHusstandsmedlem: { slettHusstandsmedlem: barn.id } },
             {
-                onSuccess: () => {
+                onSuccess: (response) => {
                     barnFieldArray.remove(index);
                     saveBoforhold.queryClientUpdater((currentData) => {
                         return {
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
+                                egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                                 husstandsbarn: currentData.boforhold.husstandsbarn.filter((b) => b.id !== barn.id),
                             },
                         };

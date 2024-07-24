@@ -476,6 +476,8 @@ export interface BoforholdDtoV2 {
     sivilstand: SivilstandDto[];
     notat: BehandlingNotatDto;
     valideringsfeil: BoforholdValideringsfeil;
+    /** Er sann hvis status på andre voksne i husstanden er 'BOR_IKKE_MED_ANDRE_VOKSNE', men det er 18 åring i husstanden som regnes som voksen i husstanden */
+    egetBarnErEnesteVoksenIHusstanden?: boolean;
     /** @uniqueItems true */
     husstandsbarn: HusstandsmedlemDtoV2[];
 }
@@ -1236,6 +1238,7 @@ export interface OppdatereBoforholdResponse {
      */
     oppdatertePerioderMedAndreVoksne: BostatusperiodeDto[];
     oppdatertHusstandsmedlem?: HusstandsmedlemDtoV2;
+    egetBarnErEnesteVoksenIHusstanden?: boolean;
     /** @uniqueItems true */
     oppdatertSivilstandshistorikk: SivilstandDto[];
     oppdatertNotat?: OppdaterNotat;
@@ -1998,8 +2001,8 @@ export interface Virkningstidspunkt {
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
     notat: SaksbehandlerNotat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface Visningsnavn {
