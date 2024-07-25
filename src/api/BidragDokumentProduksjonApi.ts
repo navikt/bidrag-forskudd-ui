@@ -185,7 +185,7 @@ export interface NotatBehandlingDetaljer {
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
     avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: Visningsnavn;
+    kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -194,7 +194,7 @@ export interface NotatBeregnetInntektDto {
 }
 
 export interface NotatDto {
-    type: NotatDtoTypeEnum;
+    type: NotatMalType;
     saksnummer: string;
     behandling: NotatBehandlingDetaljer;
     saksbehandlerNavn?: string;
@@ -225,6 +225,12 @@ export interface NotatInntektspostDto {
     visningsnavn?: string;
 }
 
+export enum NotatMalType {
+    FORSKUDD = "FORSKUDD",
+    SAeRBIDRAG = "SÆRBIDRAG",
+    BIDRAG = "BIDRAG",
+}
+
 export interface NotatResultatBeregningBarnDto {
     barn: PersonNotatDto;
     perioder: NotatResultatPeriodeDto[];
@@ -240,8 +246,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export interface NotatSivilstand {
@@ -490,11 +496,6 @@ export interface Virkningstidspunkt {
     årsakVisningsnavn?: string;
 }
 
-export interface Visningsnavn {
-    intern: string;
-    bruker: Record<string, string>;
-}
-
 export interface TypeArManedsperiode {
     /**
      * @pattern YYYY-MM
@@ -535,11 +536,11 @@ export interface MediaType {
     parameters?: Record<string, string>;
     /** @format double */
     qualityValue?: number;
-    wildcardType?: boolean;
-    concrete?: boolean;
-    charset?: string;
     wildcardSubtype?: boolean;
     subtypeSuffix?: string;
+    charset?: string;
+    wildcardType?: boolean;
+    concrete?: boolean;
 }
 
 export enum NotatBehandlingDetaljerMonthEnum {
@@ -555,12 +556,6 @@ export enum NotatBehandlingDetaljerMonthEnum {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum NotatDtoTypeEnum {
-    FORSKUDD = "FORSKUDD",
-    SAeRBIDRAG = "SÆRBIDRAG",
-    BIDRAG = "BIDRAG",
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
@@ -706,11 +701,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags produser-notat-api-v-2
          * @name GeneratePdf
-         * @request POST:/api/v2/notat/pdf/{dokumentmal}
+         * @request POST:/api/v2/notat/pdf
          */
-        generatePdf: (dokumentmal: string, data: NotatDto, params: RequestParams = {}) =>
+        generatePdf: (data: NotatDto, params: RequestParams = {}) =>
             this.request<string, any>({
-                path: `/api/v2/notat/pdf/${dokumentmal}`,
+                path: `/api/v2/notat/pdf`,
                 method: "POST",
                 body: data,
                 type: ContentType.Json,
