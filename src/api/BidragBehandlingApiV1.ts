@@ -312,6 +312,7 @@ export interface AktiveGrunnlagsdata {
     husstandsbarn: HusstandsmedlemGrunnlagDto[];
 }
 
+/** Detaljer om husstandsmedlemmer som bor hos BP for gjeldende periode. Antall hustandsmedlemmer er begrenset til maks 10 personer */
 export interface AndreVoksneIHusstandenDetaljerDto {
     navn: string;
     /** @format date */
@@ -777,6 +778,12 @@ export interface OverlappendePeriode {
 export interface PeriodeAndreVoksneIHusstanden {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
+    /**
+     * Total antall husstandsmedlemmer som bor hos BP for gjeldende periode
+     * @format int32
+     */
+    totalAntallHusstandsmedlemmer: number;
+    /** Detaljer om husstandsmedlemmer som bor hos BP for gjeldende periode. Antall hustandsmedlemmer er begrenset til maks 10 personer */
     husstandsmedlemmer: AndreVoksneIHusstandenDetaljerDto[];
 }
 
@@ -1799,7 +1806,7 @@ export interface InntekterPerRolle {
 }
 
 export interface NotatAndreVoksneIHusstanden {
-    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeListAndreVoksneIHusstandenDetaljerDto[];
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeAndreVoksneIHusstandenDetaljerDto[];
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
 
@@ -1822,7 +1829,7 @@ export interface NotatBehandlingDetaljer {
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
     avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: Visningsnavn;
+    kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -1831,7 +1838,7 @@ export interface NotatBeregnetInntektDto {
 }
 
 export interface NotatDto {
-    type: NotatDtoTypeEnum;
+    type: NotatMalType;
     saksnummer: string;
     behandling: NotatBehandlingDetaljer;
     saksbehandlerNavn?: string;
@@ -1864,10 +1871,16 @@ export interface NotatInntektspostDto {
     visningsnavn?: string;
 }
 
-export interface NotatResultatBeregningBarnDto {
+export enum NotatMalType {
+    FORSKUDD = "FORSKUDD",
+    SAeRBIDRAG = "SÆRBIDRAG",
+    BIDRAG = "BIDRAG",
+}
+
+export type NotatResultatForskuddBeregningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
     barn: PersonNotatDto;
     perioder: NotatResultatPeriodeDto[];
-}
+};
 
 export interface NotatResultatPeriodeDto {
     periode: TypeArManedsperiode;
@@ -1879,9 +1892,26 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
+
+export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
+    periode: TypeArManedsperiode;
+    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
+    beregning?: UtgiftBeregningDto;
+    inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    delberegningUtgift?: DelberegningUtgift;
+    resultat: number;
+    resultatKode: Resultatkode;
+    /** @format double */
+    antallBarnIHusstanden?: number;
+    voksenIHusstanden?: boolean;
+    enesteVoksenIHusstandenErEgetBarn?: boolean;
+    erDirekteAvslag: boolean;
+    beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
+};
 
 export interface NotatSivilstand {
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit[];
@@ -1943,10 +1973,11 @@ export interface OpplysningerBruktTilBeregningSivilstandskode {
     statusVisningsnavn?: string;
 }
 
-export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeListAndreVoksneIHusstandenDetaljerDto {
+export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeAndreVoksneIHusstandenDetaljerDto {
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
-    detaljer?: AndreVoksneIHusstandenDetaljerDto[];
+    /** Detaljer om husstandsmedlemmer som bor hos BP for gjeldende periode. Antall hustandsmedlemmer er begrenset til maks 10 personer */
+    detaljer?: AndreVoksneIHusstandenDetaljerDto;
     statusVisningsnavn?: string;
 }
 
@@ -1985,7 +2016,11 @@ export interface Vedtak {
     fattetAvSaksbehandler?: string;
     /** @format date-time */
     fattetTidspunkt?: string;
-    resultat: NotatResultatBeregningBarnDto[];
+    resultat: (NotatResultatForskuddBeregningBarnDto | NotatResultatSaerbidragsberegningDto)[];
+}
+
+export interface VedtakResultatInnhold {
+    type: NotatMalType;
 }
 
 export interface Virkningstidspunkt {
@@ -2003,11 +2038,6 @@ export interface Virkningstidspunkt {
     notat: SaksbehandlerNotat;
     avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
-}
-
-export interface Visningsnavn {
-    intern: string;
-    bruker: Record<string, string>;
 }
 
 /**
@@ -2086,12 +2116,6 @@ export enum NotatBehandlingDetaljerMonthEnum {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
-}
-
-export enum NotatDtoTypeEnum {
-    FORSKUDD = "FORSKUDD",
-    SAeRBIDRAG = "SÆRBIDRAG",
-    BIDRAG = "BIDRAG",
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";

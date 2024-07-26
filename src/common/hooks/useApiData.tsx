@@ -214,7 +214,6 @@ export const useNotatPdf = (behandlingId?: string, vedtakId?: string) => {
         queryKey: ["notat_pdf", behandlingId, resultPayload.data],
         queryFn: () =>
             BIDRAG_DOKUMENT_PRODUKSJON_API.api.generatePdf(
-                "forskudd",
                 //@ts-ignore
                 resultPayload.data as NotatPayload,
                 {
@@ -249,7 +248,6 @@ export const useNotat = (behandlingId?: string, vedtakId?: string) => {
         queryKey: ["notat_html", behandlingId, resultPayload.data],
         queryFn: () =>
             BIDRAG_DOKUMENT_PRODUKSJON_API.api.generateHtml(
-                "forskudd",
                 //@ts-ignore
                 resultPayload.data as NotatPayload
             ),

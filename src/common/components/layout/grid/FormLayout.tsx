@@ -25,6 +25,7 @@ export const FormLayout = ({
         MutationKeys.updateBoforhold(behandlingId),
         MutationKeys.updateVirkningstidspunkt(behandlingId),
         MutationKeys.updateInntekter(behandlingId),
+        MutationKeys.updateUtgifter(behandlingId),
     ];
     const saveState = useRQMutationState(listenToMutations, queryClient);
 
