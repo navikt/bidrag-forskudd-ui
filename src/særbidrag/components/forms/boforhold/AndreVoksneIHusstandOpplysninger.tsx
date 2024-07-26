@@ -57,7 +57,7 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                                 <div className="flex flex-row gap-[10px]">
                                     {hentVisningsnavn(periode.status)}{" "}
                                     {periode.status === Bostatuskode.BOR_MED_ANDRE_VOKSNE &&
-                                        `(${periode.husstandsmedlemmer.length})`}
+                                        `(${periode.totalAntallHusstandsmedlemmer})`}
                                     <VoksneIHusstandPeriodePersonerButton
                                         husstandsmedlemmer={periode.husstandsmedlemmer}
                                     />
@@ -238,7 +238,7 @@ function NyOpplysningerFraFolkeregistreTabell({
                             <td width="400px" className="flex flex-row gap-[10px]">
                                 {hentVisningsnavn(periode.status)}{" "}
                                 {periode.status === Bostatuskode.BOR_MED_ANDRE_VOKSNE &&
-                                    `(${periode.husstandsmedlemmer.length})`}
+                                    `(${periode.totalAntallHusstandsmedlemmer})`}
                                 <VoksneIHusstandPeriodePersonerButton husstandsmedlemmer={periode.husstandsmedlemmer} />
                             </td>
                         </tr>
