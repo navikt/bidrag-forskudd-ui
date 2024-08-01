@@ -108,7 +108,7 @@ const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
+        return <div className="flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
     }
     return (
         <FormControlledTextField
@@ -348,8 +348,8 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
 
     const onSaveRow = (index: number) => {
         const utgift = getValues(`utgifter.${index}`);
-
         const utgiftErForeldet = erUtgiftForeldet(behandling.mottattdato, utgift.dato);
+
         if (utgift?.dato === null) {
             setError(`utgifter.${index}.dato`, {
                 type: "notValid",
@@ -377,6 +377,8 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
             });
+        } else {
+            clearErrors(`utgifter.${index}.begrunnelse`);
         }
 
         const fieldState = getFieldState(`utgifter.${index}`);
@@ -399,7 +401,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                     },
                 },
                 (updatedValue, oppdatertUtgiftspost) => {
-                    const eksistingUtgifter = getValues(`utgifter`);
+                    const eksisterendeUtgifter = getValues(`utgifter`);
                     setValue(
                         `utgifter`,
                         updatedValue.map((v) => ({
@@ -407,7 +409,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             erRedigerbart:
                                 oppdatertUtgiftspost.id === v.id
                                     ? false
-                                    : eksistingUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
+                                    : eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
                         }))
                     );
                 }
@@ -476,26 +478,15 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
-                        saveUtgifter.queryClientUpdater((currentData) => {
-                            const updatedUgiftIndex = currentData.utgift.utgifter.findIndex(
-                                (u) => u?.id === response.oppdatertUtgiftspost?.id
-                            );
-                            const updatedUtgiftListe = currentData.utgift.utgifter.toSpliced(
-                                updatedUgiftIndex,
-                                1,
-                                response.oppdatertUtgiftspost
-                            );
-
-                            return {
-                                ...currentData,
-                                utgift: {
-                                    ...currentData.utgift,
-                                    beregning: response.beregning,
-                                    utgifter: updatedUtgiftListe,
-                                    valideringsfeil: response.valideringsfeil,
-                                },
-                            };
-                        });
+                        saveUtgifter.queryClientUpdater((currentData) => ({
+                            ...currentData,
+                            utgift: {
+                                ...currentData.utgift,
+                                beregning: response.beregning,
+                                utgifter: response.utgiftposter,
+                                valideringsfeil: response.valideringsfeil,
+                            },
+                        }));
                     },
                     onError: () => {
                         setSaveErrorState({
@@ -554,7 +545,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         </Table.Header>
                         <Table.Body>
                             {controlledFields.map((item, index) => (
-                                <Table.Row key={item.id + "-" + index}>
+                                <Table.Row key={item.id + "-" + index} className="align-top">
                                     {visBetaltAvBpValg && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
