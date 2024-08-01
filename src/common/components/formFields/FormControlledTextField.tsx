@@ -36,9 +36,10 @@ export const FormControlledTextField = ({
         }
     };
 
-    if (!editable) {
-        return <div className="h-8 flex items-center">{field.value?.toString()}</div>;
+    if (!editable || lesemodus) {
+        return <div className="min-h-8 flex items-center">{field.value?.toString()}</div>;
     }
+
     return (
         <TextField
             type={type}
@@ -47,7 +48,6 @@ export const FormControlledTextField = ({
             value={field.value?.toString()}
             onChange={(value) => onChange(value)}
             hideLabel={hideLabel}
-            readOnly={lesemodus}
             disabled={disabled}
             error={fieldState?.error?.message}
             min={min}
