@@ -261,6 +261,14 @@ const Main = () => {
                     <Label size="small">{text.label.mottattdato}:</Label>
                     <BodyShort size="small">{DateToDDMMYYYYString(new Date(behandling.mottattdato))}</BodyShort>
                 </div>
+                {behandling.klageMottattdato && (
+                    <div className="flex gap-x-2">
+                        <Label size="small">{text.label.klageMottattdato}:</Label>
+                        <BodyShort size="small">
+                            {DateToDDMMYYYYString(new Date(behandling.klageMottattdato))}
+                        </BodyShort>
+                    </div>
+                )}
             </FlexRow>
 
             <FlexRow>

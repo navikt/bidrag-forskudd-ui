@@ -435,6 +435,8 @@ export interface BehandlingDtoV2 {
     søktFomDato: string;
     /** @format date */
     mottattdato: string;
+    /** @format date */
+    klageMottattdato?: string;
     søktAv: SoktAvType;
     saksnummer: string;
     /** @format int64 */
@@ -1803,6 +1805,7 @@ export interface InntekterPerRolle {
     småbarnstillegg: NotatInntektDto[];
     kontantstøtte: NotatInntektDto[];
     beregnetInntekter: NotatBeregnetInntektDto[];
+    harInntekter: boolean;
 }
 
 export interface NotatAndreVoksneIHusstanden {
@@ -1892,8 +1895,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -1909,8 +1912,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     voksenIHusstanden?: boolean;
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSivilstand {
@@ -2163,7 +2166,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2252,7 +2258,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2514,10 +2520,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         opprettNotat: (behandlingId: number, params: RequestParams = {}) =>
-            this.request<void, any>({
+            this.request<string, any>({
                 path: `/api/v1/notat/${behandlingId}`,
                 method: "POST",
                 secure: true,
+                format: "json",
                 ...params,
             }),
 
