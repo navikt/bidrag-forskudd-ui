@@ -53,7 +53,7 @@
     "@mdx-js/loader": "^3.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "@testing-library/react": "^14.1.2",
-    "@testing-library/user-event": "^14.5.1",
+    "@testing-library/user-event": "^14.5.2",
     "@types/mocha": "^10.0.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
