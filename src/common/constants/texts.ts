@@ -166,7 +166,10 @@ const tekster = {
         typePlaceholder: "Velg type",
         årsakAvslagPlaceholder: "Velg årsak/avslag",
     },
-    skjermbildeNavn: "Søknad om forskudd",
+    skjermbildeNavn: {
+        forskudd: "Søknad om forskudd",
+        særbidrag: "Søknad om særbidrag",
+    },
     title: {
         andreVoksneIHusstanden: "Andre voksne i husstanden",
         arbeidsforhold: "Arbeidsforhold",
