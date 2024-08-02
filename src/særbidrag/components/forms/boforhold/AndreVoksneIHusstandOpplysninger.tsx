@@ -117,7 +117,7 @@ export const AndreVoksneIHusstandOpplysninger = ({
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningeAndreVoksneIHusstand();
     const activateGrunnlag = useOnActivateGrunnlag();
     const { roller } = useGetBehandlingV2();
-    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState } = useBehandlingProvider();
     const { setValue } = useFormContext<BoforholdFormValues>();
     const aktivePerioder = aktiveOpplysninger.perioder;
     const ikkeAktivertePerioder = ikkeAktiverteOpplysninger?.perioder;
@@ -162,8 +162,6 @@ export const AndreVoksneIHusstandOpplysninger = ({
             }
         );
     };
-
-    if (lesemodus) return null;
 
     return (
         <div className="grid gap-2">
