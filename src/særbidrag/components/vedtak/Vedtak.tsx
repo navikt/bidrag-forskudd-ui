@@ -131,6 +131,10 @@ const VedtakResultat = () => {
                                                 : formatterBeløp(resultat.resultat, true),
                                         },
                                         {
+                                            label: "BP har evne",
+                                            value: resultat.bpHarEvne === false ? "Nei" : "Ja",
+                                        },
+                                        {
                                             label: "Direkte betalt av BP",
                                             value: formatterBeløp(resultat.beregning?.beløpDirekteBetaltAvBp, true),
                                         },
