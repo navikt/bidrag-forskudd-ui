@@ -84,6 +84,24 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
         <div className="h-8 flex items-center">{item.dato && DateToDDMMYYYYString(dateOrNull(item.dato))}</div>
     );
 };
+const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
+    const behandling = useGetBehandlingV2();
+
+    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
+        return <div className="h-8 flex items-center">0</div>;
+    }
+    return (
+        <FormControlledTextField
+            name={`utgifter.${index}.kravbeløp`}
+            label={text.label.kravbeløp}
+            type="number"
+            min="1"
+            inputMode="numeric"
+            hideLabel
+            editable={item.erRedigerbart}
+        />
+    );
+};
 
 const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
@@ -371,7 +389,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
             });
         }
 
-        if (utgift.kravbeløp <= 0) {
+        if (!utgiftErForeldet && utgift.kravbeløp <= 0) {
             setError(`utgifter.${index}.kravbeløp`, {
                 type: "notValid",
                 message: text.error.kravbeløpMinVerdi,
@@ -581,15 +599,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                         <UtgiftType item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
-                                        <FormControlledTextField
-                                            name={`utgifter.${index}.kravbeløp`}
-                                            label={text.label.kravbeløp}
-                                            type="number"
-                                            min="1"
-                                            inputMode="numeric"
-                                            hideLabel
-                                            editable={item.erRedigerbart}
-                                        />
+                                        <Kravbeløp item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
                                         <GodkjentBeløp item={item} index={index} />
