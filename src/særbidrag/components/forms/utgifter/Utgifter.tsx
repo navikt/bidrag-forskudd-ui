@@ -371,6 +371,15 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
             });
         }
 
+        if (utgift.kravbeløp <= 0) {
+            setError(`utgifter.${index}.kravbeløp`, {
+                type: "notValid",
+                message: text.error.kravbeløpMinVerdi,
+            });
+        } else {
+            clearErrors(`utgifter.${index}.kravbeløp`);
+        }
+
         if (utgift.godkjentBeløp > utgift.kravbeløp) {
             setError(`utgifter.${index}.godkjentBeløp`, {
                 type: "notValid",

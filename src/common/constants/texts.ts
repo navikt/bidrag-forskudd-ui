@@ -73,6 +73,7 @@ const tekster = {
         manglerPerioder: "Ingen inntekstperiode er valgt. Du må velge eller legge til minst en løpende periode.",
         inntektType: "Inntekt type må settes",
         navnMåFyllesUt: "Navn må fylles ut",
+        kravbeløpMinVerdi: "Kravbeløp kan ikke være 0 eller mindre",
         kunneIkkeBeregneSivilstandPerioder: "Kunne ikke beregne sivilstand tidslinje basert på virkningstidspunkt.",
         personFinnesIkke: "Finner ikke person med ident: {}",
         statusMåFyllesUt: "Status må fylles ut",
