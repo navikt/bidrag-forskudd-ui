@@ -167,6 +167,7 @@ export enum Resultatkode {
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
+    RESULTAT_MINDRE_ENN_FORSKUDD = "RESULTAT_MINDRE_ENN_FORSKUDD",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
     SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
@@ -1388,6 +1389,7 @@ export interface ResultatSaerbidragsberegningDto {
     voksenIHusstanden?: boolean;
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
+    bpHarEvne: boolean;
     beløpSomInnkreves: number;
 }
 
@@ -1585,7 +1587,6 @@ export enum Grunnlagstype {
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
     SAMVAeRSFRADRAG = "SAMVÆRSFRADRAG",
-    SJABLON = "SJABLON",
     LOPENDEBIDRAG = "LØPENDE_BIDRAG",
     FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
     BARNETILSYNMEDSTONAD = "BARNETILSYN_MED_STØNAD",
@@ -1602,6 +1603,14 @@ export enum Grunnlagstype {
     INNBETALTBELOP = "INNBETALT_BELØP",
     FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
     KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+    SJABLON = "SJABLON",
+    SJABLON_BIDRAGSEVNE = "SJABLON_BIDRAGSEVNE",
+    SJABLON_TRINNVIS_SKATTESATS = "SJABLON_TRINNVIS_SKATTESATS",
+    SJABLON_BARNETILSYN = "SJABLON_BARNETILSYN",
+    SJABLON_FORBRUKSUTGIFTER = "SJABLON_FORBRUKSUTGIFTER",
+    SJABLON_SAMVARSFRADRAG = "SJABLON_SAMVARSFRADRAG",
+    SJABLON_MAKS_FRADRAG = "SJABLON_MAKS_FRADRAG",
+    SJABLON_MAKS_TILSYN = "SJABLON_MAKS_TILSYN",
     BOSTATUS_PERIODE = "BOSTATUS_PERIODE",
     SIVILSTAND_PERIODE = "SIVILSTAND_PERIODE",
     INNTEKT_RAPPORTERING_PERIODE = "INNTEKT_RAPPORTERING_PERIODE",
@@ -1831,6 +1840,8 @@ export interface NotatBehandlingDetaljer {
     /** @format date */
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
+    /** @format date */
+    klageMottattDato?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -1912,8 +1923,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     voksenIHusstanden?: boolean;
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
-    resultatVisningsnavn: string;
     beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
 };
 
 export interface NotatSivilstand {
@@ -2039,8 +2050,8 @@ export interface Virkningstidspunkt {
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
     notat: SaksbehandlerNotat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 /**
@@ -2166,10 +2177,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2258,7 +2266,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

@@ -93,6 +93,7 @@ export interface InntekterPerRolle {
     småbarnstillegg: NotatInntektDto[];
     kontantstøtte: NotatInntektDto[];
     beregnetInntekter: NotatBeregnetInntektDto[];
+    harInntekter: boolean;
 }
 
 export enum Inntektsrapportering {
@@ -198,6 +199,8 @@ export interface NotatBehandlingDetaljer {
     /** @format date */
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
+    /** @format date */
+    klageMottattDato?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -589,19 +592,6 @@ export enum TypeArsakstype {
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
 }
 
-export interface MediaType {
-    type?: string;
-    subtype?: string;
-    parameters?: Record<string, string>;
-    /** @format double */
-    qualityValue?: number;
-    wildcardSubtype?: boolean;
-    subtypeSuffix?: string;
-    charset?: string;
-    wildcardType?: boolean;
-    concrete?: boolean;
-}
-
 export enum NotatBehandlingDetaljerMonthEnum {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
@@ -758,7 +748,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
-         * @tags produser-notat-api-v-2
+         * @tags produser-notat-api
          * @name GeneratePdf
          * @request POST:/api/v2/notat/pdf
          */
@@ -774,7 +764,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /**
          * No description
          *
-         * @tags produser-notat-api-v-2
+         * @tags produser-notat-api
          * @name GenerateHtml
          * @request POST:/api/v2/notat/html
          */
@@ -784,142 +774,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 method: "POST",
                 body: data,
                 type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags produser-notat-api
-         * @name GeneratePdf1
-         * @request POST:/api/notat/pdf/{dokumentmal}
-         */
-        generatePdf1: (dokumentmal: string, data: NotatDto, params: RequestParams = {}) =>
-            this.request<string, any>({
-                path: `/api/notat/pdf/${dokumentmal}`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags produser-notat-api
-         * @name GenerateHtml1
-         * @request POST:/api/notat/html/{dokumentmal}
-         */
-        generateHtml1: (dokumentmal: string, data: NotatDto, params: RequestParams = {}) =>
-            this.request<string, any>({
-                path: `/api/notat/html/${dokumentmal}`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-pdf-controller
-         * @name Image
-         * @request POST:/api/genpdf/image
-         */
-        image: (data: Unit, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genpdf/image`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-pdf-controller
-         * @name Html
-         * @request POST:/api/genpdf/html
-         */
-        html: (data: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genpdf/html`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-html-controller
-         * @name GenerateHtmlFromSample
-         * @request GET:/api/genhtml/{category}/{dokumentmal}
-         */
-        generateHtmlFromSample: (category: string, dokumentmal: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genhtml/${category}/${dokumentmal}`,
-                method: "GET",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-html-controller
-         * @name FromHtml
-         * @request POST:/api/genhtml/{category}/{dokumentmal}
-         */
-        fromHtml: (category: string, dokumentmal: string, data: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genhtml/${category}/${dokumentmal}`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-pdf-controller
-         * @name GeneratePdfFromSample
-         * @request GET:/api/genpdf/{category}/{dokumentmal}
-         */
-        generatePdfFromSample: (category: string, dokumentmal: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genpdf/${category}/${dokumentmal}`,
-                method: "GET",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-pdf-controller
-         * @name GeneratePdfFromSample2
-         * @request GET:/api/genpdf/old/{category}/{dokumentmal}
-         */
-        generatePdfFromSample2: (category: string, dokumentmal: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genpdf/old/${category}/${dokumentmal}`,
-                method: "GET",
-                ...params,
-            }),
-
-        /**
-         * No description
-         *
-         * @tags gen-html-controller
-         * @name GenerateHtmlFromSampleOld
-         * @request GET:/api/genhtml/old/{category}/{dokumentmal}
-         */
-        generateHtmlFromSampleOld: (category: string, dokumentmal: string, params: RequestParams = {}) =>
-            this.request<Unit, any>({
-                path: `/api/genhtml/old/${category}/${dokumentmal}`,
-                method: "GET",
                 ...params,
             }),
     };
