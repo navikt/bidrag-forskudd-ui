@@ -105,6 +105,26 @@ export const ekplisitteYtelser = [
     Inntektsrapportering.BARNETILLEGG,
 ];
 
+export const manuelleInntekterValg = {
+    [TypeBehandling.FORSKUDD]: [
+        Inntektsrapportering.LONNMANUELTBEREGNET,
+        Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+        Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+        Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+    ],
+    [TypeBehandling.SAeRBIDRAG]: [
+        Inntektsrapportering.LONNMANUELTBEREGNET,
+        Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+        Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+        Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+        Inntektsrapportering.SKJONNMANGLENDEBRUKAVEVNE,
+        Inntektsrapportering.SKJONNMANGLENDEDOKUMENTASJON,
+    ],
+};
 export const transformInntekt =
     (virkningsdato: Date) =>
     (inntekt: InntektDtoV2): InntektFormPeriode => {

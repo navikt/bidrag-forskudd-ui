@@ -54,6 +54,18 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 )
             );
         }
+        if (feilInnhold.andreVoksneIHusstanden != null) {
+            feilliste.push(
+                <ErrorSummary.Item
+                    href={`#${elementIds.seksjon_andreVoksneIHusstand}`}
+                    onClick={() => onStepChange(steps.boforhold)}
+                >
+                    {feilInnhold.andreVoksneIHusstanden.manglerPerioder
+                        ? "Mangler perioder for andre voksne i husstanden"
+                        : "Andre voksne i husstanden har ugyldige perioder"}
+                </ErrorSummary.Item>
+            );
+        }
         if (feilInnhold.sivilstand != null) {
             feilliste.push(
                 <ErrorSummary.Item

@@ -1,4 +1,4 @@
-import { Inntektsrapportering, Inntektstype, Kilde } from "@api/BidragBehandlingApiV1";
+import { Inntektstype, Kilde } from "@api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import AinntektLink from "@common/components/inntekt/AinntektLink";
@@ -12,25 +12,20 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
+import { manuelleInntekterValg } from "../../helpers/inntektFormHelpers";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
+    const { type } = useInntektTableProvider();
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
         <FormControlledSelectField
             name={`${field}.rapporteringstype`}
             label={text.label.beskrivelse}
             options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
-                [
-                    Inntektsrapportering.LONNMANUELTBEREGNET,
-                    Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
-                    Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
-                    Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
-                    Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
-                    Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
-                ].map((value) => ({
+                manuelleInntekterValg[type].map((value) => ({
                     value,
                     text: hentVisningsnavn(value),
                 }))
