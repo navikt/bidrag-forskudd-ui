@@ -16,6 +16,7 @@ import { FormControlledTextField } from "@common/components/formFields/FormContr
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
@@ -550,7 +551,12 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
     return (
         <>
             {controlledFields.length > 0 && (
-                <div className="overflow-x-auto whitespace-nowrap">
+                <div
+                    className={`${
+                        saveUtgifter.mutation.isPending ? "relative" : "inherit"
+                    } block overflow-x-auto whitespace-nowrap`}
+                >
+                    <OverlayLoader loading={saveUtgifter.mutation.isPending} />
                     <Table size="small" className="table-fixed table bg-white w-fit">
                         <Table.Header>
                             <Table.Row className="align-baseline">
