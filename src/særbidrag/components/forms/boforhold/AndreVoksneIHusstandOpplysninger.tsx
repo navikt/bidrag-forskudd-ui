@@ -27,7 +27,7 @@ const Header = () => (
 );
 const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    if (!perioder) {
+    if (!perioder || perioder.length === 0) {
         return null;
     }
 

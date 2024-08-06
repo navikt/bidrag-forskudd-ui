@@ -78,7 +78,7 @@ export enum Inntektsrapportering {
     AINNTEKT_KORRIGERT_FOR_BARNETILLEGG = "AINNTEKT_KORRIGERT_FOR_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
-    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
+    SKJONNMANGLENDEDOKUMENTASJON = "SKJØNN_MANGLENDE_DOKUMENTASJON",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
     FODSELADOPSJON = "FØDSEL_ADOPSJON",
     INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER",
@@ -86,7 +86,7 @@ export enum Inntektsrapportering {
     LIGNING_FRA_SKATTEETATEN = "LIGNING_FRA_SKATTEETATEN",
     LONNSOPPGAVEFRASKATTEETATEN = "LØNNSOPPGAVE_FRA_SKATTEETATEN",
     LONNSOPPGAVEFRASKATTEETATENKORRIGERTFORBARNETILLEGG = "LØNNSOPPGAVE_FRA_SKATTEETATEN_KORRIGERT_FOR_BARNETILLEGG",
-    MANGLENDEBRUKAVEVNESKJONN = "MANGLENDE_BRUK_AV_EVNE_SKJØNN",
+    SKJONNMANGLENDEBRUKAVEVNE = "SKJØNN_MANGLENDE_BRUK_AV_EVNE",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
     PENSJON_KORRIGERT_FOR_BARNETILLEGG = "PENSJON_KORRIGERT_FOR_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
@@ -559,8 +559,7 @@ export enum GrunnlagInntektEndringstype {
 }
 
 export interface Grunnlagsinnhentingsfeil {
-    /** @format int64 */
-    rolleid: number;
+    rolle: RolleDto;
     grunnlagsdatatype: OpplysningerType;
     feilmelding: string;
     periode?: Datoperiode | TypeArManedsperiode;
@@ -1923,6 +1922,7 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     voksenIHusstanden?: boolean;
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
+    bpHarEvne: boolean;
     beløpSomInnkreves: number;
     resultatVisningsnavn: string;
 };
@@ -2050,8 +2050,8 @@ export interface Virkningstidspunkt {
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
     notat: SaksbehandlerNotat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 /**

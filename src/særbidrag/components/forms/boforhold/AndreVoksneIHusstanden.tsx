@@ -298,7 +298,7 @@ export const AndreVoksneIHusstanden = () => {
         } else {
             const perioderValues = getValues(`andreVoksneIHusstanden`);
             perioder.append({
-                datoFom: null,
+                datoFom: behandling.virkningstidspunkt?.virkningstidspunkt,
                 datoTom: null,
                 bostatus: Bostatuskode.BOR_MED_ANDRE_VOKSNE,
                 kilde: Kilde.MANUELL,
@@ -468,11 +468,18 @@ export const AndreVoksneIHusstanden = () => {
                             {text.label.angreSisteSteg}
                         </Button>
                     )}
-                    {!lesemodus && !erVirkningstidspunktNåværendeMånedEllerFramITid && (
-                        <Button variant="tertiary" type="button" size="small" className="w-fit" onClick={addPeriode}>
-                            {text.label.leggTilPeriode}
-                        </Button>
-                    )}
+                    {!lesemodus &&
+                        (!erVirkningstidspunktNåværendeMånedEllerFramITid || controlledFields.length === 0) && (
+                            <Button
+                                variant="tertiary"
+                                type="button"
+                                size="small"
+                                className="w-fit"
+                                onClick={addPeriode}
+                            >
+                                {text.label.leggTilPeriode}
+                            </Button>
+                        )}
                 </div>
             </div>
         </Box>
