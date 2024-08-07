@@ -78,7 +78,7 @@ export enum Inntektsrapportering {
     AINNTEKT_KORRIGERT_FOR_BARNETILLEGG = "AINNTEKT_KORRIGERT_FOR_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
-    SKJONNMANGLENDEDOKUMENTASJON = "SKJØNN_MANGLENDE_DOKUMENTASJON",
+    SKJONNMANGLERDOKUMENTASJON = "SKJØNN_MANGLER_DOKUMENTASJON",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
     FODSELADOPSJON = "FØDSEL_ADOPSJON",
     INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER",
@@ -1905,8 +1905,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2050,8 +2050,8 @@ export interface Virkningstidspunkt {
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
     notat: SaksbehandlerNotat;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 /**
