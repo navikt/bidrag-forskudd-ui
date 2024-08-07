@@ -57,7 +57,7 @@ function ForskuddBehandlingProviderWrapper({ children }: PropsWithChildren) {
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
         }),
-        [pageErrorsOrUnsavedState]
+        [JSON.stringify(pageErrorsOrUnsavedState)]
     );
 
     return <BehandlingProvider props={value}>{children}</BehandlingProvider>;

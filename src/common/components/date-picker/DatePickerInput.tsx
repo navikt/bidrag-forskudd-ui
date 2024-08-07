@@ -15,6 +15,7 @@ interface DatePickerInputProps {
     strategy?: "absolute" | "fixed";
     onValidate?: (dateValidation: DateValidationT) => void;
     fieldValue?: Date | string;
+    readOnly?: boolean;
 }
 
 export const DatePickerInput = ({
@@ -30,6 +31,7 @@ export const DatePickerInput = ({
     error,
     strategy = "absolute",
     fieldValue,
+    readOnly,
 }: DatePickerInputProps) => {
     const { datepickerProps, inputProps, setSelected } = useDatepicker({
         fromDate,
@@ -61,6 +63,7 @@ export const DatePickerInput = ({
                 placeholder={placeholder}
                 label={label}
                 error={error}
+                readOnly={readOnly}
                 size="small"
             />
         </DatePicker>

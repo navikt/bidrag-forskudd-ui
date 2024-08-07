@@ -2,6 +2,7 @@ import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
+import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -16,10 +17,9 @@ import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
 import { Tabs } from "@navikt/ds-react";
 import { getSearchParam, scrollToHash, updateUrlSearchParam } from "@utils/window-utils";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
-import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -59,14 +59,16 @@ const Main = () => {
                 </Tabs.List>
                 {roller.map((rolle) => {
                     return (
-                        <InntektTableProvider rolle={rolle} type={type}>
+                        <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
                             <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
                                 <div className="mt-4">
                                     <InntektHeader ident={rolle.ident} />
                                 </div>
-                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
-                                    InntektTableComponent[tableType]()
-                                )}
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => (
+                                    <Fragment key={rolle.ident + tableType}>
+                                        {InntektTableComponent[tableType]()}
+                                    </Fragment>
+                                ))}
                             </Tabs.Panel>
                         </InntektTableProvider>
                     );

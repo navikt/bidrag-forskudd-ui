@@ -145,7 +145,15 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             onConfirm,
             onStepChange,
         }),
-        [activeStep, behandlingId, vedtakId, saksnummer, errorMessage, errorModalOpen, pageErrorsOrUnsavedState]
+        [
+            activeStep,
+            behandlingId,
+            vedtakId,
+            saksnummer,
+            errorMessage,
+            errorModalOpen,
+            JSON.stringify(pageErrorsOrUnsavedState),
+        ]
     );
 
     return (
