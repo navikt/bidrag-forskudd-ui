@@ -122,7 +122,7 @@ export const manuelleInntekterValg = {
         Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
         Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
         Inntektsrapportering.SKJONNMANGLENDEBRUKAVEVNE,
-        Inntektsrapportering.SKJONNMANGLENDEDOKUMENTASJON,
+        Inntektsrapportering.SKJONNMANGLERDOKUMENTASJON,
     ],
 };
 export const transformInntekt =
