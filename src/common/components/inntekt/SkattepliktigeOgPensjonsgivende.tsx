@@ -49,9 +49,8 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
 };
 
 export const SkattepliktigeOgPensjonsgivende = () => {
-    const { ident } = useInntektTableProvider();
+    const { ident, viewOnly } = useInntektTableProvider();
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
-    const { viewOnly } = useInntektTableProvider();
 
     const fieldName = `årsinntekter.${ident}` as const;
 

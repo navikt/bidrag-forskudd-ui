@@ -1,3 +1,4 @@
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { DateValidationT } from "@navikt/ds-react";
 import { toISODateString } from "@utils/date-utils";
 import React from "react";
@@ -28,6 +29,7 @@ export const FormControlledDatePicker = ({
     onChange,
     toDate,
 }: FormControlledDatePickerProps) => {
+    const { lesemodus } = useBehandlingProvider();
     const { control, setError, clearErrors } = useFormContext();
     const { field, fieldState } = useController({
         name,
@@ -57,6 +59,7 @@ export const FormControlledDatePicker = ({
     return (
         <DatePickerInput
             label={label}
+            readOnly={lesemodus}
             placeholder={placeholder}
             onChange={(value) => handleChange(value)}
             defaultValue={defaultValue}

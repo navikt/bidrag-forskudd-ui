@@ -1,6 +1,6 @@
+import { RolleDto, Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
 import React, { createContext, PropsWithChildren, useContext } from "react";
 
-import { RolleDto, Rolletype, TypeBehandling } from "../../../api/BidragBehandlingApiV1";
 import { InntektTableType } from "../../helpers/inntektFormHelpers";
 import { Barnetillegg } from "./Barnetillegg";
 import { BeregnetInntekter } from "./BeregnetInntekter";

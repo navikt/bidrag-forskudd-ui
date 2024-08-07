@@ -69,9 +69,7 @@ const getUtgiftType = (kategori: Saerbidragskategori): Utgiftstype | "" => {
 };
 
 const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    const { lesemodus } = useBehandlingProvider();
-
-    return item.erRedigerbart && !lesemodus ? (
+    return item.erRedigerbart ? (
         <FormControlledDatePicker
             name={`utgifter.${index}.dato`}
             label={text.label.forfallsdato}
@@ -89,7 +87,7 @@ const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center">0</div>;
+        return <div className="h-8 flex items-center justify-end">0</div>;
     }
     return (
         <FormControlledTextField
@@ -108,7 +106,7 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center">0</div>;
+        return <div className="h-8 flex items-center justify-end">0</div>;
     }
     return (
         <FormControlledTextField
@@ -557,7 +555,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                     } block overflow-x-auto whitespace-nowrap`}
                 >
                     <OverlayLoader loading={saveUtgifter.mutation.isPending} />
-                    <Table size="small" className="table-fixed table bg-white w-fit">
+                    <Table size="small" className="table-fixed table bg-white w-full">
                         <Table.Header>
                             <Table.Row className="align-baseline">
                                 {visBetaltAvBpValg && (
@@ -565,19 +563,19 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
                                 )}
-                                <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
                                     {text.label.forfallsdato}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[158px]">
                                     {text.label.utgift}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" className="w-[154px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                                     {text.label.kravbeløp}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" className="w-[154px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" className="w-[154px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[248px]">
                                     {text.label.begrunnelse}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>

@@ -37,7 +37,11 @@ export const FormControlledTextField = ({
     };
 
     if (!editable) {
-        return <div className="min-h-8 flex items-center">{field.value?.toString()}</div>;
+        return (
+            <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>
+                {field.value?.toString()}
+            </div>
+        );
     }
 
     return (

@@ -36,8 +36,6 @@ import { InntektTables } from "../../../forskudd/context/ForskuddBehandlingProvi
 import { getFomAndTomForMonthPicker } from "../../helpers/virkningstidspunktHelpers";
 import { useInntektTableProvider } from "./InntektTableContext";
 
-export type InntektTableProps = { ident: string };
-
 export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
         <div className="h-8 w-full flex items-center justify-center">
@@ -198,8 +196,7 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
-        useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
     const {
         inntekter,
         søktFomDato,
@@ -226,8 +223,8 @@ export const InntektTabel = ({
     const [inntektType, ident, barnIdent] = fieldName.split(".");
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((state) => ({
+            ...state,
             inntekt: {
                 error:
                     !ObjectUtils.isEmpty(formState.errors.årsinntekter) ||
@@ -236,11 +233,11 @@ export const InntektTabel = ({
                     !ObjectUtils.isEmpty(formState.errors.kontantstøtte) ||
                     !ObjectUtils.isEmpty(formState.errors.utvidetBarnetrygd),
                 openFields: {
-                    ...pageErrorsOrUnsavedState.inntekt.openFields,
-                    [fieldName]: getValues(fieldName).some((period) => period.erRedigerbart),
+                    ...state.inntekt.openFields,
+                    [fieldName]: controlledFields.some((period) => !!period.erRedigerbart),
                 },
             },
-        });
+        }));
     }, [formState.errors, JSON.stringify(controlledFields)]);
 
     const handleOnSelect = (taMed: boolean, index: number) => {
