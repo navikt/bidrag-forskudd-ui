@@ -172,7 +172,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
-    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting.some(
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
         (innhentingsFeil) =>
             innhentingsFeil.rolle.ident === barn.ident &&
             innhentingsFeil.grunnlagsdatatype === OpplysningerType.BOFORHOLD

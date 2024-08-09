@@ -192,7 +192,7 @@ export const AndreVoksneIHusstanden = () => {
         ...field,
         ...watchFieldArray[index],
     }));
-    const feilVedInnhentingAvOffentligData = behandling.feilOppståttVedSisteGrunnlagsinnhenting.some(
+    const feilVedInnhentingAvOffentligData = behandling.feilOppståttVedSisteGrunnlagsinnhenting?.some(
         (innhentingsFeil) => innhentingsFeil.grunnlagsdatatype === OpplysningerType.BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN
     );
 

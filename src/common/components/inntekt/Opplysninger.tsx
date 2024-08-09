@@ -49,7 +49,7 @@ export const Opplysninger = ({
     const { resetField } = useFormContext<InntektFormValues>();
     const [inntektType] = fieldName.split(".");
     const transformFn = transformInntekt(virkningsdato);
-    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting.some(
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
         (innhentingsFeil) =>
             ident === innhentingsFeil.rolle.ident &&
             innhentingsFeil.grunnlagsdatatype === inntektTypeToOpplysningerMapper[inntektType]
