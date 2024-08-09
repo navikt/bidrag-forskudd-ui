@@ -1,4 +1,11 @@
-import { Bostatuskode, BostatusperiodeDto, Kilde, OppdatereBoforholdRequestV2 } from "@api/BidragBehandlingApiV1";
+import {
+    Bostatuskode,
+    BostatusperiodeDto,
+    Kilde,
+    OppdatereBoforholdRequestV2,
+    OpplysningerType,
+} from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
@@ -185,6 +192,9 @@ export const AndreVoksneIHusstanden = () => {
         ...field,
         ...watchFieldArray[index],
     }));
+    const feilVedInnhentingAvOffentligData = behandling.feilOppståttVedSisteGrunnlagsinnhenting.some(
+        (innhentingsFeil) => innhentingsFeil.grunnlagsdatatype === OpplysningerType.BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN
+    );
 
     useEffect(() => {
         setPageErrorsOrUnsavedState({
@@ -380,6 +390,15 @@ export const AndreVoksneIHusstanden = () => {
                     }}
                     resetTilDataFraFreg={resetTilDataFraFreg}
                 />
+                {feilVedInnhentingAvOffentligData && (
+                    <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                        <Heading size="small" level="3">
+                            {text.alert.feilVedInnhentingAvOffentligData}
+                        </Heading>
+                        {text.feilVedInnhentingAvOffentligData}
+                    </BehandlingAlert>
+                )}
+
                 {controlledFields.length > 0 && (
                     <div
                         className={`${

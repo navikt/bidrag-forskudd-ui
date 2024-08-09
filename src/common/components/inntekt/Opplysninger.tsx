@@ -5,6 +5,7 @@ import {
     OpplysningerType,
     Rolletype,
 } from "@api/BidragBehandlingApiV1";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
@@ -40,14 +41,30 @@ export const Opplysninger = ({
         | `kontantstøtte.${string}.${string}`;
 }) => {
     const { ident } = useInntektTableProvider();
-    const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
+    const { ikkeAktiverteEndringerIGrunnlagsdata, roller, feilOppståttVedSisteGrunnlagsinnhenting } =
+        useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
     const { resetField } = useFormContext<InntektFormValues>();
-    const transformFn = transformInntekt(virkningsdato);
-
     const [inntektType] = fieldName.split(".");
+    const transformFn = transformInntekt(virkningsdato);
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting.some(
+        (innhentingsFeil) =>
+            ident === innhentingsFeil.rolle.ident &&
+            innhentingsFeil.grunnlagsdatatype === inntektTypeToOpplysningerMapper[inntektType]
+    );
+
+    if (feilVedInnhentingAvOffentligData)
+        return (
+            <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                <Heading size="small" level="3">
+                    {text.alert.feilVedInnhentingAvOffentligData}
+                </Heading>
+                {text.feilVedInnhentingAvOffentligData}
+            </BehandlingAlert>
+        );
+
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
     const ikkeAktiverteEndringer: { [p: string]: IkkeAktivInntektDto[] } = roller.reduce(

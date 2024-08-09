@@ -4,6 +4,7 @@ import {
     HusstandsmedlemDtoV2,
     Kilde,
     OppdatereBoforholdRequestV2,
+    OpplysningerType,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { BoforholdOpplysninger } from "@common/components/boforhold/BoforholdOpplysninger";
@@ -140,6 +141,7 @@ const Status = ({
 export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
+        feilOppståttVedSisteGrunnlagsinnhenting,
     } = useGetBehandlingV2();
     const {
         behandlingId,
@@ -170,6 +172,11 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const barn = getValues(`husstandsbarn.${barnIndex}`);
     const barnIsOver18 = isOver18YearsOld(barn.fødselsdato);
     const monthAfter18 = getFirstDayOfMonthAfterEighteenYears(new Date(barn.fødselsdato));
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting.some(
+        (innhentingsFeil) =>
+            innhentingsFeil.rolle.ident === barn.ident &&
+            innhentingsFeil.grunnlagsdatatype === OpplysningerType.BOFORHOLD
+    );
 
     useEffect(() => {
         setPageErrorsOrUnsavedState({
@@ -484,6 +491,14 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     </Heading>
                     {text.barnetHarFylt18SjekkBostatus}
                 </StatefulAlert>
+            )}
+            {feilVedInnhentingAvOffentligData && (
+                <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                    <Heading size="small" level="3">
+                        {text.alert.feilVedInnhentingAvOffentligData}
+                    </Heading>
+                    {text.feilVedInnhentingAvOffentligData}
+                </BehandlingAlert>
             )}
             {valideringsfeilForBarn && (
                 <div className="mb-4">
