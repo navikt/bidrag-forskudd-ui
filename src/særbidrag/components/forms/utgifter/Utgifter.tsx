@@ -312,21 +312,27 @@ const Main = () => {
                         <Label size="small">{text.label.godkjentBeløp}:</Label>
                         <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
                     </FlexRow>
-                    <hr className="w-full bg-[var(--a-border-divider)] h-px" />
-                    <FlexRow>
-                        <Heading level="2" size="small">
-                            {text.title.betaltAvBp}
-                        </Heading>
-                    </FlexRow>
-                    <FlexRow>
-                        <FormControlledTextField
-                            name={`beregning.beløpDirekteBetaltAvBp`}
-                            label={text.label.direkteBetalt}
-                            type="number"
-                            min="1"
-                            inputMode="numeric"
-                        />
-                    </FlexRow>
+                    {isSærbidragBetaltAvBpEnabled && (
+                        <>
+                            <hr className="w-full bg-[var(--a-border-divider)] h-px" />
+                            <FlexRow>
+                                <Heading level="2" size="small">
+                                    {text.title.betaltAvBp}
+                                </Heading>
+                            </FlexRow>
+                            (
+                            <FlexRow>
+                                <FormControlledTextField
+                                    name={`beregning.beløpDirekteBetaltAvBp`}
+                                    label={text.label.direkteBetalt}
+                                    type="number"
+                                    min="1"
+                                    inputMode="numeric"
+                                />
+                            </FlexRow>
+                            )
+                        </>
+                    )}
                     {visBetaltAvBpValg && (
                         <FlexRow>
                             <Label size="small">{text.label.totalt}:</Label>

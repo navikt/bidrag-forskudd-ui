@@ -48,6 +48,7 @@ const Vedtak = () => {
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
 
+    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;
         const erDirekteAvslag = beregnetSærbidrag.resultat?.erDirekteAvslag;
@@ -134,7 +135,7 @@ const VedtakResultat = () => {
                                             label: "BP har evne",
                                             value: resultat.bpHarEvne === false ? "Nei" : "Ja",
                                         },
-                                        {
+                                        isSærbidragBetaltAvBpEnabled && {
                                             label: "Direkte betalt av BP",
                                             value: formatterBeløp(resultat.beregning?.beløpDirekteBetaltAvBp, true),
                                         },
@@ -144,7 +145,7 @@ const VedtakResultat = () => {
                                                 ? "Avslag"
                                                 : formatterBeløp(resultat.beløpSomInnkreves, true),
                                         },
-                                    ]}
+                                    ].filter((d) => d)}
                                 />
                             </HStack>
                         </div>
