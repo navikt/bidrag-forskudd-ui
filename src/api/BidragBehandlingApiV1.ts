@@ -167,7 +167,7 @@ export enum Resultatkode {
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
-    RESULTAT_MINDRE_ENN_FORSKUDD = "RESULTAT_MINDRE_ENN_FORSKUDD",
+    GODKJENTBELOPLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_LAVERE_ENN_FORSKUDDSSATS",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
     SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
@@ -1802,6 +1802,8 @@ export interface Inntekter {
     inntekterPerRolle: InntekterPerRolle[];
     offentligeInntekterPerRolle: InntekterPerRolle[];
     notat: SaksbehandlerNotat;
+    /** @uniqueItems true */
+    notatPerRolle: SaksbehandlerNotat[];
 }
 
 export interface InntekterPerRolle {
@@ -1905,8 +1907,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2021,6 +2023,7 @@ export interface PersonNotatDto {
 export interface SaksbehandlerNotat {
     medIVedtaket?: string;
     intern?: string;
+    gjelder?: PersonNotatDto;
 }
 
 export type Unit = object;
@@ -2050,8 +2053,8 @@ export interface Virkningstidspunkt {
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
     notat: SaksbehandlerNotat;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 /**
