@@ -53,7 +53,7 @@ const VedtakResultat = () => {
         if (beregnetSærbidrag.feil) return;
         const erDirekteAvslag = beregnetSærbidrag.resultat?.erDirekteAvslag;
         const erGodkjentBeløpLavereEnnForskuddssats =
-            beregnetSærbidrag.resultat?.resultatKode === Resultatkode.GODKJENTBELOPLAVEREENNFORSKUDDSSATS;
+            beregnetSærbidrag.resultat?.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS;
         const erBeregningeAvslag = beregnetSærbidrag.resultat?.resultatKode !== Resultatkode.SAeRBIDRAGINNVILGET;
         const resultat = beregnetSærbidrag.resultat;
         if (erDirekteAvslag) {
