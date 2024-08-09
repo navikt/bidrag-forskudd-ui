@@ -23,6 +23,7 @@ const tekster = {
         enEllerFlereInntektPerioderLagtTil: "En eller flere inntekt perioder har blitt lagt til rolle med ident - {}",
         enEllerFlereSivilstandPerioderEndret: "En eller flere sivilstandsperioder har blitt endret",
         feilIPeriodisering: "Feil i periodisering",
+        feilVedInnhentingAvOffentligData: "Data fra offentlig registre feiler",
         nyOpplysninger: "Nye opplysninger fra offentlig register vil erstatte de gamle",
         nyOpplysningerBoforhold: "Vil du ta i bruk de nye opplysningene?",
         nyOpplysningerInfo: "Nye opplysninger fra offentlig register er tilgjengelig.",
@@ -217,6 +218,7 @@ const tekster = {
     },
     barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig.",
     resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
+    feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
     år: "år",
 };
 export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
