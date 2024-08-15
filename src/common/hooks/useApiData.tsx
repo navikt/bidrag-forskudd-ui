@@ -18,7 +18,7 @@ import {
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
 } from "@api/BidragBehandlingApiV1";
-import { NotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
+import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";

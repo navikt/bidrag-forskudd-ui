@@ -26,7 +26,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
@@ -251,7 +251,11 @@ const Main = () => {
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
                     <BodyShort size="small">
-                        {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
+                        {behandling.opprinneligVedtakstype
+                            ? `${hentVisningsnavn(behandling.opprinneligVedtakstype)} (${hentVisningsnavn(
+                                  behandling.vedtakstype
+                              )})`
+                            : hentVisningsnavn(behandling.vedtakstype)}
                     </BodyShort>
                 </div>
                 {behandling.utgift.kategori.kategori !== Saerbidragskategori.ANNET && (
@@ -320,7 +324,6 @@ const Main = () => {
                                     {text.title.betaltAvBp}
                                 </Heading>
                             </FlexRow>
-                            (
                             <FlexRow>
                                 <FormControlledTextField
                                     name={`beregning.beløpDirekteBetaltAvBp`}
@@ -330,7 +333,6 @@ const Main = () => {
                                     inputMode="numeric"
                                 />
                             </FlexRow>
-                            )
                         </>
                     )}
                     {visBetaltAvBpValg && (
