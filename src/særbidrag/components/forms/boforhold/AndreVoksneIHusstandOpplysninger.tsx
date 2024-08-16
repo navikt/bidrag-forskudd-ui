@@ -80,10 +80,8 @@ const VoksneIHusstandPeriodePersonerButton = ({
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [openState, setOpenState] = useState(false);
     if (husstandsmedlemmer.length === 0) return null;
-    // const harRelasjonTilBp = husstandsmedlemmer.some((r) => r.harRelasjonTilBp);
     return (
         <>
-            {/* {harRelasjonTilBp && <PersonTallShortIcon style={{ scale: "1.7" }} />} */}
             <Button variant="tertiary" size="xsmall" onClick={() => setOpenState(!openState)} ref={buttonRef}>
                 Hvem bor på adresse?
             </Button>
@@ -95,9 +93,6 @@ const VoksneIHusstandPeriodePersonerButton = ({
                                 <li key={husstandsmedlem.navn + "-" + index}>
                                     {husstandsmedlem.navn} (
                                     {DateToDDMMYYYYString(dateOrNull(husstandsmedlem.fødselsdato))})
-                                    {/* {husstandsmedlem.harRelasjonTilBp && (
-                                        <PersonTallShortIcon style={{ scale: "1.7", marginLeft: "5px" }} />
-                                    )} */}
                                     {husstandsmedlem.harRelasjonTilBp && ", relasjon til BP"}
                                 </li>
                             );
