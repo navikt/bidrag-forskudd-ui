@@ -26,7 +26,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { capitalize, deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
+import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
@@ -130,7 +130,7 @@ const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
     return (
         <FormControlledTextField
             name={`utgifter.${index}.begrunnelse`}
-            label={text.label.begrunnelse}
+            label={text.label.kommentar}
             hideLabel
             editable={item.erRedigerbart}
         />
@@ -250,9 +250,7 @@ const Main = () => {
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">
-                        {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
-                    </BodyShort>
+                    <BodyShort size="small">{behandling.vedtakstypeVisningsnavn}</BodyShort>
                 </div>
                 {behandling.utgift.kategori.kategori !== Saerbidragskategori.ANNET && (
                     <div className="flex gap-x-2">
@@ -320,7 +318,6 @@ const Main = () => {
                                     {text.title.betaltAvBp}
                                 </Heading>
                             </FlexRow>
-                            (
                             <FlexRow>
                                 <FormControlledTextField
                                     name={`beregning.beløpDirekteBetaltAvBp`}
@@ -330,7 +327,6 @@ const Main = () => {
                                     inputMode="numeric"
                                 />
                             </FlexRow>
-                            )
                         </>
                     )}
                     {visBetaltAvBpValg && (
@@ -582,7 +578,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[248px]">
-                                    {text.label.begrunnelse}
+                                    {text.label.kommentar}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
@@ -590,7 +586,16 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         </Table.Header>
                         <Table.Body>
                             {controlledFields.map((item, index) => (
-                                <Table.Row key={item.id + "-" + index} className="align-top">
+                                <Table.Row
+                                    key={item.id + "-" + index}
+                                    className="align-top"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            onSaveRow(index);
+                                        }
+                                    }}
+                                >
                                     {visBetaltAvBpValg && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">

@@ -25,15 +25,8 @@ export interface Arbeidsforhold {
     lønnsendringDato?: string;
 }
 
-export interface Boforhold {
-    barn: BoforholdBarn[];
-    andreVoksneIHusstanden?: NotatAndreVoksneIHusstanden;
-    sivilstand: NotatSivilstand;
-    notat: SaksbehandlerNotat;
-}
-
 export interface BoforholdBarn {
-    gjelder: PersonNotatDto;
+    gjelder: NotatRolleDto;
     medIBehandling: boolean;
     kilde: Kilde;
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeUnit[];
@@ -78,14 +71,8 @@ export interface DelberegningUtgift {
     sumGodkjent: number;
 }
 
-export interface Inntekter {
-    inntekterPerRolle: InntekterPerRolle[];
-    offentligeInntekterPerRolle: InntekterPerRolle[];
-    notat: SaksbehandlerNotat;
-}
-
 export interface InntekterPerRolle {
-    gjelder: PersonNotatDto;
+    gjelder: NotatRolleDto;
     arbeidsforhold: Arbeidsforhold[];
     årsinntekter: NotatInntektDto[];
     barnetillegg: NotatInntektDto[];
@@ -128,7 +115,7 @@ export enum Inntektsrapportering {
     AINNTEKT_KORRIGERT_FOR_BARNETILLEGG = "AINNTEKT_KORRIGERT_FOR_BARNETILLEGG",
     BARNETRYGD_MANUELL_VURDERING = "BARNETRYGD_MANUELL_VURDERING",
     BARNS_SYKDOM = "BARNS_SYKDOM",
-    DOKUMENTASJONMANGLERSKJONN = "DOKUMENTASJON_MANGLER_SKJØNN",
+    SKJONNMANGLERDOKUMENTASJON = "SKJØNN_MANGLER_DOKUMENTASJON",
     FORDELSAeRFRADRAGENSLIGFORSORGER = "FORDEL_SÆRFRADRAG_ENSLIG_FORSØRGER",
     FODSELADOPSJON = "FØDSEL_ADOPSJON",
     INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER = "INNTEKTSOPPLYSNINGER_FRA_ARBEIDSGIVER",
@@ -136,7 +123,7 @@ export enum Inntektsrapportering {
     LIGNING_FRA_SKATTEETATEN = "LIGNING_FRA_SKATTEETATEN",
     LONNSOPPGAVEFRASKATTEETATEN = "LØNNSOPPGAVE_FRA_SKATTEETATEN",
     LONNSOPPGAVEFRASKATTEETATENKORRIGERTFORBARNETILLEGG = "LØNNSOPPGAVE_FRA_SKATTEETATEN_KORRIGERT_FOR_BARNETILLEGG",
-    MANGLENDEBRUKAVEVNESKJONN = "MANGLENDE_BRUK_AV_EVNE_SKJØNN",
+    SKJONNMANGLENDEBRUKAVEVNE = "SKJØNN_MANGLENDE_BRUK_AV_EVNE",
     NETTO_KAPITALINNTEKT = "NETTO_KAPITALINNTEKT",
     PENSJON_KORRIGERT_FOR_BARNETILLEGG = "PENSJON_KORRIGERT_FOR_BARNETILLEGG",
     REHABILITERINGSPENGER = "REHABILITERINGSPENGER",
@@ -181,7 +168,15 @@ export interface NotatAndreVoksneIHusstanden {
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
 
-export interface NotatBehandlingDetaljer {
+/** Notat begrunnelse skrevet av saksbehandler */
+export interface NotatBegrunnelseDto {
+    innhold?: string;
+    /** @deprecated */
+    intern?: string;
+    gjelder?: NotatRolleDto;
+}
+
+export interface NotatBehandlingDetaljerDto {
     søknadstype?: string;
     vedtakstype?: Vedtakstype;
     kategori?: NotatSaerbidragKategoriDto;
@@ -191,7 +186,7 @@ export interface NotatBehandlingDetaljer {
     søktFraDato?: {
         /** @format int32 */
         year?: number;
-        month?: NotatBehandlingDetaljerMonthEnum;
+        month?: NotatBehandlingDetaljerDtoMonthEnum;
         /** @format int32 */
         monthValue?: number;
         leapYear?: boolean;
@@ -206,21 +201,18 @@ export interface NotatBehandlingDetaljer {
 }
 
 export interface NotatBeregnetInntektDto {
-    gjelderBarn: PersonNotatDto;
+    gjelderBarn: NotatRolleDto;
     summertInntektListe: DelberegningSumInntekt[];
 }
 
-export interface NotatDto {
-    type: NotatMalType;
-    saksnummer: string;
-    behandling: NotatBehandlingDetaljer;
-    saksbehandlerNavn?: string;
-    virkningstidspunkt: Virkningstidspunkt;
-    utgift?: NotatSaerbidragUtgifterDto;
-    boforhold: Boforhold;
-    roller: PersonNotatDto[];
-    inntekter: Inntekter;
-    vedtak: Vedtak;
+export interface NotatBoforholdDto {
+    barn: BoforholdBarn[];
+    andreVoksneIHusstanden?: NotatAndreVoksneIHusstanden;
+    sivilstand: NotatSivilstand;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse: NotatBegrunnelseDto;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    notat: NotatBegrunnelseDto;
 }
 
 export interface NotatInntektDto {
@@ -230,9 +222,20 @@ export interface NotatInntektDto {
     kilde: Kilde;
     type: Inntektsrapportering;
     medIBeregning: boolean;
-    gjelderBarn?: PersonNotatDto;
+    gjelderBarn?: NotatRolleDto;
     inntektsposter: NotatInntektspostDto[];
     visningsnavn: string;
+}
+
+export interface NotatInntekterDto {
+    inntekterPerRolle: InntekterPerRolle[];
+    offentligeInntekterPerRolle: InntekterPerRolle[];
+    /** Notat begrunnelse skrevet av saksbehandler */
+    notat: NotatBegrunnelseDto;
+    /** @uniqueItems true */
+    notatPerRolle: NotatBegrunnelseDto[];
+    /** @uniqueItems true */
+    begrunnelsePerRolle: NotatBegrunnelseDto[];
 }
 
 export interface NotatInntektspostDto {
@@ -249,7 +252,7 @@ export enum NotatMalType {
 }
 
 export type NotatResultatForskuddBeregningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
-    barn: PersonNotatDto;
+    barn: NotatRolleDto;
     perioder: NotatResultatPeriodeDto[];
 };
 
@@ -263,8 +266,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -280,9 +283,18 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     voksenIHusstanden?: boolean;
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
+    bpHarEvne: boolean;
     beløpSomInnkreves: number;
     resultatVisningsnavn: string;
 };
+
+export interface NotatRolleDto {
+    rolle?: Rolletype;
+    navn?: string;
+    /** @format date */
+    fødselsdato?: string;
+    ident?: string;
+}
 
 export interface NotatSivilstand {
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit[];
@@ -296,7 +308,10 @@ export interface NotatSaerbidragKategoriDto {
 
 export interface NotatSaerbidragUtgifterDto {
     beregning?: NotatUtgiftBeregningDto;
-    notat: SaksbehandlerNotat;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse: NotatBegrunnelseDto;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    notat: NotatBegrunnelseDto;
     utgifter: NotatUtgiftspostDto[];
 }
 
@@ -328,6 +343,34 @@ export interface NotatUtgiftspostDto {
     /** Om utgiften er betalt av BP */
     betaltAvBp: boolean;
     utgiftstypeVisningsnavn: string;
+}
+
+export interface NotatVedtakDetaljerDto {
+    erFattet: boolean;
+    fattetAvSaksbehandler?: string;
+    /** @format date-time */
+    fattetTidspunkt?: string;
+    resultat: (NotatResultatForskuddBeregningBarnDto | NotatResultatSaerbidragsberegningDto)[];
+}
+
+export interface NotatVirkningstidspunktDto {
+    søknadstype?: string;
+    vedtakstype?: Vedtakstype;
+    søktAv?: SoktAvType;
+    /** @format date */
+    mottattDato?: string;
+    /** @format date */
+    søktFraDato?: string;
+    /** @format date */
+    virkningstidspunkt?: string;
+    avslag?: Resultatkode;
+    årsak?: TypeArsakstype;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse: NotatBegrunnelseDto;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    notat: NotatBegrunnelseDto;
+    avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -365,14 +408,6 @@ export interface OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit
     statusVisningsnavn?: string;
 }
 
-export interface PersonNotatDto {
-    rolle?: Rolletype;
-    navn?: string;
-    /** @format date */
-    fødselsdato?: string;
-    ident?: string;
-}
-
 export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBM?: number;
     inntektBP?: number;
@@ -398,6 +433,7 @@ export enum Resultatkode {
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
+    GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
     SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
@@ -433,11 +469,6 @@ export enum Rolletype {
     BP = "BP",
     FR = "FR",
     RM = "RM",
-}
-
-export interface SaksbehandlerNotat {
-    medIVedtaket?: string;
-    intern?: string;
 }
 
 export enum Sivilstandskode {
@@ -509,12 +540,17 @@ export enum Utgiftstype {
     ANNET = "ANNET",
 }
 
-export interface Vedtak {
-    erFattet: boolean;
-    fattetAvSaksbehandler?: string;
-    /** @format date-time */
-    fattetTidspunkt?: string;
-    resultat: (NotatResultatForskuddBeregningBarnDto | NotatResultatSaerbidragsberegningDto)[];
+export interface VedtakNotatDto {
+    type: NotatMalType;
+    saksnummer: string;
+    behandling: NotatBehandlingDetaljerDto;
+    saksbehandlerNavn?: string;
+    virkningstidspunkt: NotatVirkningstidspunktDto;
+    utgift?: NotatSaerbidragUtgifterDto;
+    boforhold: NotatBoforholdDto;
+    roller: NotatRolleDto[];
+    inntekter: NotatInntekterDto;
+    vedtak: NotatVedtakDetaljerDto;
 }
 
 export interface VedtakResultatInnhold {
@@ -532,23 +568,6 @@ export enum Vedtakstype {
     KLAGE = "KLAGE",
     ENDRING = "ENDRING",
     ENDRING_MOTTAKER = "ENDRING_MOTTAKER",
-}
-
-export interface Virkningstidspunkt {
-    søknadstype?: string;
-    vedtakstype?: Vedtakstype;
-    søktAv?: SoktAvType;
-    /** @format date */
-    mottattDato?: string;
-    /** @format date */
-    søktFraDato?: string;
-    /** @format date */
-    virkningstidspunkt?: string;
-    avslag?: Resultatkode;
-    årsak?: TypeArsakstype;
-    notat: SaksbehandlerNotat;
-    avslagVisningsnavn?: string;
-    årsakVisningsnavn?: string;
 }
 
 export interface VoksenIHusstandenDetaljerDto {
@@ -592,7 +611,7 @@ export enum TypeArsakstype {
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
 }
 
-export enum NotatBehandlingDetaljerMonthEnum {
+export enum NotatBehandlingDetaljerDtoMonthEnum {
     JANUARY = "JANUARY",
     FEBRUARY = "FEBRUARY",
     MARCH = "MARCH",
@@ -752,7 +771,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @name GeneratePdf
          * @request POST:/api/v2/notat/pdf
          */
-        generatePdf: (data: NotatDto, params: RequestParams = {}) =>
+        generatePdf: (data: VedtakNotatDto, params: RequestParams = {}) =>
             this.request<string, any>({
                 path: `/api/v2/notat/pdf`,
                 method: "POST",
@@ -768,7 +787,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @name GenerateHtml
          * @request POST:/api/v2/notat/html
          */
-        generateHtml: (data: NotatDto, params: RequestParams = {}) =>
+        generateHtml: (data: VedtakNotatDto, params: RequestParams = {}) =>
             this.request<string, any>({
                 path: `/api/v2/notat/html`,
                 method: "POST",

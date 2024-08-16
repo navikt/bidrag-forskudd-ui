@@ -55,16 +55,6 @@ export const Opplysninger = ({
             innhentingsFeil.grunnlagsdatatype === inntektTypeToOpplysningerMapper[inntektType]
     );
 
-    if (feilVedInnhentingAvOffentligData)
-        return (
-            <BehandlingAlert variant="info" className="w-[708px] mb-2">
-                <Heading size="small" level="3">
-                    {text.alert.feilVedInnhentingAvOffentligData}
-                </Heading>
-                {text.feilVedInnhentingAvOffentligData}
-            </BehandlingAlert>
-        );
-
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
     const ikkeAktiverteEndringer: { [p: string]: IkkeAktivInntektDto[] } = roller.reduce(
@@ -158,6 +148,14 @@ export const Opplysninger = ({
 
     return (
         <>
+            {feilVedInnhentingAvOffentligData && (
+                <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                    <Heading size="small" level="3">
+                        {text.alert.feilVedInnhentingAvOffentligData}
+                    </Heading>
+                    {text.feilVedInnhentingAvOffentligData}
+                </BehandlingAlert>
+            )}
             <Box
                 padding="4"
                 background="surface-default"

@@ -50,7 +50,7 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
+                <FormLayout title={text.title.boforholdBp} main={<Main />} side={<Notat />} />
             </form>
         </FormProvider>
     );
