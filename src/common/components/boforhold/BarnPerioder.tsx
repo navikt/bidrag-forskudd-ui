@@ -16,8 +16,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 export const BarnPerioder = () => {
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, lesemodus, setSaveErrorState } =
-        useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [openAddBarnForm, setOpenAddBarnForm] = useState(false);
     const { control, getValues } = useFormContext<BoforholdFormValues>();
@@ -35,13 +34,13 @@ export const BarnPerioder = () => {
 
     const onOpenAddBarnForm = () => {
         setOpenAddBarnForm(true);
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((state) => ({
+            ...state,
             boforhold: {
-                ...pageErrorsOrUnsavedState.boforhold,
-                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields, newBarn: true },
+                ...state.boforhold,
+                openFields: { ...state.boforhold.openFields, newBarn: true },
             },
-        });
+        }));
     };
 
     const onRemoveBarn = (index: number) => {
@@ -63,15 +62,17 @@ export const BarnPerioder = () => {
                         };
                     });
 
-                    const openFields = { ...pageErrorsOrUnsavedState.boforhold.openFields };
-                    delete openFields[`husstandsbarn.${index}`];
+                    setPageErrorsOrUnsavedState((state) => {
+                        const openFields = { ...state.boforhold.openFields };
+                        delete openFields[`husstandsbarn.${index}`];
 
-                    setPageErrorsOrUnsavedState({
-                        ...pageErrorsOrUnsavedState,
-                        boforhold: {
-                            ...pageErrorsOrUnsavedState.boforhold,
-                            openFields,
-                        },
+                        return {
+                            ...state,
+                            boforhold: {
+                                ...state.boforhold,
+                                openFields,
+                            },
+                        };
                     });
                 },
                 onError: () => {

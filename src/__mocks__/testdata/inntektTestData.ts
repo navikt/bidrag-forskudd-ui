@@ -1,4 +1,4 @@
-import { BehandlingNotatDto, RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
+import { RolleDto, Rolletype } from "@api/BidragBehandlingApiV1";
 
 export type Nullable<T> = T | null;
 export type MaybeList<T> = T[] | [];
@@ -50,7 +50,7 @@ export interface InntektData {
     inntekteneSomLeggesTilGrunn: InntektSomLeggesTilGrunn[];
     barnetillegg: MaybeList<BarneTilleg>;
     utvidetBarnetrygd: MaybeList<UtvidetBarnetrygd>;
-    notat: BehandlingNotatDto;
+    notat: { [key: string]: string };
 }
 
 const randomSalary = (max = 1.5e6) => {

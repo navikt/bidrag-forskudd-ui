@@ -1,11 +1,11 @@
-import { BehandlingNotatDto, Resultatkode, UtgiftBeregningDto, Utgiftstype } from "@api/BidragBehandlingApiV1";
+import { Resultatkode, UtgiftBeregningDto, Utgiftstype } from "@api/BidragBehandlingApiV1";
 
 export interface Utgiftspost {
     dato: string | null;
     type: Utgiftstype | "" | string;
     kravbeløp: number;
     godkjentBeløp: number;
-    begrunnelse: string;
+    kommentar: string;
     betaltAvBp: boolean;
     id?: number;
     utgiftstypeVisningsnavn?: string;
@@ -14,6 +14,6 @@ export interface Utgiftspost {
 export interface UtgiftFormValues {
     avslag?: Resultatkode | "";
     beregning?: UtgiftBeregningDto;
-    notat: BehandlingNotatDto;
+    begrunnelse: string;
     utgifter: Utgiftspost[];
 }

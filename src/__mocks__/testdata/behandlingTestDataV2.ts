@@ -1,5 +1,6 @@
 import {
     BehandlingDtoV2,
+    Innkrevingstype,
     Rolletype,
     SoktAvType,
     Stonadstype,
@@ -9,10 +10,12 @@ import {
 
 export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     id: 1,
+    innkrevingstype: Innkrevingstype.MED_INNKREVING,
     type: TypeBehandling.FORSKUDD,
     søknadsid: 1234,
     erVedtakFattet: false,
     vedtakstype: Vedtakstype.FASTSETTELSE,
+    vedtakstypeVisningsnavn: "",
     stønadstype: Stonadstype.FORSKUDD,
     søktFomDato: "2019-04-01",
     mottattdato: "2019-11-03",
@@ -48,9 +51,13 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         andreVoksneIHusstanden: [],
         husstandsmedlem: [],
         sivilstand: [],
+        begrunnelse: {
+            kunINotat: "",
+            innhold: "",
+        },
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
         valideringsfeil: null,
     },
@@ -62,18 +69,28 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         kontantstøtte: [],
         utvidetBarnetrygd: [],
         beregnetInntekter: [],
+        begrunnelser: [
+            {
+                kunINotat: "",
+                innhold: "",
+            },
+        ],
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
         valideringsfeil: null,
     },
     virkningstidspunkt: {
         virkningstidspunkt: "",
         årsak: null,
+        begrunnelse: {
+            kunINotat: "",
+            innhold: "",
+        },
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
     },
     aktiveGrunnlagsdata: {
@@ -82,6 +99,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         husstandsmedlem: [],
     },
     ikkeAktiverteEndringerIGrunnlagsdata: {
+        arbeidsforhold: [],
         inntekter: null,
         husstandsbarn: [],
         husstandsmedlem: [],

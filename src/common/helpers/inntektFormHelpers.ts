@@ -229,9 +229,14 @@ export const createInitialValues = (
             }),
             {}
         ),
-        notat: {
-            kunINotat: inntekter.notat.kunINotat,
-        },
+        begrunnelser: roller.reduce(
+            (acc, rolle) => ({
+                ...acc,
+                [rolle.id]:
+                    inntekter.begrunnelser?.find((begrunnelse) => begrunnelse.gjelder.id === rolle.id)?.innhold ?? "",
+            }),
+            {}
+        ),
     };
 };
 

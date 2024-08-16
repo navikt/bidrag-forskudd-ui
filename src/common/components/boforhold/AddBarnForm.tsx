@@ -24,7 +24,7 @@ export const AddBarnForm = ({
     barnFieldArray: UseFieldArrayReturn<BoforholdFormValues, "husstandsbarn">;
 }) => {
     const { getValues } = useFormContext<BoforholdFormValues>();
-    const { setPageErrorsOrUnsavedState, pageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const saveBoforhold = useOnSaveBoforhold();
     const [val, setVal] = useState("dnummer");
     const [ident, setIdent] = useState("");
@@ -140,13 +140,13 @@ export const AddBarnForm = ({
     };
 
     const updatedPageErrorState = () => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((state) => ({
+            ...state,
             boforhold: {
-                ...pageErrorsOrUnsavedState.boforhold,
-                openFields: { ...pageErrorsOrUnsavedState.boforhold.openFields, newBarn: false },
+                ...state.boforhold,
+                openFields: { ...state.boforhold.openFields, newBarn: false },
             },
-        });
+        }));
     };
 
     const onClose = () => {

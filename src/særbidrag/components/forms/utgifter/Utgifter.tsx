@@ -43,9 +43,7 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     beregning: response.beregning,
     avslag: response.avslag ?? "",
     utgifter: mapUtgifter(response.utgifter),
-    notat: {
-        kunINotat: response.notat?.kunINotat,
-    },
+    begrunnelse: response.begrunnelse.innhold,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
@@ -84,11 +82,6 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
     );
 };
 const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    const behandling = useGetBehandlingV2();
-
-    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center justify-end">0</div>;
-    }
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kravbeløp`}
@@ -121,7 +114,7 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
     );
 };
 
-const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
+const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
@@ -129,7 +122,7 @@ const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
     }
     return (
         <FormControlledTextField
-            name={`utgifter.${index}.begrunnelse`}
+            name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
             editable={item.erRedigerbart}
@@ -344,7 +337,7 @@ const Main = () => {
 };
 
 const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) => {
-    const { pageErrorsOrUnsavedState, setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
+    const { setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const saveUtgifter = useOnSaveUtgifter();
     const { control, clearErrors, formState, getFieldState, getValues, setValue, setError } =
@@ -362,14 +355,14 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
     });
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
             utgifter: {
                 error: !ObjectUtils.isEmpty(formState.errors),
-                openFields: controlledFields.some((utgift) => utgift.erRedigerbart),
+                openFields: { utgifterList: controlledFields.some((utgift) => utgift.erRedigerbart) },
             },
-        });
-    }, [formState.errors, controlledFields]);
+        }));
+    }, [formState.errors, JSON.stringify(controlledFields)]);
 
     const addUtgift = (utgift: Utgiftspost) => {
         utgifter.append(utgift);
@@ -410,13 +403,13 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !utgiftErForeldet) {
-            setError(`utgifter.${index}.begrunnelse`, {
+        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.kommentar) && !utgiftErForeldet) {
+            setError(`utgifter.${index}.kommentar`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
             });
         } else {
-            clearErrors(`utgifter.${index}.begrunnelse`);
+            clearErrors(`utgifter.${index}.kommentar`);
         }
 
         const fieldState = getFieldState(`utgifter.${index}`);
@@ -433,7 +426,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             : undefined,
                         kravbeløp: utgift.kravbeløp,
                         godkjentBeløp: utgiftErForeldet ? 0 : utgift.godkjentBeløp,
-                        begrunnelse: utgift.begrunnelse,
+                        kommentar: utgift.kommentar,
                         betaltAvBp: utgift.betaltAvBp,
                         id: utgift.id ?? undefined,
                     },
@@ -622,7 +615,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                         <GodkjentBeløp item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
-                                        <Begrunnelse item={item} index={index} />
+                                        <Kommentar item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
                                         <EditOrSaveButton
@@ -651,7 +644,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         type: defaultUtgiftType,
                         kravbeløp: 0,
                         godkjentBeløp: 0,
-                        begrunnelse: "",
+                        kommentar: "",
                         erRedigerbart: true,
                     });
                 }}
@@ -672,7 +665,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -680,7 +673,6 @@ const Side = () => {
 
 const UtgifterForm = () => {
     const { utgift } = useGetBehandlingV2();
-    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const initialValues = createInitialValues(utgift);
     const saveUtgifter = useOnSaveUtgifter();
     const prevState = useRef<UtgiftFormValues>(initialValues);
@@ -690,11 +682,6 @@ const UtgifterForm = () => {
         defaultValues: initialValues,
     });
     const { setValue, getValues } = useFormMethods;
-    useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
-        });
-    }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
@@ -725,10 +712,11 @@ const UtgifterForm = () => {
                 },
                 (response) => setValue("utgifter", mapUtgifter(response.utgiftposter))
             );
-        } else if (name === "notat.kunINotat") {
+        } else if (name === "begrunnelse") {
+            const begrunnelse = getValues(`begrunnelse`);
             updateAndSave({
-                notat: {
-                    kunINotat: getValues(`notat.kunINotat`),
+                oppdatereBegrunnelse: {
+                    nyBegrunnelse: begrunnelse,
                 },
             });
         }
@@ -751,7 +739,7 @@ const UtgifterForm = () => {
                             ...currentData.utgift,
                             avslag: response.avslag,
                             beregning: response.beregning,
-                            notat: response.notat,
+                            begrunnelse: { innhold: response.begrunnelse, kunINotat: response.begrunnelse },
                             valideringsfeil: response.valideringsfeil,
                             utgifter: mapUtgifter(response.utgiftposter),
                         },

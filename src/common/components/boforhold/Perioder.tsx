@@ -150,7 +150,6 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         setErrorMessage,
         setErrorModalOpen,
         setPageErrorsOrUnsavedState,
-        pageErrorsOrUnsavedState,
         setSaveErrorState,
     } = useBehandlingProvider();
     const [showUndoButton, setShowUndoButton] = useState(false);
@@ -179,18 +178,18 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     );
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((state) => ({
+            ...state,
             boforhold: {
                 error:
                     !ObjectUtils.isEmpty(formState.errors?.husstandsbarn) ||
                     !ObjectUtils.isEmpty(formState.errors?.sivilstand),
                 openFields: {
-                    ...pageErrorsOrUnsavedState.boforhold.openFields,
+                    ...state.boforhold.openFields,
                     [`husstandsbarn.${barnIndex}`]: !!editableRow,
                 },
             },
-        });
+        }));
     }, [formState.errors, editableRow]);
 
     const onSaveRow = (index: number) => {
@@ -231,6 +230,8 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
         }
 
         const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
+
+        console.log("fieldState", fieldState);
 
         if (!fieldState.error) {
             updateAndSave({

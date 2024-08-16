@@ -15,11 +15,11 @@ export const Notat = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { watch, getValues, setValue } = useFormContext<BoforholdFormValues>();
     const saveBoforhold = useOnSaveBoforhold();
-    const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));
+    const [previousValues, setPreviousValues] = useState<string>(getValues("begrunnelse"));
 
     const onSave = () =>
         saveBoforhold.mutation.mutate(
-            { oppdatereNotat: { kunINotat: getValues("notat.kunINotat") } },
+            { oppdatereBegrunnelse: { nyBegrunnelse: getValues("begrunnelse") } },
             {
                 onSuccess: (response) => {
                     saveBoforhold.queryClientUpdater((currentData) => {
@@ -27,18 +27,18 @@ export const Notat = () => {
                             ...currentData,
                             boforhold: {
                                 ...currentData.boforhold,
-                                notat: response.oppdatertNotat,
+                                begrunnelse: { innhold: response.begrunnelse, kunINotat: response.begrunnelse },
                             },
                         };
                     });
-                    setPreviousValues(response.oppdatertNotat.kunINotat);
+                    setPreviousValues(response.begrunnelse);
                 },
                 onError: () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue("notat.kunINotat", previousValues ?? "");
+                            setValue("begrunnelse", previousValues ?? "");
                         },
                     });
                 },
@@ -50,7 +50,7 @@ export const Notat = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["notat.kunINotat"].includes(name) && type === "change") {
+            if (["begrunnelse"].includes(name) && type === "change") {
                 debouncedOnSave();
             }
         });
@@ -59,7 +59,7 @@ export const Notat = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );

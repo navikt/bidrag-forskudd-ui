@@ -1,4 +1,4 @@
-import { BehandlingNotatDto, InntektDtoV2, Inntektsrapportering, Inntektstype } from "@api/BidragBehandlingApiV1";
+import { InntektDtoV2, Inntektsrapportering, Inntektstype } from "@api/BidragBehandlingApiV1";
 
 export interface InntektFormPeriode extends Omit<InntektDtoV2, "rapporteringstype"> {
     angittPeriode?: {
@@ -17,5 +17,5 @@ export interface InntektFormValues {
     småbarnstillegg: { [key: string]: InntektFormPeriode[] };
     kontantstøtte: { [key: string]: { [key: string]: InntektFormPeriode[] } };
     utvidetBarnetrygd: { [key: string]: InntektFormPeriode[] };
-    notat?: BehandlingNotatDto;
+    begrunnelser?: { [key: string]: string };
 }

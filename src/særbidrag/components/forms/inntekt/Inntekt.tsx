@@ -16,9 +16,10 @@ import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
 import { Tabs } from "@navikt/ds-react";
-import { getSearchParam, scrollToHash, updateUrlSearchParam } from "@utils/window-utils";
+import { getSearchParam, scrollToHash } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
@@ -26,6 +27,7 @@ import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
+    const [, setSearchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
@@ -41,8 +43,12 @@ const Main = () => {
 
     useEffect(scrollToHash, []);
     function updateSearchparamForTab(currentTabId: string) {
-        updateUrlSearchParam(urlSearchParams.inntektTab, currentTabId);
+        setSearchParams((params) => {
+            params.set(urlSearchParams.inntektTab, currentTabId);
+            return params;
+        });
     }
+
     return (
         <div className="grid gap-y-2">
             <Tabs defaultValue={defaultTab} onChange={updateSearchparamForTab}>
@@ -79,16 +85,22 @@ const Main = () => {
 };
 
 const Side = () => {
+    const [searchParams] = useSearchParams();
+    const { roller } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));
+    const rolleId = searchParams.get(urlSearchParams.inntektTab);
+    const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
+
     const onSave = () => {
-        const [kunINotat] = getValues(["notat.kunINotat"]);
+        const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
         saveInntekt.mutation.mutate(
             {
-                oppdatereNotat: {
-                    kunINotat,
+                oppdatereBegrunnelse: {
+                    nyBegrunnelse: begrunnelse,
+                    rolleid: Number(selectedRolleId),
                 },
             },
             {
@@ -97,17 +109,23 @@ const Side = () => {
                         ...currentData,
                         inntekter: {
                             ...currentData.inntekter,
-                            notat: response.notat,
+                            begrunnelser: currentData.inntekter.begrunnelser
+                                .filter((notat) => notat.gjelder.id !== selectedRolleId)
+                                .concat({
+                                    innhold: response.begrunnelse,
+                                    gjelder: roller.find((rolle) => Number(rolle.id) === Number(selectedRolleId)),
+                                    kunINotat: response.begrunnelse,
+                                }),
                         },
                     }));
-                    setPreviousValues(response.notat.kunINotat);
+                    setPreviousValues(response.begrunnelse);
                 },
                 onError: () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue("notat.kunINotat", previousValues ?? "");
+                            setValue(`begrunnelser.${selectedRolleId}`, previousValues ?? "");
                         },
                     });
                 },
@@ -120,7 +138,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["notat.kunINotat"].includes(name) && type === "change") {
+            if (name.includes("begrunnelser") && type === "change") {
                 debouncedOnSave();
             }
         });
@@ -128,10 +146,10 @@ const Side = () => {
     }, []);
 
     return (
-        <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+        <Fragment key={selectedRolleId}>
+            <FormControlledTextarea name={`begrunnelser.${selectedRolleId}`} label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
-        </>
+        </Fragment>
     );
 };
 

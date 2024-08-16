@@ -111,15 +111,17 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { roller } = useGetBehandlingV2();
+    const bmId = roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const [previousValues, setPreviousValues] = useState<string>(getValues("notat.kunINotat"));
+    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bmId}`));
     const onSave = () => {
-        const [kunINotat] = getValues(["notat.kunINotat"]);
+        const begrunnelse = getValues(`begrunnelser.${bmId}`);
         saveInntekt.mutation.mutate(
             {
-                oppdatereNotat: {
-                    kunINotat,
+                oppdatereBegrunnelse: {
+                    nyBegrunnelse: begrunnelse,
                 },
             },
             {
@@ -128,17 +130,22 @@ const Side = () => {
                         ...currentData,
                         inntekter: {
                             ...currentData.inntekter,
-                            notat: response.notat,
+                            begrunnelser: [
+                                {
+                                    innhold: response.begrunnelse,
+                                    kunINotat: response.begrunnelse,
+                                },
+                            ],
                         },
                     }));
-                    setPreviousValues(response.notat.kunINotat);
+                    setPreviousValues(response.begrunnelse);
                 },
                 onError: () => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue("notat.kunINotat", previousValues ?? "");
+                            setValue(`begrunnelser.${bmId}`, previousValues ?? "");
                         },
                     });
                 },
@@ -151,7 +158,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["notat.kunINotat"].includes(name) && type === "change") {
+            if (["begrunnelser"].includes(name) && type === "change") {
                 debouncedOnSave();
             }
         });
@@ -160,7 +167,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+            <FormControlledTextarea name={`begrunnelser.${bmId}`} label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
