@@ -5,7 +5,7 @@ export interface Utgiftspost {
     type: Utgiftstype | "" | string;
     kravbeløp: number;
     godkjentBeløp: number;
-    begrunnelse: string;
+    kommentar: string;
     betaltAvBp: boolean;
     id?: number;
     erRedigerbart?: boolean;

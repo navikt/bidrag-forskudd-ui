@@ -82,11 +82,6 @@ const Forfallsdato = ({ item, index }: { item: Utgiftspost; index: number }) => 
     );
 };
 const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    const behandling = useGetBehandlingV2();
-
-    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="h-8 flex items-center justify-end">0</div>;
-    }
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kravbeløp`}
@@ -119,7 +114,7 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
     );
 };
 
-const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
+const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
@@ -127,7 +122,7 @@ const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
     }
     return (
         <FormControlledTextField
-            name={`utgifter.${index}.begrunnelse`}
+            name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
             editable={item.erRedigerbart}
@@ -406,13 +401,13 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.begrunnelse) && !utgiftErForeldet) {
-            setError(`utgifter.${index}.begrunnelse`, {
+        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.kommentar) && !utgiftErForeldet) {
+            setError(`utgifter.${index}.kommentar`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
             });
         } else {
-            clearErrors(`utgifter.${index}.begrunnelse`);
+            clearErrors(`utgifter.${index}.kommentar`);
         }
 
         const fieldState = getFieldState(`utgifter.${index}`);
@@ -429,7 +424,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             : undefined,
                         kravbeløp: utgift.kravbeløp,
                         godkjentBeløp: utgiftErForeldet ? 0 : utgift.godkjentBeløp,
-                        begrunnelse: utgift.begrunnelse,
+                        kommentar: utgift.kommentar,
                         betaltAvBp: utgift.betaltAvBp,
                         id: utgift.id ?? undefined,
                     },
@@ -618,7 +613,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                         <GodkjentBeløp item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
-                                        <Begrunnelse item={item} index={index} />
+                                        <Kommentar item={item} index={index} />
                                     </Table.DataCell>
                                     <Table.DataCell textSize="small">
                                         <EditOrSaveButton
@@ -647,7 +642,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         type: defaultUtgiftType,
                         kravbeløp: 0,
                         godkjentBeløp: 0,
-                        begrunnelse: "",
+                        kommentar: "",
                         erRedigerbart: true,
                     });
                 }}
