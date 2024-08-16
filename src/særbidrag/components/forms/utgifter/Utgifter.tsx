@@ -586,7 +586,16 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         </Table.Header>
                         <Table.Body>
                             {controlledFields.map((item, index) => (
-                                <Table.Row key={item.id + "-" + index} className="align-top">
+                                <Table.Row
+                                    key={item.id + "-" + index}
+                                    className="align-top"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            onSaveRow(index);
+                                        }
+                                    }}
+                                >
                                     {visBetaltAvBpValg && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
