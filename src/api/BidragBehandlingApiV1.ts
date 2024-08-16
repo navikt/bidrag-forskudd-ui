@@ -456,6 +456,7 @@ export interface BehandlingDtoV2 {
     type: TypeBehandling;
     innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;
+    opprinneligVedtakstype?: Vedtakstype;
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
     erVedtakFattet: boolean;
@@ -488,6 +489,7 @@ export interface BehandlingDtoV2 {
     feilOppståttVedSisteGrunnlagsinnhenting?: Grunnlagsinnhentingsfeil[];
     /** Utgiftsgrunnlag for særbidrag. Vil alltid være null for forskudd og bidrag */
     utgift?: SaerbidragUtgifterDto;
+    vedtakstypeVisningsnavn: string;
 }
 
 export interface BeregnetInntekterDto {
@@ -664,6 +666,8 @@ export interface IkkeAktiveGrunnlagsdata {
     inntekter: IkkeAktiveInntekter;
     /** @uniqueItems true */
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
+    /** @uniqueItems true */
+    arbeidsforhold: ArbeidsforholdGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
     sivilstand?: SivilstandIkkeAktivGrunnlagDto;
     /**
@@ -1034,6 +1038,11 @@ export interface UtgiftspostDto {
     /** Beløp som er godkjent for beregningen */
     godkjentBeløp: number;
     /** Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp */
+    kommentar: string;
+    /**
+     * Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp
+     * @deprecated
+     */
     begrunnelse: string;
     /** Om utgiften er betalt av BP */
     betaltAvBp: boolean;
@@ -1078,7 +1087,12 @@ export interface OppdatereUtgift {
     kravbeløp: number;
     /** Beløp som er godkjent for beregningen */
     godkjentBeløp: number;
-    /** Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp */
+    /** Kommentar kan brukes til å legge inn nærmere informasjon om utgiften f.eks. fakturanr., butikk det er handlet i, informasjon om hvorfor man ikke har godkjent hele kravbeløpet */
+    kommentar?: string;
+    /**
+     * Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp
+     * @deprecated
+     */
     begrunnelse?: string;
     /** Om utgiften er betalt av BP */
     betaltAvBp: boolean;
@@ -1471,6 +1485,7 @@ export interface ResultatSaerbidragsberegningDto {
     bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
     beregning?: UtgiftBeregningDto;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
     resultat: number;
     resultatKode: Resultatkode;
@@ -1838,6 +1853,7 @@ export interface BehandlingDetaljerDtoV2 {
     type: TypeBehandling;
     innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;
+    opprinneligVedtakstype?: Vedtakstype;
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
     erVedtakFattet: boolean;
@@ -1906,7 +1922,7 @@ export interface NotatAndreVoksneIHusstanden {
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
 }
 
-/** Begrunnelse begrunnelse skrevet av saksbehandler */
+/** Notat begrunnelse skrevet av saksbehandler */
 export interface NotatBegrunnelseDto {
     innhold?: string;
     /** @deprecated */
@@ -1917,6 +1933,7 @@ export interface NotatBegrunnelseDto {
 export interface NotatBehandlingDetaljerDto {
     søknadstype?: string;
     vedtakstype?: Vedtakstype;
+    opprinneligVedtakstype?: Vedtakstype;
     kategori?: NotatSaerbidragKategoriDto;
     søktAv?: SoktAvType;
     /** @format date */
@@ -1936,6 +1953,7 @@ export interface NotatBehandlingDetaljerDto {
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -1947,9 +1965,9 @@ export interface NotatBoforholdDto {
     barn: BoforholdBarn[];
     andreVoksneIHusstanden?: NotatAndreVoksneIHusstanden;
     sivilstand: NotatSivilstand;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
 }
 
@@ -1969,7 +1987,7 @@ export interface NotatInntektDto {
 export interface NotatInntekterDto {
     inntekterPerRolle: InntekterPerRolle[];
     offentligeInntekterPerRolle: InntekterPerRolle[];
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
     /** @uniqueItems true */
     notatPerRolle: NotatBegrunnelseDto[];
@@ -2024,8 +2042,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatRolleDto {
@@ -2048,9 +2066,9 @@ export interface NotatSaerbidragKategoriDto {
 
 export interface NotatSaerbidragUtgifterDto {
     beregning?: NotatUtgiftBeregningDto;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
     utgifter: NotatUtgiftspostDto[];
 }
@@ -2107,9 +2125,9 @@ export interface NotatVirkningstidspunktDto {
     virkningstidspunkt?: string;
     avslag?: Resultatkode;
     årsak?: TypeArsakstype;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
-    /** Begrunnelse begrunnelse skrevet av saksbehandler */
+    /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
     avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
