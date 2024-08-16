@@ -1,5 +1,5 @@
 export enum SærligeutgifterStepper {
-    UTGIFTER = "utgifter",
+    UTGIFT = "utgift",
     INNTEKT = "inntekt",
     BOFORHOLD = "boforhold",
     VEDTAK = "vedtak",
