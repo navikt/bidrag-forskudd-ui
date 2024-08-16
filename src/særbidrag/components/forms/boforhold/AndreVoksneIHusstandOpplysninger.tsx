@@ -1,5 +1,4 @@
 import text from "@common/constants/texts";
-import { PersonTallShortIcon } from "@navikt/aksel-icons";
 import { BodyShort, Box, Button, Heading, HStack, Popover, ReadMore, Table } from "@navikt/ds-react";
 import { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -33,11 +32,11 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
 
     return (
         <ReadMore header={<Header />} size="small">
-            <Table className="w-[550px] opplysninger" size="small">
+            <Table className="w-[650px] opplysninger" size="small">
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell className="w-[150px]">{text.label.periode}</Table.HeaderCell>
-                        <Table.HeaderCell className="w-[400px]">{text.label.status}</Table.HeaderCell>
+                        <Table.HeaderCell className="w-[500px]">{text.label.status}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -57,7 +56,9 @@ const Opplysninger = ({ perioder }: { perioder: PeriodeAndreVoksneIHusstanden[] 
                                 <div className="flex flex-row gap-[10px]">
                                     {hentVisningsnavn(periode.status)}{" "}
                                     {periode.status === Bostatuskode.BOR_MED_ANDRE_VOKSNE &&
-                                        `(${periode.totalAntallHusstandsmedlemmer})`}
+                                    periode.husstandsmedlemmer.some((r) => r.harRelasjonTilBp)
+                                        ? `(${periode.totalAntallHusstandsmedlemmer}, relasjon til BP)`
+                                        : `(${periode.totalAntallHusstandsmedlemmer})`}
                                     <VoksneIHusstandPeriodePersonerButton
                                         husstandsmedlemmer={periode.husstandsmedlemmer}
                                     />
@@ -81,7 +82,6 @@ const VoksneIHusstandPeriodePersonerButton = ({
     if (husstandsmedlemmer.length === 0) return null;
     return (
         <>
-            {husstandsmedlemmer.some((r) => r.harRelasjonTilBp) && <PersonTallShortIcon style={{ scale: "1.7" }} />}
             <Button variant="tertiary" size="xsmall" onClick={() => setOpenState(!openState)} ref={buttonRef}>
                 Hvem bor på adresse?
             </Button>
@@ -93,9 +93,7 @@ const VoksneIHusstandPeriodePersonerButton = ({
                                 <li key={husstandsmedlem.navn + "-" + index}>
                                     {husstandsmedlem.navn} (
                                     {DateToDDMMYYYYString(dateOrNull(husstandsmedlem.fødselsdato))})
-                                    {husstandsmedlem.harRelasjonTilBp && (
-                                        <PersonTallShortIcon style={{ scale: "1.7", marginLeft: "5px" }} />
-                                    )}
+                                    {husstandsmedlem.harRelasjonTilBp && ", relasjon til BP"}
                                 </li>
                             );
                         })}

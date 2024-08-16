@@ -15,6 +15,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
     søknadsid: 1234,
     erVedtakFattet: false,
     vedtakstype: Vedtakstype.FASTSETTELSE,
+    vedtakstypeVisningsnavn: "",
     stønadstype: Stonadstype.FORSKUDD,
     søktFomDato: "2019-04-01",
     mottattdato: "2019-11-03",
@@ -98,6 +99,7 @@ export const behandlingMockApiDataV2: BehandlingDtoV2 = {
         husstandsmedlem: [],
     },
     ikkeAktiverteEndringerIGrunnlagsdata: {
+        arbeidsforhold: [],
         inntekter: null,
         husstandsbarn: [],
         husstandsmedlem: [],

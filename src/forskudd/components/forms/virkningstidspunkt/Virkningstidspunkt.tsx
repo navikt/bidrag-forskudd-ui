@@ -23,8 +23,8 @@ import {
 } from "@common/helpers/virkningstidspunktHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
-import { capitalize, ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
+import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
+import { ObjectUtils, toISODateString } from "@navikt/bidrag-ui-common";
 import { BodyShort, Label } from "@navikt/ds-react";
 import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect, useMemo, useState } from "react";
@@ -117,9 +117,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">
-                        {capitalize(behandling.stønadstype ?? behandling.engangsbeløptype)}
-                    </BodyShort>
+                    <BodyShort size="small">{hentVisningsnavn(behandling.vedtakstype)}</BodyShort>
                 </div>
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadfra}:</Label>
