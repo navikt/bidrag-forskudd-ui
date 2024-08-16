@@ -202,7 +202,7 @@ const tekster = {
     },
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
-        vedtakFattet: "Begrunnelse og forsendelse er opprettet og er tilgjengelig i journalen. Åpner sakshistorikken.",
+        vedtakFattet: "Notat og forsendelse er opprettet og er tilgjengelig i journalen. Åpner sakshistorikken.",
         ukjentNavn: "UKJENT",
         bekreftFatteVedtak: "Jeg har sjekket notat og opplysninger i søknaden og bekrefter at opplysningene stemmer.",
         vedtakNotat:
