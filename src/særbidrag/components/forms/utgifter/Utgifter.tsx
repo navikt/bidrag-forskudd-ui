@@ -340,7 +340,7 @@ const Main = () => {
 };
 
 const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) => {
-    const { pageErrorsOrUnsavedState, setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
+    const { setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const saveUtgifter = useOnSaveUtgifter();
     const { control, clearErrors, formState, getFieldState, getValues, setValue, setError } =
@@ -358,13 +358,13 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
     });
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
             utgifter: {
                 error: !ObjectUtils.isEmpty(formState.errors),
                 openFields: controlledFields.some((utgift) => utgift.erRedigerbart),
             },
-        });
+        }));
     }, [formState.errors, controlledFields]);
 
     const addUtgift = (utgift: Utgiftspost) => {
@@ -676,7 +676,6 @@ const Side = () => {
 
 const UtgifterForm = () => {
     const { utgift } = useGetBehandlingV2();
-    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const initialValues = createInitialValues(utgift);
     const saveUtgifter = useOnSaveUtgifter();
     const prevState = useRef<UtgiftFormValues>(initialValues);
@@ -686,11 +685,6 @@ const UtgifterForm = () => {
         defaultValues: initialValues,
     });
     const { setValue, getValues } = useFormMethods;
-    useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
-        });
-    }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {

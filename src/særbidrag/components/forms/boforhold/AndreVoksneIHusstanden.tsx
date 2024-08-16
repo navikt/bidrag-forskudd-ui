@@ -173,7 +173,6 @@ export const AndreVoksneIHusstanden = () => {
         setErrorMessage,
         setErrorModalOpen,
         setPageErrorsOrUnsavedState,
-        pageErrorsOrUnsavedState,
         setSaveErrorState,
     } = useBehandlingProvider();
     const [showUndoButton, setShowUndoButton] = useState(false);
@@ -197,18 +196,18 @@ export const AndreVoksneIHusstanden = () => {
     );
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
             boforhold: {
                 error:
                     !ObjectUtils.isEmpty(formState.errors?.husstandsbarn) ||
                     !ObjectUtils.isEmpty(formState.errors?.sivilstand),
                 openFields: {
-                    ...pageErrorsOrUnsavedState.boforhold.openFields,
+                    ...prevState.boforhold.openFields,
                     andreVoksneIHusstanden: !!editableRow,
                 },
             },
-        });
+        }));
     }, [formState.errors, editableRow]);
 
     const onSaveRow = (index: number) => {

@@ -209,7 +209,7 @@ const Side = () => {
 
 const VirkningstidspunktForm = () => {
     const { virkningstidspunkt } = useGetBehandlingV2();
-    const { pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
     const initialValues = createInitialValues(virkningstidspunkt);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
@@ -221,13 +221,12 @@ const VirkningstidspunktForm = () => {
     });
 
     useEffect(() => {
-        setPageErrorsOrUnsavedState({
-            ...pageErrorsOrUnsavedState,
+        setPageErrorsOrUnsavedState((prevState) => ({
+            ...prevState,
             virkningstidspunkt: {
                 error: !ObjectUtils.isEmpty(useFormMethods.formState.errors),
-                ...useFormMethods.formState.errors,
             },
-        });
+        }));
     }, [useFormMethods.formState.errors]);
 
     useEffect(() => {
