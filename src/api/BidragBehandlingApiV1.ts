@@ -286,16 +286,17 @@ export enum TypeArsakstype {
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
 }
 
-/** @deprecated */
-export interface OppdatereNotat {
-    nyttNotat?: string;
-    /** @format int64 */
-    rolleid?: number;
+/** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+export interface OppdatereBegrunnelse {
+    /** Saksbehandlers begrunnelse */
+    nyBegrunnelse: string;
     /**
-     * Erstattes av nyttNotat
-     * @deprecated
+     * Id til rollen begrunnelsen gjelder for
+     * @format int64
      */
-    kunINotat: string;
+    rolleid?: number;
+    /** Deprekert - Erstattes av nyBegrunnelse */
+    kunINotat?: string;
 }
 
 export interface OppdatereVirkningstidspunkt {
@@ -307,8 +308,10 @@ export interface OppdatereVirkningstidspunkt {
      * @example "2025-01-25"
      */
     virkningstidspunkt?: string;
-    oppdatereNotat?: OppdatereNotat;
-    notat?: OppdatereNotat;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereBegrunnelse?: OppdatereBegrunnelse;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    notat?: OppdatereBegrunnelse;
 }
 
 export interface AktiveGrunnlagsdata {
@@ -433,6 +436,20 @@ export interface ArbeidsforholdGrunnlagDto {
     permitteringListe?: Permittering[];
 }
 
+/**
+ * Saksbehandlers begrunnelse
+ * @deprecated
+ */
+export interface BegrunnelseDto {
+    innhold: string;
+    gjelder?: RolleDto;
+    /**
+     * Bruk innhold
+     * @deprecated
+     */
+    kunINotat: string;
+}
+
 export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
@@ -472,6 +489,7 @@ export interface BehandlingDtoV2 {
     feilOppståttVedSisteGrunnlagsinnhenting?: Grunnlagsinnhentingsfeil[];
     /** Utgiftsgrunnlag for særbidrag. Vil alltid være null for forskudd og bidrag */
     utgift?: SaerbidragUtgifterDto;
+    vedtakstypeVisningsnavn: string;
 }
 
 export interface BeregnetInntekterDto {
@@ -487,8 +505,8 @@ export interface BoforholdDtoV2 {
     andreVoksneIHusstanden: BostatusperiodeDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
-    /** Bruk notater for notat per rolle */
-    notat: NotatDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelse: BegrunnelseDto;
     valideringsfeil: BoforholdValideringsfeil;
     /** Er sann hvis status på andre voksne i husstanden er 'BOR_IKKE_MED_ANDRE_VOKSNE', men det er 18 åring i husstanden som regnes som voksen i husstanden */
     egetBarnErEnesteVoksenIHusstanden?: boolean;
@@ -498,6 +516,8 @@ export interface BoforholdDtoV2 {
      * @uniqueItems true
      */
     husstandsbarn: HusstandsmedlemDtoV2[];
+    /** Saksbehandlers begrunnelse */
+    notat: BegrunnelseDto;
 }
 
 export interface BoforholdPeriodeseringsfeil {
@@ -757,11 +777,14 @@ export interface InntekterDtoV2 {
     /** @uniqueItems true */
     årsinntekter: InntektDtoV2[];
     beregnetInntekter: BeregnetInntekterDto[];
-    /** @uniqueItems true */
-    notater: NotatDto[];
+    /**
+     * Saksbehandlers begrunnelser
+     * @uniqueItems true
+     */
+    begrunnelser: BegrunnelseDto[];
     valideringsfeil: InntektValideringsfeilDto;
-    /** Bruk notater for notat per rolle */
-    notat: NotatDto;
+    /** Saksbehandlers begrunnelse */
+    notat: BegrunnelseDto;
 }
 
 export interface InntektspostDtoV2 {
@@ -779,20 +802,6 @@ export interface InntektspostEndringDto {
     inntektstype?: Inntektstype;
     beløp?: number;
     endringstype: GrunnlagInntektEndringstype;
-}
-
-/**
- * Bruk notater for notat per rolle
- * @deprecated
- */
-export interface NotatDto {
-    innhold: string;
-    gjelder?: RolleDto;
-    /**
-     * Bruk innhold
-     * @deprecated
-     */
-    kunINotat: string;
 }
 
 export interface OverlappendeBostatusperiode {
@@ -975,10 +984,12 @@ export interface SaerbidragUtgifterDto {
     avslag?: Resultatkode;
     kategori: SaerbidragKategoriDto;
     beregning?: UtgiftBeregningDto;
-    /** Bruk notater for notat per rolle */
-    notat: NotatDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelse: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
     valideringsfeil?: UtgiftValideringsfeilDto;
+    /** Saksbehandlers begrunnelse */
+    notat: BegrunnelseDto;
 }
 
 export enum Saerbidragskategori {
@@ -1055,8 +1066,10 @@ export interface VirkningstidspunktDto {
     opprinneligVirkningstidspunkt?: string;
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
-    /** Bruk notater for notat per rolle */
-    notat: NotatDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelse: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
+    notat: BegrunnelseDto;
 }
 
 /** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
@@ -1097,17 +1110,28 @@ export interface OppdatereUtgiftRequest {
     sletteUtgift?: number;
     /** Angre siste endring som ble gjort. Siste endring kan ikke angres hvis avslag er satt */
     angreSisteEndring?: boolean;
-    oppdatereNotat?: OppdatereNotat;
-    notat?: OppdatereNotat;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereBegrunnelse?: OppdatereBegrunnelse;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    notat?: OppdatereBegrunnelse;
 }
 
 export interface OppdatereUtgiftResponse {
     oppdatertUtgiftspost?: UtgiftspostDto;
     utgiftposter: UtgiftspostDto[];
-    oppdatertNotat?: string;
+    /**
+     * Saksbehandlers begrunnelse
+     * @deprecated
+     */
+    begrunnelse?: string;
     beregning?: UtgiftBeregningDto;
     avslag?: Resultatkode;
     valideringsfeil?: UtgiftValideringsfeilDto;
+    /**
+     * Saksbehandlers begrunnelse
+     * @deprecated
+     */
+    oppdatertNotat?: string;
 }
 
 export interface OppdatereInntektRequest {
@@ -1115,12 +1139,17 @@ export interface OppdatereInntektRequest {
     oppdatereInntektsperiode?: OppdaterePeriodeInntekt;
     /** Opprette eller oppdatere manuelt oppgitt inntekt */
     oppdatereManuellInntekt?: OppdatereManuellInntekt;
-    oppdatereNotat?: OppdatereNotat;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereBegrunnelse?: OppdatereBegrunnelse;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereNotat?: OppdatereBegrunnelse;
     /**
      * Angi id til inntekt som skal slettes
      * @format int64
      */
     sletteInntekt?: number;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    henteOppdatereBegrunnelse?: OppdatereBegrunnelse;
 }
 
 /** Opprette eller oppdatere manuelt oppgitt inntekt */
@@ -1174,10 +1203,16 @@ export interface OppdaterePeriodeInntekt {
 
 export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
-    /** Periodiserte inntekter per barn */
+    /** Periodiserte inntekter */
     beregnetInntekter: BeregnetInntekterDto[];
-    notat?: string;
+    /** Oppdatert begrunnelse */
+    begrunnelse?: string;
     valideringsfeil: InntektValideringsfeilDto;
+    /**
+     * Oppdatert begrunnelse
+     * @deprecated
+     */
+    notat?: string;
 }
 
 export interface OppdatereAndreVoksneIHusstanden {
@@ -1210,7 +1245,12 @@ export interface OppdatereBoforholdRequestV2 {
     oppdaterePeriodeMedAndreVoksneIHusstand?: OppdatereAndreVoksneIHusstanden;
     oppdatereHusstandsmedlem?: OppdatereHusstandsmedlem;
     oppdatereSivilstand?: OppdatereSivilstand;
-    oppdatereNotat?: OppdatereNotat;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereBegrunnelse?: OppdatereBegrunnelse;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereNotat?: OppdatereBegrunnelse;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    henteOppdatereBegrunnelse?: OppdatereBegrunnelse;
 }
 
 export interface OppdatereBostatusperiode {
@@ -1310,11 +1350,12 @@ export interface OppdatereBoforholdResponse {
     egetBarnErEnesteVoksenIHusstanden?: boolean;
     /** @uniqueItems true */
     oppdatertSivilstandshistorikk: SivilstandDto[];
-    oppdatertNotattekst?: string;
+    begrunnelse?: string;
     valideringsfeil: BoforholdValideringsfeil;
     /** Erstattes av husstandsmedlem */
     oppdatertHusstandsbarn?: HusstandsmedlemDtoV2;
-    oppdatertNotat?: OppdatereNotat;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatertNotat?: OppdatereBegrunnelse;
 }
 
 export interface AktivereGrunnlagRequestV2 {
@@ -2083,8 +2124,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {

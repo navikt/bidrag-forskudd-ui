@@ -130,7 +130,7 @@ const Begrunnelse = ({ item, index }: { item: Utgiftspost; index: number }) => {
     return (
         <FormControlledTextField
             name={`utgifter.${index}.begrunnelse`}
-            label={text.label.begrunnelse}
+            label={text.label.kommentar}
             hideLabel
             editable={item.erRedigerbart}
         />
@@ -250,13 +250,7 @@ const Main = () => {
             <FlexRow className="gap-x-12">
                 <div className="flex gap-x-2">
                     <Label size="small">{text.label.søknadstype}:</Label>
-                    <BodyShort size="small">
-                        {behandling.opprinneligVedtakstype
-                            ? `${hentVisningsnavn(behandling.opprinneligVedtakstype)} (${hentVisningsnavn(
-                                  behandling.vedtakstype
-                              )})`
-                            : hentVisningsnavn(behandling.vedtakstype)}
-                    </BodyShort>
+                    <BodyShort size="small">{behandling.vedtakstypeVisningsnavn}</BodyShort>
                 </div>
                 {behandling.utgift.kategori.kategori !== Saerbidragskategori.ANNET && (
                     <div className="flex gap-x-2">
@@ -584,7 +578,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[248px]">
-                                    {text.label.begrunnelse}
+                                    {text.label.kommentar}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
