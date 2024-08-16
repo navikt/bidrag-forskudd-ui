@@ -11,7 +11,6 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { TypeBehandling } from "../../../../api/BidragBehandlingApiV1";
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
 import { Notat } from "./Notat";
@@ -35,7 +34,7 @@ const Main = () => {
 };
 
 const BoforholdsForm = () => {
-    const { boforhold, roller, type } = useGetBehandlingV2();
+    const { boforhold, roller } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(
@@ -51,11 +50,7 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout
-                    title={type === TypeBehandling.FORSKUDD ? text.title.boforholdBM : text.title.boforholdBp}
-                    main={<Main />}
-                    side={<Notat />}
-                />
+                <FormLayout title={text.title.boforholdBp} main={<Main />} side={<Notat />} />
             </form>
         </FormProvider>
     );
