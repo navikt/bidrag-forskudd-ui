@@ -15,7 +15,12 @@ export type InntektTables =
 type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
 
 export type PageErrorsOrUnsavedState = {
-    utgifter: { error: boolean; openFields?: boolean };
+    utgifter: {
+        error: boolean;
+        openFields?: {
+            utgifterList: boolean;
+        };
+    };
     boforhold: {
         error: boolean;
         openFields?: { [key in HusstandsbarnTables]: boolean };

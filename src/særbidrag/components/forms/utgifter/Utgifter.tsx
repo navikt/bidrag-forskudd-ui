@@ -362,10 +362,10 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
             ...prevState,
             utgifter: {
                 error: !ObjectUtils.isEmpty(formState.errors),
-                openFields: controlledFields.some((utgift) => utgift.erRedigerbart),
+                openFields: { utgifterList: controlledFields.some((utgift) => utgift.erRedigerbart) },
             },
         }));
-    }, [formState.errors, controlledFields]);
+    }, [formState.errors, JSON.stringify(controlledFields)]);
 
     const addUtgift = (utgift: Utgiftspost) => {
         utgifter.append(utgift);
