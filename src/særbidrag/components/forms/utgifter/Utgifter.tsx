@@ -155,7 +155,9 @@ const UtgiftType = ({ index, item }: { index: number; item: Utgiftspost }) => {
     ];
 
     if (readOnly || !item.erRedigerbart) {
-        return <div className="h-8 flex items-center">{erKategoriAnnet ? item.type : hentVisningsnavn(item.type)}</div>;
+        return (
+            <div className="h-8 flex items-center">{item.utgiftstypeVisningsnavn ?? hentVisningsnavn(item.type)}</div>
+        );
     }
     if (erKategoriAnnet) {
         return (

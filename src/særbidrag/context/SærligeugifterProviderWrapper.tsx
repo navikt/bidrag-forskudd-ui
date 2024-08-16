@@ -34,7 +34,7 @@ function SærligeugifterProviderWrapper({ children }: PropsWithChildren) {
         boforhold: { error: false },
         inntekt: { error: false },
     });
-    const formSteps = { defaultStep: SærligeutgifterStepper.UTGIFTER, steps: SærligeutgifterSteps };
+    const formSteps = { defaultStep: SærligeutgifterStepper.UTGIFT, steps: SærligeutgifterSteps };
 
     function getPageErrorTexts(): { title: string; description: string } {
         return {

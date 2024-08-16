@@ -11,7 +11,7 @@ import Utgifter from "./utgifter/Utgifter";
 
 const SærligeutgifterForm = memo(({ activeStep }: { activeStep: string }) => {
     switch (activeStep) {
-        case SærligeutgifterStepper.UTGIFTER:
+        case SærligeutgifterStepper.UTGIFT:
             return <Utgifter />;
         case SærligeutgifterStepper.INNTEKT:
             return <Inntekt />;

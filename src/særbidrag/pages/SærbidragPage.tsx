@@ -50,7 +50,7 @@ export const SærbidragPage = () => {
                         className="mb-8 w-[708px]"
                     >
                         <Stepper.Step completed={activeStepIndex > 1 && utgiftValideringsfeil === undefined}>
-                            {capitalize(SærligeutgifterStepper.UTGIFTER)}
+                            {capitalize(SærligeutgifterStepper.UTGIFT)}
                         </Stepper.Step>
                         <Stepper.Step
                             completed={

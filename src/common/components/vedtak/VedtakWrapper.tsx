@@ -34,10 +34,10 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
-        if (feilInnhold.utgift != null && "utgifter" in steps) {
+        if (feilInnhold.utgift != null && "utgift" in steps) {
             const beskrivelse = feilInnhold.utgift.manglerUtgifter ? "Minst en utgift må legges til" : "Utgifter";
             feilliste.push(
-                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgifter)}>
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
                     {beskrivelse}
                 </ErrorSummary.Item>
             );
