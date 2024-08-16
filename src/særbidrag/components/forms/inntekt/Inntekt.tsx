@@ -98,7 +98,7 @@ const Side = () => {
         const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
         saveInntekt.mutation.mutate(
             {
-                oppdatereNotat: {
+                oppdatereBegrunnelse: {
                     nyBegrunnelse: begrunnelse,
                     rolleid: Number(selectedRolleId),
                 },
@@ -113,7 +113,7 @@ const Side = () => {
                                 .filter((notat) => notat.gjelder.id !== selectedRolleId)
                                 .concat({
                                     innhold: response.begrunnelse,
-                                    gjelder: roller.find((rolle) => rolle.id === selectedRolleId),
+                                    gjelder: roller.find((rolle) => Number(rolle.id) === Number(selectedRolleId)),
                                     kunINotat: response.begrunnelse,
                                 }),
                         },
