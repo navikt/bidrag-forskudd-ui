@@ -1,4 +1,4 @@
-import { BehandlingNotatDto, Resultatkode, UtgiftBeregningDto, Utgiftstype } from "@api/BidragBehandlingApiV1";
+import { Resultatkode, UtgiftBeregningDto, Utgiftstype } from "@api/BidragBehandlingApiV1";
 
 export interface Utgiftspost {
     dato: string | null;
@@ -13,6 +13,6 @@ export interface Utgiftspost {
 export interface UtgiftFormValues {
     avslag?: Resultatkode | "";
     beregning?: UtgiftBeregningDto;
-    notat: BehandlingNotatDto;
+    begrunnelse: string;
     utgifter: Utgiftspost[];
 }

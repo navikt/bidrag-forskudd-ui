@@ -14,8 +14,9 @@ import { useInntektTableProvider } from "./InntektTableContext";
 export const columnWitdhRules = {
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: {
-            [InntektTableType.SKATTEPLIKTIG]: "w-[200px]",
-            [InntektTableType.UTVIDET_BARNETRYGD]: "w-[120px]",
+            [InntektTableType.SKATTEPLIKTIG]: "w-[138px]",
+            [InntektTableType.BARNETILLEGG]: "w-[122px]",
+            [InntektTableType.UTVIDET_BARNETRYGD]: "w-[112px]",
             [InntektTableType.SMÅBARNSTILLEGG]: "w-[110px]",
             [InntektTableType.KONTANTSTØTTE]: "w-[140px]",
             [InntektTableType.TOTAL_INNTEKTER]: "w-[92px]",
@@ -96,7 +97,7 @@ export const BeregnetInntekter = () => {
                             className="overflow-x-auto whitespace-nowrap"
                             key={`table-${index}-${inntektPerBarn.inntektGjelderBarnIdent}`}
                         >
-                            <Table size="small" className="table-fixed bg-white">
+                            <Table size="small" className="table-fixed bg-white w-fit">
                                 <Table.Header>
                                     <Table.Row className="align-baseline">
                                         <Table.HeaderCell textSize="small" scope="col" className="w-[198px]">

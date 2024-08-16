@@ -69,14 +69,11 @@ const avslagsListe = [
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues =>
-    ({
-        virkningstidspunkt: response.virkningstidspunkt,
-        årsakAvslag: response.årsak ?? response.avslag ?? "",
-        notat: {
-            kunINotat: response.notat?.kunINotat,
-        },
-    }) as VirkningstidspunktFormValues;
+const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues => ({
+    virkningstidspunkt: response.virkningstidspunkt,
+    årsakAvslag: response.årsak ?? response.avslag ?? "",
+    begrunnelse: response.begrunnelse?.innhold,
+});
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
     const årsak = Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag);
@@ -85,8 +82,8 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
         avslag,
-        notat: {
-            kunINotat: values.notat?.kunINotat,
+        oppdatereBegrunnelse: {
+            nyBegrunnelse: values.begrunnelse,
         },
     };
 };
@@ -206,7 +203,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );

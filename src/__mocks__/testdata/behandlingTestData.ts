@@ -1,5 +1,6 @@
 import {
     BehandlingDtoV2,
+    Innkrevingstype,
     Rolletype,
     SoktAvType,
     Stonadstype,
@@ -9,6 +10,7 @@ import {
 
 export const behandlingMockApiData: BehandlingDtoV2 = {
     id: 1,
+    innkrevingstype: Innkrevingstype.MED_INNKREVING,
     type: TypeBehandling.FORSKUDD,
     søknadsid: 1234,
     erVedtakFattet: false,
@@ -48,9 +50,13 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
         andreVoksneIHusstanden: [],
         husstandsbarn: [],
         sivilstand: [],
+        begrunnelse: {
+            kunINotat: "",
+            innhold: "",
+        },
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
         valideringsfeil: null,
     },
@@ -62,18 +68,28 @@ export const behandlingMockApiData: BehandlingDtoV2 = {
         kontantstøtte: [],
         utvidetBarnetrygd: [],
         beregnetInntekter: [],
+        begrunnelser: [
+            {
+                kunINotat: "",
+                innhold: "",
+            },
+        ],
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
         valideringsfeil: null,
     },
     virkningstidspunkt: {
         virkningstidspunkt: "",
         årsak: null,
+        begrunnelse: {
+            kunINotat: "",
+            innhold: "",
+        },
         notat: {
             kunINotat: "",
-            medIVedtaket: "",
+            innhold: "",
         },
     },
     aktiveGrunnlagsdata: {

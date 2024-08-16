@@ -13,7 +13,7 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
-import { Notat } from "./Notat";
+import { Begrunnelse } from "./Begrunnelse";
 
 const Main = () => {
     useEffect(scrollToHash, []);
@@ -50,7 +50,7 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title={text.title.boforhold} main={<Main />} side={<Notat />} />
+                <FormLayout title={text.title.boforhold} main={<Main />} side={<Begrunnelse />} />
             </form>
         </FormProvider>
     );

@@ -267,6 +267,7 @@ export const createInitialValues = (boforhold: BoforholdDtoV2): BoforholdFormVal
         ...boforhold,
         husstandsbarn: boforhold.husstandsbarn.sort(compareHusstandsBarn),
         sivilstand: boforhold.sivilstand,
+        begrunnelse: boforhold.begrunnelse.innhold,
     };
 };
 

@@ -43,9 +43,7 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     beregning: response.beregning,
     avslag: response.avslag ?? "",
     utgifter: mapUtgifter(response.utgifter),
-    notat: {
-        kunINotat: response.notat?.kunINotat,
-    },
+    begrunnelse: response.begrunnelse.innhold,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
@@ -665,7 +663,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="notat.kunINotat" label={text.title.begrunnelse} />
+            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -718,10 +716,11 @@ const UtgifterForm = () => {
                 },
                 (response) => setValue("utgifter", mapUtgifter(response.utgiftposter))
             );
-        } else if (name === "notat.kunINotat") {
+        } else if (name === "begrunnelse") {
+            const begrunnelse = getValues(`begrunnelse`);
             updateAndSave({
-                notat: {
-                    kunINotat: getValues(`notat.kunINotat`),
+                oppdatereBegrunnelse: {
+                    nyBegrunnelse: begrunnelse,
                 },
             });
         }
@@ -744,7 +743,7 @@ const UtgifterForm = () => {
                             ...currentData.utgift,
                             avslag: response.avslag,
                             beregning: response.beregning,
-                            notat: response.notat,
+                            begrunnelse: { innhold: response.begrunnelse, kunINotat: response.begrunnelse },
                             valideringsfeil: response.valideringsfeil,
                             utgifter: mapUtgifter(response.utgiftposter),
                         },
