@@ -8,6 +8,7 @@ export interface Utgiftspost {
     begrunnelse: string;
     betaltAvBp: boolean;
     id?: number;
+    utgiftstypeVisningsnavn?: string;
     erRedigerbart?: boolean;
 }
 export interface UtgiftFormValues {

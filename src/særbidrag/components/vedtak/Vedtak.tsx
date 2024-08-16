@@ -76,7 +76,7 @@ const VedtakResultat = () => {
             return (
                 <div>
                     <Heading size="small">Avslag</Heading>
-                    <VStack gap={"2"}>
+                    <VStack gap={"4"}>
                         <BodyShort size="small">
                             <ResultatTabell
                                 data={[
@@ -224,7 +224,7 @@ const UtgifsposterTabell: React.FC<{ utgifstposter: UtgiftspostDto[] }> = ({ utg
                             <td style={{ padding: "0 16px 0 0" }}>
                                 {dateToDDMMYYYYString(dateOrNull(utgifspost.dato))}
                             </td>
-                            <td className="px-[16px]">{hentVisningsnavn(utgifspost.type)}</td>
+                            <td className="px-[16px]">{utgifspost.utgiftstypeVisningsnavn}</td>
                             <td className="px-[16px] text-right">{formatterBeløp(utgifspost.kravbeløp, true)}</td>
                             <td className="px-[16px] text-right">{formatterBeløp(utgifspost.godkjentBeløp, true)}</td>
                         </tr>

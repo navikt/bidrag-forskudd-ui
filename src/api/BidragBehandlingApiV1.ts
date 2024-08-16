@@ -1046,6 +1046,7 @@ export interface UtgiftspostDto {
     betaltAvBp: boolean;
     /** @format int64 */
     id: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export enum Utgiftstype {
