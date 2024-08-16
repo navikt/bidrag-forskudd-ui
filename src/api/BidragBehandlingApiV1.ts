@@ -1483,6 +1483,7 @@ export interface ResultatSaerbidragsberegningDto {
     bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
     beregning?: UtgiftBeregningDto;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
     resultat: number;
     resultatKode: Resultatkode;
@@ -1930,6 +1931,7 @@ export interface NotatBegrunnelseDto {
 export interface NotatBehandlingDetaljerDto {
     søknadstype?: string;
     vedtakstype?: Vedtakstype;
+    opprinneligVedtakstype?: Vedtakstype;
     kategori?: NotatSaerbidragKategoriDto;
     søktAv?: SoktAvType;
     /** @format date */
@@ -1948,6 +1950,7 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
