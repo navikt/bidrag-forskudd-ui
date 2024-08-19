@@ -442,16 +442,16 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 },
                 (updatedValue, oppdatertUtgiftspost) => {
                     const eksisterendeUtgifter = getValues(`utgifter`);
-                    setValue(
-                        `utgifter`,
-                        updatedValue.map((v) => ({
+                    setValue(`utgifter`, [
+                        ...updatedValue.map((v) => ({
                             ...v,
                             erRedigerbart:
                                 oppdatertUtgiftspost.id === v.id
                                     ? false
                                     : eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
-                        }))
-                    );
+                        })),
+                        ...eksisterendeUtgifter.filter((v, i) => v.id === undefined && i !== index),
+                    ]);
                 }
             );
         }
