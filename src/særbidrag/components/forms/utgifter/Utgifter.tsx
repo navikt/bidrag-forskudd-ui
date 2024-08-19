@@ -116,15 +116,12 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
 
 const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
-
-    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="min-h-8 flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
-    }
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
+            prefix={erUtgiftForeldet(behandling.mottattdato, item.dato) ? text.label.begrunnelseUtgiftErForeldet : null}
             editable={item.erRedigerbart}
         />
     );

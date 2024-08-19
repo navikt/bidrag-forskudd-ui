@@ -55,8 +55,10 @@ const VedtakResultat = () => {
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;
         const erDirekteAvslag = beregnetSærbidrag.resultat?.erDirekteAvslag;
-        const erGodkjentBeløpLavereEnnForskuddssats =
-            beregnetSærbidrag.resultat?.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS;
+        const erAvslagSomInneholderUtgifter = [
+            Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS,
+            Resultatkode.ALLE_UTGIFTER_ER_FORELDET,
+        ].includes(beregnetSærbidrag.resultat?.resultatKode);
         const erBeregningeAvslag = beregnetSærbidrag.resultat?.resultatKode !== Resultatkode.SAeRBIDRAGINNVILGET;
         const resultat = beregnetSærbidrag.resultat;
         if (erDirekteAvslag) {
@@ -72,7 +74,7 @@ const VedtakResultat = () => {
                 </div>
             );
         }
-        if (erGodkjentBeløpLavereEnnForskuddssats) {
+        if (erAvslagSomInneholderUtgifter) {
             return (
                 <div>
                     <Heading size="small">Avslag</Heading>
