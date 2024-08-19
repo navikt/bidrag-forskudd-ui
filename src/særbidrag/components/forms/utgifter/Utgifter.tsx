@@ -523,6 +523,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
+                        setValue(`avslag`, response.avslag);
                         saveUtgifter.queryClientUpdater((currentData) => ({
                             ...currentData,
                             utgift: {
