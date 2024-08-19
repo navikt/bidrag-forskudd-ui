@@ -10,7 +10,7 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { createInitialValues, inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
+import { inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
@@ -25,6 +25,7 @@ import { InntektTableComponent, InntektTableProvider } from "../../../../common/
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { createInitialForskuddInntektValues } from "../helpers/inntektFormHelpers";
 
 const InntektHeader = ({ ident }: { ident: string }) => {
     const { inntekter } = useGetBehandlingV2();
@@ -112,12 +113,12 @@ const Main = () => {
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { roller } = useGetBehandlingV2();
-    const bmId = roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bmId}`));
+    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bm.id}`));
     const onSave = () => {
-        const begrunnelse = getValues(`begrunnelser.${bmId}`);
+        const begrunnelse = getValues(`begrunnelser.${bm.id}`);
         saveInntekt.mutation.mutate(
             {
                 oppdatereBegrunnelse: {
@@ -133,6 +134,7 @@ const Side = () => {
                             begrunnelser: [
                                 {
                                     innhold: response.begrunnelse,
+                                    gjelder: bm,
                                     kunINotat: response.begrunnelse,
                                 },
                             ],
@@ -145,7 +147,7 @@ const Side = () => {
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue(`begrunnelser.${bmId}`, previousValues ?? "");
+                            setValue(`begrunnelser.${bm.id}`, previousValues ?? "");
                         },
                     });
                 },
@@ -158,7 +160,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["begrunnelser"].includes(name) && type === "change") {
+            if (name.includes("begrunnelser") && type === "change") {
                 debouncedOnSave();
             }
         });
@@ -167,7 +169,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name={`begrunnelser.${bmId}`} label={text.title.begrunnelse} />
+            <FormControlledTextarea name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -178,7 +180,7 @@ const InntektForm = () => {
     const virkningsdato = useVirkningsdato();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialValues(bmOgBarn, inntekter, virkningsdato),
+        () => createInitialForskuddInntektValues(bmOgBarn, inntekter, virkningsdato),
         [bmOgBarn, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({
