@@ -289,6 +289,12 @@ const Main = () => {
                             {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                         </option>
                     ))}
+                    {AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag")) &&
+                        AvslagListeEtterUtgifterErUtfylt.map((value) => (
+                            <option key={value} value={value} disabled>
+                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            </option>
+                        ))}
                 </FormControlledSelectField>
             </FlexRow>
             {!erAvslagValgt && (
@@ -303,12 +309,12 @@ const Main = () => {
                     </Box>
                     <HStack gap={"8"}>
                         <FlexRow>
-                            <Label size="small">{text.label.godkjentBeløp}:</Label>
-                            <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
-                        </FlexRow>
-                        <FlexRow>
                             <Label size="small">{text.label.kravbeløp}:</Label>
                             <BodyShort size="small">{behandling.utgift.beregning?.totalKravbeløp}</BodyShort>
+                        </FlexRow>
+                        <FlexRow>
+                            <Label size="small">{text.label.godkjentBeløp}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
                         </FlexRow>
                     </HStack>
                     {isSærbidragBetaltAvBpEnabled && (
@@ -476,6 +482,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                   response.oppdatertUtgiftspost
                               );
 
+                    setValue(`avslag`, response.avslag);
                     return {
                         ...currentData,
                         utgift: {
