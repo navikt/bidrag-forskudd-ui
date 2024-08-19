@@ -27,13 +27,13 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
-import { AvslagListe } from "../../../constants/avslag";
+import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 import { useOnSaveUtgifter } from "../../../hooks/useOnSaveUtgifter";
@@ -118,7 +118,7 @@ const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
 
     if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
+        return <div className="min-h-8 flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
     }
     return (
         <FormControlledTextField
@@ -236,7 +236,10 @@ const EditOrSaveButton = ({
 const Main = () => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
-    const erAvslagValgt = getValues("avslag") !== "";
+    const erAvslagValgt =
+        getValues("avslag") !== "" &&
+        getValues("avslag") !== undefined &&
+        !AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
     const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const visBetaltAvBpValg =
         behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
@@ -301,10 +304,16 @@ const Main = () => {
                         </FlexRow>
                         <UtgifterListe visBetaltAvBpValg={visBetaltAvBpValg} />
                     </Box>
-                    <FlexRow>
-                        <Label size="small">{text.label.godkjentBeløp}:</Label>
-                        <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
-                    </FlexRow>
+                    <HStack gap={"8"}>
+                        <FlexRow>
+                            <Label size="small">{text.label.godkjentBeløp}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
+                        </FlexRow>
+                        <FlexRow>
+                            <Label size="small">{text.label.kravbeløp}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalKravbeløp}</BodyShort>
+                        </FlexRow>
+                    </HStack>
                     {isSærbidragBetaltAvBpEnabled && (
                         <>
                             <hr className="w-full bg-[var(--a-border-divider)] h-px" />
@@ -474,6 +483,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         ...currentData,
                         utgift: {
                             ...currentData.utgift,
+                            avslag: response.avslag,
                             beregning: response.beregning,
                             utgifter: updatedUtgiftListe,
                             valideringsfeil: response.valideringsfeil,
@@ -513,6 +523,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             ...currentData,
                             utgift: {
                                 ...currentData.utgift,
+                                avslag: response.avslag,
                                 beregning: response.beregning,
                                 utgifter: response.utgiftposter,
                                 valideringsfeil: response.valideringsfeil,
