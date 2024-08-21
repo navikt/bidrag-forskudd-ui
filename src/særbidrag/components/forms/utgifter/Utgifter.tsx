@@ -574,7 +574,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         <Table.Header>
                             <Table.Row className="align-baseline">
                                 {visBetaltAvBpValg && (
-                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[54px]">
+                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
                                 )}
@@ -590,7 +590,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                 <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[238px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[218px]">
                                     {text.label.kommentar}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
