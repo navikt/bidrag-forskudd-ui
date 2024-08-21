@@ -34,7 +34,7 @@ export const QueryErrorWrapper = ({ children }) => {
                 >
                     <Suspense
                         fallback={
-                            <div className="flex justify-center">
+                            <div className="flex justify-center overflow-hidden">
                                 <Loader size="3xlarge" title={text.loading} variant="interaction" />
                             </div>
                         }

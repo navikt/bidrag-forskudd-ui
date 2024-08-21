@@ -1955,7 +1955,6 @@ export interface NotatBehandlingDetaljerDto {
     avslagVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
