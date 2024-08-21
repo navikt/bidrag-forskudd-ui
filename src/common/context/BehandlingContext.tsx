@@ -2,6 +2,7 @@ import ErrorConfirmationModal from "@common/components/ErrorConfirmationModal";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import text from "@common/constants/texts";
 import { useBehandlingV2 } from "@common/hooks/useApiData";
+import { useMutationStatus } from "@common/hooks/useMutationStatus";
 import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { Button, Heading } from "@navikt/ds-react";
 import { dateOrNull, firstDayOfMonth, isAfterEqualsDate } from "@utils/date-utils";
@@ -12,6 +13,7 @@ import React, {
     SetStateAction,
     useCallback,
     useContext,
+    useEffect,
     useRef,
     useState,
 } from "react";
@@ -47,6 +49,8 @@ interface IBehandlingContext {
     >;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
     onStepChange: (x: number, query?: Record<string, string>) => void;
+    pendingTransitionState: boolean;
+    setDebouncing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
@@ -97,6 +101,9 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
         ]);
     }, []);
+    const mutationStatus = useMutationStatus(behandlingId);
+    const [debouncing, setDebouncing] = useState<boolean>(false);
+    const [navigatingToNextPage, setNavigatingToNextPage] = useState<boolean>(false);
 
     const queryLesemodus = searchParams.get(behandlingQueryKeys.lesemodus) === "true";
     const [nextStep, setNextStep] = useState<number>(undefined);
@@ -105,11 +112,23 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
         firstDayOfMonth(new Date())
     );
+
     const onConfirm = () => {
         ref.current?.close();
         setActiveStep(nextStep);
         setPageErrorsOrUnsavedState({ ...pageErrorsOrUnsavedState, [activeStep]: { error: false } });
     };
+
+    useEffect(() => {
+        if (navigatingToNextPage && mutationStatus === "success") {
+            setActiveStep(nextStep);
+            setNavigatingToNextPage(false);
+        }
+
+        if (navigatingToNextPage && mutationStatus === "error") {
+            setNavigatingToNextPage(false);
+        }
+    }, [mutationStatus]);
 
     const onStepChange = (x: number, query?: Record<string, string>) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
@@ -121,6 +140,9 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         ) {
             setNextStep(x);
             ref.current?.showModal();
+        } else if (mutationStatus === "pending" || debouncing) {
+            setNavigatingToNextPage(true);
+            setNextStep(x);
         } else {
             setActiveStep(x, query);
         }
@@ -136,23 +158,31 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             errorMessage,
-            setErrorMessage,
             errorModalOpen,
-            setErrorModalOpen,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
+            pendingTransitionState: navigatingToNextPage && (mutationStatus === "pending" || debouncing),
+            setErrorModalOpen,
+            setErrorMessage,
             setSaveErrorState,
             onConfirm,
             onStepChange,
+            setDebouncing,
         }),
         [
             activeStep,
             behandlingId,
             vedtakId,
+            erVirkningstidspunktNåværendeMånedEllerFramITid,
             saksnummer,
             errorMessage,
             errorModalOpen,
             JSON.stringify(pageErrorsOrUnsavedState),
+            queryLesemodus,
+            behandling.erVedtakFattet,
+            navigatingToNextPage,
+            mutationStatus,
+            debouncing,
         ]
     );
 

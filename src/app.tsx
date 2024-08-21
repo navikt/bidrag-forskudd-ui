@@ -43,7 +43,7 @@ export default function App() {
             <QueryClientProvider client={queryClient}>
                 <Suspense
                     fallback={
-                        <div className="flex justify-center">
+                        <div className="flex justify-center overflow-hidden">
                             <Loader size="3xlarge" title={text.loading} variant="interaction" />
                         </div>
                     }
@@ -153,7 +153,7 @@ const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
 
     if (!flagsReady && flagsError === false) {
         return (
-            <div className="flex justify-center">
+            <div className="flex justify-center overflow-hidden">
                 <Loader size="3xlarge" title={text.loading} variant="interaction" />
             </div>
         );
