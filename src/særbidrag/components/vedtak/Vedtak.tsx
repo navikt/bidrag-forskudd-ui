@@ -163,7 +163,7 @@ const VedtakResultat = () => {
                                 },
                                 {
                                     label: "BP's andel",
-                                    value: formatterProsent(resultat.bpsAndel?.andelProsent),
+                                    value: formatterProsent(resultat.bpsAndel?.andelFaktor),
                                 },
                                 {
                                     label: "BP har evne",
