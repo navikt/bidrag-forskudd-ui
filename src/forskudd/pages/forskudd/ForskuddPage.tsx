@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { NavigationLoaderWrapper } from "@common/components/NavigationLoaderWrapper";
 import elementIds from "@common/constants/elementIds";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
@@ -82,7 +83,9 @@ export const ForskuddPage = () => {
                         <Stepper.Step completed={erVedtakFattet}>{capitalize(ForskuddStepper.VEDTAK)}</Stepper.Step>
                     </Stepper>
                 </FlexRow>
-                <FormWrapper />
+                <NavigationLoaderWrapper>
+                    <FormWrapper />
+                </NavigationLoaderWrapper>
             </BidragContainer>
             <EksterneLenkerKnapper />
         </PageWrapper>
