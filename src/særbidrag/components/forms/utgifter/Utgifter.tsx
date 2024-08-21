@@ -32,6 +32,7 @@ import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@u
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
 import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
@@ -240,6 +241,7 @@ const Main = () => {
     const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const visBetaltAvBpValg =
         behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
+    const erAvslagSomInneholderUtgifter = AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -283,13 +285,13 @@ const Main = () => {
 
             <FlexRow>
                 <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
-                    {<option value="">{text.select.avslagPlaceholder}</option>}
+                    {!erAvslagSomInneholderUtgifter && <option value="">{text.select.avslagPlaceholder}</option>}
                     {AvslagListe.map((value) => (
                         <option key={value} value={value}>
                             {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                         </option>
                     ))}
-                    {AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag")) &&
+                    {erAvslagSomInneholderUtgifter &&
                         AvslagListeEtterUtgifterErUtfylt.map((value) => (
                             <option key={value} value={value} disabled>
                                 {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
@@ -572,14 +574,14 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         <Table.Header>
                             <Table.Row className="align-baseline">
                                 {visBetaltAvBpValg && (
-                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[84px]">
+                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[54px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
                                 )}
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[124px]">
                                     {text.label.forfallsdato}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[158px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[148px]">
                                     {text.label.utgift}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
@@ -588,7 +590,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                 <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[248px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[238px]">
                                     {text.label.kommentar}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
@@ -600,12 +602,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                 <Table.Row
                                     key={item.id + "-" + index}
                                     className="align-top"
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            onSaveRow(index);
-                                        }
-                                    }}
+                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                 >
                                     {visBetaltAvBpValg && (
                                         <Table.DataCell>

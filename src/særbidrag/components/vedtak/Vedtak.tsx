@@ -106,7 +106,7 @@ const VedtakResultat = () => {
             <div>
                 {erBeregningeAvslag ? (
                     <Heading spacing size="small">
-                        Avslag: {hentVisningsnavn(resultat.resultatKode).toLowerCase()}
+                        Avslag, {hentVisningsnavn(resultat.resultatKode).toLowerCase()}
                     </Heading>
                 ) : (
                     <Heading spacing size="small">
@@ -166,16 +166,17 @@ const VedtakResultat = () => {
                                     value: formatterProsent(resultat.bpsAndel?.andelProsent),
                                 },
                                 {
-                                    label: "Resultat",
-                                    value: erBeregningeAvslag ? "Avslag" : formatterBeløp(resultat.resultat, true),
-                                },
-                                {
                                     label: "BP har evne",
                                     value: resultat.bpHarEvne === false ? "Nei" : "Ja",
                                 },
+                                {
+                                    label: "Resultat",
+                                    value: erBeregningeAvslag ? "Avslag" : formatterBeløp(resultat.resultat, true),
+                                },
+
                                 isSærbidragBetaltAvBpEnabled && {
-                                    label: "Direkte betalt av BP",
-                                    value: formatterBeløp(resultat.beregning?.beløpDirekteBetaltAvBp, true),
+                                    label: "Betalt av BP",
+                                    value: formatterBeløp(resultat.beregning?.totalBeløpBetaltAvBp, true),
                                 },
                                 {
                                     label: "Beløp som innkreves",
@@ -254,7 +255,7 @@ const ResultatTabell: React.FC<GenericTableProps> = ({ data, title }) => {
                     {data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                             <td style={{ paddingRight: "10px" }}>{row.label}: </td>
-                            <td>{row.value}</td>
+                            <td className={"text-right"}>{row.value}</td>
                         </tr>
                     ))}
                 </tbody>
