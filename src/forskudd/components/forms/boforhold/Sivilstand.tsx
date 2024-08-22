@@ -34,6 +34,7 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
@@ -451,7 +452,11 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             </Table.Header>
                             <Table.Body>
                                 {controlledFields.map((item, index) => (
-                                    <Table.Row key={item?.id} className="align-top">
+                                    <Table.Row
+                                        key={item?.id}
+                                        className="align-top"
+                                        onKeyDown={actionOnEnter(() => onSaveRow(index))}
+                                    >
                                         <Table.DataCell textSize="small">
                                             <Periode
                                                 editableRow={editableRow === index}

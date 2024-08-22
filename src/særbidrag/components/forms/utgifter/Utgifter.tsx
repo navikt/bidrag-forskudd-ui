@@ -27,13 +27,14 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Heading, HStack, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
 import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
-import { AvslagListe } from "../../../constants/avslag";
+import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 import { useOnSaveUtgifter } from "../../../hooks/useOnSaveUtgifter";
@@ -116,15 +117,12 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
 
 const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
     const behandling = useGetBehandlingV2();
-
-    if (erUtgiftForeldet(behandling.mottattdato, item.dato)) {
-        return <div className="flex items-center">{text.label.begrunnelseUtgiftErForeldet}</div>;
-    }
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
+            prefix={erUtgiftForeldet(behandling.mottattdato, item.dato) ? text.label.begrunnelseUtgiftErForeldet : null}
             editable={item.erRedigerbart}
         />
     );
@@ -236,10 +234,14 @@ const EditOrSaveButton = ({
 const Main = () => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
-    const erAvslagValgt = getValues("avslag") !== "";
+    const erAvslagValgt =
+        getValues("avslag") !== "" &&
+        getValues("avslag") !== undefined &&
+        !AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
     const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const visBetaltAvBpValg =
         behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
+    const erAvslagSomInneholderUtgifter = AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -283,12 +285,18 @@ const Main = () => {
 
             <FlexRow>
                 <FormControlledSelectField name="avslag" label={text.label.avslagsGrunn} className="w-max">
-                    {<option value="">{text.select.avslagPlaceholder}</option>}
+                    {!erAvslagSomInneholderUtgifter && <option value="">{text.select.avslagPlaceholder}</option>}
                     {AvslagListe.map((value) => (
                         <option key={value} value={value}>
                             {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                         </option>
                     ))}
+                    {erAvslagSomInneholderUtgifter &&
+                        AvslagListeEtterUtgifterErUtfylt.map((value) => (
+                            <option key={value} value={value} disabled>
+                                {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
+                            </option>
+                        ))}
                 </FormControlledSelectField>
             </FlexRow>
             {!erAvslagValgt && (
@@ -301,10 +309,16 @@ const Main = () => {
                         </FlexRow>
                         <UtgifterListe visBetaltAvBpValg={visBetaltAvBpValg} />
                     </Box>
-                    <FlexRow>
-                        <Label size="small">{text.label.godkjentBeløp}:</Label>
-                        <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
-                    </FlexRow>
+                    <HStack gap={"8"}>
+                        <FlexRow>
+                            <Label size="small">{text.label.kravbeløp}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalKravbeløp}</BodyShort>
+                        </FlexRow>
+                        <FlexRow>
+                            <Label size="small">{text.label.godkjentBeløp}:</Label>
+                            <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
+                        </FlexRow>
+                    </HStack>
                     {isSærbidragBetaltAvBpEnabled && (
                         <>
                             <hr className="w-full bg-[var(--a-border-divider)] h-px" />
@@ -433,16 +447,16 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 },
                 (updatedValue, oppdatertUtgiftspost) => {
                     const eksisterendeUtgifter = getValues(`utgifter`);
-                    setValue(
-                        `utgifter`,
-                        updatedValue.map((v) => ({
+                    setValue(`utgifter`, [
+                        ...updatedValue.map((v) => ({
                             ...v,
                             erRedigerbart:
                                 oppdatertUtgiftspost.id === v.id
                                     ? false
                                     : eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
-                        }))
-                    );
+                        })),
+                        ...eksisterendeUtgifter.filter((v, i) => v.id === undefined && i !== index),
+                    ]);
                 }
             );
         }
@@ -470,10 +484,12 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                   response.oppdatertUtgiftspost
                               );
 
+                    setValue(`avslag`, response.avslag);
                     return {
                         ...currentData,
                         utgift: {
                             ...currentData.utgift,
+                            avslag: response.avslag,
                             beregning: response.beregning,
                             utgifter: updatedUtgiftListe,
                             valideringsfeil: response.valideringsfeil,
@@ -509,10 +525,12 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
+                        setValue(`avslag`, response.avslag);
                         saveUtgifter.queryClientUpdater((currentData) => ({
                             ...currentData,
                             utgift: {
                                 ...currentData.utgift,
+                                avslag: response.avslag,
                                 beregning: response.beregning,
                                 utgifter: response.utgiftposter,
                                 valideringsfeil: response.valideringsfeil,
@@ -556,14 +574,14 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         <Table.Header>
                             <Table.Row className="align-baseline">
                                 {visBetaltAvBpValg && (
-                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[84px]">
+                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
                                 )}
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[134px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[124px]">
                                     {text.label.forfallsdato}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[158px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[148px]">
                                     {text.label.utgift}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
@@ -572,7 +590,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                 <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
                                     {text.label.godkjentBeløp}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[248px]">
+                                <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[218px]">
                                     {text.label.kommentar}
                                 </Table.HeaderCell>
                                 <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
@@ -584,12 +602,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                 <Table.Row
                                     key={item.id + "-" + index}
                                     className="align-top"
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            e.preventDefault();
-                                            onSaveRow(index);
-                                        }
-                                    }}
+                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                 >
                                     {visBetaltAvBpValg && (
                                         <Table.DataCell>

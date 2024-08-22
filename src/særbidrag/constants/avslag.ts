@@ -5,5 +5,9 @@ export const AvslagListe = [
     Resultatkode.MANGLENDE_DOKUMENTASJON,
     Resultatkode.IKKENODVENDIGEUTGIFTER,
     Resultatkode.PRIVATAVTALEOMSAeRBIDRAG,
+];
+
+export const AvslagListeEtterUtgifterErUtfylt = [
     Resultatkode.ALLE_UTGIFTER_ER_FORELDET,
+    Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS,
 ];
