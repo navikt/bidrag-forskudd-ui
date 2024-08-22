@@ -17,6 +17,7 @@ import { actionOnEnter } from "../../helpers/keyboardHelpers";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
+import ModiaLink from "./ModiaLink";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: string; alert?: string }) => {
@@ -76,6 +77,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                     </Heading>
 
                     <AinntektLink ident={ident} />
+                    <ModiaLink ident={ident} />
                 </HStack>
             </div>
             <Opplysninger fieldName={fieldName} />

@@ -20,6 +20,7 @@ export default merge(webpackCommon, {
             BIDRAG_DOKUMENT_PRODUKSJON: "",
             UNLEASH_FRONTEND_TOKEN: "",
             UNLEASH_API_URL: "",
+            MODIA_URL: "",
         }),
     ],
 });
