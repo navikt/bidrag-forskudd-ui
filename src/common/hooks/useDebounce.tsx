@@ -20,8 +20,8 @@ export const useDebounce = (callback: (...args: any) => void) => {
         return debounce(func, 500);
     }, []);
 
-    return () => {
+    return (...args: any) => {
         setDebouncing(true);
-        debouncedCallback();
+        debouncedCallback(args);
     };
 };
