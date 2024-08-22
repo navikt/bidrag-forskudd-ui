@@ -55,7 +55,7 @@ export const FatteVedtakButtons = ({
                 <Heading spacing level="2" size="xsmall">
                     {tekster.title.sjekkNotatOgOpplysninger}
                 </Heading>
-                <div>
+                <div className="text-wrap">
                     {tekster.varsel.vedtakNotat} <NotatButton />
                 </div>
             </ConfirmationPanel>
