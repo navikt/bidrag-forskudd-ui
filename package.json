@@ -32,7 +32,7 @@
     "@navikt/ds-react-internal": "3.4.3",
     "@navikt/ds-tailwind": "6.7.1",
     "@navikt/ds-tokens": "^6.7.1",
-    "@tanstack/react-query": "^5.17.9",
+    "@tanstack/react-query": "^5.52.1",
     "@testing-library/react-hooks": "^8.0.1",
     "@theme-ui/mdx": "0.16.2",
     "@types/lodash": "^4.14.202",
