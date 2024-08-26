@@ -4,7 +4,7 @@ import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/hooks/useApiData";
-import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
+import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
@@ -107,9 +107,7 @@ const VedtakTableBody = ({
                             <Table.DataCell textSize="small">
                                 {opphør ? text.label.opphør : text.label.avslag}
                             </Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
-                            </Table.DataCell>
+                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
                         </Table.Row>
                     ) : (
                         <Table.Row>
@@ -126,9 +124,7 @@ const VedtakTableBody = ({
 
                             <Table.DataCell textSize="small">{periode.antallBarnIHusstanden}</Table.DataCell>
                             <Table.DataCell textSize="small">{formatterBeløp(periode.beløp)}</Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                {hentVisningsnavnVedtakstype(periode.resultatKode, vedtakstype)}
-                            </Table.DataCell>
+                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
                         </Table.Row>
                     )}
                 </>
