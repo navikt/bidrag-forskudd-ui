@@ -90,8 +90,6 @@ const VedtakTableBody = ({
     avslag: boolean;
     opphør: boolean;
 }) => {
-    const { vedtakstype } = useGetBehandlingV2();
-
     return (
         <Table.Body>
             {resultatBarn.perioder.map((periode) => (
