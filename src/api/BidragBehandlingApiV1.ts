@@ -1965,6 +1965,7 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
 }
