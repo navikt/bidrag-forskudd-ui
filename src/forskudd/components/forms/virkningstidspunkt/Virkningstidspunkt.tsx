@@ -76,8 +76,8 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
 });
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
-    const årsak = Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag);
-    const avslag = Object.values(Resultatkode).find((value) => value === values.årsakAvslag);
+    const årsak = årsakListe.find((value) => value === values.årsakAvslag);
+    const avslag = avslagsListe.find((value) => value === values.årsakAvslag);
     return {
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
