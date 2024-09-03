@@ -22,7 +22,7 @@ export const Kontantstøtte = () => {
         .sort((a, b) => a.navn.localeCompare(b.navn));
 
     return (
-        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_kontantstøtte}>
                 {text.title.kontantstøtte}
             </Heading>

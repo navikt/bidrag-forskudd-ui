@@ -149,7 +149,7 @@ export const Opplysninger = ({
     return (
         <>
             {feilVedInnhentingAvOffentligData && (
-                <BehandlingAlert variant="info" className="w-[708px] mb-2">
+                <BehandlingAlert variant="info" className="mb-2">
                     <Heading size="small" level="3">
                         {text.alert.feilVedInnhentingAvOffentligData}
                     </Heading>
@@ -162,7 +162,7 @@ export const Opplysninger = ({
                 borderWidth="1"
                 borderRadius="medium"
                 borderColor="border-default"
-                className="w-[708px]"
+                className="w-[708px] sm:max-w-[688px]"
             >
                 <Heading size="xsmall" level="6">
                     {text.alert.nyOpplysninger}

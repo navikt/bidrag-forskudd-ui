@@ -14,6 +14,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { OverlayLoader } from "@common/components/OverlayLoader";
+import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { calculateFraDato, sivilstandForskuddOptions } from "@common/helpers/boforholdFormHelpers";
@@ -165,7 +166,7 @@ export const Sivilstand = () => {
     const datoFom = useVirkningsdato();
     return (
         <div className="mt-8">
-            <Heading level="2" size="small" id="sivilstand" title="Sivilstand V2">
+            <Heading level="2" size="small" id={elementIds.seksjon_sivilstand} title="Sivilstand V2">
                 {text.label.sivilstand}
             </Heading>
             <SivilistandPerioder virkningstidspunkt={datoFom} />

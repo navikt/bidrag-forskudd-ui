@@ -3,6 +3,7 @@ import { BarnPerioder } from "@common/components/boforhold/BarnPerioder";
 import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpplysninger";
 import { FormLayout } from "@common/components/layout/grid/FormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { createInitialValues } from "@common/helpers/boforholdFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
@@ -21,7 +22,7 @@ const Main = () => {
     return (
         <>
             <NyOpplysningerAlert />
-            <Heading level="2" size="small">
+            <Heading level="2" size="small" id={elementIds.seksjon_boforhold}>
                 {text.label.barn}
             </Heading>
             <BarnPerioder />

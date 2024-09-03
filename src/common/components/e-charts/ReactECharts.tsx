@@ -62,6 +62,10 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
         const canvas = chartRef.current.querySelector("canvas");
         const chart = getInstanceByDom(chartRef.current);
         const dataLen = option.series[0].data.length;
+
+        chart.on("highlight", function (params) {
+            console.log("", params);
+        });
         const handleKeydown = (e) => {
             if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
                 chart.dispatchAction({
@@ -107,5 +111,5 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
         }
     }, [option, settings]);
 
-    return <div ref={chartRef} style={{ width: "100%", height: "250px", ...style }} />;
+    return <div ref={chartRef} style={{ width: "100%", height: "200px", ...style }} />;
 }

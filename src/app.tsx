@@ -15,7 +15,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
-import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
+import { NewForskuddPage } from "./forskudd/pages/forskudd/NewForskuddPage";
 import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
 
@@ -135,7 +135,7 @@ const BehandlingPage = () => {
 const ForskuddBehandling = () => (
     <ForskuddBehandlingProviderWrapper>
         <BidragBehandlingHeader />
-        <ForskuddPage />
+        <NewForskuddPage />
         <ErrorModal />
     </ForskuddBehandlingProviderWrapper>
 );

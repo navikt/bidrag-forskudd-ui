@@ -6,6 +6,7 @@ import { useMutationStatus } from "@common/hooks/useMutationStatus";
 import { XMarkOctagonFillIcon } from "@navikt/aksel-icons";
 import { Button, Heading } from "@navikt/ds-react";
 import { dateOrNull, firstDayOfMonth, isAfterEqualsDate } from "@utils/date-utils";
+import { getAllSearchParamsExcludingKeys } from "@utils/window-utils";
 import React, {
     createContext,
     Dispatch,
@@ -17,13 +18,12 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
 import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særbidrag/context/SærligeugifterProviderWrapper";
 import { SærligeutgifterStepper } from "../../særbidrag/enum/SærligeutgifterStepper";
-import { getAllSearchParamsExcludingKeys } from "../../utils/window-utils";
 import behandlingQueryKeys from "../constants/behandlingQueryKeys";
 
 interface SaveErrorState {
@@ -48,7 +48,7 @@ interface IBehandlingContext {
         SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
     >;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
-    onStepChange: (x: number, query?: Record<string, string>) => void;
+    onStepChange: (x: number, query?: Record<string, string>, hash?: string) => void;
     pendingTransitionState: boolean;
     setDebouncing: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -88,18 +88,27 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         saksnummer?: string;
         vedtakId?: string;
     }>();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
     const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
-    const setActiveStep = useCallback((x: number, query?: Record<string, string>) => {
-        setSearchParams([
+    const location = useLocation();
+    const navigate = useNavigate();
+    const setActiveStep = useCallback((x: number, query?: Record<string, string>, hash?: string) => {
+        const updatedSearchParams = [
+            [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
             ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.inntektTab).entries(),
             ...(query ? Object.entries(query) : []),
-            [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
-        ]);
+        ];
+
+        const updatedSearchParamsString = Object.entries(updatedSearchParams)
+            .map(([, [key, value]]) => `&${key}=${value}`)
+            .join("");
+
+        const url = `?${updatedSearchParamsString}${hash ? `#${hash}` : ""}`;
+        navigate(`${location.pathname + url}`);
     }, []);
     const mutationStatus = useMutationStatus(behandlingId);
     const [debouncing, setDebouncing] = useState<boolean>(false);
@@ -130,7 +139,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         }
     }, [mutationStatus]);
 
-    const onStepChange = (x: number, query?: Record<string, string>) => {
+    const onStepChange = (x: number, query?: Record<string, string>, hash?: string) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
 
         if (
@@ -144,7 +153,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             setNavigatingToNextPage(true);
             setNextStep(x);
         } else {
-            setActiveStep(x, query);
+            setActiveStep(x, query, hash);
         }
     };
 
