@@ -11,14 +11,14 @@ import React, { useEffect, useState } from "react";
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
-import { SideMenu } from "./SideMenu";
+import { ForskuddSideMenu } from "./ForskuddSideMenu";
 export const NewForskuddPage = () => {
     const { erVedtakFattet } = useGetBehandlingV2();
 
     return (
         <PageWrapper name="tracking-wide">
             <div className="m-auto max-w-[1272px] min-[1440px]:max-w-[1920px] grid grid-cols-[max-content,auto]">
-                <SideMenu />
+                <ForskuddSideMenu />
                 <div className="w-full p-6 overflow-x-scroll min-[1440px]:overflow-x-visible">
                     {erVedtakFattet && (
                         <Alert variant="info" size="small" className="mb-4 w-max m-auto">
