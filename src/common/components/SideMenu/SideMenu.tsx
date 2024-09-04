@@ -3,12 +3,13 @@ import "./sideMenu.css";
 import {
     BellDotIcon,
     CheckmarkIcon,
+    ChevronDownIcon,
     ChevronLeftCircleIcon,
     ExclamationmarkTriangleFillIcon,
 } from "@navikt/aksel-icons";
 import { Button, VStack } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
 export const MenuButton = ({
     completed,
@@ -33,21 +34,36 @@ export const MenuButton = ({
     valideringsfeil?: boolean;
     unconfirmedUpdates?: boolean;
 }) => {
+    const [openSubMenu, setOpenSubMenu] = useState<boolean>(active);
     const onClick = () => {
         onStepChange();
         scrollToHash();
+        setOpenSubMenu(!openSubMenu);
     };
+
+    useEffect(() => {
+        if (!active) setOpenSubMenu(false);
+    }, [active]);
 
     return (
         <>
             <Button
                 variant="tertiary"
-                className={`grid-item w-full justify-start rounded-none py-3 px-5 ${
+                className={`grid-item w-full justify-between rounded-none py-3 px-5 ${
                     active ? "bg-[var(--a-blue-50)]" : ""
                 }`}
                 onClick={onClick}
                 disabled={!interactive}
                 size={size ?? "medium"}
+                iconPosition="right"
+                icon={
+                    subMenu && (
+                        <ChevronDownIcon
+                            title="submenu"
+                            className={`duration-500 ${openSubMenu ? "rotate-0" : "rotate-180"}`}
+                        />
+                    )
+                }
             >
                 <span className="flex items-center gap-1 h-5">
                     <span className="w-5">
@@ -68,7 +84,7 @@ export const MenuButton = ({
                     <span className={`text-left ${!subMenu && size === "small" ? "font-normal" : ""}`}>{title}</span>
                 </span>
             </Button>
-            {active && subMenu}
+            {active && openSubMenu && subMenu}
         </>
     );
 };
