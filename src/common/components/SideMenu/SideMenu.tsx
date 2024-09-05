@@ -2,7 +2,7 @@ import "./sideMenu.css";
 
 import {
     BellDotIcon,
-    CheckmarkIcon,
+    CheckmarkCircleFillIcon,
     ChevronDownIcon,
     ChevronLeftCircleIcon,
     ExclamationmarkTriangleFillIcon,
@@ -42,46 +42,45 @@ export const MenuButton = ({
     };
 
     useEffect(() => {
-        if (!active) setOpenSubMenu(false);
+        setOpenSubMenu(active);
     }, [active]);
+
+    const displayBellIcon = (unconfirmedUpdates && !openSubMenu) || (unconfirmedUpdates && !subMenu);
+    const displayWarningIcon = !step && ((valideringsfeil && !openSubMenu) || (valideringsfeil && !subMenu));
 
     return (
         <>
             <Button
                 variant="tertiary"
-                className={`grid-item w-full justify-between rounded-none py-3 px-5 ${
+                className={`grid-item w-full grid justify-stretch rounded-none py-3 px-5 ${
                     active ? "bg-[var(--a-blue-50)]" : ""
                 }`}
                 onClick={onClick}
                 disabled={!interactive}
                 size={size ?? "medium"}
-                iconPosition="right"
-                icon={
-                    subMenu && (
-                        <ChevronDownIcon
-                            title="submenu"
-                            className={`duration-500 ${openSubMenu ? "rotate-0" : "rotate-180"}`}
-                        />
-                    )
-                }
             >
-                <span className="flex items-center gap-1 h-5">
-                    <span className="w-5">
-                        {((unconfirmedUpdates && !active) || (unconfirmedUpdates && !subMenu)) && (
-                            <BellDotIcon title="Info" />
-                        )}
-                    </span>
-                    <span className="w-5">
-                        {completed && <CheckmarkIcon title="Checked" />}
-                        {((valideringsfeil && !active) || (valideringsfeil && !subMenu)) && (
+                <span className="grid items-center gap-1 grid-cols-[20px,20px,auto,20px]">
+                    {!step && <span>{displayBellIcon && displayWarningIcon && <BellDotIcon title="Info" />}</span>}
+                    <span>
+                        {completed && <CheckmarkCircleFillIcon title="checked" />}
+                        {displayWarningIcon && (
                             <ExclamationmarkTriangleFillIcon
                                 title="Advarsel"
                                 style={{ color: "var(--ac-alert-icon-warning-color, var(--a-icon-warning))" }}
                             />
                         )}
+                        {!displayWarningIcon && displayBellIcon && <BellDotIcon title="Info" />}
                     </span>
-                    <span className="w-5">{step && step}</span>
+                    {step && <span>{step}</span>}
                     <span className={`text-left ${!subMenu && size === "small" ? "font-normal" : ""}`}>{title}</span>
+                    <span>
+                        {subMenu && (
+                            <ChevronDownIcon
+                                title="submenu"
+                                className={`duration-500 ${openSubMenu ? "rotate-0" : "rotate-180"}`}
+                            />
+                        )}
+                    </span>
                 </span>
             </Button>
             {active && openSubMenu && subMenu}
@@ -90,8 +89,8 @@ export const MenuButton = ({
 };
 export const SideMenu = ({ children }) => {
     const [menuOpen, setMenuOpen] = useState<boolean>(true);
-    const closedMenuCss = "p-0 w-0 min-w-0";
-    const openMenuCss = "p-6 min-w-[248px]";
+    const closedMenuCss = "p-0 w-6 min-w-0";
+    const openMenuCss = "p-6 w-[298px] min-w-[298px] min-[1440px]:w-[412px]";
 
     return (
         <div

@@ -107,6 +107,7 @@ const tekster = {
         beskrivelse: "Beskrivelse",
         betaltAvBp: "Betalt av BP",
         direkteBetalt: "Direkte betalt",
+        fastlønn: "Fastlønn",
         fatteVedtakButton: "Fatte vedtak",
         forfallsdato: "Forfallsdato",
         forskudd: "Forskudd",

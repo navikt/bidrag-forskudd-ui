@@ -73,8 +73,6 @@ export const ForskuddSideMenu = () => {
             />
             <MenuButton
                 completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
-                valideringsfeil={boforholdValideringsFeil}
-                unconfirmedUpdates={boforholdIkkeAktiverteEndringer}
                 step={"2."}
                 title={"Boforhold"}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.BOFORHOLD])}
@@ -114,8 +112,6 @@ export const ForskuddSideMenu = () => {
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.INNTEKT])}
                 interactive={interactive}
                 active={activeButton?.includes(ForskuddStepper.INNTEKT)}
-                valideringsfeil={inntektValideringsFeil}
-                unconfirmedUpdates={inntekterIkkeAktiverteEndringer}
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton

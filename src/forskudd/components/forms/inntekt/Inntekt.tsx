@@ -3,7 +3,7 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
-import { InntektChart } from "@common/components/inntekt/InntektChart";
+import { InntektChartWithInfoBoard } from "@common/components/inntekt/InntektChart";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -34,9 +34,9 @@ const InntektHeader = ({ ident }: { ident: string }) => {
 
     const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
     return månedsinntekter?.length > 0 ? (
-        <div className="grid w-full max-w-[65ch] gap-y-8">
-            <InntektChart inntekt={månedsinntekter} />
-            <ExpansionCard aria-label="default-demo" size="small">
+        <div className="grid w-full gap-y-8">
+            <InntektChartWithInfoBoard inntekt={månedsinntekter} />
+            <ExpansionCard aria-label="default-demo" size="small" className="w-[568px]">
                 <ExpansionCard.Header>
                     <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
                 </ExpansionCard.Header>

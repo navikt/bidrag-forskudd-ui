@@ -33,10 +33,11 @@ export interface ReactEChartsProps {
     option: EChartsOption;
     style?: CSSProperties;
     settings?: SetOptionOpts;
+    onHighlight?: (dataIndex: number) => void;
 }
 
 let currentIndex = -1;
-export function ReactECharts({ option, style, settings }: ReactEChartsProps): JSX.Element {
+export function ReactECharts({ option, style, settings, onHighlight }: ReactEChartsProps): JSX.Element {
     const chartRef = useRef<HTMLDivElement>(null);
     const [chartInitialized, setChartInitialized] = useState(false);
 
@@ -63,9 +64,19 @@ export function ReactECharts({ option, style, settings }: ReactEChartsProps): JS
         const chart = getInstanceByDom(chartRef.current);
         const dataLen = option.series[0].data.length;
 
-        chart.on("highlight", function (params) {
-            console.log("", params);
-        });
+        chart.on(
+            "highlight",
+            function (params: {
+                batch: {
+                    type: "highlight";
+                    seriesIndex: number;
+                    dataIndex: number;
+                }[];
+            }) {
+                const dataIndex = params.batch[0].dataIndex;
+                onHighlight(dataIndex);
+            }
+        );
         const handleKeydown = (e) => {
             if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
                 chart.dispatchAction({
