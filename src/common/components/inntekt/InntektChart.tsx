@@ -2,7 +2,6 @@ import { InntektDtoV2 } from "@api/BidragBehandlingApiV1";
 import { ReactECharts, ReactEChartsProps } from "@common/components/e-charts/ReactECharts";
 import { BodyShort, Box, Label } from "@navikt/ds-react";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "@utils/date-utils";
-import { roundDown, roundUp } from "@utils/number-utils";
 import { capitalize } from "@utils/string-utils";
 import React, { memo, useState } from "react";
 
@@ -42,8 +41,6 @@ const buildChartProps = (inntekt: InntektDtoV2[], onHighlight: (inntekt: Inntekt
             grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
             yAxis: {
                 type: "value",
-                min: (value) => roundDown(value.min),
-                max: (value) => roundUp(value.max),
             },
             series: [
                 {
