@@ -86,25 +86,33 @@ export const InntektChartWithInfoBoard = ({ inntekt }: { inntekt: InntektDtoV2[]
         <div className="grid grid-cols-[568px,1fr] gap-6">
             <InntektChart inntekt={inntekt} onHighlight={onHighlight} />
             <Box padding="4" background="surface-info-subtle" className="h-max">
+                <div className="flex gap-x-1">
+                    <Label size="small" className="text-nowrap">
+                        {text.label.måned}:
+                    </Label>
+                    <BodyShort size="small" className="capitalize">
+                        {highlightedMonth?.datoFom &&
+                            new Date(highlightedMonth?.datoFom).toLocaleString("no-NB", { month: "long" })}
+                    </BodyShort>
+                </div>
                 {!highlightedMonth && (
                     <Label size="small" className="text-nowrap">
                         {text.label.fastlønn}:
                     </Label>
                 )}
-                {highlightedMonth &&
-                    highlightedMonth.inntektsposter.map((inntekt) => (
-                        <div className="flex gap-x-2">
-                            <Label size="small" className="text-nowrap">
-                                {inntekt.visningsnavn}:
-                            </Label>
-                            <BodyShort size="small">
-                                {inntekt.beløp.toLocaleString("nb-NO", {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 2,
-                                })}
-                            </BodyShort>
-                        </div>
-                    ))}
+                {highlightedMonth?.inntektsposter?.map((inntekt) => (
+                    <div className="flex gap-x-1">
+                        <Label size="small" className="text-nowrap">
+                            {inntekt.visningsnavn}:
+                        </Label>
+                        <BodyShort size="small">
+                            {inntekt.beløp.toLocaleString("nb-NO", {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 2,
+                            })}
+                        </BodyShort>
+                    </div>
+                ))}
             </Box>
         </div>
     );

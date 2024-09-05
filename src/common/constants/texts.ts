@@ -95,6 +95,7 @@ const tekster = {
         opphør: "Opphør",
         avbryt: "Avbryt",
         barn: "Barn",
+        måned: "Måned",
         nytt: "Nytt",
         barnetillegg: "Barnetillegg",
         kommentar: "Kommentar",
