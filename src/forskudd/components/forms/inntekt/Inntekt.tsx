@@ -1,9 +1,7 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
-import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
-import { InntektChartWithInfoBoard } from "@common/components/inntekt/InntektChart";
+import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -17,7 +15,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { BodyShort, ExpansionCard, Tabs } from "@navikt/ds-react";
+import { Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -29,30 +27,6 @@ import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
 import { createInitialForskuddInntektValues } from "../helpers/inntektFormHelpers";
 
-const InntektHeader = ({ ident }: { ident: string }) => {
-    const { inntekter } = useGetBehandlingV2();
-
-    const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
-    return månedsinntekter?.length > 0 ? (
-        <div className="grid w-full gap-y-8">
-            <InntektChartWithInfoBoard inntekt={månedsinntekter} />
-            <ExpansionCard aria-label="default-demo" size="small" className="w-[568px]">
-                <ExpansionCard.Header>
-                    <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
-                </ExpansionCard.Header>
-                <ExpansionCard.Content>
-                    <QueryErrorWrapper>
-                        <Arbeidsforhold ident={ident} />
-                    </QueryErrorWrapper>
-                </ExpansionCard.Content>
-            </ExpansionCard>
-        </div>
-    ) : (
-        <BehandlingAlert variant="info">
-            <BodyShort>Ingen inntekt funnet</BodyShort>
-        </BehandlingAlert>
-    );
-};
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
     const [searchParams, setSearchParams] = useSearchParams();

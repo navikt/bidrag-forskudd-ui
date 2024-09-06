@@ -198,6 +198,7 @@ const tekster = {
         oppsummering: "Oppsummering",
         oversiktOverUtgifter: "Oversikt over utgifter",
         utvidetBarnetrygd: "Utvidet barnetrygd",
+        utgift: "Utgift",
         vedtak: "Vedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",

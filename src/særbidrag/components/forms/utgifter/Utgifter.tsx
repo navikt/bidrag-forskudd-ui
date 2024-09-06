@@ -15,7 +15,7 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
@@ -775,7 +775,7 @@ const UtgifterForm = () => {
         <>
             <FormProvider {...useFormMethods}>
                 <form>
-                    <FormLayout title={text.label.utgift} main={<Main />} side={<Side />} />
+                    <NewFormLayout title={text.title.utgift} main={<Main />} side={<Side />} />
                 </form>
             </FormProvider>
         </>

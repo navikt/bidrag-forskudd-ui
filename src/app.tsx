@@ -17,7 +17,7 @@ import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBe
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
 import { NewForskuddPage } from "./forskudd/pages/forskudd/NewForskuddPage";
 import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
-import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
+import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
@@ -142,7 +142,7 @@ const ForskuddBehandling = () => (
 const SærligeutgifterBehandling = () => (
     <SærligeugifterProviderWrapper>
         <BidragBehandlingHeader />
-        <SærbidragPage />
+        <NewSærbidragPage />
         <ErrorModal />
     </SærligeugifterProviderWrapper>
 );

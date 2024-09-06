@@ -1,7 +1,7 @@
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { BarnPerioder } from "@common/components/boforhold/BarnPerioder";
 import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpplysninger";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
@@ -20,7 +20,6 @@ const Main = () => {
 
     return (
         <>
-            <NyOpplysningerAlert />
             <Heading level="2" size="small">
                 {text.label.barn}
             </Heading>
@@ -50,7 +49,12 @@ const BoforholdsForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title={text.title.boforholdBp} main={<Main />} side={<Begrunnelse />} />
+                <NewFormLayout
+                    title={text.title.boforholdBp}
+                    main={<Main />}
+                    side={<Begrunnelse />}
+                    pageAlert={<NyOpplysningerAlert />}
+                />
             </form>
         </FormProvider>
     );

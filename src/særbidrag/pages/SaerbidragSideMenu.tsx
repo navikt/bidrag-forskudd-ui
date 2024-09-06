@@ -8,15 +8,15 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { STEPS } from "../../constants/steps";
-import { ForskuddStepper } from "../../enum/ForskuddStepper";
+import { STEPS } from "../constants/steps";
+import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
-export const ForskuddSideMenu = () => {
+export const SaerbidragSideMenu = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
-        virkningstidspunkt,
         erVedtakFattet,
         vedtakstype,
+        utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -25,25 +25,23 @@ export const ForskuddSideMenu = () => {
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
-        if (!step) return ForskuddStepper.VIRKNINGSTIDSPUNKT;
+        if (!step) return SærligeutgifterStepper.UTGIFT;
         const inntektTab = searchParams.get(behandlingQueryKeys.inntektTab);
         return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
     const activeStepIndex = STEPS[activeStep];
-    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
-    const inntektRoller = roller
-        .filter((rolle) => rolle.rolletype !== Rolletype.BP)
-        .sort((a, b) => {
-            if (a.rolletype === Rolletype.BM) return -1;
-            if (b.rolletype === Rolletype.BM) return 1;
-
-            if (a.rolletype === Rolletype.BA || b.rolletype === Rolletype.BA) {
-                return a.ident.localeCompare(b.ident);
-            }
-
-            return 0;
-        });
+    const interactive = vedtakstype !== Vedtakstype.OPPHOR && avslag === undefined;
+    const inntektRoller = roller.sort((a, b) => {
+        if (a.rolletype === Rolletype.BM) return -1;
+        if (b.rolletype === Rolletype.BM) return 1;
+        if (a.rolletype === Rolletype.BP) return -1;
+        if (b.rolletype === Rolletype.BP) return 1;
+        if (a.rolletype === Rolletype.BA || b.rolletype === Rolletype.BA) {
+            return a.ident.localeCompare(b.ident);
+        }
+        return 0;
+    });
 
     useEffect(() => {
         const activeButton = getActiveButtonFromParams();
@@ -51,11 +49,12 @@ export const ForskuddSideMenu = () => {
     }, [searchParams, location]);
 
     const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
-    const sivilstandValideringsFeil = !!boforholdValideringsfeil?.sivilstand;
-    const boforholdValideringsFeil = husstandsmedlemValideringsFeil || sivilstandValideringsFeil;
+    const andreVoksneIHusstandenValideringsFeil = !!boforholdValideringsfeil?.andreVoksneIHusstanden;
+    const boforholdValideringsFeil = husstandsmedlemValideringsFeil || andreVoksneIHusstandenValideringsFeil;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
-    const sivilstandIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand;
-    const boforholdIkkeAktiverteEndringer = husstandsmedlemIkkeAktiverteEndringer || sivilstandIkkeAktiverteEndringer;
+    const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
+    const boforholdIkkeAktiverteEndringer =
+        husstandsmedlemIkkeAktiverteEndringer || andreVoksneIHusstandenIkkeAktiverteEndringer;
     const inntektValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
@@ -64,43 +63,52 @@ export const ForskuddSideMenu = () => {
     return (
         <SideMenu>
             <MenuButton
-                completed={activeStepIndex > 1}
+                completed={activeStepIndex > 1 && !!utgiftValideringsfeil}
                 step={"1."}
-                title={ForskuddStepper.VIRKNINGSTIDSPUNKT}
-                onStepChange={() => onStepChange(STEPS[ForskuddStepper.VIRKNINGSTIDSPUNKT])}
+                title={SærligeutgifterStepper.UTGIFT}
+                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.UTGIFT])}
                 interactive={interactive}
-                active={activeButton === ForskuddStepper.VIRKNINGSTIDSPUNKT}
+                active={activeButton === SærligeutgifterStepper.UTGIFT}
+                valideringsfeil={!!utgiftValideringsfeil}
             />
             <MenuButton
                 completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
                 step={"2."}
-                title={ForskuddStepper.BOFORHOLD}
-                onStepChange={() => onStepChange(STEPS[ForskuddStepper.BOFORHOLD])}
+                title={SærligeutgifterStepper.BOFORHOLD}
+                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD])}
                 interactive={interactive}
-                active={activeButton === ForskuddStepper.BOFORHOLD}
+                active={activeButton === SærligeutgifterStepper.BOFORHOLD}
                 subMenu={
                     <>
                         <MenuButton
                             title={text.title.barn}
                             onStepChange={() =>
-                                onStepChange(STEPS[ForskuddStepper.BOFORHOLD], undefined, elementIds.seksjon_boforhold)
+                                onStepChange(
+                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
+                                    undefined,
+                                    elementIds.seksjon_boforhold
+                                )
                             }
                             interactive={interactive}
                             size="small"
-                            active={activeButton === ForskuddStepper.BOFORHOLD}
+                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
                             valideringsfeil={husstandsmedlemValideringsFeil}
                             unconfirmedUpdates={husstandsmedlemIkkeAktiverteEndringer}
                         />
                         <MenuButton
-                            title={text.title.sivilstand}
+                            title={text.title.andreVoksneIHusstanden}
                             onStepChange={() =>
-                                onStepChange(STEPS[ForskuddStepper.BOFORHOLD], undefined, elementIds.seksjon_sivilstand)
+                                onStepChange(
+                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
+                                    undefined,
+                                    elementIds.seksjon_andreVoksneIHusstand
+                                )
                             }
                             interactive={interactive}
                             size="small"
-                            active={activeButton === ForskuddStepper.BOFORHOLD}
-                            valideringsfeil={sivilstandValideringsFeil}
-                            unconfirmedUpdates={sivilstandIkkeAktiverteEndringer}
+                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
+                            valideringsfeil={andreVoksneIHusstandenValideringsFeil}
+                            unconfirmedUpdates={andreVoksneIHusstandenIkkeAktiverteEndringer}
                         />
                     </>
                 }
@@ -108,16 +116,16 @@ export const ForskuddSideMenu = () => {
             <MenuButton
                 completed={activeStepIndex > 3 && !inntektValideringsFeil && !inntekterIkkeAktiverteEndringer}
                 step={"3."}
-                title={ForskuddStepper.INNTEKT}
-                onStepChange={() => onStepChange(STEPS[ForskuddStepper.INNTEKT])}
+                title={"Inntekt"}
+                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.INNTEKT])}
                 interactive={interactive}
-                active={activeButton?.includes(ForskuddStepper.INNTEKT)}
+                active={activeButton?.includes(SærligeutgifterStepper.INNTEKT)}
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton
                             title={`${rolle.rolletype} ${rolle.ident}`}
                             onStepChange={() =>
-                                onStepChange(STEPS[ForskuddStepper.INNTEKT], {
+                                onStepChange(STEPS[SærligeutgifterStepper.INNTEKT], {
                                     [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                 })
                             }
@@ -138,7 +146,7 @@ export const ForskuddSideMenu = () => {
                                     inntekter.some((inntekt) => inntekt.ident === rolle.ident)
                                 )
                             }
-                            active={activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`}
+                            active={activeButton === `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`}
                             subMenu={
                                 rolle.rolletype === Rolletype.BM ? (
                                     <>
@@ -146,7 +154,7 @@ export const ForskuddSideMenu = () => {
                                             title={text.title.skattepliktigeogPensjonsgivendeInntekt}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -162,14 +170,15 @@ export const ForskuddSideMenu = () => {
                                             )}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
                                         />
                                         <MenuButton
                                             title={text.title.barnetillegg}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -179,18 +188,25 @@ export const ForskuddSideMenu = () => {
                                             interactive={interactive}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
-                                            valideringsfeil={!!inntektValideringsfeil?.barnetillegg?.length}
+                                            valideringsfeil={
+                                                !!inntektValideringsfeil?.barnetillegg?.some(
+                                                    (feil) => feil?.rolle?.ident === rolle.ident
+                                                )
+                                            }
                                             unconfirmedUpdates={
-                                                !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter?.barnetillegg?.length
+                                                !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter?.barnetillegg?.some(
+                                                    (inntekt) => inntekt.ident === rolle.ident
+                                                )
                                             }
                                         />
                                         <MenuButton
                                             title={text.title.utvidetBarnetrygd}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -200,7 +216,8 @@ export const ForskuddSideMenu = () => {
                                             interactive={interactive}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
                                             valideringsfeil={!!inntektValideringsfeil?.utvidetBarnetrygd}
                                             unconfirmedUpdates={
@@ -212,7 +229,7 @@ export const ForskuddSideMenu = () => {
                                             title={text.title.småbarnstillegg}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -222,7 +239,8 @@ export const ForskuddSideMenu = () => {
                                             interactive={interactive}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
                                             valideringsfeil={!!inntektValideringsfeil?.småbarnstillegg}
                                             unconfirmedUpdates={
@@ -234,7 +252,7 @@ export const ForskuddSideMenu = () => {
                                             title={text.title.kontantstøtte}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -244,11 +262,67 @@ export const ForskuddSideMenu = () => {
                                             interactive={interactive}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
                                             valideringsfeil={!!inntektValideringsfeil?.kontantstøtte?.length}
                                             unconfirmedUpdates={
                                                 !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter?.kontantstøtte?.length
+                                            }
+                                        />
+                                    </>
+                                ) : rolle.rolletype === Rolletype.BP ? (
+                                    <>
+                                        <MenuButton
+                                            title={text.title.skattepliktigeogPensjonsgivendeInntekt}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
+                                                    {
+                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                    },
+                                                    elementIds.seksjon_inntekt_skattepliktig
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            valideringsfeil={inntektValideringsfeil?.årsinntekter?.some(
+                                                (feil) => feil?.rolle?.id === rolle.id
+                                            )}
+                                            unconfirmedUpdates={ikkeAktiverteEndringerIGrunnlagsdata?.inntekter?.årsinntekter.some(
+                                                (inntekt) => inntekt.ident === rolle.ident
+                                            )}
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
+                                            }
+                                        />
+                                        <MenuButton
+                                            title={text.title.barnetillegg}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
+                                                    {
+                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                    },
+                                                    elementIds.seksjon_inntekt_barnetillegg
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
+                                            }
+                                            valideringsfeil={
+                                                !!inntektValideringsfeil?.barnetillegg?.some(
+                                                    (feil) => feil?.rolle?.ident === rolle.ident
+                                                )
+                                            }
+                                            unconfirmedUpdates={
+                                                !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter?.barnetillegg?.some(
+                                                    (inntekt) => inntekt.ident === rolle.ident
+                                                )
                                             }
                                         />
                                     </>
@@ -258,7 +332,7 @@ export const ForskuddSideMenu = () => {
                                             title={text.title.skattepliktigeogPensjonsgivendeInntekt}
                                             onStepChange={() =>
                                                 onStepChange(
-                                                    STEPS[ForskuddStepper.INNTEKT],
+                                                    STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
                                                         [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
                                                     },
@@ -268,7 +342,8 @@ export const ForskuddSideMenu = () => {
                                             interactive={interactive}
                                             size="small"
                                             active={
-                                                activeButton === `${ForskuddStepper.INNTEKT}.${rolle.id.toString()}`
+                                                activeButton ===
+                                                `${SærligeutgifterStepper.INNTEKT}.${rolle.id.toString()}`
                                             }
                                             valideringsfeil={inntektValideringsfeil?.årsinntekter?.some(
                                                 (feil) => feil?.rolle?.id === rolle.id
@@ -287,10 +362,10 @@ export const ForskuddSideMenu = () => {
             <MenuButton
                 completed={erVedtakFattet}
                 step={"4."}
-                title={ForskuddStepper.VEDTAK}
-                onStepChange={() => onStepChange(STEPS[ForskuddStepper.VEDTAK])}
+                title={SærligeutgifterStepper.VEDTAK}
+                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.VEDTAK])}
                 interactive={interactive}
-                active={activeButton === ForskuddStepper.VEDTAK}
+                active={activeButton === SærligeutgifterStepper.VEDTAK}
             />
         </SideMenu>
     );
