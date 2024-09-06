@@ -77,7 +77,7 @@ export const MenuButton = ({
                         {subMenu && (
                             <ChevronDownIcon
                                 title="submenu"
-                                className={`duration-500 ${openSubMenu ? "rotate-0" : "rotate-180"}`}
+                                className={`duration-500 ${openSubMenu ? "rotate-180" : "rotate-0"}`}
                             />
                         )}
                     </span>
