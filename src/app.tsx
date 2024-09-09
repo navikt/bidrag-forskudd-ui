@@ -3,6 +3,7 @@ import { BidragBehandlingHeader } from "@common/components/header/BidragBehandli
 import { ErrorModal } from "@common/components/modal/ErrorModal";
 import text from "@common/constants/texts";
 import { useBehandlingV2 } from "@common/hooks/useApiData";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
@@ -15,9 +16,11 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
+import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
 import { NewForskuddPage } from "./forskudd/pages/forskudd/NewForskuddPage";
 import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
+import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
@@ -132,20 +135,28 @@ const BehandlingPage = () => {
             return null;
     }
 };
-const ForskuddBehandling = () => (
-    <ForskuddBehandlingProviderWrapper>
-        <BidragBehandlingHeader />
-        <NewForskuddPage />
-        <ErrorModal />
-    </ForskuddBehandlingProviderWrapper>
-);
-const SærligeutgifterBehandling = () => (
-    <SærligeugifterProviderWrapper>
-        <BidragBehandlingHeader />
-        <NewSærbidragPage />
-        <ErrorModal />
-    </SærligeugifterProviderWrapper>
-);
+const ForskuddBehandling = () => {
+    const { isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    return (
+        <ForskuddBehandlingProviderWrapper>
+            <BidragBehandlingHeader />
+            {isbehandlingVesntremenyEnabled && <NewForskuddPage />}
+            {!isbehandlingVesntremenyEnabled && <ForskuddPage />}
+            <ErrorModal />
+        </ForskuddBehandlingProviderWrapper>
+    );
+};
+const SærligeutgifterBehandling = () => {
+    const { isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    return (
+        <SærligeugifterProviderWrapper>
+            <BidragBehandlingHeader />
+            {isbehandlingVesntremenyEnabled && <NewSærbidragPage />}
+            {!isbehandlingVesntremenyEnabled && <SærbidragPage />}
+            <ErrorModal />
+        </SærligeugifterProviderWrapper>
+    );
+};
 
 const BehandlingPageWrapper = ({ children }: PropsWithChildren) => {
     prefetchVisningsnavn();

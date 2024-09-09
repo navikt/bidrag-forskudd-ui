@@ -8,6 +8,7 @@ export default function useFeatureToogle() {
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
     const særbidragBetaltAvBp = useFlag("sarbidrag_utgift_betalt_av_bp");
+    const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
         queryKey: ["user"],
@@ -36,5 +37,6 @@ export default function useFeatureToogle() {
         isAdminEnabled: enableAdmin,
         isFatteVedtakEnabled: enableFatteVedtak,
         isSærbidragBetaltAvBpEnabled: særbidragBetaltAvBp,
+        isbehandlingVesntremenyEnabled: enableBehandlingVesntremeny,
     };
 }
