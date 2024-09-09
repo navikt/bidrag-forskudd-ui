@@ -48,6 +48,8 @@ export const SaerbidragSideMenu = () => {
         setActiveButton(activeButton);
     }, [searchParams, location]);
 
+    const utgiftHasValideringsfeil =
+        utgiftValideringsfeil && Object.values(utgiftValideringsfeil).some((feil) => !!feil);
     const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
     const andreVoksneIHusstandenValideringsFeil = !!boforholdValideringsfeil?.andreVoksneIHusstanden;
     const boforholdValideringsFeil = husstandsmedlemValideringsFeil || andreVoksneIHusstandenValideringsFeil;
@@ -63,7 +65,7 @@ export const SaerbidragSideMenu = () => {
     return (
         <SideMenu>
             <MenuButton
-                completed={activeStepIndex > 1 && !!utgiftValideringsfeil}
+                completed={activeStepIndex > 1 && !utgiftHasValideringsfeil}
                 step={"1."}
                 title={SærligeutgifterStepper.UTGIFT}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.UTGIFT])}
