@@ -67,7 +67,6 @@ export const SaerbidragSideMenu = () => {
                 step={"1."}
                 title={SærligeutgifterStepper.UTGIFT}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.UTGIFT])}
-                interactive={interactive}
                 active={activeButton === SærligeutgifterStepper.UTGIFT}
                 valideringsfeil={!!utgiftValideringsfeil}
             />
@@ -364,7 +363,6 @@ export const SaerbidragSideMenu = () => {
                 step={"4."}
                 title={SærligeutgifterStepper.VEDTAK}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.VEDTAK])}
-                interactive={interactive}
                 active={activeButton === SærligeutgifterStepper.VEDTAK}
             />
         </SideMenu>

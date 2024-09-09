@@ -68,7 +68,6 @@ export const ForskuddSideMenu = () => {
                 step={"1."}
                 title={ForskuddStepper.VIRKNINGSTIDSPUNKT}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VIRKNINGSTIDSPUNKT])}
-                interactive={interactive}
                 active={activeButton === ForskuddStepper.VIRKNINGSTIDSPUNKT}
             />
             <MenuButton
@@ -289,7 +288,6 @@ export const ForskuddSideMenu = () => {
                 step={"4."}
                 title={ForskuddStepper.VEDTAK}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VEDTAK])}
-                interactive={interactive}
                 active={activeButton === ForskuddStepper.VEDTAK}
             />
         </SideMenu>

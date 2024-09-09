@@ -16,12 +16,12 @@ export const MenuButton = ({
     step,
     title,
     onStepChange,
-    interactive,
     subMenu,
     size,
     active,
     valideringsfeil,
     unconfirmedUpdates,
+    interactive = true,
 }: {
     completed?: boolean;
     step?: string;
