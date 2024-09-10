@@ -45,6 +45,8 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     avslag: response.avslag ?? "",
     utgifter: mapUtgifter(response.utgifter),
     begrunnelse: response.begrunnelse.innhold,
+    maksGodkjentBeløp: response.maksGodkjentBeløp.beløp,
+    maksGodkjentBeløpKommentar: response.maksGodkjentBeløp.kommentar,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
@@ -344,6 +346,20 @@ const Main = () => {
                             <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
                         </FlexRow>
                     )}
+                    <FlexRow>
+                        <FormControlledTextField
+                            name={`maksGodkjentBeløp`}
+                            label={text.label.maksGodkjentBeløp}
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                        />
+                        <FormControlledTextField
+                            name={`maksGodkjentBeløpKommentar`}
+                            label={text.label.kommentar}
+                            type="text"
+                        />
+                    </FlexRow>
                 </>
             )}
         </>
@@ -732,6 +748,17 @@ const UtgifterForm = () => {
                     nyBegrunnelse: begrunnelse,
                 },
             });
+        } else if (["maksGodkjentBeløp", "maksGodkjentBeløpKommentar"].includes(name)) {
+            const [maksGodkjentBeløp, maksGodkjentBeløpKommentar] = getValues([
+                "maksGodkjentBeløp",
+                "maksGodkjentBeløpKommentar",
+            ]);
+            updateAndSave({
+                maksGodkjentBeløp: {
+                    beløp: maksGodkjentBeløp,
+                    kommentar: maksGodkjentBeløpKommentar,
+                },
+            });
         }
     };
 
@@ -755,6 +782,7 @@ const UtgifterForm = () => {
                             begrunnelse: { innhold: response.begrunnelse, kunINotat: response.begrunnelse },
                             valideringsfeil: response.valideringsfeil,
                             utgifter: mapUtgifter(response.utgiftposter),
+                            maksGodkjentBeløp: response.maksGodkjentBeløp,
                         },
                     };
                 });

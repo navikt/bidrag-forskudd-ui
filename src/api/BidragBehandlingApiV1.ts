@@ -167,22 +167,22 @@ export enum Resultatkode {
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
-    GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
     SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
     SAeRBIDRAGIKKEFULLBIDRAGSEVNE = "SÆRBIDRAG_IKKE_FULL_BIDRAGSEVNE",
+    SAeRBIDRAGMANGLERBIDRAGSEVNE = "SÆRBIDRAG_MANGLER_BIDRAGSEVNE",
     AVSLAG = "AVSLAG",
     AVSLAG2 = "AVSLAG2",
-    PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
     AVSLAGOVER18AR = "AVSLAG_OVER_18_ÅR",
     AVSLAGIKKEREGISTRERTPAADRESSE = "AVSLAG_IKKE_REGISTRERT_PÅ_ADRESSE",
     AVSLAGHOYINNTEKT = "AVSLAG_HØY_INNTEKT",
+    PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
+    IKKE_OMSORG = "IKKE_OMSORG",
     BARNETS_EKTESKAP = "BARNETS_EKTESKAP",
     BARNETS_INNTEKT = "BARNETS_INNTEKT",
     PAGRUNNAVYTELSEFRAFOLKETRYGDEN = "PÅ_GRUNN_AV_YTELSE_FRA_FOLKETRYGDEN",
     FULLT_UNDERHOLDT_AV_OFFENTLIG = "FULLT_UNDERHOLDT_AV_OFFENTLIG",
-    IKKE_OMSORG = "IKKE_OMSORG",
     IKKE_OPPHOLD_I_RIKET = "IKKE_OPPHOLD_I_RIKET",
     MANGLENDE_DOKUMENTASJON = "MANGLENDE_DOKUMENTASJON",
     PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
@@ -193,8 +193,9 @@ export enum Resultatkode {
     IKKE_INNKREVING_AV_BIDRAG = "IKKE_INNKREVING_AV_BIDRAG",
     UTGIFTER_DEKKES_AV_BARNEBIDRAGET = "UTGIFTER_DEKKES_AV_BARNEBIDRAGET",
     IKKENODVENDIGEUTGIFTER = "IKKE_NØDVENDIGE_UTGIFTER",
-    PRIVATAVTALEOMSAeRBIDRAG = "PRIVAT_AVTALE_OM_SÆRBIDRAG",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
+    GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
 }
 
 export enum Rolletype {
@@ -806,6 +807,16 @@ export interface InntektspostEndringDto {
     endringstype: GrunnlagInntektEndringstype;
 }
 
+export interface MaksGodkjentBelopDto {
+    beløp?: number;
+    kommentar?: string;
+}
+
+export interface MaksGodkjentBelopValiderignsfeil {
+    manglerBeløp: boolean;
+    manglerKommentar: boolean;
+}
+
 export interface OverlappendeBostatusperiode {
     periode: Datoperiode;
     /** @uniqueItems true */
@@ -986,6 +997,7 @@ export interface SaerbidragUtgifterDto {
     avslag?: Resultatkode;
     kategori: SaerbidragKategoriDto;
     beregning?: UtgiftBeregningDto;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
@@ -1021,6 +1033,7 @@ export interface UtgiftBeregningDto {
 }
 
 export interface UtgiftValideringsfeilDto {
+    maksGodkjentBeløp?: MaksGodkjentBelopValiderignsfeil;
     manglerUtgifter: boolean;
     ugyldigUtgiftspost: boolean;
 }
@@ -1099,6 +1112,7 @@ export interface OppdatereUtgift {
 export interface OppdatereUtgiftRequest {
     avslag?: Resultatkode;
     beløpDirekteBetaltAvBp?: number;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     /** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
     nyEllerEndretUtgift?: OppdatereUtgift;
     /**
@@ -1123,6 +1137,7 @@ export interface OppdatereUtgiftResponse {
      */
     begrunnelse?: string;
     beregning?: UtgiftBeregningDto;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     avslag?: Resultatkode;
     valideringsfeil?: UtgiftValideringsfeilDto;
     /**
@@ -1509,11 +1524,13 @@ export interface ResultatPeriodeDto {
     periode: TypeArManedsperiode;
     beløp: number;
     resultatKode: Resultatkode;
+    vedtakstype?: Vedtakstype;
     regel: string;
     sivilstand?: Sivilstandskode;
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
+    resultatkodeVisningsnavn: string;
 }
 
 export interface ResultatRolle {
@@ -1947,9 +1964,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -2020,8 +2037,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2038,8 +2055,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatRolleDto {
@@ -2308,7 +2325,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2397,7 +2417,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

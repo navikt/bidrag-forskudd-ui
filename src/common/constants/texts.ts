@@ -132,6 +132,7 @@ const tekster = {
         lukk: "Lukk",
         lønnsendring: "Lønnsendring",
         lønnsinntektMedTrygdeavgiftspliktOgMedTrekkplikt: "Lønnsinntekt med trygdeavgiftsplikt og med trekkplikt: {}",
+        maksGodkjentBeløp: "Maks godkjent beløp",
         mottattdato: "Mottatt dato",
         navn: "Navn",
         notatButton: "Vis notat",
