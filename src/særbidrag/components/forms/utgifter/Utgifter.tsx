@@ -753,12 +753,15 @@ const UtgifterForm = () => {
                 "maksGodkjentBeløp",
                 "maksGodkjentBeløpKommentar",
             ]);
-            updateAndSave({
-                maksGodkjentBeløp: {
-                    beløp: maksGodkjentBeløp,
-                    kommentar: maksGodkjentBeløpKommentar,
+            updateAndSave(
+                {
+                    maksGodkjentBeløp: {
+                        beløp: maksGodkjentBeløp,
+                        kommentar: maksGodkjentBeløpKommentar,
+                    },
                 },
-            });
+                (response) => setValue("avslag", response.avslag)
+            );
         }
     };
 
