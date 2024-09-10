@@ -240,9 +240,7 @@ const Main = () => {
         getValues("avslag") !== "" &&
         getValues("avslag") !== undefined &&
         !AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
-    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
-    const visBetaltAvBpValg =
-        behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
+    const { isSærbidragBetaltAvBpEnabled, isbehandlingVesntremenyEnabled } = useFeatureToogle();
     const erAvslagSomInneholderUtgifter = AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
     return (
         <>
@@ -309,7 +307,7 @@ const Main = () => {
                                 {text.title.oversiktOverUtgifter}
                             </Heading>
                         </FlexRow>
-                        <UtgifterListe visBetaltAvBpValg={visBetaltAvBpValg} />
+                        <UtgifterListe />
                     </Box>
                     <HStack gap={"8"}>
                         <FlexRow>
@@ -340,33 +338,35 @@ const Main = () => {
                             </FlexRow>
                         </>
                     )}
-                    {visBetaltAvBpValg && (
+                    {isSærbidragBetaltAvBpEnabled && (
                         <FlexRow>
                             <Label size="small">{text.label.totalt}:</Label>
                             <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
                         </FlexRow>
                     )}
-                    <FlexRow>
-                        <FormControlledTextField
-                            name={`maksGodkjentBeløp`}
-                            label={text.label.maksGodkjentBeløp}
-                            type="number"
-                            min="1"
-                            inputMode="numeric"
-                        />
-                        <FormControlledTextField
-                            name={`maksGodkjentBeløpKommentar`}
-                            label={text.label.kommentar}
-                            type="text"
-                        />
-                    </FlexRow>
+                    {isbehandlingVesntremenyEnabled && (
+                        <FlexRow>
+                            <FormControlledTextField
+                                name={`maksGodkjentBeløp`}
+                                label={text.label.maksGodkjentBeløp}
+                                type="number"
+                                min="1"
+                                inputMode="numeric"
+                            />
+                            <FormControlledTextField
+                                name={`maksGodkjentBeløpKommentar`}
+                                label={text.label.kommentar}
+                                type="text"
+                            />
+                        </FlexRow>
+                    )}
                 </>
             )}
         </>
     );
 };
 
-const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) => {
+const UtgifterListe = () => {
     const { setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const saveUtgifter = useOnSaveUtgifter();
@@ -377,6 +377,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
         name: "utgifter",
     });
     const watchFieldArray = useWatch({ control, name: "utgifter" });
+    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const controlledFields = utgifter.fields.map((field, index) => {
         return {
             ...field,
@@ -589,7 +590,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                     <Table size="small" className="table-fixed table bg-white w-full">
                         <Table.Header>
                             <Table.Row className="align-baseline">
-                                {visBetaltAvBpValg && (
+                                {isSærbidragBetaltAvBpEnabled && (
                                     <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
@@ -620,7 +621,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                     className="align-top"
                                     onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                 >
-                                    {visBetaltAvBpValg && (
+                                    {isSærbidragBetaltAvBpEnabled && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
                                                 <FormControlledCheckbox
