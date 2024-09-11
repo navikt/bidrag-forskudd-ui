@@ -22,8 +22,10 @@ import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import texts from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { actionOnEnter } from "@common/helpers/keyboardHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -32,8 +34,6 @@ import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@u
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -355,7 +355,7 @@ const Main = () => {
                             />
                             <FormControlledTextField
                                 name={`maksGodkjentBeløpBegrunnelse`}
-                                label={text.label.kommentar}
+                                label={text.label.begrunnelse}
                                 type="text"
                             />
                         </FlexRow>
