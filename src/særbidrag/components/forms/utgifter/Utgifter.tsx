@@ -46,7 +46,7 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     utgifter: mapUtgifter(response.utgifter),
     begrunnelse: response.begrunnelse.innhold,
     maksGodkjentBeløp: response.maksGodkjentBeløp?.beløp,
-    maksGodkjentBeløpKommentar: response.maksGodkjentBeløp?.kommentar,
+    maksGodkjentBeløpBegrunnelse: response.maksGodkjentBeløp?.begrunnelse,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
@@ -354,8 +354,8 @@ const Main = () => {
                                 inputMode="numeric"
                             />
                             <FormControlledTextField
-                                name={`maksGodkjentBeløpKommentar`}
-                                label={text.label.begrunnelse}
+                                name={`maksGodkjentBeløpBegrunnelse`}
+                                label={text.label.kommentar}
                                 type="text"
                             />
                         </FlexRow>
@@ -749,17 +749,17 @@ const UtgifterForm = () => {
                     nyBegrunnelse: begrunnelse,
                 },
             });
-        } else if (["maksGodkjentBeløp", "maksGodkjentBeløpKommentar"].includes(name)) {
-            const [maksGodkjentBeløp, maksGodkjentBeløpKommentar] = getValues([
+        } else if (["maksGodkjentBeløp", "maksGodkjentBeløpBegrunnelse"].includes(name)) {
+            const [maksGodkjentBeløp, maksGodkjentBeløpBegrunnelse] = getValues([
                 "maksGodkjentBeløp",
-                "maksGodkjentBeløpKommentar",
+                "maksGodkjentBeløpBegrunnelse",
             ]);
             updateAndSave(
                 {
                     maksGodkjentBeløp: {
                         taMed: true,
                         beløp: maksGodkjentBeløp,
-                        kommentar: maksGodkjentBeløpKommentar,
+                        begrunnelse: maksGodkjentBeløpBegrunnelse,
                     },
                 },
                 (response) => setValue("avslag", response.avslag)

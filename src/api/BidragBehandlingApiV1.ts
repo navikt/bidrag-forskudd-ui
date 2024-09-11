@@ -810,7 +810,7 @@ export interface InntektspostEndringDto {
 export interface MaksGodkjentBelopDto {
     taMed: boolean;
     beløp?: number;
-    kommentar?: string;
+    begrunnelse?: string;
 }
 
 export interface MaksGodkjentBelopValideringsfeil {
@@ -2029,6 +2029,12 @@ export interface NotatInntektspostDto {
     visningsnavn?: string;
 }
 
+export interface NotatMaksGodkjentBelopDto {
+    taMed: boolean;
+    beløp?: number;
+    begrunnelse?: string;
+}
+
 export enum NotatMalType {
     FORSKUDD = "FORSKUDD",
     SAeRBIDRAG = "SÆRBIDRAG",
@@ -2050,8 +2056,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2092,11 +2098,19 @@ export interface NotatSaerbidragKategoriDto {
 
 export interface NotatSaerbidragUtgifterDto {
     beregning?: NotatUtgiftBeregningDto;
+    maksGodkjentBeløp?: NotatMaksGodkjentBelopDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
     utgifter: NotatUtgiftspostDto[];
+    totalBeregning: NotatTotalBeregningUtgifterDto[];
+}
+
+export interface NotatTotalBeregningUtgifterDto {
+    utgiftstype: string;
+    totalKravbeløp: number;
+    totalGodkjentBeløp: number;
 }
 
 export interface NotatUtgiftBeregningDto {
