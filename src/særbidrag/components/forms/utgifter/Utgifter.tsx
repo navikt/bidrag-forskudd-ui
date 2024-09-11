@@ -45,8 +45,8 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     avslag: response.avslag ?? "",
     utgifter: mapUtgifter(response.utgifter),
     begrunnelse: response.begrunnelse.innhold,
-    maksGodkjentBeløp: response.maksGodkjentBeløp.beløp,
-    maksGodkjentBeløpKommentar: response.maksGodkjentBeløp.kommentar,
+    maksGodkjentBeløp: response.maksGodkjentBeløp?.beløp,
+    maksGodkjentBeløpKommentar: response.maksGodkjentBeløp?.kommentar,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
