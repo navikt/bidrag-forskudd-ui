@@ -808,12 +808,12 @@ export interface InntektspostEndringDto {
 }
 
 export interface MaksGodkjentBelopDto {
+    taMed: boolean;
     beløp?: number;
     kommentar?: string;
 }
 
-export interface MaksGodkjentBelopValiderignsfeil {
-    manglerBeløp: boolean;
+export interface MaksGodkjentBelopValideringsfeil {
     manglerKommentar: boolean;
 }
 
@@ -1002,6 +1002,7 @@ export interface SaerbidragUtgifterDto {
     begrunnelse: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
     valideringsfeil?: UtgiftValideringsfeilDto;
+    totalBeregning: TotalBeregningUtgifterDto[];
     /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
@@ -1011,6 +1012,12 @@ export enum Saerbidragskategori {
     TANNREGULERING = "TANNREGULERING",
     OPTIKK = "OPTIKK",
     ANNET = "ANNET",
+}
+
+export interface TotalBeregningUtgifterDto {
+    utgiftstype: string;
+    totalKravbeløp: number;
+    totalGodkjentBeløp: number;
 }
 
 export enum TypeBehandling {
@@ -1033,7 +1040,7 @@ export interface UtgiftBeregningDto {
 }
 
 export interface UtgiftValideringsfeilDto {
-    maksGodkjentBeløp?: MaksGodkjentBelopValiderignsfeil;
+    maksGodkjentBeløp?: MaksGodkjentBelopValideringsfeil;
     manglerUtgifter: boolean;
     ugyldigUtgiftspost: boolean;
 }
@@ -1140,6 +1147,7 @@ export interface OppdatereUtgiftResponse {
     maksGodkjentBeløp?: MaksGodkjentBelopDto;
     avslag?: Resultatkode;
     valideringsfeil?: UtgiftValideringsfeilDto;
+    totalBeregning: TotalBeregningUtgifterDto[];
     /**
      * Saksbehandlers begrunnelse
      * @deprecated
@@ -1498,6 +1506,7 @@ export interface ResultatSaerbidragsberegningDto {
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
+    maksGodkjentBeløp?: number;
     resultat: number;
     resultatKode: Resultatkode;
     /** @format double */
@@ -1737,12 +1746,15 @@ export enum Grunnlagstype {
     NOTAT = "NOTAT",
     SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
     UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
+    UTGIFTMAKSGODKJENTBELOP = "UTGIFT_MAKS_GODKJENT_BELØP",
     UTGIFTSPOSTER = "UTGIFTSPOSTER",
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
+    DELBEREGNINGBIDRAGBELOP = "DELBEREGNING_BIDRAG_BELØP",
+    BIDRAG = "BIDRAG",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
@@ -1964,10 +1976,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -2038,8 +2050,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2056,8 +2068,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    resultatVisningsnavn: string;
     beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
 };
 
 export interface NotatRolleDto {
@@ -2143,8 +2155,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -2326,10 +2338,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2418,7 +2427,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

@@ -99,6 +99,7 @@ const tekster = {
         nytt: "Nytt",
         barnetillegg: "Barnetillegg",
         kommentar: "Kommentar",
+        begrunnelse: "Begrunnelse",
         begrunnelseUtgiftErForeldet: "Utgiften er foreldet",
         begrunnelseKunINotat: "Begrunnelse (kun med i notat)",
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",

@@ -161,6 +161,10 @@ const VedtakResultat = () => {
                                     label: "Godkjent beløp",
                                     value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
                                 },
+                                resultat.maksGodkjentBeløp && {
+                                    label: "Maks godkjent beløp",
+                                    value: formatterBeløp(resultat.maksGodkjentBeløp, true),
+                                },
                                 {
                                     label: "BP's andel",
                                     value: formatterProsent(resultat.bpsAndel?.andelFaktor),

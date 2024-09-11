@@ -355,7 +355,7 @@ const Main = () => {
                             />
                             <FormControlledTextField
                                 name={`maksGodkjentBeløpKommentar`}
-                                label={text.label.kommentar}
+                                label={text.label.begrunnelse}
                                 type="text"
                             />
                         </FlexRow>
@@ -757,6 +757,7 @@ const UtgifterForm = () => {
             updateAndSave(
                 {
                     maksGodkjentBeløp: {
+                        taMed: true,
                         beløp: maksGodkjentBeløp,
                         kommentar: maksGodkjentBeløpKommentar,
                     },

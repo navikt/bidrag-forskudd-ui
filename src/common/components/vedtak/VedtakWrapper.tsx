@@ -35,12 +35,29 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
         if (feilInnhold.utgift != null && "utgift" in steps) {
-            const beskrivelse = feilInnhold.utgift.manglerUtgifter ? "Minst en utgift må legges til" : "Utgifter";
-            feilliste.push(
-                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
-                    {beskrivelse}
-                </ErrorSummary.Item>
-            );
+            const feillisteUtgifter = [];
+            if (feilInnhold.utgift.manglerUtgifter) {
+                feillisteUtgifter.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
+                        Utgift: Minst en utgift må legges til
+                    </ErrorSummary.Item>
+                );
+            }
+            if (feilInnhold.utgift.maksGodkjentBeløp?.manglerKommentar === true) {
+                feillisteUtgifter.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
+                        Utgift: Begrunnelse på maks godkjent beløp må fylles ut når den er satt
+                    </ErrorSummary.Item>
+                );
+            }
+            if (feillisteUtgifter.length === 0) {
+                feillisteUtgifter.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
+                        Utgift
+                    </ErrorSummary.Item>
+                );
+            }
+            feilliste.push(...feillisteUtgifter);
         }
         if (feilInnhold.husstandsmedlem != null) {
             feilInnhold.husstandsmedlem.forEach((value) =>
