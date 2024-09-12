@@ -18,4 +18,5 @@ export interface UtgiftFormValues {
     utgifter: Utgiftspost[];
     maksGodkjentBeløp: number;
     maksGodkjentBeløpBegrunnelse: string;
+    maksGodkjentBeløpTaMed: boolean;
 }

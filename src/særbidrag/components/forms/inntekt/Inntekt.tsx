@@ -36,10 +36,15 @@ const Main = () => {
         return 0;
     });
     const defaultTab = useMemo(() => {
-        const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+        const paramRoleId = getSearchParam(urlSearchParams.inntektTab);
+        return roller
+            .find((rolle) => {
+                if (getSearchParam(urlSearchParams.inntektTab)) {
+                    return rolle.id?.toString() === paramRoleId;
+                }
+                return rolle.rolletype === Rolletype.BM;
+            })
             ?.id?.toString();
-        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
     useEffect(scrollToHash, []);
