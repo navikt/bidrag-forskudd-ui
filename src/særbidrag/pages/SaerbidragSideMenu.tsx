@@ -73,50 +73,8 @@ export const SaerbidragSideMenu = () => {
                 valideringsfeil={!!utgiftValideringsfeil}
             />
             <MenuButton
-                completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
-                step={"2."}
-                title={SærligeutgifterStepper.BOFORHOLD}
-                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD])}
-                interactive={interactive}
-                active={activeButton === SærligeutgifterStepper.BOFORHOLD}
-                subMenu={
-                    <>
-                        <MenuButton
-                            title={text.title.barn}
-                            onStepChange={() =>
-                                onStepChange(
-                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
-                                    undefined,
-                                    elementIds.seksjon_boforhold
-                                )
-                            }
-                            interactive={interactive}
-                            size="small"
-                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
-                            valideringsfeil={husstandsmedlemValideringsFeil}
-                            unconfirmedUpdates={husstandsmedlemIkkeAktiverteEndringer}
-                        />
-                        <MenuButton
-                            title={text.title.andreVoksneIHusstanden}
-                            onStepChange={() =>
-                                onStepChange(
-                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
-                                    undefined,
-                                    elementIds.seksjon_andreVoksneIHusstand
-                                )
-                            }
-                            interactive={interactive}
-                            size="small"
-                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
-                            valideringsfeil={andreVoksneIHusstandenValideringsFeil}
-                            unconfirmedUpdates={andreVoksneIHusstandenIkkeAktiverteEndringer}
-                        />
-                    </>
-                }
-            />
-            <MenuButton
                 completed={activeStepIndex > 3 && !inntektValideringsFeil && !inntekterIkkeAktiverteEndringer}
-                step={"3."}
+                step={"2."}
                 title={"Inntekt"}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.INNTEKT])}
                 interactive={interactive}
@@ -359,6 +317,48 @@ export const SaerbidragSideMenu = () => {
                         />
                     </>
                 ))}
+            />
+            <MenuButton
+                completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
+                step={"3."}
+                title={SærligeutgifterStepper.BOFORHOLD}
+                onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD])}
+                interactive={interactive}
+                active={activeButton === SærligeutgifterStepper.BOFORHOLD}
+                subMenu={
+                    <>
+                        <MenuButton
+                            title={text.title.barn}
+                            onStepChange={() =>
+                                onStepChange(
+                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
+                                    undefined,
+                                    elementIds.seksjon_boforhold
+                                )
+                            }
+                            interactive={interactive}
+                            size="small"
+                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
+                            valideringsfeil={husstandsmedlemValideringsFeil}
+                            unconfirmedUpdates={husstandsmedlemIkkeAktiverteEndringer}
+                        />
+                        <MenuButton
+                            title={text.title.andreVoksneIHusstanden}
+                            onStepChange={() =>
+                                onStepChange(
+                                    STEPS[SærligeutgifterStepper.BOFORHOLD],
+                                    undefined,
+                                    elementIds.seksjon_andreVoksneIHusstand
+                                )
+                            }
+                            interactive={interactive}
+                            size="small"
+                            active={activeButton === SærligeutgifterStepper.BOFORHOLD}
+                            valideringsfeil={andreVoksneIHusstandenValideringsFeil}
+                            unconfirmedUpdates={andreVoksneIHusstandenIkkeAktiverteEndringer}
+                        />
+                    </>
+                }
             />
             <MenuButton
                 completed={erVedtakFattet}
