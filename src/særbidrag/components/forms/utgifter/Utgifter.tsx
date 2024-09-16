@@ -721,7 +721,7 @@ const BeregnetUtgifter = () => {
                                         )}
                                     </div>
                                 </Table.DataCell>
-                                <Table.DataCell textSize="small">{item.utgiftstype}</Table.DataCell>
+                                <Table.DataCell textSize="small">{item.utgiftstypeVisningsnavn}</Table.DataCell>
                                 <Table.DataCell textSize="small" align="right">
                                     {item.totalKravbeløp.toLocaleString("nb-NO")}
                                 </Table.DataCell>

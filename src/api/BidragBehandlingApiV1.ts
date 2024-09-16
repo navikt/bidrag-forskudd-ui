@@ -815,7 +815,9 @@ export interface MaksGodkjentBelopDto {
 }
 
 export interface MaksGodkjentBelopValideringsfeil {
-    manglerKommentar: boolean;
+    manglerBeløp: boolean;
+    manglerBegrunnelse: boolean;
+    harFeil: boolean;
 }
 
 export interface OverlappendeBostatusperiode {
@@ -857,9 +859,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    til?: string;
-    /** @format date */
     fom: string;
+    /** @format date */
+    til?: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1020,6 +1022,7 @@ export interface TotalBeregningUtgifterDto {
     utgiftstype: string;
     totalKravbeløp: number;
     totalGodkjentBeløp: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export enum TypeBehandling {
@@ -1978,9 +1981,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
 }
 

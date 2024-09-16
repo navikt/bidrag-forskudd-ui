@@ -43,10 +43,17 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
-            if (feilInnhold.utgift.maksGodkjentBeløp?.manglerKommentar === true) {
+            if (feilInnhold.utgift.maksGodkjentBeløp?.manglerBeløp === true) {
                 feillisteUtgifter.push(
                     <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
-                        Utgift: Begrunnelse på maks godkjent beløp må fylles ut når den er satt
+                        Utgift: Maks godkjent beløp må fylles ut når godkjent beløp skal skjønnsjusteres
+                    </ErrorSummary.Item>
+                );
+            }
+            if (feilInnhold.utgift.maksGodkjentBeløp?.manglerBegrunnelse === true) {
+                feillisteUtgifter.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.utgift)}>
+                        Utgift: Begrunnelse på maks godkjent beløp må fylles ut når godkjent beløp skal skjønnsjusteres
                     </ErrorSummary.Item>
                 );
             }
