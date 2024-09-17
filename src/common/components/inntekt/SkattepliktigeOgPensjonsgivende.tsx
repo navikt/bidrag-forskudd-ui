@@ -69,7 +69,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
     };
 
     return (
-        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
             <div className="flex gap-x-4">
                 <HStack gap={"2"}>
                     <Heading level="2" size="small" id={elementId.seksjon_inntekt_skattepliktig}>

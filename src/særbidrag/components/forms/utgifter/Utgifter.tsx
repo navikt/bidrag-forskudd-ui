@@ -11,29 +11,30 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
 import { FormControlledDatePicker } from "@common/components/formFields/FormControlledDatePicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import texts from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { actionOnEnter } from "@common/helpers/keyboardHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
+import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, HStack, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Checkbox, Heading, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
-import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
-import useFeatureToogle from "../../../../common/hooks/useFeatureToggle";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -45,6 +46,9 @@ const createInitialValues = (response: SaerbidragUtgifterDto): UtgiftFormValues 
     avslag: response.avslag ?? "",
     utgifter: mapUtgifter(response.utgifter),
     begrunnelse: response.begrunnelse.innhold,
+    maksGodkjentBeløp: response.maksGodkjentBeløp?.beløp,
+    maksGodkjentBeløpBegrunnelse: response.maksGodkjentBeløp?.begrunnelse,
+    maksGodkjentBeløpTaMed: response.maksGodkjentBeløp?.taMed,
 });
 
 const mapUtgifter = (utgifter: UtgiftspostDto[]): UtgiftspostDto[] => {
@@ -233,15 +237,14 @@ const EditOrSaveButton = ({
 
 const Main = () => {
     const behandling = useGetBehandlingV2();
-    const { getValues } = useFormContext();
-    const erAvslagValgt =
-        getValues("avslag") !== "" &&
-        getValues("avslag") !== undefined &&
-        !AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
-    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
-    const visBetaltAvBpValg =
-        behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON && isSærbidragBetaltAvBpEnabled;
-    const erAvslagSomInneholderUtgifter = AvslagListeEtterUtgifterErUtfylt.includes(getValues("avslag"));
+    const { isSærbidragBetaltAvBpEnabled, isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    const { getValues } = useFormContext<UtgiftFormValues>();
+    const avslag = getValues("avslag");
+    const erAvslagValgt = avslag !== "" && avslag !== undefined && !AvslagListeEtterUtgifterErUtfylt.includes(avslag);
+    const erAvslagSomInneholderUtgifter =
+        avslag !== "" && avslag !== undefined && AvslagListeEtterUtgifterErUtfylt.includes(avslag);
+    const erMaksBeløpMed = getValues("maksGodkjentBeløpTaMed");
+
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -307,30 +310,42 @@ const Main = () => {
                                 {text.title.oversiktOverUtgifter}
                             </Heading>
                         </FlexRow>
-                        <UtgifterListe visBetaltAvBpValg={visBetaltAvBpValg} />
+                        <UtgifterListe />
                     </Box>
-                    <HStack gap={"8"}>
-                        <FlexRow>
-                            <Label size="small">{text.label.kravbeløp}:</Label>
-                            <BodyShort size="small">{behandling.utgift.beregning?.totalKravbeløp}</BodyShort>
-                        </FlexRow>
-                        <FlexRow>
-                            <Label size="small">{text.label.godkjentBeløp}:</Label>
-                            <BodyShort size="small">{behandling.utgift.beregning?.totalGodkjentBeløp}</BodyShort>
-                        </FlexRow>
-                    </HStack>
+                    <BeregnetUtgifter />
+                    {isbehandlingVesntremenyEnabled && (
+                        <>
+                            <FlexRow>
+                                <FormControlledSwitch
+                                    name="maksGodkjentBeløpTaMed"
+                                    legend="Godkjent beløp skal skjønsjusteres"
+                                />
+                            </FlexRow>
+                            {erMaksBeløpMed && (
+                                <FlexRow>
+                                    <FormControlledTextField
+                                        name={`maksGodkjentBeløp`}
+                                        label={text.label.godkjentBeløpSkalSkjønsjusteres}
+                                        type="number"
+                                        min="1"
+                                        inputMode="numeric"
+                                    />
+                                    <FormControlledTextField
+                                        name={`maksGodkjentBeløpBegrunnelse`}
+                                        label={text.label.begrunnelse}
+                                        type="text"
+                                    />
+                                </FlexRow>
+                            )}
+                        </>
+                    )}
                     {isSærbidragBetaltAvBpEnabled && (
                         <>
                             <hr className="w-full bg-[var(--a-border-divider)] h-px" />
                             <FlexRow>
-                                <Heading level="2" size="small">
-                                    {text.title.betaltAvBp}
-                                </Heading>
-                            </FlexRow>
-                            <FlexRow>
                                 <FormControlledTextField
                                     name={`beregning.beløpDirekteBetaltAvBp`}
-                                    label={text.label.direkteBetalt}
+                                    label={text.label.direkteBetaltAvBP}
                                     type="number"
                                     min="1"
                                     inputMode="numeric"
@@ -338,19 +353,13 @@ const Main = () => {
                             </FlexRow>
                         </>
                     )}
-                    {visBetaltAvBpValg && (
-                        <FlexRow>
-                            <Label size="small">{text.label.totalt}:</Label>
-                            <BodyShort size="small">{behandling.utgift.beregning?.totalBeløpBetaltAvBp}</BodyShort>
-                        </FlexRow>
-                    )}
                 </>
             )}
         </>
     );
 };
 
-const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) => {
+const UtgifterListe = () => {
     const { setSaveErrorState, setPageErrorsOrUnsavedState } = useBehandlingProvider();
     const behandling = useGetBehandlingV2();
     const saveUtgifter = useOnSaveUtgifter();
@@ -361,6 +370,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
         name: "utgifter",
     });
     const watchFieldArray = useWatch({ control, name: "utgifter" });
+    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const controlledFields = utgifter.fields.map((field, index) => {
         return {
             ...field,
@@ -445,13 +455,13 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         id: utgift.id ?? undefined,
                     },
                 },
-                (updatedValue, oppdatertUtgiftspost) => {
+                (response) => {
                     const eksisterendeUtgifter = getValues(`utgifter`);
                     setValue(`utgifter`, [
-                        ...updatedValue.map((v) => ({
+                        ...response.utgiftposter.map((v) => ({
                             ...v,
                             erRedigerbart:
-                                oppdatertUtgiftspost.id === v.id
+                                response.oppdatertUtgiftspost.id === v.id
                                     ? false
                                     : eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
                         })),
@@ -464,7 +474,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
 
     const updateAndSave = (
         payload: OppdatereUtgiftRequest,
-        onUpdateSuccess?: (updatedValue: UtgiftspostDto[], oppdatertUtgiftspost?: UtgiftspostDto) => void
+        onUpdateSuccess?: (response: OppdatereUtgiftResponse) => void
     ) => {
         saveUtgifter.mutation.mutate(payload, {
             onSuccess: (response) => {
@@ -473,7 +483,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                         (utgift) => utgift?.id === response?.oppdatertUtgiftspost?.id
                     );
 
-                    onUpdateSuccess?.(response.utgiftposter, response.oppdatertUtgiftspost);
+                    onUpdateSuccess?.(response);
 
                     const updatedUtgiftListe =
                         updatedUtgiftIndex === -1
@@ -493,6 +503,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                             beregning: response.beregning,
                             utgifter: updatedUtgiftListe,
                             valideringsfeil: response.valideringsfeil,
+                            totalBeregning: response.totalBeregning,
                         },
                     };
                 });
@@ -573,7 +584,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                     <Table size="small" className="table-fixed table bg-white w-full">
                         <Table.Header>
                             <Table.Row className="align-baseline">
-                                {visBetaltAvBpValg && (
+                                {isSærbidragBetaltAvBpEnabled && (
                                     <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
                                         {text.label.betaltAvBp}
                                     </Table.HeaderCell>
@@ -604,7 +615,7 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                                     className="align-top"
                                     onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                 >
-                                    {visBetaltAvBpValg && (
+                                    {isSærbidragBetaltAvBpEnabled && (
                                         <Table.DataCell>
                                             <div className="h-8 w-full flex items-center justify-center">
                                                 <FormControlledCheckbox
@@ -663,6 +674,77 @@ const UtgifterListe = ({ visBetaltAvBpValg }: { visBetaltAvBpValg: boolean }) =>
                 }}
             />
         </>
+    );
+};
+
+const BeregnetUtgifter = () => {
+    const {
+        utgift: { beregning, totalBeregning },
+    } = useGetBehandlingV2();
+
+    if (!totalBeregning.length) return null;
+
+    return (
+        <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
+            <FlexRow>
+                <Heading level="2" size="small">
+                    {text.title.beregnetTotalt}
+                </Heading>
+            </FlexRow>
+            <div className="overflow-x-auto whitespace-nowrap">
+                <Table size="small" className="table-fixed table bg-white w-full">
+                    <Table.Header>
+                        <Table.Row className="align-baseline">
+                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
+                                {text.label.betaltAvBp}
+                            </Table.HeaderCell>
+                            <Table.HeaderCell textSize="small" scope="col" align="left" className="min-w-[148px]">
+                                {text.label.utgiftskategori}
+                            </Table.HeaderCell>
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
+                                {text.label.kravbeløp}
+                            </Table.HeaderCell>
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[134px]">
+                                {text.label.godkjentBeløp}
+                            </Table.HeaderCell>
+                        </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                        {totalBeregning.map((item, index) => (
+                            <Table.Row key={item.utgiftstype + "-" + index} className="align-top">
+                                <Table.DataCell textSize="small">
+                                    <div className="h-8 w-full flex items-center justify-center">
+                                        {item.betaltAvBp && (
+                                            <Checkbox checked={true} size="small" readOnly={true} hideLabel>
+                                                Betalt av BP
+                                            </Checkbox>
+                                        )}
+                                    </div>
+                                </Table.DataCell>
+                                <Table.DataCell textSize="small">{item.utgiftstypeVisningsnavn}</Table.DataCell>
+                                <Table.DataCell textSize="small" align="right">
+                                    {item.totalKravbeløp.toLocaleString("nb-NO")}
+                                </Table.DataCell>
+                                <Table.DataCell textSize="small" align="right">
+                                    {item.totalGodkjentBeløp.toLocaleString("nb-NO")}
+                                </Table.DataCell>
+                            </Table.Row>
+                        ))}
+                    </Table.Body>
+                </Table>
+                <div className="grid grid-cols-[auto,134px,134px] w-full my-2">
+                    <Label size="small" className="p-2">
+                        {text.label.totalt}
+                    </Label>
+                    <Label size="small" className="p-2 grid justify-end">
+                        {beregning?.totalKravbeløp}
+                    </Label>
+                    <Label size="small" className="p-2 grid justify-end">
+                        {beregning?.totalGodkjentBeløp}
+                    </Label>
+                </div>
+            </div>
+        </Box>
     );
 };
 
@@ -732,6 +814,22 @@ const UtgifterForm = () => {
                     nyBegrunnelse: begrunnelse,
                 },
             });
+        } else if (["maksGodkjentBeløp", "maksGodkjentBeløpBegrunnelse", "maksGodkjentBeløpTaMed"].includes(name)) {
+            const [maksGodkjentBeløp, maksGodkjentBeløpBegrunnelse, maksGodkjentBeløpTaMed] = getValues([
+                "maksGodkjentBeløp",
+                "maksGodkjentBeløpBegrunnelse",
+                "maksGodkjentBeløpTaMed",
+            ]);
+            updateAndSave(
+                {
+                    maksGodkjentBeløp: {
+                        taMed: maksGodkjentBeløpTaMed,
+                        beløp: maksGodkjentBeløp,
+                        begrunnelse: maksGodkjentBeløpBegrunnelse,
+                    },
+                },
+                (response) => setValue("avslag", response.avslag)
+            );
         }
     };
 
@@ -755,6 +853,7 @@ const UtgifterForm = () => {
                             begrunnelse: { innhold: response.begrunnelse, kunINotat: response.begrunnelse },
                             valideringsfeil: response.valideringsfeil,
                             utgifter: mapUtgifter(response.utgiftposter),
+                            maksGodkjentBeløp: response.maksGodkjentBeløp,
                         },
                     };
                 });
@@ -775,7 +874,7 @@ const UtgifterForm = () => {
         <>
             <FormProvider {...useFormMethods}>
                 <form>
-                    <FormLayout title={text.label.utgift} main={<Main />} side={<Side />} />
+                    <NewFormLayout title={text.title.utgift} main={<Main />} side={<Side />} />
                 </form>
             </FormProvider>
         </>

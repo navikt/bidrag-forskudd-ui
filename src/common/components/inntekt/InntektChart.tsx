@@ -1,14 +1,15 @@
 import { InntektDtoV2 } from "@api/BidragBehandlingApiV1";
-import { EChartsOption, ReactECharts } from "@common/components/e-charts/ReactECharts";
+import { ReactECharts, ReactEChartsProps } from "@common/components/e-charts/ReactECharts";
+import { BodyShort, Box, Label } from "@navikt/ds-react";
 import { datesAreFromSameMonthAndYear, deductMonths, getAListOfMonthsFromDate } from "@utils/date-utils";
-import { roundDown, roundUp } from "@utils/number-utils";
 import { capitalize } from "@utils/string-utils";
-import { TopLevelFormatterParams } from "echarts/types/src/component/tooltip/TooltipModel";
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
+
+import text from "../../constants/texts";
 
 const getMonths = (dates: Date[]) => dates.map((date) => capitalize(date.toLocaleString("nb-NO", { month: "short" })));
 
-const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
+const buildChartProps = (inntekt: InntektDtoV2[], onHighlight: (inntekt: InntektDtoV2) => void): ReactEChartsProps => {
     const today = new Date();
     const past12Months = getAListOfMonthsFromDate(deductMonths(today, today.getDate() > 6 ? 12 : 13), 12);
     const past12Incomes = (inntekt: InntektDtoV2[]) =>
@@ -23,47 +24,34 @@ const buildChartOptions = (inntekt: InntektDtoV2[]): EChartsOption => {
         past12Incomes(inntekt).map((incomeForThatMonth) => (incomeForThatMonth ? incomeForThatMonth.beløp : 0));
 
     return {
-        legend: {
-            show: false,
-        },
-        tooltip: {
-            trigger: "axis",
-            showContent: true,
-            formatter: (params: TopLevelFormatterParams) => {
-                const ainntektspostListe = past12Incomes(inntekt)[params[0].dataIndex]?.inntektsposter;
-                return ainntektspostListe
-                    ? ainntektspostListe
-                          .map(
-                              (inntekt) =>
-                                  `<p><strong>${inntekt.visningsnavn}</strong>: ${inntekt.beløp.toLocaleString(
-                                      "nb-NO",
-                                      { minimumFractionDigits: 0, maximumFractionDigits: 2 }
-                                  )}</p>`
-                          )
-                          .join("")
-                    : "Ingen inntekt funnet";
+        option: {
+            legend: {
+                show: false,
             },
-            backgroundColor: "rgb(230,240,255)",
-            borderColor: "rgb(230,240,255)",
-        },
-        xAxis: {
-            type: "category",
-            data: getMonths(past12Months),
-        },
-        grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
-        yAxis: {
-            type: "value",
-            min: (value) => roundDown(value.min),
-            max: (value) => roundUp(value.max),
-        },
-        series: [
-            {
-                name: "Lønn",
-                data: getTotalPerPeriode(inntekt),
-                type: "line",
-                smooth: true,
+            tooltip: {
+                trigger: "axis",
+                showContent: false,
+                backgroundColor: "rgb(230,240,255)",
+                borderColor: "rgb(230,240,255)",
             },
-        ],
+            xAxis: {
+                type: "category",
+                data: getMonths(past12Months),
+            },
+            grid: { bottom: "0px", top: "16px", left: "8px", right: "0px", containLabel: true },
+            yAxis: {
+                type: "value",
+            },
+            series: [
+                {
+                    name: "Lønn",
+                    data: getTotalPerPeriode(inntekt),
+                    type: "line",
+                    smooth: true,
+                },
+            ],
+        },
+        onHighlight: (dataIndex: number) => onHighlight(past12Incomes(inntekt)[dataIndex]),
     };
 };
 
@@ -84,6 +72,48 @@ const arePropsEqual = (oldProps: { inntekt: InntektDtoV2[] }, newProps: { inntek
 };
 
 export const InntektChart = memo(
-    ({ inntekt }: { inntekt: InntektDtoV2[] }) => <ReactECharts option={buildChartOptions(inntekt)} />,
+    ({ inntekt, onHighlight }: { inntekt: InntektDtoV2[]; onHighlight: (inntekt: InntektDtoV2) => void }) => (
+        <ReactECharts {...buildChartProps(inntekt, onHighlight)} />
+    ),
     arePropsEqual
 );
+
+export const InntektChartWithInfoBoard = ({ inntekt }: { inntekt: InntektDtoV2[] }) => {
+    const [highlightedMonth, setHighlightedMonth] = useState<InntektDtoV2>(null);
+    const onHighlight = (inntekt: InntektDtoV2) => setHighlightedMonth(inntekt);
+
+    return (
+        <div className="grid grid-cols-[568px,1fr] gap-6">
+            <InntektChart inntekt={inntekt} onHighlight={onHighlight} />
+            <Box padding="4" background="surface-info-subtle" className="h-max">
+                <div className="flex gap-x-1">
+                    <Label size="small" className="text-nowrap">
+                        {text.label.måned}:
+                    </Label>
+                    <BodyShort size="small" className="capitalize">
+                        {highlightedMonth?.datoFom &&
+                            new Date(highlightedMonth?.datoFom).toLocaleString("no-NB", { month: "long" })}
+                    </BodyShort>
+                </div>
+                {!highlightedMonth && (
+                    <Label size="small" className="text-nowrap">
+                        {text.label.fastlønn}:
+                    </Label>
+                )}
+                {highlightedMonth?.inntektsposter?.map((inntekt) => (
+                    <div className="flex gap-x-1">
+                        <Label size="small" className="text-nowrap">
+                            {inntekt.visningsnavn}:
+                        </Label>
+                        <BodyShort size="small">
+                            {inntekt.beløp.toLocaleString("nb-NO", {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 2,
+                            })}
+                        </BodyShort>
+                    </div>
+                ))}
+            </Box>
+        </div>
+    );
+};

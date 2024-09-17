@@ -16,7 +16,7 @@ export const UtvidetBarnetrygd = () => {
     const fieldName = `utvidetBarnetrygd.${ident}` as const;
 
     return (
-        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_utvidetbarnetrygd}>
                 {text.title.utvidetBarnetrygd}
             </Heading>
