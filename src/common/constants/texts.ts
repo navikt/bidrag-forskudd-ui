@@ -119,7 +119,7 @@ const tekster = {
         fødselsdato: "Fødselsdato",
         fødselsnummerDnummer: "Fødselsnummer/d-nummer",
         godkjentBeløp: "Godkjent beløp",
-        godkjentBeløpSkalSkjønsjusteres: "Godkjent beløp skal skjønsjusteres",
+        godkjentBeløpSkalSkjønsjusteres: "Godkjent beløp skal skjønnsjusteres",
         gåVidere: "Gå videre",
         gåVidereUtenÅLagre: "Gå videre uten å lagre",
         lagrePåNytt: "Lagre på nytt",

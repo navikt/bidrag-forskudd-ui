@@ -318,7 +318,7 @@ const Main = () => {
                             <FlexRow>
                                 <FormControlledSwitch
                                     name="maksGodkjentBeløpTaMed"
-                                    legend="Godkjent beløp skal skjønsjusteres"
+                                    legend={text.label.godkjentBeløpSkalSkjønsjusteres}
                                 />
                             </FlexRow>
                             {erMaksBeløpMed && (
