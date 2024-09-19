@@ -239,11 +239,11 @@ const Main = () => {
     const behandling = useGetBehandlingV2();
     const { isSærbidragBetaltAvBpEnabled, isbehandlingVesntremenyEnabled } = useFeatureToogle();
     const { getValues } = useFormContext<UtgiftFormValues>();
-    const avslag = getValues("avslag");
+    const [avslag, erMaksBeløpMed] = getValues(["avslag", "maksGodkjentBeløpTaMed"]);
     const erAvslagValgt = avslag !== "" && avslag !== undefined && !AvslagListeEtterUtgifterErUtfylt.includes(avslag);
     const erAvslagSomInneholderUtgifter =
         avslag !== "" && avslag !== undefined && AvslagListeEtterUtgifterErUtfylt.includes(avslag);
-    const erMaksBeløpMed = getValues("maksGodkjentBeløpTaMed");
+    const erKonfirmasjon = behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON;
 
     return (
         <>
@@ -313,7 +313,7 @@ const Main = () => {
                         <UtgifterListe />
                     </Box>
                     <BeregnetUtgifter />
-                    {isbehandlingVesntremenyEnabled && (
+                    {isbehandlingVesntremenyEnabled && erKonfirmasjon && behandling.utgift.utgifter.length > 0 && (
                         <>
                             <FlexRow>
                                 <FormControlledSwitch
@@ -337,11 +337,11 @@ const Main = () => {
                                     />
                                 </FlexRow>
                             )}
+                            <hr className="w-full bg-[var(--a-border-divider)] h-px" />
                         </>
                     )}
                     {isSærbidragBetaltAvBpEnabled && (
                         <>
-                            <hr className="w-full bg-[var(--a-border-divider)] h-px" />
                             <FlexRow>
                                 <FormControlledTextField
                                     name={`beregning.beløpDirekteBetaltAvBp`}
@@ -504,6 +504,7 @@ const UtgifterListe = () => {
                             utgifter: updatedUtgiftListe,
                             valideringsfeil: response.valideringsfeil,
                             totalBeregning: response.totalBeregning,
+                            maksGodkjentBeløp: response.maksGodkjentBeløp,
                         },
                     };
                 });
