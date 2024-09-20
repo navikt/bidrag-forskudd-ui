@@ -12,10 +12,9 @@ import { STEPS } from "../../constants/steps";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 
 export const ForskuddSideMenu = () => {
-    const { onStepChange, activeStep } = useBehandlingProvider();
+    const { onStepChange } = useBehandlingProvider();
     const {
         virkningstidspunkt,
-        erVedtakFattet,
         vedtakstype,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -30,7 +29,6 @@ export const ForskuddSideMenu = () => {
         return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
-    const activeStepIndex = STEPS[activeStep];
     const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const inntektRoller = roller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -52,11 +50,8 @@ export const ForskuddSideMenu = () => {
 
     const husstandsmedlemValideringsFeil = !!boforholdValideringsfeil?.husstandsmedlem?.length;
     const sivilstandValideringsFeil = !!boforholdValideringsfeil?.sivilstand;
-    const boforholdValideringsFeil = husstandsmedlemValideringsFeil || sivilstandValideringsFeil;
     const husstandsmedlemIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.husstandsmedlem?.length;
     const sivilstandIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.sivilstand;
-    const boforholdIkkeAktiverteEndringer = husstandsmedlemIkkeAktiverteEndringer || sivilstandIkkeAktiverteEndringer;
-    const inntektValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
@@ -64,19 +59,19 @@ export const ForskuddSideMenu = () => {
     return (
         <SideMenu>
             <MenuButton
-                completed={activeStepIndex > 1}
                 step={"1."}
                 title={ForskuddStepper.VIRKNINGSTIDSPUNKT}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VIRKNINGSTIDSPUNKT])}
                 active={activeButton === ForskuddStepper.VIRKNINGSTIDSPUNKT}
             />
             <MenuButton
-                completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
                 step={"2."}
                 title={ForskuddStepper.BOFORHOLD}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.BOFORHOLD])}
                 interactive={interactive}
                 active={activeButton === ForskuddStepper.BOFORHOLD}
+                valideringsfeil={husstandsmedlemValideringsFeil || sivilstandValideringsFeil}
+                unconfirmedUpdates={husstandsmedlemIkkeAktiverteEndringer || sivilstandIkkeAktiverteEndringer}
                 subMenu={
                     <>
                         <MenuButton
@@ -105,12 +100,16 @@ export const ForskuddSideMenu = () => {
                 }
             />
             <MenuButton
-                completed={activeStepIndex > 3 && !inntektValideringsFeil && !inntekterIkkeAktiverteEndringer}
                 step={"3."}
                 title={ForskuddStepper.INNTEKT}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.INNTEKT])}
                 interactive={interactive}
                 active={activeButton?.includes(ForskuddStepper.INNTEKT)}
+                valideringsfeil={
+                    inntektValideringsfeil &&
+                    Object.values(inntektValideringsfeil).some((valideringsfeil) => valideringsfeil)
+                }
+                unconfirmedUpdates={inntekterIkkeAktiverteEndringer}
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton
@@ -284,7 +283,6 @@ export const ForskuddSideMenu = () => {
                 ))}
             />
             <MenuButton
-                completed={erVedtakFattet}
                 step={"4."}
                 title={ForskuddStepper.VEDTAK}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VEDTAK])}

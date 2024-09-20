@@ -1,18 +1,17 @@
 import "./sideMenu.css";
 
 import {
+    ArrowsCirclepathIcon,
     BellDotIcon,
-    CheckmarkCircleFillIcon,
     ChevronDownIcon,
     ChevronLeftCircleIcon,
-    ExclamationmarkTriangleFillIcon,
+    ExclamationmarkTriangleIcon,
 } from "@navikt/aksel-icons";
 import { Button, VStack } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { ReactNode, useEffect, useState } from "react";
 
 export const MenuButton = ({
-    completed,
     step,
     title,
     onStepChange,
@@ -23,7 +22,6 @@ export const MenuButton = ({
     unconfirmedUpdates,
     interactive = true,
 }: {
-    completed?: boolean;
     step?: string;
     title: string;
     onStepChange: () => void;
@@ -45,8 +43,9 @@ export const MenuButton = ({
         setOpenSubMenu(active);
     }, [active]);
 
-    const displayBellIcon = (unconfirmedUpdates && !openSubMenu) || (unconfirmedUpdates && !subMenu);
-    const displayWarningIcon = !step && ((valideringsfeil && !openSubMenu) || (valideringsfeil && !subMenu));
+    const displayBellIcon = step && (unconfirmedUpdates || valideringsfeil);
+    const displayUpdateIcon = (unconfirmedUpdates && !openSubMenu) || (unconfirmedUpdates && !subMenu);
+    const displayWarningIcon = (valideringsfeil && !openSubMenu) || (valideringsfeil && !subMenu);
 
     return (
         <>
@@ -60,17 +59,22 @@ export const MenuButton = ({
                 size={size ?? "medium"}
             >
                 <span className="grid items-center gap-1 grid-cols-[20px,20px,auto,20px]">
-                    {!step && <span>{displayBellIcon && displayWarningIcon && <BellDotIcon title="Info" />}</span>}
                     <span>
-                        {completed && <CheckmarkCircleFillIcon title="checked" />}
-                        {displayWarningIcon && (
-                            <ExclamationmarkTriangleFillIcon
-                                title="Advarsel"
-                                style={{ color: "var(--ac-alert-icon-warning-color, var(--a-icon-warning))" }}
-                            />
-                        )}
-                        {!displayWarningIcon && displayBellIcon && <BellDotIcon title="Info" />}
+                        {displayBellIcon && <BellDotIcon title="Info" style={{ color: "var(--a-icon-default)" }} />}
                     </span>
+                    {!step && (
+                        <span>
+                            {displayWarningIcon && (
+                                <ExclamationmarkTriangleIcon
+                                    title="Advarsel"
+                                    style={{ color: "var(--a-icon-default)" }}
+                                />
+                            )}
+                            {!displayWarningIcon && displayUpdateIcon && (
+                                <ArrowsCirclepathIcon title="Info" style={{ color: "var(--a-icon-default)" }} />
+                            )}
+                        </span>
+                    )}
                     {step && <span>{step}</span>}
                     <span className={`text-left capitalize ${!subMenu && size === "small" ? "font-normal" : ""}`}>
                         {title}
