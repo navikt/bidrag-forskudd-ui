@@ -60,13 +60,13 @@ export const ForskuddSideMenu = () => {
         <SideMenu>
             <MenuButton
                 step={"1."}
-                title={ForskuddStepper.VIRKNINGSTIDSPUNKT}
+                title={text.title.virkningstidspunkt}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VIRKNINGSTIDSPUNKT])}
                 active={activeButton === ForskuddStepper.VIRKNINGSTIDSPUNKT}
             />
             <MenuButton
                 step={"2."}
-                title={ForskuddStepper.BOFORHOLD}
+                title={text.title.boforhold}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.BOFORHOLD])}
                 interactive={interactive}
                 active={activeButton === ForskuddStepper.BOFORHOLD}
@@ -101,7 +101,7 @@ export const ForskuddSideMenu = () => {
             />
             <MenuButton
                 step={"3."}
-                title={ForskuddStepper.INNTEKT}
+                title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.INNTEKT])}
                 interactive={interactive}
                 active={activeButton?.includes(ForskuddStepper.INNTEKT)}
@@ -284,7 +284,7 @@ export const ForskuddSideMenu = () => {
             />
             <MenuButton
                 step={"4."}
-                title={ForskuddStepper.VEDTAK}
+                title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[ForskuddStepper.VEDTAK])}
                 active={activeButton === ForskuddStepper.VEDTAK}
             />

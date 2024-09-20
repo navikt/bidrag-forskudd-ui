@@ -12,9 +12,8 @@ import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export const SaerbidragSideMenu = () => {
-    const { onStepChange, activeStep } = useBehandlingProvider();
+    const { onStepChange } = useBehandlingProvider();
     const {
-        erVedtakFattet,
         vedtakstype,
         utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
@@ -30,7 +29,6 @@ export const SaerbidragSideMenu = () => {
         return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
-    const activeStepIndex = STEPS[activeStep];
     const interactive = vedtakstype !== Vedtakstype.OPPHOR && avslag === undefined;
     const inntektRoller = roller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM) return -1;
@@ -57,7 +55,7 @@ export const SaerbidragSideMenu = () => {
     const andreVoksneIHusstandenIkkeAktiverteEndringer = !!ikkeAktiverteEndringerIGrunnlagsdata?.andreVoksneIHusstanden;
     const boforholdIkkeAktiverteEndringer =
         husstandsmedlemIkkeAktiverteEndringer || andreVoksneIHusstandenIkkeAktiverteEndringer;
-    const inntektValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
+    const inntektHasValideringsFeil = inntektValideringsfeil && !!Object.keys(inntektValideringsfeil).length;
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
@@ -65,20 +63,20 @@ export const SaerbidragSideMenu = () => {
     return (
         <SideMenu>
             <MenuButton
-                completed={activeStepIndex > 1 && !utgiftHasValideringsfeil}
                 step={"1."}
-                title={SærligeutgifterStepper.UTGIFT}
+                title={text.title.utgift}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.UTGIFT])}
                 active={activeButton === SærligeutgifterStepper.UTGIFT}
-                valideringsfeil={!!utgiftValideringsfeil}
+                valideringsfeil={utgiftHasValideringsfeil}
             />
             <MenuButton
-                completed={activeStepIndex > 3 && !inntektValideringsFeil && !inntekterIkkeAktiverteEndringer}
                 step={"2."}
-                title={"Inntekt"}
+                title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.INNTEKT])}
                 interactive={interactive}
                 active={activeButton?.includes(SærligeutgifterStepper.INNTEKT)}
+                valideringsfeil={inntektHasValideringsFeil}
+                unconfirmedUpdates={inntekterIkkeAktiverteEndringer}
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton
@@ -319,12 +317,13 @@ export const SaerbidragSideMenu = () => {
                 ))}
             />
             <MenuButton
-                completed={activeStepIndex > 2 && !boforholdValideringsFeil && !boforholdIkkeAktiverteEndringer}
                 step={"3."}
-                title={SærligeutgifterStepper.BOFORHOLD}
+                title={text.title.boforhold}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.BOFORHOLD])}
                 interactive={interactive}
                 active={activeButton === SærligeutgifterStepper.BOFORHOLD}
+                valideringsfeil={boforholdValideringsFeil}
+                unconfirmedUpdates={boforholdIkkeAktiverteEndringer}
                 subMenu={
                     <>
                         <MenuButton
@@ -361,9 +360,8 @@ export const SaerbidragSideMenu = () => {
                 }
             />
             <MenuButton
-                completed={erVedtakFattet}
                 step={"4."}
-                title={SærligeutgifterStepper.VEDTAK}
+                title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[SærligeutgifterStepper.VEDTAK])}
                 active={activeButton === SærligeutgifterStepper.VEDTAK}
             />

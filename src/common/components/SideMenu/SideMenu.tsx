@@ -76,9 +76,7 @@ export const MenuButton = ({
                         </span>
                     )}
                     {step && <span>{step}</span>}
-                    <span className={`text-left capitalize ${!subMenu && size === "small" ? "font-normal" : ""}`}>
-                        {title}
-                    </span>
+                    <span className={`text-left ${!subMenu && size === "small" ? "font-normal" : ""}`}>{title}</span>
                     <span>
                         {subMenu && (
                             <ChevronDownIcon

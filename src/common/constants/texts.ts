@@ -188,6 +188,7 @@ const tekster = {
         begrunnelse: "Begrunnelse",
         beregnetTotalt: "Beregnet totalt",
         betaltAvBp: "Betalt av BP",
+        boforhold: "Boforhold",
         boforholdBM: "Boforhold (BM)",
         boforholdBp: "Boforhold (BP)",
         copyButton: "Kopier {}",
