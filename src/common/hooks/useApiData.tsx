@@ -143,7 +143,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
                 }
                 return (
                     await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
-                        inkluderHistoriskeInntekter: false,
+                        inkluderHistoriskeInntekter: true,
                     })
                 ).data;
             } catch (e) {

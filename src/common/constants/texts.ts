@@ -122,6 +122,7 @@ const tekster = {
         godkjentBeløpSkalSkjønsjusteres: "Godkjent beløp skal skjønnsjusteres",
         gåVidere: "Gå videre",
         gåVidereUtenÅLagre: "Gå videre uten å lagre",
+        historiskInntekt: "Vis historisk inntekt (3 år)",
         lagrePåNytt: "Lagre på nytt",
         inntekt: "Inntekt",
         jaSlett: "Ja, slett",

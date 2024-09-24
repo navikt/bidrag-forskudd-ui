@@ -5,10 +5,10 @@ import AinntektLink from "@common/components/inntekt/AinntektLink";
 import text from "@common/constants/texts";
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
-import { SackKronerFillIcon } from "@navikt/aksel-icons";
+import { HourglassBottomFilledIcon, SackKronerFillIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
-import React from "react";
+import { BodyShort, Box, Checkbox, Heading, HStack, Table } from "@navikt/ds-react";
+import React, { BaseSyntheticEvent, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
@@ -46,12 +46,20 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
                     <SackKronerFillIcon title={alert} />
                 </span>
             )}
+            {item.historisk && (
+                <span className="self-center ml-[5px]">
+                    <HourglassBottomFilledIcon title="historisk" />
+                </span>
+            )}
         </BodyShort>
     );
 };
 
 export const SkattepliktigeOgPensjonsgivende = () => {
     const { ident, viewOnly } = useInntektTableProvider();
+    const [visHistoriskInntekt, setVisHistoriskInntekt] = useState<boolean>(
+        !!JSON.parse(localStorage.getItem("visHistoriskInntekt"))
+    );
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
 
     const fieldName = `årsinntekter.${ident}` as const;
@@ -81,6 +89,16 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                 </HStack>
             </div>
             <Opplysninger fieldName={fieldName} />
+            <Checkbox
+                checked={visHistoriskInntekt}
+                onChange={(value: BaseSyntheticEvent) => {
+                    localStorage.setItem("visHistoriskInntekt", value.target.checked);
+                    setVisHistoriskInntekt(value.target.checked);
+                }}
+                size="small"
+            >
+                {text.label.historiskInntekt}
+            </Checkbox>
             <InntektTabel fieldName={fieldName} customRowValidation={customRowValidation}>
                 {({
                     controlledFields,
@@ -154,78 +172,84 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                         </Table.Row>
                                     </Table.Header>
                                     <Table.Body>
-                                        {controlledFields.map((item, index) => (
-                                            <Table.ExpandableRow
-                                                key={item?.id + item.ident}
-                                                onKeyDown={actionOnEnter(() => onSaveRow(index))}
-                                                content={
-                                                    <ExpandableContent
-                                                        item={item}
-                                                        showInnteksposter
-                                                        showLøpendeTilOgMed
-                                                    />
-                                                }
-                                                togglePlacement="right"
-                                                className="align-top"
-                                                expansionDisabled={item.kilde === Kilde.MANUELL}
-                                            >
-                                                <Table.DataCell>
-                                                    <TaMed
-                                                        fieldName={fieldName}
-                                                        index={index}
-                                                        handleOnSelect={handleOnSelect}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Periode
-                                                        index={index}
-                                                        label={text.label.fraOgMed}
-                                                        fieldName={fieldName}
-                                                        field="datoFom"
-                                                        item={item}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Periode
-                                                        index={index}
-                                                        label={text.label.tilOgMed}
-                                                        fieldName={fieldName}
-                                                        field="datoTom"
-                                                        item={item}
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell textSize="small">
-                                                    <Beskrivelse
-                                                        item={item}
-                                                        field={`${fieldName}.${index}`}
-                                                        alert={
-                                                            item.inntektsposter?.some(
-                                                                (d) =>
-                                                                    d.inntektstype === Inntektstype.NAeRINGSINNTEKT ||
-                                                                    d.kode.toUpperCase().includes("NAERING")
-                                                            )
-                                                                ? "Inntekt inneholder næringsinntekt"
-                                                                : undefined
-                                                        }
-                                                    />
-                                                </Table.DataCell>
-                                                <Table.DataCell>
-                                                    <KildeIcon kilde={item.kilde} />
-                                                </Table.DataCell>
-                                                <Table.DataCell align="right" textSize="small">
-                                                    <Totalt item={item} field={`${fieldName}.${index}`} />
-                                                </Table.DataCell>
+                                        {controlledFields.map((item, index) => {
+                                            if (!visHistoriskInntekt && item.historisk && !item.taMed) {
+                                                return null;
+                                            }
+                                            return (
+                                                <Table.ExpandableRow
+                                                    key={item?.id + item.ident}
+                                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
+                                                    content={
+                                                        <ExpandableContent
+                                                            item={item}
+                                                            showInnteksposter
+                                                            showLøpendeTilOgMed
+                                                        />
+                                                    }
+                                                    togglePlacement="right"
+                                                    className="align-top"
+                                                    expansionDisabled={item.kilde === Kilde.MANUELL}
+                                                >
+                                                    <Table.DataCell>
+                                                        <TaMed
+                                                            fieldName={fieldName}
+                                                            index={index}
+                                                            handleOnSelect={handleOnSelect}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Periode
+                                                            index={index}
+                                                            label={text.label.fraOgMed}
+                                                            fieldName={fieldName}
+                                                            field="datoFom"
+                                                            item={item}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Periode
+                                                            index={index}
+                                                            label={text.label.tilOgMed}
+                                                            fieldName={fieldName}
+                                                            field="datoTom"
+                                                            item={item}
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell textSize="small">
+                                                        <Beskrivelse
+                                                            item={item}
+                                                            field={`${fieldName}.${index}`}
+                                                            alert={
+                                                                item.inntektsposter?.some(
+                                                                    (d) =>
+                                                                        d.inntektstype ===
+                                                                            Inntektstype.NAeRINGSINNTEKT ||
+                                                                        d.kode.toUpperCase().includes("NAERING")
+                                                                )
+                                                                    ? "Inntekt inneholder næringsinntekt"
+                                                                    : undefined
+                                                            }
+                                                        />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell>
+                                                        <KildeIcon kilde={item.kilde} />
+                                                    </Table.DataCell>
+                                                    <Table.DataCell align="right" textSize="small">
+                                                        <Totalt item={item} field={`${fieldName}.${index}`} />
+                                                    </Table.DataCell>
 
-                                                <Table.DataCell textSize="small">
-                                                    <EditOrSaveButton
-                                                        index={index}
-                                                        item={item}
-                                                        onEditRow={onEditRow}
-                                                        onSaveRow={onSaveRow}
-                                                    />
-                                                </Table.DataCell>
-                                            </Table.ExpandableRow>
-                                        ))}
+                                                    <Table.DataCell textSize="small">
+                                                        <EditOrSaveButton
+                                                            index={index}
+                                                            item={item}
+                                                            onEditRow={onEditRow}
+                                                            onSaveRow={onSaveRow}
+                                                        />
+                                                    </Table.DataCell>
+                                                </Table.ExpandableRow>
+                                            );
+                                        })}
                                     </Table.Body>
                                 </Table>
                             </div>

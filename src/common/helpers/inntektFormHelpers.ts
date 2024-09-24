@@ -11,7 +11,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { toISODateString } from "@navikt/bidrag-ui-common";
-import { isAfterDate } from "@utils/date-utils";
+import { firstDayOfMonth, isAfterDate, isAfterEqualsDate } from "@utils/date-utils";
 
 export enum InntektTableType {
     SKATTEPLIKTIG = "SKATTEPLIKTIG",
@@ -147,7 +147,13 @@ export const transformInntekt =
                     : null),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
             beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
-            kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
+            kanRedigeres:
+                inntekt.kilde === Kilde.MANUELL ||
+                (!ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
+                    !(
+                        inntekt.kilde === Kilde.OFFENTLIG &&
+                        isAfterEqualsDate(virkningsdato, firstDayOfMonth(new Date()))
+                    )),
         };
     };
 
