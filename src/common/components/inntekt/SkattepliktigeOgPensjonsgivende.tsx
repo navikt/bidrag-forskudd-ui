@@ -57,7 +57,7 @@ const Beskrivelse = ({ item, field, alert }: { item: InntektFormPeriode; field: 
 export const SkattepliktigeOgPensjonsgivende = () => {
     const { ident, viewOnly } = useInntektTableProvider();
     const [visHistoriskInntekt, setVisHistoriskInntekt] = useState<boolean>(
-        !!JSON.parse(localStorage.getItem("visHistoriskInntekt"))
+        !!JSON.parse(localStorage.getItem(`visHistoriskInntekt-${ident}`))
     );
     const { clearErrors, getValues, setError } = useFormContext<InntektFormValues>();
 
@@ -91,7 +91,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
             <Checkbox
                 checked={visHistoriskInntekt}
                 onChange={(value: BaseSyntheticEvent) => {
-                    localStorage.setItem("visHistoriskInntekt", value.target.checked);
+                    localStorage.setItem(`visHistoriskInntekt-${ident}`, value.target.checked);
                     setVisHistoriskInntekt(value.target.checked);
                 }}
                 size="small"
