@@ -13,7 +13,6 @@ import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
 import { manuelleInntekterValg } from "../../helpers/inntektFormHelpers";
-import { actionOnEnter } from "../../helpers/keyboardHelpers";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
@@ -179,7 +178,6 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                             return (
                                                 <Table.ExpandableRow
                                                     key={item?.id + item.ident}
-                                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                                     content={
                                                         <ExpandableContent
                                                             item={item}
@@ -238,7 +236,6 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                     <Table.DataCell align="right" textSize="small">
                                                         <Totalt item={item} field={`${fieldName}.${index}`} />
                                                     </Table.DataCell>
-
                                                     <Table.DataCell textSize="small">
                                                         <EditOrSaveButton
                                                             index={index}
