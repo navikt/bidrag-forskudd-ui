@@ -859,9 +859,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1758,8 +1758,7 @@ export enum Grunnlagstype {
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
-    DELBEREGNINGBIDRAGBELOP = "DELBEREGNING_BIDRAG_BELØP",
-    BIDRAG = "BIDRAG",
+    DELBEREGNINGSUMLOPENDEBIDRAG = "DELBEREGNING_SUM_LØPENDE_BIDRAG",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
@@ -1769,6 +1768,7 @@ export enum Grunnlagstype {
     PERSON_REELL_MOTTAKER = "PERSON_REELL_MOTTAKER",
     PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
+    PERSON_BARN_BIDRAGSPLIKTIG = "PERSON_BARN_BIDRAGSPLIKTIG",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
@@ -1821,6 +1821,11 @@ export interface StonadsendringDto {
 }
 
 export interface VedtakDto {
+    /**
+     * Vedtakets unike identifikator
+     * @format int64
+     */
+    id: number;
     /** Hva er kilden til vedtaket. Automatisk eller manuelt */
     kilde: VedtakDtoKildeEnum;
     type: Vedtakstype;
@@ -1982,9 +1987,9 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -2117,6 +2122,7 @@ export interface NotatTotalBeregningUtgifterDto {
     utgiftstype: string;
     totalKravbeløp: number;
     totalGodkjentBeløp: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export interface NotatUtgiftBeregningDto {
@@ -2358,7 +2364,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2447,7 +2456,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2890,10 +2899,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request GET:/api/v2/behandling/vedtak/{vedtakId}
          * @secure
          */
-        vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
+        vedtakLesemodus: (
+            vedtakId: number,
+            query?: {
+                inkluderHistoriskeInntekter?: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
                 method: "GET",
+                query: query,
                 secure: true,
                 format: "json",
                 ...params,

@@ -139,7 +139,11 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
         queryFn: async () => {
             try {
                 if (vedtakId) {
-                    return (await BEHANDLING_API_V1.api.vedtakLesemodus(Number(vedtakId))).data;
+                    return (
+                        await BEHANDLING_API_V1.api.vedtakLesemodus(Number(vedtakId), {
+                            inkluderHistoriskeInntekter: true,
+                        })
+                    ).data;
                 }
                 return (
                     await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
