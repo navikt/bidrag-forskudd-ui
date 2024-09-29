@@ -16,7 +16,7 @@ export const Småbarnstillegg = () => {
     const fieldName = `småbarnstillegg.${ident}` as const;
 
     return (
-        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2">
+        <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
             <Heading level="2" size="small" id={elementId.seksjon_inntekt_småbarnstillegg}>
                 {text.title.småbarnstillegg}
             </Heading>

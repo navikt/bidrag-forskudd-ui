@@ -31,6 +31,7 @@ import { formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { actionOnEnter } from "../../helpers/keyboardHelpers";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
 const DeleteButton = ({
@@ -542,7 +543,11 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         </Table.Header>
                         <Table.Body>
                             {controlledFields.map((item, index) => (
-                                <Table.Row key={item?.id} className="align-top">
+                                <Table.Row
+                                    key={item?.id}
+                                    className="align-top"
+                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
+                                >
                                     <Table.DataCell textSize="small">
                                         <Periode
                                             editableRow={editableRow === `${barnIndex}.${index}`}

@@ -14,6 +14,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import { OverlayLoader } from "@common/components/OverlayLoader";
+import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { calculateFraDato, sivilstandForskuddOptions } from "@common/helpers/boforholdFormHelpers";
@@ -34,6 +35,7 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
 import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
@@ -164,7 +166,7 @@ export const Sivilstand = () => {
     const datoFom = useVirkningsdato();
     return (
         <div className="mt-8">
-            <Heading level="2" size="small" id="sivilstand" title="Sivilstand V2">
+            <Heading level="2" size="small" id={elementIds.seksjon_sivilstand} title="Sivilstand V2">
                 {text.label.sivilstand}
             </Heading>
             <SivilistandPerioder virkningstidspunkt={datoFom} />
@@ -451,7 +453,11 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                             </Table.Header>
                             <Table.Body>
                                 {controlledFields.map((item, index) => (
-                                    <Table.Row key={item?.id} className="align-top">
+                                    <Table.Row
+                                        key={item?.id}
+                                        className="align-top"
+                                        onKeyDown={actionOnEnter(() => onSaveRow(index))}
+                                    >
                                         <Table.DataCell textSize="small">
                                             <Periode
                                                 editableRow={editableRow === index}

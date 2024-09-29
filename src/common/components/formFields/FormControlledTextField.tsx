@@ -13,6 +13,7 @@ export const FormControlledTextField = ({
     min,
     editable = true,
     inputMode,
+    prefix,
 }: {
     name: string;
     label: string;
@@ -20,6 +21,7 @@ export const FormControlledTextField = ({
     type?: "number" | "email" | "password" | "tel" | "text" | "url";
     disabled?: boolean;
     editable?: boolean;
+    prefix?: string;
     min?: string | number;
     inputMode?: "email" | "tel" | "text" | "url" | "search" | "none" | "numeric" | "decimal";
 }) => {
@@ -37,11 +39,8 @@ export const FormControlledTextField = ({
     };
 
     if (!editable) {
-        return (
-            <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>
-                {field.value?.toString()}
-            </div>
-        );
+        const value = prefix ? `${prefix}${field.value ? `, ${field.value}` : ""}` : field.value;
+        return <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>{value}</div>;
     }
 
     return (

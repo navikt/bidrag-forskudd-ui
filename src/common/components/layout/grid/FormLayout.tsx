@@ -1,11 +1,6 @@
-import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { MutationKeys } from "@common/hooks/useApiData";
-import { BidragCell, BidragGrid, Broadcast, useRQMutationState } from "@navikt/bidrag-ui-common";
+import { BidragCell, BidragGrid } from "@navikt/bidrag-ui-common";
 import { Heading } from "@navikt/ds-react";
-import { useQueryClient } from "@tanstack/react-query";
-import React, { ReactNode, useEffect } from "react";
-
-import { notatBroadcastName } from "../../../../forskudd/constants/notat";
+import React, { ReactNode } from "react";
 
 export const FormLayout = ({
     title,
@@ -18,27 +13,6 @@ export const FormLayout = ({
     side?: ReactNode;
     pageAlert?: ReactNode;
 }) => {
-    const { behandlingId } = useBehandlingProvider();
-    const queryClient = useQueryClient();
-    const listenToMutations = [
-        MutationKeys.oppdaterBehandling(behandlingId),
-        MutationKeys.updateBoforhold(behandlingId),
-        MutationKeys.updateVirkningstidspunkt(behandlingId),
-        MutationKeys.updateInntekter(behandlingId),
-        MutationKeys.updateUtgifter(behandlingId),
-    ];
-    const saveState = useRQMutationState(listenToMutations, queryClient);
-
-    useEffect(() => {
-        if (saveState === "success") {
-            console.debug("Sending broadcast", notatBroadcastName, behandlingId);
-            Broadcast.sendBroadcast(notatBroadcastName, {
-                id: behandlingId.toString(),
-                payload: null,
-            });
-        }
-    }, [saveState]);
-
     return (
         <div className="grid gap-2">
             <div className="flex flex-row gap-2">

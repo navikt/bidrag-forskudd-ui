@@ -4,8 +4,9 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -27,7 +28,7 @@ import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const [, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
@@ -35,10 +36,15 @@ const Main = () => {
         return 0;
     });
     const defaultTab = useMemo(() => {
-        const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+        const paramRoleId = getSearchParam(urlSearchParams.inntektTab);
+        return roller
+            .find((rolle) => {
+                if (getSearchParam(urlSearchParams.inntektTab)) {
+                    return rolle.id?.toString() === paramRoleId;
+                }
+                return rolle.rolletype === Rolletype.BM;
+            })
             ?.id?.toString();
-        return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
     useEffect(scrollToHash, []);
@@ -48,39 +54,41 @@ const Main = () => {
             return params;
         });
     }
+    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
 
     return (
-        <div className="grid gap-y-2">
-            <Tabs defaultValue={defaultTab} onChange={updateSearchparamForTab}>
-                <Tabs.List>
-                    {roller.map((rolle) => (
-                        <Tabs.Tab
-                            key={rolle.ident}
-                            value={rolle.id.toString()}
-                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                                [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
-                            }`}
-                        />
-                    ))}
-                </Tabs.List>
-                {roller.map((rolle) => {
-                    return (
-                        <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
-                            <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
-                                <div className="mt-4">
-                                    <InntektHeader ident={rolle.ident} />
-                                </div>
-                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => (
-                                    <Fragment key={rolle.ident + tableType}>
-                                        {InntektTableComponent[tableType]()}
-                                    </Fragment>
-                                ))}
-                            </Tabs.Panel>
-                        </InntektTableProvider>
-                    );
-                })}
-            </Tabs>
-        </div>
+        <Tabs
+            defaultValue={defaultTab}
+            value={selectedTab}
+            onChange={updateSearchparamForTab}
+            className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
+        >
+            <Tabs.List>
+                {roller.map((rolle) => (
+                    <Tabs.Tab
+                        key={rolle.ident}
+                        value={rolle.id.toString()}
+                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
+                            [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
+                        }`}
+                    />
+                ))}
+            </Tabs.List>
+            {roller.map((rolle) => {
+                return (
+                    <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
+                        <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
+                            <div className="mt-4">
+                                <InntektHeader ident={rolle.ident} />
+                            </div>
+                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) => (
+                                <Fragment key={rolle.ident + tableType}>{InntektTableComponent[tableType]()}</Fragment>
+                            ))}
+                        </Tabs.Panel>
+                    </InntektTableProvider>
+                );
+            })}
+        </Tabs>
     );
 };
 
@@ -167,7 +175,12 @@ const InntektForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title="Inntekt" main={<Main />} side={<Side />} pageAlert={<NyOpplysningerAlert />} />
+                <NewFormLayout
+                    title={text.title.inntekt}
+                    main={<Main />}
+                    side={<Side />}
+                    pageAlert={<NyOpplysningerAlert />}
+                />
             </form>
         </FormProvider>
     );

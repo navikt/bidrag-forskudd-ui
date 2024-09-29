@@ -12,7 +12,7 @@ import { FormControlledMonthPicker } from "@common/components/formFields/FormCon
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
@@ -76,8 +76,8 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
 });
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
-    const årsak = Object.values(TypeArsakstype).find((value) => value === values.årsakAvslag);
-    const avslag = Object.values(Resultatkode).find((value) => value === values.årsakAvslag);
+    const årsak = årsakListe.find((value) => value === values.årsakAvslag);
+    const avslag = avslagsListe.find((value) => value === values.årsakAvslag);
     return {
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
@@ -301,7 +301,7 @@ const VirkningstidspunktForm = () => {
         <>
             <FormProvider {...useFormMethods}>
                 <form onSubmit={useFormMethods.handleSubmit(onSave)}>
-                    <FormLayout
+                    <NewFormLayout
                         title={text.label.virkningstidspunkt}
                         main={
                             <Main

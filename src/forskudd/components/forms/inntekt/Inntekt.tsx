@@ -1,57 +1,36 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
-import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
-import { Arbeidsforhold } from "@common/components/inntekt/Arbeidsforhold";
-import { InntektChart } from "@common/components/inntekt/InntektChart";
+import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
-import { FormLayout } from "@common/components/layout/grid/FormLayout";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { createInitialValues, inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
+import { inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { BodyShort, ExpansionCard, Tabs } from "@navikt/ds-react";
-import { getSearchParam, scrollToHash, updateUrlSearchParam } from "@utils/window-utils";
+import { Tabs } from "@navikt/ds-react";
+import { getSearchParam } from "@utils/window-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
+import { createInitialForskuddInntektValues } from "../helpers/inntektFormHelpers";
 
-const InntektHeader = ({ ident }: { ident: string }) => {
-    const { inntekter } = useGetBehandlingV2();
-
-    const månedsinntekter = inntekter.månedsinntekter?.filter((månedsinntekt) => månedsinntekt.ident === ident);
-    return månedsinntekter?.length > 0 ? (
-        <div className="grid w-full max-w-[65ch] gap-y-8">
-            <InntektChart inntekt={månedsinntekter} />
-            <ExpansionCard aria-label="default-demo" size="small">
-                <ExpansionCard.Header>
-                    <ExpansionCard.Title size="small">{text.title.arbeidsforhold}</ExpansionCard.Title>
-                </ExpansionCard.Header>
-                <ExpansionCard.Content>
-                    <QueryErrorWrapper>
-                        <Arbeidsforhold ident={ident} />
-                    </QueryErrorWrapper>
-                </ExpansionCard.Content>
-            </ExpansionCard>
-        </div>
-    ) : (
-        <BehandlingAlert variant="info">
-            <BodyShort>Ingen inntekt funnet</BodyShort>
-        </BehandlingAlert>
-    );
-};
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
         .sort((a, b) => {
@@ -64,9 +43,12 @@ const Main = () => {
 
             return 0;
         });
-    useEffect(scrollToHash, []);
+
     function updateSearchparamForTab(currentTabId: string) {
-        updateUrlSearchParam(urlSearchParams.inntektTab, currentTabId);
+        setSearchParams((params) => {
+            params.set(urlSearchParams.inntektTab, currentTabId);
+            return params;
+        });
     }
 
     const defaultTab = useMemo(() => {
@@ -76,48 +58,53 @@ const Main = () => {
         return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
+    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+
     return (
-        <div className="grid gap-y-2">
-            <Tabs defaultValue={defaultTab} onChange={updateSearchparamForTab}>
-                <Tabs.List>
-                    {roller.map((rolle) => (
-                        <Tabs.Tab
-                            key={rolle.ident}
-                            value={rolle.id.toString()}
-                            label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                                rolle.rolletype === Rolletype.BM ? "" : rolle.ident
-                            }`}
-                        />
-                    ))}
-                </Tabs.List>
-                {roller.map((rolle) => {
-                    return (
-                        <InntektTableProvider rolle={rolle} type={type}>
-                            <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
-                                <div className="mt-4">
-                                    <InntektHeader ident={rolle.ident} />
-                                </div>
-                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
-                                    InntektTableComponent[tableType]()
-                                )}
-                            </Tabs.Panel>
-                        </InntektTableProvider>
-                    );
-                })}
-            </Tabs>
-        </div>
+        <Tabs
+            defaultValue={defaultTab}
+            value={selectedTab}
+            onChange={updateSearchparamForTab}
+            className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
+        >
+            <Tabs.List>
+                {roller.map((rolle) => (
+                    <Tabs.Tab
+                        key={rolle.ident}
+                        value={rolle.id.toString()}
+                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
+                            rolle.rolletype === Rolletype.BM ? "" : rolle.ident
+                        }`}
+                    />
+                ))}
+            </Tabs.List>
+            {roller.map((rolle) => {
+                return (
+                    <InntektTableProvider rolle={rolle} type={type}>
+                        <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
+                            <div className="mt-4">
+                                <InntektHeader ident={rolle.ident} />
+                            </div>
+                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
+                                InntektTableComponent[tableType]()
+                            )}
+                        </Tabs.Panel>
+                    </InntektTableProvider>
+                );
+            })}
+        </Tabs>
     );
 };
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { roller } = useGetBehandlingV2();
-    const bmId = roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bmId}`));
+    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bm.id}`));
     const onSave = () => {
-        const begrunnelse = getValues(`begrunnelser.${bmId}`);
+        const begrunnelse = getValues(`begrunnelser.${bm.id}`);
         saveInntekt.mutation.mutate(
             {
                 oppdatereBegrunnelse: {
@@ -133,6 +120,7 @@ const Side = () => {
                             begrunnelser: [
                                 {
                                     innhold: response.begrunnelse,
+                                    gjelder: bm,
                                     kunINotat: response.begrunnelse,
                                 },
                             ],
@@ -145,7 +133,7 @@ const Side = () => {
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue(`begrunnelser.${bmId}`, previousValues ?? "");
+                            setValue(`begrunnelser.${bm.id}`, previousValues ?? "");
                         },
                     });
                 },
@@ -158,7 +146,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["begrunnelser"].includes(name) && type === "change") {
+            if (name.includes("begrunnelser") && type === "change") {
                 debouncedOnSave();
             }
         });
@@ -167,7 +155,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name={`begrunnelser.${bmId}`} label={text.title.begrunnelse} />
+            <FormControlledTextarea name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -178,7 +166,7 @@ const InntektForm = () => {
     const virkningsdato = useVirkningsdato();
     const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialValues(bmOgBarn, inntekter, virkningsdato),
+        () => createInitialForskuddInntektValues(bmOgBarn, inntekter, virkningsdato),
         [bmOgBarn, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({
@@ -188,7 +176,7 @@ const InntektForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <FormLayout title="Inntekt" main={<Main />} side={<Side />} pageAlert={<NyOpplysningerAlert />} />
+                <NewFormLayout title="Inntekt" main={<Main />} side={<Side />} pageAlert={<NyOpplysningerAlert />} />
             </form>
         </FormProvider>
     );

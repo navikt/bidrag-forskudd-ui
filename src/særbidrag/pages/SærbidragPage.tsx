@@ -1,5 +1,6 @@
 import { Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
+import { NavigationLoaderWrapper } from "@common/components/NavigationLoaderWrapper";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
@@ -81,7 +82,9 @@ export const SærbidragPage = () => {
                         </Stepper.Step>
                     </Stepper>
                 </FlexRow>
-                <FormWrapper />
+                <NavigationLoaderWrapper>
+                    <FormWrapper />
+                </NavigationLoaderWrapper>
             </BidragContainer>
         </PageWrapper>
     );

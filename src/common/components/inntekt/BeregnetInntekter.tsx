@@ -68,7 +68,7 @@ export const BeregnetInntekter = () => {
         return null;
     }
     return (
-        <Box padding="4" background="surface-subtle" key={`beregnet-inntekter-${rolle.id}`}>
+        <Box padding="4" background="surface-subtle" key={`beregnet-inntekter-${rolle.id}`} className="w-full">
             <Heading level="2" size="small" spacing>
                 {text.title.beregnetTotalt}
             </Heading>

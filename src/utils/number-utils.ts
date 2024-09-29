@@ -39,7 +39,7 @@ export const formatterBeløp = (beløp: number | string | undefined, visSymbol =
 export const formatterProsent = (value: number | string | undefined): string => {
     if (!value) return "0%";
     const asNumber = typeof value == "string" ? parseFloat(value) : value;
-    const percentageAsFraction = asNumber / 100;
+    const percentageAsFraction = asNumber > 1 ? asNumber / 100 : asNumber;
     return percentageAsFraction.toLocaleString("nb-NO", {
         style: "percent",
         minimumFractionDigits: 0,
