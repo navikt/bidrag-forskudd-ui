@@ -167,22 +167,22 @@ export enum Resultatkode {
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
     FORHOYETFORSKUDD11AR125PROSENT = "FORHØYET_FORSKUDD_11_ÅR_125_PROSENT",
-    GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
     SAeRTILSKUDDINNVILGET = "SÆRTILSKUDD_INNVILGET",
     SAeRBIDRAGINNVILGET = "SÆRBIDRAG_INNVILGET",
     SAeRTILSKUDDIKKEFULLBIDRAGSEVNE = "SÆRTILSKUDD_IKKE_FULL_BIDRAGSEVNE",
     SAeRBIDRAGIKKEFULLBIDRAGSEVNE = "SÆRBIDRAG_IKKE_FULL_BIDRAGSEVNE",
+    SAeRBIDRAGMANGLERBIDRAGSEVNE = "SÆRBIDRAG_MANGLER_BIDRAGSEVNE",
     AVSLAG = "AVSLAG",
     AVSLAG2 = "AVSLAG2",
-    PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
     AVSLAGOVER18AR = "AVSLAG_OVER_18_ÅR",
     AVSLAGIKKEREGISTRERTPAADRESSE = "AVSLAG_IKKE_REGISTRERT_PÅ_ADRESSE",
     AVSLAGHOYINNTEKT = "AVSLAG_HØY_INNTEKT",
+    PAGRUNNAVBARNEPENSJON = "PÅ_GRUNN_AV_BARNEPENSJON",
+    IKKE_OMSORG = "IKKE_OMSORG",
     BARNETS_EKTESKAP = "BARNETS_EKTESKAP",
     BARNETS_INNTEKT = "BARNETS_INNTEKT",
     PAGRUNNAVYTELSEFRAFOLKETRYGDEN = "PÅ_GRUNN_AV_YTELSE_FRA_FOLKETRYGDEN",
     FULLT_UNDERHOLDT_AV_OFFENTLIG = "FULLT_UNDERHOLDT_AV_OFFENTLIG",
-    IKKE_OMSORG = "IKKE_OMSORG",
     IKKE_OPPHOLD_I_RIKET = "IKKE_OPPHOLD_I_RIKET",
     MANGLENDE_DOKUMENTASJON = "MANGLENDE_DOKUMENTASJON",
     PAGRUNNAVSAMMENFLYTTING = "PÅ_GRUNN_AV_SAMMENFLYTTING",
@@ -193,8 +193,10 @@ export enum Resultatkode {
     IKKE_INNKREVING_AV_BIDRAG = "IKKE_INNKREVING_AV_BIDRAG",
     UTGIFTER_DEKKES_AV_BARNEBIDRAGET = "UTGIFTER_DEKKES_AV_BARNEBIDRAGET",
     IKKENODVENDIGEUTGIFTER = "IKKE_NØDVENDIGE_UTGIFTER",
-    PRIVATAVTALEOMSAeRBIDRAG = "PRIVAT_AVTALE_OM_SÆRBIDRAG",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    AVSLAGPRIVATAVTALEOMSAeRBIDRAG = "AVSLAG_PRIVAT_AVTALE_OM_SÆRBIDRAG",
     ALLE_UTGIFTER_ER_FORELDET = "ALLE_UTGIFTER_ER_FORELDET",
+    GODKJENTBELOPERLAVEREENNFORSKUDDSSATS = "GODKJENT_BELØP_ER_LAVERE_ENN_FORSKUDDSSATS",
 }
 
 export enum Rolletype {
@@ -806,6 +808,18 @@ export interface InntektspostEndringDto {
     endringstype: GrunnlagInntektEndringstype;
 }
 
+export interface MaksGodkjentBelopDto {
+    taMed: boolean;
+    beløp?: number;
+    begrunnelse?: string;
+}
+
+export interface MaksGodkjentBelopValideringsfeil {
+    manglerBeløp: boolean;
+    manglerBegrunnelse: boolean;
+    harFeil: boolean;
+}
+
 export interface OverlappendeBostatusperiode {
     periode: Datoperiode;
     /** @uniqueItems true */
@@ -986,10 +1000,12 @@ export interface SaerbidragUtgifterDto {
     avslag?: Resultatkode;
     kategori: SaerbidragKategoriDto;
     beregning?: UtgiftBeregningDto;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
     valideringsfeil?: UtgiftValideringsfeilDto;
+    totalBeregning: TotalBeregningUtgifterDto[];
     /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
@@ -999,6 +1015,14 @@ export enum Saerbidragskategori {
     TANNREGULERING = "TANNREGULERING",
     OPTIKK = "OPTIKK",
     ANNET = "ANNET",
+}
+
+export interface TotalBeregningUtgifterDto {
+    betaltAvBp: boolean;
+    utgiftstype: string;
+    totalKravbeløp: number;
+    totalGodkjentBeløp: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export enum TypeBehandling {
@@ -1021,6 +1045,7 @@ export interface UtgiftBeregningDto {
 }
 
 export interface UtgiftValideringsfeilDto {
+    maksGodkjentBeløp?: MaksGodkjentBelopValideringsfeil;
     manglerUtgifter: boolean;
     ugyldigUtgiftspost: boolean;
 }
@@ -1090,11 +1115,6 @@ export interface OppdatereUtgift {
     godkjentBeløp: number;
     /** Kommentar kan brukes til å legge inn nærmere informasjon om utgiften f.eks. fakturanr., butikk det er handlet i, informasjon om hvorfor man ikke har godkjent hele kravbeløpet */
     kommentar?: string;
-    /**
-     * Begrunnelse for hvorfor godkjent beløp avviker fra kravbeløp. Må settes hvis godkjent beløp er ulik kravbeløp
-     * @deprecated
-     */
-    begrunnelse?: string;
     /** Om utgiften er betalt av BP */
     betaltAvBp: boolean;
     /** @format int64 */
@@ -1104,6 +1124,7 @@ export interface OppdatereUtgift {
 export interface OppdatereUtgiftRequest {
     avslag?: Resultatkode;
     beløpDirekteBetaltAvBp?: number;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     /** Legg til eller endre en utgift. Utgift kan ikke endres eller oppdateres hvis avslag er satt */
     nyEllerEndretUtgift?: OppdatereUtgift;
     /**
@@ -1128,8 +1149,10 @@ export interface OppdatereUtgiftResponse {
      */
     begrunnelse?: string;
     beregning?: UtgiftBeregningDto;
+    maksGodkjentBeløp?: MaksGodkjentBelopDto;
     avslag?: Resultatkode;
     valideringsfeil?: UtgiftValideringsfeilDto;
+    totalBeregning: TotalBeregningUtgifterDto[];
     /**
      * Saksbehandlers begrunnelse
      * @deprecated
@@ -1470,7 +1493,7 @@ export interface OpprettBehandlingFraVedtakRequest {
 
 export interface DelberegningBidragspliktigesAndelSaerbidrag {
     periode: TypeArManedsperiode;
-    andelProsent: number;
+    andelFaktor: number;
     andelBeløp: number;
     barnetErSelvforsørget: boolean;
 }
@@ -1488,6 +1511,7 @@ export interface ResultatSaerbidragsberegningDto {
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
+    maksGodkjentBeløp?: number;
     resultat: number;
     resultatKode: Resultatkode;
     /** @format double */
@@ -1514,11 +1538,13 @@ export interface ResultatPeriodeDto {
     periode: TypeArManedsperiode;
     beløp: number;
     resultatKode: Resultatkode;
+    vedtakstype?: Vedtakstype;
     regel: string;
     sivilstand?: Sivilstandskode;
     inntekt: number;
     /** @format int32 */
     antallBarnIHusstanden: number;
+    resultatkodeVisningsnavn: string;
 }
 
 export interface ResultatRolle {
@@ -1725,12 +1751,14 @@ export enum Grunnlagstype {
     NOTAT = "NOTAT",
     SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
     UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
+    UTGIFTMAKSGODKJENTBELOP = "UTGIFT_MAKS_GODKJENT_BELØP",
     UTGIFTSPOSTER = "UTGIFTSPOSTER",
     SLUTTBEREGNING_FORSKUDD = "SLUTTBEREGNING_FORSKUDD",
     DELBEREGNING_SUM_INNTEKT = "DELBEREGNING_SUM_INNTEKT",
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
+    DELBEREGNINGSUMLOPENDEBIDRAG = "DELBEREGNING_SUM_LØPENDE_BIDRAG",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
@@ -1740,6 +1768,7 @@ export enum Grunnlagstype {
     PERSON_REELL_MOTTAKER = "PERSON_REELL_MOTTAKER",
     PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
+    PERSON_BARN_BIDRAGSPLIKTIG = "PERSON_BARN_BIDRAGSPLIKTIG",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
@@ -1792,6 +1821,11 @@ export interface StonadsendringDto {
 }
 
 export interface VedtakDto {
+    /**
+     * Vedtakets unike identifikator
+     * @format int64
+     */
+    id: number;
     /** Hva er kilden til vedtaket. Automatisk eller manuelt */
     kilde: VedtakDtoKildeEnum;
     type: Vedtakstype;
@@ -1952,8 +1986,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
 }
@@ -2003,6 +2037,12 @@ export interface NotatInntektspostDto {
     inntektstype?: Inntektstype;
     beløp: number;
     visningsnavn?: string;
+}
+
+export interface NotatMaksGodkjentBelopDto {
+    taMed: boolean;
+    beløp?: number;
+    begrunnelse?: string;
 }
 
 export enum NotatMalType {
@@ -2068,11 +2108,21 @@ export interface NotatSaerbidragKategoriDto {
 
 export interface NotatSaerbidragUtgifterDto {
     beregning?: NotatUtgiftBeregningDto;
+    maksGodkjentBeløp?: NotatMaksGodkjentBelopDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
     utgifter: NotatUtgiftspostDto[];
+    totalBeregning: NotatTotalBeregningUtgifterDto[];
+}
+
+export interface NotatTotalBeregningUtgifterDto {
+    betaltAvBp: boolean;
+    utgiftstype: string;
+    totalKravbeløp: number;
+    totalGodkjentBeløp: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export interface NotatUtgiftBeregningDto {
@@ -2131,8 +2181,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface OpplysningerBruktTilBeregningBostatuskode {
@@ -2849,10 +2899,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request GET:/api/v2/behandling/vedtak/{vedtakId}
          * @secure
          */
-        vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
+        vedtakLesemodus: (
+            vedtakId: number,
+            query?: {
+                inkluderHistoriskeInntekter?: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
                 method: "GET",
+                query: query,
                 secure: true,
                 format: "json",
                 ...params,
