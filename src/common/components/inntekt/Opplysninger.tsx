@@ -30,16 +30,39 @@ const inntektTypeToOpplysningerMapper = {
     årsinntekter: OpplysningerType.SKATTEPLIKTIGE_INNTEKTER,
 };
 
-export const Opplysninger = ({
-    fieldName,
-}: {
-    fieldName:
-        | `småbarnstillegg.${string}`
-        | `utvidetBarnetrygd.${string}`
-        | `årsinntekter.${string}`
-        | `barnetillegg.${string}.${string}`
-        | `kontantstøtte.${string}.${string}`;
-}) => {
+type FieldName =
+    | `småbarnstillegg.${string}`
+    | `utvidetBarnetrygd.${string}`
+    | `årsinntekter.${string}`
+    | `barnetillegg.${string}.${string}`
+    | `kontantstøtte.${string}.${string}`;
+
+const FeilVedInnhentingAvOffentligData = ({ fieldName }: { fieldName: FieldName }) => {
+    const { ident } = useInntektTableProvider();
+    const { feilOppståttVedSisteGrunnlagsinnhenting } = useGetBehandlingV2();
+    const { lesemodus } = useBehandlingProvider();
+    const [inntektType] = fieldName.split(".");
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
+        (innhentingsFeil) =>
+            ident === innhentingsFeil.rolle.ident &&
+            innhentingsFeil.grunnlagsdatatype === inntektTypeToOpplysningerMapper[inntektType]
+    );
+
+    return (
+        <>
+            {!lesemodus && feilVedInnhentingAvOffentligData && (
+                <BehandlingAlert variant="info" className="mb-2">
+                    <Heading size="small" level="3">
+                        {text.alert.feilVedInnhentingAvOffentligData}
+                    </Heading>
+                    {text.feilVedInnhentingAvOffentligData}
+                </BehandlingAlert>
+            )}
+        </>
+    );
+};
+
+export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName }) => {
     const { ident } = useInntektTableProvider();
     const { ikkeAktiverteEndringerIGrunnlagsdata, roller, feilOppståttVedSisteGrunnlagsinnhenting } =
         useGetBehandlingV2();
@@ -49,11 +72,6 @@ export const Opplysninger = ({
     const { resetField } = useFormContext<InntektFormValues>();
     const [inntektType] = fieldName.split(".");
     const transformFn = transformInntekt(virkningsdato);
-    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
-        (innhentingsFeil) =>
-            ident === innhentingsFeil.rolle.ident &&
-            innhentingsFeil.grunnlagsdatatype === inntektTypeToOpplysningerMapper[inntektType]
-    );
 
     if (ikkeAktiverteEndringerIGrunnlagsdata.inntekter[inntektType].length === 0) return null;
 
@@ -147,100 +165,93 @@ export const Opplysninger = ({
         return null;
 
     return (
-        <>
-            {feilVedInnhentingAvOffentligData && (
-                <BehandlingAlert variant="info" className="mb-2">
-                    <Heading size="small" level="3">
-                        {text.alert.feilVedInnhentingAvOffentligData}
-                    </Heading>
-                    {text.feilVedInnhentingAvOffentligData}
-                </BehandlingAlert>
-            )}
-            <Box
-                padding="4"
-                background="surface-default"
-                borderWidth="1"
-                borderRadius="medium"
-                borderColor="border-default"
-                className="w-[708px] sm:max-w-[688px]"
-            >
-                <Heading size="xsmall" level="6">
-                    {text.alert.nyOpplysninger}
-                </Heading>
-                <BodyShort size="small">{text.alert.nyOpplysningerInfomelding}</BodyShort>
-                {Object.keys(ikkeAktiverteEndringer).map((key) => {
-                    if (ikkeAktiverteEndringer[key].length < 1) return null;
-                    const rolle = roller.find((rolle) => rolle.ident === key);
-                    return (
-                        <Fragment key={key}>
-                            <BodyShort className="font-bold	mt-4">
-                                <RolleTag rolleType={rolle.rolletype} />
-                                <PersonNavn ident={key} />
-                            </BodyShort>
-                            <table className="mt-2">
-                                <thead>
-                                    <tr>
-                                        <th align="left">{text.label.opplysninger}</th>
-                                        <th align="left">{text.label.beløp}</th>
-                                        <th align="left">{text.label.status}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ikkeAktiverteEndringer[key].map(
-                                        (
-                                            {
-                                                beløp,
-                                                rapporteringstype,
-                                                periode,
-                                                endringstype,
-                                                inntektsposterSomErEndret,
-                                            },
-                                            i
-                                        ) => (
-                                            <Fragment key={i + rapporteringstype}>
-                                                <tr>
-                                                    <td width="250px" scope="row">
-                                                        {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
-                                                    </td>
-                                                    <td width="75px">{formatterBeløp(beløp)}</td>
-                                                    <td width="100px">{endringstypeTilVisningsnavn(endringstype)}</td>
+        <Box
+            padding="4"
+            background="surface-default"
+            borderWidth="1"
+            borderRadius="medium"
+            borderColor="border-default"
+            className="w-[708px] sm:max-w-[688px]"
+        >
+            <Heading size="xsmall" level="6">
+                {text.alert.nyOpplysninger}
+            </Heading>
+            <BodyShort size="small">{text.alert.nyOpplysningerInfomelding}</BodyShort>
+            {Object.keys(ikkeAktiverteEndringer).map((key) => {
+                if (ikkeAktiverteEndringer[key].length < 1) return null;
+                const rolle = roller.find((rolle) => rolle.ident === key);
+                return (
+                    <Fragment key={key}>
+                        <BodyShort className="font-bold	mt-4">
+                            <RolleTag rolleType={rolle.rolletype} />
+                            <PersonNavn ident={key} />
+                        </BodyShort>
+                        <table className="mt-2">
+                            <thead>
+                                <tr>
+                                    <th align="left">{text.label.opplysninger}</th>
+                                    <th align="left">{text.label.beløp}</th>
+                                    <th align="left">{text.label.status}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ikkeAktiverteEndringer[key].map(
+                                    (
+                                        { beløp, rapporteringstype, periode, endringstype, inntektsposterSomErEndret },
+                                        i
+                                    ) => (
+                                        <Fragment key={i + rapporteringstype}>
+                                            <tr>
+                                                <td width="250px" scope="row">
+                                                    {hentVisningsnavn(rapporteringstype, periode.fom, periode.til)}
+                                                </td>
+                                                <td width="75px">{formatterBeløp(beløp)}</td>
+                                                <td width="100px">{endringstypeTilVisningsnavn(endringstype)}</td>
+                                            </tr>
+                                            {inntektsposterSomErEndret.map((i, index) => (
+                                                <tr
+                                                    key={i.visningsnavn + index}
+                                                    style={
+                                                        index === inntektsposterSomErEndret.length - 1
+                                                            ? {
+                                                                  borderBottom: "1px solid black",
+                                                              }
+                                                            : {}
+                                                    }
+                                                >
+                                                    <td>{i.visningsnavn}</td>
+                                                    <td>{formatterBeløp(i.beløp)}</td>
+                                                    <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
                                                 </tr>
-                                                {inntektsposterSomErEndret.map((i, index) => (
-                                                    <tr
-                                                        key={i.visningsnavn + index}
-                                                        style={
-                                                            index === inntektsposterSomErEndret.length - 1
-                                                                ? {
-                                                                      borderBottom: "1px solid black",
-                                                                  }
-                                                                : {}
-                                                        }
-                                                    >
-                                                        <td>{i.visningsnavn}</td>
-                                                        <td>{formatterBeløp(i.beløp)}</td>
-                                                        <td>{endringstypeTilVisningsnavn(i.endringstype)}</td>
-                                                    </tr>
-                                                ))}
-                                            </Fragment>
-                                        )
-                                    )}
-                                </tbody>
-                            </table>
-                        </Fragment>
-                    );
-                })}
-                <Button
-                    size="xsmall"
-                    type="button"
-                    variant="secondary"
-                    disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
-                    loading={aktiverGrunnlagFn.isPending}
-                    className="mt-2"
-                    onClick={onUpdate}
-                >
-                    Oppdater opplysninger
-                </Button>
-            </Box>
+                                            ))}
+                                        </Fragment>
+                                    )
+                                )}
+                            </tbody>
+                        </table>
+                    </Fragment>
+                );
+            })}
+            <Button
+                size="xsmall"
+                type="button"
+                variant="secondary"
+                disabled={aktiverGrunnlagFn.isPending || aktiverGrunnlagFn.isSuccess}
+                loading={aktiverGrunnlagFn.isPending}
+                className="mt-2"
+                onClick={onUpdate}
+            >
+                Oppdater opplysninger
+            </Button>
+        </Box>
+    );
+};
+
+export const Opplysninger = ({ fieldName }: { fieldName: FieldName }) => {
+    return (
+        <>
+            <FeilVedInnhentingAvOffentligData fieldName={fieldName} />
+            <IkkeAktiverteOpplysninger fieldName={fieldName} />
         </>
     );
 };
