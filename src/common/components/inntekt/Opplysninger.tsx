@@ -64,8 +64,7 @@ const FeilVedInnhentingAvOffentligData = ({ fieldName }: { fieldName: FieldName 
 
 export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName }) => {
     const { ident } = useInntektTableProvider();
-    const { ikkeAktiverteEndringerIGrunnlagsdata, roller, feilOppståttVedSisteGrunnlagsinnhenting } =
-        useGetBehandlingV2();
+    const { ikkeAktiverteEndringerIGrunnlagsdata, roller } = useGetBehandlingV2();
     const aktiverGrunnlagFn = useAktiveGrunnlagsdata();
     const virkningsdato = useVirkningsdato();
     const { lesemodus, setSaveErrorState } = useBehandlingProvider();
