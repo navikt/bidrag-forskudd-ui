@@ -463,7 +463,7 @@ const UtgifterListe = () => {
                             erRedigerbart:
                                 response.oppdatertUtgiftspost.id === v.id
                                     ? false
-                                    : eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false,
+                                    : (eksisterendeUtgifter.find((eu) => eu.id === v.id)?.erRedigerbart ?? false),
                         })),
                         ...eksisterendeUtgifter.filter((v, i) => v.id === undefined && i !== index),
                     ]);
