@@ -23,12 +23,12 @@ export type PageErrorsOrUnsavedState = {
     };
     boforhold: {
         error: boolean;
-        openFields?: { [key in HusstandsbarnTables]: boolean };
+        openFields?: { [_key in HusstandsbarnTables]: boolean };
     };
     inntekt: {
         error: boolean;
         openFields?: {
-            [key in InntektTables]: boolean;
+            [_key in InntektTables]: boolean;
         };
     };
 };

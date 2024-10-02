@@ -50,7 +50,9 @@ export const BeregnetInntekter = () => {
     } = useGetBehandlingV2();
 
     const behandlingViewRules = inntekterTablesViewRules[type][rolle.rolletype] as InntektTableType[];
-    const behandlingColumnWitdhRules = columnWitdhRules[type][rolle.rolletype] as { [key in InntektTableType]: string };
+    const behandlingColumnWitdhRules = columnWitdhRules[type][rolle.rolletype] as {
+        [_key in InntektTableType]: string;
+    };
 
     const beregnetInntekterForRolle = beregnetInntekter
         .find((inntekt) => inntekt.ident === rolle.ident)
