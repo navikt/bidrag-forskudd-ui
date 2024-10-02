@@ -1,5 +1,6 @@
 module.exports = {
     parser: "@typescript-eslint/parser", // Specifies the ESLint parser
+    root: true,
     parserOptions: {
         ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
         sourceType: "module", // Allows for the use of imports
@@ -31,8 +32,8 @@ module.exports = {
         "@typescript-eslint/no-var-requires": "warn",
         "@typescript-eslint/no-empty-function": "warn",
         "@typescript-eslint/ban-types": "warn",
-        "unused-imports/no-unused-vars": [
-            "warn",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
             { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" },
         ],
         eqeqeq: ["error", "smart"],
