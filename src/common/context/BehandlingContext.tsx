@@ -57,12 +57,12 @@ export const BehandlingContext = createContext<IBehandlingContext | null>(null);
 
 type ForskuddSteps = {
     defaultStep: ForskuddStepper;
-    steps: { [key in ForskuddStepper]: number };
+    steps: { [_key in ForskuddStepper]: number };
 };
 
 type SærligeutgifterSteps = {
     defaultStep: SærligeutgifterStepper;
-    steps: { [key in SærligeutgifterStepper]: number };
+    steps: { [_key in SærligeutgifterStepper]: number };
 };
 
 export type BehandlingProviderProps = {

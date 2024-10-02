@@ -16,7 +16,7 @@ import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
-type STEPSTYPE = { [key in ForskuddStepper]: number } | { [key in SærligeutgifterStepper]: number };
+type STEPSTYPE = { [_key in ForskuddStepper]: number } | { [_key in SærligeutgifterStepper]: number };
 type VedtakWrapperProps = {
     feil: VedtakBeregningFeil;
     steps: STEPSTYPE;
