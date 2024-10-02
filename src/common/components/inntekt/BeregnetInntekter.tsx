@@ -7,7 +7,7 @@ import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils";
 import React from "react";
 
-import { hasValue } from "../../../utils/array-utils";
+import { hasValue } from "@utils/array-utils";
 import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntektFormHelpers";
 import { useInntektTableProvider } from "./InntektTableContext";
 
