@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "ts": "tsc --build",
-    "lint": "eslint ./src/**/*.{js,ts,tsx} package.json --quiet",
-    "fix-lint": "eslint ./src/**/*.{js,ts,tsx} package.json --quiet --fix",
+    "lint": "eslint './src/**/*.{js,ts,tsx}' package.json",
+    "fix-lint": "eslint './src/**/*.{js,ts,tsx}' package.json --quiet --fix",
     "test": "cross-env NODE_ENV=TEST mocha --config .mocharc.js --spec ./src/__tests__/**/**/*.spec.{js,ts,tsx} --exit",
     "start": "",
     "env:export:local": "export $(cat env/.env.local | xargs)",
