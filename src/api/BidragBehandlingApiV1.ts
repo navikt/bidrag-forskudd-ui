@@ -342,6 +342,7 @@ export interface AndreVoksneIHusstandenDetaljerDto {
      * @deprecated
      */
     relasjon: AndreVoksneIHusstandenDetaljerDtoRelasjonEnum;
+    erBeskyttet: boolean;
 }
 
 export interface AndreVoksneIHusstandenGrunnlagDto {
@@ -618,7 +619,7 @@ export interface HusstandsmedlemDtoV2 {
      * @format date
      * @example "2025-01-25"
      */
-    fødselsdato: string;
+    fødselsdato?: string;
 }
 
 /**
@@ -859,9 +860,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1491,10 +1492,19 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
-export interface DelberegningBidragspliktigesAndelSaerbidrag {
+export interface DelberegningBidragsevne {
     periode: TypeArManedsperiode;
-    andelFaktor: number;
+    beløp: number;
+    skatt: Skatt;
+    underholdBarnEgenHusstand: number;
+}
+
+export interface DelberegningBidragspliktigesAndel {
+    periode: TypeArManedsperiode;
+    endeligAndelFaktor: number;
     andelBeløp: number;
+    beregnetAndelFaktor: number;
+    barnEndeligInntekt: number;
     barnetErSelvforsørget: boolean;
 }
 
@@ -1506,11 +1516,12 @@ export interface DelberegningUtgift {
 
 export interface ResultatSaerbidragsberegningDto {
     periode: TypeArManedsperiode;
-    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
+    bpsAndel?: DelberegningBidragspliktigesAndel;
     beregning?: UtgiftBeregningDto;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
+    delberegningBidragsevne?: DelberegningBidragsevne;
     maksGodkjentBeløp?: number;
     resultat: number;
     resultatKode: Resultatkode;
@@ -1527,6 +1538,14 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBM?: number;
     inntektBP?: number;
     inntektBarn?: number;
+}
+
+export interface Skatt {
+    minstefradrag: number;
+    skattAlminneligInntekt: number;
+    trinnskatt: number;
+    trygdeavgift: number;
+    sumSkatt: number;
 }
 
 export interface ResultatBeregningBarnDto {
@@ -1718,7 +1737,6 @@ export enum Grunnlagstype {
     SKATTEKLASSE = "SKATTEKLASSE",
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
-    SAMVAeRSFRADRAG = "SAMVÆRSFRADRAG",
     LOPENDEBIDRAG = "LØPENDE_BIDRAG",
     FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
     BARNETILSYNMEDSTONAD = "BARNETILSYN_MED_STØNAD",
@@ -1758,17 +1776,19 @@ export enum Grunnlagstype {
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
-    DELBEREGNINGBIDRAGBELOP = "DELBEREGNING_BIDRAG_BELØP",
-    BIDRAG = "BIDRAG",
+    DELBEREGNINGSUMLOPENDEBIDRAG = "DELBEREGNING_SUM_LØPENDE_BIDRAG",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
+    DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
+    DELBEREGNINGSAMVAeRSFRADRAG = "DELBEREGNING_SAMVÆRSFRADRAG",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
     PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
     PERSON_REELL_MOTTAKER = "PERSON_REELL_MOTTAKER",
     PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
+    PERSON_BARN_BIDRAGSPLIKTIG = "PERSON_BARN_BIDRAGSPLIKTIG",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
@@ -1948,8 +1968,14 @@ export interface InntekterPerRolle {
 }
 
 export interface NotatAndreVoksneIHusstanden {
-    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeAndreVoksneIHusstandenDetaljerDto[];
+    opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeNotatAndreVoksneIHusstandenDetaljerDto[];
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningBostatuskode[];
+}
+
+export interface NotatAndreVoksneIHusstandenDetaljerDto {
+    /** @format int32 */
+    totalAntallHusstandsmedlemmer: number;
+    husstandsmedlemmer: NotatVoksenIHusstandenDetaljerDto[];
 }
 
 /** Notat begrunnelse skrevet av saksbehandler */
@@ -2067,7 +2093,7 @@ export interface NotatResultatPeriodeDto {
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
     periode: TypeArManedsperiode;
-    bpsAndel?: DelberegningBidragspliktigesAndelSaerbidrag;
+    bpsAndel?: DelberegningBidragspliktigesAndel;
     beregning?: UtgiftBeregningDto;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     delberegningUtgift?: DelberegningUtgift;
@@ -2089,6 +2115,7 @@ export interface NotatRolleDto {
     /** @format date */
     fødselsdato?: string;
     ident?: string;
+    erBeskyttet: boolean;
 }
 
 export interface NotatSivilstand {
@@ -2117,6 +2144,7 @@ export interface NotatTotalBeregningUtgifterDto {
     utgiftstype: string;
     totalKravbeløp: number;
     totalGodkjentBeløp: number;
+    utgiftstypeVisningsnavn: string;
 }
 
 export interface NotatUtgiftBeregningDto {
@@ -2179,6 +2207,14 @@ export interface NotatVirkningstidspunktDto {
     årsakVisningsnavn?: string;
 }
 
+export interface NotatVoksenIHusstandenDetaljerDto {
+    navn: string;
+    /** @format date */
+    fødselsdato?: string;
+    erBeskyttet: boolean;
+    harRelasjonTilBp: boolean;
+}
+
 export interface OpplysningerBruktTilBeregningBostatuskode {
     periode: TypeArManedsperiode;
     status: Bostatuskode;
@@ -2193,11 +2229,10 @@ export interface OpplysningerBruktTilBeregningSivilstandskode {
     statusVisningsnavn?: string;
 }
 
-export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeAndreVoksneIHusstandenDetaljerDto {
+export interface OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeNotatAndreVoksneIHusstandenDetaljerDto {
     periode: TypeArManedsperiode;
     status?: Bostatuskode;
-    /** Detaljer om husstandsmedlemmer som bor hos BP for gjeldende periode. Antall hustandsmedlemmer er begrenset til maks 10 personer */
-    detaljer?: AndreVoksneIHusstandenDetaljerDto;
+    detaljer?: NotatAndreVoksneIHusstandenDetaljerDto;
     statusVisningsnavn?: string;
 }
 
@@ -2890,10 +2925,17 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request GET:/api/v2/behandling/vedtak/{vedtakId}
          * @secure
          */
-        vedtakLesemodus: (vedtakId: number, params: RequestParams = {}) =>
+        vedtakLesemodus: (
+            vedtakId: number,
+            query?: {
+                inkluderHistoriskeInntekter?: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
             this.request<BehandlingDtoV2, BehandlingDtoV2>({
                 path: `/api/v2/behandling/vedtak/${vedtakId}`,
                 method: "GET",
+                query: query,
                 secure: true,
                 format: "json",
                 ...params,

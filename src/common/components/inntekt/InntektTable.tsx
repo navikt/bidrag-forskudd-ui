@@ -150,9 +150,7 @@ export const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
-    const [inntektType] = fieldName.split(".");
 
-    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde === Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -167,7 +165,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erPeriodeRedigerbar ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && item.kanRedigeres ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
@@ -244,7 +242,10 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: periode.kanRedigeres && taMed });
+        setValue(`${fieldName}.${index}`, {
+            ...periode,
+            erRedigerbart: periode.kanRedigeres && taMed,
+        });
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);
