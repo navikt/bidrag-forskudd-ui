@@ -16,6 +16,7 @@ import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
+import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
 import { NewForskuddPage } from "./forskudd/pages/forskudd/NewForskuddPage";
 import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
@@ -86,6 +87,10 @@ export default function App() {
                             <Route
                                 path="/forskudd/brukerveiledning"
                                 element={<ForskuddBrukerveiledningPageWrapper />}
+                            /> 
+                            <Route
+                                path="/sarbidrag/brukerveiledning"
+                                element={<SærbidragBrukerveiledningPageWrapper />}
                             />
                             <Route path="/forskudd/:behandlingId">
                                 <Route
@@ -111,6 +116,16 @@ function ForskuddBrukerveiledningPageWrapper() {
         <PageWrapper name="Forskudd brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">
                 <BrukerveiledningForskudd />
+            </BidragContainer>
+        </PageWrapper>
+    );
+}
+function SærbidragBrukerveiledningPageWrapper() {
+    useEffect(scrollToHash, []);
+    return (
+        <PageWrapper name="Særbidrag brukerveiledning">
+            <BidragContainer className="container p-6 max-w-[60rem]">
+                <BrukerveiledningSærbidrag />
             </BidragContainer>
         </PageWrapper>
     );
