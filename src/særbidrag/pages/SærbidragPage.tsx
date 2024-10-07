@@ -4,18 +4,17 @@ import { NavigationLoaderWrapper } from "@common/components/NavigationLoaderWrap
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { BidragContainer, LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
 import React, { useEffect, useState } from "react";
 
+import elementIds from "../../common/constants/elementIds";
+import environment from "../../environment";
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper as SærbidragStepper } from "../enum/SærligeutgifterStepper";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import elementIds from "../../common/constants/elementIds";
-import environment from "../../environment";
-import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
 export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
@@ -81,9 +80,7 @@ export const SærbidragPage = () => {
                         >
                             {capitalize(SærbidragStepper.BOFORHOLD)}
                         </Stepper.Step>
-                        <Stepper.Step completed={erVedtakFattet}>
-                            {capitalize(SærbidragStepper.VEDTAK)}
-                        </Stepper.Step>
+                        <Stepper.Step completed={erVedtakFattet}>{capitalize(SærbidragStepper.VEDTAK)}</Stepper.Step>
                     </Stepper>
                 </FlexRow>
                 <NavigationLoaderWrapper>
@@ -93,13 +90,7 @@ export const SærbidragPage = () => {
         </PageWrapper>
     );
 };
-function EksterneLenkerKnapper() {
-    return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
-            <BrukerveiledningKnapp />
-        </div>
-    );
-}
+
 function BrukerveiledningKnapp() {
     const nudgeEnabledName = "brukerveiledningShowNudge";
     const { activeStep } = useBehandlingProvider();
