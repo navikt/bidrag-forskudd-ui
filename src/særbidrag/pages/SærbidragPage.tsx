@@ -4,17 +4,14 @@ import { NavigationLoaderWrapper } from "@common/components/NavigationLoaderWrap
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
-import { ExternalLinkIcon } from "@navikt/aksel-icons";
-import { BidragContainer, LocalStorage } from "@navikt/bidrag-ui-common";
-import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
+import { BidragContainer } from "@navikt/bidrag-ui-common";
+import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
-import React, { useEffect, useState } from "react";
 
-import elementIds from "../../common/constants/elementIds";
-import environment from "../../environment";
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper as SærbidragStepper } from "../enum/SærligeutgifterStepper";
+import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
@@ -87,50 +84,7 @@ export const SærbidragPage = () => {
                     <FormWrapper />
                 </NavigationLoaderWrapper>
             </BidragContainer>
+            <EksterneLenkerKnapper />
         </PageWrapper>
     );
 };
-
-function BrukerveiledningKnapp() {
-    const nudgeEnabledName = "brukerveiledningShowNudge";
-    const { activeStep } = useBehandlingProvider();
-    const [nudge, setNudge] = useState(LocalStorage.get(nudgeEnabledName) !== "false");
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setNudge(false);
-            LocalStorage.set(nudgeEnabledName, "false");
-        }, 5000);
-        return () => clearTimeout(timeoutId);
-    }, []);
-    function renderHref() {
-        switch (activeStep) {
-            case SærbidragStepper.BOFORHOLD:
-                return elementIds.brukerveildning.tittel_boforhold;
-            case SærbidragStepper.INNTEKT:
-                return elementIds.brukerveildning.tittel_inntekt;
-            case SærbidragStepper.VEDTAK:
-                return elementIds.brukerveildning.tittel_vedtak;
-            case SærbidragStepper.UTGIFT:
-                return elementIds.brukerveildning.tittel_utgift;
-            default:
-                return "";
-        }
-    }
-    return (
-        <div>
-            <Button
-                title="Brukerveiledning"
-                variant="tertiary"
-                className={`rounded-xl border-solid ${
-                    nudge ? "animate-bounce border-[var(--a-border-success)] border-[2px]" : "border"
-                } `}
-                size="xsmall"
-                icon={<ExternalLinkIcon />}
-                onClick={() => window.open(environment.url.særbidragBrukerveiledning + "#" + renderHref(), "_blank")}
-            >
-                Brukerveiledning
-            </Button>
-        </div>
-    );
-}

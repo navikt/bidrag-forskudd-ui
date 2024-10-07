@@ -5,6 +5,7 @@ import { Alert, Heading } from "@navikt/ds-react";
 import React from "react";
 
 import FormWrapper from "../components/forms/FormWrapper";
+import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 import { SaerbidragSideMenu } from "./SaerbidragSideMenu";
 export const NewSærbidragPage = () => {
     const { erVedtakFattet } = useGetBehandlingV2();
@@ -26,6 +27,7 @@ export const NewSærbidragPage = () => {
                         <FormWrapper />
                     </NavigationLoaderWrapper>
                 </div>
+                <EksterneLenkerKnapper />
             </div>
         </PageWrapper>
     );
