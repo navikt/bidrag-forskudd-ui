@@ -10,7 +10,7 @@ import { capitalize } from "@utils/string-utils";
 
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
-import { SærligeutgifterStepper as SærbidragStepper } from "../enum/SærligeutgifterStepper";
+import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
@@ -51,7 +51,7 @@ export const SærbidragPage = () => {
                         className="mb-8 w-[708px]"
                     >
                         <Stepper.Step completed={activeStepIndex > 1 && utgiftValideringsfeil === undefined}>
-                            {capitalize(SærbidragStepper.UTGIFT)}
+                            {capitalize(SærligeutgifterStepper.UTGIFT)}
                         </Stepper.Step>
                         <Stepper.Step
                             completed={
@@ -61,7 +61,7 @@ export const SærbidragPage = () => {
                             }
                             interactive={interactive}
                         >
-                            {capitalize(SærbidragStepper.INNTEKT)}
+                            {capitalize(SærligeutgifterStepper.INNTEKT)}
                         </Stepper.Step>
                         <Stepper.Step
                             completed={
@@ -75,9 +75,11 @@ export const SærbidragPage = () => {
                             }
                             interactive={interactive}
                         >
-                            {capitalize(SærbidragStepper.BOFORHOLD)}
+                            {capitalize(SærligeutgifterStepper.BOFORHOLD)}
                         </Stepper.Step>
-                        <Stepper.Step completed={erVedtakFattet}>{capitalize(SærbidragStepper.VEDTAK)}</Stepper.Step>
+                        <Stepper.Step completed={erVedtakFattet}>
+                            {capitalize(SærligeutgifterStepper.VEDTAK)}
+                        </Stepper.Step>
                     </Stepper>
                 </FlexRow>
                 <NavigationLoaderWrapper>
