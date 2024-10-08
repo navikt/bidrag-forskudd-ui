@@ -7,11 +7,11 @@ import PageWrapper from "@common/PageWrapper";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
-import React from "react";
 
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
+import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
@@ -86,6 +86,7 @@ export const SærbidragPage = () => {
                     <FormWrapper />
                 </NavigationLoaderWrapper>
             </BidragContainer>
+            <EksterneLenkerKnapper />
         </PageWrapper>
     );
 };

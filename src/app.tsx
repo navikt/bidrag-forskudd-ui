@@ -19,6 +19,7 @@ import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.m
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
 import { NewForskuddPage } from "./forskudd/pages/forskudd/NewForskuddPage";
 import { SærligeugifterProviderWrapper } from "./særbidrag/context/SærligeugifterProviderWrapper";
+import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
 
@@ -87,6 +88,10 @@ export default function App() {
                                 path="/forskudd/brukerveiledning"
                                 element={<ForskuddBrukerveiledningPageWrapper />}
                             />
+                            <Route
+                                path="/sarbidrag/brukerveiledning"
+                                element={<SærbidragBrukerveiledningPageWrapper />}
+                            />
                             <Route path="/forskudd/:behandlingId">
                                 <Route
                                     index
@@ -111,6 +116,16 @@ function ForskuddBrukerveiledningPageWrapper() {
         <PageWrapper name="Forskudd brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">
                 <BrukerveiledningForskudd />
+            </BidragContainer>
+        </PageWrapper>
+    );
+}
+function SærbidragBrukerveiledningPageWrapper() {
+    useEffect(scrollToHash, []);
+    return (
+        <PageWrapper name="Særbidrag brukerveiledning">
+            <BidragContainer className="container p-6 max-w-[60rem]">
+                <BrukerveiledningSærbidrag />
             </BidragContainer>
         </PageWrapper>
     );
