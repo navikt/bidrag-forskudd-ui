@@ -344,7 +344,12 @@ export const InntektTabel = ({
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
-        fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato, erRedigerbart: true });
+        fieldArray.append({
+            ...periode,
+            datoFom: virkningstidspunkt ?? søktFomDato,
+            erRedigerbart: true,
+            kanRedigeres: true,
+        });
     };
     const updatedAndSave = (
         updatedValues: OppdatereInntektRequest,
