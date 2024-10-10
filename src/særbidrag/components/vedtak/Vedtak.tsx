@@ -116,8 +116,8 @@ const VedtakResultat = () => {
                         Særbidrag innvilget
                     </Heading>
                 )}
+                <UtgifsposterTable />
                 <VStack gap={"2"} className="pt-4">
-                    <UtgifsposterTable />
                     <HStack gap={"24"} style={{ width: "max-content" }}>
                         <ResultatTable
                             title="Inntekter"
