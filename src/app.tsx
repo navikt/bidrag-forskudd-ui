@@ -14,6 +14,8 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 
+import { BarnebidragProviderWrapper } from "./barnebidrag/context/BarnebidragProviderWrapper";
+import { BarnebidragPage } from "./barnebidrag/pages/BarnebidragPage";
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
 import { ForskuddPage } from "./forskudd/pages/forskudd/ForskuddPage";
@@ -146,6 +148,8 @@ const BehandlingPage = () => {
             return <ForskuddBehandling />;
         case TypeBehandling.SAeRBIDRAG:
             return <SærligeutgifterBehandling />;
+        case TypeBehandling.BIDRAG:
+            return <BarnebidragBehandling />;
         default:
             return null;
     }
@@ -170,6 +174,16 @@ const SærligeutgifterBehandling = () => {
             {!isbehandlingVesntremenyEnabled && <SærbidragPage />}
             <ErrorModal />
         </SærligeugifterProviderWrapper>
+    );
+};
+
+const BarnebidragBehandling = () => {
+    return (
+        <BarnebidragProviderWrapper>
+            <BidragBehandlingHeader />
+            <BarnebidragPage />
+            <ErrorModal />
+        </BarnebidragProviderWrapper>
     );
 };
 

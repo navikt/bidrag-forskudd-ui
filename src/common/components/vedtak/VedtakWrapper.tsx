@@ -8,6 +8,7 @@ import {
     Rolletype,
     TypeBehandling,
 } from "../../../api/BidragBehandlingApiV1";
+import { BarnebidragStepper } from "../../../barnebidrag/enum/BarnebidragStepper";
 import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
 import { SærligeutgifterStepper } from "../../../særbidrag/enum/SærligeutgifterStepper";
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
@@ -16,7 +17,10 @@ import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
-type STEPSTYPE = { [_key in ForskuddStepper]: number } | { [_key in SærligeutgifterStepper]: number };
+type STEPSTYPE =
+    | { [_key in ForskuddStepper]: number }
+    | { [_key in SærligeutgifterStepper]: number }
+    | { [_key in BarnebidragStepper]: number };
 type VedtakWrapperProps = {
     feil: VedtakBeregningFeil;
     steps: STEPSTYPE;

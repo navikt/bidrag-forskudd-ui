@@ -179,6 +179,7 @@ const tekster = {
     skjermbildeNavn: {
         forskudd: "Søknad om forskudd",
         særbidrag: "Søknad om særbidrag",
+        bidrag: "Søknad om barnebidrag",
     },
     title: {
         andreVoksneIHusstanden: "Andre voksne i husstanden",
@@ -204,6 +205,7 @@ const tekster = {
         opplysningerFraFolkeregistret: "Opplysninger fra offentlige registre",
         oppsummering: "Oppsummering",
         oversiktOverUtgifter: "Oversikt over utgifter",
+        underholdskostnad: "Underholdskostnad",
         utvidetBarnetrygd: "Utvidet barnetrygd",
         utgift: "Utgift",
         vedtak: "Vedtak",
