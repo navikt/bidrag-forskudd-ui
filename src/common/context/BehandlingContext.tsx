@@ -20,6 +20,8 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
+import { PageErrorsOrUnsavedState as BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
+import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
 import { PageErrorsOrUnsavedState as SærligeutgifterPageErrorsOrUnsavedState } from "../../særbidrag/context/SærligeugifterProviderWrapper";
@@ -43,9 +45,16 @@ interface IBehandlingContext {
     errorModalOpen: boolean;
     setErrorMessage: (message: { title: string; text: string }) => void;
     setErrorModalOpen: (open: boolean) => void;
-    pageErrorsOrUnsavedState: ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState;
+    pageErrorsOrUnsavedState:
+        | ForskuddPageErrorsOrUnsavedState
+        | SærligeutgifterPageErrorsOrUnsavedState
+        | BarnebidragPageErrorsOrUnsavedState;
     setPageErrorsOrUnsavedState: Dispatch<
-        SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
+        SetStateAction<
+            | ForskuddPageErrorsOrUnsavedState
+            | SærligeutgifterPageErrorsOrUnsavedState
+            | BarnebidragPageErrorsOrUnsavedState
+        >
     >;
     setSaveErrorState: Dispatch<SetStateAction<SaveErrorState>>;
     onStepChange: (x: number, query?: Record<string, string>, hash?: string) => void;
@@ -65,13 +74,25 @@ type SærligeutgifterSteps = {
     steps: { [_key in SærligeutgifterStepper]: number };
 };
 
+type BarnebidragSteps = {
+    defaultStep: BarnebidragStepper;
+    steps: { [_key in BarnebidragStepper]: number };
+};
+
 export type BehandlingProviderProps = {
     props: {
         getPageErrorTexts: () => { title: string; description: string };
-        formSteps: ForskuddSteps | SærligeutgifterSteps;
-        pageErrorsOrUnsavedState: ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState;
+        formSteps: ForskuddSteps | SærligeutgifterSteps | BarnebidragSteps;
+        pageErrorsOrUnsavedState:
+            | ForskuddPageErrorsOrUnsavedState
+            | SærligeutgifterPageErrorsOrUnsavedState
+            | BarnebidragPageErrorsOrUnsavedState;
         setPageErrorsOrUnsavedState: Dispatch<
-            SetStateAction<ForskuddPageErrorsOrUnsavedState | SærligeutgifterPageErrorsOrUnsavedState>
+            SetStateAction<
+                | ForskuddPageErrorsOrUnsavedState
+                | SærligeutgifterPageErrorsOrUnsavedState
+                | BarnebidragPageErrorsOrUnsavedState
+            >
         >;
     };
 };
