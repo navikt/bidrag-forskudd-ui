@@ -1,23 +1,23 @@
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import text from "@common/constants/texts";
-import tekster from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { QueryKeys, useGetBehandlingV2, useGetBeregningSærbidrag } from "@common/hooks/useApiData";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
-import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, HStack, VStack } from "@navikt/ds-react";
+import { Accordion, Alert, BodyShort, Heading, HStack, VStack } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 
-import { Resultatkode, UtgiftspostDto } from "../../../api/BidragBehandlingApiV1";
+import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import VedtakWrapper from "../../../common/components/vedtak/VedtakWrapper";
 import useFeatureToogle from "../../../common/hooks/useFeatureToggle";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
-import { dateOrNull } from "../../../utils/date-utils";
 import { formatterBeløp, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
+import { DetaljertBeregningSærbidrag } from "./DetaljertBeregningSærbidrag";
+import { UtgifsposterTable } from "./UtgifstposterTable";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
@@ -49,8 +49,8 @@ const Vedtak = () => {
 
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
+    // const { data: innteksgrense } = useGetBeregningInnteksgrenseSærbidrag();
 
-    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;
         const erDirekteAvslag = beregnetSærbidrag.resultat?.erDirekteAvslag;
@@ -78,12 +78,17 @@ const VedtakResultat = () => {
                 <div>
                     <Heading size="small">Avslag</Heading>
                     <VStack gap={"4"}>
+                        <UtgifsposterTable />
                         <BodyShort size="small">
-                            <ResultatTabell
+                            <ResultatTable
                                 data={[
                                     {
                                         label: "Årsak",
                                         value: hentVisningsnavn(resultat.resultatKode),
+                                    },
+                                    resultat.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS && {
+                                        label: "Forskuddssats",
+                                        value: formatterBeløp(resultat.forskuddssats, true),
                                     },
                                     {
                                         label: "Kravbeløp",
@@ -96,7 +101,6 @@ const VedtakResultat = () => {
                                 ]}
                             />
                         </BodyShort>
-                        <UtgifsposterTabell utgifstposter={resultat.utgiftsposter} />
                     </VStack>
                 </div>
             );
@@ -112,9 +116,10 @@ const VedtakResultat = () => {
                         Særbidrag innvilget
                     </Heading>
                 )}
-                <VStack gap={"2"}>
+                <VStack gap={"2"} className="pt-4">
+                    <UtgifsposterTable />
                     <HStack gap={"24"} style={{ width: "max-content" }}>
-                        <ResultatTabell
+                        <ResultatTable
                             title="Inntekter"
                             data={[
                                 {
@@ -132,7 +137,7 @@ const VedtakResultat = () => {
                             ]}
                         />
 
-                        <ResultatTabell
+                        <ResultatTable
                             title="Boforhold"
                             data={[
                                 {
@@ -149,7 +154,7 @@ const VedtakResultat = () => {
                                 },
                             ]}
                         />
-                        <ResultatTabell
+                        <ResultatTable
                             title="Beregning"
                             data={[
                                 {
@@ -160,7 +165,7 @@ const VedtakResultat = () => {
                                     label: "Godkjent beløp",
                                     value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
                                 },
-                                resultat.maksGodkjentBeløp && {
+                                {
                                     label: "Maks godkjent beløp",
                                     value: formatterBeløp(resultat.maksGodkjentBeløp, true),
                                 },
@@ -172,12 +177,13 @@ const VedtakResultat = () => {
                                     label: "BP har evne",
                                     value: resultat.bpHarEvne === false ? "Nei" : "Ja",
                                 },
+
                                 {
                                     label: "Resultat",
                                     value: erBeregningeAvslag ? "Avslag" : formatterBeløp(resultat.resultat, true),
                                 },
 
-                                isSærbidragBetaltAvBpEnabled && {
+                                {
                                     label: "Betalt av BP",
                                     value: formatterBeløp(resultat.beregning?.totalBeløpBetaltAvBp, true),
                                 },
@@ -190,7 +196,7 @@ const VedtakResultat = () => {
                             ].filter((d) => d)}
                         />
                     </HStack>
-                    <UtgifsposterTabell utgifstposter={resultat.utgiftsposter} />
+                    <BeregningsdetaljerAccordion />
                 </VStack>
             </div>
         );
@@ -201,72 +207,19 @@ const VedtakResultat = () => {
         </VedtakWrapper>
     );
 };
-interface TableData {
-    label: string;
-    value: string | number;
-}
 
-interface GenericTableProps {
-    data: TableData[]; // Array of data objects
-    title?: string;
-}
-
-const UtgifsposterTabell: React.FC<{ utgifstposter: UtgiftspostDto[] }> = ({ utgifstposter }) => {
+const BeregningsdetaljerAccordion: React.FC = () => {
     return (
-        <div>
-            <Heading size="xsmall">{"Utgiftene lagt til grunn"}</Heading>
-            <table className="table-auto text-left">
-                <thead>
-                    <tr>
-                        <th className="pr-[16px]">{tekster.label.forfallsdato}</th>
-                        <th className="px-[16px]">{tekster.label.utgift}</th>
-                        <th className="px-[16px]">{tekster.label.kravbeløp}</th>
-                        <th className="px-[16px]">{tekster.label.godkjentBeløp}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {utgifstposter.map((utgifspost, rowIndex) => (
-                        <tr key={rowIndex} className="pr-[16px]">
-                            <td style={{ padding: "0 16px 0 0" }}>
-                                {dateToDDMMYYYYString(dateOrNull(utgifspost.dato))}
-                            </td>
-                            <td className="px-[16px]">{utgifspost.utgiftstypeVisningsnavn}</td>
-                            <td className="px-[16px] text-right">{formatterBeløp(utgifspost.kravbeløp, true)}</td>
-                            <td className="px-[16px] text-right">{formatterBeløp(utgifspost.godkjentBeløp, true)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <Accordion size="small">
+            <Accordion.Item>
+                <Accordion.Header>Beregningsdetaljer</Accordion.Header>
+                <Accordion.Content className="*:mb-5">
+                    <DetaljertBeregningSærbidrag />
+                </Accordion.Content>
+            </Accordion.Item>
+        </Accordion>
     );
 };
-
-const ResultatTabell: React.FC<GenericTableProps> = ({ data, title }) => {
-    return (
-        <div>
-            {title && <Heading size="xsmall">{title}</Heading>}
-            <table>
-                <thead>
-                    <tr>
-                        <tr>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
-                            <td style={{ paddingRight: "10px" }}>{row.label}: </td>
-                            <td className={"text-right"}>{row.value}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
 export default () => {
     return (
         <QueryErrorWrapper>

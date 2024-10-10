@@ -1492,11 +1492,27 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
-export interface DelberegningBidragsevne {
-    periode: TypeArManedsperiode;
-    beløp: number;
+export interface BeregningSumLopendeBidragPerBarn {
+    personidentBarn: string;
+    saksnummer: string;
+    løpendeBeløp: number;
+    samværsfradrag: number;
+    beregnetBeløp: number;
+    faktiskBeløp: number;
+    resultat: number;
+}
+
+export interface BidragsevneUtgifterBolig {
+    borMedAndreVoksne: boolean;
+    boutgiftBeløp: number;
+    underholdBeløp: number;
+}
+
+export interface DelberegningBidragsevneDto {
+    bidragsevne: number;
     skatt: Skatt;
-    underholdBarnEgenHusstand: number;
+    underholdEgneBarnIHusstand: UnderholdEgneBarnIHusstand;
+    utgifter: BidragsevneUtgifterBolig;
 }
 
 export interface DelberegningBidragspliktigesAndel {
@@ -1506,6 +1522,12 @@ export interface DelberegningBidragspliktigesAndel {
     beregnetAndelFaktor: number;
     barnEndeligInntekt: number;
     barnetErSelvforsørget: boolean;
+}
+
+export interface DelberegningSumLopendeBidrag {
+    periode: TypeArManedsperiode;
+    sumLøpendeBidrag: number;
+    beregningPerBarn: BeregningSumLopendeBidragPerBarn[];
 }
 
 export interface DelberegningUtgift {
@@ -1521,8 +1543,10 @@ export interface ResultatSaerbidragsberegningDto {
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
-    delberegningBidragsevne?: DelberegningBidragsevne;
+    delberegningBidragsevne?: DelberegningBidragsevneDto;
+    delberegningSumLøpendeBidrag?: DelberegningSumLopendeBidrag;
     maksGodkjentBeløp?: number;
+    forskuddssats?: number;
     resultat: number;
     resultatKode: Resultatkode;
     /** @format double */
@@ -1538,14 +1562,26 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBM?: number;
     inntektBP?: number;
     inntektBarn?: number;
+    barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
 }
 
 export interface Skatt {
-    minstefradrag: number;
+    sumSkatt: number;
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    sumSkatt: number;
+    skattResultat: number;
+    trinnskattResultat: number;
+    skattAlminneligInntektResultat: number;
+    trygdeavgiftResultat: number;
+}
+
+export interface UnderholdEgneBarnIHusstand {
+    resultat: number;
+    sjablon: number;
+    /** @format double */
+    antallBarnIHusstanden: number;
 }
 
 export interface ResultatBeregningBarnDto {
@@ -2007,8 +2043,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
 }
@@ -2204,8 +2241,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2786,6 +2823,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         beregnSaerbidrag: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<ResultatSaerbidragsberegningDto, BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn særbidrag
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregmBpInnteksgrense
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/sarbidrag/innteksgrense
+         * @secure
+         */
+        beregmBpInnteksgrense: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<number, BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag/innteksgrense`,
                 method: "POST",
                 secure: true,
                 format: "json",
