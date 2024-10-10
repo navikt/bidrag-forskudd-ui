@@ -210,7 +210,7 @@ const VedtakResultat = () => {
 
 const BeregningsdetaljerAccordion: React.FC = () => {
     return (
-        <Accordion size="small">
+        <Accordion size="small" headingSize="xsmall">
             <Accordion.Item>
                 <Accordion.Header>Beregningsdetaljer</Accordion.Header>
                 <Accordion.Content className="*:mb-5">
