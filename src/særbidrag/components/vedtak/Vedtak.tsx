@@ -49,7 +49,6 @@ const Vedtak = () => {
 
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
-    // const { data: innteksgrense } = useGetBeregningInnteksgrenseSærbidrag();
 
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;

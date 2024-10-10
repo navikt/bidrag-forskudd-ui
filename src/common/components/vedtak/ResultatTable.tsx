@@ -1,8 +1,9 @@
 import { Heading } from "@navikt/ds-react";
+import { ReactElement } from "react";
 
 interface TableData {
     label: string;
-    value: string | number;
+    value: string | number | ReactElement;
     textRight?: boolean;
 }
 interface GenericTableProps {
