@@ -39,7 +39,7 @@ export function AdminButtons() {
 }
 
 const InnteksgrenseButton: React.FC = () => {
-    const [showInnteksgrense, setShowInnteksgrense] = React.useState(true);
+    const [showBPsLavesteInntektForEvne, setBPsLavesteInntektForEvne] = React.useState(true);
 
     return (
         <Suspense
@@ -50,16 +50,16 @@ const InnteksgrenseButton: React.FC = () => {
                 </BodyShort>
             }
         >
-            {!showInnteksgrense && (
-                <Button variant="tertiary-neutral" size="small" onClick={() => setShowInnteksgrense(true)}>
+            {!showBPsLavesteInntektForEvne && (
+                <Button variant="tertiary-neutral" size="small" onClick={() => setBPsLavesteInntektForEvne(true)}>
                     Hent BPs laveste inntekt for evne
                 </Button>
             )}
-            {showInnteksgrense && <Innteksgrense />}
+            {showBPsLavesteInntektForEvne && <BPsLavesteInntektForEvne />}
         </Suspense>
     );
 };
-const Innteksgrense: React.FC = () => {
+const BPsLavesteInntektForEvne: React.FC = () => {
     const { data: innteksgrense } = useGetBeregningInnteksgrenseSærbidrag();
     const { activeStep } = useBehandlingProvider();
     const queryClient = useQueryClient();
