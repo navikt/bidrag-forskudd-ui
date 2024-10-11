@@ -18,8 +18,8 @@ export const SumLøpendeBidragTabell = () => {
                         <th className={`${colPaddingClassname}`}>{"Saksnummer"}</th>
                         <th className={`${colPaddingClassname} text-right`}>{"Løpende bidrag"}</th>
                         <th className={`${colPaddingClassname} text-right`}>{"Samværsfradrag"}</th>
-                        <th className={`${colPaddingClassname} text-right`}>{"Faktisk bidrag"}</th>
                         <th className={`${colPaddingClassname} text-right`}>{"Beregnet bidrag"}</th>
+                        <th className={`${colPaddingClassname} text-right`}>{"Faktisk bidrag"}</th>
                         <th className={`${colPaddingClassname} text-right`}>{"Resultat"}</th>
                     </tr>
                 </thead>
@@ -35,11 +35,12 @@ export const SumLøpendeBidragTabell = () => {
                                 {formatterBeløpForBeregning(row.samværsfradrag, true)}
                             </td>
                             <td className={`${colPaddingClassname} text-right`}>
-                                {formatterBeløpForBeregning(row.faktiskBeløp, true)}
-                            </td>
-                            <td className={`${colPaddingClassname} text-right`}>
                                 {formatterBeløpForBeregning(row.beregnetBeløp, true)}
                             </td>
+                            <td className={`${colPaddingClassname} text-right`}>
+                                {formatterBeløpForBeregning(row.faktiskBeløp, true)}
+                            </td>
+
                             <td className={`${colPaddingClassname} text-right`}>
                                 {formatterBeløpForBeregning(row.resultat, true)}
                             </td>
