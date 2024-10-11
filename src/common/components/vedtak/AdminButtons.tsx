@@ -33,14 +33,12 @@ export function AdminButtons() {
             >
                 Vis vedtaksgraf
             </Button>
-            {type === TypeBehandling.SAeRBIDRAG && <InnteksgrenseButton />}
+            {type === TypeBehandling.SAeRBIDRAG && <BPsLavesteInntektForEvneWrapper />}
         </div>
     );
 }
 
-const InnteksgrenseButton: React.FC = () => {
-    const [showBPsLavesteInntektForEvne, setBPsLavesteInntektForEvne] = React.useState(true);
-
+const BPsLavesteInntektForEvneWrapper: React.FC = () => {
     return (
         <Suspense
             fallback={
@@ -50,12 +48,7 @@ const InnteksgrenseButton: React.FC = () => {
                 </BodyShort>
             }
         >
-            {!showBPsLavesteInntektForEvne && (
-                <Button variant="tertiary-neutral" size="small" onClick={() => setBPsLavesteInntektForEvne(true)}>
-                    Hent BPs laveste inntekt for evne
-                </Button>
-            )}
-            {showBPsLavesteInntektForEvne && <BPsLavesteInntektForEvne />}
+            <BPsLavesteInntektForEvne />
         </Suspense>
     );
 };

@@ -319,13 +319,13 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
         queryFn: async () => {
             try {
                 if (vedtakId) {
-                    return 0;
+                    return -1;
                 }
-                const response = await BEHANDLING_API_V1.api.beregmBpInnteksgrense(Number(behandlingId));
+                const response = await BEHANDLING_API_V1.api.beregnBPsLavesteInntektForEvne(Number(behandlingId));
                 return response.data;
             } catch (error) {
                 console.error("error", error);
-                return 0;
+                return -1;
             }
         },
     });
