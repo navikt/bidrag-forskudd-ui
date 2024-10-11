@@ -42,6 +42,7 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
+    beregningInnteksgrenseSærbidrag: () => ["beregning_særbidrag_innteksgrense", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
     behandlingV2: (behandlingId: string, vedtakId?: string) => [
@@ -310,6 +311,26 @@ export const useAktiveGrunnlagsdata = () => {
         },
     });
 };
+export const useGetBeregningInnteksgrenseSærbidrag = () => {
+    const { behandlingId, vedtakId } = useBehandlingProvider();
+
+    return useSuspenseQuery<number>({
+        queryKey: QueryKeys.beregningInnteksgrenseSærbidrag(),
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    return -1;
+                }
+                const response = await BEHANDLING_API_V1.api.beregnBPsLavesteInntektForEvne(Number(behandlingId));
+                return response.data;
+            } catch (error) {
+                console.error("error", error);
+                return -1;
+            }
+        },
+    });
+};
+
 export const useGetBeregningSærbidrag = () => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 

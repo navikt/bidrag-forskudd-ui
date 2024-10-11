@@ -1492,11 +1492,28 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
-export interface DelberegningBidragsevne {
-    periode: TypeArManedsperiode;
-    beløp: number;
+export interface BeregningSumLopendeBidragPerBarn {
+    personidentBarn: string;
+    saksnummer: string;
+    løpendeBeløp: number;
+    valutakode: string;
+    samværsfradrag: number;
+    beregnetBeløp: number;
+    faktiskBeløp: number;
+    resultat: number;
+}
+
+export interface BidragsevneUtgifterBolig {
+    borMedAndreVoksne: boolean;
+    boutgiftBeløp: number;
+    underholdBeløp: number;
+}
+
+export interface DelberegningBidragsevneDto {
+    bidragsevne: number;
     skatt: Skatt;
-    underholdBarnEgenHusstand: number;
+    underholdEgneBarnIHusstand: UnderholdEgneBarnIHusstand;
+    utgifter: BidragsevneUtgifterBolig;
 }
 
 export interface DelberegningBidragspliktigesAndel {
@@ -1506,6 +1523,12 @@ export interface DelberegningBidragspliktigesAndel {
     beregnetAndelFaktor: number;
     barnEndeligInntekt: number;
     barnetErSelvforsørget: boolean;
+}
+
+export interface DelberegningSumLopendeBidrag {
+    periode: TypeArManedsperiode;
+    sumLøpendeBidrag: number;
+    beregningPerBarn: BeregningSumLopendeBidragPerBarn[];
 }
 
 export interface DelberegningUtgift {
@@ -1521,8 +1544,10 @@ export interface ResultatSaerbidragsberegningDto {
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
-    delberegningBidragsevne?: DelberegningBidragsevne;
+    delberegningBidragsevne?: DelberegningBidragsevneDto;
+    delberegningSumLøpendeBidrag?: DelberegningSumLopendeBidrag;
     maksGodkjentBeløp?: number;
+    forskuddssats?: number;
     resultat: number;
     resultatKode: Resultatkode;
     /** @format double */
@@ -1538,14 +1563,26 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBM?: number;
     inntektBP?: number;
     inntektBarn?: number;
+    barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
 }
 
 export interface Skatt {
-    minstefradrag: number;
+    sumSkatt: number;
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    sumSkatt: number;
+    skattAlminneligInntektResultat: number;
+    skattResultat: number;
+    trinnskattResultat: number;
+    trygdeavgiftResultat: number;
+}
+
+export interface UnderholdEgneBarnIHusstand {
+    resultat: number;
+    sjablon: number;
+    /** @format double */
+    antallBarnIHusstanden: number;
 }
 
 export interface ResultatBeregningBarnDto {
@@ -2008,9 +2045,9 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -2106,8 +2143,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    resultatVisningsnavn: string;
     beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
 };
 
 export interface NotatRolleDto {
@@ -2394,10 +2431,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2486,7 +2520,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2786,6 +2820,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         beregnSaerbidrag: (behandlingsid: number, params: RequestParams = {}) =>
             this.request<ResultatSaerbidragsberegningDto, BeregningValideringsfeil>({
                 path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag`,
+                method: "POST",
+                secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Beregn BPs laveste inntekt for evne
+         *
+         * @tags behandling-beregn-controller
+         * @name BeregnBPsLavesteInntektForEvne
+         * @request POST:/api/v1/behandling/{behandlingsid}/beregn/sarbidrag/bpslavesteinntektforevne
+         * @secure
+         */
+        beregnBPsLavesteInntektForEvne: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<number, BeregningValideringsfeil>({
+                path: `/api/v1/behandling/${behandlingsid}/beregn/sarbidrag/bpslavesteinntektforevne`,
                 method: "POST",
                 secure: true,
                 format: "json",
