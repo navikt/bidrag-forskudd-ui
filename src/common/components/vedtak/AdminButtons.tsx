@@ -1,10 +1,11 @@
 import { BodyShort, Button, Loader } from "@navikt/ds-react";
-import React, { Suspense } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { Suspense, useEffect } from "react";
 
 import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløp } from "../../../utils/number-utils";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
-import { useGetBehandlingV2, useGetBeregningInnteksgrenseSærbidrag } from "../../hooks/useApiData";
+import { QueryKeys, useGetBehandlingV2, useGetBeregningInnteksgrenseSærbidrag } from "../../hooks/useApiData";
 import useFeatureToogle from "../../hooks/useFeatureToggle";
 
 export function AdminButtons() {
@@ -60,7 +61,11 @@ const InnteksgrenseButton: React.FC = () => {
 };
 const Innteksgrense: React.FC = () => {
     const { data: innteksgrense } = useGetBeregningInnteksgrenseSærbidrag();
-
+    const { activeStep } = useBehandlingProvider();
+    const queryClient = useQueryClient();
+    useEffect(() => {
+        queryClient.refetchQueries({ queryKey: QueryKeys.beregningInnteksgrenseSærbidrag() });
+    }, [activeStep]);
     return (
         <BodyShort size="small" className="self-center">
             BPs laveste inntekt for evne: {formatterBeløp(innteksgrense, true)}
