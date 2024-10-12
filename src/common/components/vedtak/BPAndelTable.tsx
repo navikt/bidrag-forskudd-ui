@@ -15,6 +15,7 @@ export const BPsAndel = () => {
             <Heading size="xsmall">{"BPs andel"}</Heading>
             <HStack gap={"5"} className="pb-2 w-full">
                 <CalculationTabell
+                    title="Beregning av total inntekt"
                     data={[
                         {
                             label: "BPs inntekt",
@@ -48,6 +49,7 @@ export const BPsAndel = () => {
                     }}
                 />
                 <CalculationTabell
+                    title="Beregning av BPs andel prosent"
                     data={[
                         {
                             label: "BPs inntekt",
