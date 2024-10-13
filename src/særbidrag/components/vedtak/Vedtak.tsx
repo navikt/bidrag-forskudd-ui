@@ -97,7 +97,7 @@ const VedtakResultat = () => {
                                         label: "Godkjent beløp",
                                         value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
                                     },
-                                ]}
+                                ].filter((d) => d)}
                             />
                         </BodyShort>
                     </VStack>
