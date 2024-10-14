@@ -25,23 +25,25 @@ export const getRandomInt = () => {
     const max = Math.floor(10000);
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const formatterBeløpForBeregning = (beløp: number | string | undefined, visSymbol = false): string => {
     return (beløp ?? 0).toLocaleString("nb-NO", {
-        style: visSymbol ? "currency" : undefined,
+        // style: visSymbol ? "currency" : undefined,
         currency: "NOK",
         currencySign: "accounting",
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-        currencyDisplay: visSymbol ? "symbol" : undefined,
+        // currencyDisplay: undefined,
     });
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const formatterBeløp = (beløp: number | string | undefined, visSymbol = false): string => {
     return (beløp ?? 0).toLocaleString("nb-NO", {
-        style: visSymbol ? "currency" : undefined,
+        // style: visSymbol ? "currency" : undefined,
         currency: "NOK",
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
-        currencyDisplay: visSymbol ? "symbol" : undefined,
+        // currencyDisplay: visSymbol ? "symbol" : undefined,
     });
 };
 
