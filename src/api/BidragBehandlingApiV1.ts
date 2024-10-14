@@ -1565,6 +1565,9 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
 }
 
 export interface Skatt {
@@ -1572,17 +1575,18 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektResultat: number;
-    skattResultat: number;
-    trinnskattResultat: number;
-    trygdeavgiftResultat: number;
+    skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
-    resultat: number;
+    getårsbeløp: number;
     sjablon: number;
     /** @format double */
     antallBarnIHusstanden: number;
+    måndesbeløp: number;
 }
 
 export interface ResultatBeregningBarnDto {
@@ -2044,15 +2048,21 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetInntektDto {
     gjelderBarn: NotatRolleDto;
     summertInntektListe: DelberegningSumInntekt[];
+}
+
+export interface NotatBidragsevneUtgifterBolig {
+    borMedAndreVoksne: boolean;
+    boutgiftBeløp: number;
+    underholdBeløp: number;
 }
 
 export interface NotatBoforholdDto {
@@ -2063,6 +2073,13 @@ export interface NotatBoforholdDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
+}
+
+export interface NotatDelberegningBidragsevneDto {
+    bidragsevne: number;
+    skatt: NotatSkattBeregning;
+    underholdEgneBarnIHusstand: NotatUnderholdEgneBarnIHusstand;
+    utgifter: NotatBidragsevneUtgifterBolig;
 }
 
 export interface NotatInntektDto {
@@ -2133,7 +2150,11 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     periode: TypeArManedsperiode;
     bpsAndel?: DelberegningBidragspliktigesAndel;
     beregning?: UtgiftBeregningDto;
+    forskuddssats?: number;
+    maksGodkjentBeløp?: number;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    delberegningSumLøpendeBidrag?: DelberegningSumLopendeBidrag;
+    delberegningBidragsevne?: NotatDelberegningBidragsevneDto;
     delberegningUtgift?: DelberegningUtgift;
     resultat: number;
     resultatKode: Resultatkode;
@@ -2161,6 +2182,17 @@ export interface NotatSivilstand {
     opplysningerBruktTilBeregning: OpplysningerBruktTilBeregningSivilstandskode[];
 }
 
+export interface NotatSkattBeregning {
+    sumSkatt: number;
+    skattAlminneligInntekt: number;
+    trinnskatt: number;
+    trygdeavgift: number;
+    skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+}
+
 export interface NotatSaerbidragKategoriDto {
     kategori: Saerbidragskategori;
     beskrivelse?: string;
@@ -2183,6 +2215,14 @@ export interface NotatTotalBeregningUtgifterDto {
     totalKravbeløp: number;
     totalGodkjentBeløp: number;
     utgiftstypeVisningsnavn: string;
+}
+
+export interface NotatUnderholdEgneBarnIHusstand {
+    getårsbeløp: number;
+    sjablon: number;
+    /** @format double */
+    antallBarnIHusstanden: number;
+    måndesbeløp: number;
 }
 
 export interface NotatUtgiftBeregningDto {
@@ -2241,8 +2281,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {

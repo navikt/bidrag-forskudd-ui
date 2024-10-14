@@ -16,7 +16,7 @@ export const BPsEvne = () => {
                     value: (
                         <MathDivision top={`${formatterBeløpForBeregning(inntekter.inntektBP, true)}/år`} bottom={12} />
                     ),
-                    result: <MathValue value={formatterBeløpForBeregning(inntekter.inntektBP / 12, true)} />,
+                    result: <MathValue value={formatterBeløpForBeregning(inntekter.inntektBPMånedlig, true)} />,
                 },
                 {
                     label: "Skatt",
@@ -31,7 +31,7 @@ export const BPsEvne = () => {
                         <MathValue
                             negativeValue
                             value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.skatt.skattAlminneligInntektResultat,
+                                delberegningBidragsevne.skatt.skattAlminneligInntektMånedsbeløp,
                                 true
                             )}
                         />
@@ -49,7 +49,10 @@ export const BPsEvne = () => {
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(delberegningBidragsevne.skatt.trygdeavgiftResultat, true)}
+                            value={formatterBeløpForBeregning(
+                                delberegningBidragsevne.skatt.trygdeavgiftMånedsbeløp,
+                                true
+                            )}
                         />
                     ),
                 },
@@ -65,7 +68,10 @@ export const BPsEvne = () => {
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(delberegningBidragsevne.skatt.trinnskattResultat, true)}
+                            value={formatterBeløpForBeregning(
+                                delberegningBidragsevne.skatt.trinnskattMånedsbeløp,
+                                true
+                            )}
                         />
                     ),
                 },
@@ -82,7 +88,7 @@ export const BPsEvne = () => {
                         <MathValue
                             negativeValue
                             value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.underholdEgneBarnIHusstand.resultat,
+                                delberegningBidragsevne.underholdEgneBarnIHusstand.måndesbeløp,
                                 true
                             )}
                         />
