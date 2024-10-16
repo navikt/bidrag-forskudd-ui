@@ -7,6 +7,7 @@ import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
 import Vedtak from "../vedtak/Vedtak";
 import Boforhold from "./boforhold/Boforhold";
 import Inntekt from "./inntekt/Inntekt";
+import Samvær from "./samvær/Samvær";
 import Underholdskostnad from "./underholdskostnad/Underholdskostnad";
 import Virkningstidspunkt from "./virkningstidspunkt/Virkningstidspunkt";
 
@@ -16,6 +17,8 @@ const BarnebidragForm = memo(({ activeStep }: { activeStep: string }) => {
             return <Virkningstidspunkt />;
         case BarnebidragStepper.UNDERHOLDSKOSTNAD:
             return <Underholdskostnad />;
+        case BarnebidragStepper.SAMVÆR:
+            return <Samvær />;
         case BarnebidragStepper.INNTEKT:
             return <Inntekt />;
         case BarnebidragStepper.BOFORHOLD:

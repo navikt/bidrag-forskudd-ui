@@ -3,5 +3,6 @@ export enum BarnebidragStepper {
     INNTEKT = "inntekt",
     BOFORHOLD = "boforhold",
     UNDERHOLDSKOSTNAD = "underholdskostnad",
+    SAMVÆR = "samvær",
     VEDTAK = "vedtak",
 }
