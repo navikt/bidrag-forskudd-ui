@@ -7,7 +7,7 @@ import { useGetBeregningSærbidrag } from "../../hooks/useApiData";
 export const BpsBeregnedeTotalbidragTabell = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
 
-    const delberegning = beregnetSærbidrag.resultat.delberegningSumLøpendeBidrag;
+    const delberegning = beregnetSærbidrag.resultat.delberegningBPsBeregnedeTotalBidrag;
     const colPaddingClassname = "px-1";
     return (
         <div>
@@ -47,7 +47,7 @@ export const BpsBeregnedeTotalbidragTabell = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {delberegning.beregningPerBarn.map((row, rowIndex) => (
+                    {delberegning.beregnetBidragPerBarnListe.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                             <td className="pr-4">{row.personidentBarn}</td>
                             <td className={`${colPaddingClassname}`}>{row.saksnummer}</td>
@@ -61,10 +61,10 @@ export const BpsBeregnedeTotalbidragTabell = () => {
                                 className={`${colPaddingClassname} text-right`}
                                 title={`Reduksjon av U = Beregnet bidrag - Faktisk bidrag = ${formatterBeløpForBeregning(row.beregnetBeløp, true)} - ${formatterBeløpForBeregning(row.faktiskBeløp, true)}`}
                             >
-                                {formatterBeløpForBeregning(row.beregnetBeløp - row.faktiskBeløp, true)}
+                                {formatterBeløpForBeregning(row.reduksjonUnderholdskostnad, true)}
                             </td>
                             <td className={`${colPaddingClassname} text-right`}>
-                                {formatterBeløpForBeregning(row.resultat, true)}
+                                {formatterBeløpForBeregning(row.beregnetBidrag, true)}
                             </td>
                         </tr>
                     ))}
@@ -73,7 +73,7 @@ export const BpsBeregnedeTotalbidragTabell = () => {
                             {"Beregnet totaltbidrag:"}
                         </td>
                         <td colSpan={1} className={`${colPaddingClassname} text-right`}>
-                            {formatterBeløpForBeregning(delberegning.sumLøpendeBidrag, true)}
+                            {formatterBeløpForBeregning(delberegning.bbpsBeregnedeTotalbidrag, true)}
                         </td>
                     </tr>
                 </tbody>
