@@ -211,6 +211,8 @@ const BidragBehandlingWrapper = () => {
                 return <ForskuddBehandling />;
             case TypeBehandling.SAeRBIDRAG:
                 return <SærligeutgifterBehandling />;
+            case TypeBehandling.BIDRAG:
+                return <BarnebidragBehandling />;
             default:
                 return null;
         }

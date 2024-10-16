@@ -72,6 +72,12 @@ export const BarnebidragSideMenu = () => {
             />
             <MenuButton
                 step={"3."}
+                title={text.title.samvær}
+                onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
+                active={activeButton === BarnebidragStepper.SAMVÆR}
+            />
+            <MenuButton
+                step={"4."}
                 title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.INNTEKT])}
                 interactive={interactive}
@@ -310,7 +316,7 @@ export const BarnebidragSideMenu = () => {
                 ))}
             />
             <MenuButton
-                step={"4."}
+                step={"5."}
                 title={text.title.boforhold}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD])}
                 interactive={interactive}
@@ -319,7 +325,7 @@ export const BarnebidragSideMenu = () => {
                 unconfirmedUpdates={boforholdIkkeAktiverteEndringer}
             />
             <MenuButton
-                step={"5."}
+                step={"6."}
                 title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK])}
                 active={activeButton === BarnebidragStepper.VEDTAK}

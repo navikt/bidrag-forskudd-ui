@@ -206,6 +206,7 @@ const tekster = {
         oppsummering: "Oppsummering",
         oversiktOverUtgifter: "Oversikt over utgifter",
         underholdskostnad: "Underholdskostnad",
+        samvær: "Samvær",
         utvidetBarnetrygd: "Utvidet barnetrygd",
         utgift: "Utgift",
         vedtak: "Vedtak",
