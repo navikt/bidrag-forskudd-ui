@@ -1,6 +1,6 @@
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { BPsAndel } from "../../../common/components/vedtak/BPAndelTable";
-import { BpsBeregnedeTotalbidragTabell } from "../../../common/components/vedtak/BpsBeregnedeTotalbidragTabell";
+import { BpsBeregnedeTotalbidragTabellV2 } from "../../../common/components/vedtak/BpsBeregnedeTotalbidragTabell";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
@@ -16,7 +16,7 @@ export const DetaljertBeregningSærbidrag: React.FC = () => {
         <>
             <BPsAndel />
             <BPsEvne />
-            <BpsBeregnedeTotalbidragTabell />
+            <BpsBeregnedeTotalbidragTabellV2 />
             <ResultatTable
                 title="Beregning"
                 data={[
@@ -25,8 +25,8 @@ export const DetaljertBeregningSærbidrag: React.FC = () => {
                         textRight: false,
                         value:
                             resultat.bpHarEvne === false
-                                ? "Nei, sum løpende bidrag er høyere enn BPs bidragsevne"
-                                : "Ja, sum løpende bidrag er lavere enn BPs bidragsevne",
+                                ? "Nei, beregnet totalbidrag er høyere enn BPs bidragsevne"
+                                : "Ja, beregnet totalbidrag er lavere enn BPs bidragsevne",
                     },
                     {
                         label: "Resultat",

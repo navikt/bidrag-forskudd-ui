@@ -15,11 +15,12 @@ interface CalculationTableProps {
         value: string | number | ReactElement;
     };
     message?: string | ReactElement;
+    className?: string;
 }
 
-export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title, result, message }) => {
+export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
     return (
-        <div>
+        <div className={className}>
             {title && <Heading size="xsmall">{title}</Heading>}
             <table className="table-auto  pb-[5px] border-collapse w-full">
                 <tbody>

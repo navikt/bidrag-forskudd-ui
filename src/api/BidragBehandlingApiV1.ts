@@ -1579,10 +1579,11 @@ export interface OpprettBehandlingFraVedtakRequest {
 }
 
 export interface BeregnetBidragPerBarn {
-    personidentBarn: string;
+    gjelderBarn: string;
     saksnummer: string;
     løpendeBeløp: number;
     valutakode: string;
+    samværsklasse: Samvaersklasse;
     samværsfradrag: number;
     beregnetBeløp: number;
     faktiskBeløp: number;
@@ -1590,17 +1591,15 @@ export interface BeregnetBidragPerBarn {
     beregnetBidrag: number;
 }
 
+export interface BeregnetBidragPerBarnDto {
+    beregnetBidragPerBarn: BeregnetBidragPerBarn;
+    personidentBarn: string;
+}
+
 export interface BidragsevneUtgifterBolig {
     borMedAndreVoksne: boolean;
     boutgiftBeløp: number;
     underholdBeløp: number;
-}
-
-export interface DelberegningBPsBeregnedeTotalbidrag {
-    periode: TypeArManedsperiode;
-    bBPsBeregnedeTotalbidrag?: number;
-    beregnetBidragPerBarnListe: BeregnetBidragPerBarn[];
-    bbpsBeregnedeTotalbidrag: number;
 }
 
 export interface DelberegningBidragsevneDto {
@@ -1619,6 +1618,12 @@ export interface DelberegningBidragspliktigesAndel {
     barnetErSelvforsørget: boolean;
 }
 
+export interface DelberegningBidragspliktigesBeregnedeTotalbidragDto {
+    beregnetBidragPerBarnListe: BeregnetBidragPerBarnDto[];
+    bidragspliktigesBeregnedeTotalbidrag: number;
+    periode: TypeArManedsperiode;
+}
+
 export interface DelberegningUtgift {
     periode: TypeArManedsperiode;
     sumBetaltAvBp: number;
@@ -1633,7 +1638,7 @@ export interface ResultatSaerbidragsberegningDto {
     utgiftsposter: UtgiftspostDto[];
     delberegningUtgift?: DelberegningUtgift;
     delberegningBidragsevne?: DelberegningBidragsevneDto;
-    delberegningBPsBeregnedeTotalBidrag?: DelberegningBPsBeregnedeTotalbidrag;
+    delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
     maksGodkjentBeløp?: number;
     forskuddssats?: number;
     resultat: number;
@@ -1658,13 +1663,22 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBarnMånedlig?: number;
 }
 
+export enum Samvaersklasse {
+    INGENSAMVAeR = "INGEN_SAMVÆR",
+    SAMVAeRSKLASSE1 = "SAMVÆRSKLASSE_1",
+    SAMVAeRSKLASSE2 = "SAMVÆRSKLASSE_2",
+    SAMVAeRSKLASSE3 = "SAMVÆRSKLASSE_3",
+    SAMVAeRSKLASSE4 = "SAMVÆRSKLASSE_4",
+    DELT_BOSTED = "DELT_BOSTED",
+}
+
 export interface Skatt {
     sumSkatt: number;
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -1906,7 +1920,7 @@ export enum Grunnlagstype {
     DELBEREGNING_BARN_I_HUSSTAND = "DELBEREGNING_BARN_I_HUSSTAND",
     SLUTTBEREGNINGSAeRBIDRAG = "SLUTTBEREGNING_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSEVNE = "DELBEREGNING_BIDRAGSEVNE",
-    DELBEREGNING_BPS_BEREGNEDE_TOTALBIDRAG = "DELBEREGNING_BPS_BEREGNEDE_TOTALBIDRAG",
+    DELBEREGNING_BIDRAGSPLIKTIGES_BEREGNEDE_TOTALBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_BEREGNEDE_TOTALBIDRAG",
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
@@ -2137,10 +2151,15 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+}
+
+export interface NotatBeregnetBidragPerBarnDto {
+    beregnetBidragPerBarn: BeregnetBidragPerBarn;
+    personidentBarn: string;
 }
 
 export interface NotatBeregnetInntektDto {
@@ -2169,6 +2188,12 @@ export interface NotatDelberegningBidragsevneDto {
     skatt: NotatSkattBeregning;
     underholdEgneBarnIHusstand: NotatUnderholdEgneBarnIHusstand;
     utgifter: NotatBidragsevneUtgifterBolig;
+}
+
+export interface NotatDelberegningBidragspliktigesBeregnedeTotalbidragDto {
+    beregnetBidragPerBarnListe: NotatBeregnetBidragPerBarnDto[];
+    bidragspliktigesBeregnedeTotalbidrag: number;
+    periode: TypeArManedsperiode;
 }
 
 export interface NotatInntektDto {
@@ -2231,8 +2256,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2242,7 +2267,7 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     forskuddssats?: number;
     maksGodkjentBeløp?: number;
     inntekter?: ResultatSaerbidragsberegningInntekterDto;
-    delberegningBPsBeregnedeTotalbidrag?: DelberegningBPsBeregnedeTotalbidrag;
+    delberegningBidragspliktigesBeregnedeTotalbidrag?: NotatDelberegningBidragspliktigesBeregnedeTotalbidragDto;
     delberegningBidragsevne?: NotatDelberegningBidragsevneDto;
     delberegningUtgift?: DelberegningUtgift;
     resultat: number;
@@ -2276,8 +2301,8 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
