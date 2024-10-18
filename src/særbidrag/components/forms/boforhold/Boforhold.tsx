@@ -11,8 +11,8 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { AndreVoksneIHusstanden } from "../../../../common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
+import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { Begrunnelse } from "./Begrunnelse";
 
 const Main = () => {
