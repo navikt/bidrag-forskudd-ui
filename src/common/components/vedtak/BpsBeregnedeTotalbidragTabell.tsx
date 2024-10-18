@@ -188,8 +188,8 @@ export const BpsBeregnedeTotalbidragTabellV2 = () => {
                                     content={
                                         <BodyShort size="small">
                                             <CalculationTabell
-                                                className="w-[200px] [&_td]:w-full"
-                                                title="Reduksjon av U"
+                                                className="w-[250px] [&_td]:w-full"
+                                                title="Reduksjon av BPs andel av U"
                                                 data={[
                                                     {
                                                         label: "Beregnet bidrag",
