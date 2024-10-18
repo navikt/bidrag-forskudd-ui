@@ -24,11 +24,12 @@ const Vedtak = () => {
     const { erVedtakFattet } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const { isFatteVedtakEnabled } = useFeatureToogle();
-    const beregnetForskudd = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
+    const beregnetSærbidrag = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningSærbidrag())?.status === "error";
 
     useEffect(() => {
         queryClient.refetchQueries({ queryKey: QueryKeys.behandlingV2(behandlingId) });
+        queryClient.resetQueries({ queryKey: QueryKeys.beregningSærbidrag() });
     }, [activeStep]);
 
     return (
@@ -39,7 +40,7 @@ const Vedtak = () => {
             </Heading>
             <VedtakResultat />
 
-            {!beregnetForskudd?.feil && !lesemodus && (
+            {!beregnetSærbidrag?.feil && !lesemodus && (
                 <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!isFatteVedtakEnabled} />
             )}
             <AdminButtons />
