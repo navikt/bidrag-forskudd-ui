@@ -11,6 +11,7 @@ import { scrollToHash } from "@utils/window-utils";
 import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { AndreVoksneIHusstanden } from "../../../../common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
 import { Begrunnelse } from "./Begrunnelse";
 
@@ -23,6 +24,10 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
+            <Heading level="2" size="small">
+                {text.title.andreVoksneIHusstanden}
+            </Heading>
+            <AndreVoksneIHusstanden />
         </>
     );
 };

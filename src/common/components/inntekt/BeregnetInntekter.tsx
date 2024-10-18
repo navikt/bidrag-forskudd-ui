@@ -12,6 +12,25 @@ import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntek
 import { useInntektTableProvider } from "./InntektTableContext";
 
 export const columnWitdhRules = {
+    [TypeBehandling.BIDRAG]: {
+        [Rolletype.BM]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[138px]",
+            [InntektTableType.BARNETILLEGG]: "w-[122px]",
+            [InntektTableType.UTVIDET_BARNETRYGD]: "w-[112px]",
+            [InntektTableType.SMÅBARNSTILLEGG]: "w-[110px]",
+            [InntektTableType.KONTANTSTØTTE]: "w-[140px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[92px]",
+        },
+        [Rolletype.BP]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[150px]",
+            [InntektTableType.BARNETILLEGG]: "w-[150px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[150px]",
+        },
+        [Rolletype.BA]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[150px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[150px]",
+        },
+    },
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: {
             [InntektTableType.SKATTEPLIKTIG]: "w-[138px]",

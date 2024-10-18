@@ -32,8 +32,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import elementIds from "../../../../common/constants/elementIds";
-import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
+import elementIds from "../../../constants/elementIds";
+import { actionOnEnter } from "../../../helpers/keyboardHelpers";
 import { AndreVoksneIHusstandOpplysninger } from "./AndreVoksneIHusstandOpplysninger";
 
 export const Periode = ({

@@ -11,13 +11,13 @@ import {
     PeriodeAndreVoksneIHusstanden,
     Rolletype,
 } from "../../../../api/BidragBehandlingApiV1";
-import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
-import { useGetBehandlingV2, useGetOpplysningeAndreVoksneIHusstand } from "../../../../common/hooks/useApiData";
-import { useOnActivateGrunnlag } from "../../../../common/hooks/useOnActivateGrunnlag";
-import { useVirkningsdato } from "../../../../common/hooks/useVirkningsdato";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { BoforholdFormValues } from "../../../../common/types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isBeforeDate } from "../../../../utils/date-utils";
+import { useBehandlingProvider } from "../../../context/BehandlingContext";
+import { useGetBehandlingV2, useGetOpplysningeAndreVoksneIHusstand } from "../../../hooks/useApiData";
+import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
+import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const Header = () => (
     <BodyShort size="small" className="flex h-2">
