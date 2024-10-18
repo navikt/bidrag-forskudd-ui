@@ -169,8 +169,8 @@ export const BpsBeregnedeTotalbidragTabellV2 = () => {
                             </div>
 
                             <HelpText wrapperClassName="inline-block align-middle" className="size-4" placement="left">
-                                Reduksjon av U er differansen mellom det beregnede bidraget og det faktiske bidraget i
-                                forrige vedtak.
+                                Reduksjon av BPs andel av U er differansen mellom det beregnede bidraget og det faktiske
+                                bidraget i forrige vedtak.
                             </HelpText>
                         </Table.HeaderCell>
                         <Table.HeaderCell textSize="small" align="right">
