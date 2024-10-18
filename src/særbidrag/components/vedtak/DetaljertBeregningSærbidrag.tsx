@@ -25,8 +25,8 @@ export const DetaljertBeregningSærbidrag: React.FC = () => {
                         textRight: false,
                         value:
                             resultat.bpHarEvne === false
-                                ? "Nei, beregnet totalbidrag er høyere enn BPs bidragsevne"
-                                : "Ja, beregnet totalbidrag er lavere enn BPs bidragsevne",
+                                ? "Nei, bidragsevnen er lavere enn beregnet totalbidrag"
+                                : "Ja, bidragsevnen er høyere enn beregnet totalbidrag",
                     },
                     {
                         label: "Resultat",

@@ -164,7 +164,9 @@ export const BpsBeregnedeTotalbidragTabellV2 = () => {
                             </HelpText>
                         </Table.HeaderCell>
                         <Table.HeaderCell textSize="small" align="right" className="pl-4">
-                            <div className="inline-block align-middle">Reduksjon av U</div>
+                            <div className="inline-block align-middle whitespace-pre-wrap w-[110px]">
+                                Reduksjon av BPs andel av U
+                            </div>
 
                             <HelpText wrapperClassName="inline-block align-middle" className="size-4" placement="left">
                                 Reduksjon av U er differansen mellom det beregnede bidraget og det faktiske bidraget i
@@ -186,8 +188,8 @@ export const BpsBeregnedeTotalbidragTabellV2 = () => {
                                     content={
                                         <BodyShort size="small">
                                             <CalculationTabell
-                                                className="w-[200px] [&_td]:w-full"
-                                                title="Reduksjon av U"
+                                                className="w-[250px] [&_td]:w-full"
+                                                title="Reduksjon av BPs andel av U"
                                                 data={[
                                                     {
                                                         label: "Beregnet bidrag",
