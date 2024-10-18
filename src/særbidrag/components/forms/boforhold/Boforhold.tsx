@@ -12,7 +12,7 @@ import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
-import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
+import { AndreVoksneIHusstanden } from "../../../../common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
 import { Begrunnelse } from "./Begrunnelse";
 
 const Main = () => {

@@ -23,6 +23,22 @@ export enum InntektTableType {
     TOTAL_INNTEKTER = "TOTAL_INNTEKTER",
 }
 export const inntekterTablesViewRules = {
+    [TypeBehandling.BIDRAG]: {
+        [Rolletype.BM]: [
+            InntektTableType.SKATTEPLIKTIG,
+            InntektTableType.BARNETILLEGG,
+            InntektTableType.UTVIDET_BARNETRYGD,
+            InntektTableType.SMÅBARNSTILLEGG,
+            InntektTableType.KONTANTSTØTTE,
+            InntektTableType.BEREGNET_INNTEKTER,
+        ],
+        [Rolletype.BP]: [
+            InntektTableType.SKATTEPLIKTIG,
+            InntektTableType.BARNETILLEGG,
+            InntektTableType.BEREGNET_INNTEKTER,
+        ],
+        [Rolletype.BA]: [InntektTableType.SKATTEPLIKTIG, InntektTableType.BEREGNET_INNTEKTER],
+    },
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: [
             InntektTableType.SKATTEPLIKTIG,
@@ -115,6 +131,16 @@ export const manuelleInntekterValg = {
         Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
     ],
     [TypeBehandling.SAeRBIDRAG]: [
+        Inntektsrapportering.LONNMANUELTBEREGNET,
+        Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+        Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+        Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+        Inntektsrapportering.SKJONNMANGLENDEBRUKAVEVNE,
+        Inntektsrapportering.SKJONNMANGLERDOKUMENTASJON,
+    ],
+    [TypeBehandling.BIDRAG]: [
         Inntektsrapportering.LONNMANUELTBEREGNET,
         Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
         Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,

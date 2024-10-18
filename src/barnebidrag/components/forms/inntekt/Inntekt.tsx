@@ -31,18 +31,11 @@ const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const roller = behandlingRoller
-        .filter((rolle) => rolle.rolletype !== Rolletype.BP)
-        .sort((a, b) => {
-            if (a.rolletype === Rolletype.BM) return -1;
-            if (b.rolletype === Rolletype.BM) return 1;
-
-            if (a.rolletype === Rolletype.BA || b.rolletype === Rolletype.BA) {
-                return a.ident.localeCompare(b.ident);
-            }
-
-            return 0;
-        });
+    const roller = behandlingRoller.sort((a, b) => {
+        if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
+        if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
+        return 0;
+    });
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
