@@ -13,10 +13,16 @@ import {
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
+    OppdaterSamvaerDto,
+    OppdaterSamvaerResponsDto,
+    OppdaterSamvaerskalkulatorDto,
     OpplysningerType,
     RolleDto,
+    SamvaerskalkulatorDetaljer,
+    Samvaersklasse,
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
+    SletteSamvaersperiodeElementDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -31,6 +37,10 @@ import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from ".
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
+    updateSamvær: (behandlingId: string) => ["mutation", "samvær", behandlingId],
+    updateSamværskalkulator: (behandlingId: string) => ["mutation", "updateSamværskalkulator", behandlingId],
+    slettSamværskalkulator: (behandlingId: string) => ["mutation", "slettSamværskalkulator", behandlingId],
+    beregnSamværsklasse: (behandlingId: string) => ["mutation", "beregnSamværsklasse", behandlingId],
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
     updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
@@ -111,7 +121,93 @@ export const useUpdateInntekt = () => {
         },
     });
 };
+export const useDeleteSamværsperiode = () => {
+    const { behandlingId } = useBehandlingProvider();
 
+    return useMutation({
+        mutationKey: MutationKeys.updateSamvær(behandlingId),
+        mutationFn: async (payload: SletteSamvaersperiodeElementDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.slettSamvaersperiode(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
+export const useDeleteSamværberegning = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.slettSamværskalkulator(behandlingId),
+        mutationFn: async (payload: SletteSamvaersperiodeElementDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.slettSamvaerskalkulatorBeregning(
+                Number(behandlingId),
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
+export const useBeregnSamværsklasse = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
+        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<Samvaersklasse> => {
+            const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
+export const useUpdateSamværskalkulator = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateSamværskalkulator(behandlingId),
+        mutationFn: async (payload: OppdaterSamvaerskalkulatorDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterSamvaerskalkulatorBeregning(
+                Number(behandlingId),
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
+
+export const useUpdateSamvær = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateSamvær(behandlingId),
+        mutationFn: async (payload: OppdaterSamvaerDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterSamvaer(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
 export const useUpdateBoforhold = () => {
     const { behandlingId } = useBehandlingProvider();
 

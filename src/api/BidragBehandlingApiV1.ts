@@ -207,6 +207,44 @@ export enum Rolletype {
     RM = "RM",
 }
 
+export interface SamvaerskalkulatorDetaljer {
+    ferier: SamvaerskalkulatorFerie[];
+    /** @format int32 */
+    regelmessigSamværNetter: number;
+}
+
+export interface SamvaerskalkulatorFerie {
+    type: SamvaerskalkulatorFerietype;
+    /** @format int32 */
+    bidragsmottakerNetter: number;
+    /** @format int32 */
+    bidragspliktigNetter: number;
+    frekvens: SamvaerskalkulatorNetterFrekvens;
+}
+
+export enum SamvaerskalkulatorFerietype {
+    JULNYTTAR = "JUL_NYTTÅR",
+    VINTERFERIE = "VINTERFERIE",
+    PASKE = "PÅSKE",
+    SOMMERFERIE = "SOMMERFERIE",
+    HOSTFERIE = "HØSTFERIE",
+    ANNET = "ANNET",
+}
+
+export enum SamvaerskalkulatorNetterFrekvens {
+    HVERTAR = "HVERT_ÅR",
+    ANNENHVERTAR = "ANNEN_HVERT_ÅR",
+}
+
+export enum Samvaersklasse {
+    INGENSAMVAeR = "INGEN_SAMVÆR",
+    SAMVAeRSKLASSE1 = "SAMVÆRSKLASSE_1",
+    SAMVAeRSKLASSE2 = "SAMVÆRSKLASSE_2",
+    SAMVAeRSKLASSE3 = "SAMVÆRSKLASSE_3",
+    SAMVAeRSKLASSE4 = "SAMVÆRSKLASSE_4",
+    DELT_BOSTED = "DELT_BOSTED",
+}
+
 export enum Sivilstandskode {
     GIFT_SAMBOER = "GIFT_SAMBOER",
     BOR_ALENE_MED_BARN = "BOR_ALENE_MED_BARN",
@@ -439,10 +477,6 @@ export interface ArbeidsforholdGrunnlagDto {
     permitteringListe?: Permittering[];
 }
 
-/**
- * Saksbehandlers begrunnelse
- * @deprecated
- */
 export interface BegrunnelseDto {
     innhold: string;
     gjelder?: RolleDto;
@@ -492,6 +526,8 @@ export interface BehandlingDtoV2 {
     feilOppståttVedSisteGrunnlagsinnhenting?: Grunnlagsinnhentingsfeil[];
     /** Utgiftsgrunnlag for særbidrag. Vil alltid være null for forskudd og bidrag */
     utgift?: SaerbidragUtgifterDto;
+    /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
+    samvær?: SamvaerDto[];
     /** @uniqueItems true */
     underholdskostnader: UnderholdDto[];
     vedtakstypeVisningsnavn: string;
@@ -510,7 +546,6 @@ export interface BoforholdDtoV2 {
     andreVoksneIHusstanden: BostatusperiodeDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
-    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
     valideringsfeil: BoforholdValideringsfeil;
     /** Er sann hvis status på andre voksne i husstanden er 'BOR_IKKE_MED_ANDRE_VOKSNE', men det er 18 åring i husstanden som regnes som voksen i husstanden */
@@ -521,7 +556,6 @@ export interface BoforholdDtoV2 {
      * @uniqueItems true
      */
     husstandsbarn: HusstandsmedlemDtoV2[];
-    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -578,6 +612,13 @@ export interface BostatusperiodeGrunnlagDto {
 }
 
 export type Datoperiode = UtilRequiredKeys<PeriodeLocalDate, "fom">;
+
+export interface DatoperiodeDto {
+    /** @format date */
+    fom: string;
+    /** @format date */
+    tom?: string;
+}
 
 /** Liste over summerte inntektsperioder */
 export interface DelberegningSumInntekt {
@@ -800,7 +841,6 @@ export interface InntekterDtoV2 {
      */
     begrunnelser: BegrunnelseDto[];
     valideringsfeil: InntektValideringsfeilDto;
-    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -856,6 +896,15 @@ export interface OverlappendePeriode {
      * @uniqueItems true
      */
     inntektstyper: Inntektstype[];
+}
+
+export interface OverlappendeSamvaerPeriode {
+    periode: Datoperiode;
+    /**
+     * Teknisk id på inntekter som overlapper
+     * @uniqueItems true
+     */
+    idListe: number[];
 }
 
 export interface PeriodeAndreVoksneIHusstanden {
@@ -918,6 +967,37 @@ export interface RolleDto {
     navn?: string;
     /** @format date */
     fødselsdato?: string;
+}
+
+/** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
+export interface SamvaerDto {
+    /** @format int64 */
+    id: number;
+    gjelderBarn: string;
+    begrunnelse?: BegrunnelseDto;
+    valideringsfeil?: SamvaerValideringsfeilDto;
+    perioder: SamvaersperiodeDto[];
+}
+
+export interface SamvaerValideringsfeilDto {
+    /** @format int64 */
+    samværId: number;
+    gjelderBarn: string;
+    manglerBegrunnelse: boolean;
+    ingenLøpendeSamvær: boolean;
+    manglerSamvær: boolean;
+    /** @uniqueItems true */
+    overlappendePerioder: OverlappendeSamvaerPeriode[];
+    /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
+    hullIPerioder: Datoperiode[];
+}
+
+export interface SamvaersperiodeDto {
+    /** @format int64 */
+    id?: number;
+    periode: DatoperiodeDto;
+    samværsklasse: Samvaersklasse;
+    beregning?: SamvaerskalkulatorDetaljer;
 }
 
 export interface SivilstandAktivGrunnlagDto {
@@ -1034,12 +1114,10 @@ export interface SaerbidragUtgifterDto {
     kategori: SaerbidragKategoriDto;
     beregning?: UtgiftBeregningDto;
     maksGodkjentBeløp?: MaksGodkjentBelopDto;
-    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
     valideringsfeil?: UtgiftValideringsfeilDto;
     totalBeregning: TotalBeregningUtgifterDto[];
-    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -1159,9 +1237,7 @@ export interface VirkningstidspunktDto {
     opprinneligVirkningstidspunkt?: string;
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
-    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
-    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -1245,6 +1321,34 @@ export interface SletteUnderholdselement {
     /** @format int64 */
     id: number;
     type: SletteUnderholdselementTypeEnum;
+}
+
+export interface OppdaterSamvaerDto {
+    gjelderBarn: string;
+    periode?: OppdaterSamvaersperiodeDto;
+    /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
+    oppdatereBegrunnelse?: OppdatereBegrunnelse;
+}
+
+export interface OppdaterSamvaersperiodeDto {
+    /** @format int64 */
+    id?: number;
+    periode: DatoperiodeDto;
+    samværsklasse?: Samvaersklasse;
+    beregning?: SamvaerskalkulatorDetaljer;
+}
+
+export interface OppdaterSamvaerResponsDto {
+    /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
+    oppdatertSamvær?: SamvaerDto;
+}
+
+export interface OppdaterSamvaerskalkulatorBeregningDto {
+    gjelderBarn: string;
+    /** @format int64 */
+    samværsperiodeId: number;
+    beregning: SamvaerskalkulatorDetaljer;
+    samværsklasse?: Samvaersklasse;
 }
 
 export interface OppdatereInntektRequest {
@@ -1657,19 +1761,10 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
-}
-
-export enum Samvaersklasse {
-    INGENSAMVAeR = "INGEN_SAMVÆR",
-    SAMVAeRSKLASSE1 = "SAMVÆRSKLASSE_1",
-    SAMVAeRSKLASSE2 = "SAMVÆRSKLASSE_2",
-    SAMVAeRSKLASSE3 = "SAMVÆRSKLASSE_3",
-    SAMVAeRSKLASSE4 = "SAMVÆRSKLASSE_4",
-    DELT_BOSTED = "DELT_BOSTED",
 }
 
 export interface Skatt {
@@ -2152,8 +2247,8 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2460,6 +2555,12 @@ export interface VedtakNotatDto {
 
 export interface VedtakResultatInnhold {
     type: NotatMalType;
+}
+
+export interface SletteSamvaersperiodeElementDto {
+    gjelderBarn: string;
+    /** @format int64 */
+    samværsperiodeId: number;
 }
 
 /**
@@ -2779,6 +2880,71 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Oppdater samvær for en behandling.
+         *
+         * @tags samv-ær-controller
+         * @name OppdaterSamvaer
+         * @request PUT:/api/v2/behandling/{behandlingsid}/samvar
+         * @secure
+         */
+        oppdaterSamvaer: (behandlingsid: number, data: OppdaterSamvaerDto, params: RequestParams = {}) =>
+            this.request<OppdaterSamvaerResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/samvar`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdater samværsperiode beregning
+         *
+         * @tags samv-ær-controller
+         * @name OppdaterSamvaerskalkulatorBeregning
+         * @request PUT:/api/v2/behandling/{behandlingsid}/samvar/periode/beregning
+         * @secure
+         */
+        oppdaterSamvaerskalkulatorBeregning: (
+            behandlingsid: number,
+            data: OppdaterSamvaerskalkulatorBeregningDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<OppdaterSamvaerResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/samvar/periode/beregning`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Slett samværsperiode
+         *
+         * @tags samv-ær-controller
+         * @name SlettSamvaerskalkulatorBeregning
+         * @request DELETE:/api/v2/behandling/{behandlingsid}/samvar/periode/beregning
+         * @secure
+         */
+        slettSamvaerskalkulatorBeregning: (
+            behandlingsid: number,
+            data: SletteSamvaersperiodeElementDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<OppdaterSamvaerResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/samvar/periode/beregning`,
+                method: "DELETE",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
          * @description Oppdatere inntekt for behandling. Returnerer inntekt som ble endret, opprettet, eller slettet.
          *
          * @tags behandling-controller-v-2
@@ -2847,6 +3013,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             this.request<OppdaterRollerResponse, any>({
                 path: `/api/v2/behandling/${behandlingId}/roller`,
                 method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdater samvær for en behandling.
+         *
+         * @tags samv-ær-controller
+         * @name BeregnSamvaersklasse
+         * @request POST:/api/v2/samvar/beregn
+         * @secure
+         */
+        beregnSamvaersklasse: (data: SamvaerskalkulatorDetaljer, params: RequestParams = {}) =>
+            this.request<Samvaersklasse, any>({
+                path: `/api/v2/samvar/beregn`,
+                method: "POST",
                 body: data,
                 secure: true,
                 type: ContentType.Json,
@@ -3272,6 +3457,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 path: `/api/v1/notat/vedtak/${vedtaksid}`,
                 method: "GET",
                 secure: true,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Slett samværsperiode
+         *
+         * @tags samv-ær-controller
+         * @name SlettSamvaersperiode
+         * @request DELETE:/api/v2/behandling/{behandlingsid}/samvar/periode
+         * @secure
+         */
+        slettSamvaersperiode: (
+            behandlingsid: number,
+            data: SletteSamvaersperiodeElementDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<OppdaterSamvaerResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/samvar/periode`,
+                method: "DELETE",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
                 format: "json",
                 ...params,
             }),

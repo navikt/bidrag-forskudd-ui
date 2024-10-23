@@ -1,7 +1,7 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Select } from "@navikt/ds-react";
 import React, { PropsWithChildren } from "react";
-import { useController, useFormContext } from "react-hook-form";
+import { useController, useFormContext, useWatch } from "react-hook-form";
 
 interface Option {
     value: string;
@@ -13,8 +13,10 @@ interface FormControlledSelectFieldProps {
     label: string;
     options?: Option[];
     hideLabel?: boolean;
+    disabled?: boolean;
     className?: string;
     onSelect?: (value: string) => void;
+    onBeforeSelect?: (value: string) => void;
 }
 
 export const FormControlledSelectField = ({
@@ -24,15 +26,20 @@ export const FormControlledSelectField = ({
     hideLabel,
     className,
     onSelect,
+    onBeforeSelect,
+    disabled,
     children,
 }: PropsWithChildren<FormControlledSelectFieldProps>) => {
     const { control } = useFormContext();
     const { field, fieldState } = useController({ name, control });
 
+    const fieldValue = useWatch({ control, name });
     const { lesemodus } = useBehandlingProvider();
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        field.onChange(e.target.value);
-        onSelect?.(e.target.value);
+        onBeforeSelect?.(fieldValue);
+        const value = e.target.value;
+        field.onChange(value);
+        onSelect?.(value);
     };
 
     return (
@@ -40,8 +47,9 @@ export const FormControlledSelectField = ({
             label={label}
             readOnly={lesemodus}
             className={className}
+            disabled={disabled}
             size="small"
-            value={field.value}
+            value={fieldValue}
             onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
             error={fieldState?.error?.message}
