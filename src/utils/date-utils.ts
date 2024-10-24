@@ -186,3 +186,12 @@ export function formatDateToYearMonth(dateString?: string): string {
     // Combine and return the year and month in yyyy-MM format
     return `${year}-${month}`;
 }
+export const getStartOfCurrentMonth = (): Date => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+};
+export const getStartOfNextMonth = (): Date => {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return nextMonth;
+};

@@ -1,6 +1,5 @@
 import { RolleTag } from "@common/components/RolleTag";
-import urlSearchParams from "@common/constants/behandlingQueryKeys";
-import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import { default as behandlingQueryKeys, default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
@@ -45,6 +44,7 @@ import {
     addMonthsIgnoreDay,
     dateOrNull,
     DateToDDMMYYYYString,
+    getStartOfNextMonth,
     toISODateString,
 } from "../../../../utils/date-utils";
 import { STEPS } from "../../../constants/steps";
@@ -348,15 +348,25 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
     const findTomdato = (previousPeriode?: SamværPeriodeFormvalues) => {
         if (previousPeriode) {
             const fomDato = findFomdato(previousPeriode);
+            if (!fomDato) return previousPeriode.tom;
+
             return toISODateString(deductDays(new Date(fomDato), 1));
         }
         return null;
     };
     const findFomdato = (previousPeriode?: SamværPeriodeFormvalues) => {
         if (previousPeriode) {
-            return previousPeriode.tom
+            const fomDato = previousPeriode.tom
                 ? toISODateString(addDays(new Date(previousPeriode.tom), 1))
                 : toISODateString(addMonthsIgnoreDay(new Date(previousPeriode.fom), 1));
+
+            if (
+                new Date(fomDato) > getStartOfNextMonth() ||
+                new Date(fomDato) < new Date(behandling.virkningstidspunkt?.virkningstidspunkt)
+            ) {
+                return null;
+            }
+            return fomDato;
         }
         return behandling.virkningstidspunkt?.virkningstidspunkt;
     };
@@ -365,7 +375,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`${gjelderBarn}.perioder`);
-            console.log("ADD PERIODE", perioderValues);
+
             const sortedPerioderValues = perioderValues?.sort((a, b) => (new Date(a.fom) > new Date(b.fom) ? 1 : -1));
             const previousPeriode = sortedPerioderValues?.[perioderValues.length - 1];
             if (previousPeriode) {
