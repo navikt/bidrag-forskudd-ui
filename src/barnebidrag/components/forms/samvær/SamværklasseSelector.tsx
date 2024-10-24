@@ -5,20 +5,16 @@ import { useFormContext, useWatch } from "react-hook-form";
 
 import { Samvaersklasse } from "../../../../api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
-import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
 import { createSamværskalkulatorDefaultvalues } from "../../../../common/helpers/samværFormHelpers";
-import { useOnDeleteSamværskalkulatorBeregning } from "../../../../common/hooks/useSaveSamvær";
 import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { SamværBarnformvalues, SamværPeriodeFormvalues } from "../../../../common/types/samværFormValues";
 
 export const SamværsklasseSelector = ({
     editableRow,
     fieldName,
-    gjelderBarn,
     item,
 }: {
     editableRow: boolean;
-    gjelderBarn: string;
     fieldName: `${string}.perioder.${number}`;
     item: SamværPeriodeFormvalues;
 }) => {
@@ -26,44 +22,13 @@ export const SamværsklasseSelector = ({
     const periode = useWatch({ control, name: fieldName });
     const ref = useRef<HTMLDialogElement>(null);
     const previousSamværsklasse = useRef<Samvaersklasse>(periode.samværsklasse);
-    const deleteSamværskalkulatorBeregningFn = useOnDeleteSamværskalkulatorBeregning();
-    const { setSaveErrorState } = useBehandlingProvider();
 
     const options = Object.keys(Samvaersklasse).map((key) => Samvaersklasse[key]);
     const onRemoveBeregning = () => {
         const periode = getValues(fieldName);
-        deleteSamværskalkulatorBeregningFn.mutation.mutate(
-            {
-                samværsperiodeId: periode.id,
-                gjelderBarn,
-            },
-            {
-                onSuccess: (response) => {
-                    setValue(`${fieldName}.beregning`, createSamværskalkulatorDefaultvalues(true));
-
-                    deleteSamværskalkulatorBeregningFn.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            samvær: currentData.samvær.map((s) => {
-                                if (s.gjelderBarn === gjelderBarn) {
-                                    return response.oppdatertSamvær;
-                                }
-                                return s;
-                            }),
-                        };
-                    });
-                    previousSamværsklasse.current = periode.samværsklasse;
-                    ref.current?.close();
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => onRemoveBeregning(),
-                        rollbackFn: () => null,
-                    });
-                },
-            }
-        );
+        setValue(`${fieldName}.beregning`, createSamværskalkulatorDefaultvalues());
+        previousSamværsklasse.current = periode.samværsklasse;
+        ref.current?.close();
     };
     function renderModal() {
         return (

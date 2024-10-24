@@ -2,26 +2,18 @@ import { CalculatorIcon } from "@navikt/aksel-icons";
 import { BodyShort, Button, Heading, HStack, Modal, Table, VStack } from "@navikt/ds-react";
 import { useEffect, useRef } from "react";
 import React from "react";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
-import {
-    OppdaterSamvaerskalkulatorBeregningDto,
-    SamvaerskalkulatorNetterFrekvens,
-} from "../../../../api/BidragBehandlingApiV1";
+import { SamvaerskalkulatorNetterFrekvens } from "../../../../api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../../../common/components/formFields/FormControlledTextField";
 import { ResultatTable } from "../../../../common/components/vedtak/ResultatTable";
-import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
 import {
-    createSamværsperiodeInitialValues,
+    createSamværskalkulatorDefaultvalues,
     mapToSamværskalkulatoDetaljer,
 } from "../../../../common/helpers/samværFormHelpers";
 import { useBeregnSamværsklasse } from "../../../../common/hooks/useApiData";
 import { useDebounce } from "../../../../common/hooks/useDebounce";
-import {
-    useOnDeleteSamværskalkulatorBeregning,
-    useOnSaveSamværskalkulator,
-} from "../../../../common/hooks/useSaveSamvær";
 import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { SamværBarnformvalues } from "../../../../common/types/samværFormValues";
 
@@ -34,11 +26,12 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
     const beregnSamværsklasseFn = useBeregnSamværsklasse();
     const beregning = useWatch({ control, name: `${fieldname}.beregning` });
     const ferier = useWatch({ control, name: `${fieldname}.beregning.ferier` });
-    const samværsklasse = useWatch({ control, name: `${fieldname}.beregning.samværsklasse` });
+    const samværsklasse = useWatch({ control, name: `${fieldname}.samværsklasse` });
+
     function beregnSamværsklasse() {
-        beregnSamværsklasseFn.mutate(mapToSamværskalkulatoDetaljer(beregning), {
+        beregnSamværsklasseFn.mutate(mapToSamværskalkulatoDetaljer({ ...beregning, isSaved: true }), {
             onSuccess: (data) => {
-                setValue(`${fieldname}.beregning.samværsklasse`, data);
+                setValue(`${fieldname}.samværsklasse`, data);
             },
         });
     }
@@ -63,6 +56,7 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
                         name={`${fieldname}.beregning.regelmessigSamværNetter`}
                         label={"Antall netter"}
                         type="number"
+                        min={0}
                     />
                     <BodyShort size="small" className="self-end">
                         {" "}
@@ -70,6 +64,7 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
                     </BodyShort>
                 </HStack>
             </BodyShort>
+
             <div>
                 <Heading size="xsmall">Ferie</Heading>
                 <Table size="small" className="table-fixed table bg-white w-full">
@@ -99,6 +94,7 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
                                         label={""}
                                         hideLabel
                                         type="number"
+                                        min={0}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">
@@ -107,6 +103,7 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
                                         label={""}
                                         hideLabel
                                         type="number"
+                                        min={0}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">
@@ -141,7 +138,7 @@ export const SamværskalkulatorView = ({ fieldname }: SamværskalkulatorProps) =
 
     const regelmessigSamværNetter = useWatch({ control, name: `${fieldname}.beregning.regelmessigSamværNetter` });
     const ferier = useWatch({ control, name: `${fieldname}.beregning.ferier` });
-    const samværsklasse = useWatch({ control, name: `${fieldname}.beregning.samværsklasse` });
+    const samværsklasse = useWatch({ control, name: `${fieldname}.samværsklasse` });
 
     if (ferier === undefined) return null;
     return (
@@ -238,154 +235,55 @@ const FerieFrekvens = ({
 };
 
 interface SamværskalkulatorButtonProps {
-    gjelderBarn: string;
     editableRow: boolean;
-    samværsperiodeId: number;
     fieldname: `${string}.perioder.${number}`;
 }
-export const SamværskalkulatorButton = ({
-    fieldname,
-    gjelderBarn,
-    samværsperiodeId,
-    editableRow,
-}: SamværskalkulatorButtonProps) => {
+export const SamværskalkulatorButton = ({ fieldname, editableRow }: SamværskalkulatorButtonProps) => {
     const ref = useRef<HTMLDialogElement>(null);
-    const { control, getValues, resetField, setValue } = useFormContext<SamværBarnformvalues>();
-    const saveSamværskalkulatorBeregningFn = useOnSaveSamværskalkulator();
-    const deleteSamværskalkulatorBeregningFn = useOnDeleteSamværskalkulatorBeregning();
-    const { setSaveErrorState } = useBehandlingProvider();
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const { control, getValues, setValue } = useFormContext<SamværBarnformvalues>();
     const previousBeregning = useRef(getValues(`${fieldname}.beregning`));
-    const perioder = useFieldArray({
-        control,
-        name: `${gjelderBarn}.perioder`,
-    });
     const beregning = useWatch({ control, name: `${fieldname}.beregning` });
     const onSave = () => {
-        // const beregning = getValues(`${fieldname}.beregning`);
-        // updateAndSave({
-        //     samværsperiodeId,
-        //     beregning: {
-        //         ...beregning,
-        //         ...mapToSamværskalkulatoDetaljer(beregning),
-        //     },
-        //     gjelderBarn: gjelderBarn,
-        // });
         ref.current?.close();
-        setValue(`${fieldname}.beregning.isDeleted`, false);
-        setIsModalOpen(false);
-    };
-    const updateAndSave = (payload: OppdaterSamvaerskalkulatorBeregningDto) => {
-        saveSamværskalkulatorBeregningFn.mutation.mutate(payload, {
-            onSuccess: (response) => {
-                // Set datoTom til null ellers resettes den ikke
-                const index = perioder.fields.findIndex((p) => p.id === samværsperiodeId);
-                perioder.replace(response.oppdatertSamvær.perioder.map((d) => createSamværsperiodeInitialValues(d)));
-                perioder.update(
-                    index,
-                    createSamværsperiodeInitialValues(
-                        response.oppdatertSamvær.perioder.find((p) => p.id === samværsperiodeId)!
-                    )
-                );
-
-                saveSamværskalkulatorBeregningFn.queryClientUpdater((currentData) => {
-                    return {
-                        ...currentData,
-                        samvær: currentData.samvær.map((s) => {
-                            if (s.gjelderBarn === gjelderBarn) {
-                                return response.oppdatertSamvær;
-                            }
-                            return s;
-                        }),
-                    };
-                });
-                ref.current?.close();
-                setIsModalOpen(false);
-            },
-            onError: () => {
-                setSaveErrorState({
-                    error: true,
-                    retryFn: () => updateAndSave(payload),
-                    rollbackFn: () => null,
-                });
-            },
-        });
+        setValue(`${fieldname}.beregning.isSaved`, true);
     };
 
     const closeAndCancel = () => {
         setValue(`${fieldname}.beregning`, previousBeregning.current);
         ref.current?.close();
-        setIsModalOpen(false);
     };
 
-    const deleteBeregning = () => {
-        deleteSamværskalkulatorBeregningFn.mutation.mutate(
-            {
-                samværsperiodeId,
-                gjelderBarn,
-            },
-            {
-                onSuccess: (response) => {
-                    // Set datoTom til null ellers resettes den ikke
-                    perioder.replace(
-                        response.oppdatertSamvær.perioder.map((d) => createSamværsperiodeInitialValues(d))
-                    );
-                    resetField(`${fieldname}.beregning`);
-
-                    saveSamværskalkulatorBeregningFn.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            samvær: currentData.samvær.map((s) => {
-                                if (s.gjelderBarn === gjelderBarn) {
-                                    return response.oppdatertSamvær;
-                                }
-                                return s;
-                            }),
-                        };
-                    });
-                    ref.current?.close();
-                    setIsModalOpen(false);
-                },
-                onError: () => {
-                    // setSaveErrorState({
-                    //     error: true,
-                    //     retryFn: () => updateAndSave(payload),
-                    //     rollbackFn: () => {
-                    //         const oppdaterPeriode = payload.oppdaterePeriodeMedAndreVoksneIHusstand.oppdaterePeriode;
-                    //         if (oppdaterPeriode && oppdaterPeriode.idPeriode == null) {
-                    //             const andreVoksneIHusstandenPerioder = getValues(`perioder`);
-                    //             perioder.remove(andreVoksneIHusstandenPerioder.length - 1);
-                    //         } else {
-                    //             setValue(`perioder`, behandling.samvær);
-                    //         }
-                    //     },
-                    // });
-                },
-            }
-        );
-    };
+    if (!editableRow) return null;
     return (
         <>
-            {editableRow && (
-                <Button
-                    variant="tertiary"
-                    size="xsmall"
-                    onClick={() => {
-                        ref.current?.showModal();
-                        previousBeregning.current = beregning;
-                        setIsModalOpen(true);
-                    }}
-                    icon={<CalculatorIcon />}
-                ></Button>
-            )}
-            <Modal ref={ref} header={{ heading: "Samværsberegning" }} className="text-left">
-                <Modal.Body>{isModalOpen && <SamværskalkulatorForm fieldname={fieldname} />}</Modal.Body>
+            <Button
+                variant="tertiary"
+                size="xsmall"
+                onClick={() => {
+                    ref.current?.showModal();
+                    previousBeregning.current = beregning;
+                }}
+                icon={<CalculatorIcon />}
+            ></Button>
+            <Modal ref={ref} header={{ heading: "Samværskalkulator" }} className="text-left">
+                <Modal.Body>
+                    <SamværskalkulatorForm fieldname={fieldname} />
+                </Modal.Body>
                 <Modal.Footer>
                     <Button size="xsmall" variant="primary" onClick={onSave}>
                         Lagre beregning
                     </Button>
                     <Button size="xsmall" variant="secondary" onClick={closeAndCancel}>
                         Avbryt
+                    </Button>
+                    <Button
+                        size="xsmall"
+                        variant="tertiary"
+                        onClick={() => {
+                            setValue(`${fieldname}.beregning`, createSamværskalkulatorDefaultvalues());
+                        }}
+                    >
+                        Nullstill
                     </Button>
                 </Modal.Footer>
             </Modal>

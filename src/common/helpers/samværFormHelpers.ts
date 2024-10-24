@@ -30,23 +30,23 @@ export const createSamværInitialValues = (samvær: SamvaerDto): Samværformvalu
 
 export const createSamværsperiodeInitialValues = (periode: SamvaersperiodeDto): SamværPeriodeFormvalues => {
     return {
-        id: periode.id,
+        id: periode.id ?? null,
         fom: periode.periode.fom,
-        tom: periode.periode.tom,
+        tom: periode.periode.tom ?? null,
         samværsklasse: periode.samværsklasse,
         beregning: createSamværskalkulatorInitialValues(periode),
     };
 };
 
-export const createSamværskalkulatorDefaultvalues = (deleted = false): SamværskalkulatorFormValues => ({
+export const createSamværskalkulatorDefaultvalues = (): SamværskalkulatorFormValues => ({
     isSaved: false,
-    isDeleted: deleted,
+    regelmessigSamværNetter: null,
     ferier: Object.values(SamvaerskalkulatorFerietype).reduce(
         (acc, ferietype) => ({
             ...acc,
             [ferietype as SamvaerskalkulatorFerietype]: {
-                bidragsmottakerNetter: undefined,
-                bidragspliktigNetter: undefined,
+                bidragsmottakerNetter: null,
+                bidragspliktigNetter: null,
                 frekvens: SamvaerskalkulatorNetterFrekvens.ANNENHVERTAR,
             },
         }),
@@ -57,20 +57,19 @@ export const createSamværskalkulatorInitialValues = (
     samværsperiode: SamvaersperiodeDto
 ): SamværskalkulatorFormValues => {
     const samværskalkulatorBeregning = samværsperiode.beregning;
-    if (samværskalkulatorBeregning === null) {
+    if (samværskalkulatorBeregning === null || samværskalkulatorBeregning === undefined) {
         return createSamværskalkulatorDefaultvalues();
     }
     return {
         isSaved: true,
-        isDeleted: false,
-        regelmessigSamværNetter: samværskalkulatorBeregning?.regelmessigSamværNetter,
-        samværsklasse: samværsperiode?.samværsklasse,
+        regelmessigSamværNetter: samværskalkulatorBeregning?.regelmessigSamværNetter ?? null,
+        samværsklasse: samværsperiode?.samværsklasse ?? null,
         ferier: samværskalkulatorBeregning?.ferier.reduce(
             (acc, ferie) => ({
                 ...acc,
                 [ferie.type as SamvaerskalkulatorFerietype]: {
-                    bidragsmottakerNetter: ferie.bidragsmottakerNetter === 0 ? undefined : ferie.bidragsmottakerNetter,
-                    bidragspliktigNetter: ferie.bidragspliktigNetter === 0 ? undefined : ferie.bidragspliktigNetter,
+                    bidragsmottakerNetter: ferie.bidragsmottakerNetter === 0 ? null : ferie.bidragsmottakerNetter,
+                    bidragspliktigNetter: ferie.bidragspliktigNetter === 0 ? null : ferie.bidragspliktigNetter,
                     frekvens: ferie.frekvens,
                 },
             }),
@@ -80,7 +79,7 @@ export const createSamværskalkulatorInitialValues = (
 };
 
 export const mapToSamværskalkulatoDetaljer = (beregning?: SamværskalkulatorFormValues): SamvaerskalkulatorDetaljer => {
-    if (!beregning) return null;
+    if (!beregning || beregning.isSaved !== true) return null;
     return {
         regelmessigSamværNetter: beregning.regelmessigSamværNetter ?? 0,
         ferier: Object.entries(beregning.ferier).map(([ferietype, item]) => ({

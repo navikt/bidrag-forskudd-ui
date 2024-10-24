@@ -143,7 +143,6 @@ const Side = () => {
 };
 
 const Main = () => {
-    const supportMultipleChildren = false;
     const { roller: behandlingRoller } = useGetBehandlingV2();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -166,7 +165,7 @@ const Main = () => {
     }, []);
     const selectedTab = searchParams.get(behandlingQueryKeys.samværTab) ?? defaultTab;
 
-    if (supportMultipleChildren) {
+    if (roller.length > 1) {
         return (
             <Tabs
                 defaultValue={defaultTab}
@@ -262,16 +261,16 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
         const fieldState = getFieldState(`${gjelderBarn}.perioder.${index}`);
 
         if (!fieldState.error) {
-            console.log(periodeValues.beregning);
+            const beregningMapped = mapToSamværskalkulatoDetaljer(periodeValues.beregning);
             updateAndSave({
                 periode: {
                     id: Number(selectedPeriodeId),
-                    samværsklasse: selectedSamvær,
+                    samværsklasse: beregningMapped ? null : selectedSamvær,
                     periode: {
                         fom: selectedDatoFom,
                         tom: selectedDatoTom,
                     },
-                    beregning: mapToSamværskalkulatoDetaljer(periodeValues.beregning),
+                    beregning: beregningMapped,
                 },
                 gjelderBarn: gjelderBarn,
             });
@@ -313,8 +312,6 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
     const updateAndSave = (payload: OppdaterSamvaerDto) => {
         saveSamværFn.mutation.mutate(payload, {
             onSuccess: (response) => {
-                console.log(response.oppdatertSamvær.perioder);
-                // Set datoTom til null ellers resettes den ikke
                 perioder.replace(response.oppdatertSamvær.perioder.map((d) => createSamværsperiodeInitialValues(d)));
 
                 saveSamværFn.queryClientUpdater((currentData) => {
@@ -368,6 +365,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             showErrorModal();
         } else {
             const perioderValues = getValues(`${gjelderBarn}.perioder`);
+            console.log("ADD PERIODE", perioderValues);
             const sortedPerioderValues = perioderValues?.sort((a, b) => (new Date(a.fom) > new Date(b.fom) ? 1 : -1));
             const previousPeriode = sortedPerioderValues?.[perioderValues.length - 1];
             if (previousPeriode) {
@@ -459,7 +457,6 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                             <SamværsperiodeTable
                                 onSaveRow={onSaveRow}
                                 onEditRow={onEditRow}
-                                gjelderBarn={gjelderBarn}
                                 fieldName={`${gjelderBarn}.perioder`}
                                 onRemovePeriode={onRemovePeriode}
                                 controlledFields={controlledFields}
@@ -490,7 +487,6 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
 interface SamværsperiodeTableProps {
     controlledFields: SamværPeriodeFormvalues[];
     editableRowIndex: number;
-    gjelderBarn: string;
     fieldName: `${string}.perioder`;
     onSaveRow: (index: number) => void;
     onEditRow: (index: number) => void;
@@ -501,11 +497,19 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
     editableRowIndex,
     controlledFields,
     fieldName,
-    gjelderBarn,
     onSaveRow,
     onEditRow,
     onRemovePeriode,
 }) => {
+    const [isExpanded, setIsExpanded] = useState<{ [index: number]: boolean }>({});
+
+    const isSamværsklasseCalculated = (item: SamværPeriodeFormvalues) => item.beregning.isSaved === true;
+    useEffect(() => {
+        controlledFields.forEach((item, index) => {
+            setIsExpanded((prev) => ({ ...prev, [index]: isSamværsklasseCalculated(item) ? prev[index] : false }));
+        });
+    }, [controlledFields]);
+
     return (
         <Table size="small" className="table-auto table bg-white w-full">
             <Table.Header>
@@ -538,7 +542,11 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
                         className="align-top"
                         onKeyDown={actionOnEnter(() => onSaveRow(index))}
                         togglePlacement="right"
-                        expansionDisabled={item.beregning.isSaved !== true}
+                        open={!isSamværsklasseCalculated(item) ? false : isExpanded[index] === true}
+                        onOpenChange={(isOpen) => {
+                            setIsExpanded((prev) => ({ ...prev, [index]: isOpen }));
+                        }}
+                        expansionDisabled={!isSamværsklasseCalculated(item)}
                         content={<SamværskalkulatorView fieldname={`${fieldName}.${index}`} />}
                     >
                         <Table.DataCell textSize="small">
@@ -562,8 +570,6 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
                         <Table.DataCell textSize="small" align="right" className="align-middle">
                             <SamværskalkulatorButton
                                 editableRow={editableRowIndex === index}
-                                gjelderBarn={gjelderBarn}
-                                samværsperiodeId={item.id}
                                 fieldname={`${fieldName}.${index}`}
                             />
                         </Table.DataCell>
@@ -571,7 +577,6 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
                             <SamværsklasseSelector
                                 editableRow={editableRowIndex === index}
                                 fieldName={`${fieldName}.${index}`}
-                                gjelderBarn={gjelderBarn}
                                 item={item}
                             />
                         </Table.DataCell>

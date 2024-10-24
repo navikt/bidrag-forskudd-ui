@@ -21,7 +21,6 @@ export interface SamværPeriodeFormvalues {
 
 export interface SamværskalkulatorFormValues {
     isSaved: boolean;
-    isDeleted: boolean;
     regelmessigSamværNetter?: number;
     samværsklasse?: Samvaersklasse;
     ferier: SamværskalkulatorFerietypeFormValues;

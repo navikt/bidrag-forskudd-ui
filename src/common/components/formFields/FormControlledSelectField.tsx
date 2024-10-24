@@ -1,7 +1,7 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Select } from "@navikt/ds-react";
 import React, { PropsWithChildren } from "react";
-import { useController, useFormContext, useWatch } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
 
 interface Option {
     value: string;
@@ -33,10 +33,9 @@ export const FormControlledSelectField = ({
     const { control } = useFormContext();
     const { field, fieldState } = useController({ name, control });
 
-    const fieldValue = useWatch({ control, name });
     const { lesemodus } = useBehandlingProvider();
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        onBeforeSelect?.(fieldValue);
+        onBeforeSelect?.(field.value);
         const value = e.target.value;
         field.onChange(value);
         onSelect?.(value);
@@ -49,7 +48,7 @@ export const FormControlledSelectField = ({
             className={className}
             disabled={disabled}
             size="small"
-            value={fieldValue}
+            value={field.value}
             onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
             error={fieldState?.error?.message}
