@@ -240,9 +240,10 @@ const Main = () => {
     const { isSærbidragBetaltAvBpEnabled, isbehandlingVesntremenyEnabled } = useFeatureToogle();
     const { getValues } = useFormContext<UtgiftFormValues>();
     const [avslag, erMaksBeløpMed] = getValues(["avslag", "maksGodkjentBeløpTaMed"]);
-    const erAvslagValgt = avslag !== "" && avslag !== undefined && !AvslagListeEtterUtgifterErUtfylt.includes(avslag);
+    const erAvslagValgt =
+        avslag !== "" && avslag !== undefined && avslag !== null && !AvslagListeEtterUtgifterErUtfylt.includes(avslag);
     const erAvslagSomInneholderUtgifter =
-        avslag !== "" && avslag !== undefined && AvslagListeEtterUtgifterErUtfylt.includes(avslag);
+        avslag !== "" && avslag !== undefined && avslag !== null && AvslagListeEtterUtgifterErUtfylt.includes(avslag);
     const erKonfirmasjon = behandling.utgift.kategori.kategori === Saerbidragskategori.KONFIRMASJON;
 
     return (
@@ -494,7 +495,7 @@ const UtgifterListe = () => {
                                   response.oppdatertUtgiftspost
                               );
 
-                    setValue(`avslag`, response.avslag);
+                    setValue(`avslag`, response.avslag ?? null);
                     return {
                         ...currentData,
                         utgift: {
@@ -537,7 +538,7 @@ const UtgifterListe = () => {
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
-                        setValue(`avslag`, response.avslag);
+                        setValue(`avslag`, response.avslag ?? null);
                         saveUtgifter.queryClientUpdater((currentData) => ({
                             ...currentData,
                             utgift: {
@@ -806,7 +807,10 @@ const UtgifterForm = () => {
                 {
                     avslag: avslag === "" ? null : (avslag as Resultatkode),
                 },
-                (response) => setValue("utgifter", mapUtgifter(response.utgiftposter))
+                (response) => {
+                    setValue("avslag", response.avslag ?? null);
+                    setValue("utgifter", mapUtgifter(response.utgiftposter));
+                }
             );
         } else if (name === "begrunnelse") {
             const begrunnelse = getValues(`begrunnelse`);
@@ -829,7 +833,7 @@ const UtgifterForm = () => {
                         begrunnelse: maksGodkjentBeløpBegrunnelse,
                     },
                 },
-                (response) => setValue("avslag", response.avslag)
+                (response) => setValue(`avslag`, response.avslag ?? null)
             );
         }
     };
