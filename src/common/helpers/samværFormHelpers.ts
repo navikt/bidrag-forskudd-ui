@@ -3,6 +3,7 @@ import {
     SamvaerskalkulatorDetaljer,
     SamvaerskalkulatorFerietype,
     SamvaerskalkulatorNetterFrekvens,
+    Samvaersklasse,
     SamvaersperiodeDto,
 } from "../../api/BidragBehandlingApiV1";
 import {
@@ -41,6 +42,8 @@ export const createSamværsperiodeInitialValues = (periode: SamvaersperiodeDto):
 export const createSamværskalkulatorDefaultvalues = (): SamværskalkulatorFormValues => ({
     isSaved: false,
     regelmessigSamværNetter: null,
+    sumGjennomsnittligSamværPerMåned: 0,
+    samværsklasse: Samvaersklasse.INGENSAMVAeR,
     ferier: Object.values(SamvaerskalkulatorFerietype).reduce(
         (acc, ferietype) => ({
             ...acc,
@@ -64,6 +67,7 @@ export const createSamværskalkulatorInitialValues = (
         isSaved: true,
         regelmessigSamværNetter: samværskalkulatorBeregning?.regelmessigSamværNetter ?? null,
         samværsklasse: samværsperiode?.samværsklasse ?? null,
+        sumGjennomsnittligSamværPerMåned: samværsperiode?.sumGjennomsnittligSamværPerMåned,
         ferier: samværskalkulatorBeregning?.ferier.reduce(
             (acc, ferie) => ({
                 ...acc,

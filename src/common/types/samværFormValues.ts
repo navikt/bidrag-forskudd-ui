@@ -23,6 +23,7 @@ export interface SamværskalkulatorFormValues {
     isSaved: boolean;
     regelmessigSamværNetter?: number;
     samværsklasse?: Samvaersklasse;
+    sumGjennomsnittligSamværPerMåned?: number;
     ferier: SamværskalkulatorFerietypeFormValues;
 }
 

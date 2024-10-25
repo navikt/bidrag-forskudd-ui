@@ -26,12 +26,21 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
     const beregnSamværsklasseFn = useBeregnSamværsklasse();
     const beregning = useWatch({ control, name: `${fieldname}.beregning` });
     const ferier = useWatch({ control, name: `${fieldname}.beregning.ferier` });
-    const samværsklasse = useWatch({ control, name: `${fieldname}.samværsklasse` });
+    const samværsklasse = useWatch({ control, name: `${fieldname}.beregning.samværsklasse` });
+    const sumGjennomsnittligSamværPerMåned = useWatch({
+        control,
+        name: `${fieldname}.beregning.sumGjennomsnittligSamværPerMåned`,
+    });
 
     function beregnSamværsklasse() {
         beregnSamværsklasseFn.mutate(mapToSamværskalkulatoDetaljer({ ...beregning, isSaved: true }), {
             onSuccess: (data) => {
-                setValue(`${fieldname}.samværsklasse`, data);
+                setValue(`${fieldname}.samværsklasse`, data.samværsklasse);
+                setValue(`${fieldname}.beregning.samværsklasse`, data.samværsklasse);
+                setValue(
+                    `${fieldname}.beregning.sumGjennomsnittligSamværPerMåned`,
+                    data.sumGjennomsnittligSamværPerMåned
+                );
             },
         });
     }
@@ -124,7 +133,7 @@ export const SamværskalkulatorForm = ({ fieldname }: SamværskalkulatorProps) =
                         {
                             label: "Beregning",
                             textRight: false,
-                            value: `Samværsklasse ${hentVisningsnavn(samværsklasse)}`,
+                            value: `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
                         },
                     ].filter((d) => d)}
                 />

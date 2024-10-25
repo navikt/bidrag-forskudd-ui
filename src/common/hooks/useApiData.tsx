@@ -5,6 +5,7 @@ import {
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
+    BeregnSamvaersklasseResponsDto,
     HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -19,7 +20,6 @@ import {
     OpplysningerType,
     RolleDto,
     SamvaerskalkulatorDetaljer,
-    Samvaersklasse,
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
     SletteSamvaersperiodeElementDto,
@@ -137,31 +137,13 @@ export const useDeleteSamværsperiode = () => {
         },
     });
 };
-export const useDeleteSamværberegning = () => {
-    const { behandlingId } = useBehandlingProvider();
 
-    return useMutation({
-        mutationKey: MutationKeys.slettSamværskalkulator(behandlingId),
-        mutationFn: async (payload: SletteSamvaersperiodeElementDto): Promise<OppdaterSamvaerResponsDto> => {
-            const { data } = await BEHANDLING_API_V1.api.slettSamvaerskalkulatorBeregning(
-                Number(behandlingId),
-                payload
-            );
-            return data;
-        },
-        networkMode: "always",
-        onError: (error) => {
-            console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
-        },
-    });
-};
 export const useBeregnSamværsklasse = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
         mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
-        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<Samvaersklasse> => {
+        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<BeregnSamvaersklasseResponsDto> => {
             const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
             return data;
         },
