@@ -17,6 +17,7 @@ export const SærbidragPage = () => {
     const {
         erVedtakFattet,
         vedtakstype,
+        kanBehandlesINyLøsning,
         utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -40,6 +41,15 @@ export const SærbidragPage = () => {
                             Vedtak er fattet
                         </Heading>
                         Vedtak er fattet for behandlingen og kan derfor ikke endres
+                    </Alert>
+                )}
+                {!kanBehandlesINyLøsning && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            Kan ikke behandles gjennom ny løsning
+                        </Heading>
+                        Bidragspliktig har en eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor
+                        behandles gjennom gamle løsningen.
                     </Alert>
                 )}
                 <FlexRow className="justify-center">

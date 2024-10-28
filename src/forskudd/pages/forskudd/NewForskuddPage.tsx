@@ -20,6 +20,14 @@ export const NewForskuddPage = () => {
             <div className="m-auto max-w-[1272px] min-[1440px]:max-w-[1920px] grid grid-cols-[max-content,auto]">
                 <ForskuddSideMenu />
                 <div className="w-full p-6 overflow-x-scroll min-[1440px]:overflow-x-visible">
+                    {!kanBehandlesINyLøsning && (
+                        <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                            <Heading level="3" size="small">
+                                Kan ikke behandles gjennom ny løsning
+                            </Heading>
+                            Behandlingen kan ikke behandles gjennom ny løsning.
+                        </Alert>
+                    )}
                     {erVedtakFattet && (
                         <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                             <Heading level="3" size="small">

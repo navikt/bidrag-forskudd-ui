@@ -20,6 +20,7 @@ export const ForskuddPage = () => {
     const {
         virkningstidspunkt,
         erVedtakFattet,
+        kanBehandlesINyLøsning,
         vedtakstype,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -37,6 +38,14 @@ export const ForskuddPage = () => {
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
+                {!kanBehandlesINyLøsning && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            Kan ikke behandles gjennom ny løsning
+                        </Heading>
+                        Behandlingen kan ikke behandles gjennom ny løsning.
+                    </Alert>
+                )}
                 {erVedtakFattet && (
                     <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                         <Heading level="3" size="small">

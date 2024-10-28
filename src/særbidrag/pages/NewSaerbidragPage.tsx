@@ -8,7 +8,7 @@ import FormWrapper from "../components/forms/FormWrapper";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 import { SaerbidragSideMenu } from "./SaerbidragSideMenu";
 export const NewSærbidragPage = () => {
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
 
     return (
         <PageWrapper name="tracking-wide">
@@ -21,6 +21,15 @@ export const NewSærbidragPage = () => {
                                 Vedtak er fattet
                             </Heading>
                             Vedtak er fattet for behandlingen og kan derfor ikke endres
+                        </Alert>
+                    )}
+                    {!kanBehandlesINyLøsning && (
+                        <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                            <Heading level="3" size="small">
+                                Kan ikke behandles gjennom ny løsning
+                            </Heading>
+                            Bidragspliktig har en eller flere løpende bidrag på utenlandsk valuta. Behandlingen må
+                            derfor behandles gjennom gamle løsningen.
                         </Alert>
                     )}
                     <NavigationLoaderWrapper>
