@@ -231,7 +231,7 @@ const tekster = {
             "Et eller flere feltene mangler verdi. Vedtak kan ikke bli fattet før feilen rettes opp.",
     },
     barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig.",
-    resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
+    resetTilOpplysninger: "Tilbakestill til opplysninger fra offentlig registre",
     feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
     år: "år",
 };

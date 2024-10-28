@@ -10,7 +10,7 @@ import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export default function EksterneLenkerKnapper() {
     return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
             <BrukerveiledningKnapp />
         </div>
     );
