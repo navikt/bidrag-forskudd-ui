@@ -31,6 +31,7 @@ import { formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import elementIds from "../../constants/elementIds";
 import { actionOnEnter } from "../../helpers/keyboardHelpers";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
@@ -520,6 +521,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     className={`${
                         saveBoforhold.mutation.isPending ? "relative" : "inherit"
                     } block overflow-x-auto whitespace-nowrap`}
+                    data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed table bg-white w-full">

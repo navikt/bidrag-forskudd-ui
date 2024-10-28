@@ -5,6 +5,8 @@ export default {
     seksjon_inntekt_utvidetbarnetrygd: "utvidetbarnetrygd",
     seksjon_inntekt_skattepliktig: "skattepliktig",
     seksjon_sivilstand: "sivilstand",
+    seksjon_offentlige_opplysninger: "offentlige_opplysninger",
+    seksjon_perioder: "perioder",
     seksjon_boforhold: "boforhold",
     seksjon_andreVoksneIHusstand: "andre_voksne_i_husstand",
     brukerveildning: {

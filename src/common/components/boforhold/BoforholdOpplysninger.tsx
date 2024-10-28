@@ -17,6 +17,7 @@ import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDat
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
+import elementIds from "../../constants/elementIds";
 import { useOnActivateGrunnlag } from "../../hooks/useOnActivateGrunnlag";
 
 const Header = () => (
@@ -154,7 +155,7 @@ export const BoforholdOpplysninger = ({
 
     return (
         <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" data-section={elementIds.seksjon_offentlige_opplysninger}>
                 <Opplysninger perioder={aktivePerioder} />
 
                 {!hasNewOpplysningerFraFolkeregistre &&

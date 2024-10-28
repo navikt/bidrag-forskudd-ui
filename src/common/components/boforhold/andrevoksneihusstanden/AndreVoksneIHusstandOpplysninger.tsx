@@ -12,6 +12,7 @@ import {
     Rolletype,
 } from "../../../../api/BidragBehandlingApiV1";
 import { dateOrNull, DateToDDMMYYYYString, isBeforeDate } from "../../../../utils/date-utils";
+import elementIds from "../../../constants/elementIds";
 import { useBehandlingProvider } from "../../../context/BehandlingContext";
 import { useGetBehandlingV2, useGetOpplysningeAndreVoksneIHusstand } from "../../../hooks/useApiData";
 import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
@@ -163,7 +164,7 @@ export const AndreVoksneIHusstandOpplysninger = ({
 
     return (
         <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" data-section={elementIds.seksjon_offentlige_opplysninger}>
                 <Opplysninger perioder={aktivePerioder} />
 
                 {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (
