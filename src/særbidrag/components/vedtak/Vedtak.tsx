@@ -21,7 +21,7 @@ import { UtgifsposterTable } from "./UtgifstposterTable";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregnetSærbidrag = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
@@ -41,7 +41,10 @@ const Vedtak = () => {
             <VedtakResultat />
 
             {!beregnetSærbidrag?.feil && !lesemodus && (
-                <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!isFatteVedtakEnabled} />
+                <FatteVedtakButtons
+                    isBeregningError={isBeregningError}
+                    disabled={!isFatteVedtakEnabled || !kanBehandlesINyLøsning}
+                />
             )}
             <AdminButtons />
         </div>

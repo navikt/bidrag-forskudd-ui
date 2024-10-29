@@ -212,7 +212,7 @@ const tekster = {
         vedtak: "Vedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",
-        kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles gjennom ny løsning",
+        kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles i ny løsning",
     },
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
