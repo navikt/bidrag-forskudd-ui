@@ -235,9 +235,9 @@ const tekster = {
     resetTilOpplysninger: "Tilbakestill til opplysninger fra offentlig registre",
     feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
     år: "år",
-    kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles gjennom ny løsning.",
+    kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles i ny løsning.",
     kanIkkeBehandlesGjennomNyLøsningSærbidrag:
-        "Bidragspliktig har ett eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles gjennom gamle løsningen.",
+        "Bidragspliktig har ett eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles i gamle løsningen.",
 };
 export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
     opplysningstype: MaBekrefteNyeOpplysninger,
