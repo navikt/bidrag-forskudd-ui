@@ -8,18 +8,27 @@ import { LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 
+import texts from "../../../common/constants/texts";
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { ForskuddSideMenu } from "./ForskuddSideMenu";
 export const NewForskuddPage = () => {
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
 
     return (
         <PageWrapper name="tracking-wide">
             <div className="m-auto max-w-[1272px] min-[1440px]:max-w-[1920px] grid grid-cols-[max-content,auto]">
                 <ForskuddSideMenu />
                 <div className="w-full p-6 overflow-x-scroll min-[1440px]:overflow-x-visible">
+                    {!kanBehandlesINyLøsning && (
+                        <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                            <Heading level="3" size="small">
+                                {texts.title.kanIkkeBehandlesGjennomNyLøsning}
+                            </Heading>
+                            {texts.kanIkkeBehandlesGjennomNyLøsning}
+                        </Alert>
+                    )}
                     {erVedtakFattet && (
                         <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                             <Heading level="3" size="small">
@@ -40,7 +49,7 @@ export const NewForskuddPage = () => {
 
 function EksterneLenkerKnapper() {
     return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
             <LovverkKnapper />
             <BrukerveiledningKnapp />
         </div>

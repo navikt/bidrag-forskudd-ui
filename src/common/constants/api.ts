@@ -22,7 +22,8 @@ export const BIDRAG_GRUNNLAG_API = useApi(
 export const BEHANDLING_API_V1 = useApi(
     new BidragBehandlingApiV1({ baseURL: environment.url.bidragBehandling }),
     "bidrag-behandling",
-    "gcp"
+    "gcp",
+    environment.system.environment
 );
 
 export const BIDRAG_DOKUMENT_PRODUKSJON_API = useApi(

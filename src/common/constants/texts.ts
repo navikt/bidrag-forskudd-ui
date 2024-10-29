@@ -216,6 +216,7 @@ const tekster = {
         vedtak: "Vedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",
+        kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles i ny løsning",
     },
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
@@ -235,9 +236,12 @@ const tekster = {
             "Et eller flere feltene mangler verdi. Vedtak kan ikke bli fattet før feilen rettes opp.",
     },
     barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig.",
-    resetTilOpplysninger: "Reset til opplysninger fra offentlig register",
+    resetTilOpplysninger: "Tilbakestill til opplysninger fra offentlig registre",
     feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
     år: "år",
+    kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles i ny løsning.",
+    kanIkkeBehandlesGjennomNyLøsningSærbidrag:
+        "Bidragspliktig har ett eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles i gamle løsningen.",
 };
 export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
     opplysningstype: MaBekrefteNyeOpplysninger,

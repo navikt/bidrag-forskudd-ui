@@ -404,6 +404,7 @@ export const AndreVoksneIHusstanden = () => {
                         className={`${
                             saveBoforhold.mutation.isPending ? "relative" : "inherit"
                         } block overflow-x-auto whitespace-nowrap`}
+                        data-section={elementIds.seksjon_perioder}
                     >
                         <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                         <Table size="small" className="table-fixed table bg-white w-full">

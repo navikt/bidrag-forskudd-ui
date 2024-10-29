@@ -403,7 +403,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         )}
                     </div>
                 )}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4" data-section={elementIds.seksjon_offentlige_opplysninger}>
                     <Opplysninger />
                     {sivilstandOpplysninger != null && showResetButton && (
                         <div className="flex justify-end mb-4">
@@ -430,6 +430,7 @@ const SivilistandPerioder = ({ virkningstidspunkt }: { virkningstidspunkt: Date 
                         className={`${
                             saveBoforhold.mutation.isPending ? "relative" : "inherit"
                         } block overflow-x-auto whitespace-nowrap`}
+                        data-section={elementIds.seksjon_perioder}
                     >
                         <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                         <Table size="small" className="table-fixed table bg-white w-full">

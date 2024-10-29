@@ -497,6 +497,7 @@ export interface BehandlingDtoV2 {
     stønadstype?: Stonadstype;
     engangsbeløptype?: Engangsbeloptype;
     erVedtakFattet: boolean;
+    kanBehandlesINyLøsning: boolean;
     erKlageEllerOmgjøring: boolean;
     /** @format date-time */
     opprettetTidspunkt: string;
@@ -1101,7 +1102,7 @@ export interface StonadTilBarnetilsynDto {
     periode: DatoperiodeDto;
     skolealder: StonadTilBarnetilsynDtoSkolealderEnum;
     tilsynstype: StonadTilBarnetilsynDtoTilsynstypeEnum;
-    klde: Kilde;
+    kilde: Kilde;
 }
 
 export interface SaerbidragKategoriDto {
@@ -1301,11 +1302,12 @@ export interface OppdatereUtgiftResponse {
     oppdatertNotat?: string;
 }
 
-export interface OppdatereUnderholdReponse {
+export interface OppdatereUnderholdResponse {
     stønadTilBarnetilsyn?: StonadTilBarnetilsynDto;
     faktiskTilsynsutgift?: FaktiskTilsynsutgiftDto;
     tilleggsstønad?: TilleggsstonadDto;
-    underholdskostnad: UnderholdskostnadDto;
+    /** @uniqueItems true */
+    underholdskostnad: UnderholdskostnadDto[];
     valideringsfeil?: ValideringsfeilUnderhold;
 }
 
@@ -1690,6 +1692,28 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsreferanseid?: number;
 }
 
+export interface KanBehandlesINyLosningRequest {
+    /**
+     * @minLength 7
+     * @maxLength 7
+     */
+    saksnummer: string;
+    /**
+     * @maxItems 2147483647
+     * @minItems 2
+     */
+    roller: SjekkRolleDto[];
+    stønadstype: Stonadstype;
+    engangsbeløpstype: Engangsbeloptype;
+}
+
+/** Rolle beskrivelse som er brukte til å opprette nye roller */
+export interface SjekkRolleDto {
+    rolletype: Rolletype;
+    /** F.eks fødselsnummer. Påkrevd for alle rolletyper utenom for barn som ikke inngår i beregning. */
+    ident?: string | null;
+}
+
 export interface BeregnetBidragPerBarn {
     gjelderBarn: string;
     saksnummer: string;
@@ -1769,9 +1793,9 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2888,7 +2912,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppdatere faktisk tilsynsutgift for underholdskostnad i behandling. Returnerer oppdatert element.
+         * @description Oppdatere tilleggsstønad for underholdskostnad i behandling. Returnerer oppdatert element.
          *
          * @tags underhold-controller
          * @name OppdatereTilleggsstonad
@@ -2901,7 +2925,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             data: TilleggsstonadDto,
             params: RequestParams = {}
         ) =>
-            this.request<OppdatereUnderholdReponse, any>({
+            this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilleggsstønad`,
                 method: "PUT",
                 body: data,
@@ -2925,7 +2949,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             data: FaktiskTilsynsutgiftDto,
             params: RequestParams = {}
         ) =>
-            this.request<OppdatereUnderholdReponse, any>({
+            this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/faktisk_tilsynsutgift`,
                 method: "PUT",
                 body: data,
@@ -2936,7 +2960,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppdatere faktisk tilsynsutgift for underholdskostnad i behandling. Returnerer oppdatert element.
+         * @description Oppdatere stønad til barnetilsyn for underholdskostnad i behandling. Returnerer oppdatert element.
          *
          * @tags underhold-controller
          * @name OppdatereStonadTilBarnetilsyn
@@ -2944,12 +2968,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdatereStonadTilBarnetilsyn: (
-            behandlingsid: number,
-            underholdsid: number,
+            behandlingsid: string,
+            underholdsid: string,
             data: StonadTilBarnetilsynDto,
             params: RequestParams = {}
         ) =>
-            this.request<OppdatereUnderholdReponse, any>({
+            this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/barnetilsyn`,
                 method: "PUT",
                 body: data,
@@ -3158,6 +3182,40 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Sjekk om behandling kan behandles i ny løsning
+         *
+         * @tags behandling-controller-v-2
+         * @name KanBehandlesINyLosning
+         * @request POST:/api/v2/behandling/kanBehandles
+         * @secure
+         */
+        kanBehandlesINyLosning: (data: KanBehandlesINyLosningRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/kanBehandles`,
+                method: "POST",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                ...params,
+            }),
+
+        /**
+         * @description Sjekk om behandling kan behandles i ny løsning
+         *
+         * @tags behandling-controller-v-2
+         * @name KanBehandlingBehandlesINyLosning
+         * @request POST:/api/v2/behandling/kanBehandles/{behandlingsid}
+         * @secure
+         */
+        kanBehandlingBehandlesINyLosning: (behandlingsid: number, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/kanBehandles/${behandlingsid}`,
+                method: "POST",
+                secure: true,
                 ...params,
             }),
 
@@ -3538,7 +3596,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppdatere underholdskostnad for behandling. Returnerer oppdaterte underholdsobjekt. Objektet  vil være null dersom barn slettes.
+         * @description Sletter fra underholdskostnad i behandling. Returnerer oppdaterte underholdsobjekt. Objektet  vil være null dersom barn slettes.
          *
          * @tags underhold-controller
          * @name SletteFraUnderhold

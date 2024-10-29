@@ -35,6 +35,7 @@ import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@u
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import elementIds from "../../../../common/constants/elementIds";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -581,6 +582,7 @@ const UtgifterListe = () => {
                     className={`${
                         saveUtgifter.mutation.isPending ? "relative" : "inherit"
                     } block overflow-x-auto whitespace-nowrap`}
+                    data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveUtgifter.mutation.isPending} />
                     <Table size="small" className="table-fixed table bg-white w-full">
