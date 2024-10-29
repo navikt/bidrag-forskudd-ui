@@ -8,6 +8,7 @@ import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
 
+import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
@@ -46,10 +47,9 @@ export const SærbidragPage = () => {
                 {!kanBehandlesINyLøsning && (
                     <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                         <Heading level="3" size="small">
-                            Kan ikke behandles gjennom ny løsning
+                            {texts.title.kanIkkeBehandlesGjennomNyLøsning}
                         </Heading>
-                        Bidragspliktig har en eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor
-                        behandles gjennom gamle løsningen.
+                        {texts.kanIkkeBehandlesGjennomNyLøsningSærbidrag}
                     </Alert>
                 )}
                 <FlexRow className="justify-center">

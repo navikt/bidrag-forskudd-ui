@@ -4,6 +4,7 @@ import PageWrapper from "@common/PageWrapper";
 import { Alert, Heading } from "@navikt/ds-react";
 import React from "react";
 
+import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 import { SaerbidragSideMenu } from "./SaerbidragSideMenu";
@@ -26,10 +27,9 @@ export const NewSærbidragPage = () => {
                     {!kanBehandlesINyLøsning && (
                         <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                             <Heading level="3" size="small">
-                                Kan ikke behandles gjennom ny løsning
+                                {texts.title.kanIkkeBehandlesGjennomNyLøsning}
                             </Heading>
-                            Bidragspliktig har en eller flere løpende bidrag på utenlandsk valuta. Behandlingen må
-                            derfor behandles gjennom gamle løsningen.
+                            {texts.kanIkkeBehandlesGjennomNyLøsningSærbidrag}
                         </Alert>
                     )}
                     <NavigationLoaderWrapper>

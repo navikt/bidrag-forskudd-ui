@@ -8,12 +8,13 @@ import { LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 
+import texts from "../../../common/constants/texts";
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { ForskuddStepper } from "../../enum/ForskuddStepper";
 import { ForskuddSideMenu } from "./ForskuddSideMenu";
 export const NewForskuddPage = () => {
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
 
     return (
         <PageWrapper name="tracking-wide">
@@ -23,9 +24,9 @@ export const NewForskuddPage = () => {
                     {!kanBehandlesINyLøsning && (
                         <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                             <Heading level="3" size="small">
-                                Kan ikke behandles gjennom ny løsning
+                                {texts.title.kanIkkeBehandlesGjennomNyLøsning}
                             </Heading>
-                            Behandlingen kan ikke behandles gjennom ny løsning.
+                            {texts.kanIkkeBehandlesGjennomNyLøsning}
                         </Alert>
                     )}
                     {erVedtakFattet && (
