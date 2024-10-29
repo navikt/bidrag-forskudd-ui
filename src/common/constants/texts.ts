@@ -237,7 +237,7 @@ const tekster = {
     år: "år",
     kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles gjennom ny løsning.",
     kanIkkeBehandlesGjennomNyLøsningSærbidrag:
-        "Bidragspliktig har en eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles gjennom gamle løsningen.",
+        "Bidragspliktig har ett eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles gjennom gamle løsningen.",
 };
 export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
     opplysningstype: MaBekrefteNyeOpplysninger,
