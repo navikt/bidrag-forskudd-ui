@@ -212,6 +212,7 @@ const tekster = {
         vedtak: "Vedtak",
         virkningstidspunkt: "Virkningstidspunkt",
         vedtakFattet: "Vedtak er fattet",
+        kanIkkeBehandlesGjennomNyLøsning: "Kan ikke behandles i ny løsning",
     },
     varsel: {
         beregneFeil: "For å fatte vedtak må du rette opp feil i følgende steder:",
@@ -234,6 +235,9 @@ const tekster = {
     resetTilOpplysninger: "Tilbakestill til opplysninger fra offentlig registre",
     feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
     år: "år",
+    kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles i ny løsning.",
+    kanIkkeBehandlesGjennomNyLøsningSærbidrag:
+        "Bidragspliktig har ett eller flere løpende bidrag på utenlandsk valuta. Behandlingen må derfor behandles i gamle løsningen.",
 };
 export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
     opplysningstype: MaBekrefteNyeOpplysninger,

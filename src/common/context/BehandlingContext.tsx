@@ -184,7 +184,11 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             behandlingId,
             vedtakId,
             erVirkningstidspunktNåværendeMånedEllerFramITid,
-            lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
+            lesemodus:
+                vedtakId != null ||
+                behandling.erVedtakFattet ||
+                queryLesemodus ||
+                behandling.kanBehandlesINyLøsning === false,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             errorMessage,

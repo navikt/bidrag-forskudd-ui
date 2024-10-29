@@ -4,11 +4,12 @@ import PageWrapper from "@common/PageWrapper";
 import { Alert, Heading } from "@navikt/ds-react";
 import React from "react";
 
+import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 import { SaerbidragSideMenu } from "./SaerbidragSideMenu";
 export const NewSærbidragPage = () => {
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
 
     return (
         <PageWrapper name="tracking-wide">
@@ -21,6 +22,14 @@ export const NewSærbidragPage = () => {
                                 Vedtak er fattet
                             </Heading>
                             Vedtak er fattet for behandlingen og kan derfor ikke endres
+                        </Alert>
+                    )}
+                    {!kanBehandlesINyLøsning && (
+                        <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                            <Heading level="3" size="small">
+                                {texts.title.kanIkkeBehandlesGjennomNyLøsning}
+                            </Heading>
+                            {texts.kanIkkeBehandlesGjennomNyLøsningSærbidrag}
                         </Alert>
                     )}
                     <NavigationLoaderWrapper>
