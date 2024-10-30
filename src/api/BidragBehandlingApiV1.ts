@@ -922,9 +922,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    til?: string;
-    /** @format date */
     fom: string;
+    /** @format date */
+    til?: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1166,6 +1166,7 @@ export interface UnderholdDto {
     tilleggsstønad: TilleggsstonadDto[];
     /** @uniqueItems true */
     underholdskostnad: UnderholdskostnadDto[];
+    begrunnelse?: string;
 }
 
 export interface UnderholdskostnadDto {
@@ -1319,6 +1320,11 @@ export interface ValideringsfeilUnderhold {
     fremtidigPeriode: boolean;
     /** Er sann hvis antall perioder er 0." */
     harIngenPerioder: boolean;
+}
+
+export interface OppdatereUnderholdRequest {
+    harTilsynsordning?: boolean;
+    begrunnelse?: string;
 }
 
 export interface OppdaterSamvaerDto {
@@ -2285,8 +2291,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -2529,8 +2535,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2888,31 +2894,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Angir om et barn har tilsynsordning.
-         *
-         * @tags underhold-controller
-         * @name AngiTilsynsordning
-         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/tilsynsordning
-         * @secure
-         */
-        angiTilsynsordning: (
-            behandlingsid: number,
-            underholdsid: number,
-            query: {
-                harTilsynsordning: boolean;
-            },
-            params: RequestParams = {}
-        ) =>
-            this.request<boolean, any>({
-                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilsynsordning`,
-                method: "PUT",
-                query: query,
-                secure: true,
-                format: "json",
-                ...params,
-            }),
-
-        /**
          * @description Oppdatere tilleggsstønad for underholdskostnad i behandling. Returnerer oppdatert element.
          *
          * @tags underhold-controller
@@ -2928,6 +2909,30 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         ) =>
             this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilleggsstønad`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Angir om et barn har tilsynsordning.
+         *
+         * @tags underhold-controller
+         * @name OppdatereUnderhold
+         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/oppdatere
+         * @secure
+         */
+        oppdatereUnderhold: (
+            behandlingsid: number,
+            underholdsid: number,
+            data: OppdatereUnderholdRequest,
+            params: RequestParams = {}
+        ) =>
+            this.request<UnderholdDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/oppdatere`,
                 method: "PUT",
                 body: data,
                 secure: true,
