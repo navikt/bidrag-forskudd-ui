@@ -63,6 +63,7 @@ const tekster = {
         feilmelding: "Det har skjedd en feil",
         hentingAvNotat: "Det skjedde en feil ved henting av notat",
         hullIPerioder: "Det er perioder uten status.",
+        manglerBegrunnelse: "Begrunnelse må fylles ut",
         hullIPerioderInntekt: "Det er perioder uten inntekt",
         hullIPerioderFiks: "Korriger eller legg til inntekt i periodene.",
         identMåFyllesUt: "Ident må fylles ut",

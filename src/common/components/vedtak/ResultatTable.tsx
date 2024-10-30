@@ -9,11 +9,12 @@ interface TableData {
 interface GenericTableProps {
     data: TableData[]; // Array of data objects
     title?: string;
+    className?: string;
 }
 
-export const ResultatTable: React.FC<GenericTableProps> = ({ data, title }) => {
+export const ResultatTable: React.FC<GenericTableProps> = ({ data, title, className }) => {
     return (
-        <div>
+        <div className={className}>
             {title && <Heading size="xsmall">{title}</Heading>}
             <table>
                 <thead>

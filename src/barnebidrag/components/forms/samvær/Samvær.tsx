@@ -441,7 +441,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 className="overflow-hidden grid gap-2 py-2 px-4 w-full"
                 id={`${elementIds.seksjon_samvær}_${samværId}`}
             >
-                {valideringsfeil && (
+                {valideringsfeil?.harPeriodiseringsfeil && (
                     <div className="mb-4">
                         <BehandlingAlert variant="warning">
                             <Heading spacing size="small" level="3">

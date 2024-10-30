@@ -148,6 +148,10 @@ export const SamværskalkulatorView = ({ fieldname }: SamværskalkulatorProps) =
     const regelmessigSamværNetter = useWatch({ control, name: `${fieldname}.beregning.regelmessigSamværNetter` });
     const ferier = useWatch({ control, name: `${fieldname}.beregning.ferier` });
     const samværsklasse = useWatch({ control, name: `${fieldname}.samværsklasse` });
+    const sumGjennomsnittligSamværPerMåned = useWatch({
+        control,
+        name: `${fieldname}.beregning.sumGjennomsnittligSamværPerMåned`,
+    });
 
     if (ferier === undefined) return null;
     return (
@@ -201,11 +205,12 @@ export const SamværskalkulatorView = ({ fieldname }: SamværskalkulatorProps) =
             </div>
             {samværsklasse && (
                 <ResultatTable
+                    className="w-max"
                     data={[
                         {
                             label: "Beregning",
                             textRight: false,
-                            value: `Samværsklasse ${hentVisningsnavn(samværsklasse)}`,
+                            value: `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
                         },
                     ].filter((d) => d)}
                 />
