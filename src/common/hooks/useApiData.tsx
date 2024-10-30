@@ -5,7 +5,6 @@ import {
     ArbeidsforholdGrunnlagDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
-    DelberegningSamvaersklasse,
     HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -142,7 +141,7 @@ export const useBeregnSamværsklasse = () => {
 
     return useMutation({
         mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
-        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<DelberegningSamvaersklasse> => {
+        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<BeregnSamvaersklasseResponsDto> => {
             const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
             return data;
         },
