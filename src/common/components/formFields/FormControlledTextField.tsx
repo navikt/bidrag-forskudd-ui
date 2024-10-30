@@ -49,7 +49,7 @@ export const FormControlledTextField = ({
             label={label}
             size="small"
             readOnly={lesemodus}
-            value={field.value?.toString()}
+            value={field?.value?.toString() ?? ""}
             onChange={(value) => onChange(value)}
             hideLabel={hideLabel}
             disabled={disabled}

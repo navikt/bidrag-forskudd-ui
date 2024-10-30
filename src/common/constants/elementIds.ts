@@ -8,6 +8,7 @@ export default {
     seksjon_offentlige_opplysninger: "offentlige_opplysninger",
     seksjon_perioder: "perioder",
     seksjon_boforhold: "boforhold",
+    seksjon_samvær: "samvær",
     seksjon_andreVoksneIHusstand: "andre_voksne_i_husstand",
     brukerveildning: {
         tabell_skattepliktig: "tabell-skattepliktig",

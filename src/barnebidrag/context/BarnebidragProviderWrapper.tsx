@@ -23,6 +23,10 @@ export type PageErrorsOrUnsavedState = {
         error: boolean;
         openFields?: boolean;
     };
+    samvær: {
+        error: boolean;
+        openFields?: boolean;
+    };
     inntekt: {
         error: boolean;
         openFields?: {
@@ -35,6 +39,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
     const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
         underholdskostnad: { error: false },
         boforhold: { error: false },
+        samvær: { error: false },
         inntekt: { error: false },
     });
     const formSteps = { defaultStep: BarnebidragStepper.UNDERHOLDSKOSTNAD, steps: BarnebidragSteps };
