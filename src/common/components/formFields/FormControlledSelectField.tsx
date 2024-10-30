@@ -27,7 +27,6 @@ export const FormControlledSelectField = ({
     className,
     onSelect,
     onBeforeSelect,
-    disabled,
     children,
 }: PropsWithChildren<FormControlledSelectFieldProps>) => {
     const { control } = useFormContext();
@@ -46,7 +45,6 @@ export const FormControlledSelectField = ({
             label={label}
             readOnly={lesemodus}
             className={className}
-            disabled={disabled}
             size="small"
             value={field.value}
             onChange={(e) => onChange(e)}
