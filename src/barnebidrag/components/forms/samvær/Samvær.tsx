@@ -49,7 +49,7 @@ import {
 } from "../../../../utils/date-utils";
 import { STEPS } from "../../../constants/steps";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
-import { SamværskalkulatorButton, SamværskalkulatorView } from "./Samværskalkulator";
+import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
 import { Samværsperiode } from "./Samværsperiode";
 
 const SamværForm = () => {
@@ -385,7 +385,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
             perioder.append({
                 fom: findFomdato(previousPeriode),
                 tom: null,
-                samværsklasse: previousPeriode?.samværsklasse ?? Samvaersklasse.INGENSAMVAeR,
+                samværsklasse: previousPeriode?.samværsklasse ?? Samvaersklasse.SAMVAeRSKLASSE0,
                 beregning: previousPeriode?.beregning ?? createSamværskalkulatorDefaultvalues(),
             });
 
@@ -557,7 +557,7 @@ const SamværsperiodeTable: React.FC<SamværsperiodeTableProps> = ({
                             setIsExpanded((prev) => ({ ...prev, [index]: isOpen }));
                         }}
                         expansionDisabled={!isSamværsklasseCalculated(item)}
-                        content={<SamværskalkulatorView fieldname={`${fieldName}.${index}`} />}
+                        content={<SamværskalkulatorForm fieldname={`${fieldName}.${index}`} viewOnly />}
                     >
                         <Table.DataCell textSize="small">
                             <Samværsperiode

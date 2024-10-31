@@ -42,15 +42,18 @@ export const createSamværsperiodeInitialValues = (periode: SamvaersperiodeDto):
 export const createSamværskalkulatorDefaultvalues = (): SamværskalkulatorFormValues => ({
     isSaved: false,
     regelmessigSamværNetter: null,
-    sumGjennomsnittligSamværPerMåned: 0,
-    samværsklasse: Samvaersklasse.INGENSAMVAeR,
+    gjennomsnittligSamværPerMåned: 0,
+    samværsklasse: Samvaersklasse.SAMVAeRSKLASSE0,
     ferier: Object.values(SamvaerskalkulatorFerietype).reduce(
         (acc, ferietype) => ({
             ...acc,
             [ferietype as SamvaerskalkulatorFerietype]: {
                 bidragsmottakerNetter: null,
                 bidragspliktigNetter: null,
-                frekvens: SamvaerskalkulatorNetterFrekvens.ANNENHVERTAR,
+                frekvens:
+                    ferietype === SamvaerskalkulatorFerietype.SOMMERFERIE
+                        ? SamvaerskalkulatorNetterFrekvens.HVERTAR
+                        : SamvaerskalkulatorNetterFrekvens.ANNETHVERTAR,
             },
         }),
         {}
@@ -67,7 +70,7 @@ export const createSamværskalkulatorInitialValues = (
         isSaved: true,
         regelmessigSamværNetter: samværskalkulatorBeregning?.regelmessigSamværNetter ?? null,
         samværsklasse: samværsperiode?.samværsklasse ?? null,
-        sumGjennomsnittligSamværPerMåned: samværsperiode?.sumGjennomsnittligSamværPerMåned,
+        gjennomsnittligSamværPerMåned: samværsperiode?.gjennomsnittligSamværPerMåned,
         ferier: samværskalkulatorBeregning?.ferier.reduce(
             (acc, ferie) => ({
                 ...acc,
@@ -88,8 +91,8 @@ export const mapToSamværskalkulatoDetaljer = (beregning?: SamværskalkulatorFor
         regelmessigSamværNetter: beregning.regelmessigSamværNetter ?? 0,
         ferier: Object.entries(beregning.ferier).map(([ferietype, item]) => ({
             type: ferietype as SamvaerskalkulatorFerietype,
-            bidragsmottakerNetter: item.bidragsmottakerNetter,
-            bidragspliktigNetter: item.bidragspliktigNetter,
+            bidragsmottakerNetter: item.bidragsmottakerNetter == null ? undefined : item.bidragsmottakerNetter,
+            bidragspliktigNetter: item.bidragspliktigNetter == null ? undefined : item.bidragspliktigNetter,
             frekvens: item.frekvens,
         })),
     };
