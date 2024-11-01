@@ -1,5 +1,5 @@
 import { CalculatorIcon } from "@navikt/aksel-icons";
-import { BodyShort, Button, Heading, HStack, Modal, Table, VStack } from "@navikt/ds-react";
+import { BodyShort, Button, Heading, HelpText, HStack, Modal, Table, VStack } from "@navikt/ds-react";
 import { useEffect, useRef } from "react";
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -45,6 +45,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     const debouncedOnSave = useDebounce(beregnSamværsklasse);
 
     useEffect(() => {
+        if (viewOnly) return;
         const subscription = watch((_, { name, type }) => {
             if (name.includes("beregning") && type === "change") {
                 debouncedOnSave();
@@ -152,15 +153,33 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                 </Table>
             </div>
             {samværsklasse && (
-                <ResultatTable
-                    data={[
-                        {
-                            label: "Beregning",
-                            textRight: false,
-                            value: `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
-                        },
-                    ].filter((d) => d)}
-                />
+                <HStack gap={"1"} align={"center"}>
+                    <ResultatTable
+                        data={[
+                            {
+                                label: "Beregning",
+                                textRight: false,
+                                value: `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
+                            },
+                        ].filter((d) => d)}
+                    />
+                    <HelpText>
+                        Samværsfradraget regnes ut ifra samværsklasser. Det gjennomsnittlige samværet er delt i fire
+                        samværsklasser.
+                        <br /> <strong>Samværsklasse 0</strong> <br />
+                        0 - 1,99 netter/dager per måned
+                        <br /> <strong>Samværsklasse 1</strong> <br />
+                        2 - 3,99 netter/dager per måned
+                        <br />
+                        <strong>Samværsklasse 2</strong>
+                        <br />
+                        4 - 8,99 netter per måned
+                        <br /> <strong>Samværsklasse 3</strong> <br />
+                        9 - 13,99 netter per måned
+                        <br /> <strong>Samværsklasse 4</strong> <br />
+                        14 - 15 netter per måned
+                    </HelpText>
+                </HStack>
             )}
         </VStack>
     );
