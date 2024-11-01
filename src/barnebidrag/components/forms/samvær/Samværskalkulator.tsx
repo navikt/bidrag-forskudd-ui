@@ -31,6 +31,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     const sumGjennomsnittligSamværPerMåned = useWatch({
         control,
         name: `${fieldname}.beregning.gjennomsnittligSamværPerMåned`,
+        name: `${fieldname}.beregning.gjennomsnittligSamværPerMåned`,
     });
 
     function beregnSamværsklasse() {
@@ -38,6 +39,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
             onSuccess: (data) => {
                 setValue(`${fieldname}.samværsklasse`, data.samværsklasse);
                 setValue(`${fieldname}.beregning.samværsklasse`, data.samværsklasse);
+                setValue(`${fieldname}.beregning.gjennomsnittligSamværPerMåned`, data.gjennomsnittligSamværPerMåned);
                 setValue(`${fieldname}.beregning.gjennomsnittligSamværPerMåned`, data.gjennomsnittligSamværPerMåned);
             },
         });
@@ -81,6 +83,28 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                         </BodyShort>
                     </HStack>
                 )}
+                {viewOnly ? (
+                    <HStack gap="2">
+                        <strong>Antall netter: </strong>
+                        {beregning.regelmessigSamværNetter} / 14 dager
+                    </HStack>
+                ) : (
+                    <HStack gap="1">
+                        <FormControlledTextField
+                            name={`${fieldname}.beregning.regelmessigSamværNetter`}
+                            label={"Antall netter"}
+                            type="number"
+                            inputMode="decimal"
+                            min={0}
+                            max={15}
+                            step="0.1"
+                        />
+                        <BodyShort size="small" className="self-end">
+                            {" "}
+                            /14 dager
+                        </BodyShort>
+                    </HStack>
+                )}
             </BodyShort>
 
             <div>
@@ -93,8 +117,10 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[100px]">
                                 {"Bidragspliktig"}
+                                {"Bidragspliktig"}
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[100px]">
+                                {"Bidragsmottaker"}
                                 {"Bidragsmottaker"}
                             </Table.HeaderCell>
                             <Table.HeaderCell scope="col" className="w-[180px]">
@@ -107,6 +133,19 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                             <Table.Row key={ferietype + "_" + index} className="align-top">
                                 <Table.DataCell textSize="small">{hentVisningsnavn(ferietype)}</Table.DataCell>
                                 <Table.DataCell textSize="small">
+                                    {viewOnly ? (
+                                        _item.bidragspliktigNetter
+                                    ) : (
+                                        <FormControlledTextField
+                                            name={`${fieldname}.beregning.ferier.${ferietype}.bidragspliktigNetter`}
+                                            label={""}
+                                            hideLabel
+                                            type="number"
+                                            inputMode="decimal"
+                                            min={0}
+                                            step="0.1"
+                                        />
+                                    )}
                                     {viewOnly ? (
                                         _item.bidragspliktigNetter
                                     ) : (
@@ -135,8 +174,30 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                                             step="0.1"
                                         />
                                     )}
+                                    {viewOnly ? (
+                                        _item.bidragsmottakerNetter
+                                    ) : (
+                                        <FormControlledTextField
+                                            name={`${fieldname}.beregning.ferier.${ferietype}.bidragsmottakerNetter`}
+                                            label={""}
+                                            hideLabel
+                                            type="number"
+                                            inputMode="decimal"
+                                            min={0}
+                                            step="0.1"
+                                        />
+                                    )}
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">
+                                    {viewOnly ? (
+                                        hentVisningsnavn(_item.frekvens)
+                                    ) : (
+                                        <FerieFrekvens
+                                            fieldName={`${fieldname}.beregning.ferier.${ferietype}`}
+                                            editableRow={true}
+                                            item={_item?.frekvens}
+                                        />
+                                    )}
                                     {viewOnly ? (
                                         hentVisningsnavn(_item.frekvens)
                                     ) : (
