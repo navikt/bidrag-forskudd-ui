@@ -13,6 +13,8 @@ export const FormControlledTextField = ({
     min,
     editable = true,
     inputMode,
+    max,
+    step,
     prefix,
 }: {
     name: string;
@@ -23,6 +25,8 @@ export const FormControlledTextField = ({
     editable?: boolean;
     prefix?: string;
     min?: string | number;
+    max?: string | number;
+    step?: string;
     inputMode?: "email" | "tel" | "text" | "url" | "search" | "none" | "numeric" | "decimal";
 }) => {
     const { control, clearErrors } = useFormContext();
@@ -55,6 +59,8 @@ export const FormControlledTextField = ({
             disabled={disabled}
             error={fieldState?.error?.message}
             min={min}
+            max={max}
+            step={step}
             inputMode={inputMode}
         />
     );

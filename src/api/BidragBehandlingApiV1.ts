@@ -209,15 +209,12 @@ export enum Rolletype {
 
 export interface SamvaerskalkulatorDetaljer {
     ferier: SamvaerskalkulatorFerie[];
-    /** @format int32 */
     regelmessigSamværNetter: number;
 }
 
 export interface SamvaerskalkulatorFerie {
     type: SamvaerskalkulatorFerietype;
-    /** @format int32 */
     bidragsmottakerNetter: number;
-    /** @format int32 */
     bidragspliktigNetter: number;
     frekvens: SamvaerskalkulatorNetterFrekvens;
 }
@@ -233,11 +230,11 @@ export enum SamvaerskalkulatorFerietype {
 
 export enum SamvaerskalkulatorNetterFrekvens {
     HVERTAR = "HVERT_ÅR",
-    ANNENHVERTAR = "ANNEN_HVERT_ÅR",
+    ANNETHVERTAR = "ANNET_HVERT_ÅR",
 }
 
 export enum Samvaersklasse {
-    INGENSAMVAeR = "INGEN_SAMVÆR",
+    SAMVAeRSKLASSE0 = "SAMVÆRSKLASSE_0",
     SAMVAeRSKLASSE1 = "SAMVÆRSKLASSE_1",
     SAMVAeRSKLASSE2 = "SAMVÆRSKLASSE_2",
     SAMVAeRSKLASSE3 = "SAMVÆRSKLASSE_3",
@@ -999,7 +996,7 @@ export interface SamvaersperiodeDto {
     id?: number;
     periode: DatoperiodeDto;
     samværsklasse: Samvaersklasse;
-    sumGjennomsnittligSamværPerMåned: number;
+    gjennomsnittligSamværPerMåned: number;
     beregning?: SamvaerskalkulatorDetaljer;
 }
 
@@ -1620,9 +1617,9 @@ export interface OppdaterRollerResponse {
     status: OppdaterRollerResponseStatusEnum;
 }
 
-export interface BeregnSamvaersklasseResultat {
+export interface DelberegningSamvaersklasse {
     samværsklasse: Samvaersklasse;
-    sumGjennomsnittligSamværPerMåned: number;
+    gjennomsnittligSamværPerMåned: number;
 }
 
 export interface OpprettBehandlingRequest {
@@ -1800,9 +1797,9 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2031,7 +2028,10 @@ export enum Grunnlagstype {
     INNBETALTBELOP = "INNBETALT_BELØP",
     FORHOLDSMESSIG_FORDELING = "FORHOLDSMESSIG_FORDELING",
     KLAGE_STATISTIKK = "KLAGE_STATISTIKK",
+    NETTO_TILSYNSUTGIFT = "NETTO_TILSYNSUTGIFT",
     SAMVAeRSPERIODE = "SAMVÆRSPERIODE",
+    SAMVAeRSKALKULATOR = "SAMVÆRSKALKULATOR",
+    DELBEREGNINGSAMVAeRSKLASSE = "DELBEREGNING_SAMVÆRSKLASSE",
     SJABLON = "SJABLON",
     SJABLON_BIDRAGSEVNE = "SJABLON_BIDRAGSEVNE",
     SJABLON_TRINNVIS_SKATTESATS = "SJABLON_TRINNVIS_SKATTESATS",
@@ -2072,6 +2072,7 @@ export enum Grunnlagstype {
     PERSONSOKNADSBARN = "PERSON_SØKNADSBARN",
     PERSON_HUSSTANDSMEDLEM = "PERSON_HUSSTANDSMEDLEM",
     PERSON_BARN_BIDRAGSPLIKTIG = "PERSON_BARN_BIDRAGSPLIKTIG",
+    PERSON_BARN_BIDRAGSMOTTAKER = "PERSON_BARN_BIDRAGSMOTTAKER",
     BEREGNET_INNTEKT = "BEREGNET_INNTEKT",
     INNHENTET_HUSSTANDSMEDLEM = "INNHENTET_HUSSTANDSMEDLEM",
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
@@ -2291,8 +2292,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -3116,7 +3117,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         beregnSamvaersklasse: (data: SamvaerskalkulatorDetaljer, params: RequestParams = {}) =>
-            this.request<BeregnSamvaersklasseResultat, any>({
+            this.request<DelberegningSamvaersklasse, any>({
                 path: `/api/v2/samvar/beregn`,
                 method: "POST",
                 body: data,
