@@ -31,7 +31,6 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     const sumGjennomsnittligSamværPerMåned = useWatch({
         control,
         name: `${fieldname}.beregning.gjennomsnittligSamværPerMåned`,
-        name: `${fieldname}.beregning.gjennomsnittligSamværPerMåned`,
     });
 
     function beregnSamværsklasse() {
@@ -39,7 +38,6 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
             onSuccess: (data) => {
                 setValue(`${fieldname}.samværsklasse`, data.samværsklasse);
                 setValue(`${fieldname}.beregning.samværsklasse`, data.samværsklasse);
-                setValue(`${fieldname}.beregning.gjennomsnittligSamværPerMåned`, data.gjennomsnittligSamværPerMåned);
                 setValue(`${fieldname}.beregning.gjennomsnittligSamværPerMåned`, data.gjennomsnittligSamværPerMåned);
             },
         });
