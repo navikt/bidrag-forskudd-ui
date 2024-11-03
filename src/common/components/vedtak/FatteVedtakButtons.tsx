@@ -9,6 +9,7 @@ import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
+import { useBehandlingV2 } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
@@ -25,6 +26,7 @@ export const FatteVedtakButtons = ({
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
+    const { engangsbeløptype, stønadstype } = useBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
@@ -34,8 +36,11 @@ export const FatteVedtakButtons = ({
             return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId));
         },
         onSuccess: () => {
-            faro.api.pushEvent(`Fatte vedtak om ${type?.toLocaleLowerCase()}`, {
+            faro.api.pushEvent(`fatte.vedtak`, {
                 behandlingId: behandlingId?.toString() ?? "Ukjent",
+                stønadstype,
+                engangsbeløptype,
+                behandlingType: type,
             });
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
         },
