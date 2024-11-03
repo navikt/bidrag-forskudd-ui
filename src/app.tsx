@@ -11,6 +11,7 @@ import {
     FaroRoutes,
     getWebInstrumentations,
     initializeFaro,
+    LogLevel,
     ReactIntegration,
 } from "@grafana/faro-react";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
@@ -40,14 +41,17 @@ import { SærligeugifterProviderWrapper } from "./særbidrag/context/Særligeugi
 import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
-initializeFaro({
+export const faro = initializeFaro({
     app: {
         name: "bidrag-behandling-ui",
     },
     url: process.env.TELEMETRY_URL as string,
     instrumentations: [
         // Load the default Web instrumentations
-        ...getWebInstrumentations(),
+        ...getWebInstrumentations({
+            captureConsole: true,
+            captureConsoleDisabledLevels: [LogLevel.DEBUG, LogLevel.TRACE],
+        }),
 
         new ReactIntegration({
             router: createReactRouterV6Options({
@@ -60,6 +64,7 @@ initializeFaro({
         }),
     ],
 });
+
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
 const queryClient = new QueryClient({
@@ -159,6 +164,7 @@ function ForskuddBrukerveiledningPageWrapper() {
 }
 function SærbidragBrukerveiledningPageWrapper() {
     useEffect(scrollToHash, []);
+
     return (
         <PageWrapper name="Særbidrag brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">

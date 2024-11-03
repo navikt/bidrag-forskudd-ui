@@ -1,6 +1,7 @@
 import { NavigationLoaderWrapper } from "@common/components/NavigationLoaderWrapper";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
+import { faro, LogLevel } from "@grafana/faro-react";
 import { Alert, Heading } from "@navikt/ds-react";
 import React from "react";
 
@@ -9,8 +10,13 @@ import FormWrapper from "../components/forms/FormWrapper";
 import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 import { SaerbidragSideMenu } from "./SaerbidragSideMenu";
 export const NewSærbidragPage = () => {
-    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
-
+    const { erVedtakFattet, kanBehandlesINyLøsning, id } = useGetBehandlingV2();
+    faro.api.pushLog([`Åpner behandling for særbidrag`], {
+        level: LogLevel.INFO,
+        context: {
+            behandlingId: id?.toString() ?? "Ukjent",
+        },
+    });
     return (
         <PageWrapper name="tracking-wide">
             <div className="m-auto max-w-[1272px] min-[1440px]:max-w-[1920px] grid grid-cols-[max-content,auto]">

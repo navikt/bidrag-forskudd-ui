@@ -132,7 +132,7 @@ export const useDeleteSamværsperiode = () => {
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
+            LoggerService.error("Feil ved sletting av samværsperiode", error);
         },
     });
 };
@@ -166,7 +166,7 @@ export const useUpdateSamvær = () => {
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
+            LoggerService.error("Feil ved oppdatering av samvær", error);
         },
     });
 };
