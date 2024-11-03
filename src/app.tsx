@@ -14,7 +14,7 @@ import {
     LogLevel,
     ReactIntegration,
 } from "@grafana/faro-react";
-import { BidragContainer } from "@navikt/bidrag-ui-common";
+import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
@@ -46,6 +46,9 @@ export const faro = initializeFaro({
         name: "bidrag-behandling-ui",
     },
     url: process.env.TELEMETRY_URL as string,
+    user: {
+        username: await SecuritySessionUtils.hentSaksbehandlerId(),
+    },
     instrumentations: [
         // Load the default Web instrumentations
         ...getWebInstrumentations({
