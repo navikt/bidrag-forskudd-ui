@@ -75,7 +75,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                             max={15}
                             step="0.1"
                         />
-                        <BodyShort size="small" className="self-end">
+                        <BodyShort size="small" className="self-center h-0">
                             {" "}
                             /14 dager
                         </BodyShort>
@@ -163,22 +163,24 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                             },
                         ].filter((d) => d)}
                     />
-                    <HelpText>
-                        Samværsfradraget regnes ut ifra samværsklasser. Det gjennomsnittlige samværet er delt i fire
-                        samværsklasser.
-                        <br /> <strong>Samværsklasse 0</strong> <br />
-                        0 - 1,99 netter/dager per måned
-                        <br /> <strong>Samværsklasse 1</strong> <br />
-                        2 - 3,99 netter/dager per måned
-                        <br />
-                        <strong>Samværsklasse 2</strong>
-                        <br />
-                        4 - 8,99 netter per måned
-                        <br /> <strong>Samværsklasse 3</strong> <br />
-                        9 - 13,99 netter per måned
-                        <br /> <strong>Samværsklasse 4</strong> <br />
-                        14 - 15 netter per måned
-                    </HelpText>
+                    {!viewOnly && (
+                        <HelpText>
+                            Samværsfradraget regnes ut ifra samværsklasser. Det gjennomsnittlige samværet er delt i fire
+                            samværsklasser.
+                            <br /> <strong>Samværsklasse 0</strong> <br />
+                            0 - 1,99 netter/dager per måned
+                            <br /> <strong>Samværsklasse 1</strong> <br />
+                            2 - 3,99 netter/dager per måned
+                            <br />
+                            <strong>Samværsklasse 2</strong>
+                            <br />
+                            4 - 8,99 netter per måned
+                            <br /> <strong>Samværsklasse 3</strong> <br />
+                            9 - 13,99 netter per måned
+                            <br /> <strong>Samværsklasse 4</strong> <br />
+                            14 - 15 netter per måned
+                        </HelpText>
+                    )}
                 </HStack>
             )}
         </VStack>
@@ -221,12 +223,25 @@ interface SamværskalkulatorButtonProps {
 }
 export const SamværskalkulatorButton = ({ fieldname, editableRow }: SamværskalkulatorButtonProps) => {
     const ref = useRef<HTMLDialogElement>(null);
-    const { control, getValues, setValue } = useFormContext<SamværBarnformvalues>();
+    const { control, getValues, setValue, setError, getFieldState, clearErrors } =
+        useFormContext<SamværBarnformvalues>();
     const previousBeregning = useRef(getValues(`${fieldname}.beregning`));
     const beregning = useWatch({ control, name: `${fieldname}.beregning` });
     const onSave = () => {
-        ref.current?.close();
-        setValue(`${fieldname}.beregning.isSaved`, true);
+        const regelmessigSamværNetter = getValues(`${fieldname}.beregning.regelmessigSamværNetter`);
+        if (regelmessigSamværNetter != null && regelmessigSamværNetter > 15) {
+            setError(`${fieldname}.beregning.regelmessigSamværNetter`, {
+                type: "notValid",
+                message: "Antall netter må være mindre eller lik 15",
+            });
+        }
+        const fieldState = getFieldState(`${fieldname}.beregning`);
+
+        if (!fieldState.error) {
+            clearErrors(`${fieldname}.beregning`);
+            ref.current?.close();
+            setValue(`${fieldname}.beregning.isSaved`, true);
+        }
     };
 
     const closeAndCancel = () => {
@@ -252,7 +267,7 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
                 </Modal.Body>
                 <Modal.Footer>
                     <Button size="xsmall" variant="primary" onClick={onSave}>
-                        Lagre beregning
+                        Lagre
                     </Button>
                     <Button size="xsmall" variant="secondary" onClick={closeAndCancel}>
                         Avbryt

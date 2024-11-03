@@ -1342,15 +1342,6 @@ export interface OppdaterSamvaersperiodeDto {
 export interface OppdaterSamvaerResponsDto {
     /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
     oppdatertSamvær?: SamvaerDto;
-    samværsperioder: SamvaerDto[];
-}
-
-export interface OppdaterSamvaerskalkulatorBeregningDto {
-    gjelderBarn: string;
-    /** @format int64 */
-    samværsperiodeId: number;
-    beregning: SamvaerskalkulatorDetaljer;
-    samværsklasse?: Samvaersklasse;
 }
 
 export interface OppdatereInntektRequest {
@@ -1797,9 +1788,9 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1808,8 +1799,8 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2007,6 +1998,7 @@ export interface GrunnlagDto {
 
 /** Grunnlagstype */
 export enum Grunnlagstype {
+    UKJENT = "UKJENT",
     SAeRFRADRAG = "SÆRFRADRAG",
     SKATTEKLASSE = "SKATTEKLASSE",
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
@@ -2032,6 +2024,7 @@ export enum Grunnlagstype {
     SAMVAeRSPERIODE = "SAMVÆRSPERIODE",
     SAMVAeRSKALKULATOR = "SAMVÆRSKALKULATOR",
     DELBEREGNINGSAMVAeRSKLASSE = "DELBEREGNING_SAMVÆRSKLASSE",
+    DELBEREGNINGSAMVAeRSKLASSERNETTER = "DELBEREGNING_SAMVÆRSKLASSER_NETTER",
     SJABLON = "SJABLON",
     SJABLON_BIDRAGSEVNE = "SJABLON_BIDRAGSEVNE",
     SJABLON_TRINNVIS_SKATTESATS = "SJABLON_TRINNVIS_SKATTESATS",
@@ -2292,9 +2285,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    avslagVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
-    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2442,8 +2435,8 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2536,8 +2529,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3001,29 +2994,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterSamvaer: (behandlingsid: number, data: OppdaterSamvaerDto, params: RequestParams = {}) =>
             this.request<OppdaterSamvaerResponsDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/samvar`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Oppdater samværsperiode beregning
-         *
-         * @tags samv-ær-controller
-         * @name OppdaterSamvaerskalkulatorBeregning
-         * @request PUT:/api/v2/behandling/{behandlingsid}/samvar/periode/beregning
-         * @secure
-         */
-        oppdaterSamvaerskalkulatorBeregning: (
-            behandlingsid: number,
-            data: OppdaterSamvaerskalkulatorBeregningDto,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterSamvaerResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/samvar/periode/beregning`,
                 method: "PUT",
                 body: data,
                 secure: true,

@@ -1,8 +1,8 @@
+import { FaroErrorBoundary } from "@grafana/faro-react";
 import { LoggerService } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, Heading, Loader } from "@navikt/ds-react";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import React, { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 
 import text from "../../constants/texts";
 
@@ -10,14 +10,14 @@ export const QueryErrorWrapper = ({ children }) => {
     return (
         <QueryErrorResetBoundary>
             {({ reset }) => (
-                <ErrorBoundary
-                    onError={(error, compStack) => {
+                <FaroErrorBoundary
+                    onError={(error) => {
                         LoggerService.error(
-                            `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message} - ${compStack.componentStack}`,
+                            `Det skjedde en feil i bidrag-behandling skjermbildet ${error.message}`,
                             error
                         );
                     }}
-                    fallbackRender={({ error, resetErrorBoundary }) => (
+                    fallback={(error, resetErrorBoundary) => (
                         <Alert variant="error">
                             <div>
                                 <Heading spacing size="small" level="3">
@@ -41,7 +41,7 @@ export const QueryErrorWrapper = ({ children }) => {
                     >
                         {children}
                     </Suspense>
-                </ErrorBoundary>
+                </FaroErrorBoundary>
             )}
         </QueryErrorResetBoundary>
     );

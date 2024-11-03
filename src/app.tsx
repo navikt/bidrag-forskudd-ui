@@ -6,13 +6,29 @@ import { useBehandlingV2 } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
+import {
+    createReactRouterV6Options,
+    FaroRoutes,
+    getWebInstrumentations,
+    initializeFaro,
+    ReactIntegration,
+} from "@grafana/faro-react";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
-import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
+import {
+    BrowserRouter,
+    createRoutesFromChildren,
+    matchRoutes,
+    Route,
+    Routes,
+    useLocation,
+    useNavigationType,
+    useParams,
+} from "react-router-dom";
 
 import { BarnebidragProviderWrapper } from "./barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragPage } from "./barnebidrag/pages/BarnebidragPage";
@@ -24,7 +40,26 @@ import { SærligeugifterProviderWrapper } from "./særbidrag/context/Særligeugi
 import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
+initializeFaro({
+    app: {
+        name: "bidrag-behandling-ui",
+    },
+    url: process.env.TELEMETRY_URL as string,
+    instrumentations: [
+        // Load the default Web instrumentations
+        ...getWebInstrumentations(),
 
+        new ReactIntegration({
+            router: createReactRouterV6Options({
+                createRoutesFromChildren,
+                matchRoutes,
+                Routes,
+                useLocation,
+                useNavigationType,
+            }),
+        }),
+    ],
+});
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
 const queryClient = new QueryClient({
@@ -55,7 +90,7 @@ export default function App() {
                     }
                 >
                     <BrowserRouter>
-                        <Routes>
+                        <FaroRoutes>
                             <Route path="/sak/:saksnummer/behandling/:behandlingId">
                                 <Route index element={<BidragBehandlingWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
@@ -105,7 +140,7 @@ export default function App() {
                                 />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
-                        </Routes>
+                        </FaroRoutes>
                     </BrowserRouter>
                 </Suspense>
             </QueryClientProvider>
