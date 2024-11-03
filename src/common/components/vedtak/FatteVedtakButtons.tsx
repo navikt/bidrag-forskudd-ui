@@ -1,3 +1,4 @@
+import { faro } from "@grafana/faro-react";
 import { RedirectTo } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, ConfirmationPanel, Heading } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
@@ -23,7 +24,7 @@ export const FatteVedtakButtons = ({
     disabled?: boolean;
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
-    const { behandlingId } = useBehandlingProvider();
+    const { behandlingId, type } = useBehandlingProvider();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
@@ -33,6 +34,9 @@ export const FatteVedtakButtons = ({
             return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId));
         },
         onSuccess: () => {
+            faro.api.pushEvent(`Fatte vedtak om ${type?.toLocaleLowerCase()}`, {
+                behandlingId: behandlingId?.toString() ?? "Ukjent",
+            });
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
         },
     });
