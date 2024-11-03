@@ -9,7 +9,7 @@ import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
-import { useBehandlingV2 } from "../../hooks/useApiData";
+import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
@@ -26,7 +26,7 @@ export const FatteVedtakButtons = ({
 }) => {
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
-    const { engangsbeløptype, stønadstype } = useBehandlingV2();
+    const { engangsbeløptype, stønadstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
