@@ -3,11 +3,13 @@ import elementIds from "@common/constants/elementIds";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import PageWrapper from "@common/PageWrapper";
+import { faro } from "@grafana/faro-react";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { LocalStorage } from "@navikt/bidrag-ui-common";
 import { Alert, Button, Heading } from "@navikt/ds-react";
 import React, { useEffect, useState } from "react";
 
+import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
 import texts from "../../../common/constants/texts";
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
@@ -91,7 +93,10 @@ function BrukerveiledningKnapp() {
                 } `}
                 size="xsmall"
                 icon={<ExternalLinkIcon />}
-                onClick={() => window.open(environment.url.forskuddBrukerveiledning + "#" + renderHref(), "_blank")}
+                onClick={() => {
+                    faro.api.pushEvent("click.button.brukerveiledning", { type: TypeBehandling.FORSKUDD });
+                    window.open(environment.url.forskuddBrukerveiledning + "#" + renderHref(), "_blank");
+                }}
             >
                 Brukerveiledning
             </Button>
@@ -110,7 +115,10 @@ function LovverkKnapper() {
                     className={`border rounded-xl border-solid`}
                     size="xsmall"
                     icon={<ExternalLinkIcon />}
-                    onClick={() => window.open(url, "_blank")}
+                    onClick={() => {
+                        faro.api.pushEvent("click.button.lovverk", { name: tekst });
+                        window.open(url, "_blank");
+                    }}
                 >
                     {tekst}
                 </Button>

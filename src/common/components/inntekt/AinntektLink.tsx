@@ -1,5 +1,6 @@
 import { BEHANDLING_API_V1 } from "@common/constants/api";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { faro } from "@grafana/faro-react";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,7 @@ export default function AinntektLink({ ident }: AinntektButtonProps) {
             href={ainntektLenke.data}
             target="_blank"
             className="font-bold"
+            onClick={() => faro.api.pushEvent("click.link.ainntekt")}
             onMouseOver={() => queryClient.prefetchQuery({ queryKey, staleTime: 20000 })}
         >
             A-inntekt <ExternalLinkIcon aria-hidden />
