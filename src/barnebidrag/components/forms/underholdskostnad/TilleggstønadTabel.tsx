@@ -4,6 +4,7 @@ import { Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
+import { useOnSaveTilleggstønad } from "../../../hooks/useOnSaveTilleggstønad";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
 
@@ -17,8 +18,55 @@ const Totalt12Måned = () => {
 
 export const TilleggstønadTabel = ({ underholdIndex }: { underholdIndex: number }) => {
     const fieldName = `underholdskostnader.${underholdIndex}.tilleggsstønad` as const;
-    const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const tilleggsstønad = getValues(fieldName);
+    const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
+    const underhold = getValues(`underholdskostnader.${underholdIndex}`);
+    const tilleggsstønad = underhold.tilleggsstønad;
+    const saveTilleggstønad = useOnSaveTilleggstønad(underhold.id);
+
+    const onSaveRow = (index: number) => {
+        const { id, datoFom, datoTom, dagsats, total } = getValues(`${fieldName}.${index}`);
+        const payload = {
+            id,
+            dagsats,
+            total,
+            periode: { fom: datoFom, tom: datoTom },
+        };
+
+        saveTilleggstønad.mutation.mutate(payload, {
+            onSuccess: (response) => {
+                saveTilleggstønad.queryClientUpdater((currentData) => {
+                    const updatedTilleggsstønadIndex = currentData.underholdskostnader[
+                        underholdIndex
+                    ].tilleggsstønad.findIndex((tilleggsstønad) => tilleggsstønad?.id === response?.tilleggsstønad?.id);
+
+                    const updatedTilleggsstønadListe =
+                        updatedTilleggsstønadIndex === -1
+                            ? currentData.underholdskostnader[underholdIndex].tilleggsstønad.concat(
+                                  response.tilleggsstønad
+                              )
+                            : currentData.underholdskostnader[underholdIndex].tilleggsstønad.toSpliced(
+                                  updatedTilleggsstønadIndex,
+                                  1,
+                                  response.tilleggsstønad
+                              );
+
+                    return {
+                        ...currentData,
+                        underholdskostnader: currentData.underholdskostnader.toSpliced(underholdIndex, 1, {
+                            ...currentData.underholdskostnader[underholdIndex],
+                            tilleggsstønad: updatedTilleggsstønadListe,
+                        }),
+                    };
+                });
+            },
+            onError: () => {},
+        });
+    };
+
+    const onEditRow = (index: number) => {
+        const tilleggstønadPeriode = getValues(`${fieldName}.${index}`);
+        setValue(`${fieldName}.${index}`, { ...tilleggstønadPeriode, erRedigerbart: true });
+    };
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
@@ -78,8 +126,8 @@ export const TilleggstønadTabel = ({ underholdIndex }: { underholdIndex: number
                                     <EditOrSaveButton
                                         index={index}
                                         item={item}
-                                        onEditRow={() => {}}
-                                        onSaveRow={() => {}}
+                                        onEditRow={() => onEditRow(index)}
+                                        onSaveRow={() => onSaveRow(index)}
                                     />
                                 </Table.DataCell>
                             </Table.Row>
