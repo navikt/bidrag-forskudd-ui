@@ -11,6 +11,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
@@ -22,6 +23,7 @@ import {
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
     SletteSamvaersperiodeElementDto,
+    StonadTilBarnetilsynDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -507,6 +509,27 @@ export const useUpdateUtgifter = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av utgifter", error);
+        },
+    });
+};
+
+export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateUtgifter(behandlingId),
+        mutationFn: async (payload: StonadTilBarnetilsynDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereStonadTilBarnetilsyn(
+                behandlingId,
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av stønad til barnetilsyn", error);
         },
     });
 };

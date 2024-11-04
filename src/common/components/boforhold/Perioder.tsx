@@ -233,8 +233,6 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
 
-        console.log("fieldState", fieldState);
-
         if (!fieldState.error) {
             updateAndSave({
                 oppdatereHusstandsmedlem: {

@@ -188,8 +188,10 @@ const BehandlingPage = () => {
     const { type } = useBehandlingV2(behandlingId, vedtakId);
 
     switch (type) {
+        // case TypeBehandling.FORSKUDD:
+        //     return <ForskuddBehandling />;
         case TypeBehandling.FORSKUDD:
-            return <ForskuddBehandling />;
+            return <BarnebidragBehandling />;
         case TypeBehandling.SAeRBIDRAG:
             return <SærligeutgifterBehandling />;
         case TypeBehandling.BIDRAG:
@@ -251,8 +253,10 @@ const BidragBehandlingWrapper = () => {
 
     const getBehandling = (type: TypeBehandling) => {
         switch (type) {
+            // case TypeBehandling.FORSKUDD:
+            //     return <ForskuddBehandling />;
             case TypeBehandling.FORSKUDD:
-                return <ForskuddBehandling />;
+                return <BarnebidragBehandling />;
             case TypeBehandling.SAeRBIDRAG:
                 return <SærligeutgifterBehandling />;
             case TypeBehandling.BIDRAG:

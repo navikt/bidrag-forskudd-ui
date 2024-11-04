@@ -1342,6 +1342,15 @@ export interface OppdaterSamvaersperiodeDto {
 export interface OppdaterSamvaerResponsDto {
     /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
     oppdatertSamvær?: SamvaerDto;
+    samværsperioder: SamvaerDto[];
+}
+
+export interface OppdaterSamvaerskalkulatorBeregningDto {
+    gjelderBarn: string;
+    /** @format int64 */
+    samværsperiodeId: number;
+    beregning: SamvaerskalkulatorDetaljer;
+    samværsklasse?: Samvaersklasse;
 }
 
 export interface OppdatereInntektRequest {
@@ -1799,10 +1808,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2024,7 +2033,6 @@ export enum Grunnlagstype {
     SAMVAeRSPERIODE = "SAMVÆRSPERIODE",
     SAMVAeRSKALKULATOR = "SAMVÆRSKALKULATOR",
     DELBEREGNINGSAMVAeRSKLASSE = "DELBEREGNING_SAMVÆRSKLASSE",
-    DELBEREGNINGSAMVAeRSKLASSERNETTER = "DELBEREGNING_SAMVÆRSKLASSER_NETTER",
     SJABLON = "SJABLON",
     SJABLON_BIDRAGSEVNE = "SJABLON_BIDRAGSEVNE",
     SJABLON_TRINNVIS_SKATTESATS = "SJABLON_TRINNVIS_SKATTESATS",
@@ -2285,10 +2293,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2435,10 +2443,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2752,7 +2760,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2841,7 +2852,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -2994,6 +3005,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterSamvaer: (behandlingsid: number, data: OppdaterSamvaerDto, params: RequestParams = {}) =>
             this.request<OppdaterSamvaerResponsDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/samvar`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdater samværsperiode beregning
+         *
+         * @tags samv-ær-controller
+         * @name OppdaterSamvaerskalkulatorBeregning
+         * @request PUT:/api/v2/behandling/{behandlingsid}/samvar/periode/beregning
+         * @secure
+         */
+        oppdaterSamvaerskalkulatorBeregning: (
+            behandlingsid: number,
+            data: OppdaterSamvaerskalkulatorBeregningDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<OppdaterSamvaerResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/samvar/periode/beregning`,
                 method: "PUT",
                 body: data,
                 secure: true,

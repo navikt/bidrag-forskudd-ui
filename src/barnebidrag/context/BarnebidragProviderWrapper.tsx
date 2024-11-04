@@ -12,16 +12,20 @@ export type InntektTables =
     | `barnetillegg.${string}`
     | `kontantstøtte.${string}`;
 
+type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+
 export type PageErrorsOrUnsavedState = {
     underholdskostnad: {
         error: boolean;
         openFields?: {
-            [key: string]: boolean;
+            [_key: string]: boolean;
         };
     };
     boforhold: {
         error: boolean;
-        openFields?: boolean;
+        openFields?: {
+            [_key in HusstandsbarnTables]: boolean;
+        };
     };
     samvær: {
         error: boolean;
