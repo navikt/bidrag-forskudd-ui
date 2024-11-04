@@ -20,6 +20,7 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
+import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
 import { PageErrorsOrUnsavedState as BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
@@ -37,6 +38,7 @@ interface IBehandlingContext {
     activeStep: string;
     behandlingId: string;
     vedtakId: string;
+    type: TypeBehandling;
     lesemodus: boolean;
     erVedtakFattet: boolean;
     erVirkningstidspunktNåværendeMånedEllerFramITid: boolean;
@@ -184,6 +186,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             behandlingId,
             vedtakId,
             erVirkningstidspunktNåværendeMånedEllerFramITid,
+            type: behandling.type,
             lesemodus:
                 vedtakId != null ||
                 behandling.erVedtakFattet ||

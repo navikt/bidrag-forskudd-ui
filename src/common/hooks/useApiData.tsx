@@ -16,7 +16,6 @@ import {
     OppdatereVirkningstidspunkt,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
-    OppdaterSamvaerskalkulatorBeregningDto,
     OpplysningerType,
     RolleDto,
     SamvaerskalkulatorDetaljer,
@@ -133,7 +132,7 @@ export const useDeleteSamværsperiode = () => {
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
+            LoggerService.error("Feil ved sletting av samværsperiode", error);
         },
     });
 };
@@ -145,25 +144,6 @@ export const useBeregnSamværsklasse = () => {
         mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
         mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<DelberegningSamvaersklasse> => {
             const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
-            return data;
-        },
-        networkMode: "always",
-        onError: (error) => {
-            console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
-        },
-    });
-};
-export const useUpdateSamværskalkulator = () => {
-    const { behandlingId } = useBehandlingProvider();
-
-    return useMutation({
-        mutationKey: MutationKeys.updateSamværskalkulator(behandlingId),
-        mutationFn: async (payload: OppdaterSamvaerskalkulatorBeregningDto): Promise<OppdaterSamvaerResponsDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdaterSamvaerskalkulatorBeregning(
-                Number(behandlingId),
-                payload
-            );
             return data;
         },
         networkMode: "always",
@@ -186,7 +166,7 @@ export const useUpdateSamvær = () => {
         networkMode: "always",
         onError: (error) => {
             console.log("onError", error);
-            LoggerService.error("Feil ved oppdatering av boforhold", error);
+            LoggerService.error("Feil ved oppdatering av samvær", error);
         },
     });
 };

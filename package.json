@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@emotion/react": "11.11.4",
+    "@grafana/faro-react": "^1.11.0",
     "@mdx-js/react": "^3.0.1",
     "@navikt/aksel-icons": "6.7.1",
     "@navikt/bidrag-ui-common": "^1.10.12",

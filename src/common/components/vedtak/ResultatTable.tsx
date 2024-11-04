@@ -28,7 +28,7 @@ export const ResultatTable: React.FC<GenericTableProps> = ({ data, title, classN
                 <tbody>
                     {data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
-                            <td style={{ paddingRight: "10px" }}>{row.label}: </td>
+                            <td style={{ paddingRight: "8px" }}>{row.label}: </td>
                             <td className={row.textRight === false ? "text-left" : "text-right"}>{row.value}</td>
                         </tr>
                     ))}
