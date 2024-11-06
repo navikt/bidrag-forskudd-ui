@@ -6,11 +6,13 @@ import {
     BehandlingDtoV2,
     BeregningValideringsfeil,
     DelberegningSamvaersklasse,
+    FaktiskTilsynsutgiftDto,
     HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
@@ -22,6 +24,8 @@ import {
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
     SletteSamvaersperiodeElementDto,
+    StonadTilBarnetilsynDto,
+    TilleggsstonadDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -43,6 +47,9 @@ export const MutationKeys = {
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
     updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
+    updateStonadTilBarnetilsyn: (behandlingId: string) => ["mutation", "stonadTilBarnetilsyn", behandlingId],
+    updateFaktiskeTilsynsutgifter: (behandlingId: string) => ["mutation", "faktiskeTilsynsutgifter", behandlingId],
+    updateTilleggstønad: (behandlingId: string) => ["mutation", "tilleggstønad", behandlingId],
 };
 
 export const QueryKeys = {
@@ -507,6 +514,69 @@ export const useUpdateUtgifter = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av utgifter", error);
+        },
+    });
+};
+
+export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
+        mutationFn: async (payload: StonadTilBarnetilsynDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereStonadTilBarnetilsyn(
+                behandlingId,
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av stønad til barnetilsyn", error);
+        },
+    });
+};
+
+export const useUpdateFaktiskeTilsynsutgifter = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateFaktiskeTilsynsutgifter(behandlingId),
+        mutationFn: async (payload: FaktiskTilsynsutgiftDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereFaktiskTilsynsutgift(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av faktiske tilsynsutgifter", error);
+        },
+    });
+};
+
+export const useUpdateTilleggstønad = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateTilleggstønad(behandlingId),
+        mutationFn: async (payload: TilleggsstonadDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereTilleggsstonad(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av tillegstønad", error);
         },
     });
 };
