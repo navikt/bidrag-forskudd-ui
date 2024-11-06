@@ -12,6 +12,7 @@ import { useFormContext } from "react-hook-form";
 
 import { UnderholdkostnadsFormPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { BarnetilsynTabel } from "./BarnetilsynTabel";
+import { BeregnetUnderholdskostnad } from "./BeregnetUnderholdskostnad";
 import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 import { TilleggstønadTabel } from "./TilleggstønadTabel";
 
@@ -54,17 +55,15 @@ export const EditOrSaveButton = ({
 };
 
 export const UnderholdskostnadPeriode = ({
-    index,
     fieldName,
     field,
     label,
     item,
 }: {
-    index: number;
     fieldName:
-        | `underholdskostnader.${number}.stønadTilBarnetilsyn`
-        | `underholdskostnader.${number}.faktiskeTilsynsutgifter`
-        | `underholdskostnader.${number}.tilleggsstønad`;
+        | `underholdskostnader.${number}.stønadTilBarnetilsyn.${number}`
+        | `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`
+        | `underholdskostnader.${number}.tilleggsstønad.${number}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: UnderholdkostnadsFormPeriode;
@@ -76,22 +75,22 @@ export const UnderholdskostnadPeriode = ({
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
 
     const validateFomOgTom = () => {
-        const periode = getValues(`${fieldName}.${index}`);
+        const periode = getValues(`${fieldName}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
 
         if (fomOgTomInvalid) {
-            setError(`${fieldName}.${index}.datoFom`, {
+            setError(`${fieldName}.datoFom`, {
                 type: "notValid",
                 message: text.error.tomDatoKanIkkeVæreFørFomDato,
             });
         } else {
-            clearErrors(`${fieldName}.${index}.datoFom`);
+            clearErrors(`${fieldName}.datoFom`);
         }
     };
 
     return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && item.kanRedigeres ? (
         <FormControlledMonthPicker
-            name={`${fieldName}.${index}.${field}`}
+            name={`${fieldName}.${field}`}
             label={label}
             placeholder="DD.MM.ÅÅÅÅ"
             defaultValue={item[field]}
@@ -126,6 +125,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             <BarnetilsynTabel underholdIndex={index} />
             <FaktiskeTilsynsutgifterTabel underholdIndex={index} />
             <TilleggstønadTabel underholdIndex={index} />
+            <BeregnetUnderholdskostnad underholdIndex={index} />
         </>
     );
 };

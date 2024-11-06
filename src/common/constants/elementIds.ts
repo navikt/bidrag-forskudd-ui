@@ -24,6 +24,7 @@ export default {
     seksjon_sivilstand: "sivilstand",
     seksjon_samvær: "samvær",
     seksjon_underholdskostnad_barnetilsyn: "barnetilsyn",
+    seksjon_underholdskostnad_beregnet: "underholdskostnad_beregnet",
     seksjon_underholdskostnad_tilysnsutgifter: "tilysnsutgifter",
     seksjon_underholdskostnad_tilleggstønad: "tilleggstønad",
 };

@@ -1,23 +1,80 @@
+import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnSaveFaktiskeTilsynsutgifter } from "../../../hooks/useOnSaveFaktiskeTilsynsutgifter";
-import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import { FaktiskTilsynsutgiftPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
 
-const TotalTilysnsutgift = () => {
-    return <div></div>;
+const TotalTilysnsutgift = ({
+    item,
+    fieldName,
+}: {
+    item: FaktiskTilsynsutgiftPeriode;
+    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+}) => {
+    return (
+        <>
+            {item.erRedigerbart ? (
+                <FormControlledTextField
+                    name={`${fieldName}.utgift`}
+                    label="Totalt"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    hideLabel
+                />
+            ) : (
+                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.utgift)}</div>
+            )}
+        </>
+    );
 };
 
-const Kostpenger = () => {
-    return <div></div>;
+const Kostpenger = ({
+    item,
+    fieldName,
+}: {
+    item: FaktiskTilsynsutgiftPeriode;
+    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+}) => {
+    return (
+        <>
+            {item.erRedigerbart ? (
+                <FormControlledTextField
+                    name={`${fieldName}.kostpenger`}
+                    label="Totalt"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    hideLabel
+                />
+            ) : (
+                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.kostpenger)}</div>
+            )}
+        </>
+    );
 };
 
-const Kommentar = () => {
-    return <div></div>;
+const Kommentar = ({
+    item,
+    fieldName,
+}: {
+    item: FaktiskTilsynsutgiftPeriode;
+    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+}) => {
+    return (
+        <FormControlledTextField
+            name={`${fieldName}.kommentar`}
+            label={text.label.kommentar}
+            hideLabel
+            editable={item.erRedigerbart}
+        />
+    );
 };
 
 export const FaktiskeTilsynsutgifterTabel = ({ underholdIndex }: { underholdIndex: number }) => {
@@ -114,30 +171,28 @@ export const FaktiskeTilsynsutgifterTabel = ({ underholdIndex }: { underholdInde
                             <Table.Row key={item?.id + index} className="align-top">
                                 <Table.DataCell textSize="small">
                                     <UnderholdskostnadPeriode
-                                        index={index}
                                         label={text.label.fraOgMed}
-                                        fieldName={fieldName}
+                                        fieldName={`${fieldName}.${index}`}
                                         field="datoFom"
                                         item={item}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">
                                     <UnderholdskostnadPeriode
-                                        index={index}
                                         label={text.label.tilOgMed}
-                                        fieldName={fieldName}
+                                        fieldName={`${fieldName}.${index}`}
                                         field="datoTom"
                                         item={item}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    <TotalTilysnsutgift />
+                                    <TotalTilysnsutgift fieldName={`${fieldName}.${index}`} item={item} />
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    <Kostpenger />
+                                    <Kostpenger fieldName={`${fieldName}.${index}`} item={item} />
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    <Kommentar />
+                                    <Kommentar fieldName={`${fieldName}.${index}`} item={item} />
                                 </Table.DataCell>
                                 <Table.DataCell>
                                     <EditOrSaveButton

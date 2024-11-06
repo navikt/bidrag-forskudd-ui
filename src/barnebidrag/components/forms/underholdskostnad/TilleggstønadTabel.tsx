@@ -1,19 +1,62 @@
+import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnSaveTilleggstønad } from "../../../hooks/useOnSaveTilleggstønad";
-import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import { TilleggsstonadPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
 
-const Dagsats = () => {
-    return <div></div>;
+const Dagsats = ({
+    item,
+    fieldName,
+}: {
+    item: TilleggsstonadPeriode;
+    fieldName: `underholdskostnader.${number}.tilleggsstønad.${number}`;
+}) => {
+    return (
+        <>
+            {item.erRedigerbart ? (
+                <FormControlledTextField
+                    name={`${fieldName}.dagsats`}
+                    label="Totalt"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    hideLabel
+                />
+            ) : (
+                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.dagsats)}</div>
+            )}
+        </>
+    );
 };
-
-const Totalt12Måned = () => {
-    return <div></div>;
+const Totalt12Måned = ({
+    item,
+    fieldName,
+}: {
+    item: TilleggsstonadPeriode;
+    fieldName: `underholdskostnader.${number}.tilleggsstønad.${number}`;
+}) => {
+    return (
+        <>
+            {item.erRedigerbart ? (
+                <FormControlledTextField
+                    name={`${fieldName}.total`}
+                    label="Totalt"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    hideLabel
+                />
+            ) : (
+                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.total)}</div>
+            )}
+        </>
+    );
 };
 
 export const TilleggstønadTabel = ({ underholdIndex }: { underholdIndex: number }) => {
@@ -100,27 +143,25 @@ export const TilleggstønadTabel = ({ underholdIndex }: { underholdIndex: number
                             <Table.Row key={item?.id + index} className="align-top">
                                 <Table.DataCell textSize="small">
                                     <UnderholdskostnadPeriode
-                                        index={index}
                                         label={text.label.fraOgMed}
-                                        fieldName={fieldName}
+                                        fieldName={`${fieldName}.${index}`}
                                         field="datoFom"
                                         item={item}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">
                                     <UnderholdskostnadPeriode
-                                        index={index}
                                         label={text.label.tilOgMed}
-                                        fieldName={fieldName}
+                                        fieldName={`${fieldName}.${index}`}
                                         field="datoTom"
                                         item={item}
                                     />
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    <Dagsats />
+                                    <Dagsats fieldName={`${fieldName}.${index}`} item={item} />
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    <Totalt12Måned />
+                                    <Totalt12Måned fieldName={`${fieldName}.${index}`} item={item} />
                                 </Table.DataCell>
                                 <Table.DataCell>
                                     <EditOrSaveButton
