@@ -36,35 +36,20 @@ import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningsti
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 
 const årsakListe = [
-    TypeArsakstype.TREMANEDERTILBAKE,
-    TypeArsakstype.TREARSREGELEN,
     TypeArsakstype.FRABARNETSFODSEL,
     TypeArsakstype.FRABARNETSFLYTTEMANED,
-    TypeArsakstype.FRA_KRAVFREMSETTELSE,
-    TypeArsakstype.FRA_OPPHOLDSTILLATELSE,
-    TypeArsakstype.FRASOKNADSTIDSPUNKT,
     TypeArsakstype.FRA_SAMLIVSBRUDD,
-    TypeArsakstype.PRIVAT_AVTALE,
-    TypeArsakstype.REVURDERINGMANEDENETTER,
-    TypeArsakstype.SOKNADSTIDSPUNKTENDRING,
-    TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
-    TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.TREARSREGELEN,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+    TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
+    TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
 
 const avslagsListe = [
-    Resultatkode.PAGRUNNAVBARNEPENSJON,
-    Resultatkode.BARNETS_EKTESKAP,
-    Resultatkode.BARNETS_INNTEKT,
-    Resultatkode.PAGRUNNAVYTELSEFRAFOLKETRYGDEN,
-    Resultatkode.FULLT_UNDERHOLDT_AV_OFFENTLIG,
-    Resultatkode.IKKE_OMSORG,
-    Resultatkode.IKKE_OPPHOLD_I_RIKET,
-    Resultatkode.MANGLENDE_DOKUMENTASJON,
-    Resultatkode.PAGRUNNAVSAMMENFLYTTING,
-    Resultatkode.OPPHOLD_I_UTLANDET,
-    Resultatkode.AVSLAG_PRIVAT_AVTALE_BIDRAG,
-    Resultatkode.IKKE_INNKREVING_AV_BIDRAG,
-    Resultatkode.UTENLANDSK_YTELSE,
+    Resultatkode.IKKE_OMSORG_FOR_BARNET,
+    Resultatkode.BIDRAGSPLIKTIG_ER_UKJENT,
+    Resultatkode.BIDRAGSPLIKTIGERDOD,
 ];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];

@@ -163,6 +163,9 @@ export enum Resultatkode {
     FORHOLDSMESSIG_FORDELING_INGEN_ENDRING = "FORHOLDSMESSIG_FORDELING_INGEN_ENDRING",
     INGEN_EVNE = "INGEN_EVNE",
     KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
+    IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
+    BIDRAGSPLIKTIG_ER_UKJENT = "BIDRAGSPLIKTIG_ER_UKJENT",
+    BIDRAGSPLIKTIGERDOD = "BIDRAGSPLIKTIG_ER_DØD",
     REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
@@ -322,6 +325,8 @@ export enum TypeArsakstype {
     TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
+    FRAMANEDENETTERPRIVATAVTALE = "FRA_MÅNEDEN_ETTER_PRIVAT_AVTALE",
+    BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE = "BIDRAGSPLIKTIG_HAR_IKKE_BIDRATT_TIL_FORSØRGELSE",
 }
 
 /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
@@ -1703,10 +1708,10 @@ export interface KanBehandlesINyLosningRequest {
     stønadstype: Stonadstype;
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
-    harReferanseTilAnnenSøknad: boolean;
-    søknadsbarn: SjekkRolleDto[];
+    harReferanseTilAnnenBehandling: boolean;
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2066,6 +2071,8 @@ export enum Grunnlagstype {
     DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
     DELBEREGNINGSAMVAeRSFRADRAG = "DELBEREGNING_SAMVÆRSFRADRAG",
+    DELBEREGNING_UNDERHOLDSKOSTNAD = "DELBEREGNING_UNDERHOLDSKOSTNAD",
+    DELBEREGNING_ENDELIG_BIDRAG = "DELBEREGNING_ENDELIG_BIDRAG",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
     PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
@@ -2293,8 +2300,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -2537,8 +2544,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
