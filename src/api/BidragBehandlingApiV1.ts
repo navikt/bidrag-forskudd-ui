@@ -163,6 +163,9 @@ export enum Resultatkode {
     FORHOLDSMESSIG_FORDELING_INGEN_ENDRING = "FORHOLDSMESSIG_FORDELING_INGEN_ENDRING",
     INGEN_EVNE = "INGEN_EVNE",
     KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
+    IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
+    BIDRAGSPLIKTIG_ER_UKJENT = "BIDRAGSPLIKTIG_ER_UKJENT",
+    BIDRAGSPLIKTIGERDOD = "BIDRAGSPLIKTIG_ER_DØD",
     REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
@@ -209,6 +212,7 @@ export enum Rolletype {
 
 export interface SamvaerskalkulatorDetaljer {
     ferier: SamvaerskalkulatorFerie[];
+    /** @max 15 */
     regelmessigSamværNetter: number;
 }
 
@@ -321,6 +325,8 @@ export enum TypeArsakstype {
     TREMANEDERTILBAKE = "TRE_MÅNEDER_TILBAKE",
     TREARSREGELEN = "TRE_ÅRS_REGELEN",
     FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK = "FRA_MÅNEDEN_ETTER_I_PÅVENTE_AV_BIDRAGSSAK",
+    FRAMANEDENETTERPRIVATAVTALE = "FRA_MÅNEDEN_ETTER_PRIVAT_AVTALE",
+    BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE = "BIDRAGSPLIKTIG_HAR_IKKE_BIDRATT_TIL_FORSØRGELSE",
 }
 
 /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
@@ -495,6 +501,7 @@ export interface BehandlingDtoV2 {
     engangsbeløptype?: Engangsbeloptype;
     erVedtakFattet: boolean;
     kanBehandlesINyLøsning: boolean;
+    kanIkkeBehandlesBegrunnelse?: string;
     erKlageEllerOmgjøring: boolean;
     /** @format date-time */
     opprettetTidspunkt: string;
@@ -1342,15 +1349,6 @@ export interface OppdaterSamvaersperiodeDto {
 export interface OppdaterSamvaerResponsDto {
     /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
     oppdatertSamvær?: SamvaerDto;
-    samværsperioder: SamvaerDto[];
-}
-
-export interface OppdaterSamvaerskalkulatorBeregningDto {
-    gjelderBarn: string;
-    /** @format int64 */
-    samværsperiodeId: number;
-    beregning: SamvaerskalkulatorDetaljer;
-    samværsklasse?: Samvaersklasse;
 }
 
 export interface OppdatereInntektRequest {
@@ -1708,7 +1706,12 @@ export interface KanBehandlesINyLosningRequest {
      */
     roller: SjekkRolleDto[];
     stønadstype: Stonadstype;
+    vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
+    harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
+    /** Rolle beskrivelse som er brukte til å opprette nye roller */
+    bidragspliktig?: SjekkRolleDto;
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1808,10 +1811,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2033,7 +2036,8 @@ export enum Grunnlagstype {
     SAMVAeRSPERIODE = "SAMVÆRSPERIODE",
     SAMVAeRSKALKULATOR = "SAMVÆRSKALKULATOR",
     DELBEREGNINGSAMVAeRSKLASSE = "DELBEREGNING_SAMVÆRSKLASSE",
-    SJABLON = "SJABLON",
+    DELBEREGNINGSAMVAeRSKLASSENETTER = "DELBEREGNING_SAMVÆRSKLASSE_NETTER",
+    SJABLON_SJABLONTALL = "SJABLON_SJABLONTALL",
     SJABLON_BIDRAGSEVNE = "SJABLON_BIDRAGSEVNE",
     SJABLON_TRINNVIS_SKATTESATS = "SJABLON_TRINNVIS_SKATTESATS",
     SJABLON_BARNETILSYN = "SJABLON_BARNETILSYN",
@@ -2066,6 +2070,8 @@ export enum Grunnlagstype {
     DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
     DELBEREGNINGSAMVAeRSFRADRAG = "DELBEREGNING_SAMVÆRSFRADRAG",
+    DELBEREGNING_UNDERHOLDSKOSTNAD = "DELBEREGNING_UNDERHOLDSKOSTNAD",
+    DELBEREGNING_ENDELIG_BIDRAG = "DELBEREGNING_ENDELIG_BIDRAG",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
     PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
@@ -2293,10 +2299,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2443,10 +2449,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2760,10 +2766,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2852,7 +2855,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -3005,29 +3008,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterSamvaer: (behandlingsid: number, data: OppdaterSamvaerDto, params: RequestParams = {}) =>
             this.request<OppdaterSamvaerResponsDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/samvar`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Oppdater samværsperiode beregning
-         *
-         * @tags samv-ær-controller
-         * @name OppdaterSamvaerskalkulatorBeregning
-         * @request PUT:/api/v2/behandling/{behandlingsid}/samvar/periode/beregning
-         * @secure
-         */
-        oppdaterSamvaerskalkulatorBeregning: (
-            behandlingsid: number,
-            data: OppdaterSamvaerskalkulatorBeregningDto,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterSamvaerResponsDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/samvar/periode/beregning`,
                 method: "PUT",
                 body: data,
                 secure: true,

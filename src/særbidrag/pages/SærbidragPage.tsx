@@ -19,6 +19,7 @@ export const SærbidragPage = () => {
         erVedtakFattet,
         vedtakstype,
         kanBehandlesINyLøsning,
+        kanIkkeBehandlesBegrunnelse,
         utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -49,7 +50,7 @@ export const SærbidragPage = () => {
                         <Heading level="3" size="small">
                             {texts.title.kanIkkeBehandlesGjennomNyLøsning}
                         </Heading>
-                        {texts.kanIkkeBehandlesGjennomNyLøsningSærbidrag}
+                        {kanIkkeBehandlesBegrunnelse}
                     </Alert>
                 )}
                 <FlexRow className="justify-center">
