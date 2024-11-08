@@ -15,6 +15,7 @@ export const BarnebidragSideMenu = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
         vedtakstype,
+        virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
         ikkeAktiverteEndringerIGrunnlagsdata,
@@ -28,7 +29,7 @@ export const BarnebidragSideMenu = () => {
         return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
-    const interactive = vedtakstype !== Vedtakstype.OPPHOR;
+    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const inntektRoller = roller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM) return -1;
         if (b.rolletype === Rolletype.BM) return 1;
@@ -67,12 +68,14 @@ export const BarnebidragSideMenu = () => {
             <MenuButton
                 step={"2."}
                 title={text.title.underholdskostnad}
+                interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD])}
                 active={activeButton === BarnebidragStepper.UNDERHOLDSKOSTNAD}
             />
             <MenuButton
                 step={"3."}
                 title={text.title.samvær}
+                interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
                 active={activeButton === BarnebidragStepper.SAMVÆR}
             />
