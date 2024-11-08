@@ -388,6 +388,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             ...currentData.boforhold,
                                             husstandsbarn: updatedHusstandsbarnListe,
                                             valideringsfeil: response.valideringsfeil,
+                                            beregnetBoforhold: response.beregnetBoforhold,
                                             egetBarnErEnesteVoksenIHusstanden:
                                                 response.egetBarnErEnesteVoksenIHusstanden,
                                         },
