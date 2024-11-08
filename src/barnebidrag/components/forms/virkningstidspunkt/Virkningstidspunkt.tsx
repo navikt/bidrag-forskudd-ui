@@ -46,11 +46,7 @@ const årsakListe = [
     TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
 
-const avslagsListe = [
-    Resultatkode.IKKE_OMSORG_FOR_BARNET,
-    Resultatkode.BIDRAGSPLIKTIG_ER_UKJENT,
-    Resultatkode.BIDRAGSPLIKTIGERDOD,
-];
+const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
