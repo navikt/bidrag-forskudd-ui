@@ -6,6 +6,7 @@ import {
     BehandlingDtoV2,
     BeregningValideringsfeil,
     DelberegningSamvaersklasse,
+    FaktiskTilsynsutgiftDto,
     HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -148,7 +149,7 @@ export const useBeregnSamværsklasse = () => {
 
     return useMutation({
         mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
-        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<BeregnSamvaersklasseResponsDto> => {
+        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<DelberegningSamvaersklasse> => {
             const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
             return data;
         },
@@ -524,8 +525,8 @@ export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
         mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
         mutationFn: async (payload: StonadTilBarnetilsynDto): Promise<OppdatereUnderholdResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereStonadTilBarnetilsyn(
-                behandlingId,
-                underholdsid,
+                Number(behandlingId),
+                Number(underholdsid),
                 payload
             );
             return data;
