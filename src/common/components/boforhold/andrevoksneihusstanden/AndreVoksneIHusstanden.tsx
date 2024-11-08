@@ -272,6 +272,7 @@ export const AndreVoksneIHusstanden = () => {
                             ...currentData.boforhold,
                             andreVoksneIHusstanden: response.oppdatertePerioderMedAndreVoksne,
                             egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
+                            beregnetBoforhold: response.beregnetBoforhold,
                         },
                     };
                 });

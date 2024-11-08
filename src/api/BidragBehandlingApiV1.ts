@@ -548,6 +548,7 @@ export interface BoforholdDtoV2 {
     valideringsfeil: BoforholdValideringsfeil;
     /** Er sann hvis status på andre voksne i husstanden er 'BOR_IKKE_MED_ANDRE_VOKSNE', men det er 18 åring i husstanden som regnes som voksen i husstanden */
     egetBarnErEnesteVoksenIHusstanden?: boolean;
+    beregnetBoforhold: DelberegningBoforhold[];
     /**
      * Erstattes av husstandsmedlem
      * @deprecated
@@ -618,6 +619,13 @@ export interface DatoperiodeDto {
     tom?: string;
 }
 
+export interface DelberegningBoforhold {
+    periode: TypeArManedsperiode;
+    /** @format double */
+    antallBarn: number;
+    borMedAndreVoksne: boolean;
+}
+
 /** Liste over summerte inntektsperioder */
 export interface DelberegningSumInntekt {
     periode: TypeArManedsperiode;
@@ -634,7 +642,7 @@ export interface FaktiskTilsynsutgiftDto {
     id?: number;
     periode: DatoperiodeDto;
     utgift: number;
-    kostpenger: number;
+    kostpenger?: number;
     kommentar?: string;
     total: number;
 }
@@ -919,9 +927,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1571,6 +1579,7 @@ export interface OppdatereBoforholdResponse {
     oppdatertSivilstandshistorikk: SivilstandDto[];
     begrunnelse?: string;
     valideringsfeil: BoforholdValideringsfeil;
+    beregnetBoforhold: DelberegningBoforhold[];
     /** Erstattes av husstandsmedlem */
     oppdatertHusstandsbarn?: HusstandsmedlemDtoV2;
     /** Deprekert - Bruk oppdatereBegrunnelse i stedet */
@@ -2710,7 +2719,7 @@ export enum NotatBehandlingDetaljerDtoMonthEnum {
 
 export enum SletteUnderholdselementTypeEnum {
     BARN = "BARN",
-    FAKTISK_TILSYNSUGIFT = "FAKTISK_TILSYNSUGIFT",
+    FAKTISK_TILSYNSUTGIFT = "FAKTISK_TILSYNSUTGIFT",
     STONADTILBARNETILSYN = "STØNAD_TIL_BARNETILSYN",
     TILLEGGSSTONAD = "TILLEGGSSTØNAD",
 }
@@ -2903,7 +2912,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          *
          * @tags underhold-controller
          * @name OppdatereTilleggsstonad
-         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/tilleggsstønad
+         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/tilleggsstonad
          * @secure
          */
         oppdatereTilleggsstonad: (
@@ -2913,7 +2922,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             params: RequestParams = {}
         ) =>
             this.request<OppdatereUnderholdResponse, any>({
-                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilleggsstønad`,
+                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilleggsstonad`,
                 method: "PUT",
                 body: data,
                 secure: true,
@@ -2979,8 +2988,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppdatereStonadTilBarnetilsyn: (
-            behandlingsid: string,
-            underholdsid: string,
+            behandlingsid: number,
+            underholdsid: number,
             data: StonadTilBarnetilsynDto,
             params: RequestParams = {}
         ) =>
@@ -3155,7 +3164,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
-         * @description Oppretter underholdselement for barn.
+         * @description Oppretter underholdselement med faktiske utgifter for BMs andre barn. Legges manuelt inn av saksbehandler.
          *
          * @tags underhold-controller
          * @name OppretteUnderholdForBarn

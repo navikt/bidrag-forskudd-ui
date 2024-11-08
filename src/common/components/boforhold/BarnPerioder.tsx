@@ -58,6 +58,7 @@ export const BarnPerioder = () => {
                                 ...currentData.boforhold,
                                 egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                                 husstandsbarn: currentData.boforhold.husstandsbarn.filter((b) => b.id !== barn.id),
+                                beregnetBoforhold: response.beregnetBoforhold,
                             },
                         };
                     });

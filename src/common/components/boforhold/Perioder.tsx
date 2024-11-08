@@ -293,6 +293,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                             husstandsbarn: updatedHusstandsbarnListe,
                             valideringsfeil: response.valideringsfeil,
                             egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
+                            beregnetBoforhold: response.beregnetBoforhold,
                         },
                     };
                 });
