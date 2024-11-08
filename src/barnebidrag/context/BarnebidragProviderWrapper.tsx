@@ -46,7 +46,7 @@ function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
         samvær: { error: false },
         inntekt: { error: false },
     });
-    const formSteps = { defaultStep: BarnebidragStepper.UNDERHOLDSKOSTNAD, steps: BarnebidragSteps };
+    const formSteps = { defaultStep: BarnebidragStepper.VIRKNINGSTIDSPUNKT, steps: BarnebidragSteps };
 
     function getPageErrorTexts(): { title: string; description: string } {
         return {

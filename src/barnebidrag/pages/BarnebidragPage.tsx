@@ -4,10 +4,11 @@ import PageWrapper from "@common/PageWrapper";
 import { Alert, Heading, Provider } from "@navikt/ds-react";
 import React, { useLayoutEffect, useRef } from "react";
 
+import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import { BarnebidragSideMenu } from "./BarnebidragSideMenu";
 export const BarnebidragPage = () => {
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning, kanIkkeBehandlesBegrunnelse } = useGetBehandlingV2();
     const ref = useRef<HTMLDivElement>(null);
     const [rootElement, setRootElement] = React.useState<HTMLDivElement | null>(null);
 
@@ -30,6 +31,14 @@ export const BarnebidragPage = () => {
                                     Vedtak er fattet
                                 </Heading>
                                 Vedtak er fattet for behandlingen og kan derfor ikke endres
+                            </Alert>
+                        )}
+                        {!kanBehandlesINyLøsning && (
+                            <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                                <Heading level="3" size="small">
+                                    {texts.title.kanIkkeBehandlesGjennomNyLøsning}
+                                </Heading>
+                                {kanIkkeBehandlesBegrunnelse}
                             </Alert>
                         )}
                         <NavigationLoaderWrapper>
