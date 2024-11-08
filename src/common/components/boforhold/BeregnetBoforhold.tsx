@@ -32,17 +32,6 @@ export default function BeregnetBoforhold() {
                                 Voksne i husstanden
                             </Table.HeaderCell>
                         </Table.Row>
-                        {/* <Table.Row className="align-baseline">
-                            <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[200px]">
-                                {text.label.fraOgMed} - {text.label.tilOgMed}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[150px]">
-                                Antall barn i husstanden
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[150px]">
-                                Voksne i husstanden
-                            </Table.HeaderCell>
-                        </Table.Row>{" "} */}
                     </Table.Header>
                     <Table.Body>
                         {beregnetBoforhold.map((beregning, index) => (
@@ -60,19 +49,6 @@ export default function BeregnetBoforhold() {
                                     {beregning.borMedAndreVoksne ? "Ja" : "Nei"}
                                 </Table.DataCell>
                             </Table.Row>
-                            // <Table.Row key={beregning?.periode.fom + "-" + index} className="align-top">
-                            //     <Table.DataCell textSize="small">
-                            //         {DateToDDMMYYYYString(dateOrNull(beregning.periode.fom))} -{" "}
-                            //         {beregning.periode.til
-                            //             ? DateToDDMMYYYYString(deductDays(dateOrNull(beregning.periode.til), 1))
-                            //             : null}
-                            //     </Table.DataCell>
-
-                            //     <Table.DataCell textSize="small">{beregning.antallBarn}</Table.DataCell>
-                            //     <Table.DataCell textSize="small">
-                            //         {beregning.borMedAndreVoksne ? "Ja" : "Nei"}
-                            //     </Table.DataCell>
-                            // </Table.Row>
                         ))}
                     </Table.Body>
                 </Table>
