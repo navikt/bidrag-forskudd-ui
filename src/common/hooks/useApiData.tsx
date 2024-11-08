@@ -525,8 +525,8 @@ export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
         mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
         mutationFn: async (payload: StonadTilBarnetilsynDto): Promise<OppdatereUnderholdResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereStonadTilBarnetilsyn(
-                behandlingId,
-                underholdsid,
+                Number(behandlingId),
+                Number(underholdsid),
                 payload
             );
             return data;

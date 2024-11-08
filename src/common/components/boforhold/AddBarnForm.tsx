@@ -98,6 +98,7 @@ export const AddBarnForm = ({
                                 husstandsbarn: currentData.boforhold.husstandsbarn.concat(
                                     response.oppdatertHusstandsbarn
                                 ),
+                                beregnetBoforhold: response.beregnetBoforhold,
                             },
                         };
                     });
