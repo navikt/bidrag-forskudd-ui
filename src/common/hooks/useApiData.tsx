@@ -401,7 +401,7 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
     });
 };
 export const useGetBeregningBidrag = () => {
-    const { behandlingId, vedtakId } = useBehandlingProvider();
+    const { behandlingId } = useBehandlingProvider();
 
     return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
         queryKey: QueryKeys.beregnBarnebidrag(),
