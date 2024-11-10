@@ -1,10 +1,15 @@
 import { BodyShort, Heading, HStack } from "@navikt/ds-react";
 
+import {
+    BidragPeriodeBeregningsdetaljer,
+    DelberegningBidragspliktigesAndel,
+    ResultatSaerbidragsberegningInntekterDto,
+} from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { useGetBeregningSærbidrag } from "../../hooks/useApiData";
 import { CalculationTabell, MathMultiplication, MathValue } from "./CalculationTable";
 
-export const BPsAndel = () => {
+export const BPsAndelUtgifter = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
 
     const delberegningBpsAndel = beregnetSærbidrag.resultat.bpsAndel;
@@ -12,6 +17,57 @@ export const BPsAndel = () => {
     const utgifter = beregnetSærbidrag.resultat.delberegningUtgift;
     return (
         <div>
+            <BPsAndel
+                inntekter={inntekter}
+                bpsAndel={delberegningBpsAndel}
+                forskuddssats={beregnetSærbidrag.resultat.forskuddssats}
+            />
+
+            <div>
+                Andel utgifter:{" "}
+                <MathMultiplication
+                    left={`${formatterBeløpForBeregning(utgifter.sumGodkjent, true)}`}
+                    right={formatterProsent(delberegningBpsAndel.endeligAndelFaktor)}
+                />{" "}
+                = {formatterBeløpForBeregning(delberegningBpsAndel.andelBeløp, true)}
+            </div>
+        </div>
+    );
+};
+type DetaljertBeregningBidragProps = {
+    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
+};
+export const BPsAndelUnderholdskostnad = ({ beregningsdetaljer }: DetaljertBeregningBidragProps) => {
+    const delberegningBpsAndel = beregningsdetaljer.bpsAndel;
+    const inntekter = beregningsdetaljer.inntekter;
+    const delberegningUnderholdskostnad = beregningsdetaljer.delberegningUnderholdskostnad;
+    return (
+        <div>
+            <BPsAndel
+                inntekter={inntekter}
+                bpsAndel={delberegningBpsAndel}
+                forskuddssats={beregningsdetaljer.forskuddssats}
+            />
+
+            <div>
+                Andel underholdskostnad:{" "}
+                <MathMultiplication
+                    left={`${formatterBeløpForBeregning(delberegningUnderholdskostnad.beløp, true)}`}
+                    right={formatterProsent(delberegningBpsAndel.endeligAndelFaktor)}
+                />{" "}
+                = {formatterBeløpForBeregning(delberegningBpsAndel.andelBeløp, true)}
+            </div>
+        </div>
+    );
+};
+type BPsAndelProps = {
+    inntekter: ResultatSaerbidragsberegningInntekterDto;
+    bpsAndel: DelberegningBidragspliktigesAndel;
+    forskuddssats: number;
+};
+const BPsAndel = ({ inntekter, bpsAndel, forskuddssats }: BPsAndelProps) => {
+    return (
+        <>
             <Heading size="xsmall">{"BPs andel"}</Heading>
             <HStack gap={"5"} className="pb-2 w-full">
                 <CalculationTabell
@@ -32,10 +88,7 @@ export const BPsAndel = () => {
                                     {inntekter.inntektBarn > 0 && (
                                         <BodyShort size="small">
                                             <MathValue value={inntekter.inntektBarn} /> -{" "}
-                                            <MathMultiplication
-                                                left="30"
-                                                right={beregnetSærbidrag.resultat.forskuddssats}
-                                            />
+                                            <MathMultiplication left="30" right={forskuddssats} />
                                         </BodyShort>
                                     )}
                                 </>
@@ -67,26 +120,17 @@ export const BPsAndel = () => {
                     ]}
                     result={{
                         label: "BPs andel",
-                        value: formatterProsent(delberegningBpsAndel.beregnetAndelFaktor),
+                        value: formatterProsent(bpsAndel.beregnetAndelFaktor),
                     }}
                     message={
-                        delberegningBpsAndel.endeligAndelFaktor !== delberegningBpsAndel.beregnetAndelFaktor && (
+                        bpsAndel.endeligAndelFaktor !== bpsAndel.beregnetAndelFaktor && (
                             <BodyShort size="small" spacing className="text-red-500">
-                                Andel begrenset til {formatterProsent(delberegningBpsAndel.endeligAndelFaktor)}
+                                Andel begrenset til {formatterProsent(bpsAndel.endeligAndelFaktor)}
                             </BodyShort>
                         )
                     }
                 />
             </HStack>
-
-            <div>
-                Andel utgifter:{" "}
-                <MathMultiplication
-                    left={`${formatterBeløpForBeregning(utgifter.sumGodkjent, true)}`}
-                    right={formatterProsent(delberegningBpsAndel.endeligAndelFaktor)}
-                />{" "}
-                = {formatterBeløpForBeregning(delberegningBpsAndel.andelBeløp, true)}
-            </div>
-        </div>
+        </>
     );
 };

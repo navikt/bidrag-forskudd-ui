@@ -29,6 +29,7 @@ type VedtakWrapperProps = {
 const validerForRoller = {
     [TypeBehandling.FORSKUDD]: [Rolletype.BM],
     [TypeBehandling.SAeRBIDRAG]: [Rolletype.BA, Rolletype.BM, Rolletype.BP],
+    [TypeBehandling.BIDRAG]: [Rolletype.BA, Rolletype.BM, Rolletype.BP],
 };
 
 export default function VedtakWrapper({ feil, steps, children }: PropsWithChildren<VedtakWrapperProps>) {
@@ -70,6 +71,50 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             }
             feilliste.push(...feillisteUtgifter);
         }
+        if (feilInnhold.underholdskostnad != null && "underholdskostnad" in steps) {
+            feilInnhold.underholdskostnad.forEach((value) => {
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={`#${elementIds.seksjon_underholdskostnader}_${value.underholdskostnadId}`}
+                        onClick={() => onStepChange(steps.samvær)}
+                    >
+                        Underholdskostnad: Perioder for barn {value.barn.navn}
+                    </ErrorSummary.Item>
+                );
+                if (value.manglerPerioderForTilsynsutgifter) {
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_underholdskostnader}_${value.underholdskostnadId}`}
+                            onClick={() => onStepChange(steps.samvær)}
+                        >
+                            Underholdskostnad: Mangler tilsynsutgifter for barn {value.barn.navn}
+                        </ErrorSummary.Item>
+                    );
+                }
+            });
+        }
+        if (feilInnhold.samvær != null && "samvær" in steps) {
+            feilInnhold.samvær.forEach((value) => {
+                if (value.harPeriodiseringsfeil)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_samvær}_${value.samværId}`}
+                            onClick={() => onStepChange(steps.samvær)}
+                        >
+                            Samvær: Perioder for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                if (value.manglerBegrunnelse)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_samvær}_${value.samværId}`}
+                            onClick={() => onStepChange(steps.samvær)}
+                        >
+                            Samvær: Mangler begrunnelse for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
         if (feilInnhold.husstandsmedlem != null) {
             feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(
@@ -82,6 +127,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 )
             );
         }
+
         if (feilInnhold.andreVoksneIHusstanden != null) {
             feilliste.push(
                 <ErrorSummary.Item
