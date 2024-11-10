@@ -1,5 +1,5 @@
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
-import { BPsAndel } from "../../../common/components/vedtak/BPAndelTable";
+import { BPsAndelUtgifter } from "../../../common/components/vedtak/BPAndelTable";
 import { BpsBeregnedeTotalbidragTabellV2 } from "../../../common/components/vedtak/BpsBeregnedeTotalbidragTabell";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
@@ -14,8 +14,11 @@ export const DetaljertBeregningSærbidrag: React.FC = () => {
 
     return (
         <>
-            <BPsAndel />
-            <BPsEvne />
+            <BPsAndelUtgifter />
+            <BPsEvne
+                inntekter={beregnetSærbidrag.resultat.inntekter}
+                bidragsevne={beregnetSærbidrag.resultat.delberegningBidragsevne}
+            />
             <BpsBeregnedeTotalbidragTabellV2 />
             <ResultatTable
                 title="Beregning"

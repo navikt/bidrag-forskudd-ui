@@ -157,10 +157,9 @@ const Side = () => {
 const InntektForm = () => {
     const { inntekter, roller } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
-    const bmOgBarn = roller.filter((rolle) => rolle.rolletype === Rolletype.BM || rolle.rolletype === Rolletype.BA);
     const initialValues = useMemo(
-        () => createInitialValues(bmOgBarn, inntekter, virkningsdato),
-        [bmOgBarn, inntekter, virkningsdato]
+        () => createInitialValues(roller, inntekter, virkningsdato),
+        [roller, inntekter, virkningsdato]
     );
     const useFormMethods = useForm({
         defaultValues: initialValues,
