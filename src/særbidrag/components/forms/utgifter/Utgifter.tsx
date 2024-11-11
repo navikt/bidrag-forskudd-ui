@@ -36,6 +36,7 @@ import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import elementIds from "../../../../common/constants/elementIds";
+import { formatterBeløp } from "../../../../utils/number-utils";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -494,7 +495,7 @@ const UtgifterListe = () => {
                                   response.oppdatertUtgiftspost
                               );
 
-                    setValue(`avslag`, response.avslag ?? null);
+                    setValue(`avslag`, response.avslag ?? undefined);
                     return {
                         ...currentData,
                         utgift: {
@@ -714,7 +715,7 @@ const BeregnetUtgifter = () => {
                     </Table.Header>
                     <Table.Body>
                         {totalBeregning.map((item, index) => (
-                            <Table.Row key={item.utgiftstype + "-" + index} className="align-top">
+                            <Table.Row key={item.utgiftstype + "-" + index} className="align-middle">
                                 <Table.DataCell textSize="small">
                                     <div className="h-8 w-full flex items-center justify-center">
                                         {item.betaltAvBp && (
@@ -726,10 +727,10 @@ const BeregnetUtgifter = () => {
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">{item.utgiftstypeVisningsnavn}</Table.DataCell>
                                 <Table.DataCell textSize="small" align="right">
-                                    {item.totalKravbeløp.toLocaleString("nb-NO")}
+                                    {formatterBeløp(item.totalKravbeløp)}
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small" align="right">
-                                    {item.totalGodkjentBeløp.toLocaleString("nb-NO")}
+                                    {formatterBeløp(item.totalGodkjentBeløp)}
                                 </Table.DataCell>
                             </Table.Row>
                         ))}
