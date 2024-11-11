@@ -1,4 +1,4 @@
-import { Heading } from "@navikt/ds-react";
+import { BodyShort, Heading } from "@navikt/ds-react";
 import { ReactElement } from "react";
 
 interface TableData {
@@ -14,7 +14,7 @@ interface GenericTableProps {
 
 export const ResultatTable: React.FC<GenericTableProps> = ({ data, title, className }) => {
     return (
-        <div className={className}>
+        <BodyShort size="small" className={className}>
             {title && <Heading size="xsmall">{title}</Heading>}
             <table>
                 <thead>
@@ -34,6 +34,6 @@ export const ResultatTable: React.FC<GenericTableProps> = ({ data, title, classN
                     ))}
                 </tbody>
             </table>
-        </div>
+        </BodyShort>
     );
 };

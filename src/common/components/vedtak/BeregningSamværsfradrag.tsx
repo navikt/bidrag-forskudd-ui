@@ -1,17 +1,19 @@
-import {
-    BeregningsdetaljerSamvaersfradrag,
-    DelberegningBidragspliktigesAndel,
-} from "../../../api/BidragBehandlingApiV1";
+import { BidragPeriodeBeregningsdetaljer } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { hentVisningsnavn } from "../../hooks/useVisningsnavn";
 import { ResultatTable } from "./ResultatTable";
 
 type BeregningSamværsfradragProps = {
-    beregning: BeregningsdetaljerSamvaersfradrag;
-    bpsAndel: DelberegningBidragspliktigesAndel;
-    beregnetBidrag: number;
+    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
 };
-export default function BeregningSamværsfradrag({ beregning, bpsAndel, beregnetBidrag }: BeregningSamværsfradragProps) {
+export default function BeregningSamværsfradrag({
+    beregningsdetaljer: { samværsfradrag: beregning, bpsAndel, sluttberegning, delberegningBidragsevne },
+}: BeregningSamværsfradragProps) {
+    const beløpSomSamværsfradragTrekkesFra = sluttberegning.justertNedTil25ProsentAvInntekt
+        ? delberegningBidragsevne.sumInntekt25Prosent
+        : sluttberegning.justertForNettoBarnetilleggBP
+          ? sluttberegning.nettoBarnetilleggBP
+          : bpsAndel.andelBeløp;
     return (
         <ResultatTable
             title="Samværsfradrag"
@@ -29,7 +31,7 @@ export default function BeregningSamværsfradrag({ beregning, bpsAndel, beregnet
                 {
                     label: "Endelig bidrag (etter samværsfradrag)",
                     textRight: false,
-                    value: `${formatterBeløpForBeregning(bpsAndel.andelBeløp)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${beregnetBidrag}`,
+                    value: `${formatterBeløpForBeregning(beløpSomSamværsfradragTrekkesFra)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
                 },
             ].filter((d) => d)}
         />

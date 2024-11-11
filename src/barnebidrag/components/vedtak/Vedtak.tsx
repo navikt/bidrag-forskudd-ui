@@ -182,7 +182,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     Endelig bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "300px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "400px" }}>
                     Resultat
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "54px" }}></Table.HeaderCell>

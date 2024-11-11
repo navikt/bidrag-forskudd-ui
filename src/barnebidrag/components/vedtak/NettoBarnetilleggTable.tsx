@@ -1,14 +1,20 @@
 import { Heading, Table } from "@navikt/ds-react";
 
+import { BidragPeriodeBeregningsdetaljer, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
-import { ResultatTable } from "./ResultatTable";
 
-type NettoBarnetilleggTableProps = {};
+type NettoBarnetilleggTableProps = {
+    rolle: Rolletype;
+    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
+};
 // eslint-disable-next-line no-empty-pattern
-export const NettoBarnetilleggTable = ({}: NettoBarnetilleggTableProps) => {
+export const NettoBarnetilleggTable = ({ rolle, beregningsdetaljer }: NettoBarnetilleggTableProps) => {
+    const sluttberegning = beregningsdetaljer.sluttberegning;
     return (
         <div>
-            <Heading size="xsmall">Netto barnetillegg</Heading>
+            <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]}) -- (WIP - Fiktive tall)</Heading>
             <ResultatTable
                 data={[
                     {
@@ -47,7 +53,13 @@ export const NettoBarnetilleggTable = ({}: NettoBarnetilleggTableProps) => {
                         <Table.DataCell colSpan={2} textSize="small">
                             Resultat
                         </Table.DataCell>
-                        <Table.DataCell textSize="small">{formatterBeløpForBeregning(9999)}</Table.DataCell>
+                        <Table.DataCell textSize="small">
+                            {formatterBeløpForBeregning(
+                                rolle === Rolletype.BP
+                                    ? sluttberegning.nettoBarnetilleggBP
+                                    : sluttberegning.nettoBarnetilleggBM
+                            )}
+                        </Table.DataCell>
                     </Table.Row>
                 </Table.Body>
             </Table>
