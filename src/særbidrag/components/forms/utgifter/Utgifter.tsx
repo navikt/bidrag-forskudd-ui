@@ -36,6 +36,7 @@ import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import elementIds from "../../../../common/constants/elementIds";
+import { formatterBeløp } from "../../../../utils/number-utils";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -121,13 +122,11 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
 };
 
 const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    const behandling = useGetBehandlingV2();
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
-            prefix={erUtgiftForeldet(behandling.mottattdato, item.dato) ? text.label.begrunnelseUtgiftErForeldet : null}
             editable={item.erRedigerbart}
         />
     );
@@ -496,7 +495,7 @@ const UtgifterListe = () => {
                                   response.oppdatertUtgiftspost
                               );
 
-                    setValue(`avslag`, response.avslag ?? null);
+                    setValue(`avslag`, response.avslag ?? undefined);
                     return {
                         ...currentData,
                         utgift: {
@@ -539,15 +538,16 @@ const UtgifterListe = () => {
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
-                        setValue(`avslag`, response.avslag ?? null);
+                        setValue(`avslag`, response.avslag ?? undefined);
                         saveUtgifter.queryClientUpdater((currentData) => ({
                             ...currentData,
                             utgift: {
                                 ...currentData.utgift,
                                 avslag: response.avslag,
                                 beregning: response.beregning,
-                                utgifter: response.utgiftposter,
                                 valideringsfeil: response.valideringsfeil,
+                                totalBeregning: response.totalBeregning,
+                                maksGodkjentBeløp: response.maksGodkjentBeløp,
                             },
                         }));
                     },
@@ -715,7 +715,7 @@ const BeregnetUtgifter = () => {
                     </Table.Header>
                     <Table.Body>
                         {totalBeregning.map((item, index) => (
-                            <Table.Row key={item.utgiftstype + "-" + index} className="align-top">
+                            <Table.Row key={item.utgiftstype + "-" + index} className="align-middle">
                                 <Table.DataCell textSize="small">
                                     <div className="h-8 w-full flex items-center justify-center">
                                         {item.betaltAvBp && (
@@ -727,23 +727,21 @@ const BeregnetUtgifter = () => {
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small">{item.utgiftstypeVisningsnavn}</Table.DataCell>
                                 <Table.DataCell textSize="small" align="right">
-                                    {item.totalKravbeløp.toLocaleString("nb-NO")}
+                                    {formatterBeløp(item.totalKravbeløp)}
                                 </Table.DataCell>
                                 <Table.DataCell textSize="small" align="right">
-                                    {item.totalGodkjentBeløp.toLocaleString("nb-NO")}
+                                    {formatterBeløp(item.totalGodkjentBeløp)}
                                 </Table.DataCell>
                             </Table.Row>
                         ))}
                     </Table.Body>
                 </Table>
-                <div className="grid grid-cols-[auto,134px,134px] w-full my-2">
-                    <Label size="small" className="p-2">
-                        {text.label.totalt}
-                    </Label>
-                    <Label size="small" className="p-2 grid justify-end">
+                <div className="grid grid-cols-[auto,134px,134px] w-full my-2 pl-2 pr-2">
+                    <Label size="small">{text.label.totalt}</Label>
+                    <Label size="small" className=" grid justify-end">
                         {beregning?.totalKravbeløp}
                     </Label>
-                    <Label size="small" className="p-2 grid justify-end">
+                    <Label size="small" className="grid justify-end">
                         {beregning?.totalGodkjentBeløp}
                     </Label>
                 </div>
