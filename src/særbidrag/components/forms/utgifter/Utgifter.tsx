@@ -121,13 +121,11 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
 };
 
 const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    const behandling = useGetBehandlingV2();
     return (
         <FormControlledTextField
             name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
             hideLabel
-            prefix={erUtgiftForeldet(behandling.mottattdato, item.dato) ? text.label.begrunnelseUtgiftErForeldet : null}
             editable={item.erRedigerbart}
         />
     );
@@ -539,15 +537,16 @@ const UtgifterListe = () => {
                 {
                     onSuccess: (response) => {
                         clearErrors(`utgifter.${index}`);
-                        setValue(`avslag`, response.avslag ?? null);
+                        setValue(`avslag`, response.avslag ?? undefined);
                         saveUtgifter.queryClientUpdater((currentData) => ({
                             ...currentData,
                             utgift: {
                                 ...currentData.utgift,
                                 avslag: response.avslag,
                                 beregning: response.beregning,
-                                utgifter: response.utgiftposter,
                                 valideringsfeil: response.valideringsfeil,
+                                totalBeregning: response.totalBeregning,
+                                maksGodkjentBeløp: response.maksGodkjentBeløp,
                             },
                         }));
                     },
