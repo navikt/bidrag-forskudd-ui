@@ -739,10 +739,10 @@ const BeregnetUtgifter = () => {
                 <div className="grid grid-cols-[auto,134px,134px] w-full my-2 pl-2 pr-2">
                     <Label size="small">{text.label.totalt}</Label>
                     <Label size="small" className=" grid justify-end">
-                        {beregning?.totalKravbeløp}
+                        {formatterBeløp(beregning?.totalKravbeløp)}
                     </Label>
                     <Label size="small" className="grid justify-end">
-                        {beregning?.totalGodkjentBeløp}
+                        {formatterBeløp(beregning?.totalGodkjentBeløp)}
                     </Label>
                 </div>
             </div>
