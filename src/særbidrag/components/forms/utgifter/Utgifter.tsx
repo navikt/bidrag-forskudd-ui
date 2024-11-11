@@ -736,14 +736,12 @@ const BeregnetUtgifter = () => {
                         ))}
                     </Table.Body>
                 </Table>
-                <div className="grid grid-cols-[auto,134px,134px] w-full my-2">
-                    <Label size="small" className="p-2">
-                        {text.label.totalt}
-                    </Label>
-                    <Label size="small" className="p-2 grid justify-end">
+                <div className="grid grid-cols-[auto,134px,134px] w-full my-2 pl-2 pr-2">
+                    <Label size="small">{text.label.totalt}</Label>
+                    <Label size="small" className=" grid justify-end">
                         {beregning?.totalKravbeløp}
                     </Label>
-                    <Label size="small" className="p-2 grid justify-end">
+                    <Label size="small" className="grid justify-end">
                         {beregning?.totalGodkjentBeløp}
                     </Label>
                 </div>
