@@ -134,8 +134,19 @@ const VedtakTableBody = ({
                                 )}
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
-                                {formatterProsent(periode.bpsAndelU)} /{" "}
-                                {formatterBeløpForBeregning(periode.beregningsdetaljer.bpsAndel.andelBeløp)}
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td className="w-[55px]">{formatterProsent(periode.bpsAndelU)}</td>
+                                            <td className="w-[10px]">/</td>
+                                            <td className="w-[55px]">
+                                                {formatterBeløpForBeregning(
+                                                    periode.beregningsdetaljer.bpsAndel.andelBeløp
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(periode.samværsfradrag)}
