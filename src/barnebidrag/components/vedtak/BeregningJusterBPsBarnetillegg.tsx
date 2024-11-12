@@ -5,7 +5,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningJusterBPsBarnetillegg = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad },
+        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad, bpsAndel },
     } = useBidragBeregningPeriode();
     const uMinusBMsNettoBarnetillegg = Math.max(
         underholdskostnad.underholdskostnad - sluttberegning.nettoBarnetilleggBM,
@@ -13,7 +13,7 @@ export const BeregningJusterBPsBarnetillegg = () => {
     );
     const foreløpigBeregnetBidrag = sluttberegning.justertForNettoBarnetilleggBM
         ? uMinusBMsNettoBarnetillegg
-        : sluttberegning.kostnadsberegnetBidrag;
+        : bpsAndel.andelBeløp;
 
     function renderResult() {
         if (sluttberegning.justertForNettoBarnetilleggBP) {

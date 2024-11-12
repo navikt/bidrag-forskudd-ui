@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 import {
     BidragPeriodeBeregningsdetaljer,
     ResultatBarnebidragsberegningPeriodeDto,
+    Resultatkode,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsEvneV2 } from "../../../common/components/vedtak/BPsEvneTabell";
@@ -42,10 +43,16 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     bidragsevne={beregningsdetaljer.delberegningBidragsevne}
                 />
                 <BeregningFordeltBidrag />
-                <NettoBarnetilleggTable rolle={Rolletype.BM} />
-                <BeregningJusterBMsBarnetillegg />
-                <NettoBarnetilleggTable rolle={Rolletype.BP} />
-                <BeregningJusterBPsBarnetillegg />
+                {![Resultatkode.DELT_BOSTED, Resultatkode.BIDRAG_IKKE_BEREGNET_DELT_BOSTED].includes(
+                    periode.resultatKode
+                ) && (
+                    <>
+                        <NettoBarnetilleggTable rolle={Rolletype.BM} />
+                        <BeregningJusterBMsBarnetillegg />
+                        <NettoBarnetilleggTable rolle={Rolletype.BP} />
+                        <BeregningJusterBPsBarnetillegg />
+                    </>
+                )}
                 <BeregningSamværsfradrag />
                 <EndeligBidragTable />
             </BidragBeregningContext.Provider>
