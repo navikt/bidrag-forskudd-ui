@@ -31,7 +31,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8">
+        <div className="grid gap-y-8 w-[1100px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
