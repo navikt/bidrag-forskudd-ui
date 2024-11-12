@@ -1,14 +1,15 @@
 import { BodyShort, Heading, Label, Table } from "@navikt/ds-react";
 
-import { DelberegningUnderholdskostnad, SluttberegningBarnebidrag } from "../../../api/BidragBehandlingApiV1";
+import { BidragPeriodeBeregningsdetaljer } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 
 type EndeligBidragTableProps = {
-    sluttberegning: SluttberegningBarnebidrag;
-    underholdskostnad: DelberegningUnderholdskostnad;
+    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
 };
 // eslint-disable-next-line no-empty-pattern
-export const EndeligBidragTable = ({ sluttberegning, underholdskostnad }: EndeligBidragTableProps) => {
+export const EndeligBidragTable = ({
+    beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad },
+}: EndeligBidragTableProps) => {
     const uMinusBMsNettoBarnetillegg = Math.max(
         underholdskostnad.underholdskostnad - sluttberegning.nettoBarnetilleggBM,
         0

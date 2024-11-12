@@ -6,10 +6,10 @@ import {
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import BeregningSamværsfradrag from "../../../common/components/vedtak/BeregningSamværsfradrag";
-import { BPsAndelUnderholdskostnad } from "../../../common/components/vedtak/BPAndelTable";
 import { BPsEvneV2 } from "../../../common/components/vedtak/BPsEvneTabell";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
 import { BeregningJusterBPsBarnetillegg } from "./BeregningJusterBPsBarnetillegg";
+import { BPsAndelUnderholdskostnad } from "./BPsAndelUnderholdstkostnad";
 import { EndeligBidragTable } from "./EndeligBidragTable";
 import { NettoBarnetilleggTable } from "./NettoBarnetilleggTable";
 
@@ -30,10 +30,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
             <BeregningJusterBPsBarnetillegg beregningsdetaljer={periode.beregningsdetaljer} />
             <BeregningSamværsfradrag beregningsdetaljer={periode.beregningsdetaljer} />
             <NettoBarnetilleggTable rolle={Rolletype.BM} beregningsdetaljer={periode.beregningsdetaljer} />
-            <EndeligBidragTable
-                sluttberegning={periode.beregningsdetaljer.sluttberegning}
-                underholdskostnad={periode.beregningsdetaljer.delberegningUnderholdskostnad}
-            />
+            <EndeligBidragTable beregningsdetaljer={periode.beregningsdetaljer} />
         </VStack>
     );
 };

@@ -1,10 +1,10 @@
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
-import { BPsAndelUtgifter } from "../../../common/components/vedtak/BPAndelTable";
 import { BpsBeregnedeTotalbidragTabellV2 } from "../../../common/components/vedtak/BpsBeregnedeTotalbidragTabell";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
 import { formatterBeløp } from "../../../utils/number-utils";
+import { BPsAndelUtgifter } from "./BPsAndelUtgifter";
 
 export const DetaljertBeregningSærbidrag: React.FC = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
