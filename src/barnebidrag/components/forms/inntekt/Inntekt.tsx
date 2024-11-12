@@ -133,7 +133,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.VEDTAK]);
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD]);
 
     const debouncedOnSave = useDebounce(onSave);
 
