@@ -73,8 +73,8 @@ export const BPsAndelInntekterTableV2 = ({
                         <>
                             {inntekter.inntektBarn > 0 && (
                                 <BodyShort size="small">
-                                    <MathValue value={inntekter.inntektBarn} /> -{" "}
-                                    <MathMultiplication left="30" right={forskuddssats} />
+                                    {formatterBeløpForBeregning(inntekter.inntektBarn)} - 30 x{" "}
+                                    {formatterBeløpForBeregning(forskuddssats)}
                                 </BodyShort>
                             )}
                         </>

@@ -5,7 +5,6 @@ import {
     ResultatSaerbidragsberegningInntekterDto,
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsAndelInntekterTableV2 } from "../../../common/components/vedtak/BPsAndelInntekterTable";
-import { MathDivision, MathMultiplication, MathValue } from "../../../common/components/vedtak/CalculationTable";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
@@ -26,15 +25,7 @@ export const BPsAndelUnderholdskostnad = () => {
                         {
                             label: "Andel underholdskostnad",
                             textRight: false,
-                            value: (
-                                <div className="inline">
-                                    <MathMultiplication
-                                        left={`${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)}`}
-                                        right={formatterProsent(bpsAndel.endeligAndelFaktor)}
-                                    />{" "}
-                                    = {formatterBeløpForBeregning(bpsAndel.andelBeløp, true)}
-                                </div>
-                            ),
+                            value: `${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(bpsAndel.endeligAndelFaktor)} = ${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)}`,
                         },
                     ].filter((d) => d)}
                 />
@@ -53,15 +44,5 @@ const generateBpsAndelSection = (
 ) => ({
     label: "BP's andel av underholdskostnad (i prosent)",
     textRight: false,
-    value: (
-        <div className="inline">
-            <div>
-                <MathDivision
-                    top={formatterBeløpForBeregning(inntekter.inntektBP, true)}
-                    bottom={formatterBeløpForBeregning(inntekter.totalEndeligInntekt, true)}
-                />{" "}
-                = <MathValue value={formatterProsent(bpsAndel.beregnetAndelFaktor)} />
-            </div>
-        </div>
-    ),
+    value: `${formatterBeløpForBeregning(inntekter.inntektBP, true)} / ${formatterBeløpForBeregning(inntekter.totalEndeligInntekt)} = ${formatterProsent(bpsAndel.beregnetAndelFaktor)}`,
 });

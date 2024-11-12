@@ -34,7 +34,7 @@ export const useBidragBeregningPeriode = () => {
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
     return (
-        <VStack gap="4" className={"w-[800px]"}>
+        <VStack gap="2" className={"w-[800px]"}>
             <BidragBeregningContext.Provider value={{ beregningsdetaljer }}>
                 <BPsAndelUnderholdskostnad />
                 <BPsEvneV2

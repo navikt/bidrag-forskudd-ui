@@ -1,5 +1,4 @@
-import { BodyShort, Heading } from "@navikt/ds-react";
-
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
@@ -15,20 +14,30 @@ export const BeregningJusterBPsBarnetillegg = () => {
     const foreløpigBeregnetBidrag = sluttberegning.justertForNettoBarnetilleggBM
         ? uMinusBMsNettoBarnetillegg
         : sluttberegning.kostnadsberegnetBidrag;
+
     function renderResult() {
         if (sluttberegning.justertForNettoBarnetilleggBP) {
-            return `Fordelt bidrag (${formatterBeløpForBeregning(foreløpigBeregnetBidrag)}) er lavere enn BPs barnetillegg (${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBP)}). 
-            Bidraget justeres derfor opp til BPs barnetillegg (${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBP)}).`;
-        } else {
-            return `Fordelt bidrag (${formatterBeløpForBeregning(foreløpigBeregnetBidrag)}) er høyere enn BPs barnetillegg (${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBP)}). 
-            Bidraget justeres derfor ikke`;
+            return ` (justert opp til BPs netto barnetillegg)`;
         }
+        return "";
+    }
+    function hentForeløpigBidrag() {
+        if (sluttberegning.justertForNettoBarnetilleggBP)
+            return formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBP);
+        return formatterBeløpForBeregning(foreløpigBeregnetBidrag);
     }
     return (
         <div>
-            <Heading size="xsmall">Juster opp til netto barnetillegg til BP</Heading>
-
-            <BodyShort size="small">{renderResult()}</BodyShort>
+            <ResultatTable
+                data={[
+                    {
+                        label: "Foreløpig bidrag",
+                        textRight: false,
+                        labelStrong: true,
+                        value: `${hentForeløpigBidrag()}${renderResult()}`,
+                    },
+                ].filter((d) => d)}
+            />
         </div>
     );
 };

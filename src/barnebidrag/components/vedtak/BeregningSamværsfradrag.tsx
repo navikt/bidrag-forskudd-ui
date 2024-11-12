@@ -1,5 +1,6 @@
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
+import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 export default function BeregningSamværsfradrag() {
@@ -19,13 +20,8 @@ export default function BeregningSamværsfradrag() {
                 {
                     label: "Samværsfradrag",
                     textRight: false,
-                    value: beregning.samværsfradrag,
+                    value: formatterBeløpForBeregning(beregning.samværsfradrag),
                 },
-                // {
-                //     label: "Endelig bidrag (etter samværsfradrag)",
-                //     textRight: false,
-                //     value: `${formatterBeløpForBeregning(beløpSomSamværsfradragTrekkesFra)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
-                // },
             ].filter((d) => d)}
         />
     );

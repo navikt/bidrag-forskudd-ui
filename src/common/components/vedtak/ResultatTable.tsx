@@ -1,8 +1,9 @@
-import { BodyShort, Heading } from "@navikt/ds-react";
+import { BodyShort, Heading, Label } from "@navikt/ds-react";
 import { ReactElement } from "react";
 
 interface TableData {
     label: string;
+    labelStrong?: boolean;
     value: string | number | ReactElement;
     textRight?: boolean;
 }
@@ -28,7 +29,9 @@ export const ResultatTable: React.FC<GenericTableProps> = ({ data, title, classN
                 <tbody>
                     {data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
-                            <td style={{ paddingRight: "8px" }}>{row.label}: </td>
+                            <td style={{ paddingRight: "8px" }}>
+                                {row.labelStrong ? <Label size="small">{row.label}</Label> : row.label}:{" "}
+                            </td>
                             <td className={row.textRight === false ? "text-left" : "text-right"}>{row.value}</td>
                         </tr>
                     ))}

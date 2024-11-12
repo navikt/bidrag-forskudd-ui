@@ -1,5 +1,4 @@
-import { BodyShort, Heading } from "@navikt/ds-react";
-
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
@@ -11,21 +10,34 @@ export const BeregningFordeltBidrag = () => {
 
     function renderResult() {
         if (sluttberegning.justertNedTilEvne) {
-            return `BPs totale bidrag (${formatterBeløpForBeregning(bpsAndel.andelBeløp)}) er høyere enn evne (${formatterBeløpForBeregning(evne.bidragsevne)}) 
-            men lavere enn 25% av inntekt (${formatterBeløpForBeregning(evne.sumInntekt25Prosent)}). Bidraget reduseres derfor til evne (${formatterBeløpForBeregning(evne.bidragsevne)})`;
+            return ` (redusert til evne)`;
         } else if (sluttberegning.justertNedTil25ProsentAvInntekt) {
-            return `BPs totale bidrag (${formatterBeløpForBeregning(bpsAndel.andelBeløp)}) er lavere enn evne (${formatterBeløpForBeregning(evne.bidragsevne)}) 
-            men høyere enn 25% av inntekt (${formatterBeløpForBeregning(evne.sumInntekt25Prosent)}). Bidraget reduseres derfor til evne $(${formatterBeløpForBeregning(evne.sumInntekt25Prosent)})`;
-        } else {
-            return `BPs totale bidrag (${formatterBeløpForBeregning(bpsAndel.andelBeløp)}) er lavere enn både evne (${formatterBeløpForBeregning(evne.bidragsevne)}) 
-            og 25% av inntekt (${formatterBeløpForBeregning(evne.sumInntekt25Prosent)}). Bidraget (${formatterBeløpForBeregning(bpsAndel.andelBeløp)}) reduseres derfor ikke`;
+            return ` (redusert til 25% av inntekt)`;
         }
+        return "";
+    }
+
+    function hentForeløpigBidrag() {
+        if (sluttberegning.justertNedTilEvne) return formatterBeløpForBeregning(evne.bidragsevne);
+        if (sluttberegning.justertNedTil25ProsentAvInntekt) return formatterBeløpForBeregning(evne.sumInntekt25Prosent);
+        return formatterBeløpForBeregning(bpsAndel.andelBeløp);
     }
     return (
-        <div>
-            <Heading size="xsmall">Fordelt bidrag</Heading>
-
-            <BodyShort size="small">{renderResult()}</BodyShort>
-        </div>
+        <ResultatTable
+            data={[
+                {
+                    label: "25% av inntekt",
+                    textRight: false,
+                    labelStrong: true,
+                    value: formatterBeløpForBeregning(evne.sumInntekt25Prosent),
+                },
+                {
+                    label: "Foreløpig bidrag",
+                    textRight: false,
+                    labelStrong: true,
+                    value: `${hentForeløpigBidrag()}${renderResult()}`,
+                },
+            ].filter((d) => d)}
+        />
     );
 };

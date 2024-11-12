@@ -20,7 +20,7 @@ import {
 import { RolleTag } from "../../../common/components/RolleTag";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
-import { formatterBeløp, formatterProsent } from "../../../utils/number-utils";
+import { formatterBeløp, formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
 
@@ -38,7 +38,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8 m-auto w-[1028px]">
+        <div className="grid gap-y-8 m-auto w-[1100px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -128,11 +128,25 @@ const VedtakTableBody = ({
                                     : ""}
                             </Table.DataCell>
 
-                            <Table.DataCell textSize="small">{formatterProsent(periode.bpsAndelU)}</Table.DataCell>
-                            <Table.DataCell textSize="small">{formatterBeløp(periode.samværsfradrag)}</Table.DataCell>
-                            <Table.DataCell textSize="small">{formatterBeløp(periode.beregnetBidrag)}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløp(
+                                    periode.beregningsdetaljer.delberegningUnderholdskostnad.underholdskostnad
+                                )}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterProsent(periode.bpsAndelU)} /{" "}
+                                {formatterBeløpForBeregning(periode.beregningsdetaljer.bpsAndel.andelBeløp)}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(periode.samværsfradrag)}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(periode.beregnetBidrag)}
+                            </Table.DataCell>
 
-                            <Table.DataCell textSize="small">{formatterBeløp(periode.faktiskBidrag)}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(periode.faktiskBidrag)}
+                            </Table.DataCell>
 
                             <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
                         </Table.ExpandableRow>
@@ -167,10 +181,13 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "250px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
+                    U
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     BPs andel U
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>

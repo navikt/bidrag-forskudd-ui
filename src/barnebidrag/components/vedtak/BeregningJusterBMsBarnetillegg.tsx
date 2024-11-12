@@ -1,56 +1,44 @@
-import { BodyShort, Heading, Label, Table } from "@navikt/ds-react";
-
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 // eslint-disable-next-line no-empty-pattern
 export const BeregningJusterBMsBarnetillegg = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad },
+        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad, bpsAndel },
     } = useBidragBeregningPeriode();
 
     const uMinusBMsNettoBarnetillegg = Math.max(
         underholdskostnad.underholdskostnad - sluttberegning.nettoBarnetilleggBM,
         0
     );
+
     function renderResult() {
         if (sluttberegning.justertForNettoBarnetilleggBM) {
-            return `Fordelt bidrag (${formatterBeløpForBeregning(sluttberegning.kostnadsberegnetBidrag)}) er høyere enn U - BMs netto barnetillegg (${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}). Fordelt bidrag reduseres til (${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)})`;
-        } else {
-            return `Fordelt bidrag (${formatterBeløpForBeregning(sluttberegning.kostnadsberegnetBidrag)}) er lavere enn U - BMs netto barnetillegg (${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}). Fordelt bidrag reduseres derfor ikke`;
+            return ` (redusert til ned til U - BMs netto barnetillegg)`;
         }
+        return "";
+    }
+    function hentForeløpigBidrag() {
+        if (sluttberegning.justertForNettoBarnetilleggBM) return formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg);
+        return formatterBeløpForBeregning(bpsAndel.andelBeløp);
     }
     return (
-        <div>
-            <Heading size="xsmall">Juster ned til netto barnetillegg til BM</Heading>
-
-            <Table size="small">
-                <Table.Body>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">Underholdskostnad</Table.DataCell>
-                        <Table.DataCell colSpan={2} textSize="small">
-                            {formatterBeløpForBeregning(underholdskostnad.underholdskostnad)}
-                        </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">BM's netto barnetillegg</Table.DataCell>
-                        <Table.DataCell textSize="small">
-                            -{formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBM)}
-                        </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">
-                            <Label size="small">Totalt</Label>
-                        </Table.DataCell>
-                        <Table.DataCell textSize="small">
-                            {formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}
-                        </Table.DataCell>
-                    </Table.Row>
-                </Table.Body>
-            </Table>
-            <BodyShort className="pt-2" spacing size="small">
-                {renderResult()}
-            </BodyShort>
-        </div>
+        <ResultatTable
+            data={[
+                {
+                    label: "U - BMs netto barnetillegg",
+                    textRight: false,
+                    labelStrong: true,
+                    value: `${formatterBeløpForBeregning(underholdskostnad.underholdskostnad)} - ${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBM)} = ${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}`,
+                },
+                {
+                    label: "Foreløpig bidrag",
+                    textRight: false,
+                    labelStrong: true,
+                    value: `${hentForeløpigBidrag()}${renderResult()}`,
+                },
+            ].filter((d) => d)}
+        />
     );
 };
