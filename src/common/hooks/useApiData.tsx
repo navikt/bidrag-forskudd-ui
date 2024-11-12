@@ -401,18 +401,16 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
     });
 };
 export const useGetBeregningBidrag = () => {
-    const { behandlingId } = useBehandlingProvider();
+    const { behandlingId, vedtakId } = useBehandlingProvider();
 
     return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
         queryKey: QueryKeys.beregnBarnebidrag(),
         queryFn: async () => {
             try {
-                // if (vedtakId) {
-                //     const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatSaerbidrag(
-                //         Number(vedtakId)
-                //     );
-                //     return { resultat: response.data };
-                // }
+                if (vedtakId) {
+                    const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatBidrag(Number(vedtakId));
+                    return { resultat: response.data };
+                }
                 const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
                 return { resultat: response.data };
             } catch (error) {
