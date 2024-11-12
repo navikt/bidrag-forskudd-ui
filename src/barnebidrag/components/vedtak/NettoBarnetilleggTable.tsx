@@ -1,17 +1,22 @@
 import { Heading, Table } from "@navikt/ds-react";
 
-import { BidragPeriodeBeregningsdetaljer, Rolletype } from "../../../api/BidragBehandlingApiV1";
+import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
+import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 type NettoBarnetilleggTableProps = {
     rolle: Rolletype;
-    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
 };
 // eslint-disable-next-line no-empty-pattern
-export const NettoBarnetilleggTable = ({ rolle, beregningsdetaljer }: NettoBarnetilleggTableProps) => {
+export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) => {
+    const { beregningsdetaljer } = useBidragBeregningPeriode();
+
     const sluttberegning = beregningsdetaljer.sluttberegning;
+    const skattfaktor = rolle === Rolletype.BP ? beregningsdetaljer.delberegningBidragsevne.skatt.sumSkattFaktor : 0.4;
+    const inntekt =
+        rolle === Rolletype.BP ? beregningsdetaljer.inntekter.inntektBP : beregningsdetaljer.inntekter.inntektBM;
     return (
         <div>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]}) -- (WIP - Fiktive tall)</Heading>
@@ -20,12 +25,12 @@ export const NettoBarnetilleggTable = ({ rolle, beregningsdetaljer }: NettoBarne
                     {
                         label: "Skatteprosent",
                         textRight: false,
-                        value: formatterProsent(0.4),
+                        value: formatterProsent(skattfaktor),
                     },
                     {
                         label: "Inntekt siste 12 mnd",
                         textRight: false,
-                        value: formatterBeløpForBeregning(400000),
+                        value: formatterBeløpForBeregning(inntekt),
                     },
                 ].filter((d) => d)}
             />

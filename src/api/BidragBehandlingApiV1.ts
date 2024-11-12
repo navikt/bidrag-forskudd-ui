@@ -1831,6 +1831,7 @@ export interface ResultatSaerbidragsberegningDto {
 }
 
 export interface Skatt {
+    sumSkattFaktor: number;
     sumSkatt: number;
     skattAlminneligInntekt: number;
     trinnskatt: number;

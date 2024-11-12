@@ -1,7 +1,6 @@
 import { BodyShort, Heading } from "@navikt/ds-react";
 
 import {
-    BidragPeriodeBeregningsdetaljer,
     DelberegningBidragspliktigesAndel,
     ResultatSaerbidragsberegningInntekterDto,
 } from "../../../api/BidragBehandlingApiV1";
@@ -9,11 +8,10 @@ import { BPsAndelInntekterTableV2 } from "../../../common/components/vedtak/BPsA
 import { MathDivision, MathMultiplication, MathValue } from "../../../common/components/vedtak/CalculationTable";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
+import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
-type DetaljertBeregningBidragProps = {
-    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
-};
-export const BPsAndelUnderholdskostnad = ({ beregningsdetaljer }: DetaljertBeregningBidragProps) => {
+export const BPsAndelUnderholdskostnad = () => {
+    const { beregningsdetaljer } = useBidragBeregningPeriode();
     const bpsAndel = beregningsdetaljer.bpsAndel;
     const inntekter = beregningsdetaljer.inntekter;
     const delberegningUnderholdskostnad = beregningsdetaljer.delberegningUnderholdskostnad;

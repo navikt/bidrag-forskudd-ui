@@ -1,57 +1,27 @@
-import { BodyShort, Heading, Label, Table } from "@navikt/ds-react";
-
-import { BidragPeriodeBeregningsdetaljer } from "../../../api/BidragBehandlingApiV1";
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
+import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
-type EndeligBidragTableProps = {
-    beregningsdetaljer: BidragPeriodeBeregningsdetaljer;
-};
 // eslint-disable-next-line no-empty-pattern
-export const EndeligBidragTable = ({
-    beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad },
-}: EndeligBidragTableProps) => {
-    const uMinusBMsNettoBarnetillegg = Math.max(
-        underholdskostnad.underholdskostnad - sluttberegning.nettoBarnetilleggBM,
-        0
-    );
-    function renderResult() {
-        if (sluttberegning.justertForNettoBarnetilleggBM) {
-            return `Endelig bidrag (${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}) er høyere enn U - BMs netto barnetillegg (${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}). Endelig bidrag reduseres til (${formatterBeløpForBeregning(sluttberegning.resultatBeløp)})`;
-        } else {
-            return `Endelig bidrag (${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}) er lavere enn U - BMs netto barnetillegg (${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}). Endelig bidrag reduseres derfor ikke`;
-        }
-    }
+export const EndeligBidragTable = () => {
+    const {
+        beregningsdetaljer: { sluttberegning, delberegningBidragsevne, bpsAndel, samværsfradrag: beregning },
+    } = useBidragBeregningPeriode();
+    const beløpSomSamværsfradragTrekkesFra = sluttberegning.justertNedTil25ProsentAvInntekt
+        ? delberegningBidragsevne.sumInntekt25Prosent
+        : sluttberegning.justertForNettoBarnetilleggBP
+          ? sluttberegning.nettoBarnetilleggBP
+          : bpsAndel.andelBeløp;
     return (
-        <div>
-            <Heading size="xsmall">Endelig bidrag</Heading>
-
-            <Table size="small">
-                <Table.Body>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">Underholdskostnad</Table.DataCell>
-                        <Table.DataCell colSpan={2} textSize="small">
-                            {formatterBeløpForBeregning(underholdskostnad.underholdskostnad)}
-                        </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">BM's netto barnetillegg</Table.DataCell>
-                        <Table.DataCell textSize="small">
-                            -{formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBM)}
-                        </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.DataCell textSize="small">
-                            <Label size="small">Totalt</Label>
-                        </Table.DataCell>
-                        <Table.DataCell textSize="small">
-                            {formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}
-                        </Table.DataCell>
-                    </Table.Row>
-                </Table.Body>
-            </Table>
-            <BodyShort className="pt-2" spacing size="small">
-                {renderResult()}
-            </BodyShort>
-        </div>
+        <ResultatTable
+            title="Endelig bidrag"
+            data={[
+                {
+                    label: "Endelig bidrag (etter samværsfradrag)",
+                    textRight: false,
+                    value: `${formatterBeløpForBeregning(beløpSomSamværsfradragTrekkesFra)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
+                },
+            ].filter((d) => d)}
+        />
     );
 };
