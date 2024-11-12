@@ -19,11 +19,13 @@ export const EndeligBidragTable = () => {
                 {
                     label: "Etter samværsfradraget",
                     textRight: false,
+                    labelBold: true,
                     value: `${formatterBeløpForBeregning(beløpSomSamværsfradragTrekkesFra)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
                 },
                 {
                     label: "Avrundet beløp",
                     textRight: false,
+                    labelBold: true,
                     value: `${formatterBeløpForBeregning(sluttberegning.resultatBeløp)}`,
                 },
             ].filter((d) => d)}

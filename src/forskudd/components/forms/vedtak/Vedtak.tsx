@@ -67,7 +67,7 @@ const VedtakResultat = () => {
             {beregnetForskudd.resultat?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
-                    <Table>
+                    <Table size="small">
                         <VedtakTableHeader avslag={erAvslag} />
                         <VedtakTableBody
                             resultatBarn={r}

@@ -25,11 +25,13 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     {
                         label: "Skatteprosent",
                         textRight: false,
+                        labelBold: true,
                         value: formatterProsent(skattfaktor),
                     },
                     {
                         label: "Inntekt siste 12 mnd",
                         textRight: false,
+                        labelBold: true,
                         value: formatterBeløpForBeregning(inntekt),
                     },
                 ].filter((d) => d)}

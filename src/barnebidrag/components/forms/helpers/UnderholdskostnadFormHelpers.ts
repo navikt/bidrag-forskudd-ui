@@ -25,15 +25,18 @@ export const createInitialValues = (underholdskostnader: UnderholdDto[]): Underh
     return {
         underholdskostnader: underholdskostnader.map((underhold) => ({
             ...underhold,
-            stønadTilBarnetilsyn: underhold.stønadTilBarnetilsyn.map((barnetilsyn) => ({
-                ...(transformUnderholdskostnadPeriode(barnetilsyn) as StønadTilBarnetilsynPeriode),
-            })),
-            faktiskeTilsynsutgifter: underhold.faktiskeTilsynsutgifter.map((tilsynsutgift) => ({
-                ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
-            })),
-            tilleggsstønad: underhold.tilleggsstønad.map((tillegsstonad) => ({
-                ...(transformUnderholdskostnadPeriode(tillegsstonad) as TilleggsstonadPeriode),
-            })),
+            stønadTilBarnetilsyn:
+                underhold.stønadTilBarnetilsyn?.map((barnetilsyn) => ({
+                    ...(transformUnderholdskostnadPeriode(barnetilsyn) as StønadTilBarnetilsynPeriode),
+                })) ?? [],
+            faktiskeTilsynsutgifter:
+                underhold.faktiskeTilsynsutgifter?.map((tilsynsutgift) => ({
+                    ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
+                })) ?? [],
+            tilleggsstønad:
+                underhold.tilleggsstønad?.map((tillegsstonad) => ({
+                    ...(transformUnderholdskostnadPeriode(tillegsstonad) as TilleggsstonadPeriode),
+                })) ?? [],
         })),
     };
 };

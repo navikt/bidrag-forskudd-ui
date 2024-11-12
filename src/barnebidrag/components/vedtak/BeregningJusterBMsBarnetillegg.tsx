@@ -29,13 +29,13 @@ export const BeregningJusterBMsBarnetillegg = () => {
                 {
                     label: "U - BMs netto barnetillegg",
                     textRight: false,
-                    labelStrong: true,
+                    labelBold: true,
                     value: `${formatterBeløpForBeregning(underholdskostnad.underholdskostnad)} - ${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBM)} = ${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}`,
                 },
                 {
                     label: "Foreløpig bidrag",
                     textRight: false,
-                    labelStrong: true,
+                    labelBold: true,
                     value: `${hentForeløpigBidrag()}${renderResult()}`,
                 },
             ].filter((d) => d)}

@@ -33,7 +33,7 @@ export const BeregningJusterBPsBarnetillegg = () => {
                     {
                         label: "Foreløpig bidrag",
                         textRight: false,
-                        labelStrong: true,
+                        labelBold: true,
                         value: `${hentForeløpigBidrag()}${renderResult()}`,
                     },
                 ].filter((d) => d)}

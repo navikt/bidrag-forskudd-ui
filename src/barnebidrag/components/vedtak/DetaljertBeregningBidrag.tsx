@@ -35,22 +35,28 @@ export const useBidragBeregningPeriode = () => {
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
     return (
-        <VStack gap="2" className={"w-[800px]"}>
+        <VStack gap="6" className={"w-[800px]"}>
             <BidragBeregningContext.Provider value={{ beregningsdetaljer }}>
                 <BPsAndelUnderholdskostnad />
-                <BPsEvneV2
-                    inntekter={beregningsdetaljer.inntekter}
-                    bidragsevne={beregningsdetaljer.delberegningBidragsevne}
-                />
-                <BeregningFordeltBidrag />
+                <VStack gap="2">
+                    <BPsEvneV2
+                        inntekter={beregningsdetaljer.inntekter}
+                        bidragsevne={beregningsdetaljer.delberegningBidragsevne}
+                    />
+                    <BeregningFordeltBidrag />
+                </VStack>
                 {![Resultatkode.DELT_BOSTED, Resultatkode.BIDRAG_IKKE_BEREGNET_DELT_BOSTED].includes(
                     periode.resultatKode
                 ) && (
                     <>
-                        <NettoBarnetilleggTable rolle={Rolletype.BM} />
-                        <BeregningJusterBMsBarnetillegg />
-                        <NettoBarnetilleggTable rolle={Rolletype.BP} />
-                        <BeregningJusterBPsBarnetillegg />
+                        <VStack gap="2">
+                            <NettoBarnetilleggTable rolle={Rolletype.BM} />
+                            <BeregningJusterBMsBarnetillegg />
+                        </VStack>
+                        <VStack gap="2">
+                            <NettoBarnetilleggTable rolle={Rolletype.BP} />
+                            <BeregningJusterBPsBarnetillegg />
+                        </VStack>
                     </>
                 )}
                 <BeregningSamværsfradrag />

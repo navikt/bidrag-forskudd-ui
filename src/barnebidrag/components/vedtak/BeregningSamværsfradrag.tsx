@@ -15,11 +15,13 @@ export default function BeregningSamværsfradrag() {
                 {
                     label: "Samværsklasse",
                     textRight: false,
+                    labelBold: true,
                     value: `Samværsklasse ${hentVisningsnavn(beregning.samværsklasse)} (samvær per måned: ${beregning.gjennomsnittligSamværPerMåned})`,
                 },
                 {
                     label: "Samværsfradrag",
                     textRight: false,
+                    labelBold: true,
                     value: formatterBeløpForBeregning(beregning.samværsfradrag),
                 },
             ].filter((d) => d)}
