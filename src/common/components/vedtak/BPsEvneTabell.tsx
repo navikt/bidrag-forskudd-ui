@@ -1,12 +1,18 @@
+import { DelberegningBidragsevneDto, ResultatBeregningInntekterDto } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
-import { useGetBeregningSærbidrag } from "../../hooks/useApiData";
-import { CalculationTabell, MathDivision, MathMultiplication, MathValue } from "./CalculationTable";
+import {
+    CalculationTabell,
+    CalculationTabellV2,
+    MathDivision,
+    MathMultiplication,
+    MathValue,
+} from "./CalculationTable";
 
-export const BPsEvne = () => {
-    const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
-
-    const delberegningBidragsevne = beregnetSærbidrag.resultat.delberegningBidragsevne;
-    const inntekter = beregnetSærbidrag.resultat.inntekter;
+type BPsEvneProps = {
+    bidragsevne: DelberegningBidragsevneDto;
+    inntekter: ResultatBeregningInntekterDto;
+};
+export const BPsEvne = ({ bidragsevne, inntekter }: BPsEvneProps) => {
     return (
         <CalculationTabell
             title="BPs evne"
@@ -23,7 +29,7 @@ export const BPsEvne = () => {
                     value: (
                         <MathDivision
                             negativeValue
-                            top={`${formatterBeløpForBeregning(delberegningBidragsevne.skatt.skattAlminneligInntekt, true)}/år`}
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.skattAlminneligInntekt, true)}/år`}
                             bottom={12}
                         />
                     ),
@@ -31,7 +37,7 @@ export const BPsEvne = () => {
                         <MathValue
                             negativeValue
                             value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.skatt.skattAlminneligInntektMånedsbeløp,
+                                bidragsevne.skatt.skattAlminneligInntektMånedsbeløp,
                                 true
                             )}
                         />
@@ -42,17 +48,14 @@ export const BPsEvne = () => {
                     value: (
                         <MathDivision
                             negativeValue
-                            top={`${formatterBeløpForBeregning(delberegningBidragsevne.skatt.trygdeavgift, true)}/år`}
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.trygdeavgift, true)}/år`}
                             bottom={12}
                         />
                     ),
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.skatt.trygdeavgiftMånedsbeløp,
-                                true
-                            )}
+                            value={formatterBeløpForBeregning(bidragsevne.skatt.trygdeavgiftMånedsbeløp, true)}
                         />
                     ),
                 },
@@ -61,17 +64,14 @@ export const BPsEvne = () => {
                     value: (
                         <MathDivision
                             negativeValue
-                            top={`${formatterBeløpForBeregning(delberegningBidragsevne.skatt.trinnskatt, true)}/år`}
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.trinnskatt, true)}/år`}
                             bottom={12}
                         />
                     ),
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.skatt.trinnskattMånedsbeløp,
-                                true
-                            )}
+                            value={formatterBeløpForBeregning(bidragsevne.skatt.trinnskattMånedsbeløp, true)}
                         />
                     ),
                 },
@@ -80,48 +80,157 @@ export const BPsEvne = () => {
                     value: (
                         <MathMultiplication
                             negativeValue
-                            left={`${formatterBeløpForBeregning(delberegningBidragsevne.underholdEgneBarnIHusstand.sjablon, true)}`}
-                            right={delberegningBidragsevne.underholdEgneBarnIHusstand.antallBarnIHusstanden}
+                            left={`${formatterBeløpForBeregning(bidragsevne.underholdEgneBarnIHusstand.sjablon, true)}`}
+                            right={bidragsevne.underholdEgneBarnIHusstand.antallBarnIHusstanden}
                         />
                     ),
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(
-                                delberegningBidragsevne.underholdEgneBarnIHusstand.måndesbeløp,
-                                true
-                            )}
+                            value={formatterBeløpForBeregning(bidragsevne.underholdEgneBarnIHusstand.måndesbeløp, true)}
                         />
                     ),
                 },
                 {
                     label: "Boutgift",
-                    value: delberegningBidragsevne.utgifter.borMedAndreVoksne
+                    value: bidragsevne.utgifter.borMedAndreVoksne
                         ? "Bor med andre voksne"
                         : "Bor ikke med andre voksne",
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(delberegningBidragsevne.utgifter.boutgiftBeløp, true)}
+                            value={formatterBeløpForBeregning(bidragsevne.utgifter.boutgiftBeløp, true)}
                         />
                     ),
                 },
                 {
                     label: "Eget underhold",
-                    value: delberegningBidragsevne.utgifter.borMedAndreVoksne
+                    value: bidragsevne.utgifter.borMedAndreVoksne
                         ? "Bor med andre voksne"
                         : "Bor ikke med andre voksne",
                     result: (
                         <MathValue
                             negativeValue
-                            value={formatterBeløpForBeregning(delberegningBidragsevne.utgifter.underholdBeløp, true)}
+                            value={formatterBeløpForBeregning(bidragsevne.utgifter.underholdBeløp, true)}
                         />
                     ),
                 },
             ]}
             result={{
                 label: "Bidragsevne",
-                value: formatterBeløpForBeregning(delberegningBidragsevne.bidragsevne, true),
+                value: formatterBeløpForBeregning(bidragsevne.bidragsevne, true),
+            }}
+        />
+    );
+};
+
+export const BPsEvneV2 = ({ bidragsevne, inntekter }: BPsEvneProps) => {
+    return (
+        <CalculationTabellV2
+            title="BPs evne"
+            data={[
+                {
+                    label: "Inntekt",
+                    value: (
+                        <MathDivision top={`${formatterBeløpForBeregning(inntekter.inntektBP, true)}/år`} bottom={12} />
+                    ),
+                    result: <MathValue value={formatterBeløpForBeregning(inntekter.inntektBPMånedlig, true)} />,
+                },
+                {
+                    label: "Skatt",
+                    value: (
+                        <MathDivision
+                            negativeValue
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.skattAlminneligInntekt, true)}/år`}
+                            bottom={12}
+                        />
+                    ),
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(
+                                bidragsevne.skatt.skattAlminneligInntektMånedsbeløp,
+                                true
+                            )}
+                        />
+                    ),
+                },
+                {
+                    label: "Trygdeavgift",
+                    value: (
+                        <MathDivision
+                            negativeValue
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.trygdeavgift, true)}/år`}
+                            bottom={12}
+                        />
+                    ),
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(bidragsevne.skatt.trygdeavgiftMånedsbeløp, true)}
+                        />
+                    ),
+                },
+                {
+                    label: "Trinnskatt",
+                    value: (
+                        <MathDivision
+                            negativeValue
+                            top={`${formatterBeløpForBeregning(bidragsevne.skatt.trinnskatt, true)}/år`}
+                            bottom={12}
+                        />
+                    ),
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(bidragsevne.skatt.trinnskattMånedsbeløp, true)}
+                        />
+                    ),
+                },
+                {
+                    label: "Underhold egne barn i husstand",
+                    value: (
+                        <MathMultiplication
+                            negativeValue
+                            left={`${formatterBeløpForBeregning(bidragsevne.underholdEgneBarnIHusstand.sjablon, true)}`}
+                            right={bidragsevne.underholdEgneBarnIHusstand.antallBarnIHusstanden}
+                        />
+                    ),
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(bidragsevne.underholdEgneBarnIHusstand.måndesbeløp, true)}
+                        />
+                    ),
+                },
+                {
+                    label: "Boutgift",
+                    value: bidragsevne.utgifter.borMedAndreVoksne
+                        ? "Bor med andre voksne"
+                        : "Bor ikke med andre voksne",
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(bidragsevne.utgifter.boutgiftBeløp, true)}
+                        />
+                    ),
+                },
+                {
+                    label: "Eget underhold",
+                    value: bidragsevne.utgifter.borMedAndreVoksne
+                        ? "Bor med andre voksne"
+                        : "Bor ikke med andre voksne",
+                    result: (
+                        <MathValue
+                            negativeValue
+                            value={formatterBeløpForBeregning(bidragsevne.utgifter.underholdBeløp, true)}
+                        />
+                    ),
+                },
+            ]}
+            result={{
+                label: "Bidragsevne",
+                value: formatterBeløpForBeregning(bidragsevne.bidragsevne, true),
             }}
         />
     );

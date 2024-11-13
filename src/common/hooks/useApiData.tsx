@@ -31,7 +31,11 @@ import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi
 import { PersonDto } from "@api/PersonApi";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";
-import { VedtakBeregningResult, VedtakSærbidragBeregningResult } from "@commonTypes/vedtakTypes";
+import {
+    VedtakBarnebidragBeregningResult,
+    VedtakBeregningResult,
+    VedtakSærbidragBeregningResult,
+} from "@commonTypes/vedtakTypes";
 import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -58,6 +62,7 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
+    beregnBarnebidrag: () => ["beregning_barnebidrag", QueryKeys.behandlingVersion],
     beregningInnteksgrenseSærbidrag: () => ["beregning_særbidrag_innteksgrense", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
@@ -395,7 +400,40 @@ export const useGetBeregningInnteksgrenseSærbidrag = () => {
         },
     });
 };
+export const useGetBeregningBidrag = () => {
+    const { behandlingId, vedtakId } = useBehandlingProvider();
 
+    return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
+        queryKey: QueryKeys.beregnBarnebidrag(),
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatBidrag(Number(vedtakId));
+                    return { resultat: response.data };
+                }
+                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
+                return { resultat: response.data };
+            } catch (error) {
+                const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
+                if (error instanceof AxiosError && error.response.status === 400) {
+                    if (error.response?.data) {
+                        return {
+                            feil: {
+                                melding: feilmelding,
+                                detaljer: error.response.data as BeregningValideringsfeil,
+                            },
+                        };
+                    }
+                    return {
+                        feil: {
+                            melding: feilmelding,
+                        },
+                    };
+                }
+            }
+        },
+    });
+};
 export const useGetBeregningSærbidrag = () => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 

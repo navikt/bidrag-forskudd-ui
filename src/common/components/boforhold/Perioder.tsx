@@ -539,8 +539,8 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
                                     {text.label.kilde}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[56px]" textSize="small"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[56px]" textSize="small"></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
@@ -578,10 +578,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             barn={barn}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <KildeIcon kilde={item.kilde} />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <EditOrSaveButton
                                             index={index}
                                             editableRow={editableRow === `${barnIndex}.${index}`}
@@ -589,7 +589,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             onSaveRow={onSaveRow}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <DeleteButton index={index} onRemovePeriode={onRemovePeriode} barn={barn} />
                                     </Table.DataCell>
                                 </Table.Row>

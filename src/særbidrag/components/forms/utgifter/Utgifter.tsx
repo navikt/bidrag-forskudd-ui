@@ -237,7 +237,7 @@ const EditOrSaveButton = ({
 
 const Main = () => {
     const behandling = useGetBehandlingV2();
-    const { isSærbidragBetaltAvBpEnabled, isbehandlingVesntremenyEnabled } = useFeatureToogle();
+    const { isbehandlingVesntremenyEnabled } = useFeatureToogle();
     const { getValues } = useFormContext<UtgiftFormValues>();
     const [avslag, erMaksBeløpMed] = getValues(["avslag", "maksGodkjentBeløpTaMed"]);
     const erAvslagValgt =
@@ -341,19 +341,15 @@ const Main = () => {
                             <hr className="w-full bg-[var(--a-border-divider)] h-px" />
                         </>
                     )}
-                    {isSærbidragBetaltAvBpEnabled && (
-                        <>
-                            <FlexRow>
-                                <FormControlledTextField
-                                    name={`beregning.beløpDirekteBetaltAvBp`}
-                                    label={text.label.direkteBetaltAvBP}
-                                    type="number"
-                                    min="1"
-                                    inputMode="numeric"
-                                />
-                            </FlexRow>
-                        </>
-                    )}
+                    <FlexRow>
+                        <FormControlledTextField
+                            name={`beregning.beløpDirekteBetaltAvBp`}
+                            label={text.label.direkteBetaltAvBP}
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                        />
+                    </FlexRow>
                 </>
             )}
         </>
@@ -371,7 +367,6 @@ const UtgifterListe = () => {
         name: "utgifter",
     });
     const watchFieldArray = useWatch({ control, name: "utgifter" });
-    const { isSærbidragBetaltAvBpEnabled } = useFeatureToogle();
     const controlledFields = utgifter.fields.map((field, index) => {
         return {
             ...field,
@@ -588,11 +583,9 @@ const UtgifterListe = () => {
                     <Table size="small" className="table-fixed table bg-white w-full">
                         <Table.Header>
                             <Table.Row className="align-baseline">
-                                {isSærbidragBetaltAvBpEnabled && (
-                                    <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                        {text.label.betaltAvBp}
-                                    </Table.HeaderCell>
-                                )}
+                                <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
+                                    {text.label.betaltAvBp}
+                                </Table.HeaderCell>
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[124px]">
                                     {text.label.forfallsdato}
                                 </Table.HeaderCell>
@@ -619,17 +612,15 @@ const UtgifterListe = () => {
                                     className="align-top"
                                     onKeyDown={actionOnEnter(() => onSaveRow(index))}
                                 >
-                                    {isSærbidragBetaltAvBpEnabled && (
-                                        <Table.DataCell>
-                                            <div className="h-8 w-full flex items-center justify-center">
-                                                <FormControlledCheckbox
-                                                    name={`utgifter.${index}.betaltAvBp`}
-                                                    legend=""
-                                                    onChange={() => onSaveRow(index)}
-                                                />
-                                            </div>
-                                        </Table.DataCell>
-                                    )}
+                                    <Table.DataCell>
+                                        <div className="h-8 w-full flex items-center justify-center">
+                                            <FormControlledCheckbox
+                                                name={`utgifter.${index}.betaltAvBp`}
+                                                legend=""
+                                                onChange={() => onSaveRow(index)}
+                                            />
+                                        </div>
+                                    </Table.DataCell>
                                     <Table.DataCell textSize="small">
                                         <Forfallsdato item={item} index={index} />
                                     </Table.DataCell>

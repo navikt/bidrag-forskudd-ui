@@ -1,4 +1,4 @@
-import { Heading } from "@navikt/ds-react";
+import { Heading, Label, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
@@ -48,6 +48,58 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title
     );
 };
 
+export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+    return (
+        <div className={className}>
+            {title && <Heading size="xsmall">{title}</Heading>}
+            <Table size="small">
+                <Table.Header>
+                    <Table.Row></Table.Row>
+                    <Table.HeaderCell textSize="small" className="w-[250px]">
+                        Beskrivelse
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                        Beregning
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                        Beløp
+                    </Table.HeaderCell>
+                </Table.Header>
+                <Table.Body>
+                    {data.map((row, rowIndex) => (
+                        <Table.Row key={rowIndex}>
+                            <Table.DataCell textSize="small">{row.label}</Table.DataCell>
+                            <Table.DataCell textSize="small" align="right">
+                                {row.value}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small" align="right">
+                                {row.result}
+                            </Table.DataCell>
+                        </Table.Row>
+                    ))}
+                    {result && (
+                        <Table.Row>
+                            <Table.DataCell textSize="small" colSpan={2}>
+                                <Label size="small">{result.label}</Label>
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small" className={"text-right w-[120px] "}>
+                                {result.value}
+                            </Table.DataCell>
+                        </Table.Row>
+                    )}
+                    {message && (
+                        <Table.Row className="mt-1">
+                            <Table.DataCell textSize="small" colSpan={3}>
+                                {message}
+                            </Table.DataCell>
+                        </Table.Row>
+                    )}
+                </Table.Body>
+            </Table>
+        </div>
+    );
+};
+
 interface MathDivisionProps {
     negativeValue?: boolean;
     top: string;
@@ -71,9 +123,10 @@ export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, 
 export const MathValue: React.FC<{ value: string | number; negativeValue?: boolean }> = ({ value, negativeValue }) => {
     return (
         <math xmlns="http://www.w3.org/1998/Math/MathML">
-            {negativeValue && <mi>-</mi>}
-
-            <mn>{value}</mn>
+            <mrow>
+                {negativeValue && <mi>-</mi>}
+                <mn>{value}</mn>
+            </mrow>
         </math>
     );
 };

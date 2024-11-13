@@ -47,7 +47,7 @@ export const Begrunnelse = () => {
                 },
             }
         );
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.VEDTAK]);
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.SAMVÆR]);
 
     const debouncedOnSave = useDebounce(onSave);
 
