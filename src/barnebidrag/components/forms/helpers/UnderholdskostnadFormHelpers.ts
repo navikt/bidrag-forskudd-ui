@@ -23,20 +23,27 @@ const transformUnderholdskostnadPeriode = (
 });
 export const createInitialValues = (underholdskostnader: UnderholdDto[]): UnderholdskostnadFormValues => {
     return {
-        underholdskostnader: underholdskostnader.map((underhold) => ({
-            ...underhold,
-            stønadTilBarnetilsyn:
-                underhold.stønadTilBarnetilsyn?.map((barnetilsyn) => ({
+        underholdskostnaderMedIBehandling: underholdskostnader
+            .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
+            .map((underhold) => ({
+                ...underhold,
+                stønadTilBarnetilsyn: underhold.stønadTilBarnetilsyn.map((barnetilsyn) => ({
                     ...(transformUnderholdskostnadPeriode(barnetilsyn) as StønadTilBarnetilsynPeriode),
-                })) ?? [],
-            faktiskeTilsynsutgifter:
-                underhold.faktiskeTilsynsutgifter?.map((tilsynsutgift) => ({
+                })),
+                faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
                     ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
-                })) ?? [],
-            tilleggsstønad:
-                underhold.tilleggsstønad?.map((tillegsstonad) => ({
+                })),
+                tilleggsstønad: underhold.tilleggsstønad.map((tillegsstonad) => ({
                     ...(transformUnderholdskostnadPeriode(tillegsstonad) as TilleggsstonadPeriode),
-                })) ?? [],
-        })),
+                })),
+            })),
+        underholdskostnaderAndreBarn: underholdskostnader
+            .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
+            .map((underhold) => ({
+                ...underhold,
+                faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
+                    ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
+                })),
+            })),
     };
 };

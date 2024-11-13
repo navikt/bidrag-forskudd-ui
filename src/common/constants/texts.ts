@@ -48,6 +48,7 @@ const tekster = {
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
     error: {
+        dagsatsVerdi: "Dagsats kan ikke være 0 eller mindre",
         datoIkkeGyldig: "Dato er ikke gyldig",
         datoMåFyllesUt: "Dato må fylles ut",
         barnetilleggType: "Barnetillegg type må settes",
@@ -55,6 +56,7 @@ const tekster = {
         datoMåVæreDenSisteIMåneden: "Dato må være den siste i måneden",
         datoMåVæreDenFørsteIMåneden: "Dato må være den første i måneden",
         framoverPeriodisering: "Det kan ikke periodiseres fremover i tid.",
+        feltErPåkrevd: "Dette feltet er påkrevd",
         periodeFørVirkningstidspunkt: "Det kan ikke periodisere før virkningstidspunkt.",
         ukjentfeil: "Det skjedde en ukjent feil",
         kunneIkkFatteVedtak: "Kunne ikke fatte vedtak",
@@ -91,6 +93,7 @@ const tekster = {
     },
     label: {
         addUtgifter: "+ Legg til ny utgift",
+        andreBarn: "Andre barn til BM",
         angreSisteSteg: "Angre siste steg",
         antallBarn: "Antall barn i husstand",
         arbeidsgiver: "Arbeidsgiver",
@@ -142,6 +145,7 @@ const tekster = {
         kostpenger: "Kostpenger",
         kravbeløp: "Kravbeløp",
         lagrePåNytt: "Lagre på nytt",
+        leggTilBarn: "Legg til barn",
         leggTilPeriode: "+ Legg til periode",
         lukk: "Lukk",
         lønnsendring: "Lønnsendring",
@@ -194,6 +198,7 @@ const tekster = {
         inntektPlaceholder: "Velg type inntekt",
         typePlaceholder: "Velg type",
         årsakAvslagPlaceholder: "Velg årsak/avslag",
+        velg: "Velg",
     },
     skjermbildeNavn: {
         forskudd: "Søknad om forskudd",
@@ -201,6 +206,7 @@ const tekster = {
         bidrag: "Søknad om barnebidrag",
     },
     title: {
+        andreBarn: "Andre barn",
         andreVoksneIHusstanden: "Andre voksne i husstanden",
         arbeidsforhold: "Arbeidsforhold",
         barn: "Barn",

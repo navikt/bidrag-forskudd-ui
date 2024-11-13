@@ -321,7 +321,7 @@ export const InntektTabel = ({
 
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        if (periode.id != null) {
+        if (periode.id !== null) {
             const onSaveSuccess = (response: OppdatereInntektResponse) =>
                 saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
                     return {

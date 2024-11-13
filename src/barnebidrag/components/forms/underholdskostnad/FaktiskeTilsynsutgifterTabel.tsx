@@ -1,4 +1,5 @@
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
+import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { Box, Heading, HStack, Table } from "@navikt/ds-react";
@@ -7,15 +8,24 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnSaveFaktiskeTilsynsutgifter } from "../../../hooks/useOnSaveFaktiskeTilsynsutgifter";
-import { FaktiskTilsynsutgiftPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
-import { EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
+import {
+    FaktiskTilsynsutgiftPeriode,
+    StønadTilBarnetilsynPeriode,
+    TilleggsstonadPeriode,
+    UnderholdkostnadsFormPeriode,
+    UnderholdskostnadFormValues,
+} from "../../../types/underholdskostnadFormValues";
+import { DeleteButton, EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
+import { UnderholdskostnadTabel } from "./UnderholdskostnadTabel";
 
 const TotalTilysnsutgift = ({
     item,
     fieldName,
 }: {
     item: FaktiskTilsynsutgiftPeriode;
-    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+    fieldName:
+        | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
+        | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
 }) => {
     return (
         <>
@@ -40,7 +50,9 @@ const Kostpenger = ({
     fieldName,
 }: {
     item: FaktiskTilsynsutgiftPeriode;
-    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+    fieldName:
+        | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
+        | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
 }) => {
     return (
         <>
@@ -60,12 +72,18 @@ const Kostpenger = ({
     );
 };
 
+const Totalt12Måned = ({ item }: { item: FaktiskTilsynsutgiftPeriode }) => {
+    return <div className="h-8 flex items-center justify-end">{formatterBeløp(item.utgift * 12)}</div>;
+};
+
 const Kommentar = ({
     item,
     fieldName,
 }: {
     item: FaktiskTilsynsutgiftPeriode;
-    fieldName: `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`;
+    fieldName:
+        | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
+        | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
 }) => {
     return (
         <FormControlledTextField
@@ -77,14 +95,18 @@ const Kommentar = ({
     );
 };
 
-export const FaktiskeTilsynsutgifterTabel = ({ underholdIndex }: { underholdIndex: number }) => {
-    const fieldName = `underholdskostnader.${underholdIndex}.faktiskeTilsynsutgifter` as const;
-    const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
-    const underhold = getValues(`underholdskostnader.${underholdIndex}`);
-    const faktiskeTilsynsutgifter = underhold.faktiskeTilsynsutgifter;
+export const FaktiskeTilsynsutgifterTabel = ({
+    underholdFieldName,
+}: {
+    underholdFieldName: `underholdskostnaderMedIBehandling.${number}` | `underholdskostnaderAndreBarn.${number}`;
+}) => {
+    const fieldName = `${underholdFieldName}.faktiskTilsynsutgift` as const;
+    const { getValues } = useFormContext<UnderholdskostnadFormValues>();
+
+    const underhold = getValues(underholdFieldName);
     const saveFaktiskeTilsynsutgifter = useOnSaveFaktiskeTilsynsutgifter(underhold.id);
 
-    const onSaveRow = (index: number) => {
+    const createPayload = (index: number) => {
         const { id, datoFom, datoTom, utgift, kostpenger, kommentar, total } = getValues(`${fieldName}.${index}`);
         const payload = {
             id,
@@ -95,42 +117,7 @@ export const FaktiskeTilsynsutgifterTabel = ({ underholdIndex }: { underholdInde
             periode: { fom: datoFom, tom: datoTom },
         };
 
-        saveFaktiskeTilsynsutgifter.mutation.mutate(payload, {
-            onSuccess: (response) => {
-                saveFaktiskeTilsynsutgifter.queryClientUpdater((currentData) => {
-                    const updatedFaktiskTilsynsutgiftIndex = currentData.underholdskostnader[
-                        underholdIndex
-                    ].faktiskeTilsynsutgifter.findIndex(
-                        (faktiskTilsynsutgift) => faktiskTilsynsutgift?.id === response?.faktiskTilsynsutgift?.id
-                    );
-
-                    const updatedFaktiskTilsynsutgiftListe =
-                        updatedFaktiskTilsynsutgiftIndex === -1
-                            ? currentData.underholdskostnader[underholdIndex].faktiskeTilsynsutgifter.concat(
-                                  response.faktiskTilsynsutgift
-                              )
-                            : currentData.underholdskostnader[underholdIndex].faktiskeTilsynsutgifter.toSpliced(
-                                  updatedFaktiskTilsynsutgiftIndex,
-                                  1,
-                                  response.faktiskTilsynsutgift
-                              );
-
-                    return {
-                        ...currentData,
-                        underholdskostnader: currentData.underholdskostnader.toSpliced(underholdIndex, 1, {
-                            ...currentData.underholdskostnader[underholdIndex],
-                            faktiskeTilsynsutgifter: updatedFaktiskTilsynsutgiftListe,
-                        }),
-                    };
-                });
-            },
-            onError: () => {},
-        });
-    };
-
-    const onEditRow = (index: number) => {
-        const faktiskTilsynsutgiftPeriode = getValues(`${fieldName}.${index}`);
-        setValue(`${fieldName}.${index}`, { ...faktiskTilsynsutgiftPeriode, erRedigerbart: true });
+        return payload;
     };
 
     return (
@@ -140,73 +127,145 @@ export const FaktiskeTilsynsutgifterTabel = ({ underholdIndex }: { underholdInde
                     {text.title.faktiskeTilsynsutgifter}
                 </Heading>
             </HStack>
-            <div className="overflow-x-auto whitespace-nowrap">
-                <Table size="small" className="table-fixed table bg-white w-fit">
-                    <Table.Header>
-                        <Table.Row className="align-baseline">
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.fraOgMed}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.tilOgMed}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.totalTilysnsutgift}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                {text.label.kostpenger}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                {text.label.totalt12Måned}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                {text.label.kommentar}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {faktiskeTilsynsutgifter.map((item, index) => (
-                            <Table.Row key={item?.id + index} className="align-top">
-                                <Table.DataCell textSize="small">
-                                    <UnderholdskostnadPeriode
-                                        label={text.label.fraOgMed}
-                                        fieldName={`${fieldName}.${index}`}
-                                        field="datoFom"
-                                        item={item}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell textSize="small">
-                                    <UnderholdskostnadPeriode
-                                        label={text.label.tilOgMed}
-                                        fieldName={`${fieldName}.${index}`}
-                                        field="datoTom"
-                                        item={item}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <TotalTilysnsutgift fieldName={`${fieldName}.${index}`} item={item} />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <Kostpenger fieldName={`${fieldName}.${index}`} item={item} />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <Kommentar fieldName={`${fieldName}.${index}`} item={item} />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <EditOrSaveButton
-                                        index={index}
-                                        item={item}
-                                        onEditRow={() => onEditRow(index)}
-                                        onSaveRow={() => onSaveRow(index)}
-                                    />
-                                </Table.DataCell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            </div>
+            <UnderholdskostnadTabel
+                fieldName={fieldName}
+                saveFn={saveFaktiskeTilsynsutgifter}
+                createPayload={createPayload}
+            >
+                {({
+                    controlledFields,
+                    onRemovePeriode,
+                    onSaveRow,
+                    onEditRow,
+                    addPeriod,
+                }: {
+                    controlledFields: UnderholdkostnadsFormPeriode[];
+                    onRemovePeriode: (index: number) => void;
+                    onSaveRow: (index: number) => void;
+                    onEditRow: (index: number) => void;
+                    addPeriod: (
+                        periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode
+                    ) => void;
+                }) => (
+                    <>
+                        {controlledFields.length > 0 && (
+                            <div className="overflow-x-auto whitespace-nowrap">
+                                <Table size="small" className="table-fixed table bg-white w-fit">
+                                    <Table.Header>
+                                        <Table.Row className="align-baseline">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                                {text.label.fraOgMed}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                                {text.label.tilOgMed}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                align="right"
+                                                textSize="small"
+                                                scope="col"
+                                                className="w-[144px]"
+                                            >
+                                                {text.label.totalTilysnsutgift}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[74px]"
+                                            >
+                                                {text.label.kostpenger}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="right"
+                                                className="w-[144px]"
+                                            >
+                                                {text.label.totalt12Måned}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="center"
+                                                className="w-[200px]"
+                                            >
+                                                {text.label.kommentar}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                        </Table.Row>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {controlledFields.map((item: FaktiskTilsynsutgiftPeriode, index) => (
+                                            <Table.Row key={item?.id + index} className="align-top">
+                                                <Table.DataCell textSize="small">
+                                                    <UnderholdskostnadPeriode
+                                                        label={text.label.fraOgMed}
+                                                        fieldName={`${fieldName}.${index}`}
+                                                        field="datoFom"
+                                                        item={item}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell textSize="small">
+                                                    <UnderholdskostnadPeriode
+                                                        label={text.label.tilOgMed}
+                                                        fieldName={`${fieldName}.${index}`}
+                                                        field="datoTom"
+                                                        item={item}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell align="right">
+                                                    <TotalTilysnsutgift
+                                                        fieldName={`${fieldName}.${index}`}
+                                                        item={item}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell align="right">
+                                                    <Kostpenger fieldName={`${fieldName}.${index}`} item={item} />
+                                                </Table.DataCell>
+                                                <Table.DataCell align="right">
+                                                    <Totalt12Måned item={item} />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <Kommentar fieldName={`${fieldName}.${index}`} item={item} />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <EditOrSaveButton
+                                                        index={index}
+                                                        item={item}
+                                                        onEditRow={() => onEditRow(index)}
+                                                        onSaveRow={() => onSaveRow(index)}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <DeleteButton index={index} onRemovePeriode={onRemovePeriode} />
+                                                </Table.DataCell>
+                                            </Table.Row>
+                                        ))}
+                                    </Table.Body>
+                                </Table>
+                            </div>
+                        )}
+
+                        {
+                            <LeggTilPeriodeButton
+                                addPeriode={() =>
+                                    addPeriod({
+                                        utgift: 0,
+                                        kostpenger: 0,
+                                        kommentar: "",
+                                        total: 0,
+                                        datoFom: "",
+                                        datoTom: "",
+                                        erRedigerbart: true,
+                                        kanRedigeres: true,
+                                    })
+                                }
+                            />
+                        }
+                    </>
+                )}
+            </UnderholdskostnadTabel>
         </Box>
     );
 };

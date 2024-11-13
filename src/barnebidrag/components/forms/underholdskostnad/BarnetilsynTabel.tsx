@@ -1,11 +1,15 @@
 import {
+    Kilde,
+    StonadTilBarnetilsynDto,
     StonadTilBarnetilsynDtoSkolealderEnum,
     StonadTilBarnetilsynDtoTilsynstypeEnum,
 } from "@api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
+import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
+import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -15,15 +19,22 @@ import {
     STONAD_TIL_BARNETILSYNS_TYPE,
 } from "../../../constants/stønadTilBarnetilsyn";
 import { useOnSaveStønadTilBarnetilsyn } from "../../../hooks/useOnSaveStønadTilBarnetilsyn";
-import { StønadTilBarnetilsynPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
-import { EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
+import {
+    FaktiskTilsynsutgiftPeriode,
+    StønadTilBarnetilsynPeriode,
+    TilleggsstonadPeriode,
+    UnderholdkostnadsFormPeriode,
+    UnderholdskostnadFormValues,
+} from "../../../types/underholdskostnadFormValues";
+import { DeleteButton, EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
+import { UnderholdskostnadTabel } from "./UnderholdskostnadTabel";
 
 const Omfang = ({
     fieldName,
     item,
 }: {
     editableRow: boolean;
-    fieldName: `underholdskostnader.${number}.stønadTilBarnetilsyn.${number}`;
+    fieldName: `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`;
     item: StønadTilBarnetilsynPeriode;
 }) => {
     const { clearErrors } = useFormContext<UnderholdskostnadFormValues>();
@@ -33,10 +44,12 @@ const Omfang = ({
             name={`${fieldName}.tilsynstype`}
             className="w-fit"
             label={text.label.status}
-            options={Object.values(StonadTilBarnetilsynDtoTilsynstypeEnum).map((value) => ({
-                value,
-                text: STONAD_TIL_BARNETILSYNS_TYPE[value],
-            }))}
+            options={[{ value: "", text: text.select.velg }].concat(
+                Object.values(StonadTilBarnetilsynDtoTilsynstypeEnum).map((value) => ({
+                    value,
+                    text: STONAD_TIL_BARNETILSYNS_TYPE[value],
+                }))
+            )}
             hideLabel
             onSelect={() => clearErrors(`${fieldName}.tilsynstype`)}
         />
@@ -50,7 +63,7 @@ const StønadTilBarnetilsyn = ({
     item,
 }: {
     editableRow: boolean;
-    fieldName: `underholdskostnader.${number}.stønadTilBarnetilsyn.${number}`;
+    fieldName: `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`;
     item: StønadTilBarnetilsynPeriode;
 }) => {
     const { clearErrors } = useFormContext<UnderholdskostnadFormValues>();
@@ -60,10 +73,12 @@ const StønadTilBarnetilsyn = ({
             name={`${fieldName}.skolealder`}
             className="w-fit"
             label={text.label.status}
-            options={Object.values(StonadTilBarnetilsynDtoSkolealderEnum).map((value) => ({
-                value,
-                text: STONAD_TIL_BARNETILSYNS_SKOLEALDER[value],
-            }))}
+            options={[{ value: "", text: text.select.velg }].concat(
+                Object.values(StonadTilBarnetilsynDtoSkolealderEnum).map((value) => ({
+                    value,
+                    text: STONAD_TIL_BARNETILSYNS_SKOLEALDER[value],
+                }))
+            )}
             hideLabel
             onSelect={() => clearErrors(`${fieldName}.skolealder`)}
         />
@@ -72,57 +87,54 @@ const StønadTilBarnetilsyn = ({
     );
 };
 
-export const BarnetilsynTabel = ({ underholdIndex }: { underholdIndex: number }) => {
-    const fieldName = `underholdskostnader.${underholdIndex}.stønadTilBarnetilsyn` as const;
-    const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
-    const underhold = getValues(`underholdskostnader.${underholdIndex}`);
-    const stønadTilBarnetilsyn = underhold.stønadTilBarnetilsyn;
-    const saveStønadTilBarnetilsyn = useOnSaveStønadTilBarnetilsyn(underhold.id.toString());
+export const BarnetilsynTabel = ({
+    underholdFieldName,
+}: {
+    underholdFieldName: `underholdskostnaderMedIBehandling.${number}`;
+}) => {
+    const fieldName = `${underholdFieldName}.stønadTilBarnetilsyn` as const;
+    const { clearErrors, getValues, setError } = useFormContext<UnderholdskostnadFormValues>();
+    const underhold = getValues(underholdFieldName);
+    const saveStønadTilBarnetilsyn = useOnSaveStønadTilBarnetilsyn(underhold.id);
 
-    const onSaveRow = (index: number) => {
-        const { id, datoFom, datoTom, skolealder, tilsynstype, kilde } = getValues(`${fieldName}.${index}`);
-        const payload = {
-            id,
-            skolealder,
-            tilsynstype,
-            kilde,
-            periode: { fom: datoFom, tom: datoTom },
-        };
-
-        saveStønadTilBarnetilsyn.mutation.mutate(payload, {
-            onSuccess: (response) => {
-                saveStønadTilBarnetilsyn.queryClientUpdater((currentData) => {
-                    const updatedStønadTilBarnetilsynIndex = currentData.underholdskostnader[
-                        underholdIndex
-                    ].stønadTilBarnetilsyn.findIndex((stønad) => stønad?.id === response?.stønadTilBarnetilsyn?.id);
-
-                    const updatedStønadTilBarnetilsynListe =
-                        updatedStønadTilBarnetilsynIndex === -1
-                            ? currentData.underholdskostnader[underholdIndex].stønadTilBarnetilsyn.concat(
-                                  response.stønadTilBarnetilsyn
-                              )
-                            : currentData.underholdskostnader[underholdIndex].stønadTilBarnetilsyn.toSpliced(
-                                  updatedStønadTilBarnetilsynIndex,
-                                  1,
-                                  response.stønadTilBarnetilsyn
-                              );
-
-                    return {
-                        ...currentData,
-                        underholdskostnader: currentData.underholdskostnader.toSpliced(underholdIndex, 1, {
-                            ...currentData.underholdskostnader[underholdIndex],
-                            stønadTilBarnetilsyn: updatedStønadTilBarnetilsynListe,
-                        }),
-                    };
-                });
-            },
-            onError: () => {},
-        });
+    const validateRow = (index: number) => {
+        const { datoFom, skolealder, tilsynstype } = getValues(`${fieldName}.${index}`);
+        if (datoFom === null) {
+            setError(`${fieldName}.${index}.datoFom`, {
+                type: "notValid",
+                message: text.error.datoMåFyllesUt,
+            });
+        }
+        if (ObjectUtils.isEmpty(skolealder)) {
+            setError(`${fieldName}.${index}.skolealder`, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        } else {
+            clearErrors(`${fieldName}.${index}.skolealder`);
+        }
+        if (ObjectUtils.isEmpty(tilsynstype)) {
+            setError(`${fieldName}.${index}.tilsynstype`, {
+                type: "notValid",
+                message: text.error.feltErPåkrevd,
+            });
+        } else {
+            clearErrors(`${fieldName}.${index}.tilsynstype`);
+        }
     };
 
-    const onEditRow = (index: number) => {
+    const createPayload = (index: number) => {
         const stønadTilBarnetilsynPeriode = getValues(`${fieldName}.${index}`);
-        setValue(`${fieldName}.${index}`, { ...stønadTilBarnetilsynPeriode, erRedigerbart: true });
+
+        const payload = {
+            id: stønadTilBarnetilsynPeriode.id,
+            skolealder: stønadTilBarnetilsynPeriode.skolealder,
+            tilsynstype: stønadTilBarnetilsynPeriode.tilsynstype,
+            kilde: stønadTilBarnetilsynPeriode.kilde,
+            periode: { fom: stønadTilBarnetilsynPeriode.datoFom, tom: stønadTilBarnetilsynPeriode.datoTom },
+        } as StonadTilBarnetilsynDto;
+
+        return payload;
     };
 
     return (
@@ -132,80 +144,136 @@ export const BarnetilsynTabel = ({ underholdIndex }: { underholdIndex: number })
                     {text.title.stønadTilBarnetilsyn}
                 </Heading>
             </HStack>
-            <div className="overflow-x-auto whitespace-nowrap">
-                <Table size="small" className="table-fixed table bg-white w-fit">
-                    <Table.Header>
-                        <Table.Row className="align-baseline">
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.fraOgMed}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.tilOgMed}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
-                                {text.label.stønadTilBarnetilsyn}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                {text.label.omfang}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
-                                {text.label.kilde}
-                            </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {stønadTilBarnetilsyn.map((item, stønadIndex) => (
-                            <Table.Row key={item?.id + stønadIndex} className="align-top">
-                                <Table.DataCell textSize="small">
-                                    <UnderholdskostnadPeriode
-                                        index={stønadIndex}
-                                        label={text.label.fraOgMed}
-                                        fieldName={fieldName}
-                                        field="datoFom"
-                                        item={item}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell textSize="small">
-                                    <UnderholdskostnadPeriode
-                                        index={stønadIndex}
-                                        label={text.label.tilOgMed}
-                                        fieldName={fieldName}
-                                        field="datoTom"
-                                        item={item}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <StønadTilBarnetilsyn
-                                        fieldName={`${fieldName}.${stønadIndex}`}
-                                        item={item}
-                                        editableRow={item.erRedigerbart}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <Omfang
-                                        fieldName={`${fieldName}.${stønadIndex}`}
-                                        item={item}
-                                        editableRow={item.erRedigerbart}
-                                    />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <KildeIcon kilde={item.kilde} />
-                                </Table.DataCell>
-                                <Table.DataCell>
-                                    <EditOrSaveButton
-                                        index={stønadIndex}
-                                        item={item}
-                                        onEditRow={() => onEditRow(stønadIndex)}
-                                        onSaveRow={() => onSaveRow(stønadIndex)}
-                                    />
-                                </Table.DataCell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-            </div>
+            <UnderholdskostnadTabel
+                fieldName={fieldName}
+                saveFn={saveStønadTilBarnetilsyn}
+                createPayload={createPayload}
+                customRowValidation={validateRow}
+            >
+                {({
+                    controlledFields,
+                    onSaveRow,
+                    onEditRow,
+                    addPeriod,
+                    onRemovePeriode,
+                }: {
+                    controlledFields: UnderholdkostnadsFormPeriode[];
+                    onEditRow: (index: number) => void;
+                    onRemovePeriode: (index: number) => void;
+                    onSaveRow: (index: number) => void;
+                    addPeriod: (
+                        periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode
+                    ) => void;
+                }) => (
+                    <>
+                        {controlledFields.length > 0 && (
+                            <div className="overflow-x-auto whitespace-nowrap">
+                                <Table size="small" className="table-fixed table bg-white w-fit">
+                                    <Table.Header>
+                                        <Table.Row className="align-baseline">
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                                {text.label.fraOgMed}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                                                {text.label.tilOgMed}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell textSize="small" scope="col" className="w-[200px]">
+                                                {text.label.stønadTilBarnetilsyn}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="center"
+                                                className="w-[74px]"
+                                            >
+                                                {text.label.omfang}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="center"
+                                                className="w-[74px]"
+                                            >
+                                                {text.label.kilde}
+                                            </Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                            <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                        </Table.Row>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {controlledFields.map((item: StønadTilBarnetilsynPeriode, stønadIndex) => (
+                                            <Table.Row key={`${item?.id}-${stønadIndex}`} className="align-top">
+                                                <Table.DataCell textSize="small">
+                                                    <UnderholdskostnadPeriode
+                                                        label={text.label.fraOgMed}
+                                                        fieldName={`${fieldName}.${stønadIndex}`}
+                                                        field="datoFom"
+                                                        item={item}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell textSize="small">
+                                                    <UnderholdskostnadPeriode
+                                                        label={text.label.tilOgMed}
+                                                        fieldName={`${fieldName}.${stønadIndex}`}
+                                                        field="datoTom"
+                                                        item={item}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <StønadTilBarnetilsyn
+                                                        fieldName={`${fieldName}.${stønadIndex}`}
+                                                        item={item}
+                                                        editableRow={item.erRedigerbart}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <Omfang
+                                                        fieldName={`${fieldName}.${stønadIndex}`}
+                                                        item={item}
+                                                        editableRow={item.erRedigerbart}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <KildeIcon kilde={item.kilde} />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <EditOrSaveButton
+                                                        index={stønadIndex}
+                                                        item={item}
+                                                        onEditRow={() => onEditRow(stønadIndex)}
+                                                        onSaveRow={() => onSaveRow(stønadIndex)}
+                                                    />
+                                                </Table.DataCell>
+                                                <Table.DataCell>
+                                                    <DeleteButton
+                                                        index={stønadIndex}
+                                                        onRemovePeriode={onRemovePeriode}
+                                                    />
+                                                </Table.DataCell>
+                                            </Table.Row>
+                                        ))}
+                                    </Table.Body>
+                                </Table>
+                            </div>
+                        )}
+                        {
+                            <LeggTilPeriodeButton
+                                addPeriode={() =>
+                                    addPeriod({
+                                        skolealder: "",
+                                        tilsynstype: "",
+                                        kilde: Kilde.MANUELL,
+                                        datoFom: "",
+                                        datoTom: "",
+                                        erRedigerbart: true,
+                                        kanRedigeres: true,
+                                    })
+                                }
+                            />
+                        }
+                    </>
+                )}
+            </UnderholdskostnadTabel>
         </Box>
     );
 };

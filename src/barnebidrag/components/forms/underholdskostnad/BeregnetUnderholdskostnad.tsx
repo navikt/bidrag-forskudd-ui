@@ -7,9 +7,13 @@ import { useFormContext } from "react-hook-form";
 
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 
-export const BeregnetUnderholdskostnad = ({ underholdIndex }: { underholdIndex: number }) => {
+export const BeregnetUnderholdskostnad = ({
+    underholdFieldName,
+}: {
+    underholdFieldName: `underholdskostnaderMedIBehandling.${number}`;
+}) => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const underhold = getValues(`underholdskostnader.${underholdIndex}`);
+    const underhold = getValues(underholdFieldName);
     const underholdskostnader = underhold.underholdskostnad;
 
     return (
@@ -29,22 +33,22 @@ export const BeregnetUnderholdskostnad = ({ underholdIndex }: { underholdIndex: 
                             <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                 {text.label.tilOgMed}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[70px]">
                                 {text.label.forbruk}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[144px]">
                                 {text.label.boutgifter}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="center" className="w-[74px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[200px]">
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[200px]">
                                 {text.label.beregnet_tilsynsutgift}
                             </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[144px]">
                                 {text.label.barnetrygd}
                             </Table.HeaderCell>
-                            <Table.HeaderCell scope="col" className="w-[56px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[174px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
                         </Table.Row>
@@ -58,19 +62,24 @@ export const BeregnetUnderholdskostnad = ({ underholdIndex }: { underholdIndex: 
                                 <Table.DataCell>
                                     {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.tom))}
                                 </Table.DataCell>
-                                <Table.DataCell>
+                                <Table.DataCell align="right">
+                                    {underholdskostnad.forbruk?.toLocaleString("nb-NO") ?? 0}
+                                </Table.DataCell>
+                                <Table.DataCell align="right">
                                     {underholdskostnad.boutgifter?.toLocaleString("nb-NO") ?? 0}
                                 </Table.DataCell>
-                                <Table.DataCell>
+                                <Table.DataCell align="right">
                                     {underholdskostnad.stønadTilBarnetilsyn?.toLocaleString("nb-NO") ?? 0}
                                 </Table.DataCell>
-                                <Table.DataCell>
+                                <Table.DataCell align="right">
                                     {underholdskostnad.tilsynsutgifter?.toLocaleString("nb-NO") ?? 0}
                                 </Table.DataCell>
-                                <Table.DataCell>
+                                <Table.DataCell align="right">
                                     {underholdskostnad.barnetrygd?.toLocaleString("nb-NO") ?? 0}
                                 </Table.DataCell>
-                                <Table.DataCell>{underholdskostnad.total?.toLocaleString("nb-NO") ?? 0}</Table.DataCell>
+                                <Table.DataCell align="right">
+                                    {underholdskostnad.total?.toLocaleString("nb-NO") ?? 0}
+                                </Table.DataCell>
                             </Table.Row>
                         ))}
                     </Table.Body>

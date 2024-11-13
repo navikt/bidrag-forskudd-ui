@@ -19,11 +19,12 @@ import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { createInitialValues } from "../helpers/UnderholdskostnadFormHelpers";
+import { AndreBarn } from "./AndreBarn";
 import { Barnetilsyn } from "./Barnetilsyn";
 
 const Main = () => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const underholdskostnader = getValues("underholdskostnader");
+    const søknadsBarnUnderholdskostnader = getValues("underholdskostnaderMedIBehandling");
     const [searchParams, setSearchParams] = useSearchParams();
 
     function updateSearchparamForTab(currentTabId: string) {
@@ -34,10 +35,13 @@ const Main = () => {
     }
 
     const defaultTab = useMemo(() => {
-        const underholdskostnadId = underholdskostnader
+        if (getSearchParam(urlSearchParams.underholdskostnadTab) === text.label.andreBarn) return text.label.andreBarn;
+
+        const søknadsBarnTab = søknadsBarnUnderholdskostnader
             .find((underhold) => underhold.id?.toString() === getSearchParam(urlSearchParams.underholdskostnadTab))
             ?.id?.toString();
-        return underholdskostnadId ?? underholdskostnader[0]?.id?.toString();
+
+        return søknadsBarnTab ?? søknadsBarnUnderholdskostnader[0]?.id?.toString();
     }, []);
 
     const selectedTab = searchParams.get(behandlingQueryKeys.underholdskostnadTab) ?? defaultTab;
@@ -50,21 +54,29 @@ const Main = () => {
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>
-                {underholdskostnader.map((underhold) => (
+                {søknadsBarnUnderholdskostnader.map((underhold, index) => (
                     <Tabs.Tab
-                        key={underhold.id}
+                        key={`underholdskostnadTab-${underhold.id}-${index}`}
                         value={underhold.id.toString()}
-                        label={underhold.gjelderBarn.medIBehandlingen ? ROLE_FORKORTELSER.BA : ""}
+                        label={`${ROLE_FORKORTELSER.BA} ${underhold.gjelderBarn.ident}`}
                     />
                 ))}
+                <Tabs.Tab key="andreBarn" value={text.label.andreBarn} label={text.label.andreBarn} />
             </Tabs.List>
-            {underholdskostnader.map((underhold, index) => {
+            {søknadsBarnUnderholdskostnader.map((underhold, index) => {
                 return (
-                    <Tabs.Panel key={underhold.id} value={underhold.id.toString()} className="grid gap-y-4">
+                    <Tabs.Panel
+                        key={`underholdskostnadTabPanel-${underhold.id}-${index}`}
+                        value={underhold.id.toString()}
+                        className="grid gap-y-4 py-4"
+                    >
                         <Barnetilsyn index={index} />
                     </Tabs.Panel>
                 );
             })}
+            <Tabs.Panel value={text.label.andreBarn} className="grid gap-y-4">
+                <AndreBarn />
+            </Tabs.Panel>
         </Tabs>
     );
 };
