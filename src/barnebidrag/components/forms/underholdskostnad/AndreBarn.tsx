@@ -7,14 +7,13 @@ import { useFormContext } from "react-hook-form";
 
 import { useOnCreateUnderholdForBarn } from "../../../hooks/useOnCreateUnderholdForBarn";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import { RolleInfoBox } from "./Barnetilsyn";
+import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 
 export const AndreBarn = () => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const underholdskostnader = getValues("underholdskostnaderAndreBarn");
+    const barnSomErIkkeMedIBehandlingUnderholdskostnader = getValues("underholdskostnaderAndreBarn");
     const createBarnQuery = useOnCreateUnderholdForBarn();
-    const barnSomErIkkeMedIBehandlingUnderholdskostnader = underholdskostnader.filter(
-        (underhold) => !underhold.gjelderBarn.medIBehandlingen
-    );
     const [openForm, setOpenForm] = useState<boolean>(false);
 
     const onCreateBarn = (barn: BarnDto) => {
@@ -46,6 +45,15 @@ export const AndreBarn = () => {
                 </Button>
             )}
             {openForm && <AddBarnForm setOpenAddBarnForm={setOpenForm} onSave={onCreateBarn} />}
+            {barnSomErIkkeMedIBehandlingUnderholdskostnader.map((_, index) => {
+                const underholdFieldName = `underholdskostnaderAndreBarn.${index}` as const;
+                return (
+                    <>
+                        <RolleInfoBox underholdFieldName={underholdFieldName} />
+                        <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
+                    </>
+                );
+            })}
         </>
     );
 };

@@ -125,9 +125,13 @@ export const UnderholdskostnadPeriode = ({
     );
 };
 
-const RolleInfoBox = ({ underholdIndex }: { underholdIndex: number }) => {
+export const RolleInfoBox = ({
+    underholdFieldName,
+}: {
+    underholdFieldName: `underholdskostnaderMedIBehandling.${number}` | `underholdskostnaderAndreBarn.${number}`;
+}) => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const { gjelderBarn } = getValues(`underholdskostnaderMedIBehandling.${underholdIndex}`);
+    const { gjelderBarn } = getValues(underholdFieldName);
 
     return (
         <div className="grid grid-cols-[max-content,max-content] p-2 bg-white border border-solid border-[var(--a-border-default)]">
@@ -150,7 +154,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
 
     return (
         <>
-            <RolleInfoBox underholdIndex={index} />
+            <RolleInfoBox underholdFieldName={underholdFieldName} />
             <Switch
                 value="barnHarTilysnsordning"
                 checked={barnHarTilysnsordning}
