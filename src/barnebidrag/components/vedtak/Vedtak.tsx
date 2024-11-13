@@ -26,7 +26,7 @@ import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
     const queryClient = useQueryClient();
     const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregning = queryClient.getQueryData<VedtakBarnebidragBeregningResult>(QueryKeys.beregnBarnebidrag());
@@ -56,7 +56,10 @@ const Vedtak = () => {
             </div>
 
             {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && (
-                <FatteVedtakButtons isBeregningError={isBeregningError} />
+                <FatteVedtakButtons
+                    isBeregningError={isBeregningError}
+                    disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
+                />
             )}
             <AdminButtons />
         </div>
