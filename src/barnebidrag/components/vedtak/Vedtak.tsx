@@ -18,7 +18,6 @@ import {
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
 import { RolleTag } from "../../../common/components/RolleTag";
-import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløp, formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
@@ -162,7 +161,7 @@ const VedtakTableBody = ({
                                 {formatterBeløpForBeregning(periode.faktiskBidrag)}
                             </Table.DataCell>
 
-                            <Table.DataCell textSize="small">{hentVisningsnavn(periode.resultatKode)}</Table.DataCell>
+                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
                         </Table.ExpandableRow>
                     )}
                 </>
