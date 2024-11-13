@@ -50,6 +50,7 @@ export const UnderholdskostnadTabel = ({
 }) => {
     const {
         søktFomDato,
+        underholdskostnader,
         virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
     const { setSaveErrorState } = useBehandlingProvider();
@@ -75,14 +76,13 @@ export const UnderholdskostnadTabel = ({
 
     const saveRow = (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        const payload = createPayload(index);
-
         const editedPeriod = {
             ...periode,
             erRedigerbart: false,
         };
-
         setValue(`${fieldName}.${index}`, editedPeriod);
+
+        const payload = createPayload(index);
 
         saveFn.mutation.mutate(payload, {
             onSuccess: (response) => {
@@ -122,6 +122,18 @@ export const UnderholdskostnadTabel = ({
                 setSaveErrorState({
                     error: true,
                     retryFn: () => saveRow(index),
+                    rollbackFn: () => {
+                        if (!periode.id) {
+                            fieldArray.remove(index);
+                        } else {
+                            const cachedUnderhold = underholdskostnader.find((cU) => cU.id === underhold.id);
+                            const cachedPeriode = cachedUnderhold[underholdskostnadType].find(
+                                (p: StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto) =>
+                                    p.id === cachedPeriode.id
+                            );
+                            setValue(`${fieldName}.${index}`, cachedPeriode);
+                        }
+                    },
                 });
             },
         });
@@ -177,10 +189,10 @@ export const UnderholdskostnadTabel = ({
                     });
                 },
             });
+        } else {
+            clearErrors(`${fieldName}.${index}`);
+            fieldArray.remove(index);
         }
-
-        clearErrors(`${fieldName}.${index}`);
-        fieldArray.remove(index);
     };
 
     const addPeriod = (periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode) => {
