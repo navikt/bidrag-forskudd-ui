@@ -77,13 +77,19 @@ export const UnderholdskostnadTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const payload = createPayload(index);
 
+        const editedPeriod = {
+            ...periode,
+            erRedigerbart: false,
+        };
+
+        setValue(`${fieldName}.${index}`, editedPeriod);
+
         saveFn.mutation.mutate(payload, {
             onSuccess: (response) => {
                 const updatedPeriod = response[underholdskostnadType];
                 setValue(`${fieldName}.${index}`, {
-                    ...periode,
+                    ...editedPeriod,
                     id: updatedPeriod.id,
-                    erRedigerbart: false,
                 });
 
                 saveFn.queryClientUpdater((currentData) => {
