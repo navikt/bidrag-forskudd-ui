@@ -10,9 +10,9 @@ export const BeregningFordeltBidrag = () => {
 
     function renderResult() {
         if (sluttberegning.justertNedTilEvne) {
-            return ` (redusert til evne)`;
+            return ` (redusert ned til evne)`;
         } else if (sluttberegning.justertNedTil25ProsentAvInntekt) {
-            return ` (redusert til 25% av inntekt)`;
+            return ` (redusert ned til 25% av inntekt)`;
         }
         return "";
     }

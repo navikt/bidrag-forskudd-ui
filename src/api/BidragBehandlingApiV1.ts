@@ -1002,8 +1002,8 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
 }
 
@@ -1343,9 +1343,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
+    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
-    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1895,6 +1895,10 @@ export interface BidragPeriodeBeregningsdetaljer {
     sluttberegning?: SluttberegningBarnebidrag;
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
+    beløpSamværsfradragTrekkesFra: number;
+    beløpEtterVurderingAvBMsBarnetillegg: number;
+    underholdskostnadMinusBMsNettoBarnetillegg: number;
+    beløpEtterVurderingAv25ProsentInntektOgEvne: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -2396,8 +2400,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -2640,8 +2644,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
