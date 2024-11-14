@@ -30,6 +30,12 @@ export const BPsAndelUnderholdskostnad = () => {
                                 labelBold: true,
                                 value: `${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(bpsAndel.endeligAndelFaktor)} = ${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)}`,
                             },
+                            beregningsdetaljer.deltBosted && {
+                                label: "Etter fratrekk delt bosted",
+                                textRight: false,
+                                labelBold: true,
+                                value: `${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)} - ${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(0.5)} = ${formatterBeløpForBeregning(beregningsdetaljer.beløpEtterFratrekkDeltBosted, true)}`,
+                            },
                         ].filter((d) => d)}
                     />
                     {bpsAndel.endeligAndelFaktor !== bpsAndel.beregnetAndelFaktor && (

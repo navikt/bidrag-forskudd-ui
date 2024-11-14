@@ -5,7 +5,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningFordeltBidrag = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne, bpsAndel },
+        beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne, beløpEtterFratrekkDeltBosted },
     } = useBidragBeregningPeriode();
 
     function renderResult() {
@@ -20,7 +20,7 @@ export const BeregningFordeltBidrag = () => {
     function hentForeløpigBidrag() {
         if (sluttberegning.justertNedTilEvne) return formatterBeløpForBeregning(evne.bidragsevne);
         if (sluttberegning.justertNedTil25ProsentAvInntekt) return formatterBeløpForBeregning(evne.sumInntekt25Prosent);
-        return formatterBeløpForBeregning(bpsAndel.andelBeløp);
+        return formatterBeløpForBeregning(beløpEtterFratrekkDeltBosted);
     }
     return (
         <ResultatTable

@@ -161,7 +161,11 @@ const VedtakTableBody = ({
                                 {formatterBeløpForBeregning(periode.faktiskBidrag)}
                             </Table.DataCell>
 
-                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {periode.beregningsdetaljer.deltBosted
+                                    ? "Delt bosted"
+                                    : periode.resultatkodeVisningsnavn}
+                            </Table.DataCell>
                         </Table.ExpandableRow>
                     )}
                 </>
