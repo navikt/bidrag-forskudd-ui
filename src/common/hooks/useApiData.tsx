@@ -13,6 +13,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUnderholdRequest,
     OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
@@ -46,6 +47,7 @@ import { AxiosError } from "axios";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
+    oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
     oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
     updateSamvær: (behandlingId: string) => ["mutation", "samvær", behandlingId],
@@ -653,6 +655,27 @@ export const useCreateUnderholdForBarn = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppretting av underholds barn", error);
+        },
+    });
+};
+
+export const useUpdateUnderhold = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdatereUnderhold(behandlingId),
+        mutationFn: async (payload: OppdatereUnderholdRequest): Promise<UnderholdDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereUnderhold(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av underhold", error);
         },
     });
 };
