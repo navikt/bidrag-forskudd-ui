@@ -21,7 +21,7 @@ import React, {
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
-import { PageErrorsOrUnsavedState as BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
+import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";

@@ -1,23 +1,27 @@
 import {
     FaktiskTilsynsutgiftDto,
-    Kilde,
     StonadTilBarnetilsynDto,
+    StonadTilBarnetilsynDtoSkolealderEnum,
+    StonadTilBarnetilsynDtoTilsynstypeEnum,
     TilleggsstonadDto,
     UnderholdDto,
 } from "@api/BidragBehandlingApiV1";
 
 interface UnderholdPeriode {
     datoFom: string;
-    datoTom: string;
+    datoTom: string | "";
     kanRedigeres: boolean;
     erRedigerbart: boolean;
 }
 
-export interface StønadTilBarnetilsynPeriode extends UnderholdPeriode, StonadTilBarnetilsynDto {
-    kilde: Kilde;
+export interface StønadTilBarnetilsynPeriode
+    extends UnderholdPeriode,
+        Omit<StonadTilBarnetilsynDto, "skolealder" | "tilsynstype" | "periode"> {
+    skolealder: StonadTilBarnetilsynDtoSkolealderEnum | "";
+    tilsynstype: StonadTilBarnetilsynDtoTilsynstypeEnum | "";
 }
-export interface FaktiskTilsynsutgiftPeriode extends UnderholdPeriode, FaktiskTilsynsutgiftDto {}
-export interface TilleggsstonadPeriode extends UnderholdPeriode, TilleggsstonadDto {}
+export interface FaktiskTilsynsutgiftPeriode extends UnderholdPeriode, Omit<FaktiskTilsynsutgiftDto, "periode"> {}
+export interface TilleggsstonadPeriode extends UnderholdPeriode, Omit<TilleggsstonadDto, "periode"> {}
 
 export type UnderholdkostnadsFormPeriode =
     | StønadTilBarnetilsynPeriode
@@ -25,11 +29,18 @@ export type UnderholdkostnadsFormPeriode =
     | TilleggsstonadPeriode;
 
 export interface Underhold
-    extends Omit<UnderholdDto, "stønadTilBarnetilsyn" | "faktiskeTilsynsutgifter" | "tilleggsstønad"> {
+    extends Omit<UnderholdDto, "stønadTilBarnetilsyn" | "faktiskTilsynsutgift" | "tilleggsstønad"> {
     stønadTilBarnetilsyn?: StønadTilBarnetilsynPeriode[];
-    faktiskeTilsynsutgifter?: FaktiskTilsynsutgiftPeriode[];
+    faktiskTilsynsutgift?: FaktiskTilsynsutgiftPeriode[];
     tilleggsstønad?: TilleggsstonadPeriode[];
 }
+
+export interface UnderholdAndreBarn
+    extends Omit<UnderholdDto, "stønadTilBarnetilsyn" | "faktiskTilsynsutgift" | "tilleggsstønad"> {
+    faktiskTilsynsutgift?: FaktiskTilsynsutgiftPeriode[];
+}
+
 export type UnderholdskostnadFormValues = {
-    underholdskostnader: Underhold[];
+    underholdskostnaderMedIBehandling: Underhold[];
+    underholdskostnaderAndreBarn?: UnderholdAndreBarn[];
 };

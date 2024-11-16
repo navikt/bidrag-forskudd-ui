@@ -3,6 +3,7 @@ import {
     AktivereGrunnlagResponseV2,
     AndreVoksneIHusstandenGrunnlagDto,
     ArbeidsforholdGrunnlagDto,
+    BarnDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
     DelberegningSamvaersklasse,
@@ -12,6 +13,7 @@ import {
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUnderholdRequest,
     OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
@@ -24,8 +26,10 @@ import {
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
     SletteSamvaersperiodeElementDto,
+    SletteUnderholdselement,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
+    UnderholdDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -43,6 +47,8 @@ import { AxiosError } from "axios";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
+    oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
+    oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
     updateSamvær: (behandlingId: string) => ["mutation", "samvær", behandlingId],
     updateSamværskalkulator: (behandlingId: string) => ["mutation", "updateSamværskalkulator", behandlingId],
@@ -577,6 +583,23 @@ export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
     });
 };
 
+export const useDeleteUnderholdsObjekt = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
+        mutationFn: async (payload: SletteUnderholdselement): Promise<UnderholdDto> => {
+            const { data } = await BEHANDLING_API_V1.api.sletteFraUnderhold(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved sletting av underhold", error);
+        },
+    });
+};
+
 export const useUpdateFaktiskeTilsynsutgifter = (underholdsid: number) => {
     const { behandlingId } = useBehandlingProvider();
 
@@ -615,6 +638,44 @@ export const useUpdateTilleggstønad = (underholdsid: number) => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av tillegstønad", error);
+        },
+    });
+};
+
+export const useCreateUnderholdForBarn = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppretteUnderholdForBarn(behandlingId),
+        mutationFn: async (payload: BarnDto): Promise<UnderholdDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppretteUnderholdForBarn(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppretting av underholds barn", error);
+        },
+    });
+};
+
+export const useUpdateUnderhold = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdatereUnderhold(behandlingId),
+        mutationFn: async (payload: OppdatereUnderholdRequest): Promise<UnderholdDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereUnderhold(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av underhold", error);
         },
     });
 };

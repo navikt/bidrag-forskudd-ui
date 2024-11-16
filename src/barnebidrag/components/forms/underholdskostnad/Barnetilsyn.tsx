@@ -1,11 +1,13 @@
+import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHelpers";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
-import { FloppydiskIcon, PencilIcon } from "@navikt/aksel-icons";
+import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Button, Heading, Switch } from "@navikt/ds-react";
+import { BodyShort, Button, Switch } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -54,6 +56,22 @@ export const EditOrSaveButton = ({
     );
 };
 
+export const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
+    const { lesemodus } = useBehandlingProvider();
+
+    return !lesemodus ? (
+        <Button
+            type="button"
+            onClick={() => onRemovePeriode(index)}
+            icon={<TrashIcon aria-hidden />}
+            variant="tertiary"
+            size="small"
+        />
+    ) : (
+        <div className="min-w-[40px]"></div>
+    );
+};
+
 export const UnderholdskostnadPeriode = ({
     fieldName,
     field,
@@ -61,9 +79,10 @@ export const UnderholdskostnadPeriode = ({
     item,
 }: {
     fieldName:
-        | `underholdskostnader.${number}.stønadTilBarnetilsyn.${number}`
-        | `underholdskostnader.${number}.faktiskeTilsynsutgifter.${number}`
-        | `underholdskostnader.${number}.tilleggsstønad.${number}`;
+        | `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`
+        | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
+        | `underholdskostnaderMedIBehandling.${number}.tilleggsstønad.${number}`
+        | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: UnderholdkostnadsFormPeriode;
@@ -106,14 +125,36 @@ export const UnderholdskostnadPeriode = ({
     );
 };
 
+export const RolleInfoBox = ({
+    underholdFieldName,
+}: {
+    underholdFieldName: `underholdskostnaderMedIBehandling.${number}` | `underholdskostnaderAndreBarn.${number}`;
+}) => {
+    const { getValues } = useFormContext<UnderholdskostnadFormValues>();
+    const { gjelderBarn } = getValues(underholdFieldName);
+
+    return (
+        <div className="grid grid-cols-[max-content,max-content] p-2 bg-white border border-solid border-[var(--a-border-default)]">
+            <div>
+                <RolleTag rolleType={Rolletype.BA} />
+            </div>
+            <div className="flex items-center gap-4">
+                <BodyShort size="small" className="font-bold">
+                    {gjelderBarn.navn}
+                </BodyShort>
+                <BodyShort size="small">{gjelderBarn.ident}</BodyShort>
+            </div>
+        </div>
+    );
+};
+
 export const Barnetilsyn = ({ index }: { index: number }) => {
     const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(false);
+    const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
 
     return (
         <>
-            <Heading level="2" size="small">
-                {text.title.barneTilsyn}
-            </Heading>
+            <RolleInfoBox underholdFieldName={underholdFieldName} />
             <Switch
                 value="barnHarTilysnsordning"
                 checked={barnHarTilysnsordning}
@@ -122,10 +163,10 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             >
                 {text.label.barnHarTilysnsordning}
             </Switch>
-            <BarnetilsynTabel underholdIndex={index} />
-            <FaktiskeTilsynsutgifterTabel underholdIndex={index} />
-            <TilleggstønadTabel underholdIndex={index} />
-            <BeregnetUnderholdskostnad underholdIndex={index} />
+            <BarnetilsynTabel underholdFieldName={underholdFieldName} />
+            <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
+            <TilleggstønadTabel underholdFieldName={underholdFieldName} />
+            <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
         </>
     );
 };

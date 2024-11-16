@@ -166,6 +166,7 @@ export enum Resultatkode {
     IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
     BIDRAGSPLIKTIG_ER_UKJENT = "BIDRAGSPLIKTIG_ER_UKJENT",
     BIDRAGSPLIKTIGERDOD = "BIDRAGSPLIKTIG_ER_DØD",
+    BEREGNET_BIDRAG = "BEREGNET_BIDRAG",
     REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
@@ -1002,9 +1003,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1343,9 +1344,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
-    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1692,6 +1693,8 @@ export interface BarnDto {
     id?: number;
     personident?: string;
     navn?: string;
+    /** @format date */
+    fødselsdato?: string;
 }
 
 export interface OpprettBehandlingFraVedtakRequest {
@@ -1732,9 +1735,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1836,10 +1839,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -1895,10 +1898,12 @@ export interface BidragPeriodeBeregningsdetaljer {
     sluttberegning?: SluttberegningBarnebidrag;
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
-    beløpSamværsfradragTrekkesFra: number;
-    beløpEtterVurderingAvBMsBarnetillegg: number;
+    deltBosted: boolean;
     underholdskostnadMinusBMsNettoBarnetillegg: number;
     beløpEtterVurderingAv25ProsentInntektOgEvne: number;
+    beløpEtterVurderingAvBMsBarnetillegg: number;
+    beløpSamværsfradragTrekkesFra: number;
+    beløpEtterFratrekkDeltBosted: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -1920,7 +1925,7 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
     resultatKode: Resultatkode;
     erDirekteAvslag: boolean;
     beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
-    resultatkodeVisningsnavn: string;
+    resultatkodeVisningsnavn?: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -1940,6 +1945,7 @@ export interface SluttberegningBarnebidrag {
     kostnadsberegnetBidrag: number;
     nettoBarnetilleggBP: number;
     nettoBarnetilleggBM: number;
+    ingenEndringUnderGrense: boolean;
     justertNedTilEvne: boolean;
     justertNedTil25ProsentAvInntekt: boolean;
     justertForNettoBarnetilleggBP: boolean;
@@ -2116,12 +2122,10 @@ export enum Grunnlagstype {
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
     LOPENDEBIDRAG = "LØPENDE_BIDRAG",
-    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
-    TILLEGGSSTONAD = "TILLEGGSSTØNAD",
+    FAKTISK_UTGIFT_PERIODE = "FAKTISK_UTGIFT_PERIODE",
+    TILLEGGSSTONADPERIODE = "TILLEGGSSTØNAD_PERIODE",
     BARNETILSYNMEDSTONADPERIODE = "BARNETILSYN_MED_STØNAD_PERIODE",
     FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
-    BARN = "BARN",
-    DELT_BOSTED = "DELT_BOSTED",
     NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
     UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
     BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
@@ -2400,10 +2404,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2550,10 +2554,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2878,7 +2882,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2967,7 +2974,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
