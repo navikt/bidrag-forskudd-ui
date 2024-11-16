@@ -5,14 +5,14 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const EndeligBidragTable = () => {
     const {
-        beregningsdetaljer: { sluttberegning, samværsfradrag: beregning, beløpSamværsfradragTrekkesFra },
+        beregningsdetaljer: { deltBosted, sluttberegning, samværsfradrag: beregning, beløpSamværsfradragTrekkesFra },
     } = useBidragBeregningPeriode();
 
     return (
         <ResultatTable
             title="Endelig bidrag"
             data={[
-                {
+                !deltBosted && {
                     label: "Etter samværsfradraget",
                     textRight: false,
                     labelBold: true,

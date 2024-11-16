@@ -4,16 +4,15 @@ import { createContext, useContext } from "react";
 import {
     BidragPeriodeBeregningsdetaljer,
     ResultatBarnebidragsberegningPeriodeDto,
-    Resultatkode,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsEvneV2 } from "../../../common/components/vedtak/BPsEvneTabell";
+import { EndeligBidragTable } from "./BeregningEndeligBidrag";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
 import { BeregningJusterBMsBarnetillegg } from "./BeregningJusterBMsBarnetillegg";
 import { BeregningJusterBPsBarnetillegg } from "./BeregningJusterBPsBarnetillegg";
 import BeregningSamværsfradrag from "./BeregningSamværsfradrag";
 import { BPsAndelUnderholdskostnad } from "./BPsAndelUnderholdstkostnad";
-import { EndeligBidragTable } from "./EndeligBidragTable";
 import { NettoBarnetilleggTable } from "./NettoBarnetilleggTable";
 
 type DetaljertBeregningBidragProps = {
@@ -45,9 +44,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     />
                     <BeregningFordeltBidrag />
                 </VStack>
-                {![Resultatkode.DELT_BOSTED, Resultatkode.BIDRAG_IKKE_BEREGNET_DELT_BOSTED].includes(
-                    periode.resultatKode
-                ) && (
+                {!periode.beregningsdetaljer.deltBosted && (
                     <>
                         <VStack gap="2">
                             <NettoBarnetilleggTable rolle={Rolletype.BM} />
@@ -57,9 +54,9 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                             <NettoBarnetilleggTable rolle={Rolletype.BP} />
                             <BeregningJusterBPsBarnetillegg />
                         </VStack>
+                        <BeregningSamværsfradrag />
                     </>
                 )}
-                <BeregningSamværsfradrag />
                 <EndeligBidragTable />
             </BidragBeregningContext.Provider>
         </VStack>

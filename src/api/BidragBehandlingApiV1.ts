@@ -166,6 +166,7 @@ export enum Resultatkode {
     IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
     BIDRAGSPLIKTIG_ER_UKJENT = "BIDRAGSPLIKTIG_ER_UKJENT",
     BIDRAGSPLIKTIGERDOD = "BIDRAGSPLIKTIG_ER_DØD",
+    BEREGNET_BIDRAG = "BEREGNET_BIDRAG",
     REDUSERTFORSKUDD50PROSENT = "REDUSERT_FORSKUDD_50_PROSENT",
     ORDINAeRTFORSKUDD75PROSENT = "ORDINÆRT_FORSKUDD_75_PROSENT",
     FORHOYETFORSKUDD100PROSENT = "FORHØYET_FORSKUDD_100_PROSENT",
@@ -1692,6 +1693,8 @@ export interface BarnDto {
     id?: number;
     personident?: string;
     navn?: string;
+    /** @format date */
+    fødselsdato?: string;
 }
 
 export interface OpprettBehandlingFraVedtakRequest {
@@ -1895,10 +1898,12 @@ export interface BidragPeriodeBeregningsdetaljer {
     sluttberegning?: SluttberegningBarnebidrag;
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
+    deltBosted: boolean;
     underholdskostnadMinusBMsNettoBarnetillegg: number;
     beløpEtterVurderingAv25ProsentInntektOgEvne: number;
     beløpEtterVurderingAvBMsBarnetillegg: number;
     beløpSamværsfradragTrekkesFra: number;
+    beløpEtterFratrekkDeltBosted: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -1920,7 +1925,7 @@ export interface ResultatBarnebidragsberegningPeriodeDto {
     resultatKode: Resultatkode;
     erDirekteAvslag: boolean;
     beregningsdetaljer?: BidragPeriodeBeregningsdetaljer;
-    resultatkodeVisningsnavn: string;
+    resultatkodeVisningsnavn?: string;
 }
 
 export interface ResultatBidragberegningDto {
@@ -1940,6 +1945,7 @@ export interface SluttberegningBarnebidrag {
     kostnadsberegnetBidrag: number;
     nettoBarnetilleggBP: number;
     nettoBarnetilleggBM: number;
+    ingenEndringUnderGrense: boolean;
     justertNedTilEvne: boolean;
     justertNedTil25ProsentAvInntekt: boolean;
     justertForNettoBarnetilleggBP: boolean;
@@ -2116,12 +2122,10 @@ export enum Grunnlagstype {
     SAMVAeRSKLASSE = "SAMVÆRSKLASSE",
     BIDRAGSEVNE = "BIDRAGSEVNE",
     LOPENDEBIDRAG = "LØPENDE_BIDRAG",
-    FAKTISK_UTGIFT = "FAKTISK_UTGIFT",
-    TILLEGGSSTONAD = "TILLEGGSSTØNAD",
+    FAKTISK_UTGIFT_PERIODE = "FAKTISK_UTGIFT_PERIODE",
+    TILLEGGSSTONADPERIODE = "TILLEGGSSTØNAD_PERIODE",
     BARNETILSYNMEDSTONADPERIODE = "BARNETILSYN_MED_STØNAD_PERIODE",
     FORPLEINING_UTGIFT = "FORPLEINING_UTGIFT",
-    BARN = "BARN",
-    DELT_BOSTED = "DELT_BOSTED",
     NETTO_BARNETILSYN = "NETTO_BARNETILSYN",
     UNDERHOLDSKOSTNAD = "UNDERHOLDSKOSTNAD",
     BPS_ANDEL_UNDERHOLDSKOSTNAD = "BPS_ANDEL_UNDERHOLDSKOSTNAD",
@@ -2400,9 +2404,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
 }
 
@@ -2505,8 +2509,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
