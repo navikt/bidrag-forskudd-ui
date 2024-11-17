@@ -53,7 +53,7 @@ export const MutationKeys = {
     updateSamvær: (behandlingId: string) => ["mutation", "samvær", behandlingId],
     updateSamværskalkulator: (behandlingId: string) => ["mutation", "updateSamværskalkulator", behandlingId],
     slettSamværskalkulator: (behandlingId: string) => ["mutation", "slettSamværskalkulator", behandlingId],
-    beregnSamværsklasse: (behandlingId: string) => ["mutation", "beregnSamværsklasse", behandlingId],
+    beregnSamværsklasse: () => ["mutation", "beregnSamværsklasse"],
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
     updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
@@ -156,10 +156,8 @@ export const useDeleteSamværsperiode = () => {
 };
 
 export const useBeregnSamværsklasse = () => {
-    const { behandlingId } = useBehandlingProvider();
-
     return useMutation({
-        mutationKey: MutationKeys.beregnSamværsklasse(behandlingId),
+        mutationKey: MutationKeys.beregnSamværsklasse(),
         mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<DelberegningSamvaersklasse> => {
             const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
             return data;

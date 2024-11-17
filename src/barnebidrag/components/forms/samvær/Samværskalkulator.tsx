@@ -1,5 +1,6 @@
 import { CalculatorIcon } from "@navikt/aksel-icons";
-import { BodyShort, Button, Heading, HelpText, HStack, Modal, Table, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Heading, HelpText, HStack, Modal, Table, VStack } from "@navikt/ds-react";
+import { useMutationState } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -12,7 +13,7 @@ import {
     createSamværskalkulatorDefaultvalues,
     mapToSamværskalkulatoDetaljer,
 } from "../../../../common/helpers/samværFormHelpers";
-import { useBeregnSamværsklasse } from "../../../../common/hooks/useApiData";
+import { MutationKeys, useBeregnSamværsklasse } from "../../../../common/hooks/useApiData";
 import { useDebounce } from "../../../../common/hooks/useDebounce";
 import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
 import { SamværBarnformvalues } from "../../../../common/types/samværFormValues";
@@ -36,6 +37,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     function beregnSamværsklasse() {
         beregnSamværsklasseFn.mutate(mapToSamværskalkulatoDetaljer({ ...beregning, isSaved: true }), {
             onSuccess: (data) => {
+                beregnSamværsklasseFn.reset();
                 setValue(`${fieldname}.samværsklasse`, data.samværsklasse);
                 setValue(`${fieldname}.beregning.samværsklasse`, data.samværsklasse);
                 setValue(`${fieldname}.beregning.gjennomsnittligSamværPerMåned`, data.gjennomsnittligSamværPerMåned);
@@ -153,35 +155,44 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                 </Table>
             </div>
             {samværsklasse && (
-                <HStack gap={"1"} align={"center"}>
-                    <ResultatTable
-                        data={[
-                            {
-                                label: "Beregning",
-                                textRight: false,
-                                value: `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
-                            },
-                        ].filter((d) => d)}
-                    />
-                    {!viewOnly && (
-                        <HelpText>
-                            Samværsfradraget regnes ut ifra samværsklasser. Det gjennomsnittlige samværet er delt i fire
-                            samværsklasser.
-                            <br /> <strong>Samværsklasse 0</strong> <br />
-                            0 - 1,99 netter/dager per måned
-                            <br /> <strong>Samværsklasse 1</strong> <br />
-                            2 - 3,99 netter/dager per måned
-                            <br />
-                            <strong>Samværsklasse 2</strong>
-                            <br />
-                            4 - 8,99 netter per måned
-                            <br /> <strong>Samværsklasse 3</strong> <br />
-                            9 - 13,99 netter per måned
-                            <br /> <strong>Samværsklasse 4</strong> <br />
-                            14 - 15 netter per måned
-                        </HelpText>
+                <>
+                    <HStack gap={"1"} align={"center"}>
+                        <ResultatTable
+                            data={[
+                                {
+                                    label: "Beregning",
+                                    textRight: false,
+                                    value: beregnSamværsklasseFn.isError
+                                        ? "Ukjent"
+                                        : `Samværsklasse ${hentVisningsnavn(samværsklasse)} (samvær per måned: ${sumGjennomsnittligSamværPerMåned})`,
+                                },
+                            ].filter((d) => d)}
+                        />
+                        {!viewOnly && (
+                            <HelpText>
+                                Samværsfradraget regnes ut ifra samværsklasser. Det gjennomsnittlige samværet er delt i
+                                fire samværsklasser.
+                                <br /> <strong>Samværsklasse 0</strong> <br />
+                                0 - 1,99 netter/dager per måned
+                                <br /> <strong>Samværsklasse 1</strong> <br />
+                                2 - 3,99 netter/dager per måned
+                                <br />
+                                <strong>Samværsklasse 2</strong>
+                                <br />
+                                4 - 8,99 netter per måned
+                                <br /> <strong>Samværsklasse 3</strong> <br />
+                                9 - 13,99 netter per måned
+                                <br /> <strong>Samværsklasse 4</strong> <br />
+                                14 - 15 netter per måned
+                            </HelpText>
+                        )}
+                    </HStack>
+                    {beregnSamværsklasseFn.isError && !viewOnly && (
+                        <Alert size="small" variant={"error"}>
+                            Det skjedde en feil ved beregning av samværsklasse
+                        </Alert>
                     )}
-                </HStack>
+                </>
             )}
         </VStack>
     );
@@ -225,6 +236,9 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
     const ref = useRef<HTMLDialogElement>(null);
     const { control, getValues, setValue, setError, getFieldState, clearErrors } =
         useFormContext<SamværBarnformvalues>();
+    const beregnSamværsklasseFnStates = useMutationState({
+        filters: { mutationKey: MutationKeys.beregnSamværsklasse() },
+    });
     const previousBeregning = useRef(getValues(`${fieldname}.beregning`));
     const beregning = useWatch({ control, name: `${fieldname}.beregning` });
     const onSave = () => {
@@ -250,6 +264,10 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
     };
 
     if (!editableRow) return null;
+
+    const beregnSamværsklasseFnState = beregnSamværsklasseFnStates
+        ? beregnSamværsklasseFnStates[beregnSamværsklasseFnStates.length - 1]
+        : undefined;
     return (
         <>
             <Button
@@ -266,7 +284,12 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
                     <SamværskalkulatorForm fieldname={fieldname} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button size="xsmall" variant="primary" onClick={onSave}>
+                    <Button
+                        size="xsmall"
+                        variant="primary"
+                        onClick={onSave}
+                        disabled={beregnSamværsklasseFnState?.status === "error"}
+                    >
                         Lagre
                     </Button>
                     <Button size="xsmall" variant="secondary" onClick={closeAndCancel}>
