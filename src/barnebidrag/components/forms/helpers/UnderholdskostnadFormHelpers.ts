@@ -12,7 +12,7 @@ import {
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
 
-const transformUnderholdskostnadPeriode = (
+export const transformUnderholdskostnadPeriode = (
     periode: StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto
 ) => ({
     ...periode,

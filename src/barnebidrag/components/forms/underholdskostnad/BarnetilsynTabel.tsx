@@ -245,10 +245,7 @@ export const BarnetilsynTabel = ({
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <DeleteButton
-                                                        index={stønadIndex}
-                                                        onRemovePeriode={onRemovePeriode}
-                                                    />
+                                                    <DeleteButton onDelete={() => onRemovePeriode(stønadIndex)} />
                                                 </Table.DataCell>
                                             </Table.Row>
                                         ))}
