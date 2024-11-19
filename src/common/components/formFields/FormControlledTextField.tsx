@@ -16,6 +16,7 @@ export const FormControlledTextField = ({
     max,
     step,
     prefix,
+    width,
 }: {
     name: string;
     label: string;
@@ -28,6 +29,7 @@ export const FormControlledTextField = ({
     max?: string | number;
     step?: string;
     inputMode?: "email" | "tel" | "text" | "url" | "search" | "none" | "numeric" | "decimal";
+    width?: string;
 }) => {
     const { control, clearErrors } = useFormContext();
     const { field, fieldState } = useController({ name, control });
@@ -60,6 +62,7 @@ export const FormControlledTextField = ({
             error={fieldState?.error?.message}
             min={min}
             max={max}
+            style={width ? { width: width } : undefined}
             step={step}
             inputMode={inputMode}
         />

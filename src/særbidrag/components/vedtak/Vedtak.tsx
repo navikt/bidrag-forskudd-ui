@@ -48,6 +48,7 @@ const Vedtak = () => {
 
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
+    const { medInnkreving } = useGetBehandlingV2();
 
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;
@@ -186,7 +187,7 @@ const VedtakResultat = () => {
                                     value: formatterBeløp(resultat.beregning?.totalBeløpBetaltAvBp, true),
                                 },
                                 {
-                                    label: "Beløp som innkreves",
+                                    label: medInnkreving ? "Beløp som innkreves" : "Fastsatt beløp å betale",
                                     value: erBeregningeAvslag
                                         ? "Avslag"
                                         : formatterBeløp(resultat.beløpSomInnkreves, true),

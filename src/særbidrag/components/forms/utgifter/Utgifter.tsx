@@ -30,7 +30,7 @@ import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Checkbox, Heading, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Button, Checkbox, Heading, HStack, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
@@ -323,7 +323,7 @@ const Main = () => {
                                 />
                             </FlexRow>
                             {erMaksBeløpMed && (
-                                <FlexRow>
+                                <HStack gap="2">
                                     <FormControlledTextField
                                         name={`maksGodkjentBeløp`}
                                         label={text.label.godkjentBeløpSkalSkjønsjusteres}
@@ -335,8 +335,9 @@ const Main = () => {
                                         name={`maksGodkjentBeløpBegrunnelse`}
                                         label={text.label.begrunnelse}
                                         type="text"
+                                        width="350px"
                                     />
-                                </FlexRow>
+                                </HStack>
                             )}
                             <hr className="w-full bg-[var(--a-border-divider)] h-px" />
                         </>
