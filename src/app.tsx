@@ -7,11 +7,13 @@ import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
 import {
+    browserMeta,
     createReactRouterV6Options,
     FaroRoutes,
     getWebInstrumentations,
     initializeFaro,
     LogLevel,
+    pageMeta,
     ReactIntegration,
 } from "@grafana/faro-react";
 import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
@@ -49,6 +51,7 @@ export const faro = initializeFaro({
     user: {
         username: await SecuritySessionUtils.hentSaksbehandlerId(),
     },
+    metas: [browserMeta, pageMeta],
     instrumentations: [
         // Load the default Web instrumentations
         ...getWebInstrumentations({
