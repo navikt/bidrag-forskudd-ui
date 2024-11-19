@@ -51,6 +51,7 @@ export const faro = initializeFaro({
     user: {
         username: await SecuritySessionUtils.hentSaksbehandlerId(),
     },
+
     metas: [browserMeta, pageMeta],
     instrumentations: [
         // Load the default Web instrumentations
@@ -88,8 +89,44 @@ const config: IConfig = {
     refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
     appName: "bidrag-behandling-ui",
 };
+const getDevicePixelRatioFormatted = () => {
+    return (Math.round(window.devicePixelRatio * 100) / 100).toFixed(2);
+};
+
+const hasMultipleScreens = () => {
+    // @ts-expect-error This is not supported in all browsers (or TypeScript) yet
+    const value: boolean | undefined = window.screen.isExtended;
+    if (value === true) {
+        return "yes";
+    } else if (value === false) {
+        return "no";
+    } else {
+        return "unknown";
+    }
+};
 export default function App() {
     // const { reset } = useQueryErrorResetBoundary();
+
+    useEffect(() => {
+        try {
+            const screenResolutionData = {
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                orientation: window.screen.orientation.type,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                windowWidth: window.innerWidth,
+                windowHeight: window.innerHeight,
+                devicePixelRatio: getDevicePixelRatioFormatted(),
+                hasMultipleScreens: hasMultipleScreens(),
+            };
+            const asStrings = Object.fromEntries(
+                Object.entries(screenResolutionData).map(([key, value]) => [key, value?.toString() ?? ""])
+            );
+            faro.api.pushEvent("screenResolution", asStrings);
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
     return (
         <FlagProvider config={config}>
             <QueryClientProvider client={queryClient}>
