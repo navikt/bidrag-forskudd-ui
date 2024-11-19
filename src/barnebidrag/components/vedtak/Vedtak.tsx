@@ -19,7 +19,7 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
-import { formatterBeløp, formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
+import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
 import { DetaljertBeregningBidrag } from "./DetaljertBeregningBidrag";
 
@@ -131,7 +131,7 @@ const VedtakTableBody = ({
                             </Table.DataCell>
 
                             <Table.DataCell textSize="small">
-                                {formatterBeløp(
+                                {formatterBeløpForBeregning(
                                     periode.beregningsdetaljer.delberegningUnderholdskostnad.underholdskostnad
                                 )}
                             </Table.DataCell>
