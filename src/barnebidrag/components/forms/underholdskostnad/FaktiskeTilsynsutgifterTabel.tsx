@@ -238,7 +238,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
-                                                    <DeleteButton index={index} onRemovePeriode={onRemovePeriode} />
+                                                    <DeleteButton onDelete={() => onRemovePeriode(index)} />
                                                 </Table.DataCell>
                                             </Table.Row>
                                         ))}

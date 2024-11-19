@@ -1,5 +1,6 @@
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
+import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -7,9 +8,9 @@ import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHe
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Button, Switch } from "@navikt/ds-react";
+import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { UnderholdkostnadsFormPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
@@ -56,17 +57,11 @@ export const EditOrSaveButton = ({
     );
 };
 
-export const DeleteButton = ({ onRemovePeriode, index }: { onRemovePeriode: (index) => void; index: number }) => {
+export const DeleteButton = ({ onDelete }: { onDelete: () => void }) => {
     const { lesemodus } = useBehandlingProvider();
 
     return !lesemodus ? (
-        <Button
-            type="button"
-            onClick={() => onRemovePeriode(index)}
-            icon={<TrashIcon aria-hidden />}
-            variant="tertiary"
-            size="small"
-        />
+        <Button type="button" onClick={onDelete} icon={<TrashIcon aria-hidden />} variant="tertiary" size="small" />
     ) : (
         <div className="min-w-[40px]"></div>
     );
@@ -127,24 +122,64 @@ export const UnderholdskostnadPeriode = ({
 
 export const RolleInfoBox = ({
     underholdFieldName,
+    onDelete,
 }: {
     underholdFieldName: `underholdskostnaderMedIBehandling.${number}` | `underholdskostnaderAndreBarn.${number}`;
+    onDelete?: () => void;
 }) => {
+    const ref = useRef<HTMLDialogElement>(null);
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
-    const { gjelderBarn } = getValues(underholdFieldName);
+    const underhold = getValues(underholdFieldName);
+
+    const onConfirm = () => {
+        ref.current?.close();
+        onDelete();
+    };
 
     return (
-        <div className="grid grid-cols-[max-content,max-content] p-2 bg-white border border-solid border-[var(--a-border-default)]">
-            <div>
-                <RolleTag rolleType={Rolletype.BA} />
-            </div>
-            <div className="flex items-center gap-4">
-                <BodyShort size="small" className="font-bold">
-                    {gjelderBarn.navn}
-                </BodyShort>
-                <BodyShort size="small">{gjelderBarn.ident}</BodyShort>
-            </div>
-        </div>
+        underhold && (
+            <>
+                <div className="grid grid-cols-[max-content,max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
+                    <div>
+                        <RolleTag rolleType={Rolletype.BA} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <BodyShort size="small" className="font-bold">
+                            {underhold.gjelderBarn.navn}
+                        </BodyShort>
+                        <BodyShort size="small">{underhold.gjelderBarn.ident}</BodyShort>
+                    </div>
+                    {!underhold.gjelderBarn.medIBehandlingen && (
+                        <>
+                            <div className="flex items-center justify-end">
+                                <DeleteButton onDelete={() => ref.current?.showModal()} />
+                            </div>
+                            <ConfirmationModal
+                                ref={ref}
+                                closeable
+                                description={text.varsel.ønskerDuÅSletteBarnet}
+                                heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
+                                footer={
+                                    <>
+                                        <Button type="button" onClick={onConfirm} size="small">
+                                            {text.label.jaSlett}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="small"
+                                            onClick={() => ref.current?.close()}
+                                        >
+                                            {text.label.avbryt}
+                                        </Button>
+                                    </>
+                                }
+                            />
+                        </>
+                    )}
+                </div>
+            </>
+        )
     );
 };
 

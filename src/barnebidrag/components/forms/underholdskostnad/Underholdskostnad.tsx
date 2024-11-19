@@ -8,7 +8,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { Tabs } from "@navikt/ds-react";
+import { Tabs, Textarea } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -81,7 +81,7 @@ const Side = () => {
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
     const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
-    const underholdId = tabIsAndreBarn ? getValues(field)?.[0]?.id : id;
+    const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : id;
     const saveUnderhold = useOnUpdateUnderhold(Number(underholdId));
     const fieldName =
         `${field as "underholdskostnaderMedIBehandling" | "underholdskostnaderAndreBarn"}.${fieldIndex}.begrunnelse` as const;
@@ -147,7 +147,8 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea key={fieldName} name={fieldName} label={text.title.begrunnelse} />
+            {underholdId && <FormControlledTextarea key={fieldName} name={fieldName} label={text.title.begrunnelse} />}
+            {!underholdId && <Textarea label={text.title.begrunnelse} size="small" readOnly={true} />}
             <ActionButtons onNext={onNext} />
         </>
     );
