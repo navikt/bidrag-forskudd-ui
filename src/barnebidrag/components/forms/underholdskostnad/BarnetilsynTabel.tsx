@@ -10,7 +10,7 @@ import { KildeIcon } from "@common/components/inntekt/InntektTable";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -54,7 +54,9 @@ const Omfang = ({
             onSelect={() => clearErrors(`${fieldName}.tilsynstype`)}
         />
     ) : (
-        <div className="h-8 flex items-center">{STONAD_TIL_BARNETILSYNS_TYPE[item.tilsynstype]}</div>
+        <div className="h-8 flex items-center">
+            <BodyShort size="small">{STONAD_TIL_BARNETILSYNS_TYPE[item.tilsynstype]}</BodyShort>
+        </div>
     );
 };
 
@@ -83,7 +85,9 @@ const StønadTilBarnetilsyn = ({
             onSelect={() => clearErrors(`${fieldName}.skolealder`)}
         />
     ) : (
-        <div className="h-8 flex items-center">{STONAD_TIL_BARNETILSYNS_SKOLEALDER[item.skolealder]}</div>
+        <div className="h-8 flex items-center">
+            <BodyShort size="small">{STONAD_TIL_BARNETILSYNS_SKOLEALDER[item.skolealder]}</BodyShort>
+        </div>
     );
 };
 
@@ -177,14 +181,19 @@ export const BarnetilsynTabel = ({
                                             <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                                 {text.label.tilOgMed}
                                             </Table.HeaderCell>
-                                            <Table.HeaderCell textSize="small" scope="col" className="w-[200px]">
+                                            <Table.HeaderCell
+                                                textSize="small"
+                                                scope="col"
+                                                align="left"
+                                                className="w-[324px]"
+                                            >
                                                 {text.label.stønadTilBarnetilsyn}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
-                                                align="center"
-                                                className="w-[74px]"
+                                                align="left"
+                                                className="w-[130px]"
                                             >
                                                 {text.label.omfang}
                                             </Table.HeaderCell>
@@ -219,14 +228,14 @@ export const BarnetilsynTabel = ({
                                                         item={item}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell align="left">
                                                     <StønadTilBarnetilsyn
                                                         fieldName={`${fieldName}.${stønadIndex}`}
                                                         item={item}
                                                         editableRow={item.erRedigerbart}
                                                     />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell align="left">
                                                     <Omfang
                                                         fieldName={`${fieldName}.${stønadIndex}`}
                                                         item={item}

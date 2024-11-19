@@ -1,4 +1,4 @@
-import { TextField } from "@navikt/ds-react";
+import { BodyShort, TextField } from "@navikt/ds-react";
 import React from "react";
 import { useController, useFormContext } from "react-hook-form";
 
@@ -46,7 +46,11 @@ export const FormControlledTextField = ({
 
     if (!editable) {
         const value = prefix ? `${prefix}${field.value ? `, ${field.value}` : ""}` : field.value;
-        return <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>{value}</div>;
+        return (
+            <div className={`min-h-8 flex items-center ${type === "number" ? "justify-end" : ""}`}>
+                <BodyShort size="small">{value}</BodyShort>
+            </div>
+        );
     }
 
     return (

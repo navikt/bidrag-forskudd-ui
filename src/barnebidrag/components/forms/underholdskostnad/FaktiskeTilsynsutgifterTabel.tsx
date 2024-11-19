@@ -2,7 +2,7 @@ import { FormControlledTextField } from "@common/components/formFields/FormContr
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -39,7 +39,9 @@ const TotalTilysnsutgift = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.utgift)}</div>
+                <div className="h-8 flex items-center justify-end">
+                    <BodyShort size="small">{formatterBeløp(item.utgift)}</BodyShort>
+                </div>
             )}
         </>
     );
@@ -66,14 +68,20 @@ const Kostpenger = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.kostpenger)}</div>
+                <div className="h-8 flex items-center justify-end">
+                    <BodyShort size="small">{formatterBeløp(item.kostpenger)}</BodyShort>
+                </div>
             )}
         </>
     );
 };
 
 const Totalt12Måned = ({ item }: { item: FaktiskTilsynsutgiftPeriode }) => {
-    return <div className="h-8 flex items-center justify-end">{formatterBeløp(item.utgift * 12)}</div>;
+    return (
+        <div className="h-8 flex items-center justify-end">
+            <BodyShort size="small">{formatterBeløp(item.utgift * 12)}</BodyShort>
+        </div>
+    );
 };
 
 const Kommentar = ({
@@ -163,7 +171,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 align="right"
                                                 textSize="small"
                                                 scope="col"
-                                                className="w-[144px]"
+                                                className="w-[140px]"
                                             >
                                                 {text.label.totalTilysnsutgift}
                                             </Table.HeaderCell>
@@ -171,7 +179,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 textSize="small"
                                                 scope="col"
                                                 align="right"
-                                                className="w-[74px]"
+                                                className="w-[100px]"
                                             >
                                                 {text.label.kostpenger}
                                             </Table.HeaderCell>
@@ -179,15 +187,15 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 textSize="small"
                                                 scope="col"
                                                 align="right"
-                                                className="w-[144px]"
+                                                className="w-[125px]"
                                             >
                                                 {text.label.totalt12Måned}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
-                                                align="center"
-                                                className="w-[200px]"
+                                                align="left"
+                                                className="w-[163px]"
                                             >
                                                 {text.label.kommentar}
                                             </Table.HeaderCell>
@@ -226,7 +234,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 <Table.DataCell align="right">
                                                     <Totalt12Måned item={item} />
                                                 </Table.DataCell>
-                                                <Table.DataCell>
+                                                <Table.DataCell align="left">
                                                     <Kommentar fieldName={`${fieldName}.${index}`} item={item} />
                                                 </Table.DataCell>
                                                 <Table.DataCell>
