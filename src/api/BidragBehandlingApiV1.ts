@@ -495,6 +495,7 @@ export interface BehandlingDtoV2 {
     /** @format int64 */
     id: number;
     type: TypeBehandling;
+    medInnkreving: boolean;
     innkrevingstype: Innkrevingstype;
     vedtakstype: Vedtakstype;
     opprinneligVedtakstype?: Vedtakstype;
@@ -1003,9 +1004,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    harPeriodiseringsfeil: boolean;
     gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -1632,7 +1633,9 @@ export interface OpprettRolleDto {
      * @format date
      */
     fødselsdato?: string;
+    innbetaltBeløp?: number;
     erSlettet: boolean;
+    erUkjent: boolean;
 }
 
 export interface OppdaterRollerResponse {
@@ -1735,9 +1738,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1745,6 +1748,7 @@ export interface SjekkRolleDto {
     rolletype: Rolletype;
     /** F.eks fødselsnummer. Påkrevd for alle rolletyper utenom for barn som ikke inngår i beregning. */
     ident?: string | null;
+    erUkjent?: boolean;
 }
 
 export interface BeregnetBidragPerBarn {
@@ -1839,10 +1843,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -1899,11 +1903,11 @@ export interface BidragPeriodeBeregningsdetaljer {
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
     deltBosted: boolean;
-    underholdskostnadMinusBMsNettoBarnetillegg: number;
     beløpEtterVurderingAv25ProsentInntektOgEvne: number;
-    beløpEtterVurderingAvBMsBarnetillegg: number;
     beløpSamværsfradragTrekkesFra: number;
     beløpEtterFratrekkDeltBosted: number;
+    underholdskostnadMinusBMsNettoBarnetillegg: number;
+    beløpEtterVurderingAvBMsBarnetillegg: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -2405,9 +2409,9 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2509,8 +2513,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2554,10 +2558,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2882,10 +2886,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2974,7 +2975,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

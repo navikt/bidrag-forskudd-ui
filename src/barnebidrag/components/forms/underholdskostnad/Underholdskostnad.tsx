@@ -81,7 +81,7 @@ const Side = () => {
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
     const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
-    const underholdId = tabIsAndreBarn ? getValues(field)[0].id : id;
+    const underholdId = tabIsAndreBarn ? getValues(field)?.[0]?.id : id;
     const saveUnderhold = useOnUpdateUnderhold(Number(underholdId));
     const fieldName =
         `${field as "underholdskostnaderMedIBehandling" | "underholdskostnaderAndreBarn"}.${fieldIndex}.begrunnelse` as const;

@@ -2,12 +2,13 @@ import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { BpsBeregnedeTotalbidragTabellV2 } from "../../../common/components/vedtak/BpsBeregnedeTotalbidragTabell";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
-import { useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
+import { useGetBehandlingV2, useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
 import { formatterBeløp } from "../../../utils/number-utils";
 import { BPsAndelUtgifter } from "./BPsAndelUtgifter";
 
 export const DetaljertBeregningSærbidrag: React.FC = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
+    const { medInnkreving } = useGetBehandlingV2();
 
     const resultat = beregnetSærbidrag.resultat;
     const erBeregningeAvslag = beregnetSærbidrag.resultat?.resultatKode !== Resultatkode.SAeRBIDRAGINNVILGET;
@@ -40,7 +41,7 @@ export const DetaljertBeregningSærbidrag: React.FC = () => {
                         value: formatterBeløp(resultat.beregning?.totalBeløpBetaltAvBp, true),
                     },
                     {
-                        label: "Beløp som innkreves",
+                        label: medInnkreving ? "Beløp som innkreves" : "Fastsatt beløp å betale",
                         value: erBeregningeAvslag ? "Avslag" : formatterBeløp(resultat.beløpSomInnkreves, true),
                     },
                 ].filter((d) => d)}
