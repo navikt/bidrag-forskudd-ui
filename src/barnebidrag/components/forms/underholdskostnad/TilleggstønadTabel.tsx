@@ -2,7 +2,7 @@ import { FormControlledTextField } from "@common/components/formFields/FormContr
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -37,13 +37,19 @@ const Dagsats = ({
                     hideLabel
                 />
             ) : (
-                <div className="h-8 flex items-center justify-end">{formatterBeløp(item.dagsats)}</div>
+                <div className="h-8 flex items-center justify-end">
+                    <BodyShort size="small">{formatterBeløp(item.dagsats)}</BodyShort>
+                </div>
             )}
         </>
     );
 };
 const Totalt12Måned = ({ item }: { item: TilleggsstonadPeriode }) => {
-    return <div className="h-8 flex items-center justify-end">{formatterBeløp(item.dagsats * 12)}</div>;
+    return (
+        <div className="h-8 flex items-center justify-end">
+            <BodyShort size="small">{formatterBeløp(item.dagsats * 12)}</BodyShort>
+        </div>
+    );
 };
 
 export const TilleggstønadTabel = ({
@@ -129,7 +135,7 @@ export const TilleggstønadTabel = ({
                                                 align="right"
                                                 textSize="small"
                                                 scope="col"
-                                                className="w-[144px]"
+                                                className="w-[384px]"
                                             >
                                                 {text.label.dagsats}
                                             </Table.HeaderCell>

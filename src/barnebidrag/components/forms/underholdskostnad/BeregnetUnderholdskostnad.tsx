@@ -1,6 +1,6 @@
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
-import { Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -33,22 +33,22 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
                                 {text.label.tilOgMed}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[70px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[75px]">
                                 {text.label.forbruk}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[144px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[90px]">
                                 {text.label.boutgifter}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[200px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[125px]">
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[200px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[100px]">
                                 {text.label.beregnet_tilsynsutgift}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[144px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
                                 {text.label.barnetrygd}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[174px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[155px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
                         </Table.Row>
@@ -57,28 +57,44 @@ export const BeregnetUnderholdskostnad = ({
                         {underholdskostnader.map((underholdskostnad, index) => (
                             <Table.Row key={`underholdskostnad-${index}`} className="align-top">
                                 <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.fom))}
+                                    <BodyShort size="small">
+                                        {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.fom))}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell>
-                                    {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.tom))}
+                                    <BodyShort size="small">
+                                        {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.tom))}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.forbruk?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.forbruk?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.boutgifter?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.boutgifter?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.stønadTilBarnetilsyn?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.stønadTilBarnetilsyn?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.tilsynsutgifter?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.tilsynsutgifter?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.barnetrygd?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.barnetrygd?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
-                                    {underholdskostnad.total?.toLocaleString("nb-NO") ?? 0}
+                                    <BodyShort size="small">
+                                        {underholdskostnad.total?.toLocaleString("nb-NO") ?? 0}
+                                    </BodyShort>
                                 </Table.DataCell>
                             </Table.Row>
                         ))}
