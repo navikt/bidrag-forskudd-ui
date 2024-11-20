@@ -205,11 +205,11 @@ export const UnderholdskostnadTabel = ({
         });
     };
 
+    const mutationIsPending = saveFn.mutation.isPending || deleteUnderhold.mutation.isPending;
+
     return (
-        <div
-            className={`${saveFn.mutation.isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}
-        >
-            <OverlayLoader loading={saveFn.mutation.isPending} />
+        <div className={`${mutationIsPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}>
+            <OverlayLoader loading={mutationIsPending} />
             {children({
                 controlledFields,
                 onEditRow,
