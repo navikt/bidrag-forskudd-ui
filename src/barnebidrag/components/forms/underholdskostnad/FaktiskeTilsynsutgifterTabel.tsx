@@ -79,7 +79,7 @@ const Kostpenger = ({
 const Totalt12Måned = ({ item }: { item: FaktiskTilsynsutgiftPeriode }) => {
     return (
         <div className="h-8 flex items-center justify-end">
-            <BodyShort size="small">{formatterBeløp(item.utgift * 12)}</BodyShort>
+            <BodyShort size="small">{formatterBeløp(item.total)}</BodyShort>
         </div>
     );
 };

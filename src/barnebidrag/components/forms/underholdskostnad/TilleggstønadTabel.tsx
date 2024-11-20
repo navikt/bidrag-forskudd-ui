@@ -47,7 +47,7 @@ const Dagsats = ({
 const Totalt12Måned = ({ item }: { item: TilleggsstonadPeriode }) => {
     return (
         <div className="h-8 flex items-center justify-end">
-            <BodyShort size="small">{formatterBeløp(item.dagsats * 12)}</BodyShort>
+            <BodyShort size="small">{formatterBeløp(item.total)}</BodyShort>
         </div>
     );
 };
