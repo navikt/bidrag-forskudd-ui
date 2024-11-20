@@ -6,6 +6,7 @@ import {
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
 } from "@api/BidragBehandlingApiV1";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -204,11 +205,18 @@ export const UnderholdskostnadTabel = ({
         });
     };
 
-    return children({
-        controlledFields,
-        onEditRow,
-        onSaveRow,
-        addPeriod,
-        onRemovePeriode,
-    });
+    const mutationIsPending = saveFn.mutation.isPending || deleteUnderhold.mutation.isPending;
+
+    return (
+        <div className={`${mutationIsPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}>
+            <OverlayLoader loading={mutationIsPending} />
+            {children({
+                controlledFields,
+                onEditRow,
+                onSaveRow,
+                addPeriod,
+                onRemovePeriode,
+            })}
+        </div>
+    );
 };
