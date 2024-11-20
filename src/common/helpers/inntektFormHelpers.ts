@@ -172,7 +172,10 @@ export const transformInntekt =
                     ? inntekt.opprinneligTom
                     : null),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
-            beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
+            beløpMnd:
+                inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG
+                    ? Number((inntekt.beløp / 12).toFixed(2))
+                    : undefined,
             kanRedigeres:
                 inntekt.kilde === Kilde.MANUELL ||
                 (!ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
