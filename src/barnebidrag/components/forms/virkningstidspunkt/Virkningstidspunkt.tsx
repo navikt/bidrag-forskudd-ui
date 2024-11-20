@@ -257,6 +257,8 @@ const VirkningstidspunktForm = () => {
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                         inntekter: response.inntekter,
+                        samvær: response.samvær,
+                        underholdskostnader: response.underholdskostnader,
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
