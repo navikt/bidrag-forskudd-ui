@@ -3,7 +3,7 @@ import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPerio
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
-import { formatterBeløp } from "@utils/number-utils";
+import { formatterBeløp, formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -47,7 +47,7 @@ const Dagsats = ({
 const Totalt12Måned = ({ item }: { item: TilleggsstonadPeriode }) => {
     return (
         <div className="h-8 flex items-center justify-end">
-            <BodyShort size="small">{formatterBeløp(item.total)}</BodyShort>
+            <BodyShort size="small">{formatterBeløpForBeregning(item.total)}</BodyShort>
         </div>
     );
 };

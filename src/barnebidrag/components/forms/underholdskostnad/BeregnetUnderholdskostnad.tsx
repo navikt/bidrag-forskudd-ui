@@ -5,6 +5,7 @@ import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
+import { formatterBeløpForBeregning } from "../../../../utils/number-utils";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 
 export const BeregnetUnderholdskostnad = ({
@@ -68,32 +69,32 @@ export const BeregnetUnderholdskostnad = ({
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.forbruk?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.forbruk)}
                                     </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.boutgifter?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.boutgifter)}
                                     </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.stønadTilBarnetilsyn?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.stønadTilBarnetilsyn)}
                                     </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.tilsynsutgifter?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.tilsynsutgifter)}
                                     </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.barnetrygd?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.barnetrygd)}
                                     </BodyShort>
                                 </Table.DataCell>
                                 <Table.DataCell align="right">
                                     <BodyShort size="small">
-                                        {underholdskostnad.total?.toLocaleString("nb-NO") ?? 0}
+                                        {formatterBeløpForBeregning(underholdskostnad.total)}
                                     </BodyShort>
                                 </Table.DataCell>
                             </Table.Row>
