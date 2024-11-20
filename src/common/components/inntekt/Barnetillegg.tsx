@@ -132,7 +132,7 @@ export const Barnetillegg = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="center"
-                                                            className="w-[84px]"
+                                                            className="w-[74px]"
                                                         >
                                                             {text.label.taMed}
                                                         </Table.HeaderCell>
@@ -154,14 +154,14 @@ export const Barnetillegg = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="center"
-                                                            className="w-[74px]"
+                                                            className="w-[54px]"
                                                         >
                                                             {text.label.kilde}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
                                                             textSize="small"
                                                             scope="col"
-                                                            className="w-[140px]"
+                                                            className="w-[190px]"
                                                         >
                                                             {text.label.type}
                                                         </Table.HeaderCell>
@@ -169,7 +169,7 @@ export const Barnetillegg = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="right"
-                                                            className="w-[150px]"
+                                                            className="w-[105px]"
                                                         >
                                                             {text.label.beløpMnd}
                                                         </Table.HeaderCell>
@@ -177,7 +177,7 @@ export const Barnetillegg = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="right"
-                                                            className="w-[150px]"
+                                                            className="w-[125px]"
                                                         >
                                                             {text.label.beløp12Mnd}
                                                         </Table.HeaderCell>

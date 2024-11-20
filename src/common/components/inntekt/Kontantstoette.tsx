@@ -67,21 +67,21 @@ export const Kontantstøtte = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="center"
-                                                            className="w-[84px]"
+                                                            className="w-[74px]"
                                                         >
                                                             {text.label.taMed}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
                                                             textSize="small"
                                                             scope="col"
-                                                            className="w-[144px]"
+                                                            className="w-[134px]"
                                                         >
                                                             {text.label.fraOgMed}
                                                         </Table.HeaderCell>
                                                         <Table.HeaderCell
                                                             textSize="small"
                                                             scope="col"
-                                                            className="w-[144px]"
+                                                            className="w-[134px]"
                                                         >
                                                             {text.label.tilOgMed}
                                                         </Table.HeaderCell>
@@ -89,7 +89,7 @@ export const Kontantstøtte = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="center"
-                                                            className="w-[74px]"
+                                                            className="w-[374px]"
                                                         >
                                                             {text.label.kilde}
                                                         </Table.HeaderCell>
@@ -97,7 +97,7 @@ export const Kontantstøtte = () => {
                                                             textSize="small"
                                                             scope="col"
                                                             align="right"
-                                                            className="w-[154px]"
+                                                            className="w-[100px]"
                                                         >
                                                             {text.label.beløp}
                                                         </Table.HeaderCell>
