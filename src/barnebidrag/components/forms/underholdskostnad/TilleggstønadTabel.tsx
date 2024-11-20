@@ -33,7 +33,8 @@ const Dagsats = ({
                     label="Totalt"
                     type="number"
                     min="1"
-                    inputMode="numeric"
+                    inputMode="decimal"
+                    step="0.01"
                     hideLabel
                 />
             ) : (
@@ -66,7 +67,7 @@ export const TilleggstønadTabel = ({
         const { id, datoFom, datoTom, dagsats, total } = getValues(`${fieldName}.${index}`);
         const payload = {
             id,
-            dagsats,
+            dagsats: Number(dagsats),
             total,
             periode: { fom: datoFom, tom: datoTom },
         };

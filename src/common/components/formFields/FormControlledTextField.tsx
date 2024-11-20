@@ -37,11 +37,7 @@ export const FormControlledTextField = ({
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         clearErrors(name);
-        if (type === "number") {
-            field.onChange(Number(e.target.value));
-        } else {
-            field.onChange(e.target.value);
-        }
+        field.onChange(e.target.value);
     };
 
     if (!editable) {

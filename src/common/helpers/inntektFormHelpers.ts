@@ -294,7 +294,9 @@ export const createPayload = (periode: InntektFormPeriode, virkningsdato: Date):
             taMed: periode.taMed,
             type: periode.rapporteringstype as Inntektsrapportering,
             beløp:
-                periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? periode.beløpMnd * 12 : periode.beløp,
+                periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG
+                    ? Number(periode.beløpMnd * 12)
+                    : Number(periode.beløp),
             datoFom: periode.datoFom,
             datoTom: periode.datoTom,
             ident: periode.ident,

@@ -79,7 +79,8 @@ export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: strin
                 label="Totalt"
                 type="number"
                 min="1"
-                inputMode="numeric"
+                inputMode="decimal"
+                step="0.01"
                 hideLabel
             />
         ) : (
