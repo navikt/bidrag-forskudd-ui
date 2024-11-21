@@ -5,23 +5,18 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningFordeltBidrag = () => {
     const {
-        beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne, beløpEtterFratrekkDeltBosted },
+        beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne },
     } = useBidragBeregningPeriode();
 
     function renderResult() {
-        if (sluttberegning.justertNedTilEvne) {
+        if (sluttberegning.bidragJustertNedTilEvne) {
             return ` (redusert ned til evne)`;
-        } else if (sluttberegning.justertNedTil25ProsentAvInntekt) {
+        } else if (sluttberegning.bidragJustertNedTil25ProsentAvInntekt) {
             return ` (redusert ned til 25% av inntekt)`;
         }
         return "";
     }
 
-    function hentForeløpigBidrag() {
-        if (sluttberegning.justertNedTilEvne) return formatterBeløpForBeregning(evne.bidragsevne);
-        if (sluttberegning.justertNedTil25ProsentAvInntekt) return formatterBeløpForBeregning(evne.sumInntekt25Prosent);
-        return formatterBeløpForBeregning(beløpEtterFratrekkDeltBosted);
-    }
     return (
         <ResultatTable
             data={[
@@ -35,7 +30,7 @@ export const BeregningFordeltBidrag = () => {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: `${hentForeløpigBidrag()}${renderResult()}`,
+                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />

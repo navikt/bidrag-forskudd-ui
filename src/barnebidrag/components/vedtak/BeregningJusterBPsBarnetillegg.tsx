@@ -5,19 +5,19 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningJusterBPsBarnetillegg = () => {
     const {
-        beregningsdetaljer: { sluttberegning, beløpEtterVurderingAvBMsBarnetillegg },
+        beregningsdetaljer: { sluttberegning },
     } = useBidragBeregningPeriode();
 
     function renderResult() {
-        if (sluttberegning.justertForNettoBarnetilleggBP) {
+        if (sluttberegning.bidragJustertForNettoBarnetilleggBP) {
             return ` (justert opp til BPs netto barnetillegg)`;
         }
         return "";
     }
     function hentForeløpigBidrag() {
-        if (sluttberegning.justertForNettoBarnetilleggBP)
-            return formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBP);
-        return formatterBeløpForBeregning(beløpEtterVurderingAvBMsBarnetillegg);
+        if (sluttberegning.bidragJustertForNettoBarnetilleggBP)
+            return formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP);
+        return formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent);
     }
     return (
         <div>
