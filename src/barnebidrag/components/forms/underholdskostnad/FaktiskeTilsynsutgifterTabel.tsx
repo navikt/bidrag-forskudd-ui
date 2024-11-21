@@ -35,8 +35,8 @@ const TotalTilysnsutgift = ({
                     label="Totalt"
                     type="number"
                     min="1"
-                    inputMode="decimal"
-                    step="0.01"
+                    inputMode="numeric"
+                    step="1"
                     hideLabel
                 />
             ) : (
@@ -65,8 +65,8 @@ const Kostpenger = ({
                     label="Totalt"
                     type="number"
                     min="1"
-                    inputMode="decimal"
-                    step="0.01"
+                    inputMode="numeric"
+                    step="1"
                     hideLabel
                 />
             ) : (
