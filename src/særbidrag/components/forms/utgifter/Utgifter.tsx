@@ -95,7 +95,8 @@ const Kravbeløp = ({ item, index }: { item: Utgiftspost; index: number }) => {
             label={text.label.kravbeløp}
             type="number"
             min="1"
-            inputMode="numeric"
+            inputMode="decimal"
+            step="0.01"
             hideLabel
             editable={item.erRedigerbart}
         />
@@ -114,7 +115,8 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
             label={text.label.godkjentBeløp}
             type="number"
             min="0"
-            inputMode="numeric"
+            inputMode="decimal"
+            step="0.01"
             hideLabel
             editable={item.erRedigerbart}
         />
@@ -329,7 +331,8 @@ const Main = () => {
                                         label={text.label.godkjentBeløpSkalSkjønsjusteres}
                                         type="number"
                                         min="1"
-                                        inputMode="numeric"
+                                        inputMode="decimal"
+                                        step="0.01"
                                     />
                                     <FormControlledTextField
                                         name={`maksGodkjentBeløpBegrunnelse`}
@@ -445,8 +448,8 @@ const UtgifterListe = () => {
                         )
                             ? (utgift.type as Utgiftstype)
                             : undefined,
-                        kravbeløp: utgift.kravbeløp,
-                        godkjentBeløp: utgiftErForeldet ? 0 : utgift.godkjentBeløp,
+                        kravbeløp: Number(utgift.kravbeløp),
+                        godkjentBeløp: utgiftErForeldet ? 0 : Number(utgift.godkjentBeløp),
                         kommentar: utgift.kommentar,
                         betaltAvBp: utgift.betaltAvBp,
                         id: utgift.id ?? undefined,

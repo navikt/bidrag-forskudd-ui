@@ -10,6 +10,7 @@ import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
@@ -80,6 +81,7 @@ export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: strin
                 type="number"
                 min="1"
                 inputMode="numeric"
+                step="1"
                 hideLabel
             />
         ) : (
@@ -468,13 +470,18 @@ export const InntektTabel = ({
                     )}
                 </BehandlingAlert>
             )}
-            {children({
-                controlledFields,
-                onEditRow,
-                onSaveRow,
-                addPeriod,
-                handleOnSelect,
-            })}
+            <div
+                className={`${saveInntekt.mutation.isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}
+            >
+                <OverlayLoader loading={saveInntekt.mutation.isPending} />
+                {children({
+                    controlledFields,
+                    onEditRow,
+                    onSaveRow,
+                    addPeriod,
+                    handleOnSelect,
+                })}
+            </div>
         </>
     );
 };

@@ -36,6 +36,7 @@ const TotalTilysnsutgift = ({
                     type="number"
                     min="1"
                     inputMode="numeric"
+                    step="1"
                     hideLabel
                 />
             ) : (
@@ -65,6 +66,7 @@ const Kostpenger = ({
                     type="number"
                     min="1"
                     inputMode="numeric"
+                    step="1"
                     hideLabel
                 />
             ) : (
@@ -118,8 +120,8 @@ export const FaktiskeTilsynsutgifterTabel = ({
         const { id, datoFom, datoTom, utgift, kostpenger, kommentar, total } = getValues(`${fieldName}.${index}`);
         const payload = {
             id,
-            utgift,
-            kostpenger,
+            utgift: Number(utgift),
+            kostpenger: Number(kostpenger),
             kommentar,
             total,
             periode: { fom: datoFom, tom: datoTom },

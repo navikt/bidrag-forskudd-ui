@@ -37,8 +37,13 @@ export const FormControlledTextField = ({
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         clearErrors(name);
-        if (type === "number") {
-            field.onChange(Number(e.target.value));
+        if (inputMode === "numeric") {
+            field.onChange(Number(Number(e.target.value).toFixed()));
+        } else if (inputMode === "decimal") {
+            const fractionalPart = e.target.value.split(".")?.[1];
+            const secondFractionalDigit = fractionalPart?.[1];
+            const numberOfFractionalDigits = secondFractionalDigit ? 2 : 1;
+            field.onChange(Number.parseFloat(e.target.value).toFixed(fractionalPart ? numberOfFractionalDigits : 0));
         } else {
             field.onChange(e.target.value);
         }
@@ -69,6 +74,11 @@ export const FormControlledTextField = ({
             style={width ? { width: width } : undefined}
             step={step}
             inputMode={inputMode}
+            onKeyDown={(e) => {
+                if (inputMode === "numeric" && [",", "."].includes(e.key)) {
+                    e.preventDefault();
+                }
+            }}
         />
     );
 };
