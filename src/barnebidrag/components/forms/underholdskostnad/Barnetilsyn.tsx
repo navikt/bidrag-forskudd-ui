@@ -196,7 +196,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
         !!underhold.stønadTilBarnetilsyn.length ||
         !!underhold.faktiskTilsynsutgift.length ||
         !!underhold.tilleggsstønad.length;
-    const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(underhold.harTilsynsordning);
+    const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(hasAtLeastOnePeriod);
 
     const update = (checked: boolean) => {
         updateTilysnsordning.mutation.mutate(
