@@ -47,6 +47,7 @@ import { AxiosError } from "axios";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
+    oppdatereTilsynsordning: (behandlingId: string) => ["mutation", "oppdatereTilsynsordning", behandlingId],
     oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
     oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
@@ -674,6 +675,22 @@ export const useUpdateUnderhold = (underholdsid: number) => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av underhold", error);
+        },
+    });
+};
+
+export const useUpdateHarTilysnsordning = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdatereTilsynsordning(behandlingId),
+        mutationFn: async (payload: { harTilsynsordning: boolean }): Promise<void> => {
+            await BEHANDLING_API_V1.api.oppdatereTilsynsordning(Number(behandlingId), underholdsid, payload);
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av tilsynsordning", error);
         },
     });
 };

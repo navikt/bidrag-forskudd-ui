@@ -149,19 +149,17 @@ export enum OpplysningerType {
 }
 
 export enum Resultatkode {
+    GEBYR_FRITTATT = "GEBYR_FRITTATT",
+    GEBYR_ILAGT = "GEBYR_ILAGT",
     BARNETERSELVFORSORGET = "BARNET_ER_SELVFORSØRGET",
-    BEGRENSETEVNEFLERESAKERUTFORFORHOLDSMESSIGFORDELING = "BEGRENSET_EVNE_FLERE_SAKER_UTFØR_FORHOLDSMESSIG_FORDELING",
-    BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
     BIDRAG_IKKE_BEREGNET_DELT_BOSTED = "BIDRAG_IKKE_BEREGNET_DELT_BOSTED",
     BIDRAG_REDUSERT_AV_EVNE = "BIDRAG_REDUSERT_AV_EVNE",
     BIDRAGREDUSERTTIL25PROSENTAVINNTEKT = "BIDRAG_REDUSERT_TIL_25_PROSENT_AV_INNTEKT",
     BIDRAG_SATT_TIL_BARNETILLEGG_BP = "BIDRAG_SATT_TIL_BARNETILLEGG_BP",
-    BIDRAG_SATT_TIL_BARNETILLEGG_FORSVARET = "BIDRAG_SATT_TIL_BARNETILLEGG_FORSVARET",
     BIDRAG_SATT_TIL_UNDERHOLDSKOSTNAD_MINUS_BARNETILLEGG_BM = "BIDRAG_SATT_TIL_UNDERHOLDSKOSTNAD_MINUS_BARNETILLEGG_BM",
     DELT_BOSTED = "DELT_BOSTED",
-    FORHOLDSMESSIGFORDELINGBIDRAGSBELOPENDRET = "FORHOLDSMESSIG_FORDELING_BIDRAGSBELØP_ENDRET",
-    FORHOLDSMESSIG_FORDELING_INGEN_ENDRING = "FORHOLDSMESSIG_FORDELING_INGEN_ENDRING",
     INGEN_EVNE = "INGEN_EVNE",
+    DIREKTEOPPJOR = "DIREKTE_OPPJØR",
     KOSTNADSBEREGNET_BIDRAG = "KOSTNADSBEREGNET_BIDRAG",
     IKKE_OMSORG_FOR_BARNET = "IKKE_OMSORG_FOR_BARNET",
     BIDRAGSPLIKTIG_ER_UKJENT = "BIDRAGSPLIKTIG_ER_UKJENT",
@@ -1004,9 +1002,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
+    harPeriodiseringsfeil: boolean;
     gjelderBarnNavn?: string;
     gjelderBarn?: string;
-    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -1319,6 +1317,13 @@ export interface OppdatereUtgiftResponse {
     oppdatertNotat?: string;
 }
 
+export interface OppdatereTilleggsstonadRequest {
+    /** @format int64 */
+    id?: number;
+    periode: DatoperiodeDto;
+    dagsats: number;
+}
+
 export interface OppdatereUnderholdResponse {
     stønadTilBarnetilsyn?: StonadTilBarnetilsynDto;
     faktiskTilsynsutgift?: FaktiskTilsynsutgiftDto;
@@ -1353,6 +1358,24 @@ export interface ValideringsfeilUnderhold {
 export interface OppdatereUnderholdRequest {
     harTilsynsordning?: boolean;
     begrunnelse?: string;
+}
+
+export interface OppdatereFaktiskTilsynsutgiftRequest {
+    /** @format int64 */
+    id?: number;
+    periode: DatoperiodeDto;
+    utgift: number;
+    kostpenger?: number;
+    kommentar?: string;
+}
+
+export interface OppdatereBegrunnelseRequest {
+    /**
+     * Id til underhold begrunnelsen gjelder for hvis søknadsbarn. Null for andre barn.
+     * @format int64
+     */
+    underholdsid?: number;
+    begrunnelse: string;
 }
 
 export interface OppdaterSamvaerDto {
@@ -1843,10 +1866,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2172,12 +2195,14 @@ export enum Grunnlagstype {
     DELBEREGNING_VOKSNE_I_HUSSTAND = "DELBEREGNING_VOKSNE_I_HUSSTAND",
     DELBEREGNING_FAKTISK_UTGIFT = "DELBEREGNING_FAKTISK_UTGIFT",
     DELBEREGNINGTILLEGGSSTONAD = "DELBEREGNING_TILLEGGSSTØNAD",
-    DELBEREGNING_NETTO_TILSYNSUTGIFT = "DELBEREGNING_NETTO_TILSYNSUTGIFT",
     DELBEREGNING_BOFORHOLD = "DELBEREGNING_BOFORHOLD",
     DELBEREGNINGBIDRAGSPLIKTIGESANDELSAeRBIDRAG = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL_SÆRBIDRAG",
     DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL = "DELBEREGNING_BIDRAGSPLIKTIGES_ANDEL",
     DELBEREGNING_UTGIFT = "DELBEREGNING_UTGIFT",
     DELBEREGNINGSAMVAeRSFRADRAG = "DELBEREGNING_SAMVÆRSFRADRAG",
+    DELBEREGNING_NETTO_TILSYNSUTGIFT = "DELBEREGNING_NETTO_TILSYNSUTGIFT",
+    DELBEREGNING_BARNETILLEGG_SKATTESATS = "DELBEREGNING_BARNETILLEGG_SKATTESATS",
+    DELBEREGNING_NETTO_BARNETILLEGG = "DELBEREGNING_NETTO_BARNETILLEGG",
     DELBEREGNING_UNDERHOLDSKOSTNAD = "DELBEREGNING_UNDERHOLDSKOSTNAD",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     BARNETILLEGG_PERIODE = "BARNETILLEGG_PERIODE",
@@ -2408,9 +2433,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2513,8 +2538,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2558,10 +2583,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2652,8 +2677,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2715,6 +2740,7 @@ export type Unit = object;
 
 export interface VedtakNotatDto {
     type: NotatMalType;
+    medInnkreving: boolean;
     saksnummer: string;
     behandling: NotatBehandlingDetaljerDto;
     saksbehandlerNavn?: string;
@@ -2886,7 +2912,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -2975,7 +3004,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -3032,7 +3061,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdatereTilleggsstonad: (
             behandlingsid: number,
             underholdsid: number,
-            data: TilleggsstonadDto,
+            data: OppdatereTilleggsstonadRequest,
             params: RequestParams = {}
         ) =>
             this.request<OppdatereUnderholdResponse, any>({
@@ -3051,6 +3080,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @tags underhold-controller
          * @name OppdatereUnderhold
          * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/oppdatere
+         * @deprecated
          * @secure
          */
         oppdatereUnderhold: (
@@ -3080,7 +3110,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdatereFaktiskTilsynsutgift: (
             behandlingsid: number,
             underholdsid: number,
-            data: FaktiskTilsynsutgiftDto,
+            data: OppdatereFaktiskTilsynsutgiftRequest,
             params: RequestParams = {}
         ) =>
             this.request<OppdatereUnderholdResponse, any>({
@@ -3090,6 +3120,30 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Angir om søknadsbarn har tilsynsordning.
+         *
+         * @tags underhold-controller
+         * @name OppdatereTilsynsordning
+         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/begrunnelse
+         * @secure
+         */
+        oppdatereTilsynsordning: (
+            behandlingsid: number,
+            underholdsid: number,
+            query: {
+                harTilsynsordning: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/begrunnelse`,
+                method: "PUT",
+                query: query,
+                secure: true,
                 ...params,
             }),
 
@@ -3114,6 +3168,24 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere begrunnelse for underhold relatert til søknadsbarn eller andre barn.
+         *
+         * @tags underhold-controller
+         * @name OppdatereBegrunnelse
+         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/begrunnelse
+         * @secure
+         */
+        oppdatereBegrunnelse: (behandlingsid: number, data: OppdatereBegrunnelseRequest, params: RequestParams = {}) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/${behandlingsid}/underhold/begrunnelse`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
                 ...params,
             }),
 

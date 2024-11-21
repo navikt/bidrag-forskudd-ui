@@ -10,9 +10,10 @@ import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
-import React, { useRef, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { useOnUpdateHarTilysnsordning } from "../../../hooks/useOnUpdateHarTilysnsordning";
 import { UnderholdkostnadsFormPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { BarnetilsynTabel } from "./BarnetilsynTabel";
 import { BeregnetUnderholdskostnad } from "./BeregnetUnderholdskostnad";
@@ -186,8 +187,54 @@ export const RolleInfoBox = ({
 };
 
 export const Barnetilsyn = ({ index }: { index: number }) => {
-    const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(false);
+    const { setSaveErrorState } = useBehandlingProvider();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
+    const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
+    const underhold = getValues(underholdFieldName);
+    const updateTilysnsordning = useOnUpdateHarTilysnsordning(underhold.id);
+    const hasAtLeastOnePeriod =
+        !!underhold.stønadTilBarnetilsyn.length ||
+        !!underhold.faktiskTilsynsutgift.length ||
+        !!underhold.tilleggsstønad.length;
+    const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(underhold.harTilsynsordning);
+
+    const update = (checked: boolean) => {
+        updateTilysnsordning.mutation.mutate(
+            { harTilsynsordning: checked },
+            {
+                onSuccess: () => {
+                    setValue(underholdFieldName, { ...underhold, harTilsynsordning: checked });
+                    updateTilysnsordning.queryClientUpdater((currentData) => {
+                        const updatedUnderholdIndex = currentData.underholdskostnader.findIndex(
+                            (u) => u.id === underhold.id
+                        );
+                        return {
+                            ...currentData,
+                            underholdskostnader: currentData.underholdskostnader.toSpliced(
+                                Number(updatedUnderholdIndex),
+                                1,
+                                {
+                                    ...currentData.underholdskostnader[updatedUnderholdIndex],
+                                    harTilsynsordning: checked,
+                                }
+                            ),
+                        };
+                    });
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => update(checked),
+                        rollbackFn: () => setBarnHarTilysnsordning(!checked),
+                    });
+                },
+            }
+        );
+    };
+    const onToggle = (e: ChangeEvent<HTMLInputElement>) => {
+        setBarnHarTilysnsordning(e.target.checked);
+        update(e.target.checked);
+    };
 
     return (
         <>
@@ -195,15 +242,20 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             <Switch
                 value="barnHarTilysnsordning"
                 checked={barnHarTilysnsordning}
-                onChange={(e) => setBarnHarTilysnsordning(e.target.checked)}
+                onChange={onToggle}
                 size="small"
+                readOnly={hasAtLeastOnePeriod}
             >
                 {text.label.barnHarTilysnsordning}
             </Switch>
-            <BarnetilsynTabel underholdFieldName={underholdFieldName} />
-            <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-            <TilleggstønadTabel underholdFieldName={underholdFieldName} />
-            <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
+            {barnHarTilysnsordning && (
+                <>
+                    <BarnetilsynTabel underholdFieldName={underholdFieldName} />
+                    <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
+                    <TilleggstønadTabel underholdFieldName={underholdFieldName} />
+                    <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
+                </>
+            )}
         </>
     );
 };
