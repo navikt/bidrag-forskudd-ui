@@ -121,6 +121,7 @@ const VedtakTableBody = ({
                     ) : (
                         <Table.ExpandableRow
                             togglePlacement="right"
+                            expansionDisabled={periode.beregningsdetaljer.sluttberegning.barnetErSelvforsørget}
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
                             <Table.DataCell textSize="small">
@@ -132,7 +133,7 @@ const VedtakTableBody = ({
 
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(
-                                    periode.beregningsdetaljer.delberegningUnderholdskostnad.underholdskostnad
+                                    periode.beregningsdetaljer?.delberegningUnderholdskostnad?.underholdskostnad ?? 0
                                 )}
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
