@@ -28,7 +28,7 @@ export const BeregningJusterBMsBarnetillegg = () => {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP)}${renderResult()}`,
+                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBM)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />
