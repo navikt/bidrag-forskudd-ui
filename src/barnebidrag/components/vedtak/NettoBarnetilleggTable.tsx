@@ -1,4 +1,4 @@
-import { Heading, Table } from "@navikt/ds-react";
+import { Heading, Label, Table } from "@navikt/ds-react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
@@ -63,7 +63,7 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     ))}
                     <Table.Row className="align-top">
                         <Table.DataCell colSpan={2} textSize="small">
-                            Resultat
+                            <Label size="small">Resultat</Label>
                         </Table.DataCell>
                         <Table.DataCell textSize="small">
                             {formatterBeløpForBeregning(barnetillegg.nettoBeløp)}
