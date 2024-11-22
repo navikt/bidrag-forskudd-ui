@@ -175,7 +175,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 scope="col"
                                                 className="w-[140px]"
                                             >
-                                                {text.label.totalTilysnsutgift}
+                                                {text.label.totalTilsysnsutgift}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"

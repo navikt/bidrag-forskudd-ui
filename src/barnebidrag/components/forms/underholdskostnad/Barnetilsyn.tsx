@@ -246,7 +246,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                 size="small"
                 readOnly={hasAtLeastOnePeriod}
             >
-                {text.label.barnHarTilysnsordning}
+                {text.label.barnHarTilsysnsordning}
             </Switch>
             {barnHarTilysnsordning && (
                 <>
