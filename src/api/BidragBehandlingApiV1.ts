@@ -934,9 +934,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1761,9 +1761,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1832,10 +1832,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -1866,10 +1866,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -1926,11 +1926,11 @@ export interface BidragPeriodeBeregningsdetaljer {
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
     deltBosted: boolean;
+    underholdskostnadMinusBMsNettoBarnetillegg: number;
     beløpEtterVurderingAv25ProsentInntektOgEvne: number;
+    beløpEtterVurderingAvBMsBarnetillegg: number;
     beløpSamværsfradragTrekkesFra: number;
     beløpEtterFratrekkDeltBosted: number;
-    underholdskostnadMinusBMsNettoBarnetillegg: number;
-    beløpEtterVurderingAvBMsBarnetillegg: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -2433,10 +2433,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2583,10 +2583,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2730,10 +2730,10 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export type Unit = object;
@@ -3051,6 +3051,30 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
             }),
 
         /**
+         * @description Angir om søknadsbarn har tilsynsordning.
+         *
+         * @tags underhold-controller
+         * @name OppdatereTilsynsordning
+         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/tilsynsordning
+         * @secure
+         */
+        oppdatereTilsynsordning: (
+            behandlingsid: number,
+            underholdsid: number,
+            query: {
+                harTilsynsordning: boolean;
+            },
+            params: RequestParams = {}
+        ) =>
+            this.request<void, any>({
+                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilsynsordning`,
+                method: "PUT",
+                query: query,
+                secure: true,
+                ...params,
+            }),
+
+        /**
          * @description Oppdatere tilleggsstønad for underholdskostnad i behandling. Returnerer oppdatert element.
          *
          * @tags underhold-controller
@@ -3120,30 +3144,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
                 secure: true,
                 type: ContentType.Json,
                 format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Angir om søknadsbarn har tilsynsordning.
-         *
-         * @tags underhold-controller
-         * @name OppdatereTilsynsordning
-         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/begrunnelse
-         * @secure
-         */
-        oppdatereTilsynsordning: (
-            behandlingsid: number,
-            underholdsid: number,
-            query: {
-                harTilsynsordning: boolean;
-            },
-            params: RequestParams = {}
-        ) =>
-            this.request<void, any>({
-                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/begrunnelse`,
-                method: "PUT",
-                query: query,
-                secure: true,
                 ...params,
             }),
 

@@ -94,16 +94,19 @@ export const UnderholdskostnadTabel = ({
                 });
 
                 saveFn.queryClientUpdater((currentData) => {
-                    const updatedPeriodeIndex = currentData.underholdskostnader[underholdIndex][
+                    const cachedUnderholdIndex = currentData.underholdskostnader.findIndex(
+                        (u) => u.id === underhold.id
+                    );
+                    const updatedPeriodeIndex = currentData.underholdskostnader[cachedUnderholdIndex][
                         underholdskostnadType
-                    ].findIndex((currentPeriode) => currentPeriode?.id === updatedPeriod.id);
+                    ]?.findIndex((currentPeriode) => currentPeriode?.id === updatedPeriod.id);
 
                     const updatedListe =
                         updatedPeriodeIndex === -1
-                            ? currentData.underholdskostnader[underholdIndex][underholdskostnadType].concat(
+                            ? currentData.underholdskostnader[cachedUnderholdIndex][underholdskostnadType].concat(
                                   updatedPeriod
                               )
-                            : currentData.underholdskostnader[underholdIndex][underholdskostnadType].toSpliced(
+                            : currentData.underholdskostnader[cachedUnderholdIndex][underholdskostnadType].toSpliced(
                                   updatedPeriodeIndex,
                                   1,
                                   updatedPeriod
@@ -111,11 +114,15 @@ export const UnderholdskostnadTabel = ({
 
                     return {
                         ...currentData,
-                        underholdskostnader: currentData.underholdskostnader.toSpliced(Number(underholdIndex), 1, {
-                            ...currentData.underholdskostnader[underholdIndex],
-                            [underholdskostnadType]: updatedListe,
-                            underholdskostnad: response.underholdskostnad,
-                        }),
+                        underholdskostnader: currentData.underholdskostnader.toSpliced(
+                            Number(cachedUnderholdIndex),
+                            1,
+                            {
+                                ...currentData.underholdskostnader[cachedUnderholdIndex],
+                                [underholdskostnadType]: updatedListe,
+                                underholdskostnad: response.underholdskostnad,
+                            }
+                        ),
                     };
                 });
             },
@@ -128,7 +135,7 @@ export const UnderholdskostnadTabel = ({
                             fieldArray.remove(index);
                         } else {
                             const cachedUnderhold = underholdskostnader.find((cU) => cU.id === underhold.id);
-                            const cachedPeriode = cachedUnderhold[underholdskostnadType].find(
+                            const cachedPeriode = cachedUnderhold[underholdskostnadType]?.find(
                                 (p: StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto) =>
                                     p.id === cachedPeriode.id
                             );
@@ -169,14 +176,17 @@ export const UnderholdskostnadTabel = ({
                     fieldArray.remove(index);
 
                     deleteUnderhold.queryClientUpdater((currentData) => {
-                        const updatedList = currentData.underholdskostnader[underholdIndex][
+                        const cachedUnderholdIndex = currentData.underholdskostnader.findIndex(
+                            (u) => u.id === underhold.id
+                        );
+                        const updatedList = currentData.underholdskostnader[cachedUnderholdIndex][
                             underholdskostnadType
                         ].filter((currentPeriod) => currentPeriod.id !== periode.id);
 
                         return {
                             ...currentData,
-                            underholdskostnader: currentData.underholdskostnader.toSpliced(underholdIndex, 1, {
-                                ...currentData.underholdskostnader[underholdIndex],
+                            underholdskostnader: currentData.underholdskostnader.toSpliced(cachedUnderholdIndex, 1, {
+                                ...currentData.underholdskostnader[cachedUnderholdIndex],
                                 [underholdskostnadType]: updatedList,
                                 underholdskostnad: response.underholdskostnad,
                             }),
