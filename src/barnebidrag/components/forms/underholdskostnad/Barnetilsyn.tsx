@@ -253,9 +253,9 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
                     <TilleggstønadTabel underholdFieldName={underholdFieldName} />
-                    <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
                 </>
             )}
+            <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
         </>
     );
 };
