@@ -90,7 +90,7 @@ export const UnderholdskostnadTabel = ({
                 const updatedPeriod = response[underholdskostnadType];
                 setValue(`${fieldName}.${index}`, {
                     ...editedPeriod,
-                    id: updatedPeriod.id,
+                    ...updatedPeriod,
                 });
 
                 saveFn.queryClientUpdater((currentData) => {
