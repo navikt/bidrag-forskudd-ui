@@ -63,8 +63,8 @@ export const AddBarnForm = ({
 
         const addedBarn: OpprettHusstandsstandsmedlem = {
             personident: val === "dnummer" ? ident : null,
-            navn: navn,
-            fødselsdato: fd,
+            navn: ident ? null : navn,
+            fødselsdato: ident ? null : fd,
         };
 
         onSave(addedBarn);

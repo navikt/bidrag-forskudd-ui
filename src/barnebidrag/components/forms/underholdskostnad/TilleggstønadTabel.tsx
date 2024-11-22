@@ -96,7 +96,7 @@ export const TilleggstønadTabel = ({
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
             <HStack gap={"2"}>
                 <Heading level="2" size="small" id={elementId.seksjon_underholdskostnad_tilleggstønad}>
-                    {text.title.tilleggstønad}
+                    {text.title.tilleggsstønad}
                 </Heading>
             </HStack>
             <UnderholdskostnadTabel

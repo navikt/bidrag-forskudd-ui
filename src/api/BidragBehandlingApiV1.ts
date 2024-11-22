@@ -925,9 +925,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    fom: string;
-    /** @format date */
     til?: string;
+    /** @format date */
+    fom: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1752,9 +1752,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1823,10 +1823,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -1859,8 +1859,6 @@ export interface Skatt {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -1925,12 +1923,11 @@ export interface BidragPeriodeBeregningsdetaljer {
     delberegningUnderholdskostnad?: DelberegningUnderholdskostnad;
     delberegningBidragspliktigesBeregnedeTotalBidrag?: DelberegningBidragspliktigesBeregnedeTotalbidragDto;
     deltBosted: boolean;
-}
-
-export interface DelberegningBarnetilleggDto {
-    barnetillegg: BarnetilleggDetaljerDto[];
-    skattFaktor: number;
-    nettoBeløp: number;
+    beløpEtterVurderingAv25ProsentInntektOgEvne: number;
+    beløpSamværsfradragTrekkesFra: number;
+    beløpEtterFratrekkDeltBosted: number;
+    underholdskostnadMinusBMsNettoBarnetillegg: number;
+    beløpEtterVurderingAvBMsBarnetillegg: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -2440,10 +2437,13 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2592,8 +2592,6 @@ export interface NotatSkattBeregning {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2737,10 +2735,10 @@ export interface ResultatSaerbidragsberegningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export type Unit = object;

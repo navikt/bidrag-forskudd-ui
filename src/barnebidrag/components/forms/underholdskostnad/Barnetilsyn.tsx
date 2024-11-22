@@ -142,15 +142,15 @@ export const RolleInfoBox = ({
     return (
         underhold && (
             <>
-                <div className="grid grid-cols-[max-content,max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
-                    <div>
-                        <RolleTag rolleType={Rolletype.BA} />
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <BodyShort size="small" className="font-bold">
-                            {underhold.gjelderBarn.navn}
-                        </BodyShort>
-                        <BodyShort size="small">{underhold.gjelderBarn.ident}</BodyShort>
+                <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
+                    <div className="flex">
+                        {underhold.gjelderBarn.medIBehandlingen && <RolleTag rolleType={Rolletype.BA} />}
+                        <div className="flex items-center gap-4">
+                            <BodyShort size="small" className="font-bold">
+                                {underhold.gjelderBarn.navn}
+                            </BodyShort>
+                            <BodyShort size="small">{underhold.gjelderBarn.ident}</BodyShort>
+                        </div>
                     </div>
                     {!underhold.gjelderBarn.medIBehandlingen && (
                         <>
@@ -246,16 +246,16 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                 size="small"
                 readOnly={hasAtLeastOnePeriod}
             >
-                {text.label.barnHarTilysnsordning}
+                {text.label.barnHarTilsysnsordning}
             </Switch>
             {barnHarTilysnsordning && (
                 <>
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
                     <TilleggstønadTabel underholdFieldName={underholdFieldName} />
-                    <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
                 </>
             )}
+            <BeregnetUnderholdskostnad underholdFieldName={underholdFieldName} />
         </>
     );
 };

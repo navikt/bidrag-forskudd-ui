@@ -1,5 +1,6 @@
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React from "react";
@@ -13,9 +14,10 @@ export const BeregnetUnderholdskostnad = ({
 }: {
     underholdFieldName: `underholdskostnaderMedIBehandling.${number}`;
 }) => {
+    const { underholdskostnader } = useGetBehandlingV2();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
-    const underholdskostnader = underhold.underholdskostnad;
+    const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).underholdskostnad;
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">
@@ -55,7 +57,7 @@ export const BeregnetUnderholdskostnad = ({
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {underholdskostnader.map((underholdskostnad, index) => (
+                        {beregnetUnderholdskostnad.map((underholdskostnad, index) => (
                             <Table.Row key={`underholdskostnad-${index}`} className="align-top">
                                 <Table.DataCell>
                                     <BodyShort size="small">
