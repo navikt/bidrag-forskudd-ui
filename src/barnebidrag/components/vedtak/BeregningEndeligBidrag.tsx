@@ -5,7 +5,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const EndeligBidragTable = () => {
     const {
-        beregningsdetaljer: { deltBosted, sluttberegning, samværsfradrag: beregning, beløpSamværsfradragTrekkesFra },
+        beregningsdetaljer: { deltBosted, sluttberegning, samværsfradrag: beregning },
     } = useBidragBeregningPeriode();
 
     return (
@@ -16,7 +16,7 @@ export const EndeligBidragTable = () => {
                     label: "Etter samværsfradraget",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(beløpSamværsfradragTrekkesFra)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
+                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP)} - ${formatterBeløpForBeregning(beregning.samværsfradrag)} = ${formatterBeløpForBeregning(sluttberegning.beregnetBeløp)}`,
                 },
                 {
                     label: "Avrundet beløp",

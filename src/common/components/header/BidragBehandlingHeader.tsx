@@ -9,7 +9,7 @@ import { useGetBehandlingV2, usePersonsQueries } from "../../hooks/useApiData";
 const behandlingTypeTextMapper = {
     [TypeBehandling.FORSKUDD]: text.skjermbildeNavn.forskudd,
     [TypeBehandling.SAeRBIDRAG]: text.skjermbildeNavn.særbidrag,
-    [TypeBehandling.BIDRAG]: text.skjermbildeNavn.særbidrag,
+    [TypeBehandling.BIDRAG]: text.skjermbildeNavn.bidrag,
 };
 
 export const Header = memo(() => {

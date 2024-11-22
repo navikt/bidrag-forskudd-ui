@@ -1,4 +1,4 @@
-import { Heading, Table } from "@navikt/ds-react";
+import { Heading, Label, Table } from "@navikt/ds-react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
@@ -13,20 +13,19 @@ type NettoBarnetilleggTableProps = {
 export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) => {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 
-    const sluttberegning = beregningsdetaljer.sluttberegning;
-    const skattfaktor = rolle === Rolletype.BP ? beregningsdetaljer.delberegningBidragsevne.skatt.sumSkattFaktor : 0.4;
+    const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
     const inntekt =
         rolle === Rolletype.BP ? beregningsdetaljer.inntekter.inntektBP : beregningsdetaljer.inntekter.inntektBM;
     return (
         <div>
-            <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]}) -- (WIP - Fiktive tall)</Heading>
+            <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
             <ResultatTable
                 data={[
                     {
                         label: "Skatteprosent",
                         textRight: false,
                         labelBold: true,
-                        value: formatterProsent(skattfaktor),
+                        value: formatterProsent(barnetillegg.skattFaktor),
                     },
                     {
                         label: "Inntekt siste 12 mnd",
@@ -51,21 +50,23 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    <Table.Row className="align-top">
-                        <Table.DataCell textSize="small">Pensjon</Table.DataCell>
-                        <Table.DataCell textSize="small">{formatterBeløpForBeregning(9000)}</Table.DataCell>
-                        <Table.DataCell textSize="small">{formatterBeløpForBeregning(5400)}</Table.DataCell>
-                    </Table.Row>
+                    {barnetillegg.barnetillegg.map((bt) => (
+                        <Table.Row className="align-top">
+                            <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(bt.bruttoBeløp)}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(bt.nettoBeløp)}
+                            </Table.DataCell>
+                        </Table.Row>
+                    ))}
                     <Table.Row className="align-top">
                         <Table.DataCell colSpan={2} textSize="small">
-                            Resultat
+                            <Label size="small">Resultat</Label>
                         </Table.DataCell>
                         <Table.DataCell textSize="small">
-                            {formatterBeløpForBeregning(
-                                rolle === Rolletype.BP
-                                    ? sluttberegning.nettoBarnetilleggBP
-                                    : sluttberegning.nettoBarnetilleggBM
-                            )}
+                            {formatterBeløpForBeregning(barnetillegg.nettoBeløp)}
                         </Table.DataCell>
                     </Table.Row>
                 </Table.Body>

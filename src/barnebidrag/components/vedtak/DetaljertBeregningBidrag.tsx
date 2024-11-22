@@ -33,10 +33,18 @@ export const useBidragBeregningPeriode = () => {
 
 export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> = ({ periode }) => {
     const beregningsdetaljer = periode.beregningsdetaljer as BidragPeriodeBeregningsdetaljer;
+    if (beregningsdetaljer.sluttberegning.barnetErSelvforsørget) return null;
     return (
         <VStack gap="6" className={"w-[800px]"}>
             <BidragBeregningContext.Provider value={{ beregningsdetaljer }}>
                 <BPsAndelUnderholdskostnad />
+                {!periode.beregningsdetaljer.deltBosted && <BeregningSamværsfradrag />}
+                {!periode.beregningsdetaljer.deltBosted && (
+                    <VStack gap="2">
+                        <NettoBarnetilleggTable rolle={Rolletype.BM} />
+                        <BeregningJusterBMsBarnetillegg />
+                    </VStack>
+                )}
                 <VStack gap="2">
                     <BPsEvneV2
                         inntekter={beregningsdetaljer.inntekter}
@@ -45,17 +53,10 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     <BeregningFordeltBidrag />
                 </VStack>
                 {!periode.beregningsdetaljer.deltBosted && (
-                    <>
-                        <VStack gap="2">
-                            <NettoBarnetilleggTable rolle={Rolletype.BM} />
-                            <BeregningJusterBMsBarnetillegg />
-                        </VStack>
-                        <VStack gap="2">
-                            <NettoBarnetilleggTable rolle={Rolletype.BP} />
-                            <BeregningJusterBPsBarnetillegg />
-                        </VStack>
-                        <BeregningSamværsfradrag />
-                    </>
+                    <VStack gap="2">
+                        <NettoBarnetilleggTable rolle={Rolletype.BP} />
+                        <BeregningJusterBPsBarnetillegg />
+                    </VStack>
                 )}
                 <EndeligBidragTable />
             </BidragBeregningContext.Provider>

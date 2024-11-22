@@ -5,24 +5,16 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningJusterBMsBarnetillegg = () => {
     const {
-        beregningsdetaljer: {
-            sluttberegning,
-            delberegningUnderholdskostnad: underholdskostnad,
-            underholdskostnadMinusBMsNettoBarnetillegg: uMinusBMsNettoBarnetillegg,
-            beløpEtterVurderingAv25ProsentInntektOgEvne,
-        },
+        beregningsdetaljer: { sluttberegning, delberegningUnderholdskostnad: underholdskostnad, barnetilleggBM },
     } = useBidragBeregningPeriode();
 
     function renderResult() {
-        if (sluttberegning.justertForNettoBarnetilleggBM) {
-            return ` (redusert ned til U - BMs netto barnetillegg)`;
+        if (sluttberegning.bidragJustertForNettoBarnetilleggBM) {
+            return ` (justert til U - BMs netto barnetillegg + samværsfradrag)`;
         }
         return "";
     }
-    function hentForeløpigBidrag() {
-        if (sluttberegning.justertForNettoBarnetilleggBM) return formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg);
-        return formatterBeløpForBeregning(beløpEtterVurderingAv25ProsentInntektOgEvne);
-    }
+
     return (
         <ResultatTable
             data={[
@@ -30,13 +22,13 @@ export const BeregningJusterBMsBarnetillegg = () => {
                     label: "U - BMs netto barnetillegg",
                     textRight: false,
                     labelBold: true,
-                    value: `${formatterBeløpForBeregning(underholdskostnad.underholdskostnad)} - ${formatterBeløpForBeregning(sluttberegning.nettoBarnetilleggBM)} = ${formatterBeløpForBeregning(uMinusBMsNettoBarnetillegg)}`,
+                    value: `${formatterBeløpForBeregning(underholdskostnad.underholdskostnad)} - ${formatterBeløpForBeregning(barnetilleggBM.nettoBeløp)} = ${formatterBeløpForBeregning(sluttberegning.uminusNettoBarnetilleggBM)}`,
                 },
                 {
                     label: "Foreløpig bidrag",
                     textRight: false,
                     labelBold: true,
-                    value: `${hentForeløpigBidrag()}${renderResult()}`,
+                    value: `${formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBM)}${renderResult()}`,
                 },
             ].filter((d) => d)}
         />
