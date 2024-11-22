@@ -418,7 +418,7 @@ const UtgifterListe = () => {
             clearErrors(`utgifter.${index}.kravbeløp`);
         }
 
-        if (utgift.godkjentBeløp > utgift.kravbeløp) {
+        if (Number(utgift.godkjentBeløp) > Number(utgift.kravbeløp)) {
             setError(`utgifter.${index}.godkjentBeløp`, {
                 type: "notValid",
                 message: text.error.godkjentBeløpKanIkkeVæreHøyereEnnKravbeløp,
