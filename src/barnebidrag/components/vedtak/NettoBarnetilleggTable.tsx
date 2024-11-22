@@ -50,19 +50,17 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    <Table.Row className="align-top">
-                        {barnetillegg.barnetillegg.map((bt) => (
-                            <>
-                                <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
-                                <Table.DataCell textSize="small">
-                                    {formatterBeløpForBeregning(bt.bruttoBeløp)}
-                                </Table.DataCell>
-                                <Table.DataCell textSize="small">
-                                    {formatterBeløpForBeregning(bt.nettoBeløp)}
-                                </Table.DataCell>
-                            </>
-                        ))}
-                    </Table.Row>
+                    {barnetillegg.barnetillegg.map((bt) => (
+                        <Table.Row className="align-top">
+                            <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(bt.bruttoBeløp)}
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(bt.nettoBeløp)}
+                            </Table.DataCell>
+                        </Table.Row>
+                    ))}
                     <Table.Row className="align-top">
                         <Table.DataCell colSpan={2} textSize="small">
                             Resultat
