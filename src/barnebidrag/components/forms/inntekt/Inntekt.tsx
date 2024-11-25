@@ -20,7 +20,7 @@ import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
 import { Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
@@ -90,18 +90,22 @@ const Main = () => {
 };
 
 const Side = () => {
+    const [searchParams] = useSearchParams();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const { roller } = useGetBehandlingV2();
-    const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bm.id}`));
+    const rolleId = searchParams.get(urlSearchParams.inntektTab);
+    const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
+
     const onSave = () => {
-        const begrunnelse = getValues(`begrunnelser.${bm.id}`);
+        const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
         saveInntekt.mutation.mutate(
             {
                 oppdatereBegrunnelse: {
                     nyBegrunnelse: begrunnelse,
+                    rolleid: Number(selectedRolleId),
                 },
             },
             {
@@ -110,13 +114,13 @@ const Side = () => {
                         ...currentData,
                         inntekter: {
                             ...currentData.inntekter,
-                            begrunnelser: [
-                                {
+                            begrunnelser: currentData.inntekter.begrunnelser
+                                .filter((notat) => notat.gjelder.id !== selectedRolleId)
+                                .concat({
                                     innhold: response.begrunnelse,
-                                    gjelder: bm,
+                                    gjelder: roller.find((rolle) => Number(rolle.id) === Number(selectedRolleId)),
                                     kunINotat: response.begrunnelse,
-                                },
-                            ],
+                                }),
                         },
                     }));
                     setPreviousValues(response.begrunnelse);
@@ -126,7 +130,7 @@ const Side = () => {
                         error: true,
                         retryFn: () => onSave(),
                         rollbackFn: () => {
-                            setValue(`begrunnelser.${bm.id}`, previousValues ?? "");
+                            setValue(`begrunnelser.${selectedRolleId}`, previousValues ?? "");
                         },
                     });
                 },
@@ -147,10 +151,10 @@ const Side = () => {
     }, []);
 
     return (
-        <>
-            <FormControlledTextarea name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} />
+        <Fragment key={selectedRolleId}>
+            <FormControlledTextarea name={`begrunnelser.${selectedRolleId}`} label={text.title.begrunnelse} />
             <ActionButtons onNext={onNext} />
-        </>
+        </Fragment>
     );
 };
 
