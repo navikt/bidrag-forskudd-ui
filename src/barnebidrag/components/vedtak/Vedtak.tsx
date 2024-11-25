@@ -132,9 +132,7 @@ const VedtakTableBody = ({
                             </Table.DataCell>
 
                             <Table.DataCell textSize="small">
-                                {formatterBeløpForBeregning(
-                                    periode.beregningsdetaljer?.delberegningUnderholdskostnad?.underholdskostnad ?? 0
-                                )}
+                                {formatterBeløpForBeregning(periode.underholdskostnad)}
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
                                 <table>
@@ -143,9 +141,7 @@ const VedtakTableBody = ({
                                             <td className="w-[55px]">{formatterProsent(periode.bpsAndelU)}</td>
                                             <td className="w-[10px]">/</td>
                                             <td className="w-[55px]">
-                                                {formatterBeløpForBeregning(
-                                                    periode.beregningsdetaljer.bpsAndel.andelBeløp
-                                                )}
+                                                {formatterBeløpForBeregning(periode.bpsAndelBeløp)}
                                             </td>
                                         </tr>
                                     </tbody>

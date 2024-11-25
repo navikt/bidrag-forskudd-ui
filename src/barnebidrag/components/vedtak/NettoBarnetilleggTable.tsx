@@ -62,11 +62,14 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                         </Table.Row>
                     ))}
                     <Table.Row className="align-top">
-                        <Table.DataCell colSpan={2} textSize="small">
+                        <Table.DataCell textSize="small">
                             <Label size="small">Resultat</Label>
                         </Table.DataCell>
                         <Table.DataCell textSize="small">
-                            {formatterBeløpForBeregning(barnetillegg.nettoBeløp)}
+                            {formatterBeløpForBeregning(barnetillegg.sumBruttoBeløp)}
+                        </Table.DataCell>
+                        <Table.DataCell textSize="small">
+                            {formatterBeløpForBeregning(barnetillegg.sumNettoBeløp)}
                         </Table.DataCell>
                     </Table.Row>
                 </Table.Body>

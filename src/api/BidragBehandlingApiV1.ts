@@ -1824,8 +1824,8 @@ export interface ResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1857,8 +1857,8 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -1930,7 +1930,8 @@ export interface BidragPeriodeBeregningsdetaljer {
 export interface DelberegningBarnetilleggDto {
     barnetillegg: BarnetilleggDetaljerDto[];
     skattFaktor: number;
-    nettoBeløp: number;
+    sumNettoBeløp: number;
+    sumBruttoBeløp: number;
 }
 
 export interface DelberegningUnderholdskostnad {
@@ -1945,7 +1946,9 @@ export interface DelberegningUnderholdskostnad {
 
 export interface ResultatBarnebidragsberegningPeriodeDto {
     periode: TypeArManedsperiode;
+    underholdskostnad: number;
     bpsAndelU: number;
+    bpsAndelBeløp: number;
     samværsfradrag: number;
     beregnetBidrag: number;
     faktiskBidrag: number;
@@ -2383,7 +2386,7 @@ export interface Arbeidsforhold {
 }
 
 export interface BoforholdBarn {
-    gjelder: NotatRolleDto;
+    gjelder: NotatPersonDto;
     medIBehandling: boolean;
     kilde: Kilde;
     opplysningerFraFolkeregisteret: OpplysningerFraFolkeregisteretMedDetaljerBostatuskodeUnit[];
@@ -2391,7 +2394,7 @@ export interface BoforholdBarn {
 }
 
 export interface InntekterPerRolle {
-    gjelder: NotatRolleDto;
+    gjelder: NotatPersonDto;
     arbeidsforhold: Arbeidsforhold[];
     årsinntekter: NotatInntektDto[];
     barnetillegg: NotatInntektDto[];
@@ -2413,12 +2416,16 @@ export interface NotatAndreVoksneIHusstandenDetaljerDto {
     husstandsmedlemmer: NotatVoksenIHusstandenDetaljerDto[];
 }
 
+export interface NotatBarnetilsynOffentligeOpplysninger {
+    periode: TypeArManedsperiode;
+}
+
 /** Notat begrunnelse skrevet av saksbehandler */
 export interface NotatBegrunnelseDto {
     innhold?: string;
     /** @deprecated */
     intern?: string;
-    gjelder?: NotatRolleDto;
+    gjelder?: NotatPersonDto;
 }
 
 export interface NotatBehandlingDetaljerDto {
@@ -2442,9 +2449,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2454,7 +2461,7 @@ export interface NotatBeregnetBidragPerBarnDto {
 }
 
 export interface NotatBeregnetInntektDto {
-    gjelderBarn: NotatRolleDto;
+    gjelderBarn: NotatPersonDto;
     summertInntektListe: DelberegningSumInntekt[];
 }
 
@@ -2475,6 +2482,7 @@ export interface NotatBoforholdDto {
 }
 
 export interface NotatDelberegningBidragsevneDto {
+    sumInntekt25Prosent: number;
     bidragsevne: number;
     skatt: NotatSkattBeregning;
     underholdEgneBarnIHusstand: NotatUnderholdEgneBarnIHusstand;
@@ -2487,6 +2495,14 @@ export interface NotatDelberegningBidragspliktigesBeregnedeTotalbidragDto {
     periode: TypeArManedsperiode;
 }
 
+export interface NotatFaktiskTilsynsutgiftDto {
+    periode: DatoperiodeDto;
+    utgift: number;
+    kostpenger?: number;
+    kommentar?: string;
+    total: number;
+}
+
 export interface NotatInntektDto {
     periode?: TypeArManedsperiode;
     opprinneligPeriode?: TypeArManedsperiode;
@@ -2495,7 +2511,7 @@ export interface NotatInntektDto {
     /** Inntektsrapportering typer på inntekter som overlapper */
     type: Inntektsrapportering;
     medIBeregning: boolean;
-    gjelderBarn?: NotatRolleDto;
+    gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
     visningsnavn: string;
@@ -2532,8 +2548,40 @@ export enum NotatMalType {
     BIDRAG = "BIDRAG",
 }
 
+export interface NotatOffentligeOpplysningerUnderhold {
+    gjelder: NotatPersonDto;
+    gjelderBarn?: NotatPersonDto;
+    barnetilsyn: NotatBarnetilsynOffentligeOpplysninger[];
+    harTilleggsstønad: boolean;
+}
+
+export interface NotatPersonDto {
+    rolle?: Rolletype;
+    navn?: string;
+    /** @format date */
+    fødselsdato?: string;
+    ident?: string;
+    erBeskyttet: boolean;
+}
+
+export interface NotatResultatBeregningInntekterDto {
+    inntektBM?: number;
+    inntektBP?: number;
+    inntektBarn?: number;
+    barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
+}
+
+export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
+    barn: NotatPersonDto;
+    perioder: ResultatBarnebidragsberegningPeriodeDto[];
+};
+
 export type NotatResultatForskuddBeregningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
-    barn: NotatRolleDto;
+    barn: NotatPersonDto;
     perioder: NotatResultatPeriodeDto[];
 };
 
@@ -2557,7 +2605,7 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     beregning?: UtgiftBeregningDto;
     forskuddssats?: number;
     maksGodkjentBeløp?: number;
-    inntekter?: ResultatSaerbidragsberegningInntekterDto;
+    inntekter?: NotatResultatBeregningInntekterDto;
     delberegningBidragspliktigesBeregnedeTotalbidrag?: NotatDelberegningBidragspliktigesBeregnedeTotalbidragDto;
     delberegningBidragsevne?: NotatDelberegningBidragsevneDto;
     delberegningUtgift?: DelberegningUtgift;
@@ -2573,13 +2621,21 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     resultatVisningsnavn: string;
 };
 
-export interface NotatRolleDto {
-    rolle?: Rolletype;
-    navn?: string;
-    /** @format date */
-    fødselsdato?: string;
-    ident?: string;
-    erBeskyttet: boolean;
+export interface NotatSamvaerDto {
+    gjelderBarn: NotatPersonDto;
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse?: NotatBegrunnelseDto;
+    perioder: NotatSamvaersperiodeDto[];
+}
+
+export interface NotatSamvaersperiodeDto {
+    periode: DatoperiodeDto;
+    samværsklasse: Samvaersklasse;
+    gjennomsnittligSamværPerMåned: number;
+    beregning?: SamvaerskalkulatorDetaljer;
+    samværsklasseVisningsnavn: string;
+    ferieVisningsnavnMap: Record<string, string>;
+    frekvensVisningsnavnMap: Record<string, string>;
 }
 
 export interface NotatSivilstand {
@@ -2592,10 +2648,19 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+}
+
+export interface NotatStonadTilBarnetilsynDto {
+    periode: DatoperiodeDto;
+    skolealder: NotatStonadTilBarnetilsynDtoSkolealderEnum;
+    tilsynstype: NotatStonadTilBarnetilsynDtoTilsynstypeEnum;
+    kilde: Kilde;
+    skoleaderVisningsnavn: string;
+    tilsynstypeVisningsnavn: string;
 }
 
 export interface NotatSaerbidragKategoriDto {
@@ -2614,6 +2679,12 @@ export interface NotatSaerbidragUtgifterDto {
     totalBeregning: NotatTotalBeregningUtgifterDto[];
 }
 
+export interface NotatTilleggsstonadDto {
+    periode: DatoperiodeDto;
+    dagsats: number;
+    total: number;
+}
+
 export interface NotatTotalBeregningUtgifterDto {
     betaltAvBp: boolean;
     utgiftstype: string;
@@ -2622,12 +2693,38 @@ export interface NotatTotalBeregningUtgifterDto {
     utgiftstypeVisningsnavn: string;
 }
 
+export interface NotatUnderholdBarnDto {
+    gjelderBarn: NotatPersonDto;
+    harTilsynsordning?: boolean;
+    stønadTilBarnetilsyn: NotatStonadTilBarnetilsynDto[];
+    faktiskTilsynsutgift: NotatFaktiskTilsynsutgiftDto[];
+    tilleggsstønad: NotatTilleggsstonadDto[];
+    underholdskostnad: NotatUnderholdskostnadBeregningDto[];
+    /** Notat begrunnelse skrevet av saksbehandler */
+    begrunnelse?: NotatBegrunnelseDto;
+}
+
+export interface NotatUnderholdDto {
+    underholdskostnaderBarn: NotatUnderholdBarnDto[];
+    offentligeOpplysninger: NotatOffentligeOpplysningerUnderhold[];
+}
+
 export interface NotatUnderholdEgneBarnIHusstand {
     getårsbeløp: number;
     sjablon: number;
     /** @format double */
     antallBarnIHusstanden: number;
     måndesbeløp: number;
+}
+
+export interface NotatUnderholdskostnadBeregningDto {
+    periode: DatoperiodeDto;
+    forbruk: number;
+    boutgifter: number;
+    stønadTilBarnetilsyn: number;
+    tilsynsutgifter: number;
+    barnetrygd: number;
+    total: number;
 }
 
 export interface NotatUtgiftBeregningDto {
@@ -2667,7 +2764,11 @@ export interface NotatVedtakDetaljerDto {
     fattetAvSaksbehandler?: string;
     /** @format date-time */
     fattetTidspunkt?: string;
-    resultat: (NotatResultatForskuddBeregningBarnDto | NotatResultatSaerbidragsberegningDto)[];
+    resultat: (
+        | NotatResultatBidragsberegningBarnDto
+        | NotatResultatForskuddBeregningBarnDto
+        | NotatResultatSaerbidragsberegningDto
+    )[];
 }
 
 export interface NotatVirkningstidspunktDto {
@@ -2686,8 +2787,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2734,17 +2835,6 @@ export interface OpplysningerFraFolkeregisteretMedDetaljerSivilstandskodePDLUnit
     statusVisningsnavn?: string;
 }
 
-export interface ResultatSaerbidragsberegningInntekterDto {
-    inntektBM?: number;
-    inntektBP?: number;
-    inntektBarn?: number;
-    barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
-    inntektBarnMånedlig?: number;
-}
-
 export type Unit = object;
 
 export interface VedtakNotatDto {
@@ -2756,7 +2846,10 @@ export interface VedtakNotatDto {
     virkningstidspunkt: NotatVirkningstidspunktDto;
     utgift?: NotatSaerbidragUtgifterDto;
     boforhold: NotatBoforholdDto;
-    roller: NotatRolleDto[];
+    samvær: NotatSamvaerDto[];
+    underholdskostnader?: NotatUnderholdDto;
+    personer: NotatPersonDto[];
+    roller: NotatPersonDto[];
     inntekter: NotatInntekterDto;
     vedtak: NotatVedtakDetaljerDto;
 }
@@ -2867,6 +2960,18 @@ export enum NotatBehandlingDetaljerDtoMonthEnum {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
+}
+
+export enum NotatStonadTilBarnetilsynDtoSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+export enum NotatStonadTilBarnetilsynDtoTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
 }
 
 export enum SletteUnderholdselementTypeEnum {
