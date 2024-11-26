@@ -1,44 +1,37 @@
-import { RolleTag } from "@common/components/RolleTag";
-import { default as behandlingQueryKeys, default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
-import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
-import text from "@common/constants/texts";
-import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
-import { deductDays } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Heading, Table, Tabs } from "@navikt/ds-react";
-import { getSearchParam } from "@utils/window-utils";
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
-
 import {
     OppdaterSamvaerDto,
     Rolletype,
     Samvaersklasse,
     SletteSamvaersperiodeElementDto,
-} from "../../../../api/BidragBehandlingApiV1";
-import { ActionButtons } from "../../../../common/components/ActionButtons";
-import { BehandlingAlert } from "../../../../common/components/BehandlingAlert";
-import { FormControlledTextarea } from "../../../../common/components/formFields/FormControlledTextArea";
-import { NewFormLayout } from "../../../../common/components/layout/grid/NewFormLayout";
-import { OverlayLoader } from "../../../../common/components/OverlayLoader";
-import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { QueryErrorWrapper } from "../../../../common/components/query-error-boundary/QueryErrorWrapper";
-import elementIds from "../../../../common/constants/elementIds";
-import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
-import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
+} from "@api/BidragBehandlingApiV1";
+import { ActionButtons } from "@common/components/ActionButtons";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
+import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
+import { OverlayLoader } from "@common/components/OverlayLoader";
+import { PersonNavn } from "@common/components/PersonNavn";
+import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
+import { RolleTag } from "@common/components/RolleTag";
+import { default as urlSearchParams } from "@common/constants/behandlingQueryKeys";
+import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
+import text from "@common/constants/texts";
+import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { actionOnEnter } from "@common/helpers/keyboardHelpers";
 import {
     createInitialValues,
     createSamværInitialValues,
     createSamværskalkulatorDefaultvalues,
     createSamværsperiodeInitialValues,
     mapToSamværskalkulatoDetaljer,
-} from "../../../../common/helpers/samværFormHelpers";
-import { useGetBehandlingV2 } from "../../../../common/hooks/useApiData";
-import { useDebounce } from "../../../../common/hooks/useDebounce";
-import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "../../../../common/hooks/useSaveSamvær";
-import { useVirkningsdato } from "../../../../common/hooks/useVirkningsdato";
-import { SamværBarnformvalues, SamværPeriodeFormvalues } from "../../../../common/types/samværFormValues";
-import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
+} from "@common/helpers/samværFormHelpers";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useDebounce } from "@common/hooks/useDebounce";
+import { useOnDeleteSamværsperiode, useOnSaveSamvær } from "@common/hooks/useSaveSamvær";
+import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
+import { SamværBarnformvalues, SamværPeriodeFormvalues } from "@common/types/samværFormValues";
+import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
+import { deductDays } from "@navikt/bidrag-ui-common";
+import { BodyShort, Box, Button, Heading, Table, Tabs } from "@navikt/ds-react";
 import {
     addDays,
     addMonthsIgnoreDay,
@@ -46,7 +39,14 @@ import {
     DateToDDMMYYYYString,
     getStartOfNextMonth,
     toISODateString,
-} from "../../../../utils/date-utils";
+} from "@utils/date-utils";
+import { getSearchParam } from "@utils/window-utils";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+
+import elementIds from "../../../../common/constants/elementIds";
+import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
 import { STEPS } from "../../../constants/steps";
 import { SamværsklasseSelector } from "./SamværklasseSelector";
 import { SamværskalkulatorButton, SamværskalkulatorForm } from "./Samværskalkulator";
@@ -163,7 +163,7 @@ const Main = () => {
             ?.id?.toString();
         return roleId ?? roller[0].id.toString();
     }, []);
-    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
+    const selectedTab = searchParams.get(urlSearchParams.tab) ?? defaultTab;
 
     if (roller.length > 1) {
         return (
