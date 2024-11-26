@@ -9,7 +9,7 @@ export const useGetActiveAndDefaultUnderholdskostnadTab = () => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const søknadsBarnUnderholdskostnader = getValues("underholdskostnaderMedIBehandling");
     const [searchParams] = useSearchParams();
-    const selectedTab = searchParams.get(behandlingQueryKeys.underholdskostnadTab);
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab);
 
     const defaultTab = useMemo(() => {
         if (selectedTab) {

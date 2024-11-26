@@ -1,9 +1,9 @@
-import { BodyShort } from "@navikt/ds-react";
-
 import {
     DelberegningBidragspliktigesAndel,
     ResultatSaerbidragsberegningInntekterDto,
-} from "../../../api/BidragBehandlingApiV1";
+} from "@api/BidragBehandlingApiV1";
+import { BodyShort } from "@navikt/ds-react";
+
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { CalculationTabell, CalculationTabellV2, MathMultiplication, MathValue } from "./CalculationTable";
 

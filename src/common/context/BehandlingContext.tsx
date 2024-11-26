@@ -122,7 +122,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const setActiveStep = useCallback((x: number, query?: Record<string, string>, hash?: string) => {
         const updatedSearchParams = [
             [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
-            ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.inntektTab).entries(),
+            ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.tab).entries(),
             ...(query ? Object.entries(query) : []),
         ];
 

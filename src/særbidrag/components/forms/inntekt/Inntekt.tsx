@@ -36,10 +36,10 @@ const Main = () => {
         return 0;
     });
     const defaultTab = useMemo(() => {
-        const paramRoleId = getSearchParam(urlSearchParams.inntektTab);
+        const paramRoleId = getSearchParam(urlSearchParams.tab);
         return roller
             .find((rolle) => {
-                if (getSearchParam(urlSearchParams.inntektTab)) {
+                if (getSearchParam(urlSearchParams.tab)) {
                     return rolle.id?.toString() === paramRoleId;
                 }
                 return rolle.rolletype === Rolletype.BM;
@@ -50,11 +50,11 @@ const Main = () => {
     useEffect(scrollToHash, []);
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
-            params.set(urlSearchParams.inntektTab, currentTabId);
+            params.set(urlSearchParams.tab, currentTabId);
             return params;
         });
     }
-    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
@@ -98,7 +98,7 @@ const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const rolleId = searchParams.get(urlSearchParams.inntektTab);
+    const rolleId = searchParams.get(urlSearchParams.tab);
     const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
 

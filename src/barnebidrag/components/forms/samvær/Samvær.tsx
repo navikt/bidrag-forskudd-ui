@@ -79,7 +79,7 @@ const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
-    const samværId = searchParams.get(urlSearchParams.samværTab);
+    const samværId = searchParams.get(urlSearchParams.tab);
     const oppdaterSamvær = samvær.find((s) => s.id === Number(samværId)) ?? samvær?.[0];
     const selectedRolleId = roller.find((r) => r.ident === oppdaterSamvær.gjelderBarn).id;
     const [previousValues, setPreviousValues] = useState<string>(
@@ -152,18 +152,18 @@ const Main = () => {
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
-            params.set(urlSearchParams.samværTab, currentTabId);
+            params.set(urlSearchParams.tab, currentTabId);
             return params;
         });
     }
 
     const defaultTab = useMemo(() => {
         const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.samværTab))
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
             ?.id?.toString();
         return roleId ?? roller[0].id.toString();
     }, []);
-    const selectedTab = searchParams.get(behandlingQueryKeys.samværTab) ?? defaultTab;
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     if (roller.length > 1) {
         return (

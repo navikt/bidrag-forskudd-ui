@@ -46,19 +46,19 @@ const Main = () => {
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
-            params.set(urlSearchParams.inntektTab, currentTabId);
+            params.set(urlSearchParams.tab, currentTabId);
             return params;
         });
     }
 
     const defaultTab = useMemo(() => {
         const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
             ?.id?.toString();
         return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
-    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
