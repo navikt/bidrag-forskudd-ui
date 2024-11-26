@@ -1,14 +1,11 @@
-import {
-    DelberegningBidragspliktigesAndel,
-    ResultatSaerbidragsberegningInntekterDto,
-} from "@api/BidragBehandlingApiV1";
 import { BodyShort } from "@navikt/ds-react";
 
+import { DelberegningBidragspliktigesAndel, ResultatBeregningInntekterDto } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { CalculationTabell, CalculationTabellV2, MathMultiplication, MathValue } from "./CalculationTable";
 
 type BPsAndelProps = {
-    inntekter: ResultatSaerbidragsberegningInntekterDto;
+    inntekter: ResultatBeregningInntekterDto;
     bpsAndel: DelberegningBidragspliktigesAndel;
     forskuddssats: number;
 };
