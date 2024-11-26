@@ -195,24 +195,17 @@ const Main = () => {
     const rolle = roller[0];
     return (
         <>
-            <Box
-                background="surface-transparent"
-                borderRadius="0"
-                borderWidth="1"
-                className="overflow-hidden grid gap-2 py-2 px-4 min-w-[768px]"
-            >
-                <div className="grid grid-cols-[max-content,max-content,auto] p-1 bg-white border border-[var(--a-border-default)] ">
-                    <div>
-                        <RolleTag rolleType={Rolletype.BA} />
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <BodyShort size="small" className="font-bold">
-                            <PersonNavn ident={rolle.ident}></PersonNavn>
-                        </BodyShort>
-                        <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull())}</BodyShort>
-                    </div>
+            <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
+                <div>
+                    <RolleTag rolleType={Rolletype.BA} />
                 </div>
-            </Box>
+                <div className="flex items-center gap-4">
+                    <BodyShort size="small" className="font-bold">
+                        <PersonNavn ident={rolle.ident}></PersonNavn>
+                    </BodyShort>
+                    <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull())}</BodyShort>
+                </div>
+            </div>
             <SamværBarn gjelderBarn={rolle.ident} />
         </>
     );
