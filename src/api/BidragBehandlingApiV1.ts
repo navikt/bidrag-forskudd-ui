@@ -993,8 +993,8 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
     gjelderBarnNavn?: string;
+    gjelderBarn?: string;
     harPeriodiseringsfeil: boolean;
 }
 
@@ -1341,9 +1341,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
-    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1650,6 +1650,7 @@ export interface OpprettRolleDto {
     innbetaltBeløp?: number;
     erSlettet: boolean;
     erUkjent: boolean;
+    harGebyrsøknad: boolean;
 }
 
 export interface OppdaterRollerResponse {
@@ -1857,8 +1858,8 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2449,9 +2450,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2595,8 +2596,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2648,8 +2649,8 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2787,8 +2788,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
