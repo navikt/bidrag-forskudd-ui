@@ -3,7 +3,7 @@ import { AddBarnForm } from "@common/components/AddBarnForm";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Button } from "@navikt/ds-react";
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { useOnCreateUnderholdForBarn } from "../../../hooks/useOnCreateUnderholdForBarn";
@@ -97,13 +97,13 @@ export const AndreBarn = () => {
                 </Button>
             )}
             {openForm && <AddBarnForm setOpenAddBarnForm={setOpenForm} onSave={onCreateBarn} />}
-            {andreBarnFieldArray.map((_, index) => {
+            {andreBarnFieldArray.map((underhold, index) => {
                 const underholdFieldName = `underholdskostnaderAndreBarn.${index}` as const;
                 return (
-                    <Fragment key={underholdFieldName}>
+                    <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
                         <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
                         <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-                    </Fragment>
+                    </div>
                 );
             })}
         </>

@@ -89,6 +89,86 @@ export const BarnebidragSideMenu = () => {
                                     activeButton ===
                                     `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
                                 }
+                                subMenu={
+                                    <>
+                                        {underhold.harTilsynsordning && (
+                                            <>
+                                                <MenuButton
+                                                    title={text.title.stønadTilBarnetilsyn}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_barnetilsyn
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                    }
+                                                />
+                                                <MenuButton
+                                                    title={text.title.faktiskeTilsynsutgifter}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_tilysnsutgifter
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                    }
+                                                />
+                                                <MenuButton
+                                                    title={text.title.tilleggsstønad}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_tilleggstønad
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                    }
+                                                />
+                                            </>
+                                        )}
+                                        <MenuButton
+                                            title={text.title.underholdskostnad}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                    {
+                                                        [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                    },
+                                                    elementIds.seksjon_underholdskostnad_beregnet
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                            }
+                                        />
+                                    </>
+                                }
                             />
                             <MenuButton
                                 title={text.label.andreBarn}
@@ -103,6 +183,29 @@ export const BarnebidragSideMenu = () => {
                                     activeButton ===
                                     `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
                                 }
+                                subMenu={underholdskostnader
+                                    .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
+                                    .map((underhold) => (
+                                        <MenuButton
+                                            key={underhold.gjelderBarn.id}
+                                            title={`${underhold.gjelderBarn.navn}`}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                    {
+                                                        [behandlingQueryKeys.tab]: `underholdskostnaderAndreBarn`,
+                                                    },
+                                                    underhold.gjelderBarn.id.toString()
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
+                                            }
+                                        />
+                                    ))}
                             />
                         </Fragment>
                     ))}
