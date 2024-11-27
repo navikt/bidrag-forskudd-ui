@@ -25,8 +25,8 @@ export const ForskuddSideMenu = () => {
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
         if (!step) return ForskuddStepper.VIRKNINGSTIDSPUNKT;
-        const inntektTab = searchParams.get(behandlingQueryKeys.inntektTab);
-        return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
+        const tab = searchParams.get(behandlingQueryKeys.tab);
+        return `${step}${tab ? `.${tab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
     const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
@@ -116,7 +116,7 @@ export const ForskuddSideMenu = () => {
                             title={`${rolle.rolletype} ${rolle.ident}`}
                             onStepChange={() =>
                                 onStepChange(STEPS[ForskuddStepper.INNTEKT], {
-                                    [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                    [behandlingQueryKeys.tab]: rolle.id.toString(),
                                 })
                             }
                             interactive={interactive}
@@ -146,7 +146,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -169,7 +169,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_barnetillegg
                                                 )
@@ -190,7 +190,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_utvidetbarnetrygd
                                                 )
@@ -212,7 +212,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_småbarnstillegg
                                                 )
@@ -234,7 +234,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_kontantstøtte
                                                 )
@@ -258,7 +258,7 @@ export const ForskuddSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[ForskuddStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )

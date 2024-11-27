@@ -97,13 +97,13 @@ export const AndreBarn = () => {
                 </Button>
             )}
             {openForm && <AddBarnForm setOpenAddBarnForm={setOpenForm} onSave={onCreateBarn} />}
-            {andreBarnFieldArray.map((_, index) => {
+            {andreBarnFieldArray.map((underhold, index) => {
                 const underholdFieldName = `underholdskostnaderAndreBarn.${index}` as const;
                 return (
-                    <>
+                    <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
                         <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
                         <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-                    </>
+                    </div>
                 );
             })}
         </>

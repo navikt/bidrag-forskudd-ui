@@ -39,19 +39,19 @@ const Main = () => {
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
-            params.set(urlSearchParams.inntektTab, currentTabId);
+            params.set(urlSearchParams.tab, currentTabId);
             return params;
         });
     }
 
     const defaultTab = useMemo(() => {
         const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
             ?.id?.toString();
         return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
-    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
@@ -61,9 +61,9 @@ const Main = () => {
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>
-                {roller.map((rolle) => (
+                {roller.map((rolle, index) => (
                     <Tabs.Tab
-                        key={rolle.ident}
+                        key={rolle.ident + index}
                         value={rolle.id.toString()}
                         label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
                             rolle.rolletype === Rolletype.BM ? "" : rolle.ident
@@ -73,14 +73,14 @@ const Main = () => {
             </Tabs.List>
             {roller.map((rolle) => {
                 return (
-                    <InntektTableProvider rolle={rolle} type={type}>
-                        <Tabs.Panel key={rolle.ident} value={rolle.id.toString()} className="grid gap-y-4">
+                    <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
+                        <Tabs.Panel value={rolle.id.toString()} className="grid gap-y-4">
                             <div className="mt-4">
                                 <InntektHeader ident={rolle.ident} />
                             </div>
-                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType) =>
-                                InntektTableComponent[tableType]()
-                            )}
+                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType, index) => (
+                                <Fragment key={tableType + index}>{InntektTableComponent[tableType]()}</Fragment>
+                            ))}
                         </Tabs.Panel>
                     </InntektTableProvider>
                 );
@@ -95,7 +95,7 @@ const Side = () => {
     const { roller } = useGetBehandlingV2();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const rolleId = searchParams.get(urlSearchParams.inntektTab);
+    const rolleId = searchParams.get(urlSearchParams.tab);
     const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
 

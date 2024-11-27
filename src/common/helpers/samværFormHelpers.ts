@@ -5,7 +5,8 @@ import {
     SamvaerskalkulatorNetterFrekvens,
     Samvaersklasse,
     SamvaersperiodeDto,
-} from "../../api/BidragBehandlingApiV1";
+} from "@api/BidragBehandlingApiV1";
+
 import {
     SamværBarnformvalues,
     Samværformvalues,

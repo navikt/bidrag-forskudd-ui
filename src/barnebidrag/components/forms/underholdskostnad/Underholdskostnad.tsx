@@ -30,7 +30,7 @@ const Main = () => {
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
-            params.set(urlSearchParams.underholdskostnadTab, currentTabId);
+            params.set(urlSearchParams.tab, currentTabId);
             return params;
         });
     }
@@ -45,7 +45,7 @@ const Main = () => {
             <Tabs.List>
                 {søknadsBarnUnderholdskostnader.map((underhold, index) => (
                     <Tabs.Tab
-                        key={`underholdskostnadTab-${underhold.id}-${index}`}
+                        key={`tab-${underhold.id}-${index}`}
                         value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
                         label={`${ROLE_FORKORTELSER.BA} ${underhold.gjelderBarn.ident}`}
                     />

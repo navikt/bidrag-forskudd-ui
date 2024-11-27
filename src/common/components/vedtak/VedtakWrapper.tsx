@@ -189,7 +189,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                         href={`#${opplysningTilElementId(value)}`}
                         onClick={() =>
                             onStepChange(opplysningTilStep(value, steps), {
-                                [behandlingQueryKeys.inntektTab]: value.rolle?.id?.toString(),
+                                [behandlingQueryKeys.tab]: value.rolle?.id?.toString(),
                             })
                         }
                     >
@@ -235,7 +235,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             href={`#${elementId}`}
                             onClick={() =>
                                 onStepChange(steps.inntekt, {
-                                    [behandlingQueryKeys.inntektTab]: valideringsfeil.rolle?.id?.toString(),
+                                    [behandlingQueryKeys.tab]: valideringsfeil.rolle?.id?.toString(),
                                 })
                             }
                         >
@@ -252,7 +252,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     href={`#${elementId}`}
                     onClick={() =>
                         onStepChange(steps.inntekt, {
-                            [behandlingQueryKeys.inntektTab]: inntektvalideringsfeil.rolle?.id?.toString(),
+                            [behandlingQueryKeys.tab]: inntektvalideringsfeil.rolle?.id?.toString(),
                         })
                     }
                 >
