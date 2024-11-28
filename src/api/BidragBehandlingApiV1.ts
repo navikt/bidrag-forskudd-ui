@@ -516,6 +516,7 @@ export interface BehandlingDtoV2 {
     virkningstidspunkt: VirkningstidspunktDto;
     inntekter: InntekterDtoV2;
     boforhold: BoforholdDtoV2;
+    gebyr?: GebyrDto;
     aktiveGrunnlagsdata: AktiveGrunnlagsdata;
     ikkeAktiverteEndringerIGrunnlagsdata: IkkeAktiveGrunnlagsdata;
     /** @uniqueItems true */
@@ -643,6 +644,30 @@ export interface FaktiskTilsynsutgiftDto {
     kostpenger?: number;
     kommentar?: string;
     total: number;
+}
+
+export interface GebyrDto {
+    gebyrRoller: GebyrRolleDto[];
+    valideringsfeil?: GebyrValideringsfeilDto[];
+}
+
+export interface GebyrInntektDto {
+    skattepliktigInntekt: number;
+    maksBarnetillegg?: number;
+    totalInntekt: number;
+}
+
+export interface GebyrRolleDto {
+    inntekt: GebyrInntektDto;
+    manueltOverstyrtGebyr?: ManueltOverstyrGebyrDto;
+    beregnetIlagtGebyr: boolean;
+    rolle: RolleDto;
+}
+
+export interface GebyrValideringsfeilDto {
+    gjelder: RolleDto;
+    måBestemmeGebyr: boolean;
+    manglerBegrunnelse: boolean;
 }
 
 export enum GrunnlagInntektEndringstype {
@@ -877,6 +902,12 @@ export interface MaksGodkjentBelopValideringsfeil {
     harFeil: boolean;
 }
 
+export interface ManueltOverstyrGebyrDto {
+    begrunnelse?: string;
+    /** Skal bare settes hvis det er avslag */
+    ilagtGebyr?: boolean;
+}
+
 export interface OverlappendeBostatusperiode {
     periode: Datoperiode;
     /** @uniqueItems true */
@@ -993,9 +1024,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    harPeriodiseringsfeil: boolean;
     gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -1470,6 +1501,17 @@ export interface OppdatereInntektResponse {
     notat?: string;
 }
 
+export interface OppdaterManueltGebyrDto {
+    /** @format int64 */
+    rolleId: number;
+    overstyrtGebyr?: ManueltOverstyrGebyrDto;
+}
+
+export interface OppdaterGebyrResponsDto {
+    rolle: RolleDto;
+    overstyrtGebyr?: ManueltOverstyrGebyrDto;
+}
+
 export interface OppdatereAndreVoksneIHusstanden {
     /** Oppdatere bor-med-andre-voksne-status på periode */
     oppdaterePeriode?: OppdatereAndreVoksneIHusstandenperiode;
@@ -1753,9 +1795,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1824,10 +1866,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -1858,10 +1900,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2035,6 +2077,8 @@ export interface BeregningValideringsfeil {
     sivilstand?: SivilstandPeriodeseringsfeil;
     /** @uniqueItems true */
     samvær?: SamvaerValideringsfeilDto[];
+    /** @uniqueItems true */
+    gebyr?: GebyrValideringsfeilDto[];
     /** @uniqueItems true */
     underholdskostnad?: ValideringsfeilUnderhold[];
     /** @uniqueItems true */
@@ -2219,6 +2263,9 @@ export enum Grunnlagstype {
     DELBEREGNING_UNDERHOLDSKOSTNAD = "DELBEREGNING_UNDERHOLDSKOSTNAD",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     BARNETILLEGG_PERIODE = "BARNETILLEGG_PERIODE",
+    MANUELT_OVERSTYRT_GEBYR = "MANUELT_OVERSTYRT_GEBYR",
+    DELBEREGNING_INNTEKTSBASERT_GEBYR = "DELBEREGNING_INNTEKTSBASERT_GEBYR",
+    SLUTTBEREGNING_GEBYR = "SLUTTBEREGNING_GEBYR",
     PERSON = "PERSON",
     PERSON_BIDRAGSMOTTAKER = "PERSON_BIDRAGSMOTTAKER",
     PERSON_BIDRAGSPLIKTIG = "PERSON_BIDRAGSPLIKTIG",
@@ -2450,9 +2497,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2570,10 +2617,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2649,10 +2696,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3027,10 +3074,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3119,7 +3163,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -3334,6 +3378,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdatereInntekt: (behandlingsid: number, data: OppdatereInntektRequest, params: RequestParams = {}) =>
             this.request<OppdatereInntektResponse, OppdatereInntektResponse>({
                 path: `/api/v2/behandling/${behandlingsid}/inntekt`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdater manuelt overstyr gebyr for en behandling.
+         *
+         * @tags gebyr-controller
+         * @name OppdaterManueltOverstyrtGebyr
+         * @request PUT:/api/v2/behandling/{behandlingsid}/gebyr
+         * @secure
+         */
+        oppdaterManueltOverstyrtGebyr: (
+            behandlingsid: number,
+            data: OppdaterManueltGebyrDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<OppdaterGebyrResponsDto, any>({
+                path: `/api/v2/behandling/${behandlingsid}/gebyr`,
                 method: "PUT",
                 body: data,
                 secure: true,

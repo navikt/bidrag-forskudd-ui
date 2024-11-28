@@ -23,6 +23,7 @@ export default {
     seksjon_perioder: "perioder",
     seksjon_sivilstand: "sivilstand",
     seksjon_samvær: "samvær",
+    seksjon_gebyr: "gebyr",
     seksjon_underholdskostnader: "underholdskostnader",
     seksjon_underholdskostnad_barnetilsyn: "barnetilsyn",
     seksjon_underholdskostnad_beregnet: "underholdskostnad_beregnet",

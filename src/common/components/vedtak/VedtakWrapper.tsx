@@ -115,6 +115,30 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     );
             });
         }
+        if (feilInnhold.gebyr != null && "gebyr" in steps) {
+            feilInnhold.gebyr.forEach((value) => {
+                if (value.manglerBegrunnelse)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
+                            onClick={() => onStepChange(steps.gebyr)}
+                        >
+                            Gebyr: Begrunnelse må fylles ut når gebyr er manuelt overstyrt (
+                            {rolletypeTilVisningsnavn(value.gjelder)})
+                        </ErrorSummary.Item>
+                    );
+                if (value.måBestemmeGebyr)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
+                            onClick={() => onStepChange(steps.gebyr)}
+                        >
+                            Gebyr: Må velge om gebyr skal bli ilagt eller ikke ved avslag (
+                            {rolletypeTilVisningsnavn(value.gjelder)})
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
         if (feilInnhold.husstandsmedlem != null) {
             feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(

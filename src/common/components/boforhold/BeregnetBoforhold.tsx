@@ -12,10 +12,10 @@ export default function BeregnetBoforhold() {
     if (beregnetBoforhold.length === 0) return null;
     return (
         <>
-            <Heading level="2" size="small">
-                Beregnet boforhold
-            </Heading>
             <Box background="surface-subtle" className="overflow-hidden grid gap-2 py-2 px-4">
+                <Heading level="2" size="small">
+                    Beregnet boforhold
+                </Heading>
                 <Table size="small" className="table-fixed table bg-white w-full">
                     <Table.Header>
                         <Table.Row className="align-baseline">
