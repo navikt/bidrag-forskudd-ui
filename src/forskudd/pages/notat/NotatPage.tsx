@@ -29,12 +29,17 @@ export default (props: NotatProps) => {
                             <Tabs.Tab value="html" label="Standard" icon={<FileIcon />} />
                             <Tabs.Tab value="pdf" label="PDF" icon={<FilePdfIcon />} />
                         </Tabs.List>
-                        <Tabs.Panel value="pdf" style={{ maxHeight: "calc(100% - 200px)", width: "100%" }}>
+                        <Tabs.Panel value="pdf" style={{ maxHeight: "calc(100% - 144px)", width: "100%" }}>
                             <RenderNotatPdf {...props} />
                         </Tabs.Panel>
                         <Tabs.Panel
                             value="html"
-                            style={{ height: "calc(100% - 200px)", width: "100%", overflow: "auto" }}
+                            style={{
+                                height: "calc(100% - 144px)",
+                                width: "auto%",
+                                overflowY: "auto",
+                                overflowX: "hidden",
+                            }}
                         >
                             <RenderNotatHtml {...props} />
                         </Tabs.Panel>
@@ -79,7 +84,7 @@ const RenderNotatPdf = ({ behandlingId, vedtakId }: NotatProps) => {
         const fileBlob = new Blob([notatPdf as BlobPart], { type: "application/pdf" });
         return URL.createObjectURL(fileBlob);
     }
-    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="85%" />;
+    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="89%" />;
 };
 const RenderNotatHtml = ({ behandlingId, vedtakId }: NotatProps) => {
     const { data: notatHtml, isLoading, isError } = useNotat(behandlingId, vedtakId);
