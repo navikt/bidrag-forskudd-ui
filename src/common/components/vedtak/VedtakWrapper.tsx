@@ -1,4 +1,3 @@
-import { capitalizeFirstLetter } from "@navikt/bidrag-ui-common/esm/react_components/autosuggest/AutoSuggest";
 import { Alert, BodyShort, ErrorSummary, Heading } from "@navikt/ds-react";
 import { Fragment, PropsWithChildren } from "react";
 
@@ -13,6 +12,7 @@ import { BarnebidragStepper } from "../../../barnebidrag/enum/BarnebidragStepper
 import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
 import { SærligeutgifterStepper } from "../../../særbidrag/enum/SærligeutgifterStepper";
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
+import { capitalizeFirstLetter } from "../../../utils/string-utils";
 import behandlingQueryKeys from "../../constants/behandlingQueryKeys";
 import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
