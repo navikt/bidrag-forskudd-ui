@@ -1,3 +1,4 @@
+import { capitalizeFirstLetter } from "@navikt/bidrag-ui-common/esm/react_components/autosuggest/AutoSuggest";
 import { Alert, BodyShort, ErrorSummary, Heading } from "@navikt/ds-react";
 import { Fragment, PropsWithChildren } from "react";
 
@@ -123,7 +124,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
                             onClick={() => onStepChange(steps.gebyr)}
                         >
-                            Gebyr: Begrunnelse må fylles ut når gebyr er manuelt overstyrt (
+                            Gebyr: Begrunnelse må fylles ut når gebyrvalget er manuelt overstyrt (
                             {rolletypeTilVisningsnavn(value.gjelder)})
                         </ErrorSummary.Item>
                     );
@@ -221,6 +222,20 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             });
+        if (feilliste.length === 0) {
+            const feilInnhold = Object.keys(feil.detaljer)
+                .filter((key) =>
+                    !Array.isArray(feil.detaljer[key]) ? feil.detaljer[key] != null : feil.detaljer[key].length > 0
+                )
+                .map((key) => capitalizeFirstLetter(key));
+
+            feilliste.push(
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
+                    {feil.melding}
+                    <br /> Valideringer som feilet: {feilInnhold.join(", ")}
+                </ErrorSummary.Item>
+            );
+        }
         return feilliste;
     }
     if (feil) {
