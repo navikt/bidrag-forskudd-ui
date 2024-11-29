@@ -25,9 +25,7 @@ const Main = () => {
                 {text.label.barn}
             </Heading>
             <BarnPerioder />
-            <Heading level="2" size="small">
-                {text.title.andreVoksneIHusstanden}
-            </Heading>
+
             <AndreVoksneIHusstanden />
 
             <BeregnetBoforhold />

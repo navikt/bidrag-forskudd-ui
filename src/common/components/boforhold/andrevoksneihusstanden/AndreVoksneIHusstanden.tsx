@@ -372,6 +372,9 @@ export const AndreVoksneIHusstanden = () => {
             className="overflow-hidden grid gap-2 py-2 px-4"
             id={`${elementIds.seksjon_andreVoksneIHusstand}`}
         >
+            <Heading level="2" size="small">
+                {text.title.andreVoksneIHusstanden}
+            </Heading>
             {behandling.boforhold?.egetBarnErEnesteVoksenIHusstanden && (
                 <Alert variant="info" size="small" className="w-[708px]">
                     <Heading size="xsmall" level="4">
@@ -381,7 +384,6 @@ export const AndreVoksneIHusstanden = () => {
                     tabellen under
                 </Alert>
             )}
-
             <div className="grid gap-2">
                 <AndreVoksneIHusstandOpplysninger
                     showResetButton={showResetButton}

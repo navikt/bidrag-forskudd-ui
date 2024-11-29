@@ -12,6 +12,7 @@ import { BarnebidragStepper } from "../../../barnebidrag/enum/BarnebidragStepper
 import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
 import { SærligeutgifterStepper } from "../../../særbidrag/enum/SærligeutgifterStepper";
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
+import { capitalizeFirstLetter } from "../../../utils/string-utils";
 import behandlingQueryKeys from "../../constants/behandlingQueryKeys";
 import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
@@ -115,6 +116,30 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     );
             });
         }
+        if (feilInnhold.gebyr != null && "gebyr" in steps) {
+            feilInnhold.gebyr.forEach((value) => {
+                if (value.manglerBegrunnelse)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
+                            onClick={() => onStepChange(steps.gebyr)}
+                        >
+                            Gebyr: Begrunnelse må fylles ut når gebyrvalget er manuelt overstyrt (
+                            {rolletypeTilVisningsnavn(value.gjelder)})
+                        </ErrorSummary.Item>
+                    );
+                if (value.måBestemmeGebyr)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
+                            onClick={() => onStepChange(steps.gebyr)}
+                        >
+                            Gebyr: Må velge om gebyr skal bli ilagt eller ikke ved avslag (
+                            {rolletypeTilVisningsnavn(value.gjelder)})
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
         if (feilInnhold.husstandsmedlem != null) {
             feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(
@@ -197,6 +222,20 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             });
+        if (feilliste.length === 0) {
+            const feilInnhold = Object.keys(feil.detaljer)
+                .filter((key) =>
+                    !Array.isArray(feil.detaljer[key]) ? feil.detaljer[key] != null : feil.detaljer[key].length > 0
+                )
+                .map((key) => capitalizeFirstLetter(key));
+
+            feilliste.push(
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
+                    {feil.melding}
+                    <br /> Valideringer som feilet: {feilInnhold.join(", ")}
+                </ErrorSummary.Item>
+            );
+        }
         return feilliste;
     }
     if (feil) {
