@@ -117,7 +117,9 @@ export const AddBarnForm = ({
     const onSearchClick = (value) => {
         PERSON_API.informasjon
             .hentPersonPost({ ident: value })
-            .then(({ data }) => {
+            .then((response) => {
+                if (response.status === 204) throw new Error(text.error.personFinnesIkke);
+                const data = response.data;
                 setNavn(data.visningsnavn);
                 setPerson(data);
                 const formErrors = { ...error };
