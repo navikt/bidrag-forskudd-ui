@@ -143,7 +143,7 @@ const Side = () => {
             }
         });
         return () => subscription.unsubscribe();
-    }, []);
+    }, [fieldName]);
 
     return (
         <>
