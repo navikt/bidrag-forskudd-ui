@@ -6,6 +6,7 @@ import React, { memo, Suspense } from "react";
 import { BarnebidragStepper } from "../../enum/BarnebidragStepper";
 import Vedtak from "../vedtak/Vedtak";
 import Boforhold from "./boforhold/Boforhold";
+import Gebyr from "./gebyr/Gebyr";
 import Inntekt from "./inntekt/Inntekt";
 import Samvær from "./samvær/Samvær";
 import Underholdskostnad from "./underholdskostnad/Underholdskostnad";
@@ -17,6 +18,8 @@ const BarnebidragForm = memo(({ activeStep }: { activeStep: string }) => {
             return <Virkningstidspunkt />;
         case BarnebidragStepper.UNDERHOLDSKOSTNAD:
             return <Underholdskostnad />;
+        case BarnebidragStepper.GEBYR:
+            return <Gebyr />;
         case BarnebidragStepper.SAMVÆR:
             return <Samvær />;
         case BarnebidragStepper.INNTEKT:

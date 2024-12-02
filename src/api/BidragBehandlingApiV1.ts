@@ -1824,10 +1824,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2450,10 +2450,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2570,10 +2570,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
-    totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2618,8 +2618,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -2788,8 +2788,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {

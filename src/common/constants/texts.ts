@@ -223,6 +223,7 @@ const tekster = {
         detaljer: "Detaljer",
         direkteBetaltAvBp: "Direkte betalt av BP",
         faktiskeTilsynsutgifter: "Faktiske tilsynsutgifter",
+        gebyr: "Gebyr",
         inntekt: "Inntekt",
         kontantstøtte: "Kontantstøtte",
         sivilstand: "Sivilstand",
