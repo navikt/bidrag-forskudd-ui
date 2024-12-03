@@ -10,7 +10,7 @@ import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, { ChangeEvent, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useOnUpdateHarTilysnsordning } from "../../../hooks/useOnUpdateHarTilysnsordning";
@@ -191,19 +191,17 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
-    const updateTilysnsordning = useOnUpdateHarTilysnsordning(underhold.id);
     const hasAtLeastOnePeriod =
         !!underhold.stønadTilBarnetilsyn.length ||
         !!underhold.faktiskTilsynsutgift.length ||
         !!underhold.tilleggsstønad.length;
-    const [barnHarTilysnsordning, setBarnHarTilysnsordning] = useState<boolean>(hasAtLeastOnePeriod);
+    const updateTilysnsordning = useOnUpdateHarTilysnsordning(underhold.id);
 
     const update = (checked: boolean) => {
         updateTilysnsordning.mutation.mutate(
             { harTilsynsordning: checked },
             {
                 onSuccess: () => {
-                    setValue(underholdFieldName, { ...underhold, harTilsynsordning: checked });
                     updateTilysnsordning.queryClientUpdater((currentData) => {
                         const updatedUnderholdIndex = currentData.underholdskostnader.findIndex(
                             (u) => u.id === underhold.id
@@ -225,14 +223,14 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
                     setSaveErrorState({
                         error: true,
                         retryFn: () => update(checked),
-                        rollbackFn: () => setBarnHarTilysnsordning(!checked),
+                        rollbackFn: () => setValue(underholdFieldName, { ...underhold, harTilsynsordning: !checked }),
                     });
                 },
             }
         );
     };
     const onToggle = (e: ChangeEvent<HTMLInputElement>) => {
-        setBarnHarTilysnsordning(e.target.checked);
+        setValue(underholdFieldName, { ...underhold, harTilsynsordning: e.target.checked });
         update(e.target.checked);
     };
 
@@ -241,14 +239,14 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             <RolleInfoBox underholdFieldName={underholdFieldName} />
             <Switch
                 value="barnHarTilysnsordning"
-                checked={barnHarTilysnsordning}
+                checked={underhold.harTilsynsordning}
                 onChange={onToggle}
                 size="small"
                 readOnly={hasAtLeastOnePeriod}
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
-            {barnHarTilysnsordning && (
+            {underhold.harTilsynsordning && (
                 <>
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
