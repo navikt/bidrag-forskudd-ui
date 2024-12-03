@@ -7,24 +7,36 @@ export const FormControlledTextarea = ({
     name,
     label,
     hideLabel,
+    minRows,
+    className,
 }: {
     name: string;
     label: string;
     hideLabel?: boolean;
+    minRows?: number;
+    className?: string;
 }) => {
-    const { control } = useFormContext();
+    const { control, clearErrors } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
 
-    const { field } = useController({ name, control });
+    const { field, fieldState } = useController({ name, control });
+
+    const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        clearErrors(name);
+        field.onChange(e.target.value);
+    };
 
     return (
         <Textarea
             label={label}
             size="small"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(e) => onChange(e)}
             hideLabel={hideLabel}
             readOnly={lesemodus}
+            error={fieldState?.error?.message}
+            minRows={minRows}
+            className={className}
         />
     );
 };
