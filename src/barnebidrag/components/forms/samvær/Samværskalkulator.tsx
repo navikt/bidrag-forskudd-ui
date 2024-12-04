@@ -60,7 +60,18 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     return (
         <VStack gap={"4"}>
             <BodyShort size="small">
-                <Heading size="xsmall">Regelmessig samvær</Heading>
+                <HStack justify={"space-between"}>
+                    <Heading size="xsmall">Regelmessig samvær</Heading>
+                    <Button
+                        size="xsmall"
+                        variant="tertiary"
+                        onClick={() => {
+                            setValue(`${fieldname}.beregning`, createSamværskalkulatorDefaultvalues());
+                        }}
+                    >
+                        Nullstill
+                    </Button>
+                </HStack>
                 {viewOnly ? (
                     <HStack gap="2">
                         <strong>Antall netter: </strong>
@@ -278,7 +289,9 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
                     previousBeregning.current = beregning;
                 }}
                 icon={<CalculatorIcon />}
-            ></Button>
+            >
+                Beregn
+            </Button>
             <Modal ref={ref} header={{ heading: "Samværskalkulator" }} className="text-left">
                 <Modal.Body>
                     <SamværskalkulatorForm fieldname={fieldname} />
@@ -294,15 +307,6 @@ export const SamværskalkulatorButton = ({ fieldname, editableRow }: Samværskal
                     </Button>
                     <Button size="xsmall" variant="secondary" onClick={closeAndCancel}>
                         Avbryt
-                    </Button>
-                    <Button
-                        size="xsmall"
-                        variant="tertiary"
-                        onClick={() => {
-                            setValue(`${fieldname}.beregning`, createSamværskalkulatorDefaultvalues());
-                        }}
-                    >
-                        Nullstill
                     </Button>
                 </Modal.Footer>
             </Modal>

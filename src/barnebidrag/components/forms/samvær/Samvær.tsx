@@ -230,6 +230,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
         name: `${gjelderBarn}.perioder`,
     });
     const watchFieldArray = useWatch({ control, name: `${gjelderBarn}.perioder` });
+    console.log(behandling.samvær, gjelderBarn);
     const samvær = behandling.samvær.find((s) => s.gjelderBarn === gjelderBarn);
     const samværId = samvær.id;
     const controlledFields = perioder.fields.map((field, index) => ({
@@ -440,7 +441,7 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                             <Heading spacing size="small" level="3">
                                 {text.alert.feilIPeriodisering}
                             </Heading>
-                            {valideringsfeil.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
+                            {valideringsfeil.hullIPerioder.length > 0 && <p>Det er perioder uten samvær.</p>}
                             {valideringsfeil.ingenLøpendeSamvær && <p>{text.error.ingenLøpendeSamvær}</p>}
                             {valideringsfeil.overlappendePerioder.length > 0 && (
                                 <p>{text.error.overlappendeSamværsperioder}</p>
