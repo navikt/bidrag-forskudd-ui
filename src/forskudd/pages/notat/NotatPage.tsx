@@ -15,7 +15,7 @@ type NotatProps = { behandlingId?: string; vedtakId?: string };
 export default (props: NotatProps) => {
     const [showTab, setShowTab] = React.useState<string>("html");
     return (
-        <div className="max-w-[1092px] px-6 py-6">
+        <div className="max-w-[1092px] m-auto px-6 py-6">
             <Suspense
                 fallback={
                     <div className="flex justify-center">
@@ -29,14 +29,18 @@ export default (props: NotatProps) => {
                             <Tabs.Tab value="html" label="Standard" icon={<FileIcon />} />
                             <Tabs.Tab value="pdf" label="PDF" icon={<FilePdfIcon />} />
                         </Tabs.List>
-                        <Tabs.Panel value="pdf" style={{ maxHeight: "calc(100% - 144px)", width: "100%" }}>
+                        <Tabs.Panel
+                            value="pdf"
+                            style={{ maxHeight: "calc(100% - 144px)", width: "100%", zoom: "140%" }}
+                        >
                             <RenderNotatPdf {...props} />
                         </Tabs.Panel>
                         <Tabs.Panel
                             value="html"
                             style={{
                                 height: "calc(100% - 144px)",
-                                width: "auto%",
+                                width: "auto",
+                                zoom: "140%",
                                 overflowY: "auto",
                                 overflowX: "hidden",
                             }}
@@ -84,7 +88,9 @@ const RenderNotatPdf = ({ behandlingId, vedtakId }: NotatProps) => {
         const fileBlob = new Blob([notatPdf as BlobPart], { type: "application/pdf" });
         return URL.createObjectURL(fileBlob);
     }
-    return <object data={notatUrl + "#toolbar=0"} type="application/pdf" width="100%" height="89%" />;
+    return (
+        <object data={notatUrl + "#toolbar=0&view=FitBH&zoom=scale"} type="application/pdf" width="100%" height="89%" />
+    );
 };
 const RenderNotatHtml = ({ behandlingId, vedtakId }: NotatProps) => {
     const { data: notatHtml, isLoading, isError } = useNotat(behandlingId, vedtakId);
