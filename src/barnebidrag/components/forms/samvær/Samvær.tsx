@@ -230,7 +230,6 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
         name: `${gjelderBarn}.perioder`,
     });
     const watchFieldArray = useWatch({ control, name: `${gjelderBarn}.perioder` });
-    console.log(behandling.samvær, gjelderBarn);
     const samvær = behandling.samvær.find((s) => s.gjelderBarn === gjelderBarn);
     const samværId = samvær.id;
     const controlledFields = perioder.fields.map((field, index) => ({
