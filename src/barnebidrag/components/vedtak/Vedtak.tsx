@@ -39,7 +39,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8 m-auto w-[1100px]">
+        <div className="grid gap-y-8  w-[1100px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -140,11 +140,11 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[55px]">{formatterProsent(periode.bpsAndelU)}</td>
-                                            <td className="w-[10px]">/</td>
-                                            <td className="w-[55px]">
-                                                {formatterBeløpForBeregning(periode.bpsAndelBeløp)}
+                                            <td className="w-[60px]" align="right">
+                                                {formatterProsent(periode.bpsAndelU)}
                                             </td>
+                                            <td className="w-[10px]">/</td>
+                                            <td>{formatterBeløpForBeregning(periode.bpsAndelBeløp)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -153,11 +153,11 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[80%]">
+                                            <td className="w-[60px]" align="right">
                                                 {formatterBeløpForBeregning(periode.samværsfradrag)}
                                             </td>
                                             <td className="w-[10px]">/</td>
-                                            <td className="w-[20%]">
+                                            <td>
                                                 {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
                                                 Samvaersklasse.DELT_BOSTED
                                                     ? "D"
@@ -173,13 +173,13 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[80%]">
+                                            <td className="w-[60px]" align="right">
                                                 {formatterBeløpForBeregning(
                                                     periode.beregningsdetaljer.delberegningBidragsevne.bidragsevne
                                                 )}
                                             </td>
                                             <td className="w-[10px]">/</td>
-                                            <td className="w-[20%]">
+                                            <td>
                                                 {formatterBeløpForBeregning(
                                                     periode.beregningsdetaljer.delberegningBidragsevne
                                                         .sumInntekt25Prosent
