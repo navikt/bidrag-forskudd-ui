@@ -15,9 +15,11 @@ import {
     ResultatBidragsberegningBarnDto,
     ResultatRolle,
     Rolletype,
+    Samvaersklasse,
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
 import { RolleTag } from "../../../common/components/RolleTag";
+import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
@@ -148,8 +150,46 @@ const VedtakTableBody = ({
                                 </table>
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
-                                {formatterBeløpForBeregning(periode.samværsfradrag)}
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td className="w-[80%]">
+                                                {formatterBeløpForBeregning(periode.samværsfradrag)}
+                                            </td>
+                                            <td className="w-[10px]">/</td>
+                                            <td className="w-[20%]">
+                                                {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
+                                                Samvaersklasse.DELT_BOSTED
+                                                    ? "D"
+                                                    : hentVisningsnavn(
+                                                          periode.beregningsdetaljer.samværsfradrag.samværsklasse
+                                                      )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </Table.DataCell>
+                            <Table.DataCell textSize="small">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td className="w-[80%]">
+                                                {formatterBeløpForBeregning(
+                                                    periode.beregningsdetaljer.delberegningBidragsevne.bidragsevne
+                                                )}
+                                            </td>
+                                            <td className="w-[10px]">/</td>
+                                            <td className="w-[20%]">
+                                                {formatterBeløpForBeregning(
+                                                    periode.beregningsdetaljer.delberegningBidragsevne
+                                                        .sumInntekt25Prosent
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </Table.DataCell>
+
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(periode.beregnetBidrag)}
                             </Table.DataCell>
@@ -191,17 +231,20 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "300px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
                     U
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
                     BPs andel U
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "150px" }}>
-                    Samværsfradrag
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
+                    Samvær
+                </Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "50px" }}>
+                    Evne / 25%
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
                     Beregnet bidrag
