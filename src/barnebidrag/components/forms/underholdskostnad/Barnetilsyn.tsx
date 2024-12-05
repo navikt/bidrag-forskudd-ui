@@ -239,14 +239,14 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             <RolleInfoBox underholdFieldName={underholdFieldName} />
             <Switch
                 value="barnHarTilysnsordning"
-                checked={underhold.harTilsynsordning}
+                checked={underhold.harTilsynsordning || hasAtLeastOnePeriod}
                 onChange={onToggle}
                 size="small"
                 readOnly={hasAtLeastOnePeriod}
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
-            {underhold.harTilsynsordning && (
+            {(underhold.harTilsynsordning || hasAtLeastOnePeriod) && (
                 <>
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />

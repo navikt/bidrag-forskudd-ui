@@ -45,10 +45,12 @@ const Omfang = ({
             className="w-fit"
             label={text.label.status}
             options={[{ value: "", text: text.select.velg }].concat(
-                Object.values(StonadTilBarnetilsynDtoTilsynstypeEnum).map((value) => ({
-                    value,
-                    text: STONAD_TIL_BARNETILSYNS_TYPE[value],
-                }))
+                Object.values(StonadTilBarnetilsynDtoTilsynstypeEnum)
+                    .filter((d) => d !== StonadTilBarnetilsynDtoTilsynstypeEnum.IKKE_ANGITT)
+                    .map((value) => ({
+                        value,
+                        text: STONAD_TIL_BARNETILSYNS_TYPE[value],
+                    }))
             )}
             hideLabel
             onSelect={() => clearErrors(`${fieldName}.tilsynstype`)}
@@ -76,10 +78,12 @@ const StønadTilBarnetilsyn = ({
             className="w-fit"
             label={text.label.status}
             options={[{ value: "", text: text.select.velg }].concat(
-                Object.values(StonadTilBarnetilsynDtoSkolealderEnum).map((value) => ({
-                    value,
-                    text: STONAD_TIL_BARNETILSYNS_SKOLEALDER[value],
-                }))
+                Object.values(StonadTilBarnetilsynDtoSkolealderEnum)
+                    .filter((d) => d !== StonadTilBarnetilsynDtoSkolealderEnum.IKKE_ANGITT)
+                    .map((value) => ({
+                        value,
+                        text: STONAD_TIL_BARNETILSYNS_SKOLEALDER[value],
+                    }))
             )}
             hideLabel
             onSelect={() => clearErrors(`${fieldName}.skolealder`)}
