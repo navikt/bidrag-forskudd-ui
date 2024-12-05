@@ -140,7 +140,7 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[60px]" align="right">
+                                            <td className="w-[45px]" align="right">
                                                 {formatterProsent(periode.bpsAndelU)}
                                             </td>
                                             <td className="w-[10px]">/</td>
@@ -153,7 +153,7 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[60px]" align="right">
+                                            <td className="w-[45px]" align="right">
                                                 {formatterBeløpForBeregning(periode.samværsfradrag)}
                                             </td>
                                             <td className="w-[10px]">/</td>
@@ -173,7 +173,7 @@ const VedtakTableBody = ({
                                 <table>
                                     <tbody>
                                         <tr>
-                                            <td className="w-[60px]" align="right">
+                                            <td className="w-[45px]" align="right">
                                                 {formatterBeløpForBeregning(
                                                     periode.beregningsdetaljer.delberegningBidragsevne.bidragsevne
                                                 )}
@@ -231,7 +231,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "300px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "330px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
