@@ -30,13 +30,13 @@ import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { hentVisningsnavn, hentVisningsnavnVedtakstype } from "@common/hooks/useVisningsnavn";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { deductDays, ObjectUtils } from "@navikt/bidrag-ui-common";
-import { BodyShort, Box, Button, Checkbox, Heading, HStack, Label, Table } from "@navikt/ds-react";
+import { BodyLong, BodyShort, Box, Button, Checkbox, Heading, HStack, Label, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductMonths, isBeforeDate } from "@utils/date-utils";
+import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
 import elementIds from "../../../../common/constants/elementIds";
-import { formatterBeløp } from "../../../../utils/number-utils";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -124,13 +124,17 @@ const GodkjentBeløp = ({ item, index }: { item: Utgiftspost; index: number }) =
 };
 
 const Kommentar = ({ item, index }: { item: Utgiftspost; index: number }) => {
-    return (
-        <FormControlledTextField
+    return item.erRedigerbart ? (
+        <FormControlledTextarea
             name={`utgifter.${index}.kommentar`}
             label={text.label.kommentar}
+            minRows={1}
             hideLabel
-            editable={item.erRedigerbart}
         />
+    ) : (
+        <div className="min-h-8 flex items-center">
+            <BodyLong size="small">{item.kommentar}</BodyLong>
+        </div>
     );
 };
 
@@ -325,7 +329,7 @@ const Main = () => {
                                 />
                             </FlexRow>
                             {erMaksBeløpMed && (
-                                <HStack gap="2">
+                                <HStack gap="2" align="start">
                                     <FormControlledTextField
                                         name={`maksGodkjentBeløp`}
                                         label={text.label.godkjentBeløpSkalSkjønsjusteres}
@@ -334,11 +338,11 @@ const Main = () => {
                                         inputMode="decimal"
                                         step="0.01"
                                     />
-                                    <FormControlledTextField
+                                    <FormControlledTextarea
                                         name={`maksGodkjentBeløpBegrunnelse`}
                                         label={text.label.begrunnelse}
-                                        type="text"
-                                        width="350px"
+                                        className="w-[350px]"
+                                        minRows={1}
                                     />
                                 </HStack>
                             )}
@@ -427,7 +431,11 @@ const UtgifterListe = () => {
             clearErrors(`utgifter.${index}.godkjentBeløp`);
         }
 
-        if (utgift.godkjentBeløp !== utgift.kravbeløp && ObjectUtils.isEmpty(utgift.kommentar) && !utgiftErForeldet) {
+        if (
+            utgift.godkjentBeløp !== utgift.kravbeløp &&
+            ObjectUtils.isEmpty(utgift.kommentar.trim()) &&
+            !utgiftErForeldet
+        ) {
             setError(`utgifter.${index}.kommentar`, {
                 type: "notValid",
                 message: text.error.begrunnelseMåFyllesUt,
@@ -614,7 +622,9 @@ const UtgifterListe = () => {
                                 <Table.Row
                                     key={item.id + "-" + index}
                                     className="align-top"
-                                    onKeyDown={actionOnEnter(() => onSaveRow(index))}
+                                    onKeyDown={actionOnEnter(() => {
+                                        onSaveRow(index);
+                                    })}
                                 >
                                     <Table.DataCell>
                                         <div className="h-8 w-full flex items-center justify-center">

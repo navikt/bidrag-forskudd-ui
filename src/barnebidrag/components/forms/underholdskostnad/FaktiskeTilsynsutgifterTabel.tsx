@@ -1,8 +1,9 @@
+import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
 import elementId from "@common/constants/elementIds";
 import text from "@common/constants/texts";
-import { BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
+import { BodyLong, BodyShort, Box, Heading, HStack, Table } from "@navikt/ds-react";
 import { formatterBeløp, formatterBeløpForBeregning } from "@utils/number-utils";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -95,13 +96,12 @@ const Kommentar = ({
         | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift.${number}`
         | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift.${number}`;
 }) => {
-    return (
-        <FormControlledTextField
-            name={`${fieldName}.kommentar`}
-            label={text.label.kommentar}
-            hideLabel
-            editable={item.erRedigerbart}
-        />
+    return item.erRedigerbart ? (
+        <FormControlledTextarea name={`${fieldName}.kommentar`} label={text.label.kommentar} minRows={1} hideLabel />
+    ) : (
+        <div className="min-h-8 flex items-center">
+            <BodyLong size="small">{item.kommentar}</BodyLong>
+        </div>
     );
 };
 
