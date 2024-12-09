@@ -354,6 +354,7 @@ export interface AktiveGrunnlagsdata {
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
     sivilstand?: SivilstandAktivGrunnlagDto;
+    stønadTilBarnetilsyn?: StonadTilBarnetilsynAktiveGrunnlagDto;
     /**
      * Erstattes av husstandsmedlem
      * @deprecated
@@ -468,6 +469,32 @@ export interface ArbeidsforholdGrunnlagDto {
     permisjonListe?: Permisjon[];
     /** Liste over registrerte permitteringer */
     permitteringListe?: Permittering[];
+}
+
+export interface BarnetilsynGrunnlagDto {
+    /** Id til personen som mottar barnetilsynet */
+    partPersonId: string;
+    /** Id til barnet barnetilsynet er for */
+    barnPersonId: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil?: string;
+    /**
+     * Beløpet barnetilsynet er på
+     * @format int32
+     */
+    beløp?: number;
+    /** Angir om barnetilsynet er heltid eller deltid */
+    tilsynstype?: BarnetilsynGrunnlagDtoTilsynstypeEnum;
+    /** Angir om barnet er over eller under skolealder */
+    skolealder?: BarnetilsynGrunnlagDtoSkolealderEnum;
 }
 
 export interface BegrunnelseDto {
@@ -659,14 +686,16 @@ export interface GebyrInntektDto {
 
 export interface GebyrRolleDto {
     inntekt: GebyrInntektDto;
-    manueltOverstyrtGebyr?: ManueltOverstyrGebyrDto;
+    beløpGebyrsats: number;
     beregnetIlagtGebyr: boolean;
+    endeligIlagtGebyr: boolean;
+    begrunnelse?: string;
     rolle: RolleDto;
+    erManueltOverstyrt: boolean;
 }
 
 export interface GebyrValideringsfeilDto {
     gjelder: RolleDto;
-    måBestemmeGebyr: boolean;
     manglerBegrunnelse: boolean;
 }
 
@@ -755,6 +784,7 @@ export interface IkkeAktiveGrunnlagsdata {
     arbeidsforhold: ArbeidsforholdGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
     sivilstand?: SivilstandIkkeAktivGrunnlagDto;
+    stønadTilBarnetilsyn?: StonadTilBarnetilsynIkkeAktiveGrunnlagDto;
     /**
      * Erstattes av husstandsmedlem
      * @deprecated
@@ -900,12 +930,6 @@ export interface MaksGodkjentBelopValideringsfeil {
     manglerBeløp: boolean;
     manglerBegrunnelse: boolean;
     harFeil: boolean;
-}
-
-export interface ManueltOverstyrGebyrDto {
-    begrunnelse?: string;
-    /** Skal bare settes hvis det er avslag */
-    ilagtGebyr?: boolean;
 }
 
 export interface OverlappendeBostatusperiode {
@@ -1132,13 +1156,26 @@ export enum SivilstandskodePDL {
     GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
 }
 
+export interface StonadTilBarnetilsynAktiveGrunnlagDto {
+    grunnlag: Record<string, BarnetilsynGrunnlagDto[]>;
+    /** @format date-time */
+    innhentetTidspunkt: string;
+}
+
 export interface StonadTilBarnetilsynDto {
     /** @format int64 */
     id?: number;
     periode: DatoperiodeDto;
-    skolealder: StonadTilBarnetilsynDtoSkolealderEnum;
-    tilsynstype: StonadTilBarnetilsynDtoTilsynstypeEnum;
+    skolealder?: StonadTilBarnetilsynDtoSkolealderEnum;
+    tilsynstype?: StonadTilBarnetilsynDtoTilsynstypeEnum;
     kilde: Kilde;
+}
+
+export interface StonadTilBarnetilsynIkkeAktiveGrunnlagDto {
+    stønadTilBarnetilsyn: Record<string, StonadTilBarnetilsynDto[]>;
+    grunnlag: Record<string, BarnetilsynGrunnlagDto[]>;
+    /** @format date-time */
+    innhentetTidspunkt: string;
 }
 
 export interface SaerbidragKategoriDto {
@@ -1489,6 +1526,7 @@ export interface OppdaterePeriodeInntekt {
 
 export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
+    beregnetGebyrErEndret: boolean;
     /** Periodiserte inntekter */
     beregnetInntekter: BeregnetInntekterDto[];
     /** Oppdatert begrunnelse */
@@ -1501,15 +1539,12 @@ export interface OppdatereInntektResponse {
     notat?: string;
 }
 
-export interface OppdaterManueltGebyrDto {
+export interface OppdaterGebyrDto {
     /** @format int64 */
     rolleId: number;
-    overstyrtGebyr?: ManueltOverstyrGebyrDto;
-}
-
-export interface OppdaterGebyrResponsDto {
-    rolle: RolleDto;
-    overstyrtGebyr?: ManueltOverstyrGebyrDto;
+    /** Om gebyr skal overstyres. Settes til motsatte verdi av beregnet verdi */
+    overstyrGebyr: boolean;
+    begrunnelse?: string;
 }
 
 export interface OppdatereAndreVoksneIHusstanden {
@@ -1795,9 +1830,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1866,9 +1901,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1900,9 +1935,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 
@@ -2497,8 +2532,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
@@ -2527,6 +2562,7 @@ export interface NotatBoforholdDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
+    beregnetBoforhold: DelberegningBoforhold[];
 }
 
 export interface NotatDelberegningBidragsevneDto {
@@ -2549,6 +2585,22 @@ export interface NotatFaktiskTilsynsutgiftDto {
     kostpenger?: number;
     kommentar?: string;
     total: number;
+}
+
+export interface NotatGebyrInntektDto {
+    skattepliktigInntekt: number;
+    maksBarnetillegg?: number;
+    totalInntekt: number;
+}
+
+export interface NotatGebyrRolleDto {
+    inntekt: NotatGebyrInntektDto;
+    manueltOverstyrtGebyr?: NotatManueltOverstyrGebyrDto;
+    beregnetIlagtGebyr: boolean;
+    beløpGebyrsats: number;
+    rolle: NotatPersonDto;
+    gebyrResultatVisningsnavn: string;
+    ilagtGebyr?: boolean;
 }
 
 export interface NotatInntektDto {
@@ -2596,6 +2648,12 @@ export enum NotatMalType {
     BIDRAG = "BIDRAG",
 }
 
+export interface NotatManueltOverstyrGebyrDto {
+    begrunnelse?: string;
+    /** Skal bare settes hvis det er avslag */
+    ilagtGebyr?: boolean;
+}
+
 export interface NotatOffentligeOpplysningerUnderhold {
     gjelder: NotatPersonDto;
     gjelderBarn?: NotatPersonDto;
@@ -2617,9 +2675,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2696,9 +2754,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 
@@ -2835,8 +2893,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2895,6 +2953,7 @@ export interface VedtakNotatDto {
     utgift?: NotatSaerbidragUtgifterDto;
     boforhold: NotatBoforholdDto;
     samvær: NotatSamvaerDto[];
+    gebyr?: NotatGebyrRolleDto[];
     underholdskostnader?: NotatUnderholdDto;
     personer: NotatPersonDto[];
     roller: NotatPersonDto[];
@@ -2964,6 +3023,20 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     OCTOBER = "OCTOBER",
     NOVEMBER = "NOVEMBER",
     DECEMBER = "DECEMBER",
+}
+
+/** Angir om barnetilsynet er heltid eller deltid */
+export enum BarnetilsynGrunnlagDtoTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+/** Angir om barnet er over eller under skolealder */
+export enum BarnetilsynGrunnlagDtoSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
 }
 
 export enum StonadTilBarnetilsynDtoSkolealderEnum {
@@ -3074,7 +3147,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3163,7 +3239,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
@@ -3394,12 +3470,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request PUT:/api/v2/behandling/{behandlingsid}/gebyr
          * @secure
          */
-        oppdaterManueltOverstyrtGebyr: (
-            behandlingsid: number,
-            data: OppdaterManueltGebyrDto,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterGebyrResponsDto, any>({
+        oppdaterManueltOverstyrtGebyr: (behandlingsid: number, data: OppdaterGebyrDto, params: RequestParams = {}) =>
+            this.request<GebyrRolleDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/gebyr`,
                 method: "PUT",
                 body: data,

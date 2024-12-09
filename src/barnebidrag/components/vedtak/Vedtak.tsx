@@ -74,7 +74,7 @@ const VedtakResultat = () => {
         vedtakstype,
     } = useGetBehandlingV2();
 
-    const erAvslag = avslag != null;
+    const erAvslag = avslag !== null;
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => (
