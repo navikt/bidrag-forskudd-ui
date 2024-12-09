@@ -18,6 +18,7 @@ export const BarnebidragSideMenu = () => {
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
+        gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
         roller,
         underholdskostnader,
@@ -453,7 +454,7 @@ export const BarnebidragSideMenu = () => {
                 step={"4."}
                 title={text.title.gebyr}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
-                interactive={interactive}
+                interactive={!!gebyr}
                 active={activeButton === BarnebidragStepper.GEBYR}
             />
             <MenuButton
