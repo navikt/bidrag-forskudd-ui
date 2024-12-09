@@ -73,6 +73,7 @@ const Main = () => {
     const { setSaveErrorState } = useBehandlingProvider();
     const {
         gebyr: { gebyrRoller },
+        virkningstidspunkt: { avslag },
     } = useGetBehandlingV2();
     const { control, getValues, setValue } = useFormContext<GebyrFormValues>();
     const barnFieldArray = useFieldArray({
@@ -159,14 +160,20 @@ const Main = () => {
                                 <Label size="small">{text.label.skattepliktigeInntekt}:</Label>
                                 <BodyShort size="small">{formatterBeløp(item.inntekt.skattepliktigInntekt)}</BodyShort>
                             </div>
-                            <div className="flex gap-x-2">
-                                <Label size="small">{text.label.høyesteBarnetillegg}:</Label>
-                                <BodyShort size="small">{formatterBeløp(item.inntekt.maksBarnetillegg)}</BodyShort>
-                            </div>
-                            <div className="flex gap-x-2">
-                                <Label size="small">{text.label.totalt}:</Label>
-                                <BodyShort size="small">{formatterBeløp(item.inntekt.totalInntekt)}</BodyShort>
-                            </div>
+                            {!avslag && (
+                                <>
+                                    <div className="flex gap-x-2">
+                                        <Label size="small">{text.label.høyesteBarnetillegg}:</Label>
+                                        <BodyShort size="small">
+                                            {formatterBeløp(item.inntekt.maksBarnetillegg)}
+                                        </BodyShort>
+                                    </div>
+                                    <div className="flex gap-x-2">
+                                        <Label size="small">{text.label.totalt}:</Label>
+                                        <BodyShort size="small">{formatterBeløp(item.inntekt.totalInntekt)}</BodyShort>
+                                    </div>
+                                </>
+                            )}
                             <div className="flex gap-x-2">
                                 <GebyrSelect fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
                                 {item.endeligIlagtGebyr === EndeligIlagtGebyr.Ilagt && (
