@@ -1,3 +1,4 @@
+import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
@@ -14,6 +15,8 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import { STEPS } from "../../../constants/steps";
+import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnUpdateGebyr } from "../../../hooks/useOnUpdateGebyr";
 import { EndeligIlagtGebyr, GebyrFormValues } from "../../../types/gebyrFormValues";
 import { createInitialValues } from "../helpers/GebryFormHelpers";
@@ -58,6 +61,12 @@ const GebyrSelect = ({ fieldName, onSave }: { fieldName: `gebyrRoller.${number}`
 const booleanValueOfEndeligIlagtGebyr = {
     [EndeligIlagtGebyr.Ilagt]: true,
     [EndeligIlagtGebyr.Fritatt]: false,
+};
+
+const Side = () => {
+    const { onStepChange } = useBehandlingProvider();
+
+    return <ActionButtons onNext={() => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD])} />;
 };
 
 const Main = () => {
@@ -193,7 +202,7 @@ const GebyrForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <NewFormLayout title="Gebyr" main={<Main />} pageAlert={<NyOpplysningerAlert />} />
+                <NewFormLayout title="Gebyr" main={<Main />} side={<Side />} pageAlert={<NyOpplysningerAlert />} />
             </form>
         </FormProvider>
     );
