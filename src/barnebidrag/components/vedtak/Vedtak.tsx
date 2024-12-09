@@ -246,13 +246,13 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "50px" }}>
                     Evne / 25%
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "220px" }}>
                     Beregnet bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "220px" }}>
                     Endelig bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "400px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     Resultat
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "54px" }}></Table.HeaderCell>
