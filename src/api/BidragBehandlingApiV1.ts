@@ -1905,9 +1905,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2013,6 +2013,7 @@ export interface BidragPeriodeBeregningsdetaljer {
 export interface DelberegningBarnetilleggDto {
     barnetillegg: BarnetilleggDetaljerDto[];
     skattFaktor: number;
+    sumInntekt: number;
     sumNettoBeløp: number;
     sumBruttoBeløp: number;
 }
@@ -2319,13 +2320,13 @@ export enum Grunnlagstype {
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
     INNHENTET_SIVILSTAND = "INNHENTET_SIVILSTAND",
     INNHENTET_ARBEIDSFORHOLD = "INNHENTET_ARBEIDSFORHOLD",
-    INNHENTETTILLEGGSTONAD = "INNHENTET_TILLEGGSTØNAD",
+    INNHENTETTILLEGGSSTONAD = "INNHENTET_TILLEGGSSTØNAD",
+    INNHENTET_BARNETILSYN = "INNHENTET_BARNETILSYN",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
     INNHENTET_INNTEKT_AORDNING = "INNHENTET_INNTEKT_AORDNING",
     INNHENTET_INNTEKT_BARNETILLEGG = "INNHENTET_INNTEKT_BARNETILLEGG",
     INNHENTETINNTEKTKONTANTSTOTTE = "INNHENTET_INNTEKT_KONTANTSTØTTE",
     INNHENTET_INNTEKT_AINNTEKT = "INNHENTET_INNTEKT_AINNTEKT",
-    INNHENTET_INNTEKT_BARNETILSYN = "INNHENTET_INNTEKT_BARNETILSYN",
     INNHENTETINNTEKTSMABARNSTILLEGG = "INNHENTET_INNTEKT_SMÅBARNSTILLEGG",
     INNHENTET_INNTEKT_UTVIDETBARNETRYGD = "INNHENTET_INNTEKT_UTVIDETBARNETRYGD",
     UNNTAK = "UNNTAK",
@@ -2506,6 +2507,8 @@ export interface NotatAndreVoksneIHusstandenDetaljerDto {
 
 export interface NotatBarnetilsynOffentligeOpplysninger {
     periode: TypeArManedsperiode;
+    tilsynstype?: NotatBarnetilsynOffentligeOpplysningerTilsynstypeEnum;
+    skolealder?: NotatBarnetilsynOffentligeOpplysningerSkolealderEnum;
 }
 
 /** Notat begrunnelse skrevet av saksbehandler */
@@ -2538,8 +2541,8 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2602,9 +2605,11 @@ export interface NotatGebyrRolleDto {
     inntekt: NotatGebyrInntektDto;
     manueltOverstyrtGebyr?: NotatManueltOverstyrGebyrDto;
     beregnetIlagtGebyr: boolean;
+    endeligIlagtGebyr: boolean;
+    begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    ilagtGebyr?: boolean;
+    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
 }
 
@@ -2673,6 +2678,7 @@ export interface NotatPersonDto {
     fødselsdato?: string;
     ident?: string;
     erBeskyttet: boolean;
+    innbetaltBeløp?: number;
 }
 
 export interface NotatResultatBeregningInntekterDto {
@@ -2680,9 +2686,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -3071,6 +3077,18 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
 export enum VedtakDtoKildeEnum {
     MANUELT = "MANUELT",
     AUTOMATISK = "AUTOMATISK",
+}
+
+export enum NotatBarnetilsynOffentligeOpplysningerTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+export enum NotatBarnetilsynOffentligeOpplysningerSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
 }
 
 export enum NotatBehandlingDetaljerDtoMonthEnum {

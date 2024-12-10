@@ -14,8 +14,6 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
-    const inntekt =
-        rolle === Rolletype.BP ? beregningsdetaljer.inntekter.inntektBP : beregningsdetaljer.inntekter.inntektBM;
     return (
         <div>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
@@ -31,7 +29,7 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                         label: "Inntekt siste 12 mnd",
                         textRight: false,
                         labelBold: true,
-                        value: formatterBeløpForBeregning(inntekt),
+                        value: formatterBeløpForBeregning(barnetillegg.sumInntekt),
                     },
                 ].filter((d) => d)}
             />
