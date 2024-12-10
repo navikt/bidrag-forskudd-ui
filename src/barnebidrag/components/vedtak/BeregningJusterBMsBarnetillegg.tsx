@@ -14,7 +14,6 @@ export const BeregningJusterBMsBarnetillegg = () => {
         }
         return "";
     }
-    if (barnetilleggBM.barnetillegg.length === 0) return null;
 
     return (
         <ResultatTable
