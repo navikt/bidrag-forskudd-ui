@@ -19,6 +19,7 @@ import {
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
 import { RolleTag } from "../../../common/components/RolleTag";
+import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
@@ -74,12 +75,24 @@ const VedtakResultat = () => {
         vedtakstype,
     } = useGetBehandlingV2();
 
-    const erAvslag = avslag != null;
+    const erAvslag = avslag !== null && avslag !== undefined;
     return (
         <VedtakWrapper feil={beregning.feil} steps={STEPS}>
             {beregning.resultat?.resultatBarn?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
+                    {r.barn.innbetaltBeløp && (
+                        <ResultatTable
+                            data={[
+                                {
+                                    label: "Innbetalt beløp",
+                                    textRight: false,
+                                    labelBold: true,
+                                    value: formatterBeløpForBeregning(r.barn.innbetaltBeløp),
+                                },
+                            ].filter((d) => d)}
+                        />
+                    )}
                     <Table size="small">
                         <VedtakTableHeader avslag={erAvslag} />
                         <VedtakTableBody

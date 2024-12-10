@@ -139,6 +139,7 @@ export enum OpplysningerType {
     SMABARNSTILLEGG = "SMÅBARNSTILLEGG",
     SKATTEPLIKTIGE_INNTEKTER = "SKATTEPLIKTIGE_INNTEKTER",
     SUMMERTEMANEDSINNTEKTER = "SUMMERTE_MÅNEDSINNTEKTER",
+    TILLEGGSSTONAD = "TILLEGGSSTØNAD",
     AINNTEKT = "AINNTEKT",
     SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
     BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
@@ -354,6 +355,7 @@ export interface AktiveGrunnlagsdata {
     husstandsmedlem: HusstandsmedlemGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
     sivilstand?: SivilstandAktivGrunnlagDto;
+    stønadTilBarnetilsyn?: StonadTilBarnetilsynAktiveGrunnlagDto;
     /**
      * Erstattes av husstandsmedlem
      * @deprecated
@@ -468,6 +470,32 @@ export interface ArbeidsforholdGrunnlagDto {
     permisjonListe?: Permisjon[];
     /** Liste over registrerte permitteringer */
     permitteringListe?: Permittering[];
+}
+
+export interface BarnetilsynGrunnlagDto {
+    /** Id til personen som mottar barnetilsynet */
+    partPersonId: string;
+    /** Id til barnet barnetilsynet er for */
+    barnPersonId: string;
+    /**
+     * Periode fra-dato
+     * @format date
+     */
+    periodeFra: string;
+    /**
+     * Periode til-dato
+     * @format date
+     */
+    periodeTil?: string;
+    /**
+     * Beløpet barnetilsynet er på
+     * @format int32
+     */
+    beløp?: number;
+    /** Angir om barnetilsynet er heltid eller deltid */
+    tilsynstype?: BarnetilsynGrunnlagDtoTilsynstypeEnum;
+    /** Angir om barnet er over eller under skolealder */
+    skolealder?: BarnetilsynGrunnlagDtoSkolealderEnum;
 }
 
 export interface BegrunnelseDto {
@@ -659,14 +687,16 @@ export interface GebyrInntektDto {
 
 export interface GebyrRolleDto {
     inntekt: GebyrInntektDto;
-    manueltOverstyrtGebyr?: ManueltOverstyrGebyrDto;
+    beløpGebyrsats: number;
     beregnetIlagtGebyr: boolean;
+    endeligIlagtGebyr: boolean;
+    begrunnelse?: string;
     rolle: RolleDto;
+    erManueltOverstyrt: boolean;
 }
 
 export interface GebyrValideringsfeilDto {
     gjelder: RolleDto;
-    måBestemmeGebyr: boolean;
     manglerBegrunnelse: boolean;
 }
 
@@ -755,6 +785,7 @@ export interface IkkeAktiveGrunnlagsdata {
     arbeidsforhold: ArbeidsforholdGrunnlagDto[];
     andreVoksneIHusstanden?: AndreVoksneIHusstandenGrunnlagDto;
     sivilstand?: SivilstandIkkeAktivGrunnlagDto;
+    stønadTilBarnetilsyn?: StonadTilBarnetilsynIkkeAktiveGrunnlagDto;
     /**
      * Erstattes av husstandsmedlem
      * @deprecated
@@ -811,6 +842,8 @@ export interface InntektDtoV2 {
     /** @uniqueItems true */
     inntektstyper: Inntektstype[];
     historisk?: boolean;
+    /** Avrundet månedsbeløp for barnetillegg */
+    månedsbeløp?: number;
 }
 
 /** Periodisert inntekt per barn */
@@ -900,12 +933,6 @@ export interface MaksGodkjentBelopValideringsfeil {
     manglerBeløp: boolean;
     manglerBegrunnelse: boolean;
     harFeil: boolean;
-}
-
-export interface ManueltOverstyrGebyrDto {
-    begrunnelse?: string;
-    /** Skal bare settes hvis det er avslag */
-    ilagtGebyr?: boolean;
 }
 
 export interface OverlappendeBostatusperiode {
@@ -1002,6 +1029,7 @@ export interface RolleDto {
     navn?: string;
     /** @format date */
     fødselsdato?: string;
+    harInnvilgetTilleggsstønad?: boolean;
 }
 
 /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
@@ -1024,9 +1052,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
+    harPeriodiseringsfeil: boolean;
 }
 
 export interface SamvaersperiodeDto {
@@ -1132,13 +1160,26 @@ export enum SivilstandskodePDL {
     GJENLEVENDE_PARTNER = "GJENLEVENDE_PARTNER",
 }
 
+export interface StonadTilBarnetilsynAktiveGrunnlagDto {
+    grunnlag: Record<string, BarnetilsynGrunnlagDto[]>;
+    /** @format date-time */
+    innhentetTidspunkt: string;
+}
+
 export interface StonadTilBarnetilsynDto {
     /** @format int64 */
     id?: number;
     periode: DatoperiodeDto;
-    skolealder: StonadTilBarnetilsynDtoSkolealderEnum;
-    tilsynstype: StonadTilBarnetilsynDtoTilsynstypeEnum;
+    skolealder?: StonadTilBarnetilsynDtoSkolealderEnum;
+    tilsynstype?: StonadTilBarnetilsynDtoTilsynstypeEnum;
     kilde: Kilde;
+}
+
+export interface StonadTilBarnetilsynIkkeAktiveGrunnlagDto {
+    stønadTilBarnetilsyn: Record<string, StonadTilBarnetilsynDto[]>;
+    grunnlag: Record<string, BarnetilsynGrunnlagDto[]>;
+    /** @format date-time */
+    innhentetTidspunkt: string;
 }
 
 export interface SaerbidragKategoriDto {
@@ -1372,9 +1413,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
+    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
-    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1489,6 +1530,7 @@ export interface OppdaterePeriodeInntekt {
 
 export interface OppdatereInntektResponse {
     inntekt?: InntektDtoV2;
+    beregnetGebyrErEndret: boolean;
     /** Periodiserte inntekter */
     beregnetInntekter: BeregnetInntekterDto[];
     /** Oppdatert begrunnelse */
@@ -1501,15 +1543,12 @@ export interface OppdatereInntektResponse {
     notat?: string;
 }
 
-export interface OppdaterManueltGebyrDto {
+export interface OppdaterGebyrDto {
     /** @format int64 */
     rolleId: number;
-    overstyrtGebyr?: ManueltOverstyrGebyrDto;
-}
-
-export interface OppdaterGebyrResponsDto {
-    rolle: RolleDto;
-    overstyrtGebyr?: ManueltOverstyrGebyrDto;
+    /** Om gebyr skal overstyres. Settes til motsatte verdi av beregnet verdi */
+    overstyrGebyr: boolean;
+    begrunnelse?: string;
 }
 
 export interface OppdatereAndreVoksneIHusstanden {
@@ -1866,9 +1905,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1900,8 +1939,8 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -1937,6 +1976,7 @@ export interface ResultatRolle {
     navn: string;
     /** @format date */
     fødselsdato: string;
+    innbetaltBeløp?: number;
 }
 
 export interface BarnetilleggDetaljerDto {
@@ -1973,6 +2013,7 @@ export interface BidragPeriodeBeregningsdetaljer {
 export interface DelberegningBarnetilleggDto {
     barnetillegg: BarnetilleggDetaljerDto[];
     skattFaktor: number;
+    sumInntekt: number;
     sumNettoBeløp: number;
     sumBruttoBeløp: number;
 }
@@ -2279,13 +2320,13 @@ export enum Grunnlagstype {
     INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN = "INNHENTET_ANDRE_VOKSNE_I_HUSSTANDEN",
     INNHENTET_SIVILSTAND = "INNHENTET_SIVILSTAND",
     INNHENTET_ARBEIDSFORHOLD = "INNHENTET_ARBEIDSFORHOLD",
-    INNHENTETTILLEGGSTONAD = "INNHENTET_TILLEGGSTØNAD",
+    INNHENTETTILLEGGSSTONAD = "INNHENTET_TILLEGGSSTØNAD",
+    INNHENTET_BARNETILSYN = "INNHENTET_BARNETILSYN",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
     INNHENTET_INNTEKT_AORDNING = "INNHENTET_INNTEKT_AORDNING",
     INNHENTET_INNTEKT_BARNETILLEGG = "INNHENTET_INNTEKT_BARNETILLEGG",
     INNHENTETINNTEKTKONTANTSTOTTE = "INNHENTET_INNTEKT_KONTANTSTØTTE",
     INNHENTET_INNTEKT_AINNTEKT = "INNHENTET_INNTEKT_AINNTEKT",
-    INNHENTET_INNTEKT_BARNETILSYN = "INNHENTET_INNTEKT_BARNETILSYN",
     INNHENTETINNTEKTSMABARNSTILLEGG = "INNHENTET_INNTEKT_SMÅBARNSTILLEGG",
     INNHENTET_INNTEKT_UTVIDETBARNETRYGD = "INNHENTET_INNTEKT_UTVIDETBARNETRYGD",
     UNNTAK = "UNNTAK",
@@ -2466,6 +2507,8 @@ export interface NotatAndreVoksneIHusstandenDetaljerDto {
 
 export interface NotatBarnetilsynOffentligeOpplysninger {
     periode: TypeArManedsperiode;
+    tilsynstype?: NotatBarnetilsynOffentligeOpplysningerTilsynstypeEnum;
+    skolealder?: NotatBarnetilsynOffentligeOpplysningerSkolealderEnum;
 }
 
 /** Notat begrunnelse skrevet av saksbehandler */
@@ -2497,9 +2540,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2527,6 +2570,7 @@ export interface NotatBoforholdDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
+    beregnetBoforhold: DelberegningBoforhold[];
 }
 
 export interface NotatDelberegningBidragsevneDto {
@@ -2549,6 +2593,24 @@ export interface NotatFaktiskTilsynsutgiftDto {
     kostpenger?: number;
     kommentar?: string;
     total: number;
+}
+
+export interface NotatGebyrInntektDto {
+    skattepliktigInntekt: number;
+    maksBarnetillegg?: number;
+    totalInntekt: number;
+}
+
+export interface NotatGebyrRolleDto {
+    inntekt: NotatGebyrInntektDto;
+    manueltOverstyrtGebyr?: NotatManueltOverstyrGebyrDto;
+    beregnetIlagtGebyr: boolean;
+    endeligIlagtGebyr: boolean;
+    begrunnelse?: string;
+    beløpGebyrsats: number;
+    rolle: NotatPersonDto;
+    erManueltOverstyrt: boolean;
+    gebyrResultatVisningsnavn: string;
 }
 
 export interface NotatInntektDto {
@@ -2596,6 +2658,12 @@ export enum NotatMalType {
     BIDRAG = "BIDRAG",
 }
 
+export interface NotatManueltOverstyrGebyrDto {
+    begrunnelse?: string;
+    /** Skal bare settes hvis det er avslag */
+    ilagtGebyr?: boolean;
+}
+
 export interface NotatOffentligeOpplysningerUnderhold {
     gjelder: NotatPersonDto;
     gjelderBarn?: NotatPersonDto;
@@ -2610,6 +2678,7 @@ export interface NotatPersonDto {
     fødselsdato?: string;
     ident?: string;
     erBeskyttet: boolean;
+    innbetaltBeløp?: number;
 }
 
 export interface NotatResultatBeregningInntekterDto {
@@ -2617,9 +2686,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2696,8 +2765,8 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2835,8 +2904,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -2895,6 +2964,7 @@ export interface VedtakNotatDto {
     utgift?: NotatSaerbidragUtgifterDto;
     boforhold: NotatBoforholdDto;
     samvær: NotatSamvaerDto[];
+    gebyr?: NotatGebyrRolleDto[];
     underholdskostnader?: NotatUnderholdDto;
     personer: NotatPersonDto[];
     roller: NotatPersonDto[];
@@ -2966,6 +3036,20 @@ export enum AnsettelsesdetaljerMonthEnum1 {
     DECEMBER = "DECEMBER",
 }
 
+/** Angir om barnetilsynet er heltid eller deltid */
+export enum BarnetilsynGrunnlagDtoTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+/** Angir om barnet er over eller under skolealder */
+export enum BarnetilsynGrunnlagDtoSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
 export enum StonadTilBarnetilsynDtoSkolealderEnum {
     OVER = "OVER",
     UNDER = "UNDER",
@@ -2993,6 +3077,18 @@ export enum InitalizeForsendelseRequestBehandlingStatusEnum {
 export enum VedtakDtoKildeEnum {
     MANUELT = "MANUELT",
     AUTOMATISK = "AUTOMATISK",
+}
+
+export enum NotatBarnetilsynOffentligeOpplysningerTilsynstypeEnum {
+    HELTID = "HELTID",
+    DELTID = "DELTID",
+    IKKE_ANGITT = "IKKE_ANGITT",
+}
+
+export enum NotatBarnetilsynOffentligeOpplysningerSkolealderEnum {
+    OVER = "OVER",
+    UNDER = "UNDER",
+    IKKE_ANGITT = "IKKE_ANGITT",
 }
 
 export enum NotatBehandlingDetaljerDtoMonthEnum {
@@ -3394,12 +3490,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request PUT:/api/v2/behandling/{behandlingsid}/gebyr
          * @secure
          */
-        oppdaterManueltOverstyrtGebyr: (
-            behandlingsid: number,
-            data: OppdaterManueltGebyrDto,
-            params: RequestParams = {}
-        ) =>
-            this.request<OppdaterGebyrResponsDto, any>({
+        oppdaterManueltOverstyrtGebyr: (behandlingsid: number, data: OppdaterGebyrDto, params: RequestParams = {}) =>
+            this.request<GebyrRolleDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/gebyr`,
                 method: "PUT",
                 body: data,

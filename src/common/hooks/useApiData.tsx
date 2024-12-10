@@ -8,6 +8,7 @@ import {
     BeregningValideringsfeil,
     DelberegningSamvaersklasse,
     FaktiskTilsynsutgiftDto,
+    GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
@@ -18,6 +19,7 @@ import {
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
+    OppdaterGebyrDto,
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
@@ -47,6 +49,11 @@ import { AxiosError } from "axios";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
+    oppdaterManueltOverstyrtGebyr: (behandlingId: string) => [
+        "mutation",
+        "oppdaterManueltOverstyrtGebyr",
+        behandlingId,
+    ],
     oppdatereTilsynsordning: (behandlingId: string) => ["mutation", "oppdatereTilsynsordning", behandlingId],
     oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
     oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
@@ -691,6 +698,23 @@ export const useUpdateHarTilysnsordning = (underholdsid: number) => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av tilsynsordning", error);
+        },
+    });
+};
+
+export const useUpdateGebyr = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterManueltOverstyrtGebyr(behandlingId),
+        mutationFn: async (payload: OppdaterGebyrDto): Promise<GebyrRolleDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterManueltOverstyrtGebyr(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av gebyr", error);
         },
     });
 };

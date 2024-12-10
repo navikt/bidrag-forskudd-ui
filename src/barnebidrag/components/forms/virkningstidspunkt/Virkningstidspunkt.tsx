@@ -259,6 +259,7 @@ const VirkningstidspunktForm = () => {
                         inntekter: response.inntekter,
                         samvær: response.samvær,
                         underholdskostnader: response.underholdskostnader,
+                        gebyr: response.gebyr,
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });
