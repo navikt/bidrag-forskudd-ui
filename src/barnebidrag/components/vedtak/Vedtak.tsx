@@ -244,7 +244,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
             </Table.Row>
         ) : (
             <Table.Row>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "330px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     {text.label.periode}
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "80px" }}>
@@ -259,13 +259,13 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "50px" }}>
                     Evne / 25%
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
                     Beregnet bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "200px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
                     Endelig bidrag
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "400px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     Resultat
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "54px" }}></Table.HeaderCell>

@@ -62,15 +62,17 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
             <BodyShort size="small">
                 <HStack justify={"space-between"}>
                     <Heading size="xsmall">Regelmessig samvær</Heading>
-                    <Button
-                        size="xsmall"
-                        variant="tertiary"
-                        onClick={() => {
-                            setValue(`${fieldname}.beregning`, createSamværskalkulatorDefaultvalues());
-                        }}
-                    >
-                        Nullstill
-                    </Button>
+                    {!viewOnly && (
+                        <Button
+                            size="xsmall"
+                            variant="tertiary"
+                            onClick={() => {
+                                setValue(`${fieldname}.beregning`, createSamværskalkulatorDefaultvalues());
+                            }}
+                        >
+                            Nullstill
+                        </Button>
+                    )}
                 </HStack>
                 {viewOnly ? (
                     <HStack gap="2">

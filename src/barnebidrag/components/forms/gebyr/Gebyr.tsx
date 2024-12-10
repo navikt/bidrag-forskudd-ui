@@ -66,8 +66,15 @@ const booleanValueOfEndeligIlagtGebyr = {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
+    const {
+        virkningstidspunkt: { avslag },
+    } = useGetBehandlingV2();
 
-    return <ActionButtons onNext={() => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD])} />;
+    return (
+        <ActionButtons
+            onNext={() => onStepChange(avslag ? STEPS[BarnebidragStepper.VEDTAK] : STEPS[BarnebidragStepper.BOFORHOLD])}
+        />
+    );
 };
 
 const Main = () => {
