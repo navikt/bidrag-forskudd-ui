@@ -22,16 +22,17 @@ import { EndeligIlagtGebyr, GebyrFormValues } from "../../../types/gebyrFormValu
 import { createInitialValues } from "../helpers/GebryFormHelpers";
 
 const Begrunnelse = ({ fieldName, onSave }: { fieldName: `gebyrRoller.${number}`; onSave: () => void }) => {
-    const { control } = useFormContext<GebyrFormValues>();
-    const watchBegrunnelse = useWatch({ control, name: `${fieldName}.begrunnelse` });
-
+    const { watch } = useFormContext<GebyrFormValues>();
     const debouncedOnSave = useDebounce(onSave);
 
     useEffect(() => {
-        if (watchBegrunnelse !== undefined) {
-            debouncedOnSave();
-        }
-    }, [watchBegrunnelse]);
+        const subscription = watch((value, { name, type }) => {
+            if (`${fieldName}.begrunnelse` === name && type === "change") {
+                debouncedOnSave();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [fieldName, watch]);
 
     return (
         <FormControlledTextarea
