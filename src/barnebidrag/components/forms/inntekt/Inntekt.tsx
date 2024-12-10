@@ -137,7 +137,7 @@ const Side = () => {
             }
         );
     };
-    const onNext = () => onStepChange(STEPS[BarnebidragStepper.BOFORHOLD]);
+    const onNext = () => onStepChange(STEPS[BarnebidragStepper.GEBYR]);
 
     const debouncedOnSave = useDebounce(onSave);
 
