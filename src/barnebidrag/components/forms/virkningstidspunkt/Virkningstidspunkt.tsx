@@ -173,12 +173,15 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
+    const { gebyr } = useGetBehandlingV2();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
         onStepChange(
             avslagsListe.includes(årsakAvslag)
-                ? STEPS[BarnebidragStepper.VEDTAK]
+                ? gebyr !== undefined
+                    ? STEPS[BarnebidragStepper.GEBYR]
+                    : STEPS[BarnebidragStepper.VEDTAK]
                 : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]
         );
 
