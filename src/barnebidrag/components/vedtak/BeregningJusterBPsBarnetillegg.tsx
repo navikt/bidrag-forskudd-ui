@@ -5,7 +5,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 // eslint-disable-next-line no-empty-pattern
 export const BeregningJusterBPsBarnetillegg = () => {
     const {
-        beregningsdetaljer: { sluttberegning },
+        beregningsdetaljer: { sluttberegning, barnetilleggBP },
     } = useBidragBeregningPeriode();
 
     function renderResult() {
@@ -14,11 +14,13 @@ export const BeregningJusterBPsBarnetillegg = () => {
         }
         return "";
     }
+
     function hentForeløpigBidrag() {
         if (sluttberegning.bidragJustertForNettoBarnetilleggBP)
             return formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP);
         return formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent);
     }
+    if (barnetilleggBP.barnetillegg.length === 0) return null;
     return (
         <div>
             <ResultatTable

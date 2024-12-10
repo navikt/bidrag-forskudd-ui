@@ -14,6 +14,7 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
+    if (barnetillegg.barnetillegg.length === 0) return null;
     return (
         <div>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
