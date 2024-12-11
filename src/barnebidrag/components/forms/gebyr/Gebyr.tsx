@@ -6,11 +6,12 @@ import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { PersonNavn } from "@common/components/PersonNavn";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
+import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { BodyShort, Label } from "@navikt/ds-react";
+import { BodyShort, Box, Label } from "@navikt/ds-react";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
@@ -48,7 +49,7 @@ const GebyrSelect = ({ fieldName, onSave }: { fieldName: `gebyrRoller.${number}`
     return (
         <FormControlledSelectField
             name={`${fieldName}.endeligIlagtGebyr`}
-            className="w-fit"
+            className="w-fit h-max"
             label={text.label.gebyr}
             options={[
                 { value: EndeligIlagtGebyr.Fritatt, text: text.select.fritatt },
@@ -151,8 +152,12 @@ const Main = () => {
                 const onSaveFn = onSave(`gebyrRoller.${index}`);
                 return (
                     <Fragment key={item.id}>
-                        <div className="grid gap-y-2">
-                            <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-solid border-[var(--a-border-default)]">
+                        <Box
+                            background="surface-subtle"
+                            className="grid gap-2 py-2 px-4"
+                            id={`${elementIds.seksjon_boforhold}_${item.id}`}
+                        >
+                            <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white">
                                 <div>
                                     <RolleTag rolleType={item.rolle.rolletype} />
                                 </div>
@@ -185,18 +190,21 @@ const Main = () => {
                             <div className="flex gap-x-2">
                                 <GebyrSelect fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
                                 {item.endeligIlagtGebyr === EndeligIlagtGebyr.Ilagt && (
-                                    <div className="self-end flex gap-x-2">
-                                        <Label size="small">{text.label.beløp}:</Label>
-                                        <BodyShort size="small">{formatterBeløp(item.beløpGebyrsats)}</BodyShort>
+                                    <div className="h-[60px] flex">
+                                        <div className="flex self-end gap-x-2">
+                                            <Label size="small">{text.label.beløp}:</Label>
+                                            <BodyShort size="small">{formatterBeløp(item.beløpGebyrsats)}</BodyShort>
+                                        </div>
+                                    </div>
+                                )}
+                                {booleanValueOfEndeligIlagtGebyr[item.endeligIlagtGebyr] !==
+                                    item.beregnetIlagtGebyr && (
+                                    <div>
+                                        <Begrunnelse fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
                                     </div>
                                 )}
                             </div>
-                            {booleanValueOfEndeligIlagtGebyr[item.endeligIlagtGebyr] !== item.beregnetIlagtGebyr && (
-                                <div>
-                                    <Begrunnelse fieldName={`gebyrRoller.${index}`} onSave={onSaveFn} />
-                                </div>
-                            )}
-                        </div>
+                        </Box>
                     </Fragment>
                 );
             })}
