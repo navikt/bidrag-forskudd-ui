@@ -1061,6 +1061,8 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
+    gjelderBarn?: string;
+    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
     gjelderBarnNavn?: string;
     gjelderBarn?: string;
@@ -1864,6 +1866,11 @@ export interface SjekkRolleDto {
     erUkjent?: boolean;
 }
 
+export interface FatteVedtakRequestDto {
+    /** @format int64 */
+    innkrevingUtsattAntallDager?: number;
+}
+
 export interface BeregnetBidragPerBarn {
     gjelderBarn: string;
     saksnummer: string;
@@ -1957,9 +1964,10 @@ export interface Skatt {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2786,9 +2794,10 @@ export interface NotatSkattBeregning {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3707,11 +3716,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @request POST:/api/v2/behandling/fattevedtak/{behandlingsid}
          * @secure
          */
-        fatteVedtak: (behandlingsid: number, params: RequestParams = {}) =>
+        fatteVedtak: (behandlingsid: number, data: FatteVedtakRequestDto, params: RequestParams = {}) =>
             this.request<number, any>({
                 path: `/api/v2/behandling/fattevedtak/${behandlingsid}`,
                 method: "POST",
+                body: data,
                 secure: true,
+                type: ContentType.Json,
                 format: "json",
                 ...params,
             }),
