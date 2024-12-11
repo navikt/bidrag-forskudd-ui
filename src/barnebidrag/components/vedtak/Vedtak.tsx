@@ -18,6 +18,7 @@ import {
     Samvaersklasse,
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
+import NavnIdent from "../../../common/components/NavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -136,7 +137,7 @@ const VedtakTableBody = ({
                     ) : (
                         <Table.ExpandableRow
                             togglePlacement="right"
-                            expansionDisabled={periode.beregningsdetaljer.sluttberegning.barnetErSelvforsørget}
+                            expansionDisabled={periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget}
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
                             <Table.DataCell textSize="small">
@@ -224,7 +225,7 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
         <RolleTag rolleType={Rolletype.BA} />
         <BodyShort>
-            {barn.navn} / <span className="ml-1">{barn.ident}</span>
+            <NavnIdent ident={barn.ident} navn={barn.navn} />
         </BodyShort>
     </div>
 );

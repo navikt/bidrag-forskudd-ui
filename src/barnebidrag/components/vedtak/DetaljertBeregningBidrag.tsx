@@ -38,8 +38,8 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
         <VStack gap="6" className={"w-[800px]"}>
             <BidragBeregningContext.Provider value={{ beregningsdetaljer }}>
                 <BPsAndelUnderholdskostnad />
-                {!periode.beregningsdetaljer.deltBosted && <BeregningSamværsfradrag />}
-                {!periode.beregningsdetaljer.deltBosted && (
+                {!beregningsdetaljer.deltBosted && <BeregningSamværsfradrag />}
+                {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBM.barnetillegg.length > 0 && (
                     <VStack gap="2">
                         <NettoBarnetilleggTable rolle={Rolletype.BM} />
                         <BeregningJusterBMsBarnetillegg />
@@ -52,7 +52,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     />
                     <BeregningFordeltBidrag />
                 </VStack>
-                {!periode.beregningsdetaljer.deltBosted && (
+                {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBP.barnetillegg.length > 0 && (
                     <VStack gap="2">
                         <NettoBarnetilleggTable rolle={Rolletype.BP} />
                         <BeregningJusterBPsBarnetillegg />

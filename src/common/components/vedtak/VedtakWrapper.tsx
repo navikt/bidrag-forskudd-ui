@@ -128,16 +128,6 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             {rolletypeTilVisningsnavn(value.gjelder)})
                         </ErrorSummary.Item>
                     );
-                if (value.måBestemmeGebyr)
-                    feilliste.push(
-                        <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
-                            onClick={() => onStepChange(steps.gebyr)}
-                        >
-                            Gebyr: Må velge om gebyr skal bli ilagt eller ikke ved avslag (
-                            {rolletypeTilVisningsnavn(value.gjelder)})
-                        </ErrorSummary.Item>
-                    );
             });
         }
         if (feilInnhold.husstandsmedlem != null) {
@@ -310,6 +300,8 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
 
 const opplysningTilStep = (opplysningstype: MaBekrefteNyeOpplysninger, steps: STEPSTYPE) => {
     switch (opplysningstype.type) {
+        case OpplysningerType.BARNETILSYN:
+            return "underholdskostnad" in steps ? steps.underholdskostnad : steps.vedtak;
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
         case OpplysningerType.SMABARNSTILLEGG:
         case OpplysningerType.UTVIDET_BARNETRYGD:
