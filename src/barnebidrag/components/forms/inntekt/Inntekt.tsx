@@ -112,6 +112,7 @@ const Side = () => {
                 onSuccess: (response) => {
                     saveInntekt.queryClientUpdater((currentData) => ({
                         ...currentData,
+                        gebyr: currentData.gebyr,
                         inntekter: {
                             ...currentData.inntekter,
                             begrunnelser: currentData.inntekter.begrunnelser

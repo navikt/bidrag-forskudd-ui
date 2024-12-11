@@ -309,12 +309,12 @@ export const InntektTabel = ({
 
                 return {
                     ...currentData,
+                    gebyr: response.gebyr,
                     inntekter: {
                         ...currentData.inntekter,
                         [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
                         valideringsfeil: response.valideringsfeil,
-                        gebyr: response.gebyr,
                     },
                 };
             });
