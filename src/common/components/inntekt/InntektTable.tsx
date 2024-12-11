@@ -314,6 +314,7 @@ export const InntektTabel = ({
                         [inntektType]: sortedUpdatedInntekter,
                         beregnetInntekter: response.beregnetInntekter,
                         valideringsfeil: response.valideringsfeil,
+                        gebyr: response.gebyr,
                     },
                 };
             });
@@ -335,6 +336,7 @@ export const InntektTabel = ({
                             ),
                             beregnetInntekter: response.beregnetInntekter,
                             valideringsfeil: response.valideringsfeil,
+                            gebyr: response.gebyr,
                         },
                     };
                 });
