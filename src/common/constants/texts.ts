@@ -298,7 +298,7 @@ export const mapOpplysningtypeSomMåBekreftesTilFeilmelding = (
                 tekster.alert.nyeOpplysningerMåBekreftes
             } for ${tekster.title.barnetillegg.toLowerCase()}${forRolle}`;
         case OpplysningerType.BARNETILSYN:
-            return `Inntekter: ${tekster.alert.nyeOpplysningerMåBekreftes} for barnetilsyn ${forRolle}`;
+            return `Underholdskostnad: ${tekster.alert.nyeOpplysningerMåBekreftes} for barnetilsyn`;
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
             return `Inntekter: ${
                 tekster.alert.nyeOpplysningerMåBekreftes
