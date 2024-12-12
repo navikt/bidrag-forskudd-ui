@@ -1,5 +1,6 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
@@ -18,7 +19,7 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormValues } from "@common/types/inntektFormValues";
-import { Tabs } from "@navikt/ds-react";
+import { BodyShort, Heading, Tabs } from "@navikt/ds-react";
 import { getSearchParam } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -30,6 +31,7 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
+    const { beregnetGebyrErEndret, lesemodus } = useBehandlingProvider();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
@@ -55,41 +57,51 @@ const Main = () => {
     const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
-        <Tabs
-            defaultValue={defaultTab}
-            value={selectedTab}
-            onChange={updateSearchparamForTab}
-            className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
-        >
-            <Tabs.List>
-                {roller.map((rolle, index) => (
-                    <Tabs.Tab
-                        key={rolle.ident + index}
-                        value={rolle.id.toString()}
-                        label={
-                            <div className="flex flex-row gap-1">
-                                {ROLE_FORKORTELSER[rolle.rolletype]}
-                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
-                            </div>
-                        }
-                    />
-                ))}
-            </Tabs.List>
-            {roller.map((rolle) => {
-                return (
-                    <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
-                        <Tabs.Panel value={rolle.id.toString()} className="grid gap-y-4">
-                            <div className="mt-4">
-                                <InntektHeader ident={rolle.ident} />
-                            </div>
-                            {inntekterTablesViewRules[type][rolle.rolletype].map((tableType, index) => (
-                                <Fragment key={tableType + index}>{InntektTableComponent[tableType]()}</Fragment>
-                            ))}
-                        </Tabs.Panel>
-                    </InntektTableProvider>
-                );
-            })}
-        </Tabs>
+        <>
+            {beregnetGebyrErEndret && !lesemodus && (
+                <BehandlingAlert variant="info" className="mb-4">
+                    <Heading size="xsmall" level="6">
+                        {text.alert.gebyrHarBlittEndret}.
+                    </Heading>
+                    <BodyShort size="small">{text.alert.gebyrHarBlittEndretDescription}</BodyShort>
+                </BehandlingAlert>
+            )}
+            <Tabs
+                defaultValue={defaultTab}
+                value={selectedTab}
+                onChange={updateSearchparamForTab}
+                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
+            >
+                <Tabs.List>
+                    {roller.map((rolle, index) => (
+                        <Tabs.Tab
+                            key={rolle.ident + index}
+                            value={rolle.id.toString()}
+                            label={
+                                <div className="flex flex-row gap-1">
+                                    {ROLE_FORKORTELSER[rolle.rolletype]}
+                                    {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                                </div>
+                            }
+                        />
+                    ))}
+                </Tabs.List>
+                {roller.map((rolle) => {
+                    return (
+                        <InntektTableProvider key={rolle.ident} rolle={rolle} type={type}>
+                            <Tabs.Panel value={rolle.id.toString()} className="grid gap-y-4">
+                                <div className="mt-4">
+                                    <InntektHeader ident={rolle.ident} />
+                                </div>
+                                {inntekterTablesViewRules[type][rolle.rolletype].map((tableType, index) => (
+                                    <Fragment key={tableType + index}>{InntektTableComponent[tableType]()}</Fragment>
+                                ))}
+                            </Tabs.Panel>
+                        </InntektTableProvider>
+                    );
+                })}
+            </Tabs>
+        </>
     );
 };
 
