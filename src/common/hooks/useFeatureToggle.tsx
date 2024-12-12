@@ -7,6 +7,7 @@ export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK === "true";
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
+    const utvikler = useFlag("bidrag.utvikler");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
@@ -27,6 +28,7 @@ export default function useFeatureToogle() {
     }, [enableFatteVedtak, enableAdmin]);
     return {
         isAdminEnabled: enableAdmin,
+        isDeveloper: utvikler,
         isFatteVedtakEnabled: enableFatteVedtak,
         isbehandlingVesntremenyEnabled: enableBehandlingVesntremeny,
     };

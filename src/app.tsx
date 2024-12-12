@@ -200,11 +200,21 @@ export default function App() {
 }
 
 function HideSensitiveInfoButton() {
-    const [isHiding, setIsHiding] = useState(false);
-    const { isAdminEnabled } = useFeatureToogle();
+    const { isAdminEnabled, isDeveloper } = useFeatureToogle();
+    const [isHiding, setIsHiding] = useState(isDeveloper);
+    useEffect(() => {
+        if (isDeveloper) {
+            document.body.classList.add("blur-sensitive-info");
+            setIsHiding(true);
+        }
+        if (!isAdminEnabled) {
+            document.body.classList.remove("blur-sensitive-info");
+            setIsHiding(false);
+        }
+    }, [isDeveloper, isAdminEnabled]);
     if (!isAdminEnabled) return null;
     return (
-        <div className="fixed left-2 bottom-2">
+        <div className="fixed left-2 bottom-2 z-50">
             <Button
                 size="small"
                 variant="tertiary-neutral"
