@@ -196,7 +196,8 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState, setBeregnetGebyrErEndret } =
+        useBehandlingProvider();
     const {
         inntekter,
         søktFomDato,
@@ -361,7 +362,10 @@ export const InntektTabel = ({
         index?: number
     ) => {
         saveInntekt.mutation.mutate(updatedValues, {
-            onSuccess: (response) => onSaveSuccess?.(response),
+            onSuccess: (response) => {
+                setBeregnetGebyrErEndret(response.beregnetGebyrErEndret);
+                onSaveSuccess?.(response);
+            },
             onError: () => {
                 setSaveErrorState({
                     error: true,

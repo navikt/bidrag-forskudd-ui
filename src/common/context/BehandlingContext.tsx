@@ -41,6 +41,7 @@ interface IBehandlingContext {
     type: TypeBehandling;
     lesemodus: boolean;
     erVedtakFattet: boolean;
+    beregnetGebyrErEndret: boolean;
     erVirkningstidspunktNåværendeMånedEllerFramITid: boolean;
     saksnummer?: string;
     errorMessage: { title: string; text: string };
@@ -62,6 +63,7 @@ interface IBehandlingContext {
     onStepChange: (x: number, query?: Record<string, string>, hash?: string) => void;
     pendingTransitionState: boolean;
     setDebouncing: React.Dispatch<React.SetStateAction<boolean>>;
+    setBeregnetGebyrErEndret: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
@@ -115,6 +117,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
+    const [beregnetGebyrErEndret, setBeregnetGebyrErEndret] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
     const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
     const location = useLocation();
@@ -186,6 +189,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             behandlingId,
             vedtakId,
             erVirkningstidspunktNåværendeMånedEllerFramITid,
+            beregnetGebyrErEndret,
             type: behandling.type,
             lesemodus:
                 vedtakId != null ||
@@ -205,6 +209,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             onConfirm,
             onStepChange,
             setDebouncing,
+            setBeregnetGebyrErEndret,
         }),
         [
             activeStep,

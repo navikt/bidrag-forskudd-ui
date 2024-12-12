@@ -24,6 +24,9 @@ const tekster = {
         enEllerFlereSivilstandPerioderEndret: "En eller flere sivilstandsperioder har blitt endret",
         feilIPeriodisering: "Feil i periodisering",
         feilVedInnhentingAvOffentligData: "Data fra offentlig registre feiler",
+        gebyrHarBlittEndret: "Gebry har blitt endret",
+        gebyrHarBlittEndretDescription:
+            "Inntektsendringen har endret gebyrvurderingen. Kontroller om gebyrvurderingen er korrekt.",
         nyOpplysninger: "Nye opplysninger fra offentlig register vil erstatte de gamle",
         nyOpplysningerBoforhold: "Vil du ta i bruk de nye opplysningene?",
         nyOpplysningerInfo: "Nye opplysninger fra offentlig register er tilgjengelig.",
