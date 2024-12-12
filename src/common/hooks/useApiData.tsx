@@ -253,7 +253,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
     return behandling;
 };
 
-export const useHentPersonData = (ident: string) =>
+export const useHentPersonData = (ident?: string) =>
     useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {

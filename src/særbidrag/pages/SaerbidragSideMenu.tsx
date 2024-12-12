@@ -8,6 +8,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../common/components/PersonIdent";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
@@ -80,7 +81,11 @@ export const SaerbidragSideMenu = () => {
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton
-                            title={`${rolle.rolletype} ${rolle.ident}`}
+                            title={
+                                <div className="flex flex-row gap-1">
+                                    {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                </div>
+                            }
                             onStepChange={() =>
                                 onStepChange(STEPS[SærligeutgifterStepper.INNTEKT], {
                                     [behandlingQueryKeys.tab]: rolle.id.toString(),

@@ -4,6 +4,24 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "forskudd.css";
+.blur-sensitive-info .personnavn,
+.blur-sensitive-info .personinfo,
+.blur-sensitive-info .personident {
+  filter: blur(5px);
+  transition: filter 0.3s ease-in-out;
+}
+
+.blur-sensitive-info:hover {
+  filter: none;
+}
+.blur-sensitive-info {
+  filter: blur(5px);
+  transition: filter 0.3s ease-in-out;
+}
+
+.blur-sensitive-info:hover {
+  filter: none;
+}
 
 .bd_datadisplay dt:after {
     content: ":";

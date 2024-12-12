@@ -8,6 +8,8 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../common/components/PersonIdent";
+import { PersonNavn } from "../../common/components/PersonNavn";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
@@ -78,7 +80,11 @@ export const BarnebidragSideMenu = () => {
                     .map((underhold, index) => (
                         <Fragment key={underhold.id}>
                             <MenuButton
-                                title={`BA ${underhold.gjelderBarn.ident}`}
+                                title={
+                                    <>
+                                        BA <PersonIdent ident={underhold.gjelderBarn.ident} />
+                                    </>
+                                }
                                 onStepChange={() =>
                                     onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
                                         [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
@@ -189,7 +195,7 @@ export const BarnebidragSideMenu = () => {
                                     .map((underhold) => (
                                         <MenuButton
                                             key={underhold.gjelderBarn.id}
-                                            title={`${underhold.gjelderBarn.navn}`}
+                                            title={<PersonNavn navn={underhold.gjelderBarn.navn} />}
                                             onStepChange={() =>
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
@@ -222,7 +228,11 @@ export const BarnebidragSideMenu = () => {
                 subMenu={inntektRoller.map((rolle) => (
                     <Fragment key={rolle.id}>
                         <MenuButton
-                            title={`${rolle.rolletype} ${rolle.ident}`}
+                            title={
+                                <div className="flex flex-row gap-1">
+                                    {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                </div>
+                            }
                             onStepChange={() =>
                                 onStepChange(STEPS[BarnebidragStepper.INNTEKT], {
                                     [behandlingQueryKeys.tab]: rolle.id.toString(),

@@ -101,7 +101,7 @@ export const BarnPerioder = () => {
                             <div className="flex items-center gap-4">
                                 <BodyShort size="small" className="font-bold">
                                     {item.medIBehandling && <PersonNavn ident={item.ident}></PersonNavn>}
-                                    {!item.medIBehandling && item.navn}
+                                    {!item.medIBehandling && <span className="personnavn">{item.navn}</span>}
                                 </BodyShort>
                                 <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(item.fødselsdato))}</BodyShort>
                             </div>

@@ -92,7 +92,7 @@ const VoksneIHusstandPeriodePersonerButton = ({
                         {husstandsmedlemmer.map((husstandsmedlem, index) => {
                             return (
                                 <li key={husstandsmedlem.navn + "-" + index}>
-                                    {husstandsmedlem.navn} (
+                                    <span className="personnavn">{husstandsmedlem.navn}</span> (
                                     {DateToDDMMYYYYString(dateOrNull(husstandsmedlem.fødselsdato))})
                                     {husstandsmedlem.harRelasjonTilBp && ", relasjon til BP"}
                                 </li>

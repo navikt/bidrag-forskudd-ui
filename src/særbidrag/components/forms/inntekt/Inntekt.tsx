@@ -22,6 +22,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
@@ -68,9 +69,12 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                            [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
-                        }`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER[rolle.rolletype]}
+                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                            </div>
+                        }
                     />
                 ))}
             </Tabs.List>

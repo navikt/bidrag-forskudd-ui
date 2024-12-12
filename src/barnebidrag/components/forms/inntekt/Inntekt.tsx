@@ -24,6 +24,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
@@ -65,9 +66,12 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident + index}
                         value={rolle.id.toString()}
-                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                            rolle.rolletype === Rolletype.BM ? "" : rolle.ident
-                        }`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER[rolle.rolletype]}
+                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                            </div>
+                        }
                     />
                 ))}
             </Tabs.List>

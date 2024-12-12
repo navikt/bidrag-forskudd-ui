@@ -22,6 +22,7 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -72,9 +73,12 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                            rolle.rolletype === Rolletype.BM ? "" : rolle.ident
-                        }`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER[rolle.rolletype]}
+                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                            </div>
+                        }
                     />
                 ))}
             </Tabs.List>
