@@ -2,8 +2,8 @@ import React from "react";
 
 import { useHentPersonData } from "../hooks/useApiData";
 
-export const PersonNavn = ({ ident }: { ident: string }) => {
-    const { data: personData } = useHentPersonData(ident);
+export const PersonNavn = ({ ident, navn }: { ident?: string; navn?: string }) => {
+    const { data: personData } = useHentPersonData(navn ? undefined : ident);
 
-    return <>{personData.visningsnavn}</>;
+    return <span className="personnavn">{navn ?? personData.visningsnavn}</span>;
 };

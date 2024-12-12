@@ -16,12 +16,13 @@ import {
     pageMeta,
     ReactIntegration,
 } from "@grafana/faro-react";
+import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
 import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
-import { Loader } from "@navikt/ds-react";
+import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
+import React, { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
 import {
     BrowserRouter,
     createRoutesFromChildren,
@@ -137,6 +138,8 @@ export default function App() {
                         </div>
                     }
                 >
+                    <HideSensitiveInfoButton />
+
                     <BrowserRouter>
                         <FaroRoutes>
                             <Route path="/sak/:saksnummer/behandling/:behandlingId">
@@ -193,6 +196,25 @@ export default function App() {
                 </Suspense>
             </QueryClientProvider>
         </FlagProvider>
+    );
+}
+
+function HideSensitiveInfoButton() {
+    const [isHiding, setIsHiding] = useState(false);
+    const { isAdminEnabled } = useFeatureToogle();
+    if (!isAdminEnabled) return null;
+    return (
+        <div className="fixed right-2 bottom-2">
+            <Button
+                size="small"
+                variant="tertiary-neutral"
+                icon={isHiding ? <EyeIcon /> : <EyeObfuscatedIcon />}
+                onClick={() => {
+                    document.body.classList.toggle("blur-sensitive-info");
+                    setIsHiding(document.body.classList.contains("blur-sensitive-info"));
+                }}
+            ></Button>
+        </div>
     );
 }
 function ForskuddBrukerveiledningPageWrapper() {

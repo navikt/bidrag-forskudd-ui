@@ -9,7 +9,7 @@ import {
 } from "@navikt/aksel-icons";
 import { Button, VStack } from "@navikt/ds-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactElement, ReactNode, useEffect, useState } from "react";
 
 export const MenuButton = ({
     step,
@@ -23,7 +23,7 @@ export const MenuButton = ({
     interactive = true,
 }: {
     step?: string;
-    title: string;
+    title: string | ReactElement;
     onStepChange: () => void;
     interactive?: boolean;
     subMenu?: ReactNode;
@@ -76,7 +76,7 @@ export const MenuButton = ({
                         </span>
                     )}
                     {step && <span>{step}</span>}
-                    <span className={`text-left ${!subMenu && size === "small" ? "font-normal" : ""}`}>{title}</span>
+                    <span className={`text-left ${!subMenu && size === "small" ? "font-normal" : ""} `}>{title}</span>
                     <span>
                         {subMenu && (
                             <ChevronDownIcon

@@ -2,7 +2,6 @@ import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "@api/Bidra
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
@@ -15,6 +14,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
+import PersonNavnIdent from "../PersonNavnIdent";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
@@ -97,12 +97,7 @@ export const Barnetillegg = () => {
                                 <div className="w-8 mr-2 h-max">
                                     <RolleTag rolleType={Rolletype.BA} />
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <BodyShort size="small" className="font-bold">
-                                        <PersonNavn ident={barn.ident}></PersonNavn>
-                                    </BodyShort>
-                                    <BodyShort size="small">{barn.ident}</BodyShort>
-                                </div>
+                                <PersonNavnIdent ident={barn.ident} />
                             </div>
                         )}
                         <InntektTabel

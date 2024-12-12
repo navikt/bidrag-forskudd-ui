@@ -13,6 +13,7 @@ import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } fro
 import React, { ChangeEvent, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
+import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { useOnUpdateHarTilysnsordning } from "../../../hooks/useOnUpdateHarTilysnsordning";
 import { UnderholdkostnadsFormPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { BarnetilsynTabel } from "./BarnetilsynTabel";
@@ -145,12 +146,7 @@ export const RolleInfoBox = ({
                 <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
                     <div className="flex">
                         {underhold.gjelderBarn.medIBehandlingen && <RolleTag rolleType={Rolletype.BA} />}
-                        <div className="flex items-center gap-4">
-                            <BodyShort size="small" className="font-bold">
-                                {underhold.gjelderBarn.navn}
-                            </BodyShort>
-                            <BodyShort size="small">{underhold.gjelderBarn.ident}</BodyShort>
-                        </div>
+                        <PersonNavnIdent ident={underhold.gjelderBarn.ident} navn={underhold.gjelderBarn.navn} />
                     </div>
                     {!underhold.gjelderBarn.medIBehandlingen && (
                         <>

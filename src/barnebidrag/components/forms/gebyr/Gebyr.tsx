@@ -3,7 +3,6 @@ import { FormControlledSelectField } from "@common/components/formFields/FormCon
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import { RolleTag } from "@common/components/RolleTag";
 import elementIds from "@common/constants/elementIds";
@@ -16,6 +15,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnUpdateGebyr } from "../../../hooks/useOnUpdateGebyr";
@@ -161,12 +161,7 @@ const Main = () => {
                                 <div>
                                     <RolleTag rolleType={item.rolle.rolletype} />
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <BodyShort size="small" className="font-bold">
-                                        <PersonNavn ident={item.rolle.ident}></PersonNavn>
-                                    </BodyShort>
-                                    <BodyShort size="small">{item.rolle.ident}</BodyShort>
-                                </div>
+                                <PersonNavnIdent ident={item.rolle.ident} />
                             </div>
 
                             <div className="flex gap-x-2">

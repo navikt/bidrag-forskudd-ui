@@ -1,14 +1,14 @@
 import { Inntektsrapportering, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { InntektFormPeriode } from "@common/types/inntektFormValues";
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { Box, Heading, Table } from "@navikt/ds-react";
 import React from "react";
 
 import elementId from "../../constants/elementIds";
+import PersonNavnIdent from "../PersonNavnIdent";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed, Totalt } from "./InntektTable";
 import { useInntektTableProvider } from "./InntektTableContext";
@@ -35,12 +35,7 @@ export const Kontantstøtte = () => {
                                 <div className="w-8 mr-2 h-max">
                                     <RolleTag rolleType={Rolletype.BA} />
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <BodyShort size="small" className="font-bold">
-                                        <PersonNavn ident={barn.ident}></PersonNavn>
-                                    </BodyShort>
-                                    <BodyShort size="small">{barn.ident}</BodyShort>
-                                </div>
+                                <PersonNavnIdent ident={barn.ident} />
                             </div>
                         )}
                         <InntektTabel fieldName={`kontantstøtte.${ident}.${barn.ident}` as const}>

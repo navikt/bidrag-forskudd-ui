@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
@@ -47,7 +48,11 @@ const Main = () => {
                     <Tabs.Tab
                         key={`tab-${underhold.id}-${index}`}
                         value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
-                        label={`${ROLE_FORKORTELSER.BA} ${underhold.gjelderBarn.ident}`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
+                            </div>
+                        }
                     />
                 ))}
                 <Tabs.Tab

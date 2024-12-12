@@ -2,6 +2,7 @@ import { BarnDto, SletteUnderholdselementTypeEnum } from "@api/BidragBehandlingA
 import { AddBarnForm } from "@common/components/AddBarnForm";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { PlusIcon } from "@navikt/aksel-icons";
 import { Button } from "@navikt/ds-react";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
@@ -89,8 +90,9 @@ export const AndreBarn = () => {
                     type="button"
                     onClick={() => setOpenForm(true)}
                     variant="secondary"
-                    iconPosition="right"
+                    iconPosition="left"
                     className="w-max"
+                    icon={<PlusIcon />}
                     size="small"
                 >
                     {text.label.leggTilBarn}

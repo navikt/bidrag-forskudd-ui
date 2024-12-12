@@ -18,7 +18,7 @@ import {
     Samvaersklasse,
     Vedtakstype,
 } from "../../../api/BidragBehandlingApiV1";
-import NavnIdent from "../../../common/components/NavnIdent";
+import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
 import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
@@ -225,7 +225,7 @@ const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
         <RolleTag rolleType={Rolletype.BA} />
         <BodyShort>
-            <NavnIdent ident={barn.ident} navn={barn.navn} />
+            <PersonNavnIdent ident={barn.ident} navn={barn.navn} variant="compact" />
         </BodyShort>
     </div>
 );
