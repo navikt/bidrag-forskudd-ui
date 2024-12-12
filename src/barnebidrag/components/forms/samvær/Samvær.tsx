@@ -195,17 +195,6 @@ const Main = () => {
     const rolle = roller[0];
     return (
         <>
-            <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
-                <div>
-                    <RolleTag rolleType={Rolletype.BA} />
-                </div>
-                <div className="flex items-center gap-4">
-                    <BodyShort size="small" className="font-bold">
-                        <PersonNavn ident={rolle.ident}></PersonNavn>
-                    </BodyShort>
-                    <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull())}</BodyShort>
-                </div>
-            </div>
             <SamværBarn gjelderBarn={rolle.ident} />
         </>
     );
@@ -434,6 +423,15 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 className="overflow-hidden grid gap-2 py-2 px-4 w-full"
                 id={`${elementIds.seksjon_samvær}_${samværId}`}
             >
+                <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white">
+                    <div>
+                        <RolleTag rolleType={Rolletype.BA} />
+                    </div>
+                    <BodyShort size="small" className="flex items-center gap-4">
+                        <PersonNavn bold ident={gjelderBarn}></PersonNavn>
+                        <span>{DateToDDMMYYYYString(dateOrNull())}</span>
+                    </BodyShort>
+                </div>
                 {valideringsfeil?.harPeriodiseringsfeil && (
                     <div className="mb-4">
                         <BehandlingAlert variant="warning">
