@@ -204,7 +204,7 @@ function HideSensitiveInfoButton() {
     const { isAdminEnabled } = useFeatureToogle();
     if (!isAdminEnabled) return null;
     return (
-        <div className="fixed right-2 bottom-2">
+        <div className="fixed left-2 bottom-2">
             <Button
                 size="small"
                 variant="tertiary-neutral"
