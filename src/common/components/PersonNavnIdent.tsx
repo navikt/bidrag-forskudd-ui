@@ -14,13 +14,9 @@ export default function PersonNavnIdent({
 }) {
     if (variant === "default") {
         return (
-            <BodyShort className="flex items-center gap-4">
-                <BodyShort size="small" className="font-bold">
-                    <PersonNavn navn={navn} ident={ident} />
-                </BodyShort>
-                <BodyShort size="small">
-                    <PersonIdent ident={ident} />
-                </BodyShort>
+            <BodyShort size="small" className="flex items-center gap-4">
+                <PersonNavn bold navn={navn} ident={ident} />
+                <PersonIdent ident={ident} />
             </BodyShort>
         );
     }
