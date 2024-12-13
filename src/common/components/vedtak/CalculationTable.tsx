@@ -2,7 +2,8 @@ import { Heading, Label, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
-    label: string;
+    label: string | ReactElement;
+    labelBold?: boolean;
     value?: string | number | ReactElement;
     result: string | number | ReactElement;
 }
@@ -49,6 +50,7 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title
 };
 
 export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+    const harBeregning = data.some((d) => d.value);
     return (
         <div className={className}>
             {title && <Heading size="xsmall">{title}</Heading>}
@@ -58,9 +60,11 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, tit
                     <Table.HeaderCell textSize="small" className="w-[250px]">
                         Beskrivelse
                     </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
-                        Beregning
-                    </Table.HeaderCell>
+                    {harBeregning && (
+                        <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                            Beregning
+                        </Table.HeaderCell>
+                    )}
                     <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
                         Beløp
                     </Table.HeaderCell>
@@ -68,10 +72,14 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, tit
                 <Table.Body>
                     {data.map((row, rowIndex) => (
                         <Table.Row key={rowIndex}>
-                            <Table.DataCell textSize="small">{row.label}</Table.DataCell>
-                            <Table.DataCell textSize="small" align="right">
-                                {row.value}
+                            <Table.DataCell textSize="small" className={`${row.labelBold ? "font-bold" : ""}`}>
+                                {row.label}
                             </Table.DataCell>
+                            {harBeregning && (
+                                <Table.DataCell textSize="small" align="right">
+                                    {row.value}
+                                </Table.DataCell>
+                            )}
                             <Table.DataCell textSize="small" align="right">
                                 {row.result}
                             </Table.DataCell>

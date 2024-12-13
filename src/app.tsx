@@ -203,7 +203,21 @@ function HideSensitiveInfoButton() {
     const { isAdminEnabled, isDeveloper } = useFeatureToogle();
     const [isHiding, setIsHiding] = useState(isDeveloper);
     useEffect(() => {
-        if (isDeveloper) {
+        const eventListener = (e) => {
+            if (e.ctrlKey && e.key === "ø") {
+                document.body.classList.toggle("blur-sensitive-info");
+                window.localStorage.setItem(
+                    "blur-sensitive-info",
+                    document.body.classList.contains("blur-sensitive-info").toString()
+                );
+            }
+        };
+        document.addEventListener("keydown", eventListener);
+        return () => document.removeEventListener("keydown", eventListener);
+    }, []);
+    useEffect(() => {
+        const isEnabled = isDeveloper || window.localStorage.getItem("blur-sensitive-info") === "true";
+        if (isEnabled) {
             document.body.classList.add("blur-sensitive-info");
             setIsHiding(true);
         }

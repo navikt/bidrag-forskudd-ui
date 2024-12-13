@@ -8,6 +8,7 @@ import { useFormContext } from "react-hook-form";
 
 import { formatterBeløpForBeregning } from "../../../../utils/number-utils";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import BeregningsdetaljerUnderholdskostnad from "./BeregningsdetaljerUnderholdskostnad";
 
 export const BeregnetUnderholdskostnad = ({
     underholdFieldName,
@@ -30,10 +31,10 @@ export const BeregnetUnderholdskostnad = ({
                 <Table size="small" className="table-fixed table bg-white w-fit">
                     <Table.Header>
                         <Table.Row className="align-baseline">
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                            <Table.HeaderCell textSize="small" scope="col" className="w-[124px]">
                                 {text.label.fraOgMed}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
+                            <Table.HeaderCell textSize="small" scope="col" className="w-[124px]">
                                 {text.label.tilOgMed}
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[75px]">
@@ -42,7 +43,7 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[90px]">
                                 {text.label.boutgifter}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[125px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[115px]">
                                 {text.label.stønadTilBarnetilsyn}
                             </Table.HeaderCell>
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[100px]">
@@ -51,14 +52,30 @@ export const BeregnetUnderholdskostnad = ({
                             <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[95px]">
                                 {text.label.barnetrygd}
                             </Table.HeaderCell>
-                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[155px]">
+                            <Table.HeaderCell textSize="small" scope="col" align="right" className="w-[145px]">
                                 {text.label.underholdskostnad}
                             </Table.HeaderCell>
+                            <Table.HeaderCell
+                                textSize="small"
+                                scope="col"
+                                align="right"
+                                className="w-[50px]"
+                            ></Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
                         {beregnetUnderholdskostnad.map((underholdskostnad, index) => (
-                            <Table.Row key={`underholdskostnad-${index}`} className="align-top">
+                            <Table.ExpandableRow
+                                expansionDisabled={!underholdskostnad.beregningsdetaljer}
+                                content={
+                                    <BeregningsdetaljerUnderholdskostnad
+                                        detaljer={underholdskostnad.beregningsdetaljer}
+                                    />
+                                }
+                                key={`underholdskostnad-${index}`}
+                                togglePlacement="right"
+                                className="align-top"
+                            >
                                 <Table.DataCell>
                                     <BodyShort size="small">
                                         {DateToDDMMYYYYString(dateOrNull(underholdskostnad.periode.fom))}
@@ -99,7 +116,7 @@ export const BeregnetUnderholdskostnad = ({
                                         {formatterBeløpForBeregning(underholdskostnad.total)}
                                     </BodyShort>
                                 </Table.DataCell>
-                            </Table.Row>
+                            </Table.ExpandableRow>
                         ))}
                     </Table.Body>
                 </Table>
