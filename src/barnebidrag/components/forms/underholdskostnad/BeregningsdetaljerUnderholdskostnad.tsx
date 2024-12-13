@@ -38,23 +38,23 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                             value: `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)}`,
                         },
                         {
-                            label: "Søknadsbarn andel",
+                            label: "Søknadsbarnets andel",
                             textRight: false,
                             labelBold: true,
-                            value: `${formatterBeløpForBeregning(detaljer.endeligBeløp)} / ${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
+                            value: `${formatterBeløpForBeregning(detaljer.faktiskBeløp)} / ${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
                         },
                     ].filter((d) => d)}
                 />
             )}
             <CalculationTabellV2
-                title="Beregning av tilsysnutgifter"
+                title="Beregnet tilsysnutgifter"
                 data={[
                     {
                         label: "Faktisk beløp",
                         value: detaljer.erBegrensetAvMaksTilsyn
                             ? `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} x ${formatterProsent(detaljer.fordelingFaktor)}`
                             : undefined,
-                        result: `${formatterBeløpForBeregning(detaljer.faktiskBeløp)}`,
+                        result: `${formatterBeløpForBeregning(detaljer.andelBeløp)}`,
                     },
                     {
                         label: "Skattefradrag",
