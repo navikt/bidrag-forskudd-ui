@@ -46,6 +46,28 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                     ].filter((d) => d)}
                 />
             )}
+            <ResultatTable
+                data={[
+                    {
+                        label: "Sjablon maksfradrag",
+                        textRight: false,
+                        labelBold: true,
+                        value: `${formatterBeløpForBeregning(detaljer.sjablonMaksFradrag)}`,
+                    },
+                    {
+                        label: "Skattesats",
+                        textRight: false,
+                        labelBold: true,
+                        value: `${formatterProsent(detaljer.skattAlminneligInntektFaktor)}`,
+                    },
+                    {
+                        label: "Maksfradrag andel",
+                        textRight: false,
+                        labelBold: true,
+                        value: `${formatterBeløpForBeregning(detaljer.sjablonMaksFradrag)} / ${formatterBeløpForBeregning(detaljer.sjablonAntallBarn)}  = ${formatterBeløpForBeregning(detaljer.maksFradragAndel)}`,
+                    },
+                ].filter((d) => d)}
+            />
             <CalculationTabellV2
                 title="Beregnet tilsysnutgifter"
                 data={[
@@ -58,6 +80,7 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                     },
                     {
                         label: "Skattefradrag",
+                        value: `${formatterBeløpForBeregning(detaljer.beløpTrukkeFraSkattefradrag)} x ${formatterProsent(detaljer.skattAlminneligInntektFaktor)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradrag)}`,
                     },
                     {

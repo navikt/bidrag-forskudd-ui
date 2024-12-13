@@ -63,7 +63,7 @@ export const BeregnetUnderholdskostnad = ({
                             ></Table.HeaderCell>
                         </Table.Row>
                     </Table.Header>
-                    <Table.Body>
+                    <Table.Body className="[&_.navds-table\_\_toggle-expand-cell]:p-0">
                         {beregnetUnderholdskostnad.map((underholdskostnad, index) => (
                             <Table.ExpandableRow
                                 expansionDisabled={!underholdskostnad.beregningsdetaljer}

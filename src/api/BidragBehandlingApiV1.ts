@@ -567,6 +567,10 @@ export interface BeregnetInntekterDto {
 export interface Beregningsdetaljer {
     tilsynsutgifterBarn: TilsynsutgiftBarn[];
     sjablonMaksTilsynsutgift: number;
+    sjablonMaksFradrag: number;
+    /** @format int32 */
+    sjablonAntallBarn: number;
+    skattAlminneligInntektFaktor: number;
     totalTilsynsutgift: number;
     sumTilsynsutgifter: number;
     endeligBeløp: number;
@@ -576,7 +580,8 @@ export interface Beregningsdetaljer {
     erBegrensetAvMaksTilsyn: boolean;
     fordelingFaktor: number;
     skattefradrag: number;
-    skattefradragFaktor: number;
+    maksFradragAndel: number;
+    beløpTrukkeFraSkattefradrag: number;
 }
 
 export interface BoforholdDtoV2 {
@@ -1067,8 +1072,8 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
 }
 
@@ -1437,9 +1442,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
+    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
-    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1935,9 +1940,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1969,8 +1974,8 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2571,9 +2576,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
 }
 
@@ -2655,9 +2660,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -2719,9 +2724,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2798,8 +2803,8 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
@@ -2937,8 +2942,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    avslagVisningsnavn?: string;
     årsakVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
