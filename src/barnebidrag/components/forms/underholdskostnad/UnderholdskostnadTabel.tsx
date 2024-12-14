@@ -114,15 +114,12 @@ export const UnderholdskostnadTabel = ({
 
                     return {
                         ...currentData,
-                        underholdskostnader: currentData.underholdskostnader.toSpliced(
-                            Number(cachedUnderholdIndex),
-                            1,
-                            {
+                        underholdskostnader: currentData.underholdskostnader
+                            .toSpliced(Number(cachedUnderholdIndex), 1, {
                                 ...currentData.underholdskostnader[cachedUnderholdIndex],
                                 [underholdskostnadType]: updatedListe,
-                                underholdskostnad: response.underholdskostnad,
-                            }
-                        ),
+                            })
+                            .map((u) => ({ ...u, underholdskostnad: response.underholdskostnad })),
                     };
                 });
             },
