@@ -569,21 +569,20 @@ export interface Beregningsdetaljer {
     sjablonMaksTilsynsutgift: number;
     sjablonMaksFradrag: number;
     /** @format int32 */
-    sjablonAntallBarn: number;
+    antallBarn: number;
     skattesatsFaktor: number;
     totalTilsynsutgift: number;
     sumTilsynsutgifter: number;
-    endeligBeløp: number;
-    bruttoBeløp: number;
-    andelBeløp: number;
-    nettoBeløp: number;
+    faktiskTilsynsutgift: number;
+    bruttoTilsynsutgift: number;
+    nettoTilsynsutgift: number;
     erBegrensetAvMaksTilsyn: boolean;
     fordelingFaktor: number;
     skattefradragPerBarn: number;
-    maksFradragAndel: number;
+    maksfradragAndel: number;
     skattefradrag: number;
-    skattMaksFradrag: number;
-    skattTotalTilsynsutgift: number;
+    skattefradragMaksFradrag: number;
+    skattefradragTotalTilsynsutgift: number;
 }
 
 export interface BoforholdDtoV2 {

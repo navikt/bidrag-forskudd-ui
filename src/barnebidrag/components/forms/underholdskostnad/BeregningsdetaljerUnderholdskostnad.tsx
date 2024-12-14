@@ -41,7 +41,7 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                             label: "Andel søknadsbarn",
                             textRight: false,
                             labelBold: true,
-                            value: `${formatterBeløpForBeregning(detaljer.bruttoBeløp)} / ${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
+                            value: `${formatterBeløpForBeregning(detaljer.faktiskTilsynsutgift)} / ${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
                         },
                     ].filter((d) => d)}
                 />
@@ -52,12 +52,12 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                     {
                         label: "Maksfradrag",
                         value: `${formatterBeløpForBeregning(detaljer.sjablonMaksFradrag)} X ${formatterProsent(detaljer.skattesatsFaktor)}`,
-                        result: formatterBeløpForBeregning(detaljer.skattMaksFradrag),
+                        result: formatterBeløpForBeregning(detaljer.skattefradragMaksFradrag),
                     },
                     {
                         label: "Total tilsynsutgift",
                         value: `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} X ${formatterProsent(detaljer.skattesatsFaktor)}`,
-                        result: formatterBeløpForBeregning(detaljer.skattTotalTilsynsutgift),
+                        result: formatterBeløpForBeregning(detaljer.skattefradragTotalTilsynsutgift),
                     },
                     {
                         label: "Skattefradrag (laveste verdi)",
@@ -70,21 +70,21 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                 title="Beregnet tilsynsutgifter"
                 data={[
                     {
-                        label: "Faktisk beløp",
+                        label: "Brutto beløp",
                         value: detaljer.erBegrensetAvMaksTilsyn
                             ? `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} x ${formatterProsent(detaljer.fordelingFaktor)}`
                             : undefined,
-                        result: `${formatterBeløpForBeregning(detaljer.andelBeløp)}`,
+                        result: `${formatterBeløpForBeregning(detaljer.bruttoTilsynsutgift)}`,
                     },
                     {
                         label: "Skattefradrag (per barn)",
-                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.sjablonAntallBarn)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarn)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
                     {
                         label: "Resultat",
                         labelBold: true,
-                        result: `${formatterBeløpForBeregning(detaljer.nettoBeløp)}`,
+                        result: `${formatterBeløpForBeregning(detaljer.nettoTilsynsutgift)}`,
                     },
                 ].filter((d) => d)}
             />
