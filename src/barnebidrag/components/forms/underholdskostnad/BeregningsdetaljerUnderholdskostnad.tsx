@@ -1,15 +1,42 @@
 import { VStack } from "@navikt/ds-react";
 
-import { Beregningsdetaljer } from "../../../../api/BidragBehandlingApiV1";
+import { UnderholdskostnadPeriodeBeregningsdetaljer } from "../../../../api/BidragBehandlingApiV1";
 import { PersonNavn } from "../../../../common/components/PersonNavn";
 import { CalculationTabellV2 } from "../../../../common/components/vedtak/CalculationTable";
 import { ResultatTable } from "../../../../common/components/vedtak/ResultatTable";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../../utils/number-utils";
 
-export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { detaljer: Beregningsdetaljer }) {
+export default function BeregningsdetaljerUnderholdskostnad({
+    detaljer,
+}: {
+    detaljer: UnderholdskostnadPeriodeBeregningsdetaljer;
+}) {
     if (detaljer?.tilsynsutgifterBarn === undefined) return null;
+    const tilleggstønad = detaljer.tilsynsutgifterBarn?.filter((b) => b.tilleggsstønadDagsats !== undefined) ?? [];
     return (
         <VStack className="w-[700px]" gap="4">
+            <ResultatTable
+                data={[
+                    {
+                        label: "Antall barn under 12 år",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
+                    },
+                ].filter((d) => d)}
+            />
+            {tilleggstønad.length > 0 && (
+                <CalculationTabellV2
+                    title="Tilleggstønad"
+                    data={detaljer.tilsynsutgifterBarn
+                        ?.filter((b) => b.tilleggsstønadDagsats !== undefined)
+                        .map((b) => ({
+                            label: <PersonNavn navn={b.gjelderBarn.navn} />,
+                            value: `(${formatterBeløpForBeregning(b.tilleggsstønadDagsats)} x 260) / 12`,
+                            result: formatterBeløpForBeregning(b.tilleggsstønad),
+                        }))
+                        .filter((d) => d)}
+                />
+            )}
             <CalculationTabellV2
                 title="Tilsynsutgifter"
                 data={[
@@ -41,7 +68,7 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                             label: "Andel søknadsbarn",
                             textRight: false,
                             labelBold: true,
-                            value: `${formatterBeløpForBeregning(detaljer.faktiskTilsynsutgift)} / ${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
+                            value: `${formatterBeløpForBeregning(detaljer.bruttoTilsynsutgift)} / ${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)} = ${formatterProsent(detaljer.fordelingFaktor)}`,
                         },
                     ].filter((d) => d)}
                 />
@@ -74,11 +101,11 @@ export default function BeregningsdetaljerUnderholdskostnad({ detaljer }: { deta
                         value: detaljer.erBegrensetAvMaksTilsyn
                             ? `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} x ${formatterProsent(detaljer.fordelingFaktor)}`
                             : undefined,
-                        result: `${formatterBeløpForBeregning(detaljer.bruttoTilsynsutgift)}`,
+                        result: `${formatterBeløpForBeregning(detaljer.justertBruttoTilsynsutgift)}`,
                     },
                     {
                         label: "Skattefradrag (per barn)",
-                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarn)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
                     {
