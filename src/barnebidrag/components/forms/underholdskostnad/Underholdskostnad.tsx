@@ -22,6 +22,7 @@ import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFor
 import { createInitialValues } from "../helpers/UnderholdskostnadFormHelpers";
 import { AndreBarn } from "./AndreBarn";
 import { Barnetilsyn } from "./Barnetilsyn";
+import { NyOpplysningerAlert } from "./BarnetilsynOpplysninger";
 
 const Main = () => {
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
@@ -169,7 +170,12 @@ const UnderholdskostnadForm = () => {
     return (
         <FormProvider {...useFormMethods}>
             <form onSubmit={(e) => e.preventDefault()}>
-                <NewFormLayout title={text.title.underholdskostnad} main={<Main />} side={<Side />} />
+                <NewFormLayout
+                    title={text.title.underholdskostnad}
+                    main={<Main />}
+                    side={<Side />}
+                    pageAlert={<NyOpplysningerAlert />}
+                />
             </form>
         </FormProvider>
     );

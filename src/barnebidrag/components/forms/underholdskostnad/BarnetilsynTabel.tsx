@@ -27,6 +27,7 @@ import {
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
 import { DeleteButton, EditOrSaveButton, UnderholdskostnadPeriode } from "./Barnetilsyn";
+import { BarnetilsynOpplysninger } from "./BarnetilsynOpplysninger";
 import { UnderholdskostnadTabel } from "./UnderholdskostnadTabel";
 
 const Omfang = ({
@@ -152,6 +153,7 @@ export const BarnetilsynTabel = ({
                     {text.title.stønadTilBarnetilsyn}
                 </Heading>
             </HStack>
+            <BarnetilsynOpplysninger ident={underhold.gjelderBarn.ident} />
             <UnderholdskostnadTabel
                 fieldName={fieldName}
                 saveFn={saveStønadTilBarnetilsyn}
