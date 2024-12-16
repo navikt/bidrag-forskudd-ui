@@ -87,7 +87,7 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, tit
                     ))}
                     {result && (
                         <Table.Row>
-                            <Table.DataCell textSize="small" colSpan={2}>
+                            <Table.DataCell textSize="small" colSpan={harBeregning ? 2 : 1}>
                                 <Label size="small">{result.label}</Label>
                             </Table.DataCell>
                             <Table.DataCell textSize="small" className={"text-right w-[120px] "}>
