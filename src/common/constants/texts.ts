@@ -50,6 +50,12 @@ const tekster = {
         underArbeit:
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
+    description: {
+        inntektBegrunnelseBM:
+            "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette. Husk å vurdere forskuddet.",
+        inntektBegrunnelseBP:
+            "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette.",
+    },
     error: {
         dagsatsVerdi: "Dagsats kan ikke være 0 eller mindre",
         datoIkkeGyldig: "Dato er ikke gyldig",
