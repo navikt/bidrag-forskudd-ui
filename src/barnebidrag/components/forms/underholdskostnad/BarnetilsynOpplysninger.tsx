@@ -184,7 +184,7 @@ function NyOpplysningerFraFolkeregistreTabell({
                 onClick={() => onActivate()}
                 loading={isPending}
             >
-                Ja
+                {text.label.oppdater}
             </Button>
         </Box>
     );
