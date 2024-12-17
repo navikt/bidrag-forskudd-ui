@@ -11,14 +11,14 @@ type NettoBarnetilleggTableProps = {
     rolle: Rolletype;
 };
 // eslint-disable-next-line no-empty-pattern
-export const BarnetilleggSkattesats = ({ rolle }: NettoBarnetilleggTableProps) => {
+export const BarnetilleggSkatteprosent = ({ rolle }: NettoBarnetilleggTableProps) => {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
     const barnetilleggSkattesats = barnetillegg.delberegningSkattesats;
     if (!barnetilleggSkattesats) return null;
     return (
         <div>
-            <Heading size="xsmall">Beregning av skatteprosent ({ROLE_FORKORTELSER[rolle]})</Heading>
+            <Heading size="xsmall">Beregning av skatteprosent på barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
 
             <CalculationTabellV2
                 data={[
