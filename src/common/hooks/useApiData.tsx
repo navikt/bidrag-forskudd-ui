@@ -29,6 +29,7 @@ import {
     SivilstandIkkeAktivGrunnlagDto,
     SletteSamvaersperiodeElementDto,
     SletteUnderholdselement,
+    StonadTilBarnetilsynAktiveGrunnlagDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
     UnderholdDto,
@@ -102,6 +103,17 @@ export const useGetOpplysningerBoforhold = (): {
     return {
         aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
         ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
+};
+
+export const useGetOpplysningerBarnetilsyn = (): {
+    aktiveOpplysninger: StonadTilBarnetilsynAktiveGrunnlagDto;
+    ikkeAktiverteOpplysninger: StonadTilBarnetilsynAktiveGrunnlagDto;
+} => {
+    const behandling = useGetBehandlingV2();
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.stønadTilBarnetilsyn,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.stønadTilBarnetilsyn,
     };
 };
 
