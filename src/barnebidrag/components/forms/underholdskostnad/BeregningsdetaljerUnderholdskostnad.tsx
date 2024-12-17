@@ -80,7 +80,9 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     <Link
                         className="pl-2 align-middle"
                         inlineText
-                        href="hhttps://lovdata.no/pro/#document/NAV/rundskriv/v1-55-02"
+                        href="https://lovdata.no/pro/#document/NAV/rundskriv/v1-55-02"
+                        target="_blank"
+                        rel="noreferrer noopener"
                     >
                         {"Rundskriv"} <ExternalLinkIcon aria-hidden />
                     </Link>
