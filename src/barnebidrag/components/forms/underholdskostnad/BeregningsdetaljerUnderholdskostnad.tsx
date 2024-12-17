@@ -1,4 +1,5 @@
-import { VStack } from "@navikt/ds-react";
+import { ExternalLinkIcon } from "@navikt/aksel-icons";
+import { Link, VStack } from "@navikt/ds-react";
 
 import { UnderholdskostnadPeriodeBeregningsdetaljer } from "../../../../api/BidragBehandlingApiV1";
 import { PersonNavn } from "../../../../common/components/PersonNavn";
@@ -75,6 +76,15 @@ export default function BeregningsdetaljerUnderholdskostnad({
             )}
             <CalculationTabellV2
                 title="Skattefradrag"
+                titleLink={
+                    <Link
+                        className="pl-2 align-middle"
+                        inlineText
+                        href="hhttps://lovdata.no/pro/#document/NAV/rundskriv/v1-55-02"
+                    >
+                        {"Rundskriv"} <ExternalLinkIcon aria-hidden />
+                    </Link>
+                }
                 data={[
                     {
                         label: "Maksfradrag",

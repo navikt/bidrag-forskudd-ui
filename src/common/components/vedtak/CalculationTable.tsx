@@ -11,6 +11,7 @@ interface CalculationTableData {
 interface CalculationTableProps {
     data: CalculationTableData[]; // Array of data objects
     title?: string;
+    titleLink?: string | ReactElement;
     result?: {
         label: string;
         value: string | number | ReactElement;
@@ -19,10 +20,20 @@ interface CalculationTableProps {
     className?: string;
 }
 
-export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+export const CalculationTabell: React.FC<CalculationTableProps> = ({
+    data,
+    title,
+    result,
+    message,
+    className,
+    titleLink,
+}) => {
     return (
         <div className={className}>
-            {title && <Heading size="xsmall">{title}</Heading>}
+            <div>
+                {title && <Heading size="xsmall">{title}</Heading>}
+                {titleLink}
+            </div>
             <table className="table-auto  pb-[5px] border-collapse w-full">
                 <tbody>
                     {data.map((row, rowIndex) => (
@@ -49,11 +60,25 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title
     );
 };
 
-export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+export const CalculationTabellV2: React.FC<CalculationTableProps> = ({
+    data,
+    title,
+    result,
+    message,
+    className,
+    titleLink,
+}) => {
     const harBeregning = data.some((d) => d.value);
     return (
         <div className={className}>
-            {title && <Heading size="xsmall">{title}</Heading>}
+            <>
+                {title && (
+                    <Heading className="inline-block align-middle" size="xsmall">
+                        {title}
+                    </Heading>
+                )}
+                {titleLink}
+            </>
             <Table size="small">
                 <Table.Header>
                     <Table.Row></Table.Row>
