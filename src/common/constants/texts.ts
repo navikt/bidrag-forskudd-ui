@@ -167,7 +167,7 @@ const tekster = {
         omfang: "Omfang",
         opphør: "Opphør",
         opplysninger: "Opplysninger",
-        oppdater: "Oppdater",
+        oppdaterOpplysninger: "Oppdater opplysninger",
         periode: "Periode",
         resultat: "Resultat",
         sivilstand: "Sivilstand",
