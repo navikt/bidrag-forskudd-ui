@@ -1052,9 +1052,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
-    gjelderBarnNavn?: string;
     harPeriodiseringsfeil: boolean;
+    gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1252,6 +1252,8 @@ export interface UnderholdDto {
     /** @uniqueItems true */
     underholdskostnad: UnderholdskostnadDto[];
     begrunnelse?: string;
+    /** @uniqueItems true */
+    beregnetUnderholdskostnad: UnderholdskostnadDto[];
 }
 
 export interface UnderholdskostnadDto {
@@ -1418,6 +1420,12 @@ export interface OppdatereTilleggsstonadRequest {
     dagsats: number;
 }
 
+export interface BeregnetUnderholdskostnad {
+    gjelderBarn: PersoninfoDto;
+    /** @uniqueItems true */
+    perioder: UnderholdskostnadDto[];
+}
+
 export interface OppdatereUnderholdResponse {
     stønadTilBarnetilsyn?: StonadTilBarnetilsynDto;
     faktiskTilsynsutgift?: FaktiskTilsynsutgiftDto;
@@ -1425,6 +1433,8 @@ export interface OppdatereUnderholdResponse {
     /** @uniqueItems true */
     underholdskostnad: UnderholdskostnadDto[];
     valideringsfeil?: ValideringsfeilUnderhold;
+    /** @uniqueItems true */
+    beregnetUnderholdskostnader: BeregnetUnderholdskostnad[];
 }
 
 export interface UnderholdBarnDto {
@@ -1444,9 +1454,9 @@ export interface ValideringsfeilUnderhold {
     harIngenPerioder: boolean;
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
-    barn: UnderholdBarnDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    barn: UnderholdBarnDto;
 }
 
 export interface OppdatereUnderholdRequest {
@@ -1866,9 +1876,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1943,8 +1953,8 @@ export interface ResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -1977,8 +1987,8 @@ export interface Skatt {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 
@@ -2590,10 +2600,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2739,8 +2749,8 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
 }
 
@@ -2818,8 +2828,8 @@ export interface NotatSkattBeregning {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
 }
 
@@ -3252,7 +3262,10 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
+        this.instance = axios.create({
+            ...axiosConfig,
+            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
+        });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3341,7 +3354,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl http://localhost:8990
+ * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {
