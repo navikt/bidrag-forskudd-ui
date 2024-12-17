@@ -1,4 +1,4 @@
-import { Heading, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Heading, Label, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
@@ -142,25 +142,21 @@ interface MathDivisionProps {
 //@ts-ignore
 export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, bottom }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML" style={{ fontSize: "1.125rem" }}>
-            <mrow>
-                {negativeValue && <mi>-</mi>}
-                <mn>{top}</mn>
-                <mo>&#247;</mo> {/* Multiplication symbol */}
-                <mn>{bottom}</mn>
-            </mrow>
-        </math>
+        <BodyShort size="small">
+            {negativeValue && <span>-</span>}
+            <span>{top}</span>
+            <span> &#247;</span> {/* Multiplication symbol */}
+            <span>{bottom}</span>
+        </BodyShort>
     );
 };
 
 export const MathValue: React.FC<{ value: string | number; negativeValue?: boolean }> = ({ value, negativeValue }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-            <mrow>
-                {negativeValue && <mi>-</mi>}
-                <mn>{value}</mn>
-            </mrow>
-        </math>
+        <BodyShort size="small">
+            {negativeValue && <span>-</span>}
+            <span>{value}</span>
+        </BodyShort>
     );
 };
 interface MathMultiplicationProps {
@@ -171,13 +167,11 @@ interface MathMultiplicationProps {
 
 export const MathMultiplication: React.FC<MathMultiplicationProps> = ({ negativeValue, left, right }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML" style={{ fontSize: "1.125rem" }}>
-            <mrow>
-                {negativeValue && <mi>-</mi>}
-                <mn>{left}</mn>
-                <mo>&#xD7;</mo> {/* Multiplication symbol */}
-                <mn>{right}</mn>
-            </mrow>
-        </math>
+        <BodyShort size="small">
+            {negativeValue && <span>-</span>}
+            <span>{left}</span>
+            <span> &#xD7;</span> {/* Multiplication symbol */}
+            <span>{right}</span>
+        </BodyShort>
     );
 };
