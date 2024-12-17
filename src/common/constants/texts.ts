@@ -153,7 +153,7 @@ const tekster = {
         samvær: "Samværsklasse",
         klageMottattdato: "Klage mottatt dato",
         kontantstøtte: "Kontantstøtte",
-        kostpenger: "Kostpenger",
+        fratrekk: "Fratrekk",
         kravbeløp: "Kravbeløp",
         lagrePåNytt: "Lagre på nytt",
         leggTilBarn: "Legg til barn",

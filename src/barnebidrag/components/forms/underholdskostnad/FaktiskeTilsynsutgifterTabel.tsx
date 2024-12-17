@@ -183,7 +183,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                 align="right"
                                                 className="w-[100px]"
                                             >
-                                                {text.label.kostpenger}
+                                                {text.label.fratrekk}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
