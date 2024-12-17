@@ -123,7 +123,7 @@ export const TilleggstønadTabel = ({
                     <>
                         {controlledFields.length > 0 && (
                             <div className="overflow-x-auto whitespace-nowrap">
-                                <Table size="small" className="table-fixed table bg-white w-fit">
+                                <Table size="small" className="table-fixed table bg-white min-w-[644px] w-full">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
                                             <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
@@ -136,7 +136,7 @@ export const TilleggstønadTabel = ({
                                                 align="right"
                                                 textSize="small"
                                                 scope="col"
-                                                className="w-[384px]"
+                                                className="min-w-[100px]"
                                             >
                                                 {text.label.dagsats}
                                             </Table.HeaderCell>

@@ -9,12 +9,14 @@ export const FormControlledTextarea = ({
     hideLabel,
     minRows,
     className,
+    description,
 }: {
     name: string;
     label: string;
     hideLabel?: boolean;
     minRows?: number;
     className?: string;
+    description?: React.ReactNode;
 }) => {
     const { control, clearErrors } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
@@ -29,6 +31,7 @@ export const FormControlledTextarea = ({
     return (
         <Textarea
             label={label}
+            description={description}
             size="small"
             value={field.value}
             onChange={(e) => onChange(e)}
