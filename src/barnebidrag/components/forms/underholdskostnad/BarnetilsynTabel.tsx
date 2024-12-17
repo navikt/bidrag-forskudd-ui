@@ -176,7 +176,7 @@ export const BarnetilsynTabel = ({
                     <>
                         {controlledFields.length > 0 && (
                             <div className="overflow-x-auto whitespace-nowrap">
-                                <Table size="small" className="table-fixed table bg-white w-fit">
+                                <Table size="small" className="table-fixed table bg-white min-w-[744px] w-full">
                                     <Table.Header>
                                         <Table.Row className="align-baseline">
                                             <Table.HeaderCell textSize="small" scope="col" className="w-[144px]">
@@ -189,7 +189,7 @@ export const BarnetilsynTabel = ({
                                                 textSize="small"
                                                 scope="col"
                                                 align="left"
-                                                className="w-[324px]"
+                                                className="min-w-[170px]"
                                             >
                                                 {text.label.stønadTilBarnetilsyn}
                                             </Table.HeaderCell>
@@ -197,7 +197,7 @@ export const BarnetilsynTabel = ({
                                                 textSize="small"
                                                 scope="col"
                                                 align="left"
-                                                className="w-[130px]"
+                                                className="w-[100px]"
                                             >
                                                 {text.label.omfang}
                                             </Table.HeaderCell>

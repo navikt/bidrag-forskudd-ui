@@ -12,8 +12,7 @@ import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
-import { createInitialValues } from "@common/helpers/inntektFormHelpers";
+import { createInitialValues, inntekterTablesViewRules } from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
@@ -112,7 +111,10 @@ const Side = () => {
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
     const rolleId = searchParams.get(urlSearchParams.tab);
-    const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const selectedRolle = rolleId
+        ? roller.find((rolle) => rolle.id === Number(rolleId))
+        : roller.find((rolle) => rolle.rolletype === Rolletype.BM);
+    const selectedRolleId = selectedRolle.id;
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
 
     const onSave = () => {
@@ -167,9 +169,20 @@ const Side = () => {
         return () => subscription.unsubscribe();
     }, []);
 
+    const descriptionText =
+        selectedRolle.rolletype === Rolletype.BM
+            ? text.description.inntektBegrunnelseBM
+            : selectedRolle.rolletype === Rolletype.BP
+              ? text.description.inntektBegrunnelseBP
+              : undefined;
+
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea name={`begrunnelser.${selectedRolleId}`} label={text.title.begrunnelse} />
+            <FormControlledTextarea
+                name={`begrunnelser.${selectedRolleId}`}
+                label={text.title.begrunnelse}
+                description={descriptionText}
+            />
             <ActionButtons onNext={onNext} />
         </Fragment>
     );
