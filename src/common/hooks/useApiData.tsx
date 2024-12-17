@@ -606,7 +606,7 @@ export const useDeleteUnderholdsObjekt = () => {
 
     return useMutation({
         mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
-        mutationFn: async (payload: SletteUnderholdselement): Promise<UnderholdDto> => {
+        mutationFn: async (payload: SletteUnderholdselement): Promise<OppdatereUnderholdResponse> => {
             const { data } = await BEHANDLING_API_V1.api.sletteFraUnderhold(Number(behandlingId), payload);
             return data;
         },

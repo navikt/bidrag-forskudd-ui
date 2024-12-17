@@ -59,14 +59,29 @@ export const AndreBarn = () => {
         };
 
         deleteUnderhold.mutation.mutate(payload, {
-            onSuccess: (_) => {
+            onSuccess: (response) => {
                 clearErrors(`underholdskostnaderAndreBarn.${index}`);
                 fieldArray.remove(Number(index));
 
                 deleteUnderhold.queryClientUpdater((currentData) => {
-                    const updatedList = currentData.underholdskostnader.filter(
-                        (underhold) => underhold.gjelderBarn.id !== payload.idElement
-                    );
+                    const updatedList = currentData.underholdskostnader
+                        .filter((underhold) => underhold.gjelderBarn.id !== payload.idElement)
+                        .map((cachedUnderhold) => {
+                            let updatedUnderhold = { ...cachedUnderhold };
+                            const updatedBeregnetUnderholdskostnad = response.beregnetUnderholdskostnader.find(
+                                (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
+                            );
+                            if (updatedBeregnetUnderholdskostnad) {
+                                updatedUnderhold = {
+                                    ...updatedUnderhold,
+                                    beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
+                                        ? updatedBeregnetUnderholdskostnad.perioder
+                                        : cachedUnderhold.beregnetUnderholdskostnad,
+                                };
+                            }
+
+                            return updatedUnderhold;
+                        });
 
                     return {
                         ...currentData,
