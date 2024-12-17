@@ -142,21 +142,21 @@ interface MathDivisionProps {
 //@ts-ignore
 export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, bottom }) => {
     return (
-        <div>
+        <BodyShort size="small">
             {negativeValue && <span>-</span>}
             <span>{top}</span>
             <span> &#247;</span> {/* Multiplication symbol */}
             <span>{bottom}</span>
-        </div>
+        </BodyShort>
     );
 };
 
 export const MathValue: React.FC<{ value: string | number; negativeValue?: boolean }> = ({ value, negativeValue }) => {
     return (
-        <div>
+        <BodyShort size="small">
             {negativeValue && <span>-</span>}
             <span>{value}</span>
-        </div>
+        </BodyShort>
     );
 };
 interface MathMultiplicationProps {
