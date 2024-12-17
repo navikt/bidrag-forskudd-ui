@@ -2,7 +2,8 @@ import { Heading, Label, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
-    label: string;
+    label: string | ReactElement;
+    labelBold?: boolean;
     value?: string | number | ReactElement;
     result: string | number | ReactElement;
 }
@@ -10,6 +11,7 @@ interface CalculationTableData {
 interface CalculationTableProps {
     data: CalculationTableData[]; // Array of data objects
     title?: string;
+    titleLink?: string | ReactElement;
     result?: {
         label: string;
         value: string | number | ReactElement;
@@ -18,10 +20,20 @@ interface CalculationTableProps {
     className?: string;
 }
 
-export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+export const CalculationTabell: React.FC<CalculationTableProps> = ({
+    data,
+    title,
+    result,
+    message,
+    className,
+    titleLink,
+}) => {
     return (
         <div className={className}>
-            {title && <Heading size="xsmall">{title}</Heading>}
+            <div>
+                {title && <Heading size="xsmall">{title}</Heading>}
+                {titleLink}
+            </div>
             <table className="table-auto  pb-[5px] border-collapse w-full">
                 <tbody>
                     {data.map((row, rowIndex) => (
@@ -48,19 +60,36 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title
     );
 };
 
-export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+export const CalculationTabellV2: React.FC<CalculationTableProps> = ({
+    data,
+    title,
+    result,
+    message,
+    className,
+    titleLink,
+}) => {
+    const harBeregning = data.some((d) => d.value);
     return (
         <div className={className}>
-            {title && <Heading size="xsmall">{title}</Heading>}
+            <>
+                {title && (
+                    <Heading className="inline-block align-middle" size="xsmall">
+                        {title}
+                    </Heading>
+                )}
+                {titleLink}
+            </>
             <Table size="small">
                 <Table.Header>
                     <Table.Row></Table.Row>
                     <Table.HeaderCell textSize="small" className="w-[250px]">
                         Beskrivelse
                     </Table.HeaderCell>
-                    <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
-                        Beregning
-                    </Table.HeaderCell>
+                    {harBeregning && (
+                        <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                            Beregning
+                        </Table.HeaderCell>
+                    )}
                     <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
                         Beløp
                     </Table.HeaderCell>
@@ -68,10 +97,14 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, tit
                 <Table.Body>
                     {data.map((row, rowIndex) => (
                         <Table.Row key={rowIndex}>
-                            <Table.DataCell textSize="small">{row.label}</Table.DataCell>
-                            <Table.DataCell textSize="small" align="right">
-                                {row.value}
+                            <Table.DataCell textSize="small" className={`${row.labelBold ? "font-bold" : ""}`}>
+                                {row.label}
                             </Table.DataCell>
+                            {harBeregning && (
+                                <Table.DataCell textSize="small" align="right">
+                                    {row.value}
+                                </Table.DataCell>
+                            )}
                             <Table.DataCell textSize="small" align="right">
                                 {row.result}
                             </Table.DataCell>
@@ -79,7 +112,7 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({ data, tit
                     ))}
                     {result && (
                         <Table.Row>
-                            <Table.DataCell textSize="small" colSpan={2}>
+                            <Table.DataCell textSize="small" colSpan={harBeregning ? 2 : 1}>
                                 <Label size="small">{result.label}</Label>
                             </Table.DataCell>
                             <Table.DataCell textSize="small" className={"text-right w-[120px] "}>

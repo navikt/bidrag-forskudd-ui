@@ -146,7 +146,11 @@ export const RolleInfoBox = ({
                 <div className="grid grid-cols-[max-content,auto] items-center p-2 bg-white border border-solid border-[var(--a-border-default)]">
                     <div className="flex">
                         {underhold.gjelderBarn.medIBehandlingen && <RolleTag rolleType={Rolletype.BA} />}
-                        <PersonNavnIdent ident={underhold.gjelderBarn.ident} navn={underhold.gjelderBarn.navn} />
+                        <PersonNavnIdent
+                            ident={underhold.gjelderBarn.ident}
+                            navn={underhold.gjelderBarn.navn}
+                            fødselsdato={underhold.gjelderBarn.fødselsdato}
+                        />
                     </div>
                     {!underhold.gjelderBarn.medIBehandlingen && (
                         <>

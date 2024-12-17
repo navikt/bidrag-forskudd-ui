@@ -1,9 +1,8 @@
 import { Heading, Label, Table } from "@navikt/ds-react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
 import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
-import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
+import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 type NettoBarnetilleggTableProps = {
@@ -17,22 +16,6 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
     return (
         <div>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
-            <ResultatTable
-                data={[
-                    {
-                        label: "Skatteprosent",
-                        textRight: false,
-                        labelBold: true,
-                        value: formatterProsent(barnetillegg.skattFaktor),
-                    },
-                    {
-                        label: "Inntekt siste 12 mnd",
-                        textRight: false,
-                        labelBold: true,
-                        value: formatterBeløpForBeregning(barnetillegg.sumInntekt),
-                    },
-                ].filter((d) => d)}
-            />
             <Table size="small" className="table-fixed table bg-white w-full">
                 <Table.Header>
                     <Table.Row className="align-baseline">
