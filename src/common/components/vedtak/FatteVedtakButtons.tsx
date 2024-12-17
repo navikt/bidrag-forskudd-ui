@@ -12,6 +12,7 @@ import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
+import useFeatureToogle from "../../hooks/useFeatureToggle";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
@@ -28,6 +29,7 @@ export const FatteVedtakButtons = ({
     isBeregningError: boolean;
     disabled?: boolean;
 }) => {
+    const { isAdminEnabled } = useFeatureToogle();
     const [showConfetti, setShowConfetti] = useState(false);
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
@@ -52,7 +54,7 @@ export const FatteVedtakButtons = ({
                 behandlingType: type,
             });
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
-            if (erBarnebidrag) {
+            if (erBarnebidrag && isAdminEnabled) {
                 setShowConfetti(true);
             }
         },
