@@ -1,5 +1,8 @@
+import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
+import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
 import urlSearchParams from "@common/constants/behandlingQueryKeys";
@@ -8,7 +11,7 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { Tabs, Textarea } from "@navikt/ds-react";
+import { BodyShort, Tabs, Textarea } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -25,10 +28,12 @@ import { Barnetilsyn } from "./Barnetilsyn";
 import { NyOpplysningerAlert } from "./BarnetilsynOpplysninger";
 
 const Main = () => {
+    const { roller } = useGetBehandlingV2();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const søknadsBarnUnderholdskostnader = getValues("underholdskostnaderMedIBehandling");
     const [activeTab, defaultTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [_, setSearchParams] = useSearchParams();
+    const BMRolle = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
 
     function updateSearchparamForTab(currentTabId: string) {
         setSearchParams((params) => {
@@ -38,45 +43,53 @@ const Main = () => {
     }
 
     return (
-        <Tabs
-            defaultValue={defaultTab}
-            value={activeTab}
-            onChange={updateSearchparamForTab}
-            className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
-        >
-            <Tabs.List>
-                {søknadsBarnUnderholdskostnader.map((underhold, index) => (
+        <>
+            {BMRolle.harInnvilgetTilleggsstønad && (
+                <BehandlingAlert variant="info">
+                    <BodyShort size="small">{text.alert.harInnvilgetTilleggsstønad}</BodyShort>
+                    <ModiaLink ident={BMRolle.ident} />
+                </BehandlingAlert>
+            )}
+            <Tabs
+                defaultValue={defaultTab}
+                value={activeTab}
+                onChange={updateSearchparamForTab}
+                className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
+            >
+                <Tabs.List>
+                    {søknadsBarnUnderholdskostnader.map((underhold, index) => (
+                        <Tabs.Tab
+                            key={`tab-${underhold.id}-${index}`}
+                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            label={
+                                <div className="flex flex-row gap-1">
+                                    {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
+                                </div>
+                            }
+                        />
+                    ))}
                     <Tabs.Tab
-                        key={`tab-${underhold.id}-${index}`}
-                        value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
-                        label={
-                            <div className="flex flex-row gap-1">
-                                {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
-                            </div>
-                        }
+                        key="underholdskostnaderAndreBarn"
+                        value="underholdskostnaderAndreBarn"
+                        label={text.label.andreBarn}
                     />
-                ))}
-                <Tabs.Tab
-                    key="underholdskostnaderAndreBarn"
-                    value="underholdskostnaderAndreBarn"
-                    label={text.label.andreBarn}
-                />
-            </Tabs.List>
-            {søknadsBarnUnderholdskostnader.map((underhold, index) => {
-                return (
-                    <Tabs.Panel
-                        key={`underholdskostnadTabPanel-${underhold.id}-${index}`}
-                        value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
-                        className="grid gap-y-4 py-4"
-                    >
-                        <Barnetilsyn index={index} />
-                    </Tabs.Panel>
-                );
-            })}
-            <Tabs.Panel value="underholdskostnaderAndreBarn" className="grid gap-y-4">
-                <AndreBarn />
-            </Tabs.Panel>
-        </Tabs>
+                </Tabs.List>
+                {søknadsBarnUnderholdskostnader.map((underhold, index) => {
+                    return (
+                        <Tabs.Panel
+                            key={`underholdskostnadTabPanel-${underhold.id}-${index}`}
+                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            className="grid gap-y-4 py-4"
+                        >
+                            <Barnetilsyn index={index} />
+                        </Tabs.Panel>
+                    );
+                })}
+                <Tabs.Panel value="underholdskostnaderAndreBarn" className="grid gap-y-4">
+                    <AndreBarn />
+                </Tabs.Panel>
+            </Tabs>
+        </>
     );
 };
 

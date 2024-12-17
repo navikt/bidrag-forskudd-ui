@@ -27,6 +27,7 @@ const tekster = {
         gebyrHarBlittEndret: "Gebry har blitt endret",
         gebyrHarBlittEndretDescription:
             "Inntektsendringen har endret gebyrvurderingen. Kontroller om gebyrvurderingen er korrekt.",
+        harInnvilgetTilleggsstønad: "BM har fått innvilget tilleggstønad for et eller flere barn.",
         nyOpplysninger: "Nye opplysninger fra offentlig register vil erstatte de gamle",
         nyOpplysningerBoforhold: "Vil du ta i bruk de nye opplysningene?",
         nyOpplysningerInfo: "Nye opplysninger fra offentlig register er tilgjengelig.",
