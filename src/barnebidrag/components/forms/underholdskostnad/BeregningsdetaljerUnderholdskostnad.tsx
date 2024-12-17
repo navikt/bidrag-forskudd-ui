@@ -27,7 +27,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
             />
             {tilleggstønad.length > 0 && (
                 <CalculationTabellV2
-                    title="Tilleggstønad"
+                    title="Tilleggsstønad"
                     data={detaljer.tilsynsutgifterBarn
                         ?.filter((b) => b.tilleggsstønadDagsats !== undefined)
                         .map((b) => ({
@@ -89,7 +89,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                 }
                 data={[
                     {
-                        label: "Maksfradrag",
+                        label: "Maks fradrag",
                         value: `${formatterBeløpForBeregning(detaljer.sjablonMaksFradrag)} X ${formatterProsent(detaljer.skattesatsFaktor)}`,
                         result: formatterBeløpForBeregning(detaljer.skattefradragMaksFradrag),
                     },

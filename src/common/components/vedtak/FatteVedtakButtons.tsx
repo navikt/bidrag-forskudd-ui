@@ -2,7 +2,8 @@ import { faro } from "@grafana/faro-react";
 import { RedirectTo } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Button, ConfirmationPanel, Heading, Select } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
 import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
@@ -27,6 +28,7 @@ export const FatteVedtakButtons = ({
     isBeregningError: boolean;
     disabled?: boolean;
 }) => {
+    const [showConfetti, setShowConfetti] = useState(false);
     const [bekreftetVedtak, setBekreftetVedtak] = useState(false);
     const { behandlingId, type } = useBehandlingProvider();
     const erBarnebidrag = type === TypeBehandling.BIDRAG;
@@ -50,6 +52,9 @@ export const FatteVedtakButtons = ({
                 behandlingType: type,
             });
             RedirectTo.sakshistorikk(saksnummer, environment.url.bisys);
+            if (erBarnebidrag) {
+                setShowConfetti(true);
+            }
         },
     });
 
@@ -58,6 +63,7 @@ export const FatteVedtakButtons = ({
 
     return (
         <div>
+            {showConfetti && <Confetti />}
             {erBarnebidrag && (
                 <Select
                     size="small"
@@ -121,3 +127,67 @@ export const FatteVedtakButtons = ({
         </div>
     );
 };
+
+export default function Confetti() {
+    const refAnimationInstance = useRef(null);
+
+    const getInstance = useCallback((instance) => {
+        console.log(instance);
+        refAnimationInstance.current = instance;
+    }, []);
+
+    const makeShot = useCallback((particleRatio, opts) => {
+        console.log(refAnimationInstance.current);
+        refAnimationInstance.current &&
+            refAnimationInstance.current.confetti({
+                ...opts,
+                origin: { y: 0.7 },
+                particleCount: Math.floor(200 * particleRatio),
+            });
+    }, []);
+
+    useEffect(() => fire(), []);
+
+    const fire = useCallback(() => {
+        makeShot(0.25, {
+            spread: 26,
+            startVelocity: 55,
+        });
+
+        makeShot(0.2, {
+            spread: 60,
+        });
+
+        makeShot(0.35, {
+            spread: 100,
+            decay: 0.91,
+            scalar: 0.8,
+        });
+
+        makeShot(0.1, {
+            spread: 120,
+            startVelocity: 25,
+            decay: 0.92,
+            scalar: 1.2,
+        });
+
+        makeShot(0.1, {
+            spread: 120,
+            startVelocity: 45,
+        });
+    }, [makeShot]);
+
+    return (
+        <ReactCanvasConfetti
+            onInit={(ref) => getInstance(ref)}
+            style={{
+                position: "fixed",
+                pointerEvents: "none",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+            }}
+        />
+    );
+}

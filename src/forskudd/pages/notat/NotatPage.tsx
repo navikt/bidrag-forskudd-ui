@@ -40,7 +40,6 @@ export default (props: NotatProps) => {
                             style={{
                                 height: "calc(100% - 144px)",
                                 width: "auto",
-                                zoom: "140%",
                                 overflowY: "auto",
                                 overflowX: "hidden",
                             }}
