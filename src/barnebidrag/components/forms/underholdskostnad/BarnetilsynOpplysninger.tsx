@@ -149,33 +149,37 @@ function NyOpplysningerFraFolkeregistreTabell({
             className="w-[708px]"
         >
             <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
-            <table className="mt-2">
-                <thead>
-                    <tr>
-                        <th align="left">{text.label.fraOgMed}</th>
-                        <th align="left">{text.label.tilOgMed}</th>
-                        <th align="left">{text.label.stønadTilBarnetilsyn}</th>
-                        <th align="left">{text.label.omfang}</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <Table className="opplysninger table-fixed table w-max mt-2" size="small">
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell align="left">{text.label.fraOgMed}</Table.HeaderCell>
+                        <Table.HeaderCell align="left">{text.label.tilOgMed}</Table.HeaderCell>
+                        <Table.HeaderCell align="left">{text.label.stønadTilBarnetilsyn}</Table.HeaderCell>
+                        <Table.HeaderCell align="left">{text.label.omfang}</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
                     {ikkeAktivertePerioder?.map((periode, index) => (
-                        <tr key={index + periode.partPersonId}>
-                            <td width="100px" scope="row">
+                        <Table.Row key={index + periode.partPersonId}>
+                            <Table.DataCell width="100px" scope="row">
                                 {virkningsOrSoktFraDato && isBeforeDate(periode.periodeFra, virkningsOrSoktFraDato)
                                     ? DateToDDMMYYYYString(virkningsOrSoktFraDato)
                                     : DateToDDMMYYYYString(new Date(periode.periodeFra))}
-                            </td>
-                            <td width="100px">
+                            </Table.DataCell>
+                            <Table.DataCell width="100px">
                                 {" "}
                                 {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
-                            </td>
-                            <td width="170px">{STONAD_TIL_BARNETILSYNS_SKOLEALDER[periode.skolealder]}</td>
-                            <td width="80px">{STONAD_TIL_BARNETILSYNS_TYPE[periode.tilsynstype]}</td>
-                        </tr>
+                            </Table.DataCell>
+                            <Table.DataCell width="170px">
+                                {STONAD_TIL_BARNETILSYNS_SKOLEALDER[periode.skolealder]}
+                            </Table.DataCell>
+                            <Table.DataCell width="80px">
+                                {STONAD_TIL_BARNETILSYNS_TYPE[periode.tilsynstype]}
+                            </Table.DataCell>
+                        </Table.Row>
                     ))}
-                </tbody>
-            </table>
+                </Table.Body>
+            </Table>
             <Button
                 className="mt-4"
                 type="button"
