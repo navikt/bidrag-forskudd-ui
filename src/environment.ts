@@ -18,6 +18,7 @@ const url = {
     bidragDokumentProduksjon: process.env.BIDRAG_DOKUMENT_PRODUKSJON,
     modia: process.env.MODIA_URL,
     forskuddBrukerveiledning: "/forskudd/brukerveiledning",
+    bidragBrukerveiledning: "/bidrag/brukerveiledning",
     særbidragBrukerveiledning: "/sarbidrag/brukerveiledning",
 };
 
