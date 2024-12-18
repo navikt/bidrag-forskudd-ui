@@ -1,4 +1,5 @@
 import {
+    BeregnetUnderholdskostnad,
     FaktiskTilsynsutgiftDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
@@ -11,6 +12,24 @@ import {
     TilleggsstonadPeriode,
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
+
+export const mapBeregnetUnderholdskostnadToRole =
+    (beregnetUnderholdskostnader: BeregnetUnderholdskostnad[]) => (cachedUnderhold: UnderholdDto) => {
+        let updatedUnderhold = { ...cachedUnderhold };
+        const updatedBeregnetUnderholdskostnad = beregnetUnderholdskostnader.find(
+            (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
+        );
+        if (updatedBeregnetUnderholdskostnad) {
+            updatedUnderhold = {
+                ...updatedUnderhold,
+                beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
+                    ? updatedBeregnetUnderholdskostnad.perioder
+                    : cachedUnderhold.beregnetUnderholdskostnad,
+            };
+        }
+
+        return updatedUnderhold;
+    };
 
 export const transformUnderholdskostnadPeriode = (
     periode: StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto

@@ -23,6 +23,7 @@ import {
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
+    OpprettUnderholdskostnadBarnResponse,
     RolleDto,
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
@@ -69,6 +70,7 @@ export const MutationKeys = {
     updateStonadTilBarnetilsyn: (behandlingId: string) => ["mutation", "stonadTilBarnetilsyn", behandlingId],
     updateFaktiskeTilsynsutgifter: (behandlingId: string) => ["mutation", "faktiskeTilsynsutgifter", behandlingId],
     updateTilleggstønad: (behandlingId: string) => ["mutation", "tilleggstønad", behandlingId],
+    slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
 };
 
 export const QueryKeys = {
@@ -605,7 +607,7 @@ export const useDeleteUnderholdsObjekt = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
-        mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
+        mutationKey: MutationKeys.slettUnderholdsElement(behandlingId),
         mutationFn: async (payload: SletteUnderholdselement): Promise<OppdatereUnderholdResponse> => {
             const { data } = await BEHANDLING_API_V1.api.sletteFraUnderhold(Number(behandlingId), payload);
             return data;
@@ -665,7 +667,7 @@ export const useCreateUnderholdForBarn = () => {
 
     return useMutation({
         mutationKey: MutationKeys.oppretteUnderholdForBarn(behandlingId),
-        mutationFn: async (payload: BarnDto): Promise<UnderholdDto> => {
+        mutationFn: async (payload: BarnDto): Promise<OpprettUnderholdskostnadBarnResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppretteUnderholdForBarn(Number(behandlingId), payload);
             return data;
         },

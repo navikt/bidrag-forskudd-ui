@@ -21,6 +21,7 @@ import {
     TilleggsstonadPeriode,
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
+import { mapBeregnetUnderholdskostnadToRole } from "../helpers/UnderholdskostnadFormHelpers";
 
 const fieldNameToSletteUnderholdselementTypeEnum = {
     stønadTilBarnetilsyn: SletteUnderholdselementTypeEnum.STONADTILBARNETILSYN,
@@ -204,22 +205,7 @@ export const UnderholdskostnadTabel = ({
                                     [underholdskostnadType]: updatedList,
                                     underholdskostnad: response.underholdskostnad,
                                 })
-                                .map((cachedUnderhold) => {
-                                    let updatedUnderhold = { ...cachedUnderhold };
-                                    const updatedBeregnetUnderholdskostnad = response.beregnetUnderholdskostnader.find(
-                                        (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
-                                    );
-                                    if (updatedBeregnetUnderholdskostnad) {
-                                        updatedUnderhold = {
-                                            ...updatedUnderhold,
-                                            beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
-                                                ? updatedBeregnetUnderholdskostnad.perioder
-                                                : cachedUnderhold.beregnetUnderholdskostnad,
-                                        };
-                                    }
-
-                                    return updatedUnderhold;
-                                }),
+                                .map(mapBeregnetUnderholdskostnadToRole(response.beregnetUnderholdskostnader)),
                         };
                     });
                 },

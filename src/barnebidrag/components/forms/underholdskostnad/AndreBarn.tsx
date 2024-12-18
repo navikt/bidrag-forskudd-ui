@@ -10,6 +10,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { useOnCreateUnderholdForBarn } from "../../../hooks/useOnCreateUnderholdForBarn";
 import { useOnDeleteUnderholdsObjekt } from "../../../hooks/useOnDeleteUnderholdsObjekt";
 import { FaktiskTilsynsutgiftPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import { mapBeregnetUnderholdskostnadToRole } from "../helpers/UnderholdskostnadFormHelpers";
 import { RolleInfoBox } from "./Barnetilsyn";
 import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 
@@ -33,16 +34,18 @@ export const AndreBarn = () => {
 
     const onCreateBarn = (barn: BarnDto) => {
         createBarnQuery.mutation.mutate(barn, {
-            onSuccess: (underhold) => {
+            onSuccess: (response) => {
                 fieldArray.append({
-                    ...underhold,
+                    ...response.underholdskostnad,
                     faktiskTilsynsutgift: [] as FaktiskTilsynsutgiftPeriode[],
                 });
                 setOpenForm(false);
                 createBarnQuery.queryClientUpdater((currentData) => {
                     return {
                         ...currentData,
-                        underholdskostnader: currentData.underholdskostnader.concat(underhold),
+                        underholdskostnader: currentData.underholdskostnader
+                            .concat(response.underholdskostnad)
+                            .map(mapBeregnetUnderholdskostnadToRole(response.beregnetUnderholdskostnader)),
                     };
                 });
             },
@@ -66,22 +69,7 @@ export const AndreBarn = () => {
                 deleteUnderhold.queryClientUpdater((currentData) => {
                     const updatedList = currentData.underholdskostnader
                         .filter((underhold) => underhold.gjelderBarn.id !== payload.idElement)
-                        .map((cachedUnderhold) => {
-                            let updatedUnderhold = { ...cachedUnderhold };
-                            const updatedBeregnetUnderholdskostnad = response.beregnetUnderholdskostnader.find(
-                                (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
-                            );
-                            if (updatedBeregnetUnderholdskostnad) {
-                                updatedUnderhold = {
-                                    ...updatedUnderhold,
-                                    beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
-                                        ? updatedBeregnetUnderholdskostnad.perioder
-                                        : cachedUnderhold.beregnetUnderholdskostnad,
-                                };
-                            }
-
-                            return updatedUnderhold;
-                        });
+                        .map(mapBeregnetUnderholdskostnadToRole(response.beregnetUnderholdskostnader));
 
                     return {
                         ...currentData,

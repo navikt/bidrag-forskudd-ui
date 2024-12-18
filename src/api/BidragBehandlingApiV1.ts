@@ -983,9 +983,9 @@ export interface PeriodeAndreVoksneIHusstanden {
 
 export interface PeriodeLocalDate {
     /** @format date */
-    til?: string;
-    /** @format date */
     fom: string;
+    /** @format date */
+    til?: string;
 }
 
 /** Liste over registrerte permisjoner */
@@ -1838,6 +1838,13 @@ export interface BarnDto {
     fødselsdato?: string;
 }
 
+export interface OpprettUnderholdskostnadBarnResponse {
+    underholdskostnad: UnderholdDto;
+    valideringsfeil?: ValideringsfeilUnderhold;
+    /** @uniqueItems true */
+    beregnetUnderholdskostnader: BeregnetUnderholdskostnad[];
+}
+
 export interface OpprettBehandlingFraVedtakRequest {
     vedtakstype: Vedtakstype;
     /** @format date */
@@ -1876,9 +1883,9 @@ export interface KanBehandlesINyLosningRequest {
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
     harReferanseTilAnnenBehandling: boolean;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1952,10 +1959,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2600,10 +2607,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2669,8 +2676,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    gebyrResultatVisningsnavn: string;
     erManueltOverstyrt: boolean;
+    gebyrResultatVisningsnavn: string;
 }
 
 export interface NotatInntektDto {
@@ -2748,10 +2755,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2796,8 +2803,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    resultatVisningsnavn: string;
     beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
 };
 
 export interface NotatSamvaerDto {
@@ -2996,8 +3003,8 @@ export interface NotatVirkningstidspunktDto {
     begrunnelse: NotatBegrunnelseDto;
     /** Notat begrunnelse skrevet av saksbehandler */
     notat: NotatBegrunnelseDto;
-    årsakVisningsnavn?: string;
     avslagVisningsnavn?: string;
+    årsakVisningsnavn?: string;
 }
 
 export interface NotatVoksenIHusstandenDetaljerDto {
@@ -3704,7 +3711,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppretteUnderholdForBarn: (behandlingsid: number, data: BarnDto, params: RequestParams = {}) =>
-            this.request<UnderholdDto, any>({
+            this.request<OpprettUnderholdskostnadBarnResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/opprette`,
                 method: "POST",
                 body: data,
