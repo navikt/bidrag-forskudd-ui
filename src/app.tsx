@@ -35,6 +35,7 @@ import {
 } from "react-router-dom";
 
 import { BarnebidragProviderWrapper } from "./barnebidrag/context/BarnebidragProviderWrapper";
+import BrukerveiledningBarnebidragV1 from "./barnebidrag/docs/BrukerveiledningBarnebidragV1.mdx";
 import { BarnebidragPage } from "./barnebidrag/pages/BarnebidragPage";
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
@@ -180,6 +181,7 @@ export default function App() {
                                 path="/sarbidrag/brukerveiledning"
                                 element={<SærbidragBrukerveiledningPageWrapper />}
                             />
+                            <Route path="/bidrag/brukerveiledning" element={<BidragBrukerveiledningPageWrapper />} />
                             <Route path="/forskudd/:behandlingId">
                                 <Route
                                     index
@@ -247,6 +249,17 @@ function ForskuddBrukerveiledningPageWrapper() {
         <PageWrapper name="Forskudd brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">
                 <BrukerveiledningForskudd />
+            </BidragContainer>
+        </PageWrapper>
+    );
+}
+function BidragBrukerveiledningPageWrapper() {
+    useEffect(scrollToHash, []);
+
+    return (
+        <PageWrapper name="Bidrag brukerveiledning">
+            <BidragContainer className="container p-6 max-w-[60rem]">
+                <BrukerveiledningBarnebidragV1 />
             </BidragContainer>
         </PageWrapper>
     );

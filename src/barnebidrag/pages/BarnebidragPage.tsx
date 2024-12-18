@@ -7,6 +7,7 @@ import React, { useLayoutEffect, useRef } from "react";
 import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import { BarnebidragSideMenu } from "./BarnebidragSideMenu";
+import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const BarnebidragPage = () => {
     const { erVedtakFattet, kanBehandlesINyLøsning, kanIkkeBehandlesBegrunnelse } = useGetBehandlingV2();
     const ref = useRef<HTMLDivElement>(null);
@@ -46,6 +47,7 @@ export const BarnebidragPage = () => {
                         </NavigationLoaderWrapper>
                     </div>
                 </div>
+                <EksterneLenkerKnapper />
             </Provider>
         </PageWrapper>
     );
