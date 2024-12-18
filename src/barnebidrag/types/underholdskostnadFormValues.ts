@@ -43,4 +43,5 @@ export interface UnderholdAndreBarn
 export type UnderholdskostnadFormValues = {
     underholdskostnaderMedIBehandling: Underhold[];
     underholdskostnaderAndreBarn?: UnderholdAndreBarn[];
+    underholdskostnaderAndreBarnBegrunnelse: string;
 };

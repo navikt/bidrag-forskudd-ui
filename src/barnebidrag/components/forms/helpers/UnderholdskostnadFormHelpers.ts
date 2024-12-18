@@ -41,28 +41,31 @@ export const transformUnderholdskostnadPeriode = (
     erRedigerbart: false,
 });
 export const createInitialValues = (underholdskostnader: UnderholdDto[]): UnderholdskostnadFormValues => {
+    const underholdskostnaderMedIBehandling = underholdskostnader.filter(
+        (underhold) => underhold.gjelderBarn.medIBehandlingen
+    );
+    const underholdskostnaderAndreBarn = underholdskostnader.filter(
+        (underhold) => !underhold.gjelderBarn.medIBehandlingen
+    );
     return {
-        underholdskostnaderMedIBehandling: underholdskostnader
-            .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
-            .map((underhold) => ({
-                ...underhold,
-                stønadTilBarnetilsyn: underhold.stønadTilBarnetilsyn.map((barnetilsyn) => ({
-                    ...(transformUnderholdskostnadPeriode(barnetilsyn) as StønadTilBarnetilsynPeriode),
-                })),
-                faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
-                    ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
-                })),
-                tilleggsstønad: underhold.tilleggsstønad.map((tillegsstonad) => ({
-                    ...(transformUnderholdskostnadPeriode(tillegsstonad) as TilleggsstonadPeriode),
-                })),
+        underholdskostnaderMedIBehandling: underholdskostnaderMedIBehandling.map((underhold) => ({
+            ...underhold,
+            stønadTilBarnetilsyn: underhold.stønadTilBarnetilsyn.map((barnetilsyn) => ({
+                ...(transformUnderholdskostnadPeriode(barnetilsyn) as StønadTilBarnetilsynPeriode),
             })),
-        underholdskostnaderAndreBarn: underholdskostnader
-            .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
-            .map((underhold) => ({
-                ...underhold,
-                faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
-                    ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
-                })),
+            faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
+                ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
             })),
+            tilleggsstønad: underhold.tilleggsstønad.map((tillegsstonad) => ({
+                ...(transformUnderholdskostnadPeriode(tillegsstonad) as TilleggsstonadPeriode),
+            })),
+        })),
+        underholdskostnaderAndreBarn: underholdskostnaderAndreBarn.map((underhold) => ({
+            ...underhold,
+            faktiskTilsynsutgift: underhold.faktiskTilsynsutgift.map((tilsynsutgift) => ({
+                ...(transformUnderholdskostnadPeriode(tilsynsutgift) as FaktiskTilsynsutgiftPeriode),
+            })),
+        })),
+        underholdskostnaderAndreBarnBegrunnelse: underholdskostnaderAndreBarn[0]?.begrunnelse ?? "",
     };
 };

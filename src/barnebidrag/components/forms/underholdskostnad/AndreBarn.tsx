@@ -16,7 +16,7 @@ import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 
 export const AndreBarn = () => {
     const { setSaveErrorState } = useBehandlingProvider();
-    const { control, clearErrors } = useFormContext<UnderholdskostnadFormValues>();
+    const { control, clearErrors, setValue, getValues } = useFormContext<UnderholdskostnadFormValues>();
     const createBarnQuery = useOnCreateUnderholdForBarn();
     const deleteUnderhold = useOnDeleteUnderholdsObjekt();
     const [openForm, setOpenForm] = useState<boolean>(false);
@@ -65,6 +65,11 @@ export const AndreBarn = () => {
             onSuccess: (response) => {
                 clearErrors(`underholdskostnaderAndreBarn.${index}`);
                 fieldArray.remove(Number(index));
+                const underholdskostnaderAndreBarn = getValues("underholdskostnaderAndreBarn");
+
+                if (!underholdskostnaderAndreBarn.length) {
+                    setValue("underholdskostnaderAndreBarnBegrunnelse", "");
+                }
 
                 deleteUnderhold.queryClientUpdater((currentData) => {
                     const updatedList = currentData.underholdskostnader
@@ -105,10 +110,12 @@ export const AndreBarn = () => {
             {andreBarnFieldArray.map((underhold, index) => {
                 const underholdFieldName = `underholdskostnaderAndreBarn.${index}` as const;
                 return (
-                    <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
-                        <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
-                        <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
-                    </div>
+                    underhold?.gjelderBarn && (
+                        <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
+                            <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
+                            <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
+                        </div>
+                    )
                 );
             })}
         </>

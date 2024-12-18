@@ -10,11 +10,11 @@ import {
     FaktiskTilsynsutgiftDto,
     GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
+    OppdatereBegrunnelseRequest,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
-    OppdatereUnderholdRequest,
     OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
@@ -33,7 +33,6 @@ import {
     StonadTilBarnetilsynAktiveGrunnlagDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
-    UnderholdDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -679,18 +678,13 @@ export const useCreateUnderholdForBarn = () => {
     });
 };
 
-export const useUpdateUnderhold = (underholdsid: number) => {
+export const useUpdateUnderholdBegrunnelse = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
         mutationKey: MutationKeys.oppdatereUnderhold(behandlingId),
-        mutationFn: async (payload: OppdatereUnderholdRequest): Promise<UnderholdDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereUnderhold(
-                Number(behandlingId),
-                underholdsid,
-                payload
-            );
-            return data;
+        mutationFn: async (payload: OppdatereBegrunnelseRequest): Promise<void> => {
+            await BEHANDLING_API_V1.api.oppdatereBegrunnelse(Number(behandlingId), payload);
         },
         networkMode: "always",
         onError: (error) => {

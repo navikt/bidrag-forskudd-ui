@@ -20,7 +20,7 @@ import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
-import { useOnUpdateUnderhold } from "../../../hooks/useOnUpdateUnderhold";
+import { useOnUpdateUnderholdBegrunnelse } from "../../../hooks/useOnUpdateUnderhold";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { createInitialValues } from "../helpers/UnderholdskostnadFormHelpers";
 import { AndreBarn } from "./AndreBarn";
@@ -101,9 +101,10 @@ const Side = () => {
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
     const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
     const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : id;
-    const saveUnderhold = useOnUpdateUnderhold(Number(underholdId));
-    const fieldName =
-        `${field as "underholdskostnaderMedIBehandling" | "underholdskostnaderAndreBarn"}.${fieldIndex}.begrunnelse` as const;
+    const saveUnderhold = useOnUpdateUnderholdBegrunnelse();
+    const fieldName = tabIsAndreBarn
+        ? "underholdskostnaderAndreBarnBegrunnelse"
+        : (`${field as "underholdskostnaderMedIBehandling"}.${fieldIndex}.begrunnelse` as const);
     const [previousValue, setPreviousValue] = useState<string>(getValues(fieldName));
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
@@ -113,9 +114,10 @@ const Side = () => {
         saveUnderhold.mutation.mutate(
             {
                 begrunnelse,
+                underholdsid: Number(underholdId),
             },
             {
-                onSuccess: (response) => {
+                onSuccess: () => {
                     saveUnderhold.queryClientUpdater((currentData) => {
                         const underholdIndex = currentData.underholdskostnader.findIndex(
                             (underhold) => underhold.id === Number(underholdId)
@@ -126,11 +128,11 @@ const Side = () => {
                                   ...underhold,
                                   begrunnelse: underhold.gjelderBarn.medIBehandlingen
                                       ? underhold.begrunnelse
-                                      : response.begrunnelse,
+                                      : begrunnelse,
                               }))
                             : currentData.underholdskostnader.toSpliced(Number(underholdIndex), 1, {
                                   ...currentData.underholdskostnader[underholdIndex],
-                                  begrunnelse: response.begrunnelse,
+                                  begrunnelse: begrunnelse,
                               });
 
                         return {
@@ -138,7 +140,7 @@ const Side = () => {
                             underholdskostnader: updatedUnderholdskostnader,
                         };
                     });
-                    setPreviousValue(response.begrunnelse);
+                    setPreviousValue(begrunnelse);
                 },
                 onError: () => {
                     setSaveErrorState({
