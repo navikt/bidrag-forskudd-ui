@@ -5,7 +5,6 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
-import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -14,7 +13,6 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { BodyShort, Tabs, Textarea } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
 
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
@@ -29,18 +27,11 @@ import { NyOpplysningerAlert } from "./BarnetilsynOpplysninger";
 
 const Main = () => {
     const { roller } = useGetBehandlingV2();
+    const { onNavigateToTab } = useBehandlingProvider();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const søknadsBarnUnderholdskostnader = getValues("underholdskostnaderMedIBehandling");
     const [activeTab, defaultTab] = useGetActiveAndDefaultUnderholdskostnadTab();
-    const [_, setSearchParams] = useSearchParams();
     const BMRolle = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
-
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
 
     return (
         <>
@@ -53,7 +44,7 @@ const Main = () => {
             <Tabs
                 defaultValue={defaultTab}
                 value={activeTab}
-                onChange={updateSearchparamForTab}
+                onChange={onNavigateToTab}
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
             >
                 <Tabs.List>
