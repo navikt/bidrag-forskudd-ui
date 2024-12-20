@@ -20,6 +20,8 @@ export const BarnebidragSideMenu = () => {
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
+        gebyr: { valideringsfeil: gebyrValideringsfeil },
+        samvær,
         gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
         roller,
@@ -60,6 +62,17 @@ export const BarnebidragSideMenu = () => {
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
+    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
+        return (
+            valideringsfeil.manglerSamvær ||
+            valideringsfeil.manglerBegrunnelse ||
+            valideringsfeil.ingenLøpendeSamvær ||
+            valideringsfeil.harPeriodiseringsfeil ||
+            valideringsfeil.hullIPerioder ||
+            valideringsfeil.overlappendePerioder
+        );
+    });
 
     return (
         <SideMenu>
@@ -466,6 +479,7 @@ export const BarnebidragSideMenu = () => {
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
                 interactive={!!gebyr}
                 active={activeButton === BarnebidragStepper.GEBYR}
+                valideringsfeil={gebyrValideringsFeil}
             />
             <MenuButton
                 step={"5."}
@@ -482,6 +496,7 @@ export const BarnebidragSideMenu = () => {
                 interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
                 active={activeButton === BarnebidragStepper.SAMVÆR}
+                valideringsfeil={samværValideringsFeil}
             />
             <MenuButton
                 step={"7."}
