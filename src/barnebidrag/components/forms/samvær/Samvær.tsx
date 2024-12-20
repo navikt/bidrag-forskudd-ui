@@ -144,18 +144,12 @@ const Side = () => {
 
 const Main = () => {
     const { roller: behandlingRoller } = useGetBehandlingV2();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype === Rolletype.BA)
         .sort((a, b) => a.ident.localeCompare(b.ident));
-
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
 
     const defaultTab = useMemo(() => {
         const roleId = roller
@@ -170,7 +164,7 @@ const Main = () => {
             <Tabs
                 defaultValue={defaultTab}
                 value={selectedTab}
-                onChange={updateSearchparamForTab}
+                onChange={onNavigateToTab}
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] w-full"
             >
                 <Tabs.List>

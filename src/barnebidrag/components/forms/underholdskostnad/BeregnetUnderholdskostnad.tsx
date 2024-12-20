@@ -18,7 +18,7 @@ export const BeregnetUnderholdskostnad = ({
     const { underholdskostnader } = useGetBehandlingV2();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
-    const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).underholdskostnad;
+    const beregnetUnderholdskostnad = underholdskostnader.find((u) => u.id === underhold.id).beregnetUnderholdskostnad;
 
     return (
         <Box background="surface-subtle" className="grid gap-y-2 px-4 py-2 w-full">

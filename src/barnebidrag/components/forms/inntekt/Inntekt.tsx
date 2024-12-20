@@ -30,21 +30,14 @@ import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const { beregnetGebyrErEndret, lesemodus } = useBehandlingProvider();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { beregnetGebyrErEndret, lesemodus, onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
         if (b.rolletype === Rolletype.BM || a.rolletype === Rolletype.BA) return 1;
         return 0;
     });
-
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
 
     const defaultTab = useMemo(() => {
         const roleId = roller
@@ -68,7 +61,7 @@ const Main = () => {
             <Tabs
                 defaultValue={defaultTab}
                 value={selectedTab}
-                onChange={updateSearchparamForTab}
+                onChange={onNavigateToTab}
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
             >
                 <Tabs.List>

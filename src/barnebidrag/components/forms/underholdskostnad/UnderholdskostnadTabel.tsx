@@ -21,6 +21,7 @@ import {
     TilleggsstonadPeriode,
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
+import { mapBeregnetUnderholdskostnadToRole } from "../helpers/UnderholdskostnadFormHelpers";
 
 const fieldNameToSletteUnderholdselementTypeEnum = {
     stønadTilBarnetilsyn: SletteUnderholdselementTypeEnum.STONADTILBARNETILSYN,
@@ -114,12 +115,28 @@ export const UnderholdskostnadTabel = ({
 
                     return {
                         ...currentData,
-                        underholdskostnader: currentData.underholdskostnader
-                            .toSpliced(Number(cachedUnderholdIndex), 1, {
-                                ...currentData.underholdskostnader[cachedUnderholdIndex],
-                                [underholdskostnadType]: updatedListe,
-                            })
-                            .map((u) => ({ ...u, underholdskostnad: response.underholdskostnad })),
+                        underholdskostnader: currentData.underholdskostnader.map((cachedUnderhold, index) => {
+                            let updatedUnderhold = { ...cachedUnderhold };
+                            const updatedBeregnetUnderholdskostnad = response.beregnetUnderholdskostnader.find(
+                                (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
+                            );
+                            if (updatedBeregnetUnderholdskostnad) {
+                                updatedUnderhold = {
+                                    ...updatedUnderhold,
+                                    beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
+                                        ? updatedBeregnetUnderholdskostnad.perioder
+                                        : cachedUnderhold.beregnetUnderholdskostnad,
+                                };
+                            }
+                            if (index === cachedUnderholdIndex) {
+                                updatedUnderhold = {
+                                    ...updatedUnderhold,
+                                    [underholdskostnadType]: updatedListe,
+                                };
+                            }
+
+                            return updatedUnderhold;
+                        }),
                     };
                 });
             },
@@ -182,11 +199,13 @@ export const UnderholdskostnadTabel = ({
 
                         return {
                             ...currentData,
-                            underholdskostnader: currentData.underholdskostnader.toSpliced(cachedUnderholdIndex, 1, {
-                                ...currentData.underholdskostnader[cachedUnderholdIndex],
-                                [underholdskostnadType]: updatedList,
-                                underholdskostnad: response.underholdskostnad,
-                            }),
+                            underholdskostnader: currentData.underholdskostnader
+                                .toSpliced(cachedUnderholdIndex, 1, {
+                                    ...currentData.underholdskostnader[cachedUnderholdIndex],
+                                    [underholdskostnadType]: updatedList,
+                                    underholdskostnad: response.underholdskostnad,
+                                })
+                                .map(mapBeregnetUnderholdskostnadToRole(response.beregnetUnderholdskostnader)),
                         };
                     });
                 },

@@ -10,11 +10,11 @@ import {
     FaktiskTilsynsutgiftDto,
     GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
+    OppdatereBegrunnelseRequest,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
-    OppdatereUnderholdRequest,
     OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
@@ -23,6 +23,7 @@ import {
     OppdaterSamvaerDto,
     OppdaterSamvaerResponsDto,
     OpplysningerType,
+    OpprettUnderholdskostnadBarnResponse,
     RolleDto,
     SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
@@ -32,7 +33,6 @@ import {
     StonadTilBarnetilsynAktiveGrunnlagDto,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
-    UnderholdDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
@@ -69,6 +69,7 @@ export const MutationKeys = {
     updateStonadTilBarnetilsyn: (behandlingId: string) => ["mutation", "stonadTilBarnetilsyn", behandlingId],
     updateFaktiskeTilsynsutgifter: (behandlingId: string) => ["mutation", "faktiskeTilsynsutgifter", behandlingId],
     updateTilleggstønad: (behandlingId: string) => ["mutation", "tilleggstønad", behandlingId],
+    slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
 };
 
 export const QueryKeys = {
@@ -605,8 +606,8 @@ export const useDeleteUnderholdsObjekt = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
-        mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
-        mutationFn: async (payload: SletteUnderholdselement): Promise<UnderholdDto> => {
+        mutationKey: MutationKeys.slettUnderholdsElement(behandlingId),
+        mutationFn: async (payload: SletteUnderholdselement): Promise<OppdatereUnderholdResponse> => {
             const { data } = await BEHANDLING_API_V1.api.sletteFraUnderhold(Number(behandlingId), payload);
             return data;
         },
@@ -665,7 +666,7 @@ export const useCreateUnderholdForBarn = () => {
 
     return useMutation({
         mutationKey: MutationKeys.oppretteUnderholdForBarn(behandlingId),
-        mutationFn: async (payload: BarnDto): Promise<UnderholdDto> => {
+        mutationFn: async (payload: BarnDto): Promise<OpprettUnderholdskostnadBarnResponse> => {
             const { data } = await BEHANDLING_API_V1.api.oppretteUnderholdForBarn(Number(behandlingId), payload);
             return data;
         },
@@ -677,18 +678,13 @@ export const useCreateUnderholdForBarn = () => {
     });
 };
 
-export const useUpdateUnderhold = (underholdsid: number) => {
+export const useUpdateUnderholdBegrunnelse = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
         mutationKey: MutationKeys.oppdatereUnderhold(behandlingId),
-        mutationFn: async (payload: OppdatereUnderholdRequest): Promise<UnderholdDto> => {
-            const { data } = await BEHANDLING_API_V1.api.oppdatereUnderhold(
-                Number(behandlingId),
-                underholdsid,
-                payload
-            );
-            return data;
+        mutationFn: async (payload: OppdatereBegrunnelseRequest): Promise<void> => {
+            await BEHANDLING_API_V1.api.oppdatereBegrunnelse(Number(behandlingId), payload);
         },
         networkMode: "always",
         onError: (error) => {

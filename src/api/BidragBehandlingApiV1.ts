@@ -1838,6 +1838,13 @@ export interface BarnDto {
     fødselsdato?: string;
 }
 
+export interface OpprettUnderholdskostnadBarnResponse {
+    underholdskostnad: UnderholdDto;
+    valideringsfeil?: ValideringsfeilUnderhold;
+    /** @uniqueItems true */
+    beregnetUnderholdskostnader: BeregnetUnderholdskostnad[];
+}
+
 export interface OpprettBehandlingFraVedtakRequest {
     vedtakstype: Vedtakstype;
     /** @format date */
@@ -3704,7 +3711,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         oppretteUnderholdForBarn: (behandlingsid: number, data: BarnDto, params: RequestParams = {}) =>
-            this.request<UnderholdDto, any>({
+            this.request<OpprettUnderholdskostnadBarnResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/opprette`,
                 method: "POST",
                 body: data,
@@ -4192,7 +4199,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
          * @secure
          */
         sletteFraUnderhold: (behandlingsid: number, data: SletteUnderholdselement, params: RequestParams = {}) =>
-            this.request<UnderholdDto, any>({
+            this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold`,
                 method: "DELETE",
                 body: data,

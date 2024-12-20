@@ -29,7 +29,8 @@ import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
@@ -49,19 +50,14 @@ const Main = () => {
     }, []);
 
     useEffect(scrollToHash, []);
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
+
     const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
             defaultValue={defaultTab}
             value={selectedTab}
-            onChange={updateSearchparamForTab}
+            onChange={onNavigateToTab}
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>

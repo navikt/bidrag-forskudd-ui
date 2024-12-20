@@ -30,7 +30,8 @@ import { createInitialForskuddInntektValues } from "../helpers/inntektFormHelper
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -45,13 +46,6 @@ const Main = () => {
             return 0;
         });
 
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
-
     const defaultTab = useMemo(() => {
         const roleId = roller
             .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
@@ -65,7 +59,7 @@ const Main = () => {
         <Tabs
             defaultValue={defaultTab}
             value={selectedTab}
-            onChange={updateSearchparamForTab}
+            onChange={onNavigateToTab}
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>

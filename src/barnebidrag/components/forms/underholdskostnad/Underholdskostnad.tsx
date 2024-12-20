@@ -5,7 +5,6 @@ import { FormControlledTextarea } from "@common/components/formFields/FormContro
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
-import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import { ROLE_FORKORTELSER } from "@common/constants/roleTags";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -14,13 +13,12 @@ import { useDebounce } from "@common/hooks/useDebounce";
 import { BodyShort, Tabs, Textarea } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
 
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
-import { useOnUpdateUnderhold } from "../../../hooks/useOnUpdateUnderhold";
+import { useOnUpdateUnderholdBegrunnelse } from "../../../hooks/useOnUpdateUnderhold";
 import { UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
 import { createInitialValues } from "../helpers/UnderholdskostnadFormHelpers";
 import { AndreBarn } from "./AndreBarn";
@@ -29,18 +27,11 @@ import { NyOpplysningerAlert } from "./BarnetilsynOpplysninger";
 
 const Main = () => {
     const { roller } = useGetBehandlingV2();
+    const { onNavigateToTab } = useBehandlingProvider();
     const { getValues } = useFormContext<UnderholdskostnadFormValues>();
     const søknadsBarnUnderholdskostnader = getValues("underholdskostnaderMedIBehandling");
     const [activeTab, defaultTab] = useGetActiveAndDefaultUnderholdskostnadTab();
-    const [_, setSearchParams] = useSearchParams();
     const BMRolle = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
-
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.tab, currentTabId);
-            return params;
-        });
-    }
 
     return (
         <>
@@ -53,7 +44,7 @@ const Main = () => {
             <Tabs
                 defaultValue={defaultTab}
                 value={activeTab}
-                onChange={updateSearchparamForTab}
+                onChange={onNavigateToTab}
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
             >
                 <Tabs.List>
@@ -101,9 +92,10 @@ const Side = () => {
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
     const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
     const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : id;
-    const saveUnderhold = useOnUpdateUnderhold(Number(underholdId));
-    const fieldName =
-        `${field as "underholdskostnaderMedIBehandling" | "underholdskostnaderAndreBarn"}.${fieldIndex}.begrunnelse` as const;
+    const saveUnderhold = useOnUpdateUnderholdBegrunnelse();
+    const fieldName = tabIsAndreBarn
+        ? "underholdskostnaderAndreBarnBegrunnelse"
+        : (`${field as "underholdskostnaderMedIBehandling"}.${fieldIndex}.begrunnelse` as const);
     const [previousValue, setPreviousValue] = useState<string>(getValues(fieldName));
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
@@ -113,9 +105,10 @@ const Side = () => {
         saveUnderhold.mutation.mutate(
             {
                 begrunnelse,
+                underholdsid: Number(underholdId),
             },
             {
-                onSuccess: (response) => {
+                onSuccess: () => {
                     saveUnderhold.queryClientUpdater((currentData) => {
                         const underholdIndex = currentData.underholdskostnader.findIndex(
                             (underhold) => underhold.id === Number(underholdId)
@@ -126,11 +119,11 @@ const Side = () => {
                                   ...underhold,
                                   begrunnelse: underhold.gjelderBarn.medIBehandlingen
                                       ? underhold.begrunnelse
-                                      : response.begrunnelse,
+                                      : begrunnelse,
                               }))
                             : currentData.underholdskostnader.toSpliced(Number(underholdIndex), 1, {
                                   ...currentData.underholdskostnader[underholdIndex],
-                                  begrunnelse: response.begrunnelse,
+                                  begrunnelse: begrunnelse,
                               });
 
                         return {
@@ -138,7 +131,7 @@ const Side = () => {
                             underholdskostnader: updatedUnderholdskostnader,
                         };
                     });
-                    setPreviousValue(response.begrunnelse);
+                    setPreviousValue(begrunnelse);
                 },
                 onError: () => {
                     setSaveErrorState({

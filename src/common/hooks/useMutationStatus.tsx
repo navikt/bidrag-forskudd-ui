@@ -13,6 +13,13 @@ export const useMutationStatus = (behandlingId: string) => {
         MutationKeys.updateVirkningstidspunkt(behandlingId),
         MutationKeys.updateInntekter(behandlingId),
         MutationKeys.updateUtgifter(behandlingId),
+        MutationKeys.oppretteUnderholdForBarn(behandlingId),
+        MutationKeys.updateUtgifter(behandlingId),
+        MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
+        MutationKeys.updateFaktiskeTilsynsutgifter(behandlingId),
+        MutationKeys.updateTilleggstønad(behandlingId),
+        MutationKeys.slettUnderholdsElement(behandlingId),
+        MutationKeys.oppdatereTilsynsordning(behandlingId),
     ];
     const mutationStatus = useRQMutationState(listenToMutations, queryClient);
 
