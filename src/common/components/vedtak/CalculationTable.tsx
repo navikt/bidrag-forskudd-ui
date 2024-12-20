@@ -81,18 +81,19 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({
             </>
             <Table size="small">
                 <Table.Header>
-                    <Table.Row></Table.Row>
-                    <Table.HeaderCell textSize="small" className="w-[250px]">
-                        Beskrivelse
-                    </Table.HeaderCell>
-                    {harBeregning && (
-                        <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
-                            Beregning
+                    <Table.Row>
+                        <Table.HeaderCell textSize="small" className="w-[250px]">
+                            Beskrivelse
                         </Table.HeaderCell>
-                    )}
-                    <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
-                        Beløp
-                    </Table.HeaderCell>
+                        {harBeregning && (
+                            <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                                Beregning
+                            </Table.HeaderCell>
+                        )}
+                        <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                            Beløp
+                        </Table.HeaderCell>
+                    </Table.Row>
                 </Table.Header>
                 <Table.Body>
                     {data.map((row, rowIndex) => (
