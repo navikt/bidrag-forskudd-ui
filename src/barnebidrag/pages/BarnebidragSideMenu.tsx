@@ -65,12 +65,12 @@ export const BarnebidragSideMenu = () => {
     const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
     const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
         return (
-            valideringsfeil.manglerSamvær ||
-            valideringsfeil.manglerBegrunnelse ||
-            valideringsfeil.ingenLøpendeSamvær ||
-            valideringsfeil.harPeriodiseringsfeil ||
-            valideringsfeil.hullIPerioder ||
-            valideringsfeil.overlappendePerioder
+            valideringsfeil?.manglerSamvær ||
+            valideringsfeil?.manglerBegrunnelse ||
+            valideringsfeil?.ingenLøpendeSamvær ||
+            valideringsfeil?.harPeriodiseringsfeil ||
+            valideringsfeil?.hullIPerioder ||
+            valideringsfeil?.overlappendePerioder
         );
     });
 
