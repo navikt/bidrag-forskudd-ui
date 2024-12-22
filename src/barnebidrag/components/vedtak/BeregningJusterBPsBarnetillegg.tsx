@@ -1,4 +1,4 @@
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
@@ -22,7 +22,7 @@ export const BeregningJusterBPsBarnetillegg = () => {
     }
     return (
         <div>
-            <ResultatTable
+            <ResultatDescription
                 data={[
                     {
                         label: "Foreløpig bidrag",

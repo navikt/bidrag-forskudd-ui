@@ -1,7 +1,7 @@
-import { BodyShort, Heading, HStack } from "@navikt/ds-react";
+import { BodyShort } from "@navikt/ds-react";
 
 import { BPsAndelInntekterTable } from "../../../common/components/vedtak/BPsAndelInntekterTable";
-import { CalculationTabell, MathMultiplication } from "../../../common/components/vedtak/CalculationTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 
@@ -13,51 +13,32 @@ export const BPsAndelUtgifter = () => {
     const utgifter = beregnetSærbidrag.resultat.delberegningUtgift;
     return (
         <>
-            <Heading size="xsmall">{"BPs andel"}</Heading>
-            <HStack gap={"5"} className="pb-2 w-full">
-                <BPsAndelInntekterTable
-                    inntekter={inntekter}
-                    forskuddssats={beregnetSærbidrag.resultat.forskuddssats}
-                />
-                <CalculationTabell
-                    title="Beregning av BPs andel prosent"
-                    data={[
-                        {
-                            label: "BPs inntekt",
-                            result: formatterBeløpForBeregning(inntekter.inntektBP, true),
-                        },
-                        {
-                            label: "Total inntekt",
-                            result: (
-                                <div className="flex flex-row justify-end gap-1">
-                                    <div>&#247;</div>
-                                    {formatterBeløpForBeregning(inntekter.totalEndeligInntekt, true)}
-                                </div>
-                            ),
-                        },
-                    ]}
-                    result={{
-                        label: "BPs andel",
-                        value: formatterProsent(bpsAndel.beregnetAndelFaktor),
-                    }}
-                    message={
-                        bpsAndel.endeligAndelFaktor !== bpsAndel.beregnetAndelFaktor && (
+            <BPsAndelInntekterTable inntekter={inntekter} forskuddssats={beregnetSærbidrag.resultat.forskuddssats} />
+            <ResultatDescription
+                data={[
+                    {
+                        label: "BP's andel prosent",
+                        textRight: true,
+                        value: `${formatterBeløpForBeregning(inntekter.inntektBP, true)} / ${formatterBeløpForBeregning(inntekter.totalEndeligInntekt, true)}`,
+                        result: formatterProsent(bpsAndel.beregnetAndelFaktor),
+                    },
+
+                    {
+                        label: "Andel utgifter",
+                        textRight: true,
+                        value: `${formatterBeløpForBeregning(utgifter.sumGodkjent, true)} X ${formatterProsent(bpsAndel.endeligAndelFaktor)}`,
+                        result: formatterBeløpForBeregning(bpsAndel.andelBeløp, true),
+                    },
+                    bpsAndel.endeligAndelFaktor !== bpsAndel.beregnetAndelFaktor && {
+                        textRight: false,
+                        value: (
                             <BodyShort size="small" spacing className="text-red-500">
                                 Andel begrenset til {formatterProsent(bpsAndel.endeligAndelFaktor)}
                             </BodyShort>
-                        )
-                    }
-                />
-            </HStack>
-
-            <div>
-                Andel utgifter:{" "}
-                <MathMultiplication
-                    left={`${formatterBeløpForBeregning(utgifter.sumGodkjent, true)}`}
-                    right={formatterProsent(bpsAndel.endeligAndelFaktor)}
-                />{" "}
-                = {formatterBeløpForBeregning(bpsAndel.andelBeløp, true)}
-            </div>
+                        ),
+                    },
+                ]}
+            />
         </>
     );
 };

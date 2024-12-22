@@ -6,7 +6,7 @@ import {
     ResultatBarnebidragsberegningPeriodeDto,
     Rolletype,
 } from "../../../api/BidragBehandlingApiV1";
-import { BPsEvneV2 } from "../../../common/components/vedtak/BPsEvneTabell";
+import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { BarnetilleggSkatteprosent } from "./BarnetilleggSkatteprosent";
 import { EndeligBidragTable } from "./BeregningEndeligBidrag";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
@@ -48,7 +48,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     </VStack>
                 )}
                 <VStack gap="2">
-                    <BPsEvneV2
+                    <BPsEvne
                         inntekter={beregningsdetaljer.inntekter}
                         bidragsevne={beregningsdetaljer.delberegningBidragsevne}
                     />

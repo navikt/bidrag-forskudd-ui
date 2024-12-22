@@ -17,14 +17,14 @@ export default function PersonNavnIdent({
 }) {
     if (variant === "default") {
         return (
-            <BodyShort size="small" className="flex items-center gap-4">
+            <BodyShort as="span" size="small" className="flex items-center gap-4">
                 <PersonNavn bold navn={navn} ident={ident} />
                 {ident ? <PersonIdent ident={ident} /> : <span>{ISODateTimeStringToDDMMYYYYString(fødselsdato)}</span>}
             </BodyShort>
         );
     }
     return (
-        <BodyShort size="small" className="gap-2">
+        <BodyShort as="span" size="small" className="gap-2">
             <PersonNavn navn={navn} /> /{" "}
             {ident ? <PersonIdent ident={ident} /> : <span>{ISODateTimeStringToDDMMYYYYString(fødselsdato)}</span>}
         </BodyShort>

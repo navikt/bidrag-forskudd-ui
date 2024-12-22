@@ -1,8 +1,8 @@
 import { Heading } from "@navikt/ds-react";
 
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
-import { CalculationTabellV2 } from "../../../common/components/vedtak/CalculationTable";
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { CalculationTabell } from "../../../common/components/vedtak/CalculationTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
@@ -20,7 +20,7 @@ export const BarnetilleggSkatteprosent = ({ rolle }: NettoBarnetilleggTableProps
         <div>
             <Heading size="xsmall">Beregning av skatteprosent på barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
 
-            <CalculationTabellV2
+            <CalculationTabell
                 data={[
                     {
                         label: "Skatt",
@@ -40,7 +40,7 @@ export const BarnetilleggSkatteprosent = ({ rolle }: NettoBarnetilleggTableProps
                     value: formatterBeløpForBeregning(barnetilleggSkattesats.sumSkatt, true),
                 }}
             />
-            <ResultatTable
+            <ResultatDescription
                 data={[
                     {
                         label: "Inntekt",

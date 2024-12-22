@@ -1,4 +1,4 @@
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
@@ -9,7 +9,7 @@ export default function BeregningSamværsfradrag() {
     } = useBidragBeregningPeriode();
 
     return (
-        <ResultatTable
+        <ResultatDescription
             title="Samværsfradrag"
             data={[
                 {

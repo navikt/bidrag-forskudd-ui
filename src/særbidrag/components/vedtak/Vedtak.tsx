@@ -10,7 +10,7 @@ import React, { useEffect } from "react";
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import VedtakWrapper from "../../../common/components/vedtak/VedtakWrapper";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløp, formatterProsent } from "../../../utils/number-utils";
@@ -77,29 +77,27 @@ const VedtakResultat = () => {
                 <div>
                     <Heading size="small">Avslag</Heading>
                     <VStack gap={"4"}>
-                        <UtgifsposterTable />
-                        <BodyShort size="small">
-                            <ResultatTable
-                                data={[
-                                    {
-                                        label: "Årsak",
-                                        value: hentVisningsnavn(resultat.resultatKode),
-                                    },
-                                    resultat.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS && {
-                                        label: "Forskuddssats",
-                                        value: formatterBeløp(resultat.forskuddssats, true),
-                                    },
-                                    {
-                                        label: "Kravbeløp",
-                                        value: formatterBeløp(resultat.beregning?.totalKravbeløp, true),
-                                    },
-                                    {
-                                        label: "Godkjent beløp",
-                                        value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
-                                    },
-                                ].filter((d) => d)}
-                            />
-                        </BodyShort>
+                        <ResultatDescription
+                            data={[
+                                {
+                                    label: "Årsak",
+                                    value: hentVisningsnavn(resultat.resultatKode),
+                                },
+                                resultat.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS && {
+                                    label: "Forskuddssats",
+                                    value: formatterBeløp(resultat.forskuddssats, true),
+                                },
+                                {
+                                    label: "Kravbeløp",
+                                    value: formatterBeløp(resultat.beregning?.totalKravbeløp, true),
+                                },
+                                {
+                                    label: "Godkjent beløp",
+                                    value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
+                                },
+                            ].filter((d) => d)}
+                        />
+                        <UtgifterLagtTilGrunnAccordion />
                     </VStack>
                 </div>
             );
@@ -115,10 +113,9 @@ const VedtakResultat = () => {
                         Særbidrag innvilget
                     </Heading>
                 )}
-                <UtgifsposterTable />
-                <VStack gap={"2"} className="pt-4">
+                <VStack gap={"2"} className="pt-2">
                     <HStack gap={"24"} style={{ width: "max-content" }}>
-                        <ResultatTable
+                        <ResultatDescription
                             title="Inntekter"
                             data={[
                                 {
@@ -136,7 +133,7 @@ const VedtakResultat = () => {
                             ]}
                         />
 
-                        <ResultatTable
+                        <ResultatDescription
                             title="Boforhold"
                             data={[
                                 {
@@ -153,7 +150,7 @@ const VedtakResultat = () => {
                                 },
                             ]}
                         />
-                        <ResultatTable
+                        <ResultatDescription
                             title="Beregning"
                             data={[
                                 {
@@ -195,6 +192,7 @@ const VedtakResultat = () => {
                             ].filter((d) => d)}
                         />
                     </HStack>
+                    <UtgifterLagtTilGrunnAccordion />
                     <BeregningsdetaljerAccordion />
                 </VStack>
             </div>
@@ -206,7 +204,18 @@ const VedtakResultat = () => {
         </VedtakWrapper>
     );
 };
-
+const UtgifterLagtTilGrunnAccordion: React.FC = () => {
+    return (
+        <Accordion size="small" headingSize="xsmall">
+            <Accordion.Item>
+                <Accordion.Header>Utgiftene lagt til grunn</Accordion.Header>
+                <Accordion.Content className="*:mb-5">
+                    <UtgifsposterTable />
+                </Accordion.Content>
+            </Accordion.Item>
+        </Accordion>
+    );
+};
 const BeregningsdetaljerAccordion: React.FC = () => {
     return (
         <Accordion size="small" headingSize="xsmall">

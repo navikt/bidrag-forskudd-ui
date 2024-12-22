@@ -14,9 +14,9 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
 
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
     return (
-        <div>
+        <>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
-            <Table size="small" className="table-fixed table bg-white w-full">
+            <Table size="small" zebraStripes className="table-fixed table bg-white w-full">
                 <Table.Header>
                     <Table.Row className="align-baseline">
                         <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[200px]">
@@ -31,8 +31,8 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {barnetillegg.barnetillegg.map((bt) => (
-                        <Table.Row className="align-top">
+                    {barnetillegg.barnetillegg.map((bt, index) => (
+                        <Table.Row className="align-top" key={bt.visningsnavn + "-" + index}>
                             <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(bt.bruttoBeløp)}
@@ -55,6 +55,6 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     </Table.Row>
                 </Table.Body>
             </Table>
-        </div>
+        </>
     );
 };

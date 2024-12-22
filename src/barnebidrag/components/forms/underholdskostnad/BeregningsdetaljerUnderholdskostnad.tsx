@@ -3,8 +3,8 @@ import { Link, VStack } from "@navikt/ds-react";
 
 import { UnderholdskostnadPeriodeBeregningsdetaljer } from "../../../../api/BidragBehandlingApiV1";
 import { PersonNavn } from "../../../../common/components/PersonNavn";
-import { CalculationTabellV2 } from "../../../../common/components/vedtak/CalculationTable";
-import { ResultatTable } from "../../../../common/components/vedtak/ResultatTable";
+import { CalculationTabell } from "../../../../common/components/vedtak/CalculationTable";
+import { ResultatDescription } from "../../../../common/components/vedtak/ResultatDescription";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../../utils/number-utils";
 
 export default function BeregningsdetaljerUnderholdskostnad({
@@ -16,7 +16,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
     const tilleggstønad = detaljer.tilsynsutgifterBarn?.filter((b) => b.tilleggsstønadDagsats !== undefined) ?? [];
     return (
         <VStack className="w-[700px]" gap="4">
-            <ResultatTable
+            <ResultatDescription
                 data={[
                     {
                         label: "Antall barn under 12 år",
@@ -26,7 +26,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                 ].filter((d) => d)}
             />
             {tilleggstønad.length > 0 && (
-                <CalculationTabellV2
+                <CalculationTabell
                     title="Tilleggsstønad"
                     data={detaljer.tilsynsutgifterBarn
                         ?.filter((b) => b.tilleggsstønadDagsats !== undefined)
@@ -38,7 +38,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         .filter((d) => d)}
                 />
             )}
-            <CalculationTabellV2
+            <CalculationTabell
                 title="Tilsynsutgifter"
                 data={[
                     ...(detaljer.tilsynsutgifterBarn?.flatMap((b) => [
@@ -57,7 +57,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
             />
 
             {detaljer.erBegrensetAvMaksTilsyn && (
-                <ResultatTable
+                <ResultatDescription
                     data={[
                         {
                             label: "Totalbeløp begrenset av maks tilsynsutgift",
@@ -74,7 +74,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     ].filter((d) => d)}
                 />
             )}
-            <CalculationTabellV2
+            <CalculationTabell
                 title="Skattefradrag"
                 titleLink={
                     <Link
@@ -105,7 +105,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     },
                 ].filter((d) => d)}
             />
-            <CalculationTabellV2
+            <CalculationTabell
                 title="Beregnet tilsynsutgifter"
                 data={[
                     {

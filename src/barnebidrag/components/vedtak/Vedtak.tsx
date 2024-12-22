@@ -9,7 +9,7 @@ import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { dateToDDMMYYYYString, deductDays } from "@navikt/bidrag-ui-common";
 import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { Fragment, useEffect } from "react";
 
 import {
     ResultatBidragsberegningBarnDto,
@@ -20,7 +20,7 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import PersonNavnIdent from "../../../common/components/PersonNavnIdent";
 import { RolleTag } from "../../../common/components/RolleTag";
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { VedtakBarnebidragBeregningResult } from "../../../types/vedtakTypes";
 import { formatterBeløpForBeregning, formatterProsent } from "../../../utils/number-utils";
@@ -83,7 +83,7 @@ const VedtakResultat = () => {
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
                     {r.barn.innbetaltBeløp && (
-                        <ResultatTable
+                        <ResultatDescription
                             data={[
                                 {
                                     label: "Innbetalt beløp",
@@ -119,8 +119,8 @@ const VedtakTableBody = ({
 }) => {
     return (
         <Table.Body>
-            {resultatBarn.perioder.map((periode) => (
-                <>
+            {resultatBarn.perioder.map((periode, index) => (
+                <Fragment key={periode.periode.fom + index}>
                     {avslag ? (
                         <Table.Row>
                             <Table.DataCell textSize="small">
@@ -215,7 +215,7 @@ const VedtakTableBody = ({
                             <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
                         </Table.ExpandableRow>
                     )}
-                </>
+                </Fragment>
             ))}
         </Table.Body>
     );

@@ -11,6 +11,7 @@ interface CalculationTableData {
 interface CalculationTableProps {
     data: CalculationTableData[]; // Array of data objects
     title?: string;
+    zebraStripes?: boolean;
     titleLink?: string | ReactElement;
     result?: {
         label: string;
@@ -27,59 +28,20 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({
     message,
     className,
     titleLink,
-}) => {
-    return (
-        <div className={className}>
-            <div>
-                {title && <Heading size="xsmall">{title}</Heading>}
-                {titleLink}
-            </div>
-            <table className="table-auto  pb-[5px] border-collapse w-full">
-                <tbody>
-                    {data.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
-                            <td colSpan={row.value ? 1 : 2}>{row.label}</td>
-                            {row.value && <td className={"text-right w-[200px]"}>{row.value}</td>}
-                            <td className={"text-right w-[100px]"}>{row.result}</td>
-                        </tr>
-                    ))}
-                    {result && (
-                        <tr className="border-t border-solid border-black border-b-2 border-l-0 border-r-0">
-                            <td colSpan={2}>{result.label}</td>
-                            <td className={"text-right w-[120px] "}>{result.value}</td>
-                        </tr>
-                    )}
-                    {message && (
-                        <tr className="mt-1">
-                            <td colSpan={3}>{message}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
-export const CalculationTabellV2: React.FC<CalculationTableProps> = ({
-    data,
-    title,
-    result,
-    message,
-    className,
-    titleLink,
+    zebraStripes = true,
 }) => {
     const harBeregning = data.some((d) => d.value);
     return (
         <div className={className}>
             <>
                 {title && (
-                    <Heading className="inline-block align-middle" size="xsmall">
+                    <Heading as="h4" className="inline-block align-middle" size="xsmall">
                         {title}
                     </Heading>
                 )}
                 {titleLink}
             </>
-            <Table size="small">
+            <Table size="small" zebraStripes={zebraStripes} className="w-full">
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell textSize="small" className="w-[250px]">
@@ -113,7 +75,7 @@ export const CalculationTabellV2: React.FC<CalculationTableProps> = ({
                     ))}
                     {result && (
                         <Table.Row>
-                            <Table.DataCell textSize="small" colSpan={harBeregning ? 2 : 1}>
+                            <Table.DataCell textSize="small" align="right" colSpan={harBeregning ? 2 : 1}>
                                 <Label size="small">{result.label}</Label>
                             </Table.DataCell>
                             <Table.DataCell textSize="small" className={"text-right w-[120px] "}>
@@ -143,7 +105,7 @@ interface MathDivisionProps {
 //@ts-ignore
 export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, bottom }) => {
     return (
-        <BodyShort size="small">
+        <BodyShort as="span" size="small">
             {negativeValue && <span>-</span>}
             <span>{top}</span>
             <span> &#247;</span> {/* Multiplication symbol */}
@@ -154,7 +116,7 @@ export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, 
 
 export const MathValue: React.FC<{ value: string | number; negativeValue?: boolean }> = ({ value, negativeValue }) => {
     return (
-        <BodyShort size="small">
+        <BodyShort as="span" size="small">
             {negativeValue && <span>-</span>}
             <span>{value}</span>
         </BodyShort>
@@ -168,7 +130,7 @@ interface MathMultiplicationProps {
 
 export const MathMultiplication: React.FC<MathMultiplicationProps> = ({ negativeValue, left, right }) => {
     return (
-        <BodyShort size="small">
+        <BodyShort as="span" size="small">
             {negativeValue && <span>-</span>}
             <span>{left}</span>
             <span> &#xD7;</span> {/* Multiplication symbol */}
