@@ -77,8 +77,10 @@ export const FatteVedtakButtons = ({
                     className="w-max pb-2"
                 >
                     <option value="">Ikke utsett</option>
-                    {utsettDagerListe.map((dager) => (
-                        <option value={dager}>{dager} dager</option>
+                    {utsettDagerListe.map((dager, index) => (
+                        <option value={dager} key={dager + "-" + index}>
+                            {dager} dager
+                        </option>
                     ))}
                 </Select>
             )}

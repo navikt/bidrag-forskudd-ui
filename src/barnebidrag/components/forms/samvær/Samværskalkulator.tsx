@@ -8,7 +8,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { SamvaerskalkulatorNetterFrekvens } from "../../../../api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "../../../../common/components/formFields/FormControlledSelectField";
 import { FormControlledTextField } from "../../../../common/components/formFields/FormControlledTextField";
-import { ResultatTable } from "../../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../../common/components/vedtak/ResultatDescription";
 import {
     createSamværskalkulatorDefaultvalues,
     mapToSamværskalkulatoDetaljer,
@@ -170,7 +170,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
             {samværsklasse && (
                 <>
                     <HStack gap={"1"} align={"center"}>
-                        <ResultatTable
+                        <ResultatDescription
                             data={[
                                 {
                                     label: "Beregning",

@@ -2,7 +2,7 @@ import { BodyShort } from "@navikt/ds-react";
 
 import { DelberegningBidragspliktigesAndel, ResultatBeregningInntekterDto } from "../../../api/BidragBehandlingApiV1";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
-import { CalculationTabell, CalculationTabellV2, MathMultiplication, MathValue } from "./CalculationTable";
+import { CalculationTabell } from "./CalculationTable";
 
 type BPsAndelProps = {
     inntekter: ResultatBeregningInntekterDto;
@@ -16,45 +16,7 @@ export const BPsAndelInntekterTable = ({
 }: Omit<BPsAndelProps, "bpsAndel" | "delberegningUnderholdskostnad">) => {
     return (
         <CalculationTabell
-            title="Beregning av total inntekt"
-            data={[
-                {
-                    label: "BPs inntekt",
-                    result: formatterBeløpForBeregning(inntekter.inntektBP, true),
-                },
-                {
-                    label: "BMs inntekt",
-                    result: formatterBeløpForBeregning(inntekter.inntektBM, true),
-                },
-                {
-                    label: "BAs inntekt",
-                    value: (
-                        <>
-                            {inntekter.inntektBarn > 0 && (
-                                <BodyShort size="small">
-                                    <MathValue value={inntekter.inntektBarn} /> -{" "}
-                                    <MathMultiplication left="30" right={forskuddssats} />
-                                </BodyShort>
-                            )}
-                        </>
-                    ),
-                    result: formatterBeløpForBeregning(inntekter.barnEndeligInntekt, true),
-                },
-            ]}
-            result={{
-                label: "Total inntekt",
-                value: formatterBeløpForBeregning(inntekter.totalEndeligInntekt, true),
-            }}
-        />
-    );
-};
-
-export const BPsAndelInntekterTableV2 = ({
-    inntekter,
-    forskuddssats,
-}: Omit<BPsAndelProps, "bpsAndel" | "delberegningUnderholdskostnad">) => {
-    return (
-        <CalculationTabellV2
+            title="BP's andel"
             data={[
                 {
                     label: "BPs inntekt",
