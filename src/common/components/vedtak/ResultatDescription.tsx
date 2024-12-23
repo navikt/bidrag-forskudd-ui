@@ -17,17 +17,15 @@ interface GenericTableProps {
 export const ResultatDescription: React.FC<GenericTableProps> = ({ data, title, className }) => {
     const harResultat = data.some((d) => d.result);
     return (
-        <BodyShort as="span" size="small" className={className}>
+        <div>
             {title && <Heading size="xsmall">{title}</Heading>}
             <table>
-                <tbody>
+                <BodyShort as="tbody" size="small" className={className}>
                     {data.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                             {row.label && (
-                                <td style={{ paddingRight: "8px" }}>
-                                    <BodyShort size="small" weight={row.labelBold ? "semibold" : "regular"}>
-                                        {row.label}:{" "}
-                                    </BodyShort>
+                                <td style={{ paddingRight: "8px" }} className={`${row.labelBold ? "font-bold" : ""}`}>
+                                    {row.label}:{" "}
                                 </td>
                             )}
                             <td
@@ -39,8 +37,8 @@ export const ResultatDescription: React.FC<GenericTableProps> = ({ data, title, 
                             {harResultat && row.result && <td>= {row.result}</td>}
                         </tr>
                     ))}
-                </tbody>
+                </BodyShort>
             </table>
-        </BodyShort>
+        </div>
     );
 };
