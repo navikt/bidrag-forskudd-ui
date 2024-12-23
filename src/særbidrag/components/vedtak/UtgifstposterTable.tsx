@@ -1,5 +1,5 @@
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Heading } from "@navikt/ds-react";
+import { Table } from "@navikt/ds-react";
 
 import tekster from "../../../common/constants/texts";
 import { useGetBeregningSærbidrag } from "../../../common/hooks/useApiData";
@@ -11,44 +11,50 @@ export const UtgifsposterTable: React.FC = () => {
 
     const utgifstposter = beregnetSærbidrag.resultat.utgiftsposter;
     return (
-        <div>
-            <Heading size="xsmall">{"Utgiftene lagt til grunn"}</Heading>
-            <table className="table-auto text-left border-collapse">
-                <thead>
-                    <tr>
-                        <th className="pr-[16px]">{tekster.label.betaltAvBp}</th>
-                        <th className="px-[16px]">{tekster.label.forfallsdato}</th>
-                        <th className="px-[16px]">{tekster.label.utgift}</th>
-                        <th className="px-[16px]">{tekster.label.kravbeløp}</th>
-                        <th className="px-[16px]">{tekster.label.godkjentBeløp}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {utgifstposter.map((utgifspost, rowIndex) => (
-                        <tr key={rowIndex} className="pr-[16px]">
-                            <td className={"pr-[16px]"}>{utgifspost.betaltAvBp ? "Ja" : "Nei"}</td>
-                            <td className="px-[16px]">{dateToDDMMYYYYString(dateOrNull(utgifspost.dato))}</td>
-                            <td className="px-[16px]">{utgifspost.utgiftstypeVisningsnavn}</td>
-                            <td className="px-[16px] text-right">
-                                {formatterBeløpForBeregning(utgifspost.kravbeløp, true)}
-                            </td>
-                            <td className="px-[16px] text-right">
-                                {formatterBeløpForBeregning(utgifspost.godkjentBeløp, true)}
-                            </td>
-                        </tr>
-                    ))}
-                    <tr className="border-t border-solid border-black border-b-2 border-l-0 border-r-0">
-                        <td>Sum</td>
-                        <td colSpan={2} />
-                        <td className={"text-right px-[16px] "}>
-                            {formatterBeløpForBeregning(beregnetSærbidrag.resultat.beregning.totalKravbeløp, true)}
-                        </td>
-                        <td className={"text-right px-[16px] "}>
-                            {formatterBeløpForBeregning(beregnetSærbidrag.resultat.beregning.totalGodkjentBeløp, true)}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <Table size="small" zebraStripes>
+            <Table.Header>
+                <Table.Row>
+                    <Table.HeaderCell textSize="small">{tekster.label.betaltAvBp}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small">{tekster.label.forfallsdato}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small">{tekster.label.utgift}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right">
+                        {tekster.label.kravbeløp}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right">
+                        {tekster.label.godkjentBeløp}
+                    </Table.HeaderCell>
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                {utgifstposter.map((utgifspost, rowIndex) => (
+                    <Table.Row key={rowIndex} className="pr-[16px]">
+                        <Table.DataCell textSize="small" className={"pr-[16px]"}>
+                            {utgifspost.betaltAvBp ? "Ja" : "Nei"}
+                        </Table.DataCell>
+                        <Table.DataCell textSize="small">
+                            {dateToDDMMYYYYString(dateOrNull(utgifspost.dato))}
+                        </Table.DataCell>
+                        <Table.DataCell textSize="small">{utgifspost.utgiftstypeVisningsnavn}</Table.DataCell>
+                        <Table.DataCell textSize="small" align="right">
+                            {formatterBeløpForBeregning(utgifspost.kravbeløp, true)}
+                        </Table.DataCell>
+                        <Table.DataCell textSize="small" align="right">
+                            {formatterBeløpForBeregning(utgifspost.godkjentBeløp, true)}
+                        </Table.DataCell>
+                    </Table.Row>
+                ))}
+                <Table.Row className="border-t border-solid border-black border-b-2 border-l-0 border-r-0">
+                    <Table.DataCell textSize="small" className="font-bold" align="right" colSpan={3}>
+                        Sum:
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small" align="right">
+                        {formatterBeløpForBeregning(beregnetSærbidrag.resultat.beregning.totalKravbeløp, true)}
+                    </Table.DataCell>
+                    <Table.DataCell textSize="small" align="right">
+                        {formatterBeløpForBeregning(beregnetSærbidrag.resultat.beregning.totalGodkjentBeløp, true)}
+                    </Table.DataCell>
+                </Table.Row>
+            </Table.Body>
+        </Table>
     );
 };
