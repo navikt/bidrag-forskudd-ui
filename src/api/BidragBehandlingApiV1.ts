@@ -639,6 +639,7 @@ export interface BostatusperiodeGrunnlagDto {
 
 export type Datoperiode = UtilRequiredKeys<PeriodeLocalDate, "fom">;
 
+/** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
 export interface DatoperiodeDto {
     /** @format date */
     fom: string;
@@ -667,6 +668,7 @@ export interface DelberegningSumInntekt {
 export interface FaktiskTilsynsutgiftDto {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     utgift: number;
     kostpenger?: number;
@@ -941,23 +943,11 @@ export interface OverlappendeBostatusperiode {
     bosstatus: Bostatuskode[];
 }
 
+/** Overlappende perioder i stønad til barnetilsyn eller tillegsstønad. */
 export interface OverlappendePeriode {
-    periode: Datoperiode;
-    /**
-     * Teknisk id på inntekter som overlapper
-     * @uniqueItems true
-     */
-    idListe: number[];
-    /**
-     * Inntektsrapportering typer på inntekter som overlapper
-     * @uniqueItems true
-     */
-    rapporteringTyper: Inntektsrapportering[];
-    /**
-     * Inntektstyper som inntektene har felles. Det der dette som bestemmer hvilken inntekter som overlapper.
-     * @uniqueItems true
-     */
-    inntektstyper: Inntektstype[];
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
+    periode: DatoperiodeDto;
+    overlapperMedPerioder: DatoperiodeDto[];
 }
 
 export interface OverlappendeSamvaerPeriode {
@@ -1060,6 +1050,7 @@ export interface SamvaerValideringsfeilDto {
 export interface SamvaersperiodeDto {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     samværsklasse: Samvaersklasse;
     gjennomsnittligSamværPerMåned: number;
@@ -1169,6 +1160,7 @@ export interface StonadTilBarnetilsynAktiveGrunnlagDto {
 export interface StonadTilBarnetilsynDto {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     skolealder?: StonadTilBarnetilsynDtoSkolealderEnum;
     tilsynstype?: StonadTilBarnetilsynDtoTilsynstypeEnum;
@@ -1210,6 +1202,7 @@ export enum Saerbidragskategori {
 export interface TilleggsstonadDto {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     dagsats: number;
     total: number;
@@ -1238,6 +1231,14 @@ export enum TypeBehandling {
     BIDRAG = "BIDRAG",
 }
 
+export interface UnderholdBarnDto {
+    navn?: string;
+    ident?: string;
+    /** @format date */
+    fødselsdato: string;
+    medIBehandling: boolean;
+}
+
 export interface UnderholdDto {
     /** @format int64 */
     id: number;
@@ -1254,9 +1255,11 @@ export interface UnderholdDto {
     begrunnelse?: string;
     /** @uniqueItems true */
     beregnetUnderholdskostnad: UnderholdskostnadDto[];
+    valideringsfeil?: UnderholdskostnadValideringsfeil;
 }
 
 export interface UnderholdskostnadDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     forbruk: number;
     boutgifter: number;
@@ -1286,6 +1289,33 @@ export interface UnderholdskostnadPeriodeBeregningsdetaljer {
     skattefradrag: number;
     skattefradragMaksFradrag: number;
     skattefradragTotalTilsynsutgift: number;
+}
+
+export interface UnderholdskostnadValideringsfeil {
+    tilleggsstønad?: UnderholdskostnadValideringsfeilTabell;
+    faktiskTilsynsutgift?: UnderholdskostnadValideringsfeilTabell;
+    stønadTilBarnetilsyn?: UnderholdskostnadValideringsfeilTabell;
+    /**
+     * Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter.
+     * @uniqueItems true
+     */
+    tilleggsstønadsperioderUtenFaktiskTilsynsutgift: DatoperiodeDto[];
+    /** Minst en periode må legges til hvis det ikke finnes noen offentlige opplysninger for stønad til barnetilsyn */
+    manglerPerioderForTilsynsordning: boolean;
+    /** @format int64 */
+    underholdskostnadsid: number;
+    barn: UnderholdBarnDto;
+}
+
+export interface UnderholdskostnadValideringsfeilTabell {
+    /** Overlappende perioder i stønad til barnetilsyn eller tillegsstønad. */
+    overlappendePerioder: OverlappendePeriode[];
+    /** Perioder som starter senere enn starten av dagens måned. */
+    fremtidigePerioder: DatoperiodeDto[];
+    /** Er sann hvis antall perioder er 0." */
+    harIngenPerioder: boolean;
+    /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
+    manglerPerioderForTilsynsutgifter: boolean;
 }
 
 export interface UtgiftBeregningDto {
@@ -1416,6 +1446,7 @@ export interface OppdatereUtgiftResponse {
 export interface OppdatereTilleggsstonadRequest {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     dagsats: number;
 }
@@ -1427,46 +1458,22 @@ export interface BeregnetUnderholdskostnad {
 }
 
 export interface OppdatereUnderholdResponse {
-    stønadTilBarnetilsyn?: StonadTilBarnetilsynDto;
-    faktiskTilsynsutgift?: FaktiskTilsynsutgiftDto;
-    tilleggsstønad?: TilleggsstonadDto;
     /** @uniqueItems true */
-    underholdskostnad: UnderholdskostnadDto[];
-    valideringsfeil?: ValideringsfeilUnderhold;
+    stønadTilBarnetilsyn: StonadTilBarnetilsynDto[];
+    /** @uniqueItems true */
+    faktiskTilsynsutgift: FaktiskTilsynsutgiftDto[];
+    /** @uniqueItems true */
+    tilleggsstønad: TilleggsstonadDto[];
+    /** @uniqueItems true */
+    valideringsfeil?: UnderholdskostnadValideringsfeil[];
     /** @uniqueItems true */
     beregnetUnderholdskostnader: BeregnetUnderholdskostnad[];
-}
-
-export interface UnderholdBarnDto {
-    navn?: string;
-    ident?: string;
-    /** @format date */
-    fødselsdato: string;
-    medIBehandling: boolean;
-}
-
-export interface ValideringsfeilUnderhold {
-    hullIPerioder: Datoperiode[];
-    overlappendePerioder: OverlappendeBostatusperiode[];
-    /** Er sann hvis det finnes en eller flere perioder som starter senere enn starten av dagens måned. */
-    fremtidigPeriode: boolean;
-    /** Er sann hvis antall perioder er 0." */
-    harIngenPerioder: boolean;
-    /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
-    manglerPerioderForTilsynsutgifter: boolean;
-    /** @format int64 */
-    underholdskostnadId?: number;
-    barn: UnderholdBarnDto;
-}
-
-export interface OppdatereUnderholdRequest {
-    harTilsynsordning?: boolean;
-    begrunnelse?: string;
 }
 
 export interface OppdatereFaktiskTilsynsutgiftRequest {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     utgift: number;
     kostpenger?: number;
@@ -1492,6 +1499,7 @@ export interface OppdaterSamvaerDto {
 export interface OppdaterSamvaersperiodeDto {
     /** @format int64 */
     id?: number;
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     samværsklasse?: Samvaersklasse;
     beregning?: SamvaerskalkulatorDetaljer;
@@ -1786,6 +1794,7 @@ export interface DelberegningSamvaersklasse {
 }
 
 export interface OpprettBehandlingRequest {
+    søknadstype?: OpprettBehandlingRequestSoknadstypeEnum;
     vedtakstype: Vedtakstype;
     /** @format date */
     søktFomDato: string;
@@ -1840,7 +1849,8 @@ export interface BarnDto {
 
 export interface OpprettUnderholdskostnadBarnResponse {
     underholdskostnad: UnderholdDto;
-    valideringsfeil?: ValideringsfeilUnderhold;
+    /** @uniqueItems true */
+    valideringsfeil?: UnderholdskostnadValideringsfeil[];
     /** @uniqueItems true */
     beregnetUnderholdskostnader: BeregnetUnderholdskostnad[];
 }
@@ -1866,6 +1876,7 @@ export interface OpprettBehandlingFraVedtakRequest {
     søknadsid: number;
     /** @format int64 */
     søknadsreferanseid?: number;
+    søknadstype?: OpprettBehandlingFraVedtakRequestSoknadstypeEnum;
 }
 
 export interface KanBehandlesINyLosningRequest {
@@ -1882,10 +1893,11 @@ export interface KanBehandlesINyLosningRequest {
     stønadstype: Stonadstype;
     vedtakstype: Vedtakstype;
     engangsbeløpstype: Engangsbeloptype;
+    søknadstype?: KanBehandlesINyLosningRequestSoknadstypeEnum;
     harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1993,10 +2005,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2187,7 +2199,7 @@ export interface BeregningValideringsfeil {
     /** @uniqueItems true */
     gebyr?: GebyrValideringsfeilDto[];
     /** @uniqueItems true */
-    underholdskostnad?: ValideringsfeilUnderhold[];
+    underholdskostnad?: UnderholdskostnadValideringsfeil[];
     /** @uniqueItems true */
     måBekrefteNyeOpplysninger: MaBekrefteNyeOpplysninger[];
 }
@@ -2607,10 +2619,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2655,6 +2667,7 @@ export interface NotatDelberegningBidragspliktigesBeregnedeTotalbidragDto {
 }
 
 export interface NotatFaktiskTilsynsutgiftDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     utgift: number;
     kostpenger?: number;
@@ -2676,8 +2689,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -2803,8 +2816,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -2815,6 +2828,7 @@ export interface NotatSamvaerDto {
 }
 
 export interface NotatSamvaersperiodeDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     samværsklasse: Samvaersklasse;
     gjennomsnittligSamværPerMåned: number;
@@ -2834,13 +2848,14 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
+    trygdeavgiftMånedsbeløp: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     skolealder: NotatStonadTilBarnetilsynDtoSkolealderEnum;
     tilsynstype: NotatStonadTilBarnetilsynDtoTilsynstypeEnum;
@@ -2866,6 +2881,7 @@ export interface NotatSaerbidragUtgifterDto {
 }
 
 export interface NotatTilleggsstonadDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     dagsats: number;
     total: number;
@@ -2912,6 +2928,7 @@ export interface NotatUnderholdEgneBarnIHusstand {
 }
 
 export interface NotatUnderholdskostnadBeregningDto {
+    /** Tilleggsstønadsperioder som ikke overlapper fullstendig med faktiske tilsynsutgifter. */
     periode: DatoperiodeDto;
     forbruk: number;
     boutgifter: number;
@@ -3166,6 +3183,66 @@ export enum OppdaterRollerResponseStatusEnum {
     ROLLER_OPPDATERT = "ROLLER_OPPDATERT",
 }
 
+export enum OpprettBehandlingRequestSoknadstypeEnum {
+    ENDRING = "ENDRING",
+    EGET_TILTAK = "EGET_TILTAK",
+    SOKNAD = "SØKNAD",
+    INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+    INDEKSREGULERING = "INDEKSREGULERING",
+    KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
+    KLAGE = "KLAGE",
+    FOLGERKLAGE = "FØLGER_KLAGE",
+    KORRIGERING = "KORRIGERING",
+    KONVERTERING = "KONVERTERING",
+    OPPHOR = "OPPHØR",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
+    REVURDERING = "REVURDERING",
+    OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
+    OMGJORING = "OMGJØRING",
+    OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+}
+
+export enum OpprettBehandlingFraVedtakRequestSoknadstypeEnum {
+    ENDRING = "ENDRING",
+    EGET_TILTAK = "EGET_TILTAK",
+    SOKNAD = "SØKNAD",
+    INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+    INDEKSREGULERING = "INDEKSREGULERING",
+    KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
+    KLAGE = "KLAGE",
+    FOLGERKLAGE = "FØLGER_KLAGE",
+    KORRIGERING = "KORRIGERING",
+    KONVERTERING = "KONVERTERING",
+    OPPHOR = "OPPHØR",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
+    REVURDERING = "REVURDERING",
+    OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
+    OMGJORING = "OMGJØRING",
+    OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+}
+
+export enum KanBehandlesINyLosningRequestSoknadstypeEnum {
+    ENDRING = "ENDRING",
+    EGET_TILTAK = "EGET_TILTAK",
+    SOKNAD = "SØKNAD",
+    INNKREVINGSGRUNNLAG = "INNKREVINGSGRUNNLAG",
+    INDEKSREGULERING = "INDEKSREGULERING",
+    KLAGE_BEGRENSET_SATS = "KLAGE_BEGRENSET_SATS",
+    KLAGE = "KLAGE",
+    FOLGERKLAGE = "FØLGER_KLAGE",
+    KORRIGERING = "KORRIGERING",
+    KONVERTERING = "KONVERTERING",
+    OPPHOR = "OPPHØR",
+    PRIVAT_AVTALE = "PRIVAT_AVTALE",
+    BEGRENSET_REVURDERING = "BEGRENSET_REVURDERING",
+    REVURDERING = "REVURDERING",
+    OPPJUSTERT_FORSKUDD = "OPPJUSTERT_FORSKUDD",
+    OMGJORING = "OMGJØRING",
+    OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
+}
+
 export enum InitalizeForsendelseRequestBehandlingStatusEnum {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
@@ -3306,6 +3383,9 @@ export class HttpClient<SecurityDataType = unknown> {
     }
 
     protected createFormData(input: Record<string, unknown>): FormData {
+        if (input instanceof FormData) {
+            return input;
+        }
         return Object.keys(input || {}).reduce((formData, key) => {
             const property = input[key];
             const propertyContent: any[] = property instanceof Array ? property : [property];
@@ -3348,7 +3428,7 @@ export class HttpClient<SecurityDataType = unknown> {
             ...requestParams,
             headers: {
                 ...(requestParams.headers || {}),
-                ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
+                ...(type ? { "Content-Type": type } : {}),
             },
             params: query,
             responseType: responseFormat,
@@ -3447,31 +3527,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         ) =>
             this.request<OppdatereUnderholdResponse, any>({
                 path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/tilleggsstonad`,
-                method: "PUT",
-                body: data,
-                secure: true,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
-
-        /**
-         * @description Angir om et barn har tilsynsordning.
-         *
-         * @tags underhold-controller
-         * @name OppdatereUnderhold
-         * @request PUT:/api/v2/behandling/{behandlingsid}/underhold/{underholdsid}/oppdatere
-         * @deprecated
-         * @secure
-         */
-        oppdatereUnderhold: (
-            behandlingsid: number,
-            underholdsid: number,
-            data: OppdatereUnderholdRequest,
-            params: RequestParams = {}
-        ) =>
-            this.request<UnderholdDto, any>({
-                path: `/api/v2/behandling/${behandlingsid}/underhold/${underholdsid}/oppdatere`,
                 method: "PUT",
                 body: data,
                 secure: true,
