@@ -13,15 +13,17 @@ export const UtgifsposterTable: React.FC = () => {
     return (
         <Table size="small" zebraStripes>
             <Table.Header>
-                <Table.HeaderCell textSize="small">{tekster.label.betaltAvBp}</Table.HeaderCell>
-                <Table.HeaderCell textSize="small">{tekster.label.forfallsdato}</Table.HeaderCell>
-                <Table.HeaderCell textSize="small">{tekster.label.utgift}</Table.HeaderCell>
-                <Table.HeaderCell textSize="small" align="right">
-                    {tekster.label.kravbeløp}
-                </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" align="right">
-                    {tekster.label.godkjentBeløp}
-                </Table.HeaderCell>
+                <Table.Row>
+                    <Table.HeaderCell textSize="small">{tekster.label.betaltAvBp}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small">{tekster.label.forfallsdato}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small">{tekster.label.utgift}</Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right">
+                        {tekster.label.kravbeløp}
+                    </Table.HeaderCell>
+                    <Table.HeaderCell textSize="small" align="right">
+                        {tekster.label.godkjentBeløp}
+                    </Table.HeaderCell>
+                </Table.Row>
             </Table.Header>
             <Table.Body>
                 {utgifstposter.map((utgifspost, rowIndex) => (
