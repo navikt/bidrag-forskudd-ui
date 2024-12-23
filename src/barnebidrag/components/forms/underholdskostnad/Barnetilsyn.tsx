@@ -1,3 +1,4 @@
+import { Kilde } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
@@ -152,7 +153,7 @@ export const RolleInfoBox = ({
                             fødselsdato={underhold.gjelderBarn.fødselsdato}
                         />
                     </div>
-                    {!underhold.gjelderBarn.medIBehandlingen && (
+                    {!underhold.gjelderBarn.medIBehandlingen && underhold.gjelderBarn.kilde === Kilde.MANUELL && (
                         <>
                             <div className="flex items-center justify-end">
                                 <DeleteButton onDelete={() => ref.current?.showModal()} />

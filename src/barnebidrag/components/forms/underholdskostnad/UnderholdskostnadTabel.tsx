@@ -111,14 +111,20 @@ export const UnderholdskostnadTabel = ({
                 const updatedBeregnetUnderholdskostnad = response.beregnetUnderholdskostnader.find(
                     (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
                 );
-                if (updatedBeregnetUnderholdskostnad) {
-                    updatedUnderhold = {
-                        ...updatedUnderhold,
-                        beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
-                            ? updatedBeregnetUnderholdskostnad.perioder
-                            : cachedUnderhold.beregnetUnderholdskostnad,
-                    };
-                }
+                const updatedUnderholdskostnadValideringsfeiler = response.valideringsfeil.find(
+                    (uV) => uV.underholdskostnadsid === cachedUnderhold.id
+                );
+
+                updatedUnderhold = {
+                    ...updatedUnderhold,
+                    beregnetUnderholdskostnad: updatedBeregnetUnderholdskostnad
+                        ? updatedBeregnetUnderholdskostnad.perioder
+                        : cachedUnderhold.beregnetUnderholdskostnad,
+                    valideringsfeil: updatedUnderholdskostnadValideringsfeiler
+                        ? updatedUnderholdskostnadValideringsfeiler
+                        : cachedUnderhold.valideringsfeil,
+                };
+
                 if (index === cachedUnderholdIndex) {
                     updatedUnderhold = {
                         ...updatedUnderhold,
@@ -221,7 +227,7 @@ export const UnderholdskostnadTabel = ({
     const mutationIsPending = saveFn.mutation.isPending || deleteUnderhold.mutation.isPending;
 
     const tableValideringsfeil: UnderholdskostnadValideringsfeilTabell | undefined = underholdskostnader.find(
-        (u) => u.gjelderBarn.id === u.gjelderBarn.id
+        (u) => u.gjelderBarn.id === underhold.gjelderBarn.id
     )?.valideringsfeil?.[underholdskostnadType];
 
     return (
