@@ -137,6 +137,7 @@ const VedtakTableBody = ({
                     ) : (
                         <Table.ExpandableRow
                             togglePlacement="right"
+                            expandOnRowClick
                             expansionDisabled={periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget}
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >

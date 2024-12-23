@@ -119,7 +119,7 @@ export const BpsBeregnedeTotalbidragTabell = () => {
                             </React.Fragment>
                         )
                     )}
-                    <Table.Row className="!bg-inherit  border-t border-solid border-black border-b-2 border-l-0 border-r-0">
+                    <Table.Row className="!bg-inherit">
                         <Table.DataCell colSpan={6} align="right" textSize="small" className="font-bold">
                             {"Beregnet totalbidrag:"}
                         </Table.DataCell>

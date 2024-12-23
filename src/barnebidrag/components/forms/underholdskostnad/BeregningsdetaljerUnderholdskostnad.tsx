@@ -40,20 +40,21 @@ export default function BeregningsdetaljerUnderholdskostnad({
             )}
             <CalculationTabell
                 title="Tilsynsutgifter"
-                data={[
-                    ...(detaljer.tilsynsutgifterBarn?.flatMap((b) => [
-                        {
-                            label: <PersonNavn navn={b.gjelderBarn.navn} />,
-                            value: `(${formatterBeløpForBeregning(b.totalTilsynsutgift)} - ${formatterBeløpForBeregning(b.kostpenger)}${b.tilleggsstønad ? " - " + formatterBeløpForBeregning(b.tilleggsstønad) : ""}) x 11/12`,
-                            result: formatterBeløpForBeregning(b.beløp),
-                        },
-                    ]) ?? []),
-                    {
-                        label: "Total",
-                        labelBold: true,
-                        result: `${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)}`,
-                    },
-                ].filter((d) => d)}
+                data={
+                    detaljer.tilsynsutgifterBarn
+                        ?.flatMap((b) => [
+                            {
+                                label: <PersonNavn navn={b.gjelderBarn.navn} />,
+                                value: `(${formatterBeløpForBeregning(b.totalTilsynsutgift)} - ${formatterBeløpForBeregning(b.kostpenger)}${b.tilleggsstønad ? " - " + formatterBeløpForBeregning(b.tilleggsstønad) : ""}) x 11/12`,
+                                result: formatterBeløpForBeregning(b.beløp),
+                            },
+                        ])
+                        .filter((d) => d) ?? []
+                }
+                result={{
+                    label: "Total",
+                    value: `${formatterBeløpForBeregning(detaljer.sumTilsynsutgifter)}`,
+                }}
             />
 
             {detaljer.erBegrensetAvMaksTilsyn && (
@@ -98,12 +99,11 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         value: `${formatterBeløpForBeregning(detaljer.totalTilsynsutgift)} X ${formatterProsent(detaljer.skattesatsFaktor)}`,
                         result: formatterBeløpForBeregning(detaljer.skattefradragTotalTilsynsutgift),
                     },
-                    {
-                        label: "Skattefradrag (laveste verdi)",
-                        labelBold: true,
-                        result: `${formatterBeløpForBeregning(detaljer.skattefradrag)}`,
-                    },
                 ].filter((d) => d)}
+                result={{
+                    label: "Skattefradrag (laveste verdi)",
+                    value: `${formatterBeløpForBeregning(detaljer.skattefradrag)}`,
+                }}
             />
             <CalculationTabell
                 title="Beregnet tilsynsutgifter"
@@ -120,12 +120,11 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
-                    {
-                        label: "Resultat",
-                        labelBold: true,
-                        result: `${formatterBeløpForBeregning(detaljer.nettoTilsynsutgift)}`,
-                    },
                 ].filter((d) => d)}
+                result={{
+                    label: "Resultat",
+                    value: `${formatterBeløpForBeregning(detaljer.nettoTilsynsutgift)}`,
+                }}
             />
         </VStack>
     );

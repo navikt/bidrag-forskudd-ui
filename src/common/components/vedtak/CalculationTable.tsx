@@ -1,4 +1,4 @@
-import { BodyShort, Heading, Label, Table } from "@navikt/ds-react";
+import { BodyShort, Heading, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
@@ -75,10 +75,10 @@ export const CalculationTabell: React.FC<CalculationTableProps> = ({
                     ))}
                     {result && (
                         <Table.Row>
-                            <Table.DataCell textSize="small" align="right" colSpan={harBeregning ? 2 : 1}>
-                                <Label size="small">{result.label}</Label>
+                            <Table.DataCell textSize="small" colSpan={harBeregning ? 2 : 1}>
+                                <span className="font-bold">{result.label}</span>
                             </Table.DataCell>
-                            <Table.DataCell textSize="small" className={"text-right w-[120px] "}>
+                            <Table.DataCell textSize="small" align="right">
                                 {result.value}
                             </Table.DataCell>
                         </Table.Row>

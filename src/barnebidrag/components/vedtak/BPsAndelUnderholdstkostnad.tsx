@@ -17,21 +17,24 @@ export const BPsAndelUnderholdskostnad = () => {
                 data={[
                     {
                         label: "BP's andel av underholdskostnad (i prosent)",
-                        textRight: false,
                         labelBold: true,
-                        value: `${formatterBeløpForBeregning(inntekter.inntektBP, true)} / ${formatterBeløpForBeregning(inntekter.totalEndeligInntekt)} = ${formatterProsent(bpsAndel.beregnetAndelFaktor)}`,
+                        value: `${formatterBeløpForBeregning(inntekter.inntektBP, true)} / ${formatterBeløpForBeregning(inntekter.totalEndeligInntekt)}`,
+                        result: formatterProsent(bpsAndel.beregnetAndelFaktor),
                     },
                     {
                         label: "Andel underholdskostnad",
-                        textRight: false,
                         labelBold: true,
-                        value: `${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(bpsAndel.endeligAndelFaktor)} = ${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)}`,
+                        value: `${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(bpsAndel.endeligAndelFaktor)}`,
+                        result: formatterBeløpForBeregning(bpsAndel.andelBeløp),
                     },
                     beregningsdetaljer.deltBosted && {
                         label: "Etter fratrekk delt bosted",
-                        textRight: false,
                         labelBold: true,
-                        value: `${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)} - ${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(0.5)} = ${formatterBeløpForBeregning(beregningsdetaljer.sluttberegning.bpAndelAvUVedDeltBostedBeløp, true)}`,
+                        value: `${formatterBeløpForBeregning(bpsAndel.andelBeløp, true)} - ${formatterBeløpForBeregning(delberegningUnderholdskostnad.underholdskostnad, true)} x ${formatterProsent(0.5)}`,
+                        result: formatterBeløpForBeregning(
+                            beregningsdetaljer.sluttberegning.bpAndelAvUVedDeltBostedBeløp,
+                            true
+                        ),
                     },
                 ].filter((d) => d)}
             />
