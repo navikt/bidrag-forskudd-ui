@@ -1,6 +1,9 @@
 import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
-import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import behandlingQueryKeys, {
+    toUnderholdskostnadTabQueryParameter,
+    toUnderholdskostnadTabQueryParameterForUnderhold,
+} from "@common/constants/behandlingQueryKeys";
 import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -109,7 +112,7 @@ export const BarnebidragSideMenu = () => {
                 active={activeButton?.includes(BarnebidragStepper.UNDERHOLDSKOSTNAD)}
                 subMenu={underholdskostnader
                     .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
-                    .map((underhold, index) => (
+                    .map((underhold) => (
                         <Fragment key={underhold.id}>
                             <MenuButton
                                 title={
@@ -119,7 +122,8 @@ export const BarnebidragSideMenu = () => {
                                 }
                                 onStepChange={() =>
                                     onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
-                                        [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                        [behandlingQueryKeys.tab]:
+                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
                                     })
                                 }
                                 interactive={interactive}
@@ -134,7 +138,7 @@ export const BarnebidragSideMenu = () => {
                                 }
                                 active={
                                     activeButton ===
-                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                 }
                                 subMenu={
                                     <>
@@ -146,7 +150,10 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_barnetilsyn
                                                         )
@@ -165,7 +172,7 @@ export const BarnebidragSideMenu = () => {
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                                 <MenuButton
@@ -174,7 +181,10 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_tilysnsutgifter
                                                         )
@@ -193,7 +203,7 @@ export const BarnebidragSideMenu = () => {
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                                 <MenuButton
@@ -202,7 +212,10 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_tilleggstønad
                                                         )
@@ -220,7 +233,7 @@ export const BarnebidragSideMenu = () => {
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                             </>
@@ -231,7 +244,8 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                     {
-                                                        [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
                                                     },
                                                     elementIds.seksjon_underholdskostnad_beregnet
                                                 )
@@ -240,7 +254,7 @@ export const BarnebidragSideMenu = () => {
                                             size="small"
                                             active={
                                                 activeButton ===
-                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                             }
                                         />
                                     </>
@@ -250,7 +264,7 @@ export const BarnebidragSideMenu = () => {
                                 title={text.label.andreBarn}
                                 onStepChange={() =>
                                     onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
-                                        [behandlingQueryKeys.tab]: "underholdskostnaderAndreBarn",
+                                        [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
                                     })
                                 }
                                 interactive={interactive}
@@ -258,7 +272,7 @@ export const BarnebidragSideMenu = () => {
                                 size="small"
                                 active={
                                     activeButton ===
-                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
                                 }
                                 subMenu={underholdskostnader
                                     .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
@@ -270,7 +284,8 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                     {
-                                                        [behandlingQueryKeys.tab]: `underholdskostnaderAndreBarn`,
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameter(),
                                                     },
                                                     underhold.gjelderBarn.id.toString()
                                                 )
@@ -288,7 +303,7 @@ export const BarnebidragSideMenu = () => {
                                             size="small"
                                             active={
                                                 activeButton ===
-                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
                                             }
                                         />
                                     ))}

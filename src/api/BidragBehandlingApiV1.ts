@@ -131,6 +131,7 @@ export enum OpplysningerType {
     ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
     BARNETILLEGG = "BARNETILLEGG",
     BARNETILSYN = "BARNETILSYN",
+    ANDRE_BARN = "ANDRE_BARN",
     BOFORHOLD = "BOFORHOLD",
     BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
     KONTANTSTOTTE = "KONTANTSTØTTE",
@@ -1043,8 +1044,8 @@ export interface SamvaerValideringsfeilDto {
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
     harPeriodiseringsfeil: boolean;
-    gjelderBarnNavn?: string;
     gjelderBarn?: string;
+    gjelderBarnNavn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1232,11 +1233,14 @@ export enum TypeBehandling {
 }
 
 export interface UnderholdBarnDto {
+    /** @format int64 */
+    id?: number;
     navn?: string;
     ident?: string;
     /** @format date */
     fødselsdato: string;
-    medIBehandling: boolean;
+    medIBehandlingen: boolean;
+    kilde?: Kilde;
 }
 
 export interface UnderholdDto {
@@ -1305,8 +1309,8 @@ export interface UnderholdskostnadValideringsfeil {
     /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
     manglerBegrunnelse: boolean;
     /** @format int64 */
-    underholdskostnadsid: number;
-    barn: UnderholdBarnDto;
+    id: number;
+    gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -1897,9 +1901,9 @@ export interface KanBehandlesINyLosningRequest {
     engangsbeløpstype: Engangsbeloptype;
     søknadstype?: KanBehandlesINyLosningRequestSoknadstypeEnum;
     harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1973,10 +1977,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2007,10 +2011,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2622,9 +2626,9 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2691,8 +2695,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    erManueltOverstyrt: boolean;
     gebyrResultatVisningsnavn: string;
+    erManueltOverstyrt: boolean;
 }
 
 export interface NotatInntektDto {
@@ -2770,10 +2774,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
+    inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
     inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
-    inntektBarnMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2818,8 +2822,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -2850,10 +2854,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -3348,10 +3352,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3443,7 +3444,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

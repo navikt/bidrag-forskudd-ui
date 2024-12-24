@@ -1,4 +1,4 @@
-import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import behandlingQueryKeys, { toUnderholdskostnadTabQueryParameter } from "@common/constants/behandlingQueryKeys";
 import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -16,7 +16,7 @@ export const useGetActiveAndDefaultUnderholdskostnadTab = () => {
             return selectedTab;
         }
 
-        return `underholdskostnaderMedIBehandling-${søknadsBarnUnderholdskostnader[0]?.id}-0`;
+        return toUnderholdskostnadTabQueryParameter(søknadsBarnUnderholdskostnader[0].gjelderBarn.id, true);
     }, []);
 
     const activeTab = selectedTab ?? defaultTab;

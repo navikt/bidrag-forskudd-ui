@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { PersonIdent } from "../../../../common/components/PersonIdent";
+import { toUnderholdskostnadTabQueryParameter } from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
@@ -48,10 +49,10 @@ const Main = () => {
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
             >
                 <Tabs.List>
-                    {søknadsBarnUnderholdskostnader.map((underhold, index) => (
+                    {søknadsBarnUnderholdskostnader.map((underhold) => (
                         <Tabs.Tab
-                            key={`tab-${underhold.id}-${index}`}
-                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            key={`tab-${underhold.gjelderBarn.id}`}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, true)}
                             label={
                                 <div className="flex flex-row gap-1">
                                     {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
@@ -68,8 +69,8 @@ const Main = () => {
                 {søknadsBarnUnderholdskostnader.map((underhold, index) => {
                     return (
                         <Tabs.Panel
-                            key={`underholdskostnadTabPanel-${underhold.id}-${index}`}
-                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            key={`underholdskostnadTabPanel-${underhold.gjelderBarn.id}`}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, true)}
                             className="grid gap-y-4 py-4"
                         >
                             <Barnetilsyn index={index} />

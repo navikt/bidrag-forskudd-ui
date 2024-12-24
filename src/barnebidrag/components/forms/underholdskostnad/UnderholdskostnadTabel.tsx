@@ -112,7 +112,7 @@ export const UnderholdskostnadTabel = ({
                     (bU) => bU.gjelderBarn.ident === cachedUnderhold.gjelderBarn.ident
                 );
                 const updatedUnderholdskostnadValideringsfeiler = response.valideringsfeil.find(
-                    (uV) => uV.underholdskostnadsid === cachedUnderhold.id
+                    (uV) => uV.id === cachedUnderhold.id
                 );
 
                 updatedUnderhold = {
