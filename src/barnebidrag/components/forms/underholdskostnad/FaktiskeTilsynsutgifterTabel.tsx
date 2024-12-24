@@ -214,6 +214,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                         fieldName={`${fieldName}.${index}`}
                                                         field="datoFom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
@@ -222,6 +223,7 @@ export const FaktiskeTilsynsutgifterTabel = ({
                                                         fieldName={`${fieldName}.${index}`}
                                                         field="datoTom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell align="right">

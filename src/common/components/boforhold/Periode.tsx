@@ -2,7 +2,7 @@ import { BostatusperiodeDto, HusstandsmedlemDtoV2 } from "@api/BidragBehandlingA
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { getEitherFirstDayOfFoedselsOrVirkingsdatoMonth } from "@common/helpers/boforholdFormHelpers";
+import { getEitherFirstDayOfFoedselsOrVirkingsdatoMonth } from "@common/helpers/virkningstidspunktHelpers";
 import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHelpers";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";

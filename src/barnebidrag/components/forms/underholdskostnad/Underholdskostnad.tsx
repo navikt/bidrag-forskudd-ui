@@ -1,4 +1,4 @@
-import { Rolletype } from "@api/BidragBehandlingApiV1";
+import { Rolletype, UnderholdDto } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
@@ -172,6 +172,30 @@ const UnderholdskostnadForm = () => {
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    useEffect(() => {
+        const underholdskostnaderMedIBehandling = underholdskostnader.filter(
+            (underhold) => underhold.gjelderBarn.medIBehandlingen
+        );
+        const underholdskostnaderAndreBarn = underholdskostnader.filter(
+            (underhold) => !underhold.gjelderBarn.medIBehandlingen
+        );
+
+        const checkForBegrunnelseValidationError = (underhold: UnderholdDto, index: number) => {
+            if (underhold?.valideringsfeil?.manglerBegrunnelse) {
+                const fieldName = underhold.gjelderBarn.medIBehandlingen
+                    ? (`underholdskostnaderMedIBehandling.${index}.begrunnelse` as const)
+                    : ("underholdskostnaderAndreBarnBegrunnelse" as const);
+                useFormMethods.setError(fieldName, {
+                    type: "notValid",
+                    message: text.error.feltErPåkrevd,
+                });
+            }
+        };
+
+        underholdskostnaderMedIBehandling.forEach(checkForBegrunnelseValidationError);
+        underholdskostnaderAndreBarn.forEach(checkForBegrunnelseValidationError);
+    }, []);
 
     return (
         <FormProvider {...useFormMethods}>

@@ -1,22 +1,33 @@
 import { Kilde } from "@api/BidragBehandlingApiV1";
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
+import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
 import { RolleTag } from "@common/components/RolleTag";
+import StatefulAlert from "@common/components/StatefulAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import { getFomAndTomForMonthPicker } from "@common/helpers/virkningstidspunktHelpers";
+import {
+    getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
+    getFomAndTomForMonthPicker,
+} from "@common/helpers/virkningstidspunktHelpers";
+import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading, Switch } from "@navikt/ds-react";
-import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
+import { addMonthsIgnoreDay, calculateAge, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
 import React, { ChangeEvent, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { useOnUpdateHarTilysnsordning } from "../../../hooks/useOnUpdateHarTilysnsordning";
-import { UnderholdkostnadsFormPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
+import {
+    Underhold,
+    UnderholdkostnadsFormPeriode,
+    UnderholdskostnadFormValues,
+} from "../../../types/underholdskostnadFormValues";
+import { displayOver12Alert } from "../helpers/UnderholdskostnadFormHelpers";
 import { BarnetilsynTabel } from "./BarnetilsynTabel";
 import { BeregnetUnderholdskostnad } from "./BeregnetUnderholdskostnad";
 import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
@@ -75,6 +86,7 @@ export const UnderholdskostnadPeriode = ({
     field,
     label,
     item,
+    underhold,
 }: {
     fieldName:
         | `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn.${number}`
@@ -84,9 +96,11 @@ export const UnderholdskostnadPeriode = ({
     label: string;
     field: "datoFom" | "datoTom";
     item: UnderholdkostnadsFormPeriode;
+    underhold: Underhold;
 }) => {
     const virkningsdato = useVirkningsdato();
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
+    const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(underhold.gjelderBarn.fødselsdato, virkningsdato);
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
     const { getValues, clearErrors, setError } = useFormContext<UnderholdskostnadFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
@@ -153,34 +167,36 @@ export const RolleInfoBox = ({
                             fødselsdato={underhold.gjelderBarn.fødselsdato}
                         />
                     </div>
-                    {!underhold.gjelderBarn.medIBehandlingen && underhold.gjelderBarn.kilde === Kilde.MANUELL && (
-                        <>
-                            <div className="flex items-center justify-end">
-                                <DeleteButton onDelete={() => ref.current?.showModal()} />
-                            </div>
-                            <ConfirmationModal
-                                ref={ref}
-                                closeable
-                                description={text.varsel.ønskerDuÅSletteBarnet}
-                                heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
-                                footer={
-                                    <>
-                                        <Button type="button" onClick={onConfirm} size="small">
-                                            {text.label.jaSlett}
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
-                                            size="small"
-                                            onClick={() => ref.current?.close()}
-                                        >
-                                            {text.label.avbryt}
-                                        </Button>
-                                    </>
-                                }
-                            />
-                        </>
-                    )}
+                    {!underhold.gjelderBarn.medIBehandlingen &&
+                        underhold.gjelderBarn.kilde &&
+                        underhold.gjelderBarn.kilde === Kilde.MANUELL && (
+                            <>
+                                <div className="flex items-center justify-end">
+                                    <DeleteButton onDelete={() => ref.current?.showModal()} />
+                                </div>
+                                <ConfirmationModal
+                                    ref={ref}
+                                    closeable
+                                    description={text.varsel.ønskerDuÅSletteBarnet}
+                                    heading={<Heading size="small">{text.varsel.ønskerDuÅSlette}</Heading>}
+                                    footer={
+                                        <>
+                                            <Button type="button" onClick={onConfirm} size="small">
+                                                {text.label.jaSlett}
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="small"
+                                                onClick={() => ref.current?.close()}
+                                            >
+                                                {text.label.avbryt}
+                                            </Button>
+                                        </>
+                                    }
+                                />
+                            </>
+                        )}
                 </div>
             </>
         )
@@ -189,6 +205,7 @@ export const RolleInfoBox = ({
 
 export const Barnetilsyn = ({ index }: { index: number }) => {
     const { setSaveErrorState } = useBehandlingProvider();
+    const { underholdskostnader } = useGetBehandlingV2();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
@@ -197,6 +214,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
         !!underhold.faktiskTilsynsutgift.length ||
         !!underhold.tilleggsstønad.length;
     const updateTilysnsordning = useOnUpdateHarTilysnsordning(underhold.id);
+    const underholdsValideringsFeil = underholdskostnader.find((u) => u.id === underhold.id).valideringsfeil;
 
     const update = (checked: boolean) => {
         updateTilysnsordning.mutation.mutate(
@@ -247,8 +265,30 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
+            {underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
+                <BehandlingAlert variant="warning">
+                    <Heading size="xsmall" level="6">
+                        {text.alert.manglerPerioderForTilsynsordning}
+                    </Heading>
+                    <BodyShort size="small">{text.alert.manglerPerioder}</BodyShort>
+                </BehandlingAlert>
+            )}
             {(underhold.harTilsynsordning || hasAtLeastOnePeriod) && (
                 <>
+                    {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                        <StatefulAlert
+                            variant="info"
+                            size="small"
+                            alertKey={`12åralert-underhold-${underhold.id}`}
+                            className="w-[708px]"
+                            closeButton
+                        >
+                            <Heading size="small" level="3">
+                                {text.title.barnOver12}
+                            </Heading>
+                            {text.barnetHarFylt12SjekkPerioder}
+                        </StatefulAlert>
+                    )}
                     <BarnetilsynTabel underholdFieldName={underholdFieldName} />
                     <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
                     <TilleggstønadTabel underholdFieldName={underholdFieldName} />

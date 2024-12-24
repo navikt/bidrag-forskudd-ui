@@ -5,6 +5,7 @@ import {
     TilleggsstonadDto,
     UnderholdDto,
 } from "@api/BidragBehandlingApiV1";
+import { isAfterDate } from "@utils/date-utils";
 
 import {
     FaktiskTilsynsutgiftPeriode,
@@ -68,4 +69,11 @@ export const createInitialValues = (underholdskostnader: UnderholdDto[]): Underh
         })),
         underholdskostnaderAndreBarnBegrunnelse: underholdskostnaderAndreBarn[0]?.begrunnelse ?? "",
     };
+};
+
+export const displayOver12Alert = (barnsAge: number) => {
+    const date = new Date();
+    date.setMonth(5);
+    date.setDate(30);
+    return barnsAge === 12 ? isAfterDate(new Date(), date) : barnsAge > 12;
 };
