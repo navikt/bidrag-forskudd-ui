@@ -105,9 +105,10 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             if (manglerBegrunnelseForAndreBarn)
                 feilliste.push(
                     <ErrorSummary.Item
+                        href={`#${elementIds.seksjon_underholdskostnader}`}
                         onClick={() =>
                             onStepChange(steps.underholdskostnad, {
-                                [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(),
+                                [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
                             })
                         }
                     >
@@ -289,7 +290,11 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             onStepChange(opplysningTilStep(value, steps), {
                                 [behandlingQueryKeys.tab]:
                                     value.type === OpplysningerType.BARNETILSYN
-                                        ? toUnderholdskostnadTabQueryParameter(value.rolle?.id, true)
+                                        ? toUnderholdskostnadTabQueryParameter(
+                                              value.rolle?.id,
+                                              value.underholdskostnadId,
+                                              true
+                                          )
                                         : value.rolle?.id?.toString(),
                             })
                         }

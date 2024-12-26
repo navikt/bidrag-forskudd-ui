@@ -52,7 +52,7 @@ const Main = () => {
                     {søknadsBarnUnderholdskostnader.map((underhold) => (
                         <Tabs.Tab
                             key={`tab-${underhold.gjelderBarn.id}`}
-                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, true)}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
                             label={
                                 <div className="flex flex-row gap-1">
                                     {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
@@ -70,7 +70,7 @@ const Main = () => {
                     return (
                         <Tabs.Panel
                             key={`underholdskostnadTabPanel-${underhold.gjelderBarn.id}`}
-                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, true)}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
                             className="grid gap-y-4 py-4"
                         >
                             <Barnetilsyn index={index} />
@@ -88,11 +88,14 @@ const Main = () => {
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
-    const [field, id, index] = activeTab.split("-");
+    const [field, _, underholdskostnadId] = activeTab.split("-");
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
-    const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
-    const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : id;
+    const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : underholdskostnadId;
+    const fieldIndex = tabIsAndreBarn
+        ? 0
+        : getValues("underholdskostnaderMedIBehandling").findIndex((underhold) => underhold.id === Number(underholdId));
+
     const saveUnderhold = useOnUpdateUnderholdBegrunnelse();
     const fieldName = tabIsAndreBarn
         ? "underholdskostnaderAndreBarnBegrunnelse"

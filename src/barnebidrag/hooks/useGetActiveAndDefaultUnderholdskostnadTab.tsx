@@ -16,7 +16,11 @@ export const useGetActiveAndDefaultUnderholdskostnadTab = () => {
             return selectedTab;
         }
 
-        return toUnderholdskostnadTabQueryParameter(søknadsBarnUnderholdskostnader[0].gjelderBarn.id, true);
+        return toUnderholdskostnadTabQueryParameter(
+            søknadsBarnUnderholdskostnader[0].gjelderBarn.id,
+            søknadsBarnUnderholdskostnader[0].id,
+            true
+        );
     }, []);
 
     const activeTab = selectedTab ?? defaultTab;
