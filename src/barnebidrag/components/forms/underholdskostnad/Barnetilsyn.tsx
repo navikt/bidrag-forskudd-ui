@@ -11,7 +11,7 @@ import {
     getEitherFirstDayOfFoedselsOrVirkingsdatoMonth,
     getFomAndTomForMonthPicker,
 } from "@common/helpers/virkningstidspunktHelpers";
-import { useGetBehandlingV2 } from "@common/hooks/useApiData";
+import { useGetBehandlingV2, useGetOpplysningerBarnetilsyn } from "@common/hooks/useApiData";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
@@ -205,14 +205,17 @@ export const RolleInfoBox = ({
 
 export const Barnetilsyn = ({ index }: { index: number }) => {
     const { setSaveErrorState } = useBehandlingProvider();
+    const { aktiveOpplysninger } = useGetOpplysningerBarnetilsyn();
     const { underholdskostnader } = useGetBehandlingV2();
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
+    const aktivePerioder = aktiveOpplysninger?.grunnlag[underhold.gjelderBarn.ident];
     const hasAtLeastOnePeriod =
         !!underhold.stønadTilBarnetilsyn.length ||
         !!underhold.faktiskTilsynsutgift.length ||
         !!underhold.tilleggsstønad.length;
+    const hasAtLeastOnePeriodOrActiveOpplysninger = hasAtLeastOnePeriod || !!aktivePerioder.length;
     const updateTilysnsordning = useOnUpdateHarTilysnsordning(underhold.id);
     const underholdsValideringsFeil = underholdskostnader.find((u) => u.id === underhold.id).valideringsfeil;
 
@@ -258,10 +261,10 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             <RolleInfoBox underholdFieldName={underholdFieldName} />
             <Switch
                 value="barnHarTilysnsordning"
-                checked={underhold.harTilsynsordning || hasAtLeastOnePeriod}
+                checked={underhold.harTilsynsordning || hasAtLeastOnePeriodOrActiveOpplysninger}
                 onChange={onToggle}
                 size="small"
-                readOnly={hasAtLeastOnePeriod}
+                readOnly={hasAtLeastOnePeriodOrActiveOpplysninger}
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
