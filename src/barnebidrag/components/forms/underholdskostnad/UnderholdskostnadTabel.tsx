@@ -61,7 +61,7 @@ export const UnderholdskostnadTabel = ({
         underholdskostnader,
         virkningstidspunkt: { virkningstidspunkt },
     } = useGetBehandlingV2();
-    const { lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { lesemodus, setSaveErrorState, setErrorMessage, setErrorModalOpen } = useBehandlingProvider();
     const { control, clearErrors, getValues, getFieldState, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const fieldArray = useFieldArray({
         control,
@@ -181,9 +181,22 @@ export const UnderholdskostnadTabel = ({
         saveRow(index);
     };
 
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
+        });
+        setErrorModalOpen(true);
+    };
+
     const onEditRow = (index: number) => {
-        const periode = getValues(`${fieldName}.${index}`);
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: true });
+        const perioder = getValues(fieldName);
+
+        if (perioder.some((periode) => periode.erRedigerbart)) {
+            showErrorModal();
+        } else {
+            setValue(`${fieldName}.${index}`, { ...perioder[index], erRedigerbart: true });
+        }
     };
 
     const onRemovePeriode = (index: number) => {

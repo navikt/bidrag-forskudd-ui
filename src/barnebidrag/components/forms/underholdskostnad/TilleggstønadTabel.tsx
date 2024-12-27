@@ -154,7 +154,7 @@ export const TilleggstønadTabel = ({
                                     </Table.Header>
                                     <Table.Body>
                                         {controlledFields.map((item: TilleggsstonadPeriode, index) => (
-                                            <Table.Row key={item?.id + index} className="align-top">
+                                            <Table.Row key={`${item?.id}-${index}`} className="align-top">
                                                 <Table.DataCell textSize="small">
                                                     <UnderholdskostnadPeriode
                                                         label={text.label.fraOgMed}
