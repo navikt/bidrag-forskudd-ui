@@ -210,7 +210,7 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
     const underholdFieldName = `underholdskostnaderMedIBehandling.${index}` as const;
     const { getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const underhold = getValues(underholdFieldName);
-    const aktivePerioder = aktiveOpplysninger?.grunnlag[underhold.gjelderBarn.ident];
+    const aktivePerioder = aktiveOpplysninger?.grunnlag[underhold.gjelderBarn.ident] ?? [];
     const hasAtLeastOnePeriod =
         !!underhold.stønadTilBarnetilsyn.length ||
         !!underhold.faktiskTilsynsutgift.length ||
