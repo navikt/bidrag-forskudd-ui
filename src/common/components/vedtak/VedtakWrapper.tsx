@@ -105,21 +105,21 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             if (manglerBegrunnelseForAndreBarn)
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={`#${elementIds.seksjon_underholdskostnader}`}
+                        href={""}
                         onClick={() =>
                             onStepChange(steps.underholdskostnad, {
                                 [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
                             })
                         }
                     >
-                        Underholdskostnad: Mangler begrunnelse for andre barn til BM
+                        Underholdskostnad: Mangler begrunnelse for andre barn til Bidragsmottaker
                     </ErrorSummary.Item>
                 );
             feilInnhold.underholdskostnad.forEach((value) => {
                 if (value.manglerPerioderForTilsynsordning)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={""}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
@@ -132,34 +132,34 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 if (value.tilleggsstønad)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={`#${elementIds.seksjon_underholdskostnad_tilleggstønad}`}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
                                 })
                             }
                         >
-                            Underholdskostnad: Ugyldig perioder for tilleggsstønad for barn {value.gjelderBarn.navn}
+                            Underholdskostnad: Ugyldig perioder i tilleggsstønad for barn {value.gjelderBarn.navn}
                         </ErrorSummary.Item>
                     );
                 if (value.stønadTilBarnetilsyn)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={`#${elementIds.seksjon_underholdskostnad_barnetilsyn}`}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
                                 })
                             }
                         >
-                            Underholdskostnad: Ugyldig perioder for stønad til barnetilsyn for barn{" "}
+                            Underholdskostnad: Ugyldig perioder i stønad til barnetilsyn for barn{" "}
                             {value.gjelderBarn.navn}
                         </ErrorSummary.Item>
                     );
                 if (value.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length > 0)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={`#${elementIds.seksjon_underholdskostnad_tilleggstønad}`}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
@@ -173,14 +173,14 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 if (value.faktiskTilsynsutgift)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={`#${elementIds.seksjon_underholdskostnad_tilysnsutgifter}`}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
                                 })
                             }
                         >
-                            Underholdskostnad: Ugyldig perioder faktiske tilsynsutgifter for barn{" "}
+                            Underholdskostnad: Ugyldig perioder i faktiske tilsynsutgifter for barn{" "}
                             {value.gjelderBarn.navn}
                         </ErrorSummary.Item>
                     );
@@ -188,7 +188,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 if (value.manglerBegrunnelse && value.gjelderBarn.medIBehandlingen)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={`#${elementIds.seksjon_underholdskostnader}_${value.id}`}
+                            href={""}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
