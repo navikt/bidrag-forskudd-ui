@@ -1,6 +1,7 @@
 import {
     OppdaterSamvaerDto,
     Rolletype,
+    SamvaerDto,
     Samvaersklasse,
     SletteSamvaersperiodeElementDto,
 } from "@api/BidragBehandlingApiV1";
@@ -63,6 +64,19 @@ const SamværForm = () => {
         defaultValues: initialValues,
         criteriaMode: "all",
     });
+
+    useEffect(() => {
+        const checkForBegrunnelseValidationError = (samvær: SamvaerDto) => {
+            if (samvær?.valideringsfeil?.manglerBegrunnelse) {
+                useFormMethods.setError(`${samvær.gjelderBarn}.begrunnelse`, {
+                    type: "notValid",
+                    message: text.error.feltErPåkrevd,
+                });
+            }
+        };
+
+        samvær.forEach(checkForBegrunnelseValidationError);
+    }, []);
 
     return (
         <FormProvider {...useFormMethods}>
@@ -429,15 +443,21 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 {valideringsfeil?.harPeriodiseringsfeil && (
                     <div className="mb-4">
                         <BehandlingAlert variant="warning">
-                            <Heading spacing size="small" level="3">
+                            <Heading size="xsmall" level="6">
                                 {text.alert.feilIPeriodisering}
                             </Heading>
-                            {valideringsfeil.hullIPerioder.length > 0 && <p>Det er perioder uten samvær.</p>}
-                            {valideringsfeil.ingenLøpendeSamvær && <p>{text.error.ingenLøpendeSamvær}</p>}
-                            {valideringsfeil.overlappendePerioder.length > 0 && (
-                                <p>{text.error.overlappendeSamværsperioder}</p>
+                            {valideringsfeil.hullIPerioder.length > 0 && (
+                                <BodyShort size="small">Det er perioder uten samvær.</BodyShort>
                             )}
-                            {valideringsfeil.manglerSamvær && <p>{text.error.manglerSamværsperioder}</p>}
+                            {valideringsfeil.ingenLøpendeSamvær && (
+                                <BodyShort size="small">{text.error.ingenLøpendeSamvær}</BodyShort>
+                            )}
+                            {valideringsfeil.overlappendePerioder.length > 0 && (
+                                <BodyShort size="small">{text.error.overlappendeSamværsperioder}</BodyShort>
+                            )}
+                            {valideringsfeil.manglerSamvær && (
+                                <BodyShort size="small">{text.error.manglerSamværsperioder}</BodyShort>
+                            )}
                         </BehandlingAlert>
                     </div>
                 )}
