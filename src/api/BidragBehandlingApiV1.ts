@@ -1978,8 +1978,8 @@ export interface ResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
 }
 
@@ -2628,8 +2628,8 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
 }
@@ -2713,9 +2713,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
+    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
-    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -2778,8 +2778,8 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
     inntektBMMånedlig?: number;
 }
 

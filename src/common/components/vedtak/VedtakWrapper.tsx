@@ -291,7 +291,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                                 [behandlingQueryKeys.tab]:
                                     value.type === OpplysningerType.BARNETILSYN
                                         ? toUnderholdskostnadTabQueryParameter(
-                                              value.rolle?.id,
+                                              value.gjelderBarn?.husstandsmedlemId,
                                               value.underholdskostnadId,
                                               true
                                           )
