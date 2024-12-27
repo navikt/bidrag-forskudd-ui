@@ -122,7 +122,7 @@ export const UnderholdskostnadTabel = ({
                         : cachedUnderhold.beregnetUnderholdskostnad,
                     valideringsfeil: updatedUnderholdskostnadValideringsfeiler
                         ? updatedUnderholdskostnadValideringsfeiler
-                        : cachedUnderhold.valideringsfeil,
+                        : undefined,
                 };
 
                 if (index === cachedUnderholdIndex) {
