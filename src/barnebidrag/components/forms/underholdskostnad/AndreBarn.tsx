@@ -17,7 +17,7 @@ import { RolleInfoBox } from "./Barnetilsyn";
 import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 
 export const AndreBarn = () => {
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const { control, clearErrors, setValue, getValues } = useFormContext<UnderholdskostnadFormValues>();
     const createBarnQuery = useOnCreateUnderholdForBarn();
     const deleteUnderhold = useOnDeleteUnderholdsObjekt();
@@ -95,7 +95,7 @@ export const AndreBarn = () => {
 
     return (
         <>
-            {!openForm && (
+            {!openForm && !lesemodus && (
                 <Button
                     type="button"
                     onClick={() => setOpenForm(true)}
