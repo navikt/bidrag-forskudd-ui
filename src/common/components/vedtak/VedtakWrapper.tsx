@@ -105,7 +105,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             if (manglerBegrunnelseForAndreBarn)
                 feilliste.push(
                     <ErrorSummary.Item
-                        href={""}
+                        href={"#"}
                         onClick={() =>
                             onStepChange(steps.underholdskostnad, {
                                 [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
@@ -156,6 +156,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             {value.gjelderBarn.navn}
                         </ErrorSummary.Item>
                     );
+
                 if (value.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length > 0)
                     feilliste.push(
                         <ErrorSummary.Item
@@ -188,7 +189,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 if (value.manglerBegrunnelse && value.gjelderBarn.medIBehandlingen)
                     feilliste.push(
                         <ErrorSummary.Item
-                            href={""}
+                            href={"#"}
                             onClick={() =>
                                 onStepChange(steps.underholdskostnad, {
                                     [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
