@@ -278,6 +278,26 @@ export const UnderholdskostnadTabel = ({
                             <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
                         </>
                     )}
+                    {tableValideringsfeil?.ugyldigPerioder?.length > 0 && (
+                        <>
+                            {tableValideringsfeil?.ugyldigPerioder?.map((periode, index) => (
+                                <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
+                                    {periode.tom &&
+                                        removePlaceholder(
+                                            text.alert.ugyldigPerioderBarnetilsyn,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom)),
+                                            DateToDDMMYYYYString(dateOrNull(periode.tom))
+                                        )}
+                                    {!periode.tom &&
+                                        removePlaceholder(
+                                            text.alert.ugyldigLøpendePerioderBarnetilsyn,
+                                            DateToDDMMYYYYString(dateOrNull(periode.fom))
+                                        )}
+                                </BodyShort>
+                            ))}
+                            <BodyShort size="small">{text.alert.ugyldigPerioderBarnetilsynFiks}</BodyShort>
+                        </>
+                    )}
                     {tableValideringsfeil?.fremtidigePerioder?.length > 0 && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
                     )}

@@ -52,6 +52,9 @@ const tekster = {
         stillingprosentEndret: "Stillingprosent fra arbeidsgiver {} er endret fra {}% til {}%",
         sumEndret: "Sum for {} har blitt endret for rolle med ident - {} fra {} til {}",
         nyeOpplysningerMåBekreftes: "Nye opplysninger må bekreftes",
+        ugyldigLøpendePerioderBarnetilsyn: "Perioder fra {} er ugyldig.",
+        ugyldigPerioderBarnetilsyn: "Periode {} - {} er ugyldig.",
+        ugyldigPerioderBarnetilsynFiks: "Heltid/deltid må fylles ut for alle perioder",
         underArbeit:
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
