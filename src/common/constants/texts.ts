@@ -102,6 +102,8 @@ const tekster = {
         utgiftstypeMåFyllesUt: "Utgiftstype må fylles ut",
         godkjentBeløpKanIkkeVæreHøyereEnnKravbeløp: "Godkjent beløp kan ikke være høyere enn kravbeløp",
         begrunnelseMåFyllesUt: "Begrunnelse må fylles ut hvis godkjent beløp er ulik kravbeløp",
+        tilleggsstønadsperioderUtenFaktiskTilsynsutgift:
+            "Tilleggsstønad periode må overlappe med faktiske tilsynsutgifter periode",
         tomDatoKanIkkeVæreFørFomDato: "Tom dato kan ikke være før fom dato",
         ugyldigBoststatusFør18: "Ugyldig boststatus for periode før barnet har fylt 18 år.",
         ugyldigBoststatusEtter18: "Ugyldig bosstatus for periode etter barnet har fylt 18 år.",

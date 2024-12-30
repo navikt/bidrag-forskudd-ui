@@ -5,7 +5,6 @@ import {
     SletteUnderholdselementTypeEnum,
     StonadTilBarnetilsynDto,
     TilleggsstonadDto,
-    UnderholdskostnadValideringsfeilTabell,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { OverlayLoader } from "@common/components/OverlayLoader";
@@ -239,9 +238,12 @@ export const UnderholdskostnadTabel = ({
 
     const mutationIsPending = saveFn.mutation.isPending || deleteUnderhold.mutation.isPending;
 
-    const tableValideringsfeil: UnderholdskostnadValideringsfeilTabell | undefined = underholdskostnader.find(
+    const valideringsfeil = underholdskostnader.find(
         (u) => u.gjelderBarn.id === underhold.gjelderBarn.id
-    )?.valideringsfeil?.[underholdskostnadType];
+    )?.valideringsfeil;
+    const tilleggsstønadsperioderUtenFaktiskTilsynsutgift =
+        !!valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length;
+    const tableValideringsfeil = valideringsfeil?.[underholdskostnadType];
 
     return (
         <>
@@ -250,6 +252,9 @@ export const UnderholdskostnadTabel = ({
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
+                    {underholdskostnadType === "tilleggsstønad" && tilleggsstønadsperioderUtenFaktiskTilsynsutgift && (
+                        <BodyShort size="small">{text.error.tilleggsstønadsperioderUtenFaktiskTilsynsutgift}</BodyShort>
+                    )}
                     {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
                             {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
