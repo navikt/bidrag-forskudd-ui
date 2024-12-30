@@ -244,20 +244,23 @@ export const UnderholdskostnadTabel = ({
     const tilleggsstønadsperioderUtenFaktiskTilsynsutgift =
         !!valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length;
     const tableValideringsfeil = valideringsfeil?.[underholdskostnadType];
+    const displayTilleggsstønadsperioderUtenFaktiskTilsynsutgiftError =
+        underholdskostnadType === "tilleggsstønad" && tilleggsstønadsperioderUtenFaktiskTilsynsutgift;
+    const tableHasErrors = tableValideringsfeil || displayTilleggsstønadsperioderUtenFaktiskTilsynsutgiftError;
 
     return (
         <>
-            {!lesemodus && tableValideringsfeil && (
+            {!lesemodus && tableHasErrors && (
                 <BehandlingAlert variant="warning" className="mb-4">
                     <Heading size="xsmall" level="6">
                         {text.alert.feilIPeriodisering}.
                     </Heading>
-                    {underholdskostnadType === "tilleggsstønad" && tilleggsstønadsperioderUtenFaktiskTilsynsutgift && (
+                    {displayTilleggsstønadsperioderUtenFaktiskTilsynsutgiftError && (
                         <BodyShort size="small">{text.error.tilleggsstønadsperioderUtenFaktiskTilsynsutgift}</BodyShort>
                     )}
-                    {tableValideringsfeil.overlappendePerioder.length > 0 && (
+                    {tableValideringsfeil?.overlappendePerioder?.length > 0 && (
                         <>
-                            {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
+                            {tableValideringsfeil?.overlappendePerioder?.map(({ periode }, index) => (
                                 <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
                                     {periode.tom &&
                                         removePlaceholder(
@@ -275,10 +278,10 @@ export const UnderholdskostnadTabel = ({
                             <BodyShort size="small">{text.alert.overlappendePerioderFiks}</BodyShort>
                         </>
                     )}
-                    {tableValideringsfeil.fremtidigePerioder.length > 0 && (
+                    {tableValideringsfeil?.fremtidigePerioder?.length > 0 && (
                         <BodyShort size="small">{text.error.framoverPeriodisering}</BodyShort>
                     )}
-                    {tableValideringsfeil.harIngenPerioder && (
+                    {tableValideringsfeil?.harIngenPerioder && (
                         <BodyShort size="small">{text.error.manglerPerioderUnderhold}</BodyShort>
                     )}
                 </BehandlingAlert>
