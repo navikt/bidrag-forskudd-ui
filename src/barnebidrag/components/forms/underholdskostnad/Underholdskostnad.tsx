@@ -1,4 +1,4 @@
-import { Rolletype } from "@api/BidragBehandlingApiV1";
+import { Rolletype, UnderholdDto } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { PersonIdent } from "../../../../common/components/PersonIdent";
+import { toUnderholdskostnadTabQueryParameter } from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useGetActiveAndDefaultUnderholdskostnadTab } from "../../../hooks/useGetActiveAndDefaultUnderholdskostnadTab";
@@ -48,10 +49,10 @@ const Main = () => {
                 className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
             >
                 <Tabs.List>
-                    {søknadsBarnUnderholdskostnader.map((underhold, index) => (
+                    {søknadsBarnUnderholdskostnader.map((underhold) => (
                         <Tabs.Tab
-                            key={`tab-${underhold.id}-${index}`}
-                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            key={`tab-${underhold.gjelderBarn.id}`}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
                             label={
                                 <div className="flex flex-row gap-1">
                                     {ROLE_FORKORTELSER.BA} <PersonIdent ident={underhold.gjelderBarn.ident} />
@@ -68,8 +69,8 @@ const Main = () => {
                 {søknadsBarnUnderholdskostnader.map((underhold, index) => {
                     return (
                         <Tabs.Panel
-                            key={`underholdskostnadTabPanel-${underhold.id}-${index}`}
-                            value={`underholdskostnaderMedIBehandling-${underhold.id}-${index}`}
+                            key={`underholdskostnadTabPanel-${underhold.gjelderBarn.id}`}
+                            value={toUnderholdskostnadTabQueryParameter(underhold.gjelderBarn.id, underhold.id, true)}
                             className="grid gap-y-4 py-4"
                         >
                             <Barnetilsyn index={index} />
@@ -87,11 +88,14 @@ const Main = () => {
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
-    const [field, id, index] = activeTab.split("-");
+    const [field, _, underholdskostnadId] = activeTab.split("-");
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
     const tabIsAndreBarn = field === "underholdskostnaderAndreBarn";
-    const fieldIndex = tabIsAndreBarn ? 0 : Number(index);
-    const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : id;
+    const underholdId = tabIsAndreBarn ? getValues(field)[0]?.id : underholdskostnadId;
+    const fieldIndex = tabIsAndreBarn
+        ? 0
+        : getValues("underholdskostnaderMedIBehandling").findIndex((underhold) => underhold.id === Number(underholdId));
+
     const saveUnderhold = useOnUpdateUnderholdBegrunnelse();
     const fieldName = tabIsAndreBarn
         ? "underholdskostnaderAndreBarnBegrunnelse"
@@ -172,6 +176,30 @@ const UnderholdskostnadForm = () => {
     const useFormMethods = useForm({
         defaultValues: initialValues,
     });
+
+    useEffect(() => {
+        const underholdskostnaderMedIBehandling = underholdskostnader.filter(
+            (underhold) => underhold.gjelderBarn.medIBehandlingen
+        );
+        const underholdskostnaderAndreBarn = underholdskostnader.filter(
+            (underhold) => !underhold.gjelderBarn.medIBehandlingen
+        );
+
+        const checkForBegrunnelseValidationError = (underhold: UnderholdDto, index: number) => {
+            if (underhold?.valideringsfeil?.manglerBegrunnelse) {
+                const fieldName = underhold.gjelderBarn.medIBehandlingen
+                    ? (`underholdskostnaderMedIBehandling.${index}.begrunnelse` as const)
+                    : ("underholdskostnaderAndreBarnBegrunnelse" as const);
+                useFormMethods.setError(fieldName, {
+                    type: "notValid",
+                    message: text.error.feltErPåkrevd,
+                });
+            }
+        };
+
+        underholdskostnaderMedIBehandling.forEach(checkForBegrunnelseValidationError);
+        underholdskostnaderAndreBarn.forEach(checkForBegrunnelseValidationError);
+    }, []);
 
     return (
         <FormProvider {...useFormMethods}>

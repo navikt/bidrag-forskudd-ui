@@ -10,7 +10,7 @@ export const STONAD_TIL_BARNETILSYNS_TYPE = {
 } as const;
 
 export const STONAD_TIL_BARNETILSYNS_SKOLEALDER = {
-    [StonadTilBarnetilsynDtoSkolealderEnum.OVER]: "Over skolealder",
-    [StonadTilBarnetilsynDtoSkolealderEnum.UNDER]: "Under skolealder",
+    [StonadTilBarnetilsynDtoSkolealderEnum.OVER]: "Ja",
+    [StonadTilBarnetilsynDtoSkolealderEnum.UNDER]: "Nei",
     [StonadTilBarnetilsynDtoSkolealderEnum.IKKE_ANGITT]: "Ikke angitt",
 } as const;

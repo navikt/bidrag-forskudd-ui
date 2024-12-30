@@ -17,8 +17,8 @@ interface UnderholdPeriode {
 export interface StønadTilBarnetilsynPeriode
     extends UnderholdPeriode,
         Omit<StonadTilBarnetilsynDto, "skolealder" | "tilsynstype" | "periode"> {
-    skolealder: StonadTilBarnetilsynDtoSkolealderEnum | "";
-    tilsynstype: StonadTilBarnetilsynDtoTilsynstypeEnum | "";
+    skolealder?: StonadTilBarnetilsynDtoSkolealderEnum | "";
+    tilsynstype?: StonadTilBarnetilsynDtoTilsynstypeEnum | "";
 }
 export interface FaktiskTilsynsutgiftPeriode extends UnderholdPeriode, Omit<FaktiskTilsynsutgiftDto, "periode"> {}
 export interface TilleggsstonadPeriode extends UnderholdPeriode, Omit<TilleggsstonadDto, "periode"> {}

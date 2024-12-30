@@ -154,13 +154,14 @@ export const TilleggstønadTabel = ({
                                     </Table.Header>
                                     <Table.Body>
                                         {controlledFields.map((item: TilleggsstonadPeriode, index) => (
-                                            <Table.Row key={item?.id + index} className="align-top">
+                                            <Table.Row key={`${item?.id}-${index}`} className="align-top">
                                                 <Table.DataCell textSize="small">
                                                     <UnderholdskostnadPeriode
                                                         label={text.label.fraOgMed}
                                                         fieldName={`${fieldName}.${index}`}
                                                         field="datoFom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
@@ -169,6 +170,7 @@ export const TilleggstønadTabel = ({
                                                         fieldName={`${fieldName}.${index}`}
                                                         field="datoTom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell align="right">

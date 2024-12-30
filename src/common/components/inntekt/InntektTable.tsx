@@ -433,14 +433,14 @@ export const InntektTabel = ({
                     {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
                             {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
-                                <BodyShort key={`${periode.fom}-${periode.til}-${index}`} size="small">
-                                    {periode.til &&
+                                <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
+                                    {periode.tom &&
                                         removePlaceholder(
                                             text.alert.overlappendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom)),
-                                            DateToDDMMYYYYString(dateOrNull(periode.til))
+                                            DateToDDMMYYYYString(dateOrNull(periode.tom))
                                         )}
-                                    {!periode.til &&
+                                    {!periode.tom &&
                                         removePlaceholder(
                                             text.alert.overlappendeLøpendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom))

@@ -70,3 +70,15 @@ export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string) =>
 
     return [fom, tom];
 };
+
+export const getEitherFirstDayOfFoedselsOrVirkingsdatoMonth = (
+    barnsFoedselsDato: Date | string,
+    virkningsOrSoktFraDato: Date
+) => {
+    const date =
+        barnsFoedselsDato && isAfterDate(barnsFoedselsDato, virkningsOrSoktFraDato)
+            ? new Date(barnsFoedselsDato)
+            : virkningsOrSoktFraDato;
+
+    return firstDayOfMonth(date);
+};

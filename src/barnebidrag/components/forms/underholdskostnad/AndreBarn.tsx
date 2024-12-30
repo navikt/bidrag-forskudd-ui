@@ -1,21 +1,23 @@
 import { BarnDto, SletteUnderholdselementTypeEnum } from "@api/BidragBehandlingApiV1";
 import { AddBarnForm } from "@common/components/AddBarnForm";
+import StatefulAlert from "@common/components/StatefulAlert";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { PlusIcon } from "@navikt/aksel-icons";
-import { Button } from "@navikt/ds-react";
+import { Button, Heading } from "@navikt/ds-react";
+import { calculateAge } from "@utils/date-utils";
 import React, { useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { useOnCreateUnderholdForBarn } from "../../../hooks/useOnCreateUnderholdForBarn";
 import { useOnDeleteUnderholdsObjekt } from "../../../hooks/useOnDeleteUnderholdsObjekt";
 import { FaktiskTilsynsutgiftPeriode, UnderholdskostnadFormValues } from "../../../types/underholdskostnadFormValues";
-import { mapBeregnetUnderholdskostnadToRole } from "../helpers/UnderholdskostnadFormHelpers";
+import { displayOver12Alert, mapBeregnetUnderholdskostnadToRole } from "../helpers/UnderholdskostnadFormHelpers";
 import { RolleInfoBox } from "./Barnetilsyn";
 import { FaktiskeTilsynsutgifterTabel } from "./FaktiskeTilsynsutgifterTabel";
 
 export const AndreBarn = () => {
-    const { setSaveErrorState } = useBehandlingProvider();
+    const { setSaveErrorState, lesemodus } = useBehandlingProvider();
     const { control, clearErrors, setValue, getValues } = useFormContext<UnderholdskostnadFormValues>();
     const createBarnQuery = useOnCreateUnderholdForBarn();
     const deleteUnderhold = useOnDeleteUnderholdsObjekt();
@@ -93,7 +95,7 @@ export const AndreBarn = () => {
 
     return (
         <>
-            {!openForm && (
+            {!openForm && !lesemodus && (
                 <Button
                     type="button"
                     onClick={() => setOpenForm(true)}
@@ -113,6 +115,20 @@ export const AndreBarn = () => {
                     underhold?.gjelderBarn && (
                         <div key={underholdFieldName} id={underhold.gjelderBarn.id.toString()} className="grid gap-y-2">
                             <RolleInfoBox underholdFieldName={underholdFieldName} onDelete={() => onDelete(index)} />
+                            {displayOver12Alert(calculateAge(underhold.gjelderBarn.fødselsdato)) && (
+                                <StatefulAlert
+                                    variant="info"
+                                    size="small"
+                                    alertKey={`12åralert-underhold-${underhold.id}`}
+                                    className="w-[708px]"
+                                    closeButton
+                                >
+                                    <Heading size="small" level="3">
+                                        {text.title.barnOver12}
+                                    </Heading>
+                                    {text.barnetHarFylt12SjekkPerioder}
+                                </StatefulAlert>
+                            )}
                             <FaktiskeTilsynsutgifterTabel underholdFieldName={underholdFieldName} />
                         </div>
                     )

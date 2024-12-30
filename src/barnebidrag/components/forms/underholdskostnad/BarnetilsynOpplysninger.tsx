@@ -7,12 +7,7 @@ import { useOnActivateGrunnlag } from "@common/hooks/useOnActivateGrunnlag";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { BodyShort, Box, Button, Heading, ReadMore, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYHHMMString, DateToDDMMYYYYString, isBeforeDate } from "@utils/date-utils";
-import React from "react";
-
-import {
-    STONAD_TIL_BARNETILSYNS_SKOLEALDER,
-    STONAD_TIL_BARNETILSYNS_TYPE,
-} from "../../../constants/stønadTilBarnetilsyn";
+import React, { useEffect, useState } from "react";
 
 const Header = () => (
     <BodyShort size="small" className="flex h-2">
@@ -38,21 +33,29 @@ export const NyOpplysningerAlert = () => {
         </BehandlingAlert>
     );
 };
-const Opplysninger = ({ perioder }: { perioder: BarnetilsynGrunnlagDto[] }) => {
+const Opplysninger = ({ perioder, ident }: { perioder: BarnetilsynGrunnlagDto[]; ident: string }) => {
+    const { underholdskostnader } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
+    const hasAtLeastOneBarnetilsynPerioder = !!underholdskostnader.find((u) => u.gjelderBarn.ident === ident)
+        .stønadTilBarnetilsyn.length;
+    const [open, setOpen] = useState<boolean>(!hasAtLeastOneBarnetilsynPerioder);
 
     if (!perioder) {
         return null;
     }
 
+    useEffect(() => {
+        if (!hasAtLeastOneBarnetilsynPerioder && !open) {
+            setOpen(true);
+        }
+    }, [hasAtLeastOneBarnetilsynPerioder]);
+
     return (
-        <ReadMore header={<Header />} size="small">
+        <ReadMore header={<Header />} size="small" open={open} onClick={() => setOpen(!open)}>
             <Table className="opplysninger table-fixed table w-max" size="small">
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell>{text.label.periode}</Table.HeaderCell>
-                        <Table.HeaderCell className="w-[170px]">{text.label.stønadTilBarnetilsyn}</Table.HeaderCell>
-                        <Table.HeaderCell className="w-[80px]">{text.label.omfang}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -68,8 +71,6 @@ const Opplysninger = ({ perioder }: { perioder: BarnetilsynGrunnlagDto[] }) => {
                                     {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
                                 </>
                             </Table.DataCell>
-                            <Table.DataCell>{STONAD_TIL_BARNETILSYNS_SKOLEALDER[periode.skolealder]}</Table.DataCell>
-                            <Table.DataCell>{STONAD_TIL_BARNETILSYNS_TYPE[periode.tilsynstype]}</Table.DataCell>
                         </Table.Row>
                     ))}
                 </Table.Body>
@@ -116,7 +117,7 @@ export const BarnetilsynOpplysninger = ({ ident }: { ident: string }) => {
     return (
         <div className="grid gap-2">
             <div className="grid grid-cols-2 gap-4">
-                <Opplysninger perioder={aktivePerioder} />
+                <Opplysninger perioder={aktivePerioder} ident={ident} />
             </div>
             {hasNewOpplysningerFraFolkeregistre && !lesemodus && (
                 <NyOpplysningerFraFolkeregistreTabell
@@ -146,7 +147,7 @@ function NyOpplysningerFraFolkeregistreTabell({
             borderWidth="1"
             borderRadius="medium"
             borderColor="border-default"
-            className="w-[708px]"
+            className="w-[708px] sm:max-w-[688px]"
         >
             <Heading size="xsmall">{text.alert.nyOpplysningerBoforhold}</Heading>
             <Table className="opplysninger table-fixed table w-max mt-2" size="small">
@@ -154,8 +155,6 @@ function NyOpplysningerFraFolkeregistreTabell({
                     <Table.Row>
                         <Table.HeaderCell align="left">{text.label.fraOgMed}</Table.HeaderCell>
                         <Table.HeaderCell align="left">{text.label.tilOgMed}</Table.HeaderCell>
-                        <Table.HeaderCell align="left">{text.label.stønadTilBarnetilsyn}</Table.HeaderCell>
-                        <Table.HeaderCell align="left">{text.label.omfang}</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -169,12 +168,6 @@ function NyOpplysningerFraFolkeregistreTabell({
                             <Table.DataCell width="100px">
                                 {" "}
                                 {periode.periodeTil ? DateToDDMMYYYYString(new Date(periode.periodeTil)) : ""}
-                            </Table.DataCell>
-                            <Table.DataCell width="170px">
-                                {STONAD_TIL_BARNETILSYNS_SKOLEALDER[periode.skolealder]}
-                            </Table.DataCell>
-                            <Table.DataCell width="80px">
-                                {STONAD_TIL_BARNETILSYNS_TYPE[periode.tilsynstype]}
                             </Table.DataCell>
                         </Table.Row>
                     ))}

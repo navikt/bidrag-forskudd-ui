@@ -191,15 +191,15 @@ export const BarnetilsynTabel = ({
                                                 textSize="small"
                                                 scope="col"
                                                 align="left"
-                                                className="min-w-[170px]"
+                                                className="min-w-[160px]"
                                             >
-                                                {text.label.stønadTilBarnetilsyn}
+                                                {text.label.iSkolealder}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
                                                 align="left"
-                                                className="w-[100px]"
+                                                className="w-[110px]"
                                             >
                                                 {text.label.omfang}
                                             </Table.HeaderCell>
@@ -224,6 +224,7 @@ export const BarnetilsynTabel = ({
                                                         fieldName={`${fieldName}.${stønadIndex}`}
                                                         field="datoFom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell textSize="small">
@@ -232,6 +233,7 @@ export const BarnetilsynTabel = ({
                                                         fieldName={`${fieldName}.${stønadIndex}`}
                                                         field="datoTom"
                                                         item={item}
+                                                        underhold={underhold}
                                                     />
                                                 </Table.DataCell>
                                                 <Table.DataCell align="left">

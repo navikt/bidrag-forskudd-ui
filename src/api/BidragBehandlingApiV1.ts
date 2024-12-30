@@ -131,6 +131,7 @@ export enum OpplysningerType {
     ARBEIDSFORHOLD = "ARBEIDSFORHOLD",
     BARNETILLEGG = "BARNETILLEGG",
     BARNETILSYN = "BARNETILSYN",
+    ANDRE_BARN = "ANDRE_BARN",
     BOFORHOLD = "BOFORHOLD",
     BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN = "BOFORHOLD_ANDRE_VOKSNE_I_HUSSTANDEN",
     KONTANTSTOTTE = "KONTANTSTØTTE",
@@ -1232,11 +1233,14 @@ export enum TypeBehandling {
 }
 
 export interface UnderholdBarnDto {
+    /** @format int64 */
+    id?: number;
     navn?: string;
     ident?: string;
     /** @format date */
     fødselsdato: string;
-    medIBehandling: boolean;
+    medIBehandlingen: boolean;
+    kilde?: Kilde;
 }
 
 export interface UnderholdDto {
@@ -1302,9 +1306,11 @@ export interface UnderholdskostnadValideringsfeil {
     tilleggsstønadsperioderUtenFaktiskTilsynsutgift: DatoperiodeDto[];
     /** Minst en periode må legges til hvis det ikke finnes noen offentlige opplysninger for stønad til barnetilsyn */
     manglerPerioderForTilsynsordning: boolean;
+    /** Må ha fylt ut begrunnelse hvis minst en periode er lagt til underholdskostnad */
+    manglerBegrunnelse: boolean;
     /** @format int64 */
-    underholdskostnadsid: number;
-    barn: UnderholdBarnDto;
+    id: number;
+    gjelderBarn: UnderholdBarnDto;
 }
 
 export interface UnderholdskostnadValideringsfeilTabell {
@@ -1314,6 +1320,7 @@ export interface UnderholdskostnadValideringsfeilTabell {
     fremtidigePerioder: DatoperiodeDto[];
     /** Er sann hvis antall perioder er 0." */
     harIngenPerioder: boolean;
+    ugyldigPerioder: DatoperiodeDto[];
     /** Er sann hvis det er satt at BM har tilsynsordning for barnet men det mangler perioder for tilsynsutgifter. */
     manglerPerioderForTilsynsutgifter: boolean;
 }
@@ -1895,9 +1902,9 @@ export interface KanBehandlesINyLosningRequest {
     engangsbeløpstype: Engangsbeloptype;
     søknadstype?: KanBehandlesINyLosningRequestSoknadstypeEnum;
     harReferanseTilAnnenBehandling: boolean;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -1971,10 +1978,10 @@ export interface ResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2005,10 +2012,10 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2220,6 +2227,8 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
+    /** @format int64 */
+    underholdskostnadId?: number;
     /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
     gjelderBarn?: HusstandsmedlemDto;
 }
@@ -2401,6 +2410,7 @@ export enum Grunnlagstype {
     INNHENTETTILLEGGSSTONAD = "INNHENTET_TILLEGGSSTØNAD",
     INNHENTETTILLEGGSSTONADBEGRENSET = "INNHENTET_TILLEGGSSTØNAD_BEGRENSET",
     INNHENTET_BARNETILSYN = "INNHENTET_BARNETILSYN",
+    INNHENTET_ANDRE_BARN_TIL_BIDRAGSMOTTAKER = "INNHENTET_ANDRE_BARN_TIL_BIDRAGSMOTTAKER",
     INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE = "INNHENTET_INNTEKT_SKATTEGRUNNLAG_PERIODE",
     INNHENTET_INNTEKT_AORDNING = "INNHENTET_INNTEKT_AORDNING",
     INNHENTET_INNTEKT_BARNETILLEGG = "INNHENTET_INNTEKT_BARNETILLEGG",
@@ -2619,10 +2629,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
+    avslagVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2704,9 +2714,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
+    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
-    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -2747,6 +2757,12 @@ export interface NotatManueltOverstyrGebyrDto {
 }
 
 export interface NotatOffentligeOpplysningerUnderhold {
+    offentligeOpplysningerBarn: NotatOffentligeOpplysningerUnderholdBarn[];
+    andreBarnTilBidragsmottaker: NotatPersonDto[];
+    bidragsmottakerHarInnvilgetTilleggsstønad: boolean;
+}
+
+export interface NotatOffentligeOpplysningerUnderholdBarn {
     gjelder: NotatPersonDto;
     gjelderBarn?: NotatPersonDto;
     barnetilsyn: NotatBarnetilsynOffentligeOpplysninger[];
@@ -2768,10 +2784,10 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBP?: number;
     inntektBarn?: number;
     barnEndeligInntekt?: number;
-    totalEndeligInntekt: number;
-    inntektBPMånedlig?: number;
-    inntektBMMånedlig?: number;
     inntektBarnMånedlig?: number;
+    inntektBMMånedlig?: number;
+    inntektBPMånedlig?: number;
+    totalEndeligInntekt: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2794,8 +2810,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    resultatKodeVisningsnavn: string;
     sivilstandVisningsnavn?: string;
+    resultatKodeVisningsnavn: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2848,10 +2864,10 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trinnskattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
+    trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
@@ -2916,7 +2932,8 @@ export interface NotatUnderholdBarnDto {
 
 export interface NotatUnderholdDto {
     underholdskostnaderBarn: NotatUnderholdBarnDto[];
-    offentligeOpplysninger: NotatOffentligeOpplysningerUnderhold[];
+    offentligeOpplysninger: NotatOffentligeOpplysningerUnderholdBarn[];
+    offentligeOpplysningerV2: NotatOffentligeOpplysningerUnderhold;
 }
 
 export interface NotatUnderholdEgneBarnIHusstand {
@@ -2945,6 +2962,8 @@ export interface NotatUnderholdskostnadPeriodeBeregningsdetaljer {
     sjablonMaksFradrag: number;
     /** @format int32 */
     antallBarnBMUnderTolvÅr: number;
+    /** @format int32 */
+    antallBarnBMBeregnet: number;
     skattesatsFaktor: number;
     totalTilsynsutgift: number;
     sumTilsynsutgifter: number;
@@ -3346,10 +3365,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({
-            ...axiosConfig,
-            baseURL: axiosConfig.baseURL || "https://bidrag-behandling-q2.intern.dev.nav.no",
-        });
+        this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "http://localhost:8990" });
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -3441,7 +3457,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title bidrag-behandling
  * @version v1
- * @baseUrl https://bidrag-behandling-q2.intern.dev.nav.no
+ * @baseUrl http://localhost:8990
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     api = {

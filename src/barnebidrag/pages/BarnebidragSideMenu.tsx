@@ -1,6 +1,9 @@
 import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
-import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import behandlingQueryKeys, {
+    toUnderholdskostnadTabQueryParameter,
+    toUnderholdskostnadTabQueryParameterForUnderhold,
+} from "@common/constants/behandlingQueryKeys";
 import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
@@ -20,6 +23,8 @@ export const BarnebidragSideMenu = () => {
         virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
+        gebyr: { valideringsfeil: gebyrValideringsfeil },
+        samvær,
         gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
         roller,
@@ -60,6 +65,35 @@ export const BarnebidragSideMenu = () => {
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
+    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
+        return (
+            valideringsfeil?.manglerSamvær ||
+            valideringsfeil?.manglerBegrunnelse ||
+            valideringsfeil?.ingenLøpendeSamvær ||
+            valideringsfeil?.harPeriodiseringsfeil ||
+            valideringsfeil?.hullIPerioder ||
+            valideringsfeil?.overlappendePerioder
+        );
+    });
+    const underholdskostnadHasValideringsFeil = underholdskostnader
+        .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
+        .some(({ valideringsfeil }) => {
+            return (
+                valideringsfeil?.manglerBegrunnelse ||
+                valideringsfeil?.manglerPerioderForTilsynsordning ||
+                !!valideringsfeil?.faktiskTilsynsutgift ||
+                !!valideringsfeil?.stønadTilBarnetilsyn ||
+                !!valideringsfeil?.tilleggsstønad ||
+                !!valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length
+            );
+        });
+
+    const underholdskostnadAndreBarnHasValideringsFeil = underholdskostnader
+        .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
+        .some(({ valideringsfeil }) => {
+            return valideringsfeil?.manglerBegrunnelse || !!valideringsfeil?.faktiskTilsynsutgift;
+        });
 
     return (
         <SideMenu>
@@ -73,11 +107,12 @@ export const BarnebidragSideMenu = () => {
                 step={"2."}
                 title={text.title.underholdskostnad}
                 interactive={interactive}
+                valideringsfeil={underholdskostnadHasValideringsFeil}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD])}
                 active={activeButton?.includes(BarnebidragStepper.UNDERHOLDSKOSTNAD)}
                 subMenu={underholdskostnader
                     .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
-                    .map((underhold, index) => (
+                    .map((underhold) => (
                         <Fragment key={underhold.id}>
                             <MenuButton
                                 title={
@@ -87,14 +122,23 @@ export const BarnebidragSideMenu = () => {
                                 }
                                 onStepChange={() =>
                                     onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
-                                        [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                        [behandlingQueryKeys.tab]:
+                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
                                     })
                                 }
                                 interactive={interactive}
                                 size="small"
+                                valideringsfeil={
+                                    underhold.valideringsfeil?.manglerBegrunnelse ||
+                                    underhold.valideringsfeil?.manglerPerioderForTilsynsordning ||
+                                    !!underhold.valideringsfeil?.faktiskTilsynsutgift ||
+                                    !!underhold.valideringsfeil?.stønadTilBarnetilsyn ||
+                                    !!underhold.valideringsfeil?.tilleggsstønad ||
+                                    !!underhold.valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length
+                                }
                                 active={
                                     activeButton ===
-                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                 }
                                 subMenu={
                                     <>
@@ -106,16 +150,29 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_barnetilsyn
                                                         )
                                                     }
                                                     interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.fremtidigePerioder.length
+                                                    }
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                                 <MenuButton
@@ -124,16 +181,29 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_tilysnsutgifter
                                                         )
                                                     }
                                                     interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.fremtidigePerioder.length
+                                                    }
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                                 <MenuButton
@@ -142,16 +212,28 @@ export const BarnebidragSideMenu = () => {
                                                         onStepChange(
                                                             STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                             {
-                                                                [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
                                                             },
                                                             elementIds.seksjon_underholdskostnad_tilleggstønad
                                                         )
                                                     }
                                                     interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.tilleggsstønad?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.tilleggsstønad
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.tilleggsstønad
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.tilleggsstønad?.fremtidigePerioder
+                                                            .length
+                                                    }
                                                     size="small"
                                                     active={
                                                         activeButton ===
-                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                                     }
                                                 />
                                             </>
@@ -162,7 +244,8 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                     {
-                                                        [behandlingQueryKeys.tab]: `underholdskostnaderMedIBehandling-${underhold.id}-${index}`,
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
                                                     },
                                                     elementIds.seksjon_underholdskostnad_beregnet
                                                 )
@@ -171,7 +254,7 @@ export const BarnebidragSideMenu = () => {
                                             size="small"
                                             active={
                                                 activeButton ===
-                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderMedIBehandling-${underhold.id}-${index}`
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
                                             }
                                         />
                                     </>
@@ -181,14 +264,15 @@ export const BarnebidragSideMenu = () => {
                                 title={text.label.andreBarn}
                                 onStepChange={() =>
                                     onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
-                                        [behandlingQueryKeys.tab]: "underholdskostnaderAndreBarn",
+                                        [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
                                     })
                                 }
                                 interactive={interactive}
+                                valideringsfeil={underholdskostnadAndreBarnHasValideringsFeil}
                                 size="small"
                                 active={
                                     activeButton ===
-                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
                                 }
                                 subMenu={underholdskostnader
                                     .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
@@ -200,16 +284,26 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
                                                     {
-                                                        [behandlingQueryKeys.tab]: `underholdskostnaderAndreBarn`,
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameter(),
                                                     },
                                                     underhold.gjelderBarn.id.toString()
                                                 )
                                             }
                                             interactive={interactive}
+                                            valideringsfeil={
+                                                underhold.valideringsfeil?.faktiskTilsynsutgift?.harIngenPerioder ||
+                                                underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                    ?.manglerPerioderForTilsynsutgifter ||
+                                                !!underhold?.valideringsfeil?.faktiskTilsynsutgift?.overlappendePerioder
+                                                    .length ||
+                                                !!underhold?.valideringsfeil?.faktiskTilsynsutgift?.fremtidigePerioder
+                                                    .length
+                                            }
                                             size="small"
                                             active={
                                                 activeButton ===
-                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.underholdskostnaderAndreBarn`
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
                                             }
                                         />
                                     ))}
@@ -466,6 +560,7 @@ export const BarnebidragSideMenu = () => {
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
                 interactive={!!gebyr}
                 active={activeButton === BarnebidragStepper.GEBYR}
+                valideringsfeil={gebyrValideringsFeil}
             />
             <MenuButton
                 step={"5."}
@@ -482,6 +577,7 @@ export const BarnebidragSideMenu = () => {
                 interactive={interactive}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
                 active={activeButton === BarnebidragStepper.SAMVÆR}
+                valideringsfeil={samværValideringsFeil}
             />
             <MenuButton
                 step={"7."}
