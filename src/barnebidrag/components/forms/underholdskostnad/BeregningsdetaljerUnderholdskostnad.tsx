@@ -26,7 +26,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
                         label: "Antall barn over 12 år med tilsynsutgifter",
                         textRight: false,
-                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet - detaljer.antallBarnBMUnderTolvÅr)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMOver12ÅrMedTilsynsutgifter)}`,
                     },
                     detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
                         label: "Antall barn i beregningen",
