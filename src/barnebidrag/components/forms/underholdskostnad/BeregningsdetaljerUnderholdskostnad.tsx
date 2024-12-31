@@ -23,6 +23,16 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
                     },
+                    detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
+                        label: "Antall barn over 12 år med tilsynsutgifter",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet - detaljer.antallBarnBMUnderTolvÅr)}`,
+                    },
+                    detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
+                        label: "Antall barn i beregningen",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
+                    },
                 ].filter((d) => d)}
             />
             {tilleggstønad.length > 0 && (
@@ -117,7 +127,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     },
                     {
                         label: "Skattefradrag (per barn)",
-                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
                 ].filter((d) => d)}
