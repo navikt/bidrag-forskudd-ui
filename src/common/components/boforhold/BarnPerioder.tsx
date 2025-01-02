@@ -3,17 +3,16 @@ import { Rolletype } from "@api/BidragDokumentProduksjonApi";
 import { AddBarnForm } from "@common/components/boforhold/AddBarnForm";
 import { Perioder } from "@common/components/boforhold/Perioder";
 import { RemoveButton } from "@common/components/boforhold/RemoveButton";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import elementIds from "@common/constants/elementIds";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useOnSaveBoforhold } from "@common/hooks/useOnSaveBoforhold";
-import { BodyShort, Box, Button } from "@navikt/ds-react";
-import { dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
+import { Box, Button } from "@navikt/ds-react";
 import React, { Fragment, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
+import PersonNavnIdent from "../PersonNavnIdent";
 
 export const BarnPerioder = () => {
     const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
@@ -58,6 +57,7 @@ export const BarnPerioder = () => {
                                 ...currentData.boforhold,
                                 egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
                                 husstandsbarn: currentData.boforhold.husstandsbarn.filter((b) => b.id !== barn.id),
+                                beregnetBoforhold: response.beregnetBoforhold,
                             },
                         };
                     });
@@ -98,11 +98,11 @@ export const BarnPerioder = () => {
                         <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white border border-[var(--a-border-default)]">
                             <div>{item.medIBehandling && <RolleTag rolleType={Rolletype.BA} />}</div>
                             <div className="flex items-center gap-4">
-                                <BodyShort size="small" className="font-bold">
-                                    {item.medIBehandling && <PersonNavn ident={item.ident}></PersonNavn>}
-                                    {!item.medIBehandling && item.navn}
-                                </BodyShort>
-                                <BodyShort size="small">{DateToDDMMYYYYString(dateOrNull(item.fødselsdato))}</BodyShort>
+                                <PersonNavnIdent
+                                    navn={item.navn}
+                                    ident={item.medIBehandling ? item.ident : null}
+                                    fødselsdato={item.fødselsdato}
+                                />
                             </div>
                             {!item.medIBehandling && !lesemodus && item.kilde === Kilde.MANUELL && (
                                 <RemoveButton index={index} onRemoveBarn={onRemoveBarn} />

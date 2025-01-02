@@ -1,5 +1,6 @@
 import ErrorConfirmationModal from "@common/components/ErrorConfirmationModal";
 import { ConfirmationModal } from "@common/components/modal/ConfirmationModal";
+import urlSearchParams from "@common/constants/behandlingQueryKeys";
 import text from "@common/constants/texts";
 import { useBehandlingV2 } from "@common/hooks/useApiData";
 import { useMutationStatus } from "@common/hooks/useMutationStatus";
@@ -20,7 +21,8 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { PageErrorsOrUnsavedState as BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
+import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
+import { BarnebidragPageErrorsOrUnsavedState } from "../../barnebidrag/context/BarnebidragProviderWrapper";
 import { BarnebidragStepper } from "../../barnebidrag/enum/BarnebidragStepper";
 import { PageErrorsOrUnsavedState as ForskuddPageErrorsOrUnsavedState } from "../../forskudd/context/ForskuddBehandlingProviderWrapper";
 import { ForskuddStepper } from "../../forskudd/enum/ForskuddStepper";
@@ -37,8 +39,10 @@ interface IBehandlingContext {
     activeStep: string;
     behandlingId: string;
     vedtakId: string;
+    type: TypeBehandling;
     lesemodus: boolean;
     erVedtakFattet: boolean;
+    beregnetGebyrErEndret: boolean;
     erVirkningstidspunktNåværendeMånedEllerFramITid: boolean;
     saksnummer?: string;
     errorMessage: { title: string; text: string };
@@ -60,6 +64,8 @@ interface IBehandlingContext {
     onStepChange: (x: number, query?: Record<string, string>, hash?: string) => void;
     pendingTransitionState: boolean;
     setDebouncing: React.Dispatch<React.SetStateAction<boolean>>;
+    setBeregnetGebyrErEndret: React.Dispatch<React.SetStateAction<boolean>>;
+    onNavigateToTab: (nextTab: string) => void;
 }
 
 export const BehandlingContext = createContext<IBehandlingContext | null>(null);
@@ -109,10 +115,11 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         saksnummer?: string;
         vedtakId?: string;
     }>();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | undefined>();
     const [errorMessage, setErrorMessage] = useState<{ title: string; text: string }>(null);
     const [errorModalOpen, setErrorModalOpen] = useState(false);
+    const [beregnetGebyrErEndret, setBeregnetGebyrErEndret] = useState(false);
     const behandling = useBehandlingV2(behandlingId, vedtakId);
     const activeStep = searchParams.get(behandlingQueryKeys.steg) ?? defaultStep;
     const location = useLocation();
@@ -120,7 +127,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const setActiveStep = useCallback((x: number, query?: Record<string, string>, hash?: string) => {
         const updatedSearchParams = [
             [behandlingQueryKeys.steg, Object.keys(steps).find((k) => steps[k] === x)],
-            ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.inntektTab).entries(),
+            ...getAllSearchParamsExcludingKeys(behandlingQueryKeys.steg, behandlingQueryKeys.tab).entries(),
             ...(query ? Object.entries(query) : []),
         ];
 
@@ -134,9 +141,11 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
     const mutationStatus = useMutationStatus(behandlingId);
     const [debouncing, setDebouncing] = useState<boolean>(false);
     const [navigatingToNextPage, setNavigatingToNextPage] = useState<boolean>(false);
+    const [navigatingToNextTab, setNavigatingToNextTab] = useState<boolean>(false);
 
     const queryLesemodus = searchParams.get(behandlingQueryKeys.lesemodus) === "true";
     const [nextStep, setNextStep] = useState<number>(undefined);
+    const [nextTab, setNextTab] = useState<string>(undefined);
     const ref = useRef<HTMLDialogElement>(null);
     const erVirkningstidspunktNåværendeMånedEllerFramITid = isAfterEqualsDate(
         dateOrNull(behandling.virkningstidspunkt.virkningstidspunkt),
@@ -158,7 +167,32 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
         if (navigatingToNextPage && mutationStatus === "error") {
             setNavigatingToNextPage(false);
         }
+
+        if (navigatingToNextTab && mutationStatus === "success") {
+            setActiveTab(nextTab);
+            setNavigatingToNextTab(false);
+        }
+
+        if (navigatingToNextTab && mutationStatus === "error") {
+            setNavigatingToNextTab(false);
+        }
     }, [mutationStatus]);
+
+    const setActiveTab = (nextTab: string) => {
+        setSearchParams((params) => {
+            params.set(urlSearchParams.tab, nextTab);
+            return params;
+        });
+    };
+
+    const onNavigateToTab = (nextTab: string) => {
+        if (mutationStatus === "pending" || debouncing) {
+            setNavigatingToNextTab(true);
+            setNextTab(nextTab);
+        } else {
+            setActiveTab(nextTab);
+        }
+    };
 
     const onStepChange = (x: number, query?: Record<string, string>, hash?: string) => {
         const currentPageErrors = pageErrorsOrUnsavedState[activeStep];
@@ -184,20 +218,29 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             behandlingId,
             vedtakId,
             erVirkningstidspunktNåværendeMånedEllerFramITid,
-            lesemodus: vedtakId != null || behandling.erVedtakFattet || queryLesemodus,
+            beregnetGebyrErEndret,
+            type: behandling.type,
+            lesemodus:
+                vedtakId != null ||
+                behandling.erVedtakFattet ||
+                queryLesemodus ||
+                behandling.kanBehandlesINyLøsning === false,
             erVedtakFattet: behandling.erVedtakFattet,
             saksnummer,
             errorMessage,
             errorModalOpen,
             pageErrorsOrUnsavedState,
             setPageErrorsOrUnsavedState,
-            pendingTransitionState: navigatingToNextPage && (mutationStatus === "pending" || debouncing),
+            pendingTransitionState:
+                (navigatingToNextPage || navigatingToNextTab) && (mutationStatus === "pending" || debouncing),
             setErrorModalOpen,
             setErrorMessage,
             setSaveErrorState,
             onConfirm,
             onStepChange,
             setDebouncing,
+            setBeregnetGebyrErEndret,
+            onNavigateToTab,
         }),
         [
             activeStep,
@@ -211,6 +254,7 @@ function BehandlingProvider({ props, children }: PropsWithChildren<BehandlingPro
             queryLesemodus,
             behandling.erVedtakFattet,
             navigatingToNextPage,
+            navigatingToNextTab,
             mutationStatus,
             debouncing,
         ]

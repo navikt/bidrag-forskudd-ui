@@ -6,15 +6,36 @@ import { useBehandlingV2 } from "@common/hooks/useApiData";
 import useFeatureToogle from "@common/hooks/useFeatureToggle";
 import { prefetchVisningsnavn } from "@common/hooks/useVisningsnavn";
 import PageWrapper from "@common/PageWrapper";
-import { BidragContainer } from "@navikt/bidrag-ui-common";
-import { Loader } from "@navikt/ds-react";
+import {
+    browserMeta,
+    createReactRouterV6Options,
+    FaroRoutes,
+    getWebInstrumentations,
+    initializeFaro,
+    LogLevel,
+    pageMeta,
+    ReactIntegration,
+} from "@grafana/faro-react";
+import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
+import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
+import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
-import React, { lazy, PropsWithChildren, Suspense, useEffect } from "react";
-import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
+import React, { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
+import {
+    BrowserRouter,
+    createRoutesFromChildren,
+    matchRoutes,
+    Route,
+    Routes,
+    useLocation,
+    useNavigationType,
+    useParams,
+} from "react-router-dom";
 
 import { BarnebidragProviderWrapper } from "./barnebidrag/context/BarnebidragProviderWrapper";
+import BrukerveiledningBarnebidragV1 from "./barnebidrag/docs/BrukerveiledningBarnebidragV1.mdx";
 import { BarnebidragPage } from "./barnebidrag/pages/BarnebidragPage";
 import { ForskuddBehandlingProviderWrapper } from "./forskudd/context/ForskuddBehandlingProviderWrapper";
 import BrukerveiledningForskudd from "./forskudd/docs/BrukerveiledningForskudd.mdx";
@@ -24,6 +45,34 @@ import { SærligeugifterProviderWrapper } from "./særbidrag/context/Særligeugi
 import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
+export const faro = initializeFaro({
+    app: {
+        name: "bidrag-behandling-ui",
+    },
+    url: process.env.TELEMETRY_URL as string,
+    user: {
+        username: await SecuritySessionUtils.hentSaksbehandlerId(),
+    },
+
+    metas: [browserMeta, pageMeta],
+    instrumentations: [
+        // Load the default Web instrumentations
+        ...getWebInstrumentations({
+            captureConsole: true,
+            captureConsoleDisabledLevels: [LogLevel.DEBUG, LogLevel.TRACE],
+        }),
+
+        new ReactIntegration({
+            router: createReactRouterV6Options({
+                createRoutesFromChildren,
+                matchRoutes,
+                Routes,
+                useLocation,
+                useNavigationType,
+            }),
+        }),
+    ],
+});
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
 
@@ -42,8 +91,44 @@ const config: IConfig = {
     refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
     appName: "bidrag-behandling-ui",
 };
+const getDevicePixelRatioFormatted = () => {
+    return (Math.round(window.devicePixelRatio * 100) / 100).toFixed(2);
+};
+
+const hasMultipleScreens = () => {
+    // @ts-expect-error This is not supported in all browsers (or TypeScript) yet
+    const value: boolean | undefined = window.screen.isExtended;
+    if (value === true) {
+        return "yes";
+    } else if (value === false) {
+        return "no";
+    } else {
+        return "unknown";
+    }
+};
 export default function App() {
     // const { reset } = useQueryErrorResetBoundary();
+
+    useEffect(() => {
+        try {
+            const screenResolutionData = {
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                orientation: window.screen.orientation.type,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                windowWidth: window.innerWidth,
+                windowHeight: window.innerHeight,
+                devicePixelRatio: getDevicePixelRatioFormatted(),
+                hasMultipleScreens: hasMultipleScreens(),
+            };
+            const asStrings = Object.fromEntries(
+                Object.entries(screenResolutionData).map(([key, value]) => [key, value?.toString() ?? ""])
+            );
+            faro.api.pushEvent("screenResolution", asStrings);
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
     return (
         <FlagProvider config={config}>
             <QueryClientProvider client={queryClient}>
@@ -54,8 +139,10 @@ export default function App() {
                         </div>
                     }
                 >
+                    <HideSensitiveInfoButton />
+
                     <BrowserRouter>
-                        <Routes>
+                        <FaroRoutes>
                             <Route path="/sak/:saksnummer/behandling/:behandlingId">
                                 <Route index element={<BidragBehandlingWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
@@ -94,6 +181,7 @@ export default function App() {
                                 path="/sarbidrag/brukerveiledning"
                                 element={<SærbidragBrukerveiledningPageWrapper />}
                             />
+                            <Route path="/bidrag/brukerveiledning" element={<BidragBrukerveiledningPageWrapper />} />
                             <Route path="/forskudd/:behandlingId">
                                 <Route
                                     index
@@ -105,11 +193,54 @@ export default function App() {
                                 />
                                 <Route path="notat" element={<NotatPageWrapper />} />
                             </Route>
-                        </Routes>
+                        </FaroRoutes>
                     </BrowserRouter>
                 </Suspense>
             </QueryClientProvider>
         </FlagProvider>
+    );
+}
+
+function HideSensitiveInfoButton() {
+    const { isAdminEnabled, isDeveloper } = useFeatureToogle();
+    const [isHiding, setIsHiding] = useState(isDeveloper);
+    useEffect(() => {
+        const eventListener = (e) => {
+            if (e.ctrlKey && e.key === "ø") {
+                document.body.classList.toggle("blur-sensitive-info");
+                window.localStorage.setItem(
+                    "blur-sensitive-info",
+                    document.body.classList.contains("blur-sensitive-info").toString()
+                );
+            }
+        };
+        document.addEventListener("keydown", eventListener);
+        return () => document.removeEventListener("keydown", eventListener);
+    }, []);
+    useEffect(() => {
+        const isEnabled = isDeveloper || window.localStorage.getItem("blur-sensitive-info") === "true";
+        if (isEnabled) {
+            document.body.classList.add("blur-sensitive-info");
+            setIsHiding(true);
+        }
+        if (!isAdminEnabled) {
+            document.body.classList.remove("blur-sensitive-info");
+            setIsHiding(false);
+        }
+    }, [isDeveloper, isAdminEnabled]);
+    if (!isAdminEnabled) return null;
+    return (
+        <div className="fixed left-2 bottom-2 z-50">
+            <Button
+                size="small"
+                variant="tertiary-neutral"
+                icon={isHiding ? <EyeIcon /> : <EyeObfuscatedIcon />}
+                onClick={() => {
+                    document.body.classList.toggle("blur-sensitive-info");
+                    setIsHiding(document.body.classList.contains("blur-sensitive-info"));
+                }}
+            ></Button>
+        </div>
     );
 }
 function ForskuddBrukerveiledningPageWrapper() {
@@ -122,8 +253,20 @@ function ForskuddBrukerveiledningPageWrapper() {
         </PageWrapper>
     );
 }
+function BidragBrukerveiledningPageWrapper() {
+    useEffect(scrollToHash, []);
+
+    return (
+        <PageWrapper name="Bidrag brukerveiledning">
+            <BidragContainer className="container p-6 max-w-[60rem]">
+                <BrukerveiledningBarnebidragV1 />
+            </BidragContainer>
+        </PageWrapper>
+    );
+}
 function SærbidragBrukerveiledningPageWrapper() {
     useEffect(scrollToHash, []);
+
     return (
         <PageWrapper name="Særbidrag brukerveiledning">
             <BidragContainer className="container p-6 max-w-[60rem]">

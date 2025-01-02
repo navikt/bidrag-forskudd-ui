@@ -1,13 +1,18 @@
 import { Rolletype, Vedtakstype } from "@api/BidragBehandlingApiV1";
 import { MenuButton, SideMenu } from "@common/components/SideMenu/SideMenu";
-import behandlingQueryKeys from "@common/constants/behandlingQueryKeys";
+import behandlingQueryKeys, {
+    toUnderholdskostnadTabQueryParameter,
+    toUnderholdskostnadTabQueryParameterForUnderhold,
+} from "@common/constants/behandlingQueryKeys";
 import elementIds from "@common/constants/elementIds";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../common/components/PersonIdent";
+import { PersonNavn } from "../../common/components/PersonNavn";
 import { STEPS } from "../constants/steps";
 import { BarnebidragStepper } from "../enum/BarnebidragStepper";
 
@@ -15,20 +20,25 @@ export const BarnebidragSideMenu = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
         vedtakstype,
+        virkningstidspunkt,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
+        gebyr: { valideringsfeil: gebyrValideringsfeil },
+        samvær,
+        gebyr,
         ikkeAktiverteEndringerIGrunnlagsdata,
         roller,
+        underholdskostnader,
     } = useGetBehandlingV2();
     const [searchParams] = useSearchParams();
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
         if (!step) return BarnebidragStepper.VIRKNINGSTIDSPUNKT;
-        const inntektTab = searchParams.get(behandlingQueryKeys.inntektTab);
-        return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
+        const tab = searchParams.get(behandlingQueryKeys.tab);
+        return `${step}${tab ? `.${tab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
-    const interactive = vedtakstype !== Vedtakstype.OPPHOR;
+    const interactive = !virkningstidspunkt.avslag && vedtakstype !== Vedtakstype.OPPHOR;
     const inntektRoller = roller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM) return -1;
         if (b.rolletype === Rolletype.BM) return 1;
@@ -55,6 +65,35 @@ export const BarnebidragSideMenu = () => {
     const inntekterIkkeAktiverteEndringer =
         !!ikkeAktiverteEndringerIGrunnlagsdata?.inntekter &&
         Object.values(ikkeAktiverteEndringerIGrunnlagsdata.inntekter).some((inntekt) => !!inntekt.length);
+    const gebyrValideringsFeil = !!gebyrValideringsfeil?.length;
+    const samværValideringsFeil = samvær.some(({ valideringsfeil }) => {
+        return (
+            valideringsfeil?.manglerSamvær ||
+            valideringsfeil?.manglerBegrunnelse ||
+            valideringsfeil?.ingenLøpendeSamvær ||
+            valideringsfeil?.harPeriodiseringsfeil ||
+            valideringsfeil?.hullIPerioder ||
+            valideringsfeil?.overlappendePerioder
+        );
+    });
+    const underholdskostnadHasValideringsFeil = underholdskostnader
+        .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
+        .some(({ valideringsfeil }) => {
+            return (
+                valideringsfeil?.manglerBegrunnelse ||
+                valideringsfeil?.manglerPerioderForTilsynsordning ||
+                !!valideringsfeil?.faktiskTilsynsutgift ||
+                !!valideringsfeil?.stønadTilBarnetilsyn ||
+                !!valideringsfeil?.tilleggsstønad ||
+                !!valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length
+            );
+        });
+
+    const underholdskostnadAndreBarnHasValideringsFeil = underholdskostnader
+        .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
+        .some(({ valideringsfeil }) => {
+            return valideringsfeil?.manglerBegrunnelse || !!valideringsfeil?.faktiskTilsynsutgift;
+        });
 
     return (
         <SideMenu>
@@ -67,17 +106,213 @@ export const BarnebidragSideMenu = () => {
             <MenuButton
                 step={"2."}
                 title={text.title.underholdskostnad}
+                interactive={interactive}
+                valideringsfeil={underholdskostnadHasValideringsFeil}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD])}
-                active={activeButton === BarnebidragStepper.UNDERHOLDSKOSTNAD}
+                active={activeButton?.includes(BarnebidragStepper.UNDERHOLDSKOSTNAD)}
+                subMenu={underholdskostnader
+                    .filter((underhold) => underhold.gjelderBarn.medIBehandlingen)
+                    .map((underhold) => (
+                        <Fragment key={underhold.id}>
+                            <MenuButton
+                                title={
+                                    <>
+                                        BA <PersonIdent ident={underhold.gjelderBarn.ident} />
+                                    </>
+                                }
+                                onStepChange={() =>
+                                    onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
+                                        [behandlingQueryKeys.tab]:
+                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
+                                    })
+                                }
+                                interactive={interactive}
+                                size="small"
+                                valideringsfeil={
+                                    underhold.valideringsfeil?.manglerBegrunnelse ||
+                                    underhold.valideringsfeil?.manglerPerioderForTilsynsordning ||
+                                    !!underhold.valideringsfeil?.faktiskTilsynsutgift ||
+                                    !!underhold.valideringsfeil?.stønadTilBarnetilsyn ||
+                                    !!underhold.valideringsfeil?.tilleggsstønad ||
+                                    !!underhold.valideringsfeil?.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length
+                                }
+                                active={
+                                    activeButton ===
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
+                                }
+                                subMenu={
+                                    <>
+                                        {underhold.harTilsynsordning && (
+                                            <>
+                                                <MenuButton
+                                                    title={text.title.stønadTilBarnetilsyn}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_barnetilsyn
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.stønadTilBarnetilsyn
+                                                            ?.fremtidigePerioder.length
+                                                    }
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
+                                                    }
+                                                />
+                                                <MenuButton
+                                                    title={text.title.faktiskeTilsynsutgifter}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_tilysnsutgifter
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.faktiskTilsynsutgift
+                                                            ?.fremtidigePerioder.length
+                                                    }
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
+                                                    }
+                                                />
+                                                <MenuButton
+                                                    title={text.title.tilleggsstønad}
+                                                    onStepChange={() =>
+                                                        onStepChange(
+                                                            STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                            {
+                                                                [behandlingQueryKeys.tab]:
+                                                                    toUnderholdskostnadTabQueryParameterForUnderhold(
+                                                                        underhold
+                                                                    ),
+                                                            },
+                                                            elementIds.seksjon_underholdskostnad_tilleggstønad
+                                                        )
+                                                    }
+                                                    interactive={interactive}
+                                                    valideringsfeil={
+                                                        underhold.valideringsfeil?.tilleggsstønad?.harIngenPerioder ||
+                                                        underhold.valideringsfeil?.tilleggsstønad
+                                                            ?.manglerPerioderForTilsynsutgifter ||
+                                                        !!underhold?.valideringsfeil?.tilleggsstønad
+                                                            ?.overlappendePerioder.length ||
+                                                        !!underhold?.valideringsfeil?.tilleggsstønad?.fremtidigePerioder
+                                                            .length
+                                                    }
+                                                    size="small"
+                                                    active={
+                                                        activeButton ===
+                                                        `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
+                                                    }
+                                                />
+                                            </>
+                                        )}
+                                        <MenuButton
+                                            title={text.title.underholdskostnad}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                    {
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameterForUnderhold(underhold),
+                                                    },
+                                                    elementIds.seksjon_underholdskostnad_beregnet
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameterForUnderhold(underhold)}`
+                                            }
+                                        />
+                                    </>
+                                }
+                            />
+                            <MenuButton
+                                title={text.label.andreBarn}
+                                onStepChange={() =>
+                                    onStepChange(STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD], {
+                                        [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
+                                    })
+                                }
+                                interactive={interactive}
+                                valideringsfeil={underholdskostnadAndreBarnHasValideringsFeil}
+                                size="small"
+                                active={
+                                    activeButton ===
+                                    `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
+                                }
+                                subMenu={underholdskostnader
+                                    .filter((underhold) => !underhold.gjelderBarn.medIBehandlingen)
+                                    .map((underhold) => (
+                                        <MenuButton
+                                            key={underhold.gjelderBarn.id}
+                                            title={<PersonNavn navn={underhold.gjelderBarn.navn} />}
+                                            onStepChange={() =>
+                                                onStepChange(
+                                                    STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD],
+                                                    {
+                                                        [behandlingQueryKeys.tab]:
+                                                            toUnderholdskostnadTabQueryParameter(),
+                                                    },
+                                                    underhold.gjelderBarn.id.toString()
+                                                )
+                                            }
+                                            interactive={interactive}
+                                            valideringsfeil={
+                                                underhold.valideringsfeil?.faktiskTilsynsutgift?.harIngenPerioder ||
+                                                underhold.valideringsfeil?.faktiskTilsynsutgift
+                                                    ?.manglerPerioderForTilsynsutgifter ||
+                                                !!underhold?.valideringsfeil?.faktiskTilsynsutgift?.overlappendePerioder
+                                                    .length ||
+                                                !!underhold?.valideringsfeil?.faktiskTilsynsutgift?.fremtidigePerioder
+                                                    .length
+                                            }
+                                            size="small"
+                                            active={
+                                                activeButton ===
+                                                `${BarnebidragStepper.UNDERHOLDSKOSTNAD}.${toUnderholdskostnadTabQueryParameter()}`
+                                            }
+                                        />
+                                    ))}
+                            />
+                        </Fragment>
+                    ))}
             />
             <MenuButton
                 step={"3."}
-                title={text.title.samvær}
-                onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
-                active={activeButton === BarnebidragStepper.SAMVÆR}
-            />
-            <MenuButton
-                step={"4."}
                 title={text.title.inntekt}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.INNTEKT])}
                 interactive={interactive}
@@ -85,12 +320,16 @@ export const BarnebidragSideMenu = () => {
                 valideringsfeil={inntektHasValideringsFeil}
                 unconfirmedUpdates={inntekterIkkeAktiverteEndringer}
                 subMenu={inntektRoller.map((rolle) => (
-                    <>
+                    <Fragment key={rolle.id}>
                         <MenuButton
-                            title={`${rolle.rolletype} ${rolle.ident}`}
+                            title={
+                                <div className="flex flex-row gap-1">
+                                    {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                </div>
+                            }
                             onStepChange={() =>
                                 onStepChange(STEPS[BarnebidragStepper.INNTEKT], {
-                                    [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                    [behandlingQueryKeys.tab]: rolle.id.toString(),
                                 })
                             }
                             interactive={interactive}
@@ -120,7 +359,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -143,7 +382,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_barnetillegg
                                                 )
@@ -170,7 +409,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_utvidetbarnetrygd
                                                 )
@@ -192,7 +431,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_småbarnstillegg
                                                 )
@@ -214,7 +453,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_kontantstøtte
                                                 )
@@ -238,7 +477,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -261,7 +500,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_barnetillegg
                                                 )
@@ -291,7 +530,7 @@ export const BarnebidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[BarnebidragStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -312,8 +551,16 @@ export const BarnebidragSideMenu = () => {
                                 )
                             }
                         />
-                    </>
+                    </Fragment>
                 ))}
+            />
+            <MenuButton
+                step={"4."}
+                title={text.title.gebyr}
+                onStepChange={() => onStepChange(STEPS[BarnebidragStepper.GEBYR])}
+                interactive={!!gebyr}
+                active={activeButton === BarnebidragStepper.GEBYR}
+                valideringsfeil={gebyrValideringsFeil}
             />
             <MenuButton
                 step={"5."}
@@ -326,6 +573,14 @@ export const BarnebidragSideMenu = () => {
             />
             <MenuButton
                 step={"6."}
+                title={text.title.samvær}
+                interactive={interactive}
+                onStepChange={() => onStepChange(STEPS[BarnebidragStepper.SAMVÆR])}
+                active={activeButton === BarnebidragStepper.SAMVÆR}
+                valideringsfeil={samværValideringsFeil}
+            />
+            <MenuButton
+                step={"7."}
                 title={text.title.vedtak}
                 onStepChange={() => onStepChange(STEPS[BarnebidragStepper.VEDTAK])}
                 active={activeButton === BarnebidragStepper.VEDTAK}

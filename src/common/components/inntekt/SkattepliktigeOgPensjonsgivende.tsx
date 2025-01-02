@@ -146,14 +146,14 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                 textSize="small"
                                                 scope="col"
                                                 align="left"
-                                                className="w-[290px]"
+                                                className="w-[320px]"
                                             >
                                                 {text.label.beskrivelse}
                                             </Table.HeaderCell>
                                             <Table.HeaderCell
                                                 textSize="small"
                                                 scope="col"
-                                                align="left"
+                                                align="center"
                                                 className="w-[54px]"
                                             >
                                                 {text.label.kilde}
@@ -162,7 +162,7 @@ export const SkattepliktigeOgPensjonsgivende = () => {
                                                 textSize="small"
                                                 scope="col"
                                                 align="right"
-                                                className="w-[154px]"
+                                                className="w-[100px]"
                                             >
                                                 {text.label.beløp}
                                             </Table.HeaderCell>

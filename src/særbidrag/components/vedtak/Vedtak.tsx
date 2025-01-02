@@ -10,9 +10,8 @@ import React, { useEffect } from "react";
 import { Resultatkode } from "../../../api/BidragBehandlingApiV1";
 import { AdminButtons } from "../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../common/components/vedtak/FatteVedtakButtons";
-import { ResultatTable } from "../../../common/components/vedtak/ResultatTable";
+import { ResultatDescription } from "../../../common/components/vedtak/ResultatDescription";
 import VedtakWrapper from "../../../common/components/vedtak/VedtakWrapper";
-import useFeatureToogle from "../../../common/hooks/useFeatureToggle";
 import { hentVisningsnavn } from "../../../common/hooks/useVisningsnavn";
 import { formatterBeløp, formatterProsent } from "../../../utils/number-utils";
 import { STEPS } from "../../constants/steps";
@@ -21,9 +20,8 @@ import { UtgifsposterTable } from "./UtgifstposterTable";
 
 const Vedtak = () => {
     const { behandlingId, activeStep, lesemodus } = useBehandlingProvider();
-    const { erVedtakFattet } = useGetBehandlingV2();
+    const { erVedtakFattet, kanBehandlesINyLøsning } = useGetBehandlingV2();
     const queryClient = useQueryClient();
-    const { isFatteVedtakEnabled } = useFeatureToogle();
     const beregnetSærbidrag = queryClient.getQueryData<VedtakBeregningResult>(QueryKeys.beregningSærbidrag());
     const isBeregningError = queryClient.getQueryState(QueryKeys.beregningSærbidrag())?.status === "error";
 
@@ -41,7 +39,7 @@ const Vedtak = () => {
             <VedtakResultat />
 
             {!beregnetSærbidrag?.feil && !lesemodus && (
-                <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!isFatteVedtakEnabled} />
+                <FatteVedtakButtons isBeregningError={isBeregningError} disabled={!kanBehandlesINyLøsning} />
             )}
             <AdminButtons />
         </div>
@@ -50,6 +48,7 @@ const Vedtak = () => {
 
 const VedtakResultat = () => {
     const { data: beregnetSærbidrag } = useGetBeregningSærbidrag();
+    const { medInnkreving } = useGetBehandlingV2();
 
     function renderResultat() {
         if (beregnetSærbidrag.feil) return;
@@ -78,29 +77,27 @@ const VedtakResultat = () => {
                 <div>
                     <Heading size="small">Avslag</Heading>
                     <VStack gap={"4"}>
-                        <UtgifsposterTable />
-                        <BodyShort size="small">
-                            <ResultatTable
-                                data={[
-                                    {
-                                        label: "Årsak",
-                                        value: hentVisningsnavn(resultat.resultatKode),
-                                    },
-                                    resultat.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS && {
-                                        label: "Forskuddssats",
-                                        value: formatterBeløp(resultat.forskuddssats, true),
-                                    },
-                                    {
-                                        label: "Kravbeløp",
-                                        value: formatterBeløp(resultat.beregning?.totalKravbeløp, true),
-                                    },
-                                    {
-                                        label: "Godkjent beløp",
-                                        value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
-                                    },
-                                ].filter((d) => d)}
-                            />
-                        </BodyShort>
+                        <ResultatDescription
+                            data={[
+                                {
+                                    label: "Årsak",
+                                    value: hentVisningsnavn(resultat.resultatKode),
+                                },
+                                resultat.resultatKode === Resultatkode.GODKJENTBELOPERLAVEREENNFORSKUDDSSATS && {
+                                    label: "Forskuddssats",
+                                    value: formatterBeløp(resultat.forskuddssats, true),
+                                },
+                                {
+                                    label: "Kravbeløp",
+                                    value: formatterBeløp(resultat.beregning?.totalKravbeløp, true),
+                                },
+                                {
+                                    label: "Godkjent beløp",
+                                    value: formatterBeløp(resultat.beregning?.totalGodkjentBeløp, true),
+                                },
+                            ].filter((d) => d)}
+                        />
+                        <UtgifterLagtTilGrunnAccordion />
                     </VStack>
                 </div>
             );
@@ -116,10 +113,9 @@ const VedtakResultat = () => {
                         Særbidrag innvilget
                     </Heading>
                 )}
-                <UtgifsposterTable />
-                <VStack gap={"2"} className="pt-4">
+                <VStack gap={"2"} className="pt-2">
                     <HStack gap={"24"} style={{ width: "max-content" }}>
-                        <ResultatTable
+                        <ResultatDescription
                             title="Inntekter"
                             data={[
                                 {
@@ -137,7 +133,7 @@ const VedtakResultat = () => {
                             ]}
                         />
 
-                        <ResultatTable
+                        <ResultatDescription
                             title="Boforhold"
                             data={[
                                 {
@@ -154,7 +150,7 @@ const VedtakResultat = () => {
                                 },
                             ]}
                         />
-                        <ResultatTable
+                        <ResultatDescription
                             title="Beregning"
                             data={[
                                 {
@@ -188,7 +184,7 @@ const VedtakResultat = () => {
                                     value: formatterBeløp(resultat.beregning?.totalBeløpBetaltAvBp, true),
                                 },
                                 {
-                                    label: "Beløp som innkreves",
+                                    label: medInnkreving ? "Beløp som innkreves" : "Fastsatt beløp å betale",
                                     value: erBeregningeAvslag
                                         ? "Avslag"
                                         : formatterBeløp(resultat.beløpSomInnkreves, true),
@@ -196,6 +192,7 @@ const VedtakResultat = () => {
                             ].filter((d) => d)}
                         />
                     </HStack>
+                    <UtgifterLagtTilGrunnAccordion />
                     <BeregningsdetaljerAccordion />
                 </VStack>
             </div>
@@ -207,7 +204,18 @@ const VedtakResultat = () => {
         </VedtakWrapper>
     );
 };
-
+const UtgifterLagtTilGrunnAccordion: React.FC = () => {
+    return (
+        <Accordion size="small" headingSize="xsmall">
+            <Accordion.Item>
+                <Accordion.Header>Utgiftene lagt til grunn</Accordion.Header>
+                <Accordion.Content className="*:mb-5">
+                    <UtgifsposterTable />
+                </Accordion.Content>
+            </Accordion.Item>
+        </Accordion>
+    );
+};
 const BeregningsdetaljerAccordion: React.FC = () => {
     return (
         <Accordion size="small" headingSize="xsmall">

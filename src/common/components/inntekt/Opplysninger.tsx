@@ -240,7 +240,7 @@ export const IkkeAktiverteOpplysninger = ({ fieldName }: { fieldName: FieldName 
                 className="mt-2"
                 onClick={onUpdate}
             >
-                Oppdater opplysninger
+                {text.label.oppdaterOpplysninger}
             </Button>
         </Box>
     );

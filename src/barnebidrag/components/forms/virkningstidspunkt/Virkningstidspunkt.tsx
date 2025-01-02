@@ -36,36 +36,17 @@ import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningsti
 import { VirkningstidspunktFormValues } from "../../../types/virkningstidspunktFormValues";
 
 const årsakListe = [
-    TypeArsakstype.TREMANEDERTILBAKE,
-    TypeArsakstype.TREARSREGELEN,
     TypeArsakstype.FRABARNETSFODSEL,
     TypeArsakstype.FRABARNETSFLYTTEMANED,
-    TypeArsakstype.FRA_KRAVFREMSETTELSE,
-    TypeArsakstype.FRA_OPPHOLDSTILLATELSE,
-    TypeArsakstype.FRASOKNADSTIDSPUNKT,
     TypeArsakstype.FRA_SAMLIVSBRUDD,
-    TypeArsakstype.PRIVAT_AVTALE,
-    TypeArsakstype.REVURDERINGMANEDENETTER,
-    TypeArsakstype.SOKNADSTIDSPUNKTENDRING,
-    TypeArsakstype.TIDLIGERE_FEILAKTIG_AVSLAG,
-    TypeArsakstype.FRAMANEDENETTERIPAVENTEAVBIDRAGSSAK,
+    TypeArsakstype.FRASOKNADSTIDSPUNKT,
+    TypeArsakstype.TREARSREGELEN,
+    TypeArsakstype.FRA_KRAVFREMSETTELSE,
+    TypeArsakstype.FRAMANEDENETTERPRIVATAVTALE,
+    TypeArsakstype.BIDRAGSPLIKTIGHARIKKEBIDRATTTILFORSORGELSE,
 ];
 
-const avslagsListe = [
-    Resultatkode.PAGRUNNAVBARNEPENSJON,
-    Resultatkode.BARNETS_EKTESKAP,
-    Resultatkode.BARNETS_INNTEKT,
-    Resultatkode.PAGRUNNAVYTELSEFRAFOLKETRYGDEN,
-    Resultatkode.FULLT_UNDERHOLDT_AV_OFFENTLIG,
-    Resultatkode.IKKE_OMSORG,
-    Resultatkode.IKKE_OPPHOLD_I_RIKET,
-    Resultatkode.MANGLENDE_DOKUMENTASJON,
-    Resultatkode.PAGRUNNAVSAMMENFLYTTING,
-    Resultatkode.OPPHOLD_I_UTLANDET,
-    Resultatkode.AVSLAG_PRIVAT_AVTALE_BIDRAG,
-    Resultatkode.IKKE_INNKREVING_AV_BIDRAG,
-    Resultatkode.UTENLANDSK_YTELSE,
-];
+const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSPLIKTIGERDOD];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -192,12 +173,15 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
+    const { gebyr } = useGetBehandlingV2();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
         onStepChange(
             avslagsListe.includes(årsakAvslag)
-                ? STEPS[BarnebidragStepper.VEDTAK]
+                ? gebyr !== undefined
+                    ? STEPS[BarnebidragStepper.GEBYR]
+                    : STEPS[BarnebidragStepper.VEDTAK]
                 : STEPS[BarnebidragStepper.UNDERHOLDSKOSTNAD]
         );
 
@@ -276,6 +260,9 @@ const VirkningstidspunktForm = () => {
                         boforhold: response.boforhold,
                         aktiveGrunnlagsdata: response.aktiveGrunnlagsdata,
                         inntekter: response.inntekter,
+                        samvær: response.samvær,
+                        underholdskostnader: response.underholdskostnader,
+                        gebyr: response.gebyr,
                         ikkeAktiverteEndringerIGrunnlagsdata: response.ikkeAktiverteEndringerIGrunnlagsdata,
                     };
                 });

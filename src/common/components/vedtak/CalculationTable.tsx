@@ -1,8 +1,9 @@
-import { Heading } from "@navikt/ds-react";
+import { BodyShort, Heading, Table } from "@navikt/ds-react";
 import { ReactElement } from "react";
 //file:@ts-ignore
 interface CalculationTableData {
-    label: string;
+    label: string | ReactElement;
+    labelBold?: boolean;
     value?: string | number | ReactElement;
     result: string | number | ReactElement;
 }
@@ -10,6 +11,8 @@ interface CalculationTableData {
 interface CalculationTableProps {
     data: CalculationTableData[]; // Array of data objects
     title?: string;
+    zebraStripes?: boolean;
+    titleLink?: string | ReactElement;
     result?: {
         label: string;
         value: string | number | ReactElement;
@@ -18,32 +21,77 @@ interface CalculationTableProps {
     className?: string;
 }
 
-export const CalculationTabell: React.FC<CalculationTableProps> = ({ data, title, result, message, className }) => {
+export const CalculationTabell: React.FC<CalculationTableProps> = ({
+    data,
+    title,
+    result,
+    message,
+    className,
+    titleLink,
+    zebraStripes = true,
+}) => {
+    const harBeregning = data.some((d) => d.value);
     return (
         <div className={className}>
-            {title && <Heading size="xsmall">{title}</Heading>}
-            <table className="table-auto  pb-[5px] border-collapse w-full">
-                <tbody>
+            <>
+                {title && (
+                    <Heading as="h4" className="inline-block align-middle" size="xsmall">
+                        {title}
+                    </Heading>
+                )}
+                {titleLink}
+            </>
+            <Table size="small" zebraStripes={zebraStripes} className="w-full">
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell textSize="small" className="w-[250px]">
+                            Beskrivelse
+                        </Table.HeaderCell>
+                        {harBeregning && (
+                            <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                                Beregning
+                            </Table.HeaderCell>
+                        )}
+                        <Table.HeaderCell textSize="small" align="right" className="w-[150px]">
+                            Beløp
+                        </Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
                     {data.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
-                            <td colSpan={row.value ? 1 : 2}>{row.label}</td>
-                            {row.value && <td className={"text-right w-[200px]"}>{row.value}</td>}
-                            <td className={"text-right w-[100px]"}>{row.result}</td>
-                        </tr>
+                        <Table.Row key={rowIndex}>
+                            <Table.DataCell textSize="small" className={`${row.labelBold ? "font-bold" : ""}`}>
+                                {row.label}
+                            </Table.DataCell>
+                            {harBeregning && (
+                                <Table.DataCell textSize="small" align="right">
+                                    {row.value}
+                                </Table.DataCell>
+                            )}
+                            <Table.DataCell textSize="small" align="right">
+                                {row.result}
+                            </Table.DataCell>
+                        </Table.Row>
                     ))}
                     {result && (
-                        <tr className="border-t border-solid border-black border-b-2 border-l-0 border-r-0">
-                            <td colSpan={2}>{result.label}</td>
-                            <td className={"text-right w-[120px] "}>{result.value}</td>
-                        </tr>
+                        <Table.Row>
+                            <Table.DataCell textSize="small" colSpan={harBeregning ? 2 : 1}>
+                                <span className="font-bold">{result.label}</span>
+                            </Table.DataCell>
+                            <Table.DataCell textSize="small" align="right">
+                                {result.value}
+                            </Table.DataCell>
+                        </Table.Row>
                     )}
                     {message && (
-                        <tr className="mt-1">
-                            <td colSpan={3}>{message}</td>
-                        </tr>
+                        <Table.Row className="mt-1">
+                            <Table.DataCell textSize="small" colSpan={3}>
+                                {message}
+                            </Table.DataCell>
+                        </Table.Row>
                     )}
-                </tbody>
-            </table>
+                </Table.Body>
+            </Table>
         </div>
     );
 };
@@ -57,24 +105,21 @@ interface MathDivisionProps {
 //@ts-ignore
 export const MathDivision: React.FC<MathDivisionProps> = ({ negativeValue, top, bottom }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML" style={{ fontSize: "1.125rem" }}>
-            <mrow>
-                {negativeValue && <mi>-</mi>}
-                <mn>{top}</mn>
-                <mo>&#247;</mo> {/* Multiplication symbol */}
-                <mn>{bottom}</mn>
-            </mrow>
-        </math>
+        <BodyShort as="span" size="small">
+            {negativeValue && <span>-</span>}
+            <span>{top}</span>
+            <span> &#247;</span> {/* Multiplication symbol */}
+            <span>{bottom}</span>
+        </BodyShort>
     );
 };
 
 export const MathValue: React.FC<{ value: string | number; negativeValue?: boolean }> = ({ value, negativeValue }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-            {negativeValue && <mi>-</mi>}
-
-            <mn>{value}</mn>
-        </math>
+        <BodyShort as="span" size="small">
+            {negativeValue && <span>-</span>}
+            <span>{value}</span>
+        </BodyShort>
     );
 };
 interface MathMultiplicationProps {
@@ -85,13 +130,11 @@ interface MathMultiplicationProps {
 
 export const MathMultiplication: React.FC<MathMultiplicationProps> = ({ negativeValue, left, right }) => {
     return (
-        <math xmlns="http://www.w3.org/1998/Math/MathML" style={{ fontSize: "1.125rem" }}>
-            <mrow>
-                {negativeValue && <mi>-</mi>}
-                <mn>{left}</mn>
-                <mo>&#xD7;</mo> {/* Multiplication symbol */}
-                <mn>{right}</mn>
-            </mrow>
-        </math>
+        <BodyShort as="span" size="small">
+            {negativeValue && <span>-</span>}
+            <span>{left}</span>
+            <span> &#xD7;</span> {/* Multiplication symbol */}
+            <span>{right}</span>
+        </BodyShort>
     );
 };

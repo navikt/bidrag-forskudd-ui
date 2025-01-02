@@ -1,6 +1,7 @@
 import {
     BeregningValideringsfeil,
     ResultatBeregningBarnDto,
+    ResultatBidragberegningDto,
     ResultatSaerbidragsberegningDto,
 } from "@api/BidragBehandlingApiV1";
 
@@ -15,5 +16,10 @@ export interface VedtakBeregningResult {
 
 export interface VedtakSærbidragBeregningResult {
     resultat?: ResultatSaerbidragsberegningDto;
+    feil?: VedtakBeregningFeil;
+}
+
+export interface VedtakBarnebidragBeregningResult {
+    resultat?: ResultatBidragberegningDto;
     feil?: VedtakBeregningFeil;
 }

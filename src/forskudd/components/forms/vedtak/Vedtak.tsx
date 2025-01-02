@@ -7,12 +7,13 @@ import { QueryKeys, useGetBehandlingV2, useGetBeregningForskudd } from "@common/
 import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { VedtakBeregningResult } from "@commonTypes/vedtakTypes";
 import { dateToDDMMYYYYString } from "@navikt/bidrag-ui-common";
-import { Alert, BodyShort, Heading, Table } from "@navikt/ds-react";
+import { Alert, Heading, Table } from "@navikt/ds-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deductDays } from "@utils/date-utils";
 import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect } from "react";
 
+import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { AdminButtons } from "../../../../common/components/vedtak/AdminButtons";
 import { FatteVedtakButtons } from "../../../../common/components/vedtak/FatteVedtakButtons";
 import VedtakWrapper from "../../../../common/components/vedtak/VedtakWrapper";
@@ -31,7 +32,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8">
+        <div className="grid gap-y-8 w-[1100px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -67,7 +68,7 @@ const VedtakResultat = () => {
             {beregnetForskudd.resultat?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
-                    <Table>
+                    <Table size="small">
                         <VedtakTableHeader avslag={erAvslag} />
                         <VedtakTableBody
                             resultatBarn={r}
@@ -134,9 +135,7 @@ const VedtakTableBody = ({
 const VedtakResultatBarn = ({ barn }: { barn: ResultatRolle }) => (
     <div className="my-4 flex items-center gap-x-2">
         <RolleTag rolleType={Rolletype.BA} />
-        <BodyShort>
-            {barn.navn} / <span className="ml-1">{barn.ident}</span>
-        </BodyShort>
+        <PersonNavnIdent ident={barn.ident} navn={barn.navn} variant="compact" />
     </div>
 );
 const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (

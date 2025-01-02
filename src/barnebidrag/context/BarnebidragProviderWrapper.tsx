@@ -12,14 +12,22 @@ export type InntektTables =
     | `barnetillegg.${string}`
     | `kontantstøtte.${string}`;
 
-export type PageErrorsOrUnsavedState = {
-    underholdskostnad: {
+export type UnderholdskostnadTables =
+    | `underholdskostnaderMedIBehandling.${number}.stønadTilBarnetilsyn`
+    | `underholdskostnaderMedIBehandling.${number}.faktiskTilsynsutgift`
+    | `underholdskostnaderMedIBehandling.${number}.tilleggsstønad`
+    | `underholdskostnaderAndreBarn.${number}.faktiskTilsynsutgift`;
+
+type HusstandsbarnTables = "andreVoksneIHusstanden" | "sivilstand" | "newBarn" | `husstandsbarn.${string}`;
+
+export type BarnebidragPageErrorsOrUnsavedState = {
+    boforhold: {
         error: boolean;
         openFields?: {
-            [key: string]: boolean;
+            [_key in HusstandsbarnTables]: boolean;
         };
     };
-    boforhold: {
+    samvær: {
         error: boolean;
         openFields?: boolean;
     };
@@ -29,15 +37,22 @@ export type PageErrorsOrUnsavedState = {
             [_key in InntektTables]: boolean;
         };
     };
+    underholdskostnad: {
+        error: boolean;
+        openFields?: {
+            [_key: UnderholdskostnadTables]: boolean;
+        };
+    };
 };
 
 function BarnebidragProviderWrapper({ children }: PropsWithChildren) {
-    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<PageErrorsOrUnsavedState>({
+    const [pageErrorsOrUnsavedState, setPageErrorsOrUnsavedState] = useState<BarnebidragPageErrorsOrUnsavedState>({
         underholdskostnad: { error: false },
         boforhold: { error: false },
+        samvær: { error: false },
         inntekt: { error: false },
     });
-    const formSteps = { defaultStep: BarnebidragStepper.UNDERHOLDSKOSTNAD, steps: BarnebidragSteps };
+    const formSteps = { defaultStep: BarnebidragStepper.VIRKNINGSTIDSPUNKT, steps: BarnebidragSteps };
 
     function getPageErrorTexts(): { title: string; description: string } {
         return {

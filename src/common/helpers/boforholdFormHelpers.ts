@@ -11,6 +11,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { RelatertPersonGrunnlagDto, SivilstandGrunnlagDto, SivilstandskodePDL } from "@api/BidragGrunnlagApi";
 import text from "@common/constants/texts";
+import { getEitherFirstDayOfFoedselsOrVirkingsdatoMonth } from "@common/helpers/virkningstidspunktHelpers";
 import { firstDayOfMonth } from "@navikt/bidrag-ui-common";
 import {
     addDays,
@@ -210,19 +211,6 @@ export const mapGrunnlagSivilstandToBehandlingSivilstandType = (
         sivilstand: getSivilstandType(sivilstand.type),
     }));
 };
-
-export const getEitherFirstDayOfFoedselsOrVirkingsdatoMonth = (
-    barnsFoedselsDato: Date | string,
-    virkningsOrSoktFraDato: Date
-) => {
-    const date =
-        barnsFoedselsDato && isAfterDate(barnsFoedselsDato, virkningsOrSoktFraDato)
-            ? new Date(barnsFoedselsDato)
-            : virkningsOrSoktFraDato;
-
-    return firstDayOfMonth(date);
-};
-
 const periodIsAfterVirkningstidspunkt =
     (virkningsOrSoktFraDato: Date) =>
     ({ datoTom }: { datoTom: string }) =>

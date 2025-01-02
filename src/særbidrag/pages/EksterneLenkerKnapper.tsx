@@ -1,8 +1,10 @@
+import { faro } from "@grafana/faro-react";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { LocalStorage } from "@navikt/bidrag-ui-common";
 import { Button } from "@navikt/ds-react";
 import { useEffect, useState } from "react";
 
+import { TypeBehandling } from "../../api/BidragBehandlingApiV1";
 import elementIds from "../../common/constants/elementIds";
 import { useBehandlingProvider } from "../../common/context/BehandlingContext";
 import environment from "../../environment";
@@ -10,7 +12,7 @@ import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
 export default function EksterneLenkerKnapper() {
     return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
             <BrukerveiledningKnapp />
         </div>
     );
@@ -51,7 +53,10 @@ function BrukerveiledningKnapp() {
                 } `}
                 size="xsmall"
                 icon={<ExternalLinkIcon />}
-                onClick={() => window.open(environment.url.særbidragBrukerveiledning + "#" + renderHref(), "_blank")}
+                onClick={() => {
+                    faro.api.pushEvent("click.button.brukerveiledning", { type: TypeBehandling.SAeRBIDRAG });
+                    window.open(environment.url.særbidragBrukerveiledning + "#" + renderHref(), "_blank");
+                }}
             >
                 Brukerveiledning
             </Button>
