@@ -14,6 +14,8 @@ export default function BeregningsdetaljerUnderholdskostnad({
 }) {
     if (detaljer?.tilsynsutgifterBarn === undefined) return null;
     const tilleggstønad = detaljer.tilsynsutgifterBarn?.filter((b) => b.tilleggsstønadDagsats !== undefined) ?? [];
+    const antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr =
+        detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr;
     return (
         <VStack className="w-[700px]" gap="4">
             <ResultatDescription
@@ -23,12 +25,12 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
                     },
-                    detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
+                    antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr && {
                         label: "Antall barn over 12 år med tilsynsutgifter",
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMOver12ÅrMedTilsynsutgifter)}`,
                     },
-                    detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr && {
+                    antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr && {
                         label: "Antall barn i beregningen",
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
