@@ -231,6 +231,11 @@ const tekster = {
         særbidrag: "Søknad om særbidrag",
         bidrag: "Søknad om barnebidrag",
     },
+    skjermbildeTittel: {
+        forskudd: "Forskudd",
+        særbidrag: "Særbidrag",
+        bidrag: "Barnebidrag",
+    },
     title: {
         andreBarn: "Andre barn",
         andreVoksneIHusstanden: "Andre voksne i husstanden",
