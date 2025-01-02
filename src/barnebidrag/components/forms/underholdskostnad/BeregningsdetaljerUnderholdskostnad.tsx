@@ -14,6 +14,8 @@ export default function BeregningsdetaljerUnderholdskostnad({
 }) {
     if (detaljer?.tilsynsutgifterBarn === undefined) return null;
     const tilleggstønad = detaljer.tilsynsutgifterBarn?.filter((b) => b.tilleggsstønadDagsats !== undefined) ?? [];
+    const antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr =
+        detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr;
     return (
         <VStack className="w-[700px]" gap="4">
             <ResultatDescription
@@ -22,6 +24,16 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         label: "Antall barn under 12 år",
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
+                    },
+                    antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr && {
+                        label: "Antall barn over 12 år med tilsynsutgifter",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMOver12ÅrMedTilsynsutgifter)}`,
+                    },
+                    antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr && {
+                        label: "Antall barn i beregningen",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
                     },
                 ].filter((d) => d)}
             />
@@ -117,7 +129,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     },
                     {
                         label: "Skattefradrag (per barn)",
-                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
                 ].filter((d) => d)}

@@ -1280,6 +1280,10 @@ export interface UnderholdskostnadPeriodeBeregningsdetaljer {
     sjablonMaksFradrag: number;
     /** @format int32 */
     antallBarnBMUnderTolvÅr: number;
+    /** @format int32 */
+    antallBarnBMBeregnet: number;
+    /** @format int32 */
+    antallBarnBMOver12ÅrMedTilsynsutgifter: number;
     skattesatsFaktor: number;
     totalTilsynsutgift: number;
     sumTilsynsutgifter: number;
@@ -1979,9 +1983,9 @@ export interface ResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2012,9 +2016,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
 }
 
@@ -2629,9 +2633,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
     vedtakstypeVisningsnavn?: string;
     kategoriVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
 }
 
@@ -2714,9 +2718,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -2785,9 +2789,9 @@ export interface NotatResultatBeregningInntekterDto {
     inntektBarn?: number;
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
-    inntektBMMånedlig?: number;
-    inntektBPMånedlig?: number;
     totalEndeligInntekt: number;
+    inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2810,8 +2814,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2864,9 +2868,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattAlminneligInntektMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
     trygdeavgiftMånedsbeløp: number;
+    skattAlminneligInntektMånedsbeløp: number;
     skattMånedsbeløp: number;
 }
 

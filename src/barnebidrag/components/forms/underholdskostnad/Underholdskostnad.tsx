@@ -38,8 +38,10 @@ const Main = () => {
         <>
             {BMRolle.harInnvilgetTilleggsstønad && (
                 <BehandlingAlert variant="info">
-                    <BodyShort size="small">{text.alert.harInnvilgetTilleggsstønad}</BodyShort>
-                    <ModiaLink ident={BMRolle.ident} />
+                    <div className="inline-flex gap-2 items-center">
+                        <BodyShort size="small">{text.alert.harInnvilgetTilleggsstønad}</BodyShort>
+                        <ModiaLink ident={BMRolle.ident} />
+                    </div>
                 </BehandlingAlert>
             )}
             <Tabs
