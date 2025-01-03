@@ -296,7 +296,7 @@ const tekster = {
     barnetHarFylt12SjekkPerioder: "Barnet har fylt 12 år i løpet av perioden. Sjekk om perioder er riktig.",
     barnetHarFylt18SjekkBostatus: "Barnet har fylt 18 år i løpet av perioden. Sjekk om bostatus til barnet er riktig.",
     resetTilOpplysninger: "Tilbakestill til opplysninger fra offentlig registre",
-    feilVedInnhentingAvOffentligData: "Innhenting av data fra offentlig registre feiler",
+    feilVedInnhentingAvOffentligData: "Innhenting av nyeste data fra offentlig registre feiler",
     år: "år",
     kanIkkeBehandlesGjennomNyLøsning: "Behandlingen kan ikke behandles i ny løsning.",
     kanIkkeBehandlesGjennomNyLøsningSærbidrag:

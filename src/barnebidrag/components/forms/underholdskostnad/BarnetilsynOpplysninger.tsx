@@ -78,6 +78,29 @@ const Opplysninger = ({ perioder, ident }: { perioder: BarnetilsynGrunnlagDto[];
         </ReadMore>
     );
 };
+
+const FeilVedInnhentingAvOffentligData = ({ ident }: { ident: string }) => {
+    const { feilOppståttVedSisteGrunnlagsinnhenting } = useGetBehandlingV2();
+    const { lesemodus } = useBehandlingProvider();
+    const feilVedInnhentingAvOffentligData = feilOppståttVedSisteGrunnlagsinnhenting?.some(
+        (innhentingsFeil) =>
+            ident === innhentingsFeil.rolle.ident && innhentingsFeil.grunnlagsdatatype === OpplysningerType.BARNETILSYN
+    );
+
+    return (
+        <>
+            {!lesemodus && feilVedInnhentingAvOffentligData && (
+                <BehandlingAlert variant="info" className="mb-2">
+                    <Heading size="small" level="3">
+                        {text.alert.feilVedInnhentingAvOffentligData}
+                    </Heading>
+                    {text.feilVedInnhentingAvOffentligData}
+                </BehandlingAlert>
+            )}
+        </>
+    );
+};
+
 export const BarnetilsynOpplysninger = ({ ident }: { ident: string }) => {
     const { aktiveOpplysninger, ikkeAktiverteOpplysninger } = useGetOpplysningerBarnetilsyn();
     const activateGrunnlag = useOnActivateGrunnlag();
@@ -116,6 +139,7 @@ export const BarnetilsynOpplysninger = ({ ident }: { ident: string }) => {
 
     return (
         <div className="grid gap-2">
+            <FeilVedInnhentingAvOffentligData ident={ident} />
             <div className="grid grid-cols-2 gap-4">
                 <Opplysninger perioder={aktivePerioder} ident={ident} />
             </div>
