@@ -59,7 +59,7 @@ const SamværForm = () => {
     const barnMedISaken = useMemo(() => roller.filter((rolle) => rolle.rolletype === Rolletype.BA), [roller]);
     const initialValues = useMemo(() => createInitialValues(samvær), [samvær, virkningsOrSoktFraDato, barnMedISaken]);
 
-    const ref = useRef();
+    const ref = useRef(null);
     const useFormMethods = useForm({
         defaultValues: initialValues,
         criteriaMode: "all",

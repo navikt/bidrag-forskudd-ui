@@ -12,7 +12,7 @@ import {
 import type { ComposeOption, ECharts, SetOptionOpts } from "echarts/core";
 import { getInstanceByDom, init, use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { CSSProperties, ReactNode, useEffect, useRef, useState } from "react";
 
 use([
     LegendComponent,
@@ -37,7 +37,7 @@ export interface ReactEChartsProps {
 }
 
 let currentIndex = -1;
-export function ReactECharts({ option, style, settings, onHighlight }: ReactEChartsProps): JSX.Element {
+export function ReactECharts({ option, style, settings, onHighlight }: ReactEChartsProps): ReactNode {
     const chartRef = useRef<HTMLDivElement>(null);
     const [chartInitialized, setChartInitialized] = useState(false);
 

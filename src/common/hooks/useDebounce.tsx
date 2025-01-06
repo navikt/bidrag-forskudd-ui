@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 
 export const useDebounce = (callback: (...args: any) => void) => {
-    const ref = useRef<(...args: any) => void>();
+    const ref = useRef<(...args: any) => void>(null);
     const { setDebouncing } = useBehandlingProvider();
 
     useEffect(() => {

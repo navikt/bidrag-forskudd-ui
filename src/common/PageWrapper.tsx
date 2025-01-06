@@ -1,7 +1,7 @@
 import "../index.css";
 
 import { MDXProvider, useMDXComponents } from "@mdx-js/react";
-import { ArrowRightIcon, Buldings2Icon, PersonIcon, SackKronerFillIcon } from "@navikt/aksel-icons";
+import { ArrowRightIcon, Buildings2Icon, PersonIcon, SackKronerFillIcon } from "@navikt/aksel-icons";
 import { BodyLong, BodyShort, Heading, Label } from "@navikt/ds-react";
 import { useThemedStylesWithMdx } from "@theme-ui/mdx";
 import React, { PropsWithChildren } from "react";
@@ -17,7 +17,7 @@ const mdxComponents = {
     BodyLong,
     Label,
     SackKronerFillIcon,
-    Buldings2Icon,
+    Buildings2Icon,
     PersonIcon,
 };
 

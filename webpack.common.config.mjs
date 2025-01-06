@@ -112,7 +112,7 @@ export default {
                 "./Behandling": "./src/app.tsx",
             },
             shared: {
-                react: { singleton: true, requiredVersion: deps.dependencies.react, eager: true },
+                react: { singleton: true, requiredVersion: deps.dependencies.react },
                 "react-dom": { singleton: true, requiredVersion: deps.dependencies.react },
             },
         }),
