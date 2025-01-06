@@ -1,4 +1,4 @@
-name: Build and deploy
+name: Deploy to prod
 on:
   workflow_dispatch:
   push:
@@ -7,6 +7,7 @@ on:
 env:
   app_name: bidrag_behandling_ui
   bucket_name_prod: bidrag-ui-static-files-prod
+  NPM_TOKEN: ${{ secrets.READER_TOKEN }}
 jobs:
   build:
     name: Build
