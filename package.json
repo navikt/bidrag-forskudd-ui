@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@mdx-js/loader": "^3.0.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
     "@types/echarts": "^4.9.22",
