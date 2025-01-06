@@ -1,11 +1,9 @@
 name: Deploy to q2
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '**'
-      - '!main'
-      - '!dependabot/**'
+  pull_request:
+    types: [ ready_for_review, opened, synchronize ]
+    
 env:
   app_name: bidrag_behandling_ui
   bucket_name_dev: bidrag-ui-static-files-dev
