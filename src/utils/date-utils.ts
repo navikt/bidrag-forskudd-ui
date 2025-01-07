@@ -186,3 +186,31 @@ export function formatDateToYearMonth(dateString?: string): string {
     // Combine and return the year and month in yyyy-MM format
     return `${year}-${month}`;
 }
+export const getStartOfCurrentMonth = (): Date => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+};
+export const getStartOfNextMonth = (): Date => {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return nextMonth;
+};
+
+export const calculateAge = (dateOfBirth: Date | string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    // Check if the birthday has occurred this year
+    const hasBirthdayOccurred =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+    // If the birthday hasn't occurred yet, subtract 1 from the age
+    if (!hasBirthdayOccurred) {
+        age--;
+    }
+
+    return age;
+};

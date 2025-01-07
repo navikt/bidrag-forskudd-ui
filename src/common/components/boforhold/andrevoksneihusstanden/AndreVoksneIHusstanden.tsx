@@ -32,8 +32,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
-import elementIds from "../../../../common/constants/elementIds";
-import { actionOnEnter } from "../../../../common/helpers/keyboardHelpers";
+import elementIds from "../../../constants/elementIds";
+import { actionOnEnter } from "../../../helpers/keyboardHelpers";
 import { AndreVoksneIHusstandOpplysninger } from "./AndreVoksneIHusstandOpplysninger";
 
 export const Periode = ({
@@ -272,6 +272,7 @@ export const AndreVoksneIHusstanden = () => {
                             ...currentData.boforhold,
                             andreVoksneIHusstanden: response.oppdatertePerioderMedAndreVoksne,
                             egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
+                            beregnetBoforhold: response.beregnetBoforhold,
                         },
                     };
                 });
@@ -371,6 +372,9 @@ export const AndreVoksneIHusstanden = () => {
             className="overflow-hidden grid gap-2 py-2 px-4"
             id={`${elementIds.seksjon_andreVoksneIHusstand}`}
         >
+            <Heading level="2" size="small">
+                {text.title.andreVoksneIHusstanden}
+            </Heading>
             {behandling.boforhold?.egetBarnErEnesteVoksenIHusstanden && (
                 <Alert variant="info" size="small" className="w-[708px]">
                     <Heading size="xsmall" level="4">
@@ -380,7 +384,6 @@ export const AndreVoksneIHusstanden = () => {
                     tabellen under
                 </Alert>
             )}
-
             <div className="grid gap-2">
                 <AndreVoksneIHusstandOpplysninger
                     showResetButton={showResetButton}
@@ -404,6 +407,7 @@ export const AndreVoksneIHusstanden = () => {
                         className={`${
                             saveBoforhold.mutation.isPending ? "relative" : "inherit"
                         } block overflow-x-auto whitespace-nowrap`}
+                        data-section={elementIds.seksjon_perioder}
                     >
                         <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                         <Table size="small" className="table-fixed table bg-white w-full">

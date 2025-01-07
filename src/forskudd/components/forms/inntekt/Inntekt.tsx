@@ -22,6 +22,7 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { ForskuddStepper } from "../../../enum/ForskuddStepper";
@@ -29,7 +30,8 @@ import { createInitialForskuddInntektValues } from "../helpers/inntektFormHelper
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller
         .filter((rolle) => rolle.rolletype !== Rolletype.BP)
@@ -44,27 +46,20 @@ const Main = () => {
             return 0;
         });
 
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.inntektTab, currentTabId);
-            return params;
-        });
-    }
-
     const defaultTab = useMemo(() => {
         const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.inntektTab))
+            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
             ?.id?.toString();
         return roleId ?? roller.find((rolle) => rolle.rolletype === Rolletype.BM).id.toString();
     }, []);
 
-    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
             defaultValue={defaultTab}
             value={selectedTab}
-            onChange={updateSearchparamForTab}
+            onChange={onNavigateToTab}
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>
@@ -72,9 +67,12 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                            rolle.rolletype === Rolletype.BM ? "" : rolle.ident
-                        }`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER[rolle.rolletype]}
+                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                            </div>
+                        }
                     />
                 ))}
             </Tabs.List>

@@ -19,12 +19,12 @@ export const NewFormLayout = ({
                     {title}
                 </Heading>
             </div>
-            <div className="flex flex-wrap gap-6">
-                <div className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px] h-fit grid gap-y-4">
+            <div className="grid 2xl:grid-cols-[960px_auto] gap-6">
+                <div className="h-fit grid gap-y-4">
                     {pageAlert}
                     {main}
                 </div>
-                <div className="flex flex-1 min-w-[248px] bg-white">
+                <div className="flex flex-1 w-max-[400px] bg-white">
                     <div className="w-full h-fit grid gap-y-4 lg:sticky lg:top-8 lg:p-0">{side}</div>
                 </div>
             </div>

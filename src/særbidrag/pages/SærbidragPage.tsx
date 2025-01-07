@@ -7,16 +7,19 @@ import PageWrapper from "@common/PageWrapper";
 import { BidragContainer } from "@navikt/bidrag-ui-common";
 import { Alert, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
-import React from "react";
 
+import texts from "../../common/constants/texts";
 import FormWrapper from "../components/forms/FormWrapper";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
+import EksterneLenkerKnapper from "./EksterneLenkerKnapper";
 export const SærbidragPage = () => {
     const { onStepChange, activeStep } = useBehandlingProvider();
     const {
         erVedtakFattet,
         vedtakstype,
+        kanBehandlesINyLøsning,
+        kanIkkeBehandlesBegrunnelse,
         utgift: { avslag, valideringsfeil: utgiftValideringsfeil },
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -40,6 +43,14 @@ export const SærbidragPage = () => {
                             Vedtak er fattet
                         </Heading>
                         Vedtak er fattet for behandlingen og kan derfor ikke endres
+                    </Alert>
+                )}
+                {!kanBehandlesINyLøsning && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            {texts.title.kanIkkeBehandlesGjennomNyLøsning}
+                        </Heading>
+                        {kanIkkeBehandlesBegrunnelse}
                     </Alert>
                 )}
                 <FlexRow className="justify-center">
@@ -86,6 +97,7 @@ export const SærbidragPage = () => {
                     <FormWrapper />
                 </NavigationLoaderWrapper>
             </BidragContainer>
+            <EksterneLenkerKnapper />
         </PageWrapper>
     );
 };

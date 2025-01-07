@@ -11,7 +11,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { toISODateString } from "@navikt/bidrag-ui-common";
-import { isAfterDate } from "@utils/date-utils";
+import { firstDayOfMonth, isAfterDate, isAfterEqualsDate } from "@utils/date-utils";
 
 export enum InntektTableType {
     SKATTEPLIKTIG = "SKATTEPLIKTIG",
@@ -23,6 +23,22 @@ export enum InntektTableType {
     TOTAL_INNTEKTER = "TOTAL_INNTEKTER",
 }
 export const inntekterTablesViewRules = {
+    [TypeBehandling.BIDRAG]: {
+        [Rolletype.BM]: [
+            InntektTableType.SKATTEPLIKTIG,
+            InntektTableType.BARNETILLEGG,
+            InntektTableType.UTVIDET_BARNETRYGD,
+            InntektTableType.SMÅBARNSTILLEGG,
+            InntektTableType.KONTANTSTØTTE,
+            InntektTableType.BEREGNET_INNTEKTER,
+        ],
+        [Rolletype.BP]: [
+            InntektTableType.SKATTEPLIKTIG,
+            InntektTableType.BARNETILLEGG,
+            InntektTableType.BEREGNET_INNTEKTER,
+        ],
+        [Rolletype.BA]: [InntektTableType.SKATTEPLIKTIG, InntektTableType.BEREGNET_INNTEKTER],
+    },
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: [
             InntektTableType.SKATTEPLIKTIG,
@@ -124,6 +140,16 @@ export const manuelleInntekterValg = {
         Inntektsrapportering.SKJONNMANGLENDEBRUKAVEVNE,
         Inntektsrapportering.SKJONNMANGLERDOKUMENTASJON,
     ],
+    [TypeBehandling.BIDRAG]: [
+        Inntektsrapportering.LONNMANUELTBEREGNET,
+        Inntektsrapportering.KAPITALINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.PERSONINNTEKT_EGNE_OPPLYSNINGER,
+        Inntektsrapportering.SAKSBEHANDLER_BEREGNET_INNTEKT,
+        Inntektsrapportering.NAeRINGSINNTEKTMANUELTBEREGNET,
+        Inntektsrapportering.YTELSE_FRA_OFFENTLIG_MANUELT_BEREGNET,
+        Inntektsrapportering.SKJONNMANGLENDEBRUKAVEVNE,
+        Inntektsrapportering.SKJONNMANGLERDOKUMENTASJON,
+    ],
 };
 export const transformInntekt =
     (virkningsdato: Date) =>
@@ -146,8 +172,17 @@ export const transformInntekt =
                     ? inntekt.opprinneligTom
                     : null),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
-            beløpMnd: inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? inntekt.beløp / 12 : undefined,
-            kanRedigeres: inntekt.kilde === Kilde.MANUELL || !ekplisitteYtelser.includes(inntekt.rapporteringstype),
+            beløpMnd:
+                inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG
+                    ? Number(inntekt.månedsbeløp)
+                    : undefined,
+            kanRedigeres:
+                inntekt.kilde === Kilde.MANUELL ||
+                (!ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
+                    !(
+                        inntekt.kilde === Kilde.OFFENTLIG &&
+                        isAfterEqualsDate(virkningsdato, firstDayOfMonth(new Date()))
+                    )),
         };
     };
 
@@ -262,7 +297,9 @@ export const createPayload = (periode: InntektFormPeriode, virkningsdato: Date):
             taMed: periode.taMed,
             type: periode.rapporteringstype as Inntektsrapportering,
             beløp:
-                periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG ? periode.beløpMnd * 12 : periode.beløp,
+                periode.rapporteringstype === Inntektsrapportering.BARNETILLEGG
+                    ? Number(periode.beløpMnd * 12)
+                    : Number(periode.beløp),
             datoFom: periode.datoFom,
             datoTom: periode.datoTom,
             ident: periode.ident,

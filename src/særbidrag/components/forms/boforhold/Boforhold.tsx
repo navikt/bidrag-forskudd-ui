@@ -1,4 +1,5 @@
 import { Rolletype } from "@api/BidragDokumentProduksjonApi";
+import { AndreVoksneIHusstanden } from "@common/components/boforhold/andrevoksneihusstanden/AndreVoksneIHusstanden";
 import { BarnPerioder } from "@common/components/boforhold/BarnPerioder";
 import { NyOpplysningerAlert } from "@common/components/boforhold/BoforholdOpplysninger";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
@@ -12,7 +13,6 @@ import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { createInitialValues } from "../helpers/BoforholdFormHelpers";
-import { AndreVoksneIHusstanden } from "./AndreVoksneIHusstanden";
 import { Begrunnelse } from "./Begrunnelse";
 
 const Main = () => {

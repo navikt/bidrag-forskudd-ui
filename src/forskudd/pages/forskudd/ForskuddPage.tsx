@@ -11,6 +11,7 @@ import { Alert, Button, Heading, Stepper } from "@navikt/ds-react";
 import { capitalize } from "@utils/string-utils";
 import React, { useEffect, useState } from "react";
 
+import texts from "../../../common/constants/texts";
 import environment from "../../../environment";
 import FormWrapper from "../../components/forms/FormWrapper";
 import { STEPS } from "../../constants/steps";
@@ -20,6 +21,7 @@ export const ForskuddPage = () => {
     const {
         virkningstidspunkt,
         erVedtakFattet,
+        kanBehandlesINyLøsning,
         vedtakstype,
         boforhold: { valideringsfeil: boforholdValideringsfeil },
         inntekter: { valideringsfeil: inntektValideringsfeil },
@@ -37,6 +39,14 @@ export const ForskuddPage = () => {
     return (
         <PageWrapper name="tracking-wide">
             <BidragContainer className="container p-6">
+                {!kanBehandlesINyLøsning && (
+                    <Alert variant="info" size="small" className="mb-4 w-max m-auto">
+                        <Heading level="3" size="small">
+                            {texts.title.kanIkkeBehandlesGjennomNyLøsning}
+                        </Heading>
+                        {texts.kanIkkeBehandlesGjennomNyLøsning}
+                    </Alert>
+                )}
                 {erVedtakFattet && (
                     <Alert variant="info" size="small" className="mb-4 w-max m-auto">
                         <Heading level="3" size="small">
@@ -94,7 +104,7 @@ export const ForskuddPage = () => {
 
 function EksterneLenkerKnapper() {
     return (
-        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-24 flex-row gap-[5px]">
+        <div className="agroup fixed bottom-0 right-0 p-2 flex items-end justify-end w-max h-0 flex-row gap-[5px]">
             <LovverkKnapper />
             <BrukerveiledningKnapp />
         </div>

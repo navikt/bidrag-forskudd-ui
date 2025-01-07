@@ -11,13 +11,14 @@ import {
     PeriodeAndreVoksneIHusstanden,
     Rolletype,
 } from "../../../../api/BidragBehandlingApiV1";
-import { useBehandlingProvider } from "../../../../common/context/BehandlingContext";
-import { useGetBehandlingV2, useGetOpplysningeAndreVoksneIHusstand } from "../../../../common/hooks/useApiData";
-import { useOnActivateGrunnlag } from "../../../../common/hooks/useOnActivateGrunnlag";
-import { useVirkningsdato } from "../../../../common/hooks/useVirkningsdato";
-import { hentVisningsnavn } from "../../../../common/hooks/useVisningsnavn";
-import { BoforholdFormValues } from "../../../../common/types/boforholdFormValues";
 import { dateOrNull, DateToDDMMYYYYString, isBeforeDate } from "../../../../utils/date-utils";
+import elementIds from "../../../constants/elementIds";
+import { useBehandlingProvider } from "../../../context/BehandlingContext";
+import { useGetBehandlingV2, useGetOpplysningeAndreVoksneIHusstand } from "../../../hooks/useApiData";
+import { useOnActivateGrunnlag } from "../../../hooks/useOnActivateGrunnlag";
+import { useVirkningsdato } from "../../../hooks/useVirkningsdato";
+import { hentVisningsnavn } from "../../../hooks/useVisningsnavn";
+import { BoforholdFormValues } from "../../../types/boforholdFormValues";
 
 const Header = () => (
     <BodyShort size="small" className="flex h-2">
@@ -91,7 +92,7 @@ const VoksneIHusstandPeriodePersonerButton = ({
                         {husstandsmedlemmer.map((husstandsmedlem, index) => {
                             return (
                                 <li key={husstandsmedlem.navn + "-" + index}>
-                                    {husstandsmedlem.navn} (
+                                    <span className="personnavn">{husstandsmedlem.navn}</span> (
                                     {DateToDDMMYYYYString(dateOrNull(husstandsmedlem.fødselsdato))})
                                     {husstandsmedlem.harRelasjonTilBp && ", relasjon til BP"}
                                 </li>
@@ -163,7 +164,7 @@ export const AndreVoksneIHusstandOpplysninger = ({
 
     return (
         <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4" data-section={elementIds.seksjon_offentlige_opplysninger}>
                 <Opplysninger perioder={aktivePerioder} />
 
                 {!hasNewOpplysningerFraFolkeregistre && hasOpplysningerFraFolkeregistre && showResetButton && (

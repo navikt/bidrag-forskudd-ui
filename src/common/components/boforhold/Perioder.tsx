@@ -31,6 +31,7 @@ import { formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
+import elementIds from "../../constants/elementIds";
 import { actionOnEnter } from "../../helpers/keyboardHelpers";
 import { BoforholdFormValues } from "../../types/boforholdFormValues";
 
@@ -232,8 +233,6 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
         const fieldState = getFieldState(`husstandsbarn.${barnIndex}.perioder.${index}`);
 
-        console.log("fieldState", fieldState);
-
         if (!fieldState.error) {
             updateAndSave({
                 oppdatereHusstandsmedlem: {
@@ -294,6 +293,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                             husstandsbarn: updatedHusstandsbarnListe,
                             valideringsfeil: response.valideringsfeil,
                             egetBarnErEnesteVoksenIHusstanden: response.egetBarnErEnesteVoksenIHusstanden,
+                            beregnetBoforhold: response.beregnetBoforhold,
                         },
                     };
                 });
@@ -388,6 +388,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             ...currentData.boforhold,
                                             husstandsbarn: updatedHusstandsbarnListe,
                                             valideringsfeil: response.valideringsfeil,
+                                            beregnetBoforhold: response.beregnetBoforhold,
                                             egetBarnErEnesteVoksenIHusstanden:
                                                 response.egetBarnErEnesteVoksenIHusstanden,
                                         },
@@ -520,6 +521,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                     className={`${
                         saveBoforhold.mutation.isPending ? "relative" : "inherit"
                     } block overflow-x-auto whitespace-nowrap`}
+                    data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
                     <Table size="small" className="table-fixed table bg-white w-full">
@@ -537,8 +539,8 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                 <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[54px]">
                                     {text.label.kilde}
                                 </Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
-                                <Table.HeaderCell scope="col" className="w-[56px]"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[56px]" textSize="small"></Table.HeaderCell>
+                                <Table.HeaderCell scope="col" className="w-[56px]" textSize="small"></Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
@@ -576,10 +578,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             barn={barn}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <KildeIcon kilde={item.kilde} />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <EditOrSaveButton
                                             index={index}
                                             editableRow={editableRow === `${barnIndex}.${index}`}
@@ -587,7 +589,7 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                                             onSaveRow={onSaveRow}
                                         />
                                     </Table.DataCell>
-                                    <Table.DataCell>
+                                    <Table.DataCell textSize="small">
                                         <DeleteButton index={index} onRemovePeriode={onRemovePeriode} barn={barn} />
                                     </Table.DataCell>
                                 </Table.Row>

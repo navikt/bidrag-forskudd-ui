@@ -3,6 +3,7 @@ const system = {
     isTest: process.env.NODE_ENV === "TEST",
     isDevelopment: process.env.NODE_ENV === "development",
     isProduction: process.env.NODE_ENV === "production",
+    environment: process.env.ENVIRONMENT,
 };
 
 const url = {
@@ -17,6 +18,8 @@ const url = {
     bidragDokumentProduksjon: process.env.BIDRAG_DOKUMENT_PRODUKSJON,
     modia: process.env.MODIA_URL,
     forskuddBrukerveiledning: "/forskudd/brukerveiledning",
+    bidragBrukerveiledning: "/bidrag/brukerveiledning",
+    særbidragBrukerveiledning: "/sarbidrag/brukerveiledning",
 };
 
 export default { url, system };

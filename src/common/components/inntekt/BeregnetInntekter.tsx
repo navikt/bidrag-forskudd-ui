@@ -1,17 +1,36 @@
 import { Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
-import { PersonNavn } from "@common/components/PersonNavn";
 import { RolleTag } from "@common/components/RolleTag";
 import text from "@common/constants/texts";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
-import { BodyShort, Box, Heading, Table } from "@navikt/ds-react";
+import { Box, Heading, Table } from "@navikt/ds-react";
 import { dateOrNull, DateToDDMMYYYYString, deductDays } from "@utils/date-utils";
 import React from "react";
 
 import { hasValue } from "@utils/array-utils";
 import { inntekterTablesViewRules, InntektTableType } from "../../helpers/inntektFormHelpers";
+import PersonNavnIdent from "../PersonNavnIdent";
 import { useInntektTableProvider } from "./InntektTableContext";
 
 export const columnWitdhRules = {
+    [TypeBehandling.BIDRAG]: {
+        [Rolletype.BM]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[138px]",
+            [InntektTableType.BARNETILLEGG]: "w-[122px]",
+            [InntektTableType.UTVIDET_BARNETRYGD]: "w-[112px]",
+            [InntektTableType.SMÅBARNSTILLEGG]: "w-[110px]",
+            [InntektTableType.KONTANTSTØTTE]: "w-[140px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[92px]",
+        },
+        [Rolletype.BP]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[150px]",
+            [InntektTableType.BARNETILLEGG]: "w-[150px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[150px]",
+        },
+        [Rolletype.BA]: {
+            [InntektTableType.SKATTEPLIKTIG]: "w-[150px]",
+            [InntektTableType.TOTAL_INNTEKTER]: "w-[150px]",
+        },
+    },
     [TypeBehandling.SAeRBIDRAG]: {
         [Rolletype.BM]: {
             [InntektTableType.SKATTEPLIKTIG]: "w-[138px]",
@@ -87,12 +106,7 @@ export const BeregnetInntekter = () => {
                                     <div className="w-8 mr-2 h-max">
                                         <RolleTag rolleType={Rolletype.BA} />
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <BodyShort size="small" className="font-bold">
-                                            <PersonNavn ident={inntektPerBarn.inntektGjelderBarnIdent}></PersonNavn>
-                                        </BodyShort>
-                                        <BodyShort size="small">{inntektPerBarn.inntektGjelderBarnIdent}</BodyShort>
-                                    </div>
+                                    <PersonNavnIdent ident={inntektPerBarn.inntektGjelderBarnIdent} />
                                 </div>
                             )}
                         <div

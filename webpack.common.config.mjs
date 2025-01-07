@@ -87,6 +87,12 @@ export default {
                 test: /\.svg$/,
                 loader: "svg-inline-loader",
             },
+            {
+                test: /\.m?js/,
+                resolve: {
+                    fullySpecified: false
+                },
+            },
         ],
     },
     plugins: [

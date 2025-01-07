@@ -8,15 +8,23 @@ import {
     Rolletype,
     TypeBehandling,
 } from "../../../api/BidragBehandlingApiV1";
+import { BarnebidragStepper } from "../../../barnebidrag/enum/BarnebidragStepper";
 import { ForskuddStepper } from "../../../forskudd/enum/ForskuddStepper";
 import { SærligeutgifterStepper } from "../../../særbidrag/enum/SærligeutgifterStepper";
 import { VedtakBeregningFeil } from "../../../types/vedtakTypes";
-import behandlingQueryKeys from "../../constants/behandlingQueryKeys";
+import { capitalizeFirstLetter } from "../../../utils/string-utils";
+import behandlingQueryKeys, {
+    toUnderholdskostnadTabQueryParameter,
+    toUnderholdskostnadTabQueryParameterForUnderhold,
+} from "../../constants/behandlingQueryKeys";
 import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
-type STEPSTYPE = { [_key in ForskuddStepper]: number } | { [_key in SærligeutgifterStepper]: number };
+type STEPSTYPE =
+    | { [_key in ForskuddStepper]: number }
+    | { [_key in SærligeutgifterStepper]: number }
+    | { [_key in BarnebidragStepper]: number };
 type VedtakWrapperProps = {
     feil: VedtakBeregningFeil;
     steps: STEPSTYPE;
@@ -25,6 +33,7 @@ type VedtakWrapperProps = {
 const validerForRoller = {
     [TypeBehandling.FORSKUDD]: [Rolletype.BM],
     [TypeBehandling.SAeRBIDRAG]: [Rolletype.BA, Rolletype.BM, Rolletype.BP],
+    [TypeBehandling.BIDRAG]: [Rolletype.BA, Rolletype.BM, Rolletype.BP],
 };
 
 export default function VedtakWrapper({ feil, steps, children }: PropsWithChildren<VedtakWrapperProps>) {
@@ -66,6 +75,146 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             }
             feilliste.push(...feillisteUtgifter);
         }
+
+        if (feilInnhold.samvær != null && "samvær" in steps) {
+            feilInnhold.samvær.forEach((value) => {
+                if (value.harPeriodiseringsfeil)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_samvær}_${value.samværId}`}
+                            onClick={() => onStepChange(steps.samvær)}
+                        >
+                            Samvær: Perioder for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+                if (value.manglerBegrunnelse)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_samvær}_${value.samværId}`}
+                            onClick={() => onStepChange(steps.samvær)}
+                        >
+                            Samvær: Mangler begrunnelse for barn {value.gjelderBarnNavn}
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
+        if (feilInnhold.underholdskostnad != null && "underholdskostnad" in steps) {
+            const manglerBegrunnelseForAndreBarn = feilInnhold.underholdskostnad.some(
+                (v) => !v.gjelderBarn.medIBehandlingen && v.manglerBegrunnelse
+            );
+            if (manglerBegrunnelseForAndreBarn)
+                feilliste.push(
+                    <ErrorSummary.Item
+                        href={"#"}
+                        onClick={() =>
+                            onStepChange(steps.underholdskostnad, {
+                                [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameter(),
+                            })
+                        }
+                    >
+                        Underholdskostnad: Mangler begrunnelse for andre barn til Bidragsmottaker
+                    </ErrorSummary.Item>
+                );
+            feilInnhold.underholdskostnad.forEach((value) => {
+                if (value.manglerPerioderForTilsynsordning)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={""}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Mangler perioder for tilsynsordning for barn {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+                if (value.tilleggsstønad)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_underholdskostnad_tilleggstønad}`}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Ugyldig perioder i tilleggsstønad for barn {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+                if (value.stønadTilBarnetilsyn)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_underholdskostnad_barnetilsyn}`}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Ugyldig perioder i stønad til barnetilsyn for barn{" "}
+                            {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+
+                if (value.tilleggsstønadsperioderUtenFaktiskTilsynsutgift.length > 0)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_underholdskostnad_tilleggstønad}`}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Tilleggsstønad uten faktisk tilsynsutgift for barn{" "}
+                            {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+                if (value.faktiskTilsynsutgift)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_underholdskostnad_tilysnsutgifter}`}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Ugyldig perioder i faktiske tilsynsutgifter for barn{" "}
+                            {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+
+                if (value.manglerBegrunnelse && value.gjelderBarn.medIBehandlingen)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={"#"}
+                            onClick={() =>
+                                onStepChange(steps.underholdskostnad, {
+                                    [behandlingQueryKeys.tab]: toUnderholdskostnadTabQueryParameterForUnderhold(value),
+                                })
+                            }
+                        >
+                            Underholdskostnad: Mangler begrunnelse for barn {value.gjelderBarn.navn}
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
+        if (feilInnhold.gebyr != null && "gebyr" in steps) {
+            feilInnhold.gebyr.forEach((value) => {
+                if (value.manglerBegrunnelse)
+                    feilliste.push(
+                        <ErrorSummary.Item
+                            href={`#${elementIds.seksjon_gebyr}_${value.gjelder.id}`}
+                            onClick={() => onStepChange(steps.gebyr)}
+                        >
+                            Gebyr: Begrunnelse må fylles ut når gebyrvalget er manuelt overstyrt (
+                            {rolletypeTilVisningsnavn(value.gjelder)})
+                        </ErrorSummary.Item>
+                    );
+            });
+        }
         if (feilInnhold.husstandsmedlem != null) {
             feilInnhold.husstandsmedlem.forEach((value) =>
                 feilliste.push(
@@ -78,6 +227,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 )
             );
         }
+
         if (feilInnhold.andreVoksneIHusstanden != null) {
             feilliste.push(
                 <ErrorSummary.Item
@@ -139,7 +289,14 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                         href={`#${opplysningTilElementId(value)}`}
                         onClick={() =>
                             onStepChange(opplysningTilStep(value, steps), {
-                                [behandlingQueryKeys.inntektTab]: value.rolle?.id?.toString(),
+                                [behandlingQueryKeys.tab]:
+                                    value.type === OpplysningerType.BARNETILSYN
+                                        ? toUnderholdskostnadTabQueryParameter(
+                                              value.gjelderBarn?.husstandsmedlemId,
+                                              value.underholdskostnadId,
+                                              true
+                                          )
+                                        : value.rolle?.id?.toString(),
                             })
                         }
                     >
@@ -147,6 +304,20 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             });
+        if (feilliste.length === 0) {
+            const feilInnhold = Object.keys(feil.detaljer)
+                .filter((key) =>
+                    !Array.isArray(feil.detaljer[key]) ? feil.detaljer[key] != null : feil.detaljer[key].length > 0
+                )
+                .map((key) => capitalizeFirstLetter(key));
+
+            feilliste.push(
+                <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
+                    {feil.melding}
+                    <br /> Valideringer som feilet: {feilInnhold.join(", ")}
+                </ErrorSummary.Item>
+            );
+        }
         return feilliste;
     }
     if (feil) {
@@ -185,7 +356,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                             href={`#${elementId}`}
                             onClick={() =>
                                 onStepChange(steps.inntekt, {
-                                    [behandlingQueryKeys.inntektTab]: valideringsfeil.rolle?.id?.toString(),
+                                    [behandlingQueryKeys.tab]: valideringsfeil.rolle?.id?.toString(),
                                 })
                             }
                         >
@@ -202,7 +373,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     href={`#${elementId}`}
                     onClick={() =>
                         onStepChange(steps.inntekt, {
-                            [behandlingQueryKeys.inntektTab]: inntektvalideringsfeil.rolle?.id?.toString(),
+                            [behandlingQueryKeys.tab]: inntektvalideringsfeil.rolle?.id?.toString(),
                         })
                     }
                 >
@@ -221,6 +392,8 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
 
 const opplysningTilStep = (opplysningstype: MaBekrefteNyeOpplysninger, steps: STEPSTYPE) => {
     switch (opplysningstype.type) {
+        case OpplysningerType.BARNETILSYN:
+            return "underholdskostnad" in steps ? steps.underholdskostnad : steps.vedtak;
         case OpplysningerType.SKATTEPLIKTIGE_INNTEKTER:
         case OpplysningerType.SMABARNSTILLEGG:
         case OpplysningerType.UTVIDET_BARNETRYGD:

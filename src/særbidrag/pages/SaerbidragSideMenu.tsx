@@ -8,6 +8,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../common/components/PersonIdent";
 import { STEPS } from "../constants/steps";
 import { SærligeutgifterStepper } from "../enum/SærligeutgifterStepper";
 
@@ -25,8 +26,8 @@ export const SaerbidragSideMenu = () => {
     const getActiveButtonFromParams = () => {
         const step = searchParams.get(behandlingQueryKeys.steg);
         if (!step) return SærligeutgifterStepper.UTGIFT;
-        const inntektTab = searchParams.get(behandlingQueryKeys.inntektTab);
-        return `${step}${inntektTab ? `.${inntektTab}` : ""}`;
+        const tab = searchParams.get(behandlingQueryKeys.tab);
+        return `${step}${tab ? `.${tab}` : ""}`;
     };
     const [activeButton, setActiveButton] = useState<string>(getActiveButtonFromParams());
     const interactive = vedtakstype !== Vedtakstype.OPPHOR && avslag === undefined;
@@ -80,10 +81,14 @@ export const SaerbidragSideMenu = () => {
                 subMenu={inntektRoller.map((rolle) => (
                     <>
                         <MenuButton
-                            title={`${rolle.rolletype} ${rolle.ident}`}
+                            title={
+                                <div className="flex flex-row gap-1">
+                                    {rolle.rolletype} <PersonIdent ident={rolle.ident} />
+                                </div>
+                            }
                             onStepChange={() =>
                                 onStepChange(STEPS[SærligeutgifterStepper.INNTEKT], {
-                                    [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                    [behandlingQueryKeys.tab]: rolle.id.toString(),
                                 })
                             }
                             interactive={interactive}
@@ -113,7 +118,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -137,7 +142,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_barnetillegg
                                                 )
@@ -165,7 +170,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_utvidetbarnetrygd
                                                 )
@@ -188,7 +193,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_småbarnstillegg
                                                 )
@@ -211,7 +216,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_kontantstøtte
                                                 )
@@ -236,7 +241,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )
@@ -260,7 +265,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_barnetillegg
                                                 )
@@ -291,7 +296,7 @@ export const SaerbidragSideMenu = () => {
                                                 onStepChange(
                                                     STEPS[SærligeutgifterStepper.INNTEKT],
                                                     {
-                                                        [behandlingQueryKeys.inntektTab]: rolle.id.toString(),
+                                                        [behandlingQueryKeys.tab]: rolle.id.toString(),
                                                     },
                                                     elementIds.seksjon_inntekt_skattepliktig
                                                 )

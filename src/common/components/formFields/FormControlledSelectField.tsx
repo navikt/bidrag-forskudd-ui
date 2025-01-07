@@ -13,8 +13,10 @@ interface FormControlledSelectFieldProps {
     label: string;
     options?: Option[];
     hideLabel?: boolean;
+    disabled?: boolean;
     className?: string;
     onSelect?: (value: string) => void;
+    onBeforeSelect?: (value: string) => void;
 }
 
 export const FormControlledSelectField = ({
@@ -24,6 +26,7 @@ export const FormControlledSelectField = ({
     hideLabel,
     className,
     onSelect,
+    onBeforeSelect,
     children,
 }: PropsWithChildren<FormControlledSelectFieldProps>) => {
     const { control } = useFormContext();
@@ -31,8 +34,10 @@ export const FormControlledSelectField = ({
 
     const { lesemodus } = useBehandlingProvider();
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        field.onChange(e.target.value);
-        onSelect?.(e.target.value);
+        onBeforeSelect?.(field.value);
+        const value = e.target.value;
+        field.onChange(value);
+        onSelect?.(value);
     };
 
     return (

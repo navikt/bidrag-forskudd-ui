@@ -7,7 +7,7 @@ export default function useFeatureToogle() {
     const isMockEnabled = process.env.ENABLE_MOCK === "true";
     const enableFatteVedtak = useFlag("behandling.fattevedtak");
     const enableAdmin = useFlag("behandling.admin");
-    const særbidragBetaltAvBp = useFlag("sarbidrag_utgift_betalt_av_bp");
+    const utvikler = useFlag("bidrag.utvikler");
     const enableBehandlingVesntremeny = useFlag("behandling_vesntremeny");
     const client = useUnleashClient();
     const { data: userId } = useQuery({
@@ -24,19 +24,12 @@ export default function useFeatureToogle() {
     }, [userId]);
 
     useEffect(() => {
-        console.debug(
-            "enableFatteVedtak",
-            enableFatteVedtak,
-            "enableAdmin",
-            enableAdmin,
-            "særbidragBetaltAvBp",
-            særbidragBetaltAvBp
-        );
-    }, [enableFatteVedtak, enableAdmin, særbidragBetaltAvBp]);
+        console.debug("enableFatteVedtak", enableFatteVedtak, "enableAdmin", enableAdmin);
+    }, [enableFatteVedtak, enableAdmin]);
     return {
         isAdminEnabled: enableAdmin,
+        isDeveloper: utvikler,
         isFatteVedtakEnabled: enableFatteVedtak,
-        isSærbidragBetaltAvBpEnabled: særbidragBetaltAvBp,
         isbehandlingVesntremenyEnabled: enableBehandlingVesntremeny,
     };
 }
