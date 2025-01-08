@@ -29,7 +29,7 @@ export default {
             "@common": path.resolve("./src/common"),
             "@commonTypes": path.resolve("./src/types"),
             "@utils": path.resolve("./src/utils"),
-        }
+        },
     },
     optimization: {
         minimizer: [
@@ -90,7 +90,7 @@ export default {
             {
                 test: /\.m?js/,
                 resolve: {
-                    fullySpecified: false
+                    fullySpecified: false,
                 },
             },
         ],
