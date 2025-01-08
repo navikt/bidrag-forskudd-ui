@@ -67,7 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
     "autoprefixer": "^10.4.16",
-    "chai": "^4.3.10",
+    "chai": "^5.1.2",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.35.0",
