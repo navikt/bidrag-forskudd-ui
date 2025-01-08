@@ -350,7 +350,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (Array.isArray(inntektvalideringsfeil)) {
             validerForRoller[type].forEach((rolletype) => {
                 const valideringsfeil = inntektvalideringsfeil.find((a) => a.rolle.rolletype === rolletype);
-                valideringsfeil &&
+                if (valideringsfeil) {
                     feilliste.push(
                         <ErrorSummary.Item
                             href={`#${elementId}`}
@@ -366,6 +366,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                                 : ""}
                         </ErrorSummary.Item>
                     );
+                }
             });
         } else {
             feilliste.push(
