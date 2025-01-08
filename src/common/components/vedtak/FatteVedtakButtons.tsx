@@ -136,18 +136,17 @@ export default function Confetti() {
     const refAnimationInstance = useRef(null);
 
     const getInstance = useCallback((instance) => {
-        console.log(instance);
         refAnimationInstance.current = instance;
     }, []);
 
     const makeShot = useCallback((particleRatio, opts) => {
-        console.log(refAnimationInstance.current);
-        refAnimationInstance.current &&
+        if (refAnimationInstance.current) {
             refAnimationInstance.current.confetti({
                 ...opts,
                 origin: { y: 0.7 },
                 particleCount: Math.floor(200 * particleRatio),
             });
+        }
     }, []);
 
     useEffect(() => fire(), []);
