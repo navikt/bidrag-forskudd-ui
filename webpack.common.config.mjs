@@ -29,7 +29,7 @@ export default {
             "@common": path.resolve("./src/common"),
             "@commonTypes": path.resolve("./src/types"),
             "@utils": path.resolve("./src/utils"),
-        }
+        },
     },
     optimization: {
         minimizer: [
@@ -86,6 +86,12 @@ export default {
             {
                 test: /\.svg$/,
                 loader: "svg-inline-loader",
+            },
+            {
+                test: /\.m?js/,
+                resolve: {
+                    fullySpecified: false,
+                },
             },
         ],
     },

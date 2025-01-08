@@ -3,6 +3,7 @@ import { describe } from "mocha";
 
 import { periodsAreOverlapping } from "../../forskudd/components/forms/helpers/helpers";
 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 describe("Helpers", () => {
     it("should return true for overlapping periods", () => {
         const periodeA = {

@@ -22,13 +22,15 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { onNavigateToTab } = useBehandlingProvider();
+    const [searchParams] = useSearchParams();
 
     const roller = behandlingRoller.sort((a, b) => {
         if (a.rolletype === Rolletype.BM || b.rolletype === Rolletype.BA) return -1;
@@ -36,10 +38,10 @@ const Main = () => {
         return 0;
     });
     const defaultTab = useMemo(() => {
-        const paramRoleId = getSearchParam(urlSearchParams.inntektTab);
+        const paramRoleId = getSearchParam(urlSearchParams.tab);
         return roller
             .find((rolle) => {
-                if (getSearchParam(urlSearchParams.inntektTab)) {
+                if (getSearchParam(urlSearchParams.tab)) {
                     return rolle.id?.toString() === paramRoleId;
                 }
                 return rolle.rolletype === Rolletype.BM;
@@ -48,19 +50,14 @@ const Main = () => {
     }, []);
 
     useEffect(scrollToHash, []);
-    function updateSearchparamForTab(currentTabId: string) {
-        setSearchParams((params) => {
-            params.set(urlSearchParams.inntektTab, currentTabId);
-            return params;
-        });
-    }
-    const selectedTab = searchParams.get(behandlingQueryKeys.inntektTab) ?? defaultTab;
+
+    const selectedTab = searchParams.get(behandlingQueryKeys.tab) ?? defaultTab;
 
     return (
         <Tabs
             defaultValue={defaultTab}
             value={selectedTab}
-            onChange={updateSearchparamForTab}
+            onChange={onNavigateToTab}
             className="lg:max-w-[960px] md:max-w-[720px] sm:max-w-[598px]"
         >
             <Tabs.List>
@@ -68,9 +65,12 @@ const Main = () => {
                     <Tabs.Tab
                         key={rolle.ident}
                         value={rolle.id.toString()}
-                        label={`${ROLE_FORKORTELSER[rolle.rolletype]} ${
-                            [Rolletype.BM, Rolletype.BP].includes(rolle.rolletype) ? "" : rolle.ident
-                        }`}
+                        label={
+                            <div className="flex flex-row gap-1">
+                                {ROLE_FORKORTELSER[rolle.rolletype]}
+                                {rolle.rolletype !== Rolletype.BM && <PersonIdent ident={rolle.ident} />}
+                            </div>
+                        }
                     />
                 ))}
             </Tabs.List>
@@ -98,8 +98,11 @@ const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
-    const rolleId = searchParams.get(urlSearchParams.inntektTab);
-    const selectedRolleId = rolleId ? rolleId : roller.find((rolle) => rolle.rolletype === Rolletype.BM).id;
+    const rolleId = searchParams.get(urlSearchParams.tab);
+    const selectedRolle = rolleId
+        ? roller.find((rolle) => rolle.id === Number(rolleId))
+        : roller.find((rolle) => rolle.rolletype === Rolletype.BM);
+    const selectedRolleId = selectedRolle.id;
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
 
     const onSave = () => {
@@ -153,9 +156,20 @@ const Side = () => {
         return () => subscription.unsubscribe();
     }, []);
 
+    const descriptionText =
+        selectedRolle.rolletype === Rolletype.BM
+            ? text.description.inntektBegrunnelseBM
+            : selectedRolle.rolletype === Rolletype.BP
+              ? text.description.inntektBegrunnelseBP
+              : undefined;
+
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea name={`begrunnelser.${selectedRolleId}`} label={text.title.begrunnelse} />
+            <FormControlledTextarea
+                name={`begrunnelser.${selectedRolleId}`}
+                label={text.title.begrunnelse}
+                description={descriptionText}
+            />
             <ActionButtons onNext={onNext} />
         </Fragment>
     );

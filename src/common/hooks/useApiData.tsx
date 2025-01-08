@@ -3,26 +3,46 @@ import {
     AktivereGrunnlagResponseV2,
     AndreVoksneIHusstandenGrunnlagDto,
     ArbeidsforholdGrunnlagDto,
+    BarnDto,
     BehandlingDtoV2,
     BeregningValideringsfeil,
+    DelberegningSamvaersklasse,
+    FaktiskTilsynsutgiftDto,
+    GebyrRolleDto,
     HusstandsmedlemGrunnlagDto,
+    OppdatereBegrunnelseRequest,
     OppdatereBoforholdRequestV2,
     OppdatereBoforholdResponse,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    OppdatereUnderholdResponse,
     OppdatereUtgiftRequest,
     OppdatereUtgiftResponse,
     OppdatereVirkningstidspunkt,
+    OppdaterGebyrDto,
+    OppdaterSamvaerDto,
+    OppdaterSamvaerResponsDto,
     OpplysningerType,
+    OpprettUnderholdskostnadBarnResponse,
     RolleDto,
+    SamvaerskalkulatorDetaljer,
     SivilstandAktivGrunnlagDto,
     SivilstandIkkeAktivGrunnlagDto,
+    SletteSamvaersperiodeElementDto,
+    SletteUnderholdselement,
+    StonadTilBarnetilsynAktiveGrunnlagDto,
+    StonadTilBarnetilsynDto,
+    TilleggsstonadDto,
 } from "@api/BidragBehandlingApiV1";
 import { VedtakNotatDto as NotatPayload } from "@api/BidragDokumentProduksjonApi";
 import { PersonDto } from "@api/PersonApi";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { FantIkkeVedtakEllerBehandlingError } from "@commonTypes/apiStatus";
-import { VedtakBeregningResult, VedtakSærbidragBeregningResult } from "@commonTypes/vedtakTypes";
+import {
+    VedtakBarnebidragBeregningResult,
+    VedtakBeregningResult,
+    VedtakSærbidragBeregningResult,
+} from "@commonTypes/vedtakTypes";
 import { LoggerService, RolleTypeFullName } from "@navikt/bidrag-ui-common";
 import { useMutation, useQuery, useQueryClient, useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -30,10 +50,26 @@ import { AxiosError } from "axios";
 import { BEHANDLING_API_V1, BIDRAG_DOKUMENT_PRODUKSJON_API, PERSON_API } from "../constants/api";
 export const MutationKeys = {
     oppdaterBehandling: (behandlingId: string) => ["mutation", "behandling", behandlingId],
+    oppdaterManueltOverstyrtGebyr: (behandlingId: string) => [
+        "mutation",
+        "oppdaterManueltOverstyrtGebyr",
+        behandlingId,
+    ],
+    oppdatereTilsynsordning: (behandlingId: string) => ["mutation", "oppdatereTilsynsordning", behandlingId],
+    oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
+    oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
     updateBoforhold: (behandlingId: string) => ["mutation", "boforhold", behandlingId],
+    updateSamvær: (behandlingId: string) => ["mutation", "samvær", behandlingId],
+    updateSamværskalkulator: (behandlingId: string) => ["mutation", "updateSamværskalkulator", behandlingId],
+    slettSamværskalkulator: (behandlingId: string) => ["mutation", "slettSamværskalkulator", behandlingId],
+    beregnSamværsklasse: () => ["mutation", "beregnSamværsklasse"],
     updateInntekter: (behandlingId: string) => ["mutation", "inntekter", behandlingId],
     updateVirkningstidspunkt: (behandlingId: string) => ["mutation", "virkningstidspunkt", behandlingId],
     updateUtgifter: (behandlingId: string) => ["mutation", "utgifter", behandlingId],
+    updateStonadTilBarnetilsyn: (behandlingId: string) => ["mutation", "stonadTilBarnetilsyn", behandlingId],
+    updateFaktiskeTilsynsutgifter: (behandlingId: string) => ["mutation", "faktiskeTilsynsutgifter", behandlingId],
+    updateTilleggstønad: (behandlingId: string) => ["mutation", "tilleggstønad", behandlingId],
+    slettUnderholdsElement: (behandlingId: string) => ["mutation", "slettUnderholdsElement", behandlingId],
 };
 
 export const QueryKeys = {
@@ -42,6 +78,8 @@ export const QueryKeys = {
     visningsnavn: () => ["visningsnavn", QueryKeys.behandlingVersion],
     beregningForskudd: () => ["beregning_forskudd", QueryKeys.behandlingVersion],
     beregningSærbidrag: () => ["beregning_særbidrag", QueryKeys.behandlingVersion],
+    beregnBarnebidrag: () => ["beregning_barnebidrag", QueryKeys.behandlingVersion],
+    beregningInnteksgrenseSærbidrag: () => ["beregning_særbidrag_innteksgrense", QueryKeys.behandlingVersion],
     notat: (behandlingId: string) => ["notat_payload", QueryKeys.behandlingVersion, behandlingId],
     notatPdf: (behandlingId: string) => ["notat_payload_pdf", QueryKeys.behandlingVersion, behandlingId],
     behandlingV2: (behandlingId: string, vedtakId?: string) => [
@@ -66,6 +104,17 @@ export const useGetOpplysningerBoforhold = (): {
     return {
         aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.husstandsbarn,
         ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.husstandsbarn,
+    };
+};
+
+export const useGetOpplysningerBarnetilsyn = (): {
+    aktiveOpplysninger: StonadTilBarnetilsynAktiveGrunnlagDto;
+    ikkeAktiverteOpplysninger: StonadTilBarnetilsynAktiveGrunnlagDto;
+} => {
+    const behandling = useGetBehandlingV2();
+    return {
+        aktiveOpplysninger: behandling.aktiveGrunnlagsdata?.stønadTilBarnetilsyn,
+        ikkeAktiverteOpplysninger: behandling.ikkeAktiverteEndringerIGrunnlagsdata?.stønadTilBarnetilsyn,
     };
 };
 
@@ -110,7 +159,54 @@ export const useUpdateInntekt = () => {
         },
     });
 };
+export const useDeleteSamværsperiode = () => {
+    const { behandlingId } = useBehandlingProvider();
 
+    return useMutation({
+        mutationKey: MutationKeys.updateSamvær(behandlingId),
+        mutationFn: async (payload: SletteSamvaersperiodeElementDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.slettSamvaersperiode(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved sletting av samværsperiode", error);
+        },
+    });
+};
+
+export const useBeregnSamværsklasse = () => {
+    return useMutation({
+        mutationKey: MutationKeys.beregnSamværsklasse(),
+        mutationFn: async (payload: SamvaerskalkulatorDetaljer): Promise<DelberegningSamvaersklasse> => {
+            const { data } = await BEHANDLING_API_V1.api.beregnSamvaersklasse(payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av boforhold", error);
+        },
+    });
+};
+
+export const useUpdateSamvær = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateSamvær(behandlingId),
+        mutationFn: async (payload: OppdaterSamvaerDto): Promise<OppdaterSamvaerResponsDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterSamvaer(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av samvær", error);
+        },
+    });
+};
 export const useUpdateBoforhold = () => {
     const { behandlingId } = useBehandlingProvider();
 
@@ -139,11 +235,15 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
         queryFn: async () => {
             try {
                 if (vedtakId) {
-                    return (await BEHANDLING_API_V1.api.vedtakLesemodus(Number(vedtakId))).data;
+                    return (
+                        await BEHANDLING_API_V1.api.vedtakLesemodus(Number(vedtakId), {
+                            inkluderHistoriskeInntekter: true,
+                        })
+                    ).data;
                 }
                 return (
                     await BEHANDLING_API_V1.api.henteBehandlingV2(Number(behandlingId), {
-                        inkluderHistoriskeInntekter: false,
+                        inkluderHistoriskeInntekter: true,
                     })
                 ).data;
             } catch (e) {
@@ -166,7 +266,7 @@ export const useBehandlingV2 = (behandlingId?: string, vedtakId?: string): Behan
     return behandling;
 };
 
-export const useHentPersonData = (ident: string) =>
+export const useHentPersonData = (ident?: string) =>
     useSuspenseQuery({
         queryKey: ["persons", ident],
         queryFn: async (): Promise<PersonDto> => {
@@ -306,6 +406,59 @@ export const useAktiveGrunnlagsdata = () => {
         },
     });
 };
+export const useGetBeregningInnteksgrenseSærbidrag = () => {
+    const { behandlingId, vedtakId } = useBehandlingProvider();
+
+    return useSuspenseQuery<number>({
+        queryKey: QueryKeys.beregningInnteksgrenseSærbidrag(),
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    return -1;
+                }
+                const response = await BEHANDLING_API_V1.api.beregnBPsLavesteInntektForEvne(Number(behandlingId));
+                return response.data;
+            } catch (error) {
+                console.error("error", error);
+                return -1;
+            }
+        },
+    });
+};
+export const useGetBeregningBidrag = () => {
+    const { behandlingId, vedtakId } = useBehandlingProvider();
+
+    return useSuspenseQuery<VedtakBarnebidragBeregningResult>({
+        queryKey: QueryKeys.beregnBarnebidrag(),
+        queryFn: async () => {
+            try {
+                if (vedtakId) {
+                    const response = await BEHANDLING_API_V1.api.hentVedtakBeregningResultatBidrag(Number(vedtakId));
+                    return { resultat: response.data };
+                }
+                const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
+                return { resultat: response.data };
+            } catch (error) {
+                const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
+                if (error instanceof AxiosError && error.response.status === 400) {
+                    if (error.response?.data) {
+                        return {
+                            feil: {
+                                melding: feilmelding,
+                                detaljer: error.response.data as BeregningValideringsfeil,
+                            },
+                        };
+                    }
+                    return {
+                        feil: {
+                            melding: feilmelding,
+                        },
+                    };
+                }
+            }
+        },
+    });
+};
 export const useGetBeregningSærbidrag = () => {
     const { behandlingId, vedtakId } = useBehandlingProvider();
 
@@ -424,6 +577,152 @@ export const useUpdateUtgifter = () => {
         onError: (error) => {
             console.log("onError", error);
             LoggerService.error("Feil ved oppdatering av utgifter", error);
+        },
+    });
+};
+
+export const useUpdateStønadTilBarnetilsyn = (underholdsid: string) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateStonadTilBarnetilsyn(behandlingId),
+        mutationFn: async (payload: StonadTilBarnetilsynDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereStonadTilBarnetilsyn(
+                Number(behandlingId),
+                Number(underholdsid),
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av stønad til barnetilsyn", error);
+        },
+    });
+};
+
+export const useDeleteUnderholdsObjekt = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.slettUnderholdsElement(behandlingId),
+        mutationFn: async (payload: SletteUnderholdselement): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.sletteFraUnderhold(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved sletting av underhold", error);
+        },
+    });
+};
+
+export const useUpdateFaktiskeTilsynsutgifter = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateFaktiskeTilsynsutgifter(behandlingId),
+        mutationFn: async (payload: FaktiskTilsynsutgiftDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereFaktiskTilsynsutgift(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av faktiske tilsynsutgifter", error);
+        },
+    });
+};
+
+export const useUpdateTilleggstønad = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.updateTilleggstønad(behandlingId),
+        mutationFn: async (payload: TilleggsstonadDto): Promise<OppdatereUnderholdResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdatereTilleggsstonad(
+                Number(behandlingId),
+                underholdsid,
+                payload
+            );
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av tillegstønad", error);
+        },
+    });
+};
+
+export const useCreateUnderholdForBarn = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppretteUnderholdForBarn(behandlingId),
+        mutationFn: async (payload: BarnDto): Promise<OpprettUnderholdskostnadBarnResponse> => {
+            const { data } = await BEHANDLING_API_V1.api.oppretteUnderholdForBarn(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppretting av underholds barn", error);
+        },
+    });
+};
+
+export const useUpdateUnderholdBegrunnelse = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdatereUnderhold(behandlingId),
+        mutationFn: async (payload: OppdatereBegrunnelseRequest): Promise<void> => {
+            await BEHANDLING_API_V1.api.oppdatereBegrunnelse(Number(behandlingId), payload);
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av underhold", error);
+        },
+    });
+};
+
+export const useUpdateHarTilysnsordning = (underholdsid: number) => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdatereTilsynsordning(behandlingId),
+        mutationFn: async (payload: { harTilsynsordning: boolean }): Promise<void> => {
+            await BEHANDLING_API_V1.api.oppdatereTilsynsordning(Number(behandlingId), underholdsid, payload);
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av tilsynsordning", error);
+        },
+    });
+};
+
+export const useUpdateGebyr = () => {
+    const { behandlingId } = useBehandlingProvider();
+
+    return useMutation({
+        mutationKey: MutationKeys.oppdaterManueltOverstyrtGebyr(behandlingId),
+        mutationFn: async (payload: OppdaterGebyrDto): Promise<GebyrRolleDto> => {
+            const { data } = await BEHANDLING_API_V1.api.oppdaterManueltOverstyrtGebyr(Number(behandlingId), payload);
+            return data;
+        },
+        networkMode: "always",
+        onError: (error) => {
+            console.log("onError", error);
+            LoggerService.error("Feil ved oppdatering av gebyr", error);
         },
     });
 };

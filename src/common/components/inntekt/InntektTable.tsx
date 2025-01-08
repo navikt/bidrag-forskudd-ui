@@ -10,6 +10,7 @@ import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
+import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import {
@@ -80,6 +81,7 @@ export const Totalt = ({ item, field }: { item: InntektFormPeriode; field: strin
                 type="number"
                 min="1"
                 inputMode="numeric"
+                step="1"
                 hideLabel
             />
         ) : (
@@ -150,9 +152,7 @@ export const Periode = ({
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
-    const [inntektType] = fieldName.split(".");
 
-    const erPeriodeRedigerbar = inntektType === "årsinntekter" || item.kilde === Kilde.MANUELL;
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
         const fomOgTomInvalid = !ObjectUtils.isEmpty(periode.datoTom) && isAfterDate(periode?.datoFom, periode.datoTom);
@@ -167,7 +167,7 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && erPeriodeRedigerbar ? (
+    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && item.kanRedigeres ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
@@ -196,7 +196,8 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: React.FunctionComponent;
 }) => {
-    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState } = useBehandlingProvider();
+    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState, setBeregnetGebyrErEndret } =
+        useBehandlingProvider();
     const {
         inntekter,
         søktFomDato,
@@ -244,7 +245,10 @@ export const InntektTabel = ({
         const periode = getValues(`${fieldName}.${index}`);
         const erOffentlig = periode.kilde === Kilde.OFFENTLIG;
 
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: periode.kanRedigeres && taMed });
+        setValue(`${fieldName}.${index}`, {
+            ...periode,
+            erRedigerbart: periode.kanRedigeres && taMed,
+        });
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);
@@ -306,6 +310,7 @@ export const InntektTabel = ({
 
                 return {
                     ...currentData,
+                    gebyr: response.gebyr,
                     inntekter: {
                         ...currentData.inntekter,
                         [inntektType]: sortedUpdatedInntekter,
@@ -320,7 +325,7 @@ export const InntektTabel = ({
 
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
-        if (periode.id != null) {
+        if (periode.id !== null) {
             const onSaveSuccess = (response: OppdatereInntektResponse) =>
                 saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
                     return {
@@ -332,6 +337,7 @@ export const InntektTabel = ({
                             ),
                             beregnetInntekter: response.beregnetInntekter,
                             valideringsfeil: response.valideringsfeil,
+                            gebyr: response.gebyr,
                         },
                     };
                 });
@@ -343,7 +349,12 @@ export const InntektTabel = ({
     };
 
     const addPeriod = (periode: InntektFormPeriode) => {
-        fieldArray.append({ ...periode, datoFom: virkningstidspunkt ?? søktFomDato, erRedigerbart: true });
+        fieldArray.append({
+            ...periode,
+            datoFom: virkningstidspunkt ?? søktFomDato,
+            erRedigerbart: true,
+            kanRedigeres: true,
+        });
     };
     const updatedAndSave = (
         updatedValues: OppdatereInntektRequest,
@@ -351,7 +362,10 @@ export const InntektTabel = ({
         index?: number
     ) => {
         saveInntekt.mutation.mutate(updatedValues, {
-            onSuccess: (response) => onSaveSuccess?.(response),
+            onSuccess: (response) => {
+                setBeregnetGebyrErEndret(response.beregnetGebyrErEndret);
+                onSaveSuccess?.(response);
+            },
             onError: () => {
                 setSaveErrorState({
                     error: true,
@@ -419,14 +433,14 @@ export const InntektTabel = ({
                     {tableValideringsfeil.overlappendePerioder.length > 0 && (
                         <>
                             {tableValideringsfeil.overlappendePerioder.map(({ periode }, index) => (
-                                <BodyShort key={`${periode.fom}-${periode.til}-${index}`} size="small">
-                                    {periode.til &&
+                                <BodyShort key={`${periode.fom}-${periode.tom}-${index}`} size="small">
+                                    {periode.tom &&
                                         removePlaceholder(
                                             text.alert.overlappendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom)),
-                                            DateToDDMMYYYYString(dateOrNull(periode.til))
+                                            DateToDDMMYYYYString(dateOrNull(periode.tom))
                                         )}
-                                    {!periode.til &&
+                                    {!periode.tom &&
                                         removePlaceholder(
                                             text.alert.overlappendeLøpendePerioder,
                                             DateToDDMMYYYYString(dateOrNull(periode.fom))
@@ -462,13 +476,18 @@ export const InntektTabel = ({
                     )}
                 </BehandlingAlert>
             )}
-            {children({
-                controlledFields,
-                onEditRow,
-                onSaveRow,
-                addPeriod,
-                handleOnSelect,
-            })}
+            <div
+                className={`${saveInntekt.mutation.isPending ? "relative" : "inherit"} block overflow-x-auto whitespace-nowrap`}
+            >
+                <OverlayLoader loading={saveInntekt.mutation.isPending} />
+                {children({
+                    controlledFields,
+                    onEditRow,
+                    onSaveRow,
+                    addPeriod,
+                    handleOnSelect,
+                })}
+            </div>
         </>
     );
 };
