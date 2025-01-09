@@ -24,7 +24,7 @@ import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
-import { Buldings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
+import { Buildings2Icon, FloppydiskIcon, PencilIcon, PersonIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { BodyShort, Button, Heading } from "@navikt/ds-react";
 import { addMonthsIgnoreDay, dateOrNull, DateToDDMMYYYYString, isAfterDate } from "@utils/date-utils";
@@ -41,7 +41,7 @@ export const KildeIcon = ({ kilde }: { kilde: Kilde }) => {
     return (
         <div className="h-8 w-full flex items-center justify-center">
             {kilde === Kilde.OFFENTLIG ? (
-                <Buldings2Icon title="Offentlig" fontSize="1.5rem" />
+                <Buildings2Icon title="Offentlig" fontSize="1.5rem" />
             ) : (
                 <PersonIcon title="Manuelt" fontSize="1.5rem" />
             )}
@@ -187,6 +187,14 @@ export const Periode = ({
     );
 };
 
+type InntektTabelChildrenProps = {
+    controlledFields: InntektFormPeriode[];
+    onEditRow: (index: number) => void;
+    onSaveRow: (index: number) => void;
+    addPeriod: (periode: InntektFormPeriode) => void;
+    handleOnSelect: (taMed: boolean, index: number) => void;
+};
+
 export const InntektTabel = ({
     fieldName,
     customRowValidation,
@@ -194,7 +202,7 @@ export const InntektTabel = ({
 }: {
     fieldName: InntektTables;
     customRowValidation?: (fieldName: string) => void;
-    children: React.FunctionComponent;
+    children: (props: InntektTabelChildrenProps) => React.ReactNode;
 }) => {
     const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState, setBeregnetGebyrErEndret } =
         useBehandlingProvider();

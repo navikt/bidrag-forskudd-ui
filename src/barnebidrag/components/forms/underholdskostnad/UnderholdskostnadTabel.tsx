@@ -24,6 +24,7 @@ import {
     FaktiskTilsynsutgiftPeriode,
     StønadTilBarnetilsynPeriode,
     TilleggsstonadPeriode,
+    UnderholdkostnadsFormPeriode,
     UnderholdskostnadFormValues,
 } from "../../../types/underholdskostnadFormValues";
 import { transformUnderholdskostnadPeriode } from "../helpers/UnderholdskostnadFormHelpers";
@@ -32,6 +33,14 @@ const fieldNameToSletteUnderholdselementTypeEnum = {
     stønadTilBarnetilsyn: SletteUnderholdselementTypeEnum.STONADTILBARNETILSYN,
     faktiskTilsynsutgift: SletteUnderholdselementTypeEnum.FAKTISK_TILSYNSUTGIFT,
     tilleggsstønad: SletteUnderholdselementTypeEnum.TILLEGGSSTONAD,
+};
+
+type UnderholdskostnadTableChildrenProps = {
+    controlledFields: UnderholdkostnadsFormPeriode[];
+    onRemovePeriode: (index: number) => void;
+    onSaveRow: (index: number) => void;
+    onEditRow: (index: number) => void;
+    addPeriod: (periode: StønadTilBarnetilsynPeriode | FaktiskTilsynsutgiftPeriode | TilleggsstonadPeriode) => void;
 };
 
 export const UnderholdskostnadTabel = ({
@@ -53,7 +62,7 @@ export const UnderholdskostnadTabel = ({
         queryClientUpdater: (updateFn: (currentData: BehandlingDtoV2) => BehandlingDtoV2) => BehandlingDtoV2;
     };
     createPayload: (index: number) => StonadTilBarnetilsynDto | FaktiskTilsynsutgiftDto | TilleggsstonadDto;
-    children: React.FunctionComponent;
+    children: (props: UnderholdskostnadTableChildrenProps) => React.ReactNode;
 }) => {
     const {
         søktFomDato,

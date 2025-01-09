@@ -8,7 +8,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 type NettoBarnetilleggTableProps = {
     rolle: Rolletype;
 };
-// eslint-disable-next-line no-empty-pattern
+
 export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) => {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 

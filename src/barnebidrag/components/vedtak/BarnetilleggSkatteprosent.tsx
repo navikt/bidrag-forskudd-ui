@@ -10,7 +10,7 @@ import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 type NettoBarnetilleggTableProps = {
     rolle: Rolletype;
 };
-// eslint-disable-next-line no-empty-pattern
+
 export const BarnetilleggSkatteprosent = ({ rolle }: NettoBarnetilleggTableProps) => {
     const { beregningsdetaljer } = useBidragBeregningPeriode();
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;

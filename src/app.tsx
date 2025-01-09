@@ -20,6 +20,7 @@ import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
 import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
@@ -196,6 +197,7 @@ export default function App() {
                         </FaroRoutes>
                     </BrowserRouter>
                 </Suspense>
+                <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
         </FlagProvider>
     );
