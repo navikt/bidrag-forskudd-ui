@@ -45,6 +45,7 @@ import { SærligeugifterProviderWrapper } from "./særbidrag/context/Særligeugi
 import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 export const faro = initializeFaro({
     app: {
         name: "bidrag-behandling-ui",
@@ -196,6 +197,7 @@ export default function App() {
                         </FaroRoutes>
                     </BrowserRouter>
                 </Suspense>
+                <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
         </FlagProvider>
     );
