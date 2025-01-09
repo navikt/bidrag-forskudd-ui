@@ -2,7 +2,6 @@ import { ResultatDescription } from "../../../common/components/vedtak/ResultatD
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
-// eslint-disable-next-line no-empty-pattern
 export const BeregningFordeltBidrag = () => {
     const {
         beregningsdetaljer: { sluttberegning, delberegningBidragsevne: evne },

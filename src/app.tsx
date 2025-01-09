@@ -20,6 +20,7 @@ import { EyeIcon, EyeObfuscatedIcon } from "@navikt/aksel-icons";
 import { BidragContainer, SecuritySessionUtils } from "@navikt/bidrag-ui-common";
 import { Button, Loader } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { FlagProvider, IConfig, useFlagsStatus } from "@unleash/proxy-client-react";
 import { scrollToHash } from "@utils/window-utils";
 import React, { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
@@ -45,7 +46,6 @@ import { SærligeugifterProviderWrapper } from "./særbidrag/context/Særligeugi
 import BrukerveiledningSærbidrag from "./særbidrag/docs/BrukerveiledningSærbidrag.mdx";
 import { NewSærbidragPage } from "./særbidrag/pages/NewSaerbidragPage";
 import { SærbidragPage } from "./særbidrag/pages/SærbidragPage";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 export const faro = initializeFaro({
     app: {
         name: "bidrag-behandling-ui",

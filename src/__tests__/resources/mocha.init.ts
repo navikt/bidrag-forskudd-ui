@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import "cross-fetch/polyfill";
 
 import { cleanup } from "@testing-library/react";
