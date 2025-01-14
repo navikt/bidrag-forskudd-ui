@@ -1,6 +1,6 @@
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { Textarea } from "@navikt/ds-react";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 export const FormControlledTextarea = ({
@@ -10,6 +10,7 @@ export const FormControlledTextarea = ({
     minRows,
     className,
     description,
+    resize,
 }: {
     name: string;
     label: string;
@@ -17,6 +18,7 @@ export const FormControlledTextarea = ({
     minRows?: number;
     className?: string;
     description?: React.ReactNode;
+    resize?: boolean;
 }) => {
     const { control, clearErrors } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
@@ -27,6 +29,29 @@ export const FormControlledTextarea = ({
         clearErrors(name);
         field.onChange(e.target.value);
     };
+
+    const textareaRef = useRef(null);
+    const [maxHeight, setMaxHeight] = useState(100);
+    const [maxWidth, setMaxWidth] = useState(100);
+
+    const recalculateMaxHeight = () => {
+        if (textareaRef?.current?.getBoundingClientRect()) {
+            const position = textareaRef?.current?.getBoundingClientRect();
+            const updatedMaxHeight = window.innerHeight - position.top - 100;
+            const updatedMaxWidth = window.innerWidth - position.left - 32;
+            setMaxHeight(updatedMaxHeight);
+            setMaxWidth(updatedMaxWidth);
+        }
+    };
+
+    useEffect(() => {
+        if (resize) {
+            recalculateMaxHeight();
+            window.addEventListener("resize", recalculateMaxHeight);
+        }
+
+        return () => window.removeEventListener("resize", recalculateMaxHeight);
+    }, []);
 
     return (
         <Textarea
@@ -40,6 +65,9 @@ export const FormControlledTextarea = ({
             error={fieldState?.error?.message}
             minRows={minRows}
             className={className}
+            resize={resize}
+            ref={textareaRef}
+            style={{ maxHeight: `${maxHeight}px`, maxWidth: `${maxWidth}` }}
         />
     );
 };

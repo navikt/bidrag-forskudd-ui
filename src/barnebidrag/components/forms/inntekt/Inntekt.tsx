@@ -175,6 +175,7 @@ const Side = () => {
                 name={`begrunnelser.${selectedRolleId}`}
                 label={text.title.begrunnelse}
                 description={descriptionText}
+                resize
             />
             <ActionButtons onNext={onNext} />
         </Fragment>

@@ -150,7 +150,11 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`} label={text.title.begrunnelse} />
+            <FormControlledTextarea
+                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
+                label={text.title.begrunnelse}
+                resize
+            />
             <ActionButtons onNext={onNext} />
         </Fragment>
     );
