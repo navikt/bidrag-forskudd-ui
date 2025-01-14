@@ -11,6 +11,7 @@ const inntekskodeMedÅrstall = [
 ];
 const inntekskodeMedPeriode = [
     Inntektsrapportering.OVERGANGSSTONAD.toString(),
+    Inntektsrapportering.AAP.toString(),
     Inntektsrapportering.AINNTEKTBEREGNET12MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
     Inntektsrapportering.AINNTEKTBEREGNET3MNDFRAOPPRINNELIGVEDTAKSTIDSPUNKT.toString(),
 ];

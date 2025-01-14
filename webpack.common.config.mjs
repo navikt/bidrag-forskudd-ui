@@ -7,7 +7,7 @@ import path from "path";
 import rehypeSlug from "rehype-slug";
 import webpack from "webpack";
 
-import deps from "./package.json" assert { type: "json" };
+import deps from "./package.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
