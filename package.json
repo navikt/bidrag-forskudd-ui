@@ -50,6 +50,7 @@
     "react-error-boundary": "^5.0.0",
     "react-hook-form": "^7.49.3",
     "react-router-dom": "^7.1.1",
+    "react-simple-wysiwyg": "^3.2.0",
     "theme-ui": "0.16.1",
     "unleash-proxy-client": "^3.3.0"
   },

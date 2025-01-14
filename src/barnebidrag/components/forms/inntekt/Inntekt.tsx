@@ -27,6 +27,7 @@ import { useSearchParams } from "react-router-dom";
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
+import { CustomEditor } from "../../../../common/components/CustomEditor";
 
 const Main = () => {
     const { roller: behandlingRoller, type } = useGetBehandlingV2();
@@ -155,7 +156,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes("begrunnelser") && type === "change") {
+            if (name.includes("begrunnelser") && (type === "change" || type == undefined)) {
                 debouncedOnSave();
             }
         });
@@ -166,16 +167,17 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-              ? text.description.inntektBegrunnelseBP
-              : undefined;
+                ? text.description.inntektBegrunnelseBP
+                : undefined;
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea
+            {/* <FormControlledTextarea
                 name={`begrunnelser.${selectedRolleId}`}
                 label={text.title.begrunnelse}
                 description={descriptionText}
-            />
+            /> */}
+            <CustomEditor description={descriptionText} label={text.title.begrunnelse} name={`begrunnelser.${selectedRolleId}`} />
             <ActionButtons onNext={onNext} />
         </Fragment>
     );
