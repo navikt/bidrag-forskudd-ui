@@ -2,6 +2,7 @@ import { BodyLong, BodyShort, Label } from "@navikt/ds-react";
 import { useFormContext } from "react-hook-form";
 import { EditorProvider, Editor, Toolbar, BtnBold, BtnItalic, BtnStyles, Separator, createButton, createDropdown, useEditorState, Dropdown, } from "react-simple-wysiwyg";
 import React, { useRef } from "react";
+import { CustomQuillEditor } from "./CustomQuillEditor";
 const BtnCustomStyles = createDropdown2('Formattering', [
     ['Normal', 'formatBlock', 'DIV'],
     ['Overskrift 1', "formatBlock", 'H1'],
@@ -43,26 +44,20 @@ function createDropdown2(title, items) {
 }
 export function CustomEditor({ name, label, description }: { name: string; label?: string; description?: string }) {
     const { watch, setValue } = useFormContext();
+    const quillRef = useRef(null);
 
-    function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-        setValue(name, e.target.value?.replace('<br/>', String.fromCharCode(10)).replace('<br>', String.fromCharCode(10)));
+    function onChange(value: string) {
+        setValue(name, value?.replace('<br/>', String.fromCharCode(10)).replace('<br>', String.fromCharCode(10)));
     }
+    return <BodyLong size="small" as="div">
+        {label && <Label size="small" htmlFor={name}>{label}</Label>}
+        {description && <BodyShort spacing textColor="subtle" size="small">{description}</BodyShort>}<CustomQuillEditor
+            ref={quillRef}
+            readOnly={false}
+            defaultValue={watch(name)?.replace(new RegExp(String.fromCharCode(10), 'g'), '<br>')}
+            onTextChange={onChange}
+        />
+    </BodyLong>
 
 
-    return (
-        <EditorProvider>
-            <BodyLong size="small" as="div">
-                {label && <Label size="small" htmlFor={name}>{label}</Label>}
-                {description && <BodyShort spacing textColor="subtle" size="small">{description}</BodyShort>}
-                <Editor spellCheck="false" onChange={onChange} value={watch(name)?.replace(new RegExp(String.fromCharCode(10), 'g'), '<br>')} name={name}>
-                    <Toolbar>
-                        <BtnBold />
-                        <BtnItalic />
-                        <Separator />
-                        <BtnCustomStyles />
-                    </Toolbar>
-                </Editor>
-            </BodyLong>
-        </EditorProvider>
-    );
 }

@@ -1,0 +1,20 @@
+.ql-top-container {
+   
+    height: inherit;
+    width: max-content;
+    height: auto;
+
+}
+.ql-editor {
+    height: inherit;
+    resize: both;
+    overflow: auto;
+
+}
+.ql-container {
+    /* height: inherit; */
+    width: 400px;
+}
+.ql-toolbar {
+    width: 100%;
+}
