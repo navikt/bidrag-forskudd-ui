@@ -1,5 +1,5 @@
 import {
-    BehandlingDtoV2,
+    InntektDtoV2,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
@@ -198,8 +198,8 @@ export const InntektTabel = ({
     children: (props: InntektTabelChildrenProps) => React.ReactNode;
 }) => {
     const {
-        setPageErrorsOrUnsavedState,
         lesemodus,
+        setPageErrorsOrUnsavedState,
         setSaveErrorState,
         setBeregnetGebyrErEndret,
         setErrorMessage,
@@ -257,47 +257,51 @@ export const InntektTabel = ({
             erRedigerbart: periode.kanRedigeres && taMed,
         });
 
-        if (!taMed && !erOffentlig) {
-            handleDelete(index);
-        }
-
-        if (!taMed && erOffentlig) {
-            handleUpdate(index);
+        if (!taMed) {
+            if (!erOffentlig) {
+                handleDelete(index);
+            } else {
+                const inntekt = inntekter[inntektType].find((inntekt: InntektDtoV2) => inntekt.id === periode.id);
+                if (inntekt.taMed !== taMed) {
+                    handleUpdate(index);
+                }
+            }
         }
     };
 
-    const handleUpdate = (index: number) => {
-        const perioder = getValues(fieldName);
-        const updatedPeriode = perioder[index];
-        const payload = createPayload(updatedPeriode, virkningsdato);
+    const onSaveSuccess = (response: OppdatereInntektResponse) => {
         const transformFn = transformInntekt(virkningsdato);
-        const onSaveSuccess = (response: OppdatereInntektResponse) => {
-            resetField(fieldName, {
-                defaultValue: response.inntekter[inntektType].map(transformFn),
-            });
+        const isBarnetilleggOrKontantstøtteTable = ["barnetillegg", "kontantstøtte"].includes(inntektType);
 
-            saveInntekt.queryClientUpdater((currentData) => {
-                return {
-                    ...currentData,
-                    gebyr: response.gebyr,
-                    inntekter: response.inntekter,
-                };
-            });
-        };
+        resetField(fieldName, {
+            defaultValue: response.inntekter[inntektType]
+                .filter((inntekt: InntektDtoV2) => {
+                    if (isBarnetilleggOrKontantstøtteTable) {
+                        return inntekt.gjelderBarn === barnIdent && inntekt.ident === ident;
+                    }
+                    return inntekt.ident === ident;
+                })
+                .map(transformFn),
+        });
+
+        saveInntekt.queryClientUpdater((currentData) => {
+            return {
+                ...currentData,
+                gebyr: response.gebyr,
+                inntekter: response.inntekter,
+            };
+        });
+    };
+
+    const handleUpdate = (index: number) => {
+        const updatedPeriode = getValues(`${fieldName}.${index}`);
+        const payload = createPayload(updatedPeriode, virkningsdato);
         updatedAndSave(payload, onSaveSuccess, index);
     };
 
     const handleDelete = async (index: number) => {
         const periode = getValues(`${fieldName}.${index}`);
         if (periode.id) {
-            const onSaveSuccess = (response: OppdatereInntektResponse) =>
-                saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
-                    return {
-                        ...currentData,
-                        inntekter: response.inntekter,
-                    };
-                });
-
             updatedAndSave({ sletteInntekt: periode.id }, onSaveSuccess, index);
         }
         clearErrors(`${fieldName}.${index}`);
