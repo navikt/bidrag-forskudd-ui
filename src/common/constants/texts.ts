@@ -37,6 +37,7 @@ const tekster = {
         færreBarnRegistrertPåAdresse: "Det er færre barn registrert på samme adresse i offentlige registre.",
         ingenInntekt: "Ingen inntekt funnet",
         manglerPerioderForTilsynsordning: "Mangler perioder for tilsynsordning",
+        manglerPerioderForTilsynsordningDescription: "Du må minst legge til en periode når barnet har tilsynsordning.",
         manglerPerioder: "Mangler perioder. Du må minst legge til en gyldig periode",
         manglerVirkningstidspunkt: "Mangler virkningstidspunkt",
         minstEnInntektMindre: "Det er minst en inntekt som legges til grunn mindre for person med ident - {}",
