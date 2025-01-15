@@ -1,6 +1,5 @@
 import {
     BehandlingDtoV2,
-    InntektDtoV2,
     InntektValideringsfeil,
     Kilde,
     OppdatereInntektRequest,
@@ -13,13 +12,7 @@ import { FormControlledTextField } from "@common/components/formFields/FormContr
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
-import {
-    createPayload,
-    inntektSorting,
-    offentligPeriodeHasHigherOrder,
-    periodeHasHigherPriorityOrder,
-    transformInntekt,
-} from "@common/helpers/inntektFormHelpers";
+import { createPayload, transformInntekt } from "@common/helpers/inntektFormHelpers";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useOnSaveInntekt } from "@common/hooks/useOnSaveInntekt";
 import { useVirkningsdato } from "@common/hooks/useVirkningsdato";
@@ -204,8 +197,14 @@ export const InntektTabel = ({
     customRowValidation?: (fieldName: string) => void;
     children: (props: InntektTabelChildrenProps) => React.ReactNode;
 }) => {
-    const { setPageErrorsOrUnsavedState, lesemodus, setSaveErrorState, setBeregnetGebyrErEndret } =
-        useBehandlingProvider();
+    const {
+        setPageErrorsOrUnsavedState,
+        lesemodus,
+        setSaveErrorState,
+        setBeregnetGebyrErEndret,
+        setErrorMessage,
+        setErrorModalOpen,
+    } = useBehandlingProvider();
     const {
         inntekter,
         søktFomDato,
@@ -260,35 +259,10 @@ export const InntektTabel = ({
 
         if (!taMed && !erOffentlig) {
             handleDelete(index);
-        } else {
-            handleUpdate(index);
         }
-    };
 
-    const movePeriods = (index: number, updatedPeriode: InntektFormPeriode, perioder: InntektFormPeriode[]) => {
-        if (updatedPeriode.taMed) {
-            const indexOfFirstMatchingPeriod = perioder.findIndex(
-                (periode) =>
-                    periode.taMed &&
-                    !periode.erRedigerbart &&
-                    periode.id !== updatedPeriode.id &&
-                    (isAfterDate(periode.datoFom, updatedPeriode.datoFom) ||
-                        (periode.datoFom === updatedPeriode.datoFom &&
-                            periodeHasHigherPriorityOrder(updatedPeriode, periode)))
-            );
-            const moveToIndex = indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : perioder.length;
-            const newIndex = index >= moveToIndex ? moveToIndex : moveToIndex - 1;
-            fieldArray.move(index, newIndex);
-        } else {
-            const notSelectedOrEditedPeriods = perioder.filter(
-                (periode) => !periode.taMed && !periode.erRedigerbart && periode.id !== updatedPeriode.id
-            );
-            const indexOfFirstMatchingPeriod = notSelectedOrEditedPeriods.findIndex((periode) =>
-                offentligPeriodeHasHigherOrder(updatedPeriode, periode)
-            );
-            const moveToIndex =
-                indexOfFirstMatchingPeriod !== -1 ? indexOfFirstMatchingPeriod : notSelectedOrEditedPeriods.length;
-            fieldArray.move(index, moveToIndex);
+        if (!taMed && erOffentlig) {
+            handleUpdate(index);
         }
     };
 
@@ -298,33 +272,15 @@ export const InntektTabel = ({
         const payload = createPayload(updatedPeriode, virkningsdato);
         const transformFn = transformInntekt(virkningsdato);
         const onSaveSuccess = (response: OppdatereInntektResponse) => {
-            resetField(`${fieldName}.${index}`, {
-                defaultValue: { ...updatedPeriode, ...transformFn(response.inntekt) },
+            resetField(fieldName, {
+                defaultValue: response.inntekter[inntektType].map(transformFn),
             });
 
-            if (!updatedPeriode.erRedigerbart) {
-                movePeriods(index, updatedPeriode, perioder);
-            }
-
             saveInntekt.queryClientUpdater((currentData) => {
-                const updatedInntektIndex = currentData.inntekter[inntektType].findIndex(
-                    (inntekt: InntektDtoV2) => inntekt.id === response.inntekt.id
-                );
-                const updatedInntekter =
-                    updatedInntektIndex === -1
-                        ? currentData.inntekter[inntektType].concat(response.inntekt)
-                        : currentData.inntekter[inntektType].toSpliced(updatedInntektIndex, 1, response.inntekt);
-                const sortedUpdatedInntekter = updatedInntekter.toSorted(inntektSorting);
-
                 return {
                     ...currentData,
                     gebyr: response.gebyr,
-                    inntekter: {
-                        ...currentData.inntekter,
-                        [inntektType]: sortedUpdatedInntekter,
-                        beregnetInntekter: response.beregnetInntekter,
-                        valideringsfeil: response.valideringsfeil,
-                    },
+                    inntekter: response.inntekter,
                 };
             });
         };
@@ -338,15 +294,7 @@ export const InntektTabel = ({
                 saveInntekt.queryClientUpdater((currentData: BehandlingDtoV2) => {
                     return {
                         ...currentData,
-                        inntekter: {
-                            ...currentData.inntekter,
-                            [inntektType]: currentData.inntekter[inntektType].filter(
-                                (inntekt: InntektDtoV2) => inntekt.id !== response.inntekt.id
-                            ),
-                            beregnetInntekter: response.beregnetInntekter,
-                            valideringsfeil: response.valideringsfeil,
-                            gebyr: response.gebyr,
-                        },
+                        inntekter: response.inntekter,
                     };
                 });
 
@@ -415,9 +363,21 @@ export const InntektTabel = ({
         }
     };
 
+    const showErrorModal = () => {
+        setErrorMessage({
+            title: text.alert.fullførRedigering,
+            text: text.alert.periodeUnderRedigering,
+        });
+        setErrorModalOpen(true);
+    };
+
     const onEditRow = (index: number) => {
-        const periode = getValues(`${fieldName}.${index}`);
-        setValue(`${fieldName}.${index}`, { ...periode, erRedigerbart: true });
+        const perioder = getValues(fieldName);
+        if (perioder.some((periode) => periode.erRedigerbart)) {
+            showErrorModal();
+        } else {
+            setValue(`${fieldName}.${index}`, { ...perioder[index], erRedigerbart: true });
+        }
     };
 
     const tableValideringsfeil: InntektValideringsfeil | undefined = ["småbarnstillegg", "utvidetBarnetrygd"].includes(
