@@ -305,16 +305,25 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 );
             });
         if (feilliste.length === 0) {
-            const feilInnhold = Object.keys(feil.detaljer)
-                .filter((key) =>
-                    !Array.isArray(feil.detaljer[key]) ? feil.detaljer[key] != null : feil.detaljer[key].length > 0
-                )
-                .map((key) => capitalizeFirstLetter(key));
+            const feilInnhold =
+                typeof feil.detaljer == "string"
+                    ? []
+                    : Object.keys(feil.detaljer)
+                          .filter((key) =>
+                              !Array.isArray(feil.detaljer[key])
+                                  ? feil.detaljer[key] != null
+                                  : feil.detaljer[key].length > 0
+                          )
+                          .map((key) => capitalizeFirstLetter(key));
 
             feilliste.push(
                 <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>
                     {feil.melding}
-                    <br /> Valideringer som feilet: {feilInnhold.join(", ")}
+                    {feilInnhold.length > 0 && (
+                        <>
+                            <br /> Valideringer som feilet: {feilInnhold.join(", ")}
+                        </>
+                    )}
                 </ErrorSummary.Item>
             );
         }
