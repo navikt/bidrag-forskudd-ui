@@ -267,12 +267,12 @@ export const Barnetilsyn = ({ index }: { index: number }) => {
             >
                 {text.label.barnHarTilsysnsordning}
             </Switch>
-            {underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
+            {underhold.harTilsynsordning && underholdsValideringsFeil?.manglerPerioderForTilsynsordning && (
                 <BehandlingAlert variant="warning">
                     <Heading size="xsmall" level="6">
                         {text.alert.manglerPerioderForTilsynsordning}
                     </Heading>
-                    <BodyShort size="small">{text.alert.manglerPerioder}</BodyShort>
+                    <BodyShort size="small">{text.alert.manglerPerioderForTilsynsordningDescription}</BodyShort>
                 </BehandlingAlert>
             )}
             {(underhold.harTilsynsordning || hasAtLeastOnePeriod) && (
