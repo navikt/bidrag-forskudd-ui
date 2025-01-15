@@ -31,16 +31,14 @@ export const FormControlledTextarea = ({
     };
 
     const textareaRef = useRef(null);
-    const [maxHeight, setMaxHeight] = useState(100);
-    const [maxWidth, setMaxWidth] = useState(100);
+    const [constraints, setConstraints] = useState<{ maxHeight: number; maxWidth: number } | undefined>(undefined);
 
     const recalculateMaxHeight = () => {
         if (textareaRef?.current?.getBoundingClientRect()) {
             const position = textareaRef?.current?.getBoundingClientRect();
             const updatedMaxHeight = window.innerHeight - position.top - 100;
             const updatedMaxWidth = window.innerWidth - position.left - 32;
-            setMaxHeight(updatedMaxHeight);
-            setMaxWidth(updatedMaxWidth);
+            setConstraints({ maxHeight: updatedMaxHeight, maxWidth: updatedMaxWidth });
         }
     };
 
@@ -67,7 +65,7 @@ export const FormControlledTextarea = ({
             className={className}
             resize={resize}
             ref={textareaRef}
-            style={{ maxHeight: `${maxHeight}px`, maxWidth: `${maxWidth}` }}
+            style={constraints ?? undefined}
         />
     );
 };
