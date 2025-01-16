@@ -25,7 +25,6 @@ export function CustomTextareaEditor({
     const quillRef = useRef(null);
 
     function onChange(value: string) {
-        console.log(value);
         setValue(name, value);
         trigger(name);
     }
