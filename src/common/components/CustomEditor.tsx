@@ -33,7 +33,7 @@ export function CustomTextareaEditor({
             <div className="flex items-center gap-2">
                 {lesemodus && <PadlockLockedFillIcon />}
                 {label && (
-                    <Label size="small" htmlFor={name}>
+                    <Label spacing size="small" htmlFor={name}>
                         {label}
                     </Label>
                 )}
