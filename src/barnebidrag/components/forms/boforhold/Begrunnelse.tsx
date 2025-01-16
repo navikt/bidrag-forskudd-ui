@@ -53,7 +53,7 @@ export const Begrunnelse = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["begrunnelse"].includes(name) && type === "change") {
+            if (["begrunnelse"].includes(name) && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });

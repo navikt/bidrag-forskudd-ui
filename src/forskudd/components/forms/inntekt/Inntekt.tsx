@@ -144,7 +144,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes("begrunnelser") && type === "change") {
+            if (name.includes("begrunnelser") && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });

@@ -156,7 +156,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes(fieldName) && type === "change") {
+            if (name.includes(fieldName) && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });

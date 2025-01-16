@@ -25,11 +25,14 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
         const quill = new Quill(editorContainer, {
             theme: "snow",
             modules: {
-                toolbar: [
-                    ["bold", "italic", "underline"],
-                    [{ header: 3 }, { header: 4 }],
-                    // [{ 'color': "red" }, { 'background': "yellow" }]
-                ],
+                history: {},
+                toolbar: {
+                    container: [
+                        ["bold", "italic", "underline"],
+                        [{ header: 3 }],
+                        // [{ 'color': "red" }, { 'background': "yellow" }]
+                    ],
+                },
                 clipboard: {
                     allowed: {
                         tags: ["strong", "h3", "h4", "em", "p", "br", "span", "u"],
@@ -50,10 +53,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
         if (defaultValue) {
             const delta = quill.clipboard.convert({ html: defaultValue });
             quill.setContents(delta, "silent");
+            quill.history.clear();
         }
 
         quill.on(Quill.events.TEXT_CHANGE, () => {
-            onTextChange(quill.getSemanticHTML());
+            onTextChange(quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>"));
         });
 
         return () => {

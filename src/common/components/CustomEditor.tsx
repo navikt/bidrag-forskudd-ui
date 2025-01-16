@@ -19,13 +19,15 @@ export function CustomTextareaEditor({
     className?: string;
     resize?: boolean;
 }) {
-    const { watch, setValue } = useFormContext();
+    const { watch, setValue, trigger } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
 
     const quillRef = useRef(null);
 
     function onChange(value: string) {
-        setValue(name, value?.replace("<br/>", String.fromCharCode(10)).replace("<br>", String.fromCharCode(10)));
+        console.log(value);
+        setValue(name, value);
+        trigger(name);
     }
     return (
         <BodyLong size="small" as="div" className={className}>
