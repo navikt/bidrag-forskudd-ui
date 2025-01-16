@@ -62,7 +62,7 @@ export const Begrunnelse = () => {
 
     return (
         <>
-            <CustomTextareaEditor label={text.title.begrunnelse} name={`begrunnelse`} />
+            <CustomTextareaEditor label={text.title.begrunnelse} name={`begrunnelse`} resize />
             <ActionButtons onNext={onNext} />
         </>
     );
