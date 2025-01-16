@@ -1,7 +1,6 @@
 import { fileURLToPath } from "node:url";
 
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
-import { EsbuildPlugin } from "esbuild-loader";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import rehypeSlug from "rehype-slug";
@@ -29,24 +28,13 @@ export default {
             "@common": path.resolve("./src/common"),
             "@commonTypes": path.resolve("./src/types"),
             "@utils": path.resolve("./src/utils"),
+            parchment: path.resolve(__dirname, "./node_modules/parchment/dist/parchment.js"),
+            // quill: path.resolve(__dirname, "./node_modules/quill/quill.js"),
+            // "^quill$": path.resolve(__dirname, "./node_modules/quill/quill.js"),
+            // "quill/dist/quill.snow.css": path.resolve(__dirname, "./node_modules/quill/dist/quill.snow.css"),
         },
     },
-    optimization: {
-        minimizer: [
-            new EsbuildPlugin({
-                target: "ESNext",
-                minify: false,
-                format: "esm",
-                sourcemap: true,
-                minifyIdentifiers: false,
-                minifyWhitespace: true,
-                minifySyntax: true,
-                globalName: "bidrag_behandling_ui",
-                css: true,
-                keepNames: true,
-            }),
-        ],
-    },
+
     module: {
         rules: [
             {
@@ -77,10 +65,14 @@ export default {
             },
             {
                 test: /\.([jt]sx?)?$/,
-                exclude: /node_modules/,
-                loader: "esbuild-loader",
+                exclude: /node_modules(?!\/quill)/,
+                loader: "babel-loader",
                 options: {
-                    target: "ESNext",
+                    presets: [
+                        ["@babel/preset-env", { targets: "defaults" }],
+                        "@babel/preset-typescript",
+                        "@babel/preset-react",
+                    ],
                 },
             },
             {

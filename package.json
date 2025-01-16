@@ -8,7 +8,8 @@
     "fix-lint": "eslint './src/**/*.{js,ts,tsx}' package.json --quiet --fix",
     "test": "cross-env NODE_ENV=TEST mocha --config .mocharc.js --spec ./src/__tests__/**/**/*.spec.{js,ts,tsx} --exit",
     "start": "",
-    "env:export:local": "export $(cat env/.env.local | xargs)",
+    "serve": "npx serve -l 5253 ./dist",
+    "env:export:local": "export $(cat env/.env.local.private | xargs)",
     "dev": "cross-env-shell NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
     "dev:mock": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --config webpack.dev.config.mjs",
     "dev:local": "cross-env ENABLE_MOCK=true NODE_ENV=development webpack serve --env envfile=.env.local.private --config webpack.dev.config.mjs",
@@ -56,6 +57,10 @@
     "unleash-proxy-client": "^3.3.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
     "@eslint/compat": "^1.2.4",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.17.0",
@@ -71,6 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
     "autoprefixer": "^10.4.16",
+    "babel-loader": "^9.2.1",
     "chai": "^5.1.2",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
