@@ -201,7 +201,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} />
+            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );

@@ -165,7 +165,9 @@ const Side = () => {
 
     return (
         <>
-            {underholdId && <FormControlledTextarea key={fieldName} name={fieldName} label={text.title.begrunnelse} />}
+            {underholdId && (
+                <FormControlledTextarea key={fieldName} name={fieldName} label={text.title.begrunnelse} resize />
+            )}
             {!underholdId && <Textarea label={text.title.begrunnelse} size="small" readOnly={true} />}
             <ActionButtons onNext={onNext} />
         </>

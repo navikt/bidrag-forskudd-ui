@@ -179,9 +179,7 @@ const Side = () => {
                 name={`begrunnelser.${selectedRolleId}`}
                 label={text.title.begrunnelse}
                 description={descriptionText}
-            /> */}
-            <CustomEditor description={descriptionText} label={text.title.begrunnelse} name={`begrunnelser.${selectedRolleId}`} />
-
+            />
             <ActionButtons onNext={onNext} />
         </Fragment>
     );
