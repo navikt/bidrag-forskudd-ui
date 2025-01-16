@@ -122,15 +122,15 @@ const Side = () => {
 
                         const updatedUnderholdskostnader = tabIsAndreBarn
                             ? currentData.underholdskostnader.map((underhold) => ({
-                                ...underhold,
-                                begrunnelse: underhold.gjelderBarn.medIBehandlingen
-                                    ? underhold.begrunnelse
-                                    : begrunnelse,
-                            }))
+                                  ...underhold,
+                                  begrunnelse: underhold.gjelderBarn.medIBehandlingen
+                                      ? underhold.begrunnelse
+                                      : begrunnelse,
+                              }))
                             : currentData.underholdskostnader.toSpliced(Number(underholdIndex), 1, {
-                                ...currentData.underholdskostnader[underholdIndex],
-                                begrunnelse: begrunnelse,
-                            });
+                                  ...currentData.underholdskostnader[underholdIndex],
+                                  begrunnelse: begrunnelse,
+                              });
 
                         return {
                             ...currentData,

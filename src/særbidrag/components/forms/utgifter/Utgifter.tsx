@@ -498,10 +498,10 @@ const UtgifterListe = () => {
                         updatedUtgiftIndex === -1
                             ? currentData.utgift.utgifter.concat(response.oppdatertUtgiftspost)
                             : currentData.utgift.utgifter.toSpliced(
-                                updatedUtgiftIndex,
-                                1,
-                                response.oppdatertUtgiftspost
-                            );
+                                  updatedUtgiftIndex,
+                                  1,
+                                  response.oppdatertUtgiftspost
+                              );
 
                     setValue(`avslag`, response.avslag ?? undefined);
                     return {
@@ -587,8 +587,9 @@ const UtgifterListe = () => {
         <>
             {controlledFields.length > 0 && (
                 <div
-                    className={`${saveUtgifter.mutation.isPending ? "relative" : "inherit"
-                        } block overflow-x-auto whitespace-nowrap`}
+                    className={`${
+                        saveUtgifter.mutation.isPending ? "relative" : "inherit"
+                    } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveUtgifter.mutation.isPending} />

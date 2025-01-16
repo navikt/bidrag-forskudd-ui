@@ -166,8 +166,8 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-                ? text.description.inntektBegrunnelseBP
-                : undefined;
+              ? text.description.inntektBegrunnelseBP
+              : undefined;
 
     return (
         <Fragment key={selectedRolleId}>
