@@ -1,5 +1,4 @@
 import { ActionButtons } from "@common/components/ActionButtons";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useDebounce } from "@common/hooks/useDebounce";
@@ -8,6 +7,7 @@ import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 
@@ -62,7 +62,7 @@ export const Begrunnelse = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor label={text.title.begrunnelse} name={`begrunnelse`} />
             <ActionButtons onNext={onNext} />
         </>
     );

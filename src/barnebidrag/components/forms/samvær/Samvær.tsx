@@ -7,7 +7,6 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { PersonNavn } from "@common/components/PersonNavn";
@@ -46,6 +45,7 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
 import { STEPS } from "../../../constants/steps";
@@ -150,9 +150,9 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea
-                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
+            <CustomTextareaEditor
                 label={text.title.begrunnelse}
+                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
                 resize
             />
             <ActionButtons onNext={onNext} />
@@ -468,9 +468,8 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${
-                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                            } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                                } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

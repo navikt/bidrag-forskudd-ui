@@ -36,6 +36,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
@@ -497,10 +498,10 @@ const UtgifterListe = () => {
                         updatedUtgiftIndex === -1
                             ? currentData.utgift.utgifter.concat(response.oppdatertUtgiftspost)
                             : currentData.utgift.utgifter.toSpliced(
-                                  updatedUtgiftIndex,
-                                  1,
-                                  response.oppdatertUtgiftspost
-                              );
+                                updatedUtgiftIndex,
+                                1,
+                                response.oppdatertUtgiftspost
+                            );
 
                     setValue(`avslag`, response.avslag ?? undefined);
                     return {
@@ -586,9 +587,8 @@ const UtgifterListe = () => {
         <>
             {controlledFields.length > 0 && (
                 <div
-                    className={`${
-                        saveUtgifter.mutation.isPending ? "relative" : "inherit"
-                    } block overflow-x-auto whitespace-nowrap`}
+                    className={`${saveUtgifter.mutation.isPending ? "relative" : "inherit"
+                        } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveUtgifter.mutation.isPending} />
@@ -767,7 +767,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );

@@ -1,6 +1,5 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
@@ -21,6 +20,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { InntektTableComponent, InntektTableProvider } from "../../../../common/components/inntekt/InntektTableContext";
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import urlSearchParams from "../../../../common/constants/behandlingQueryKeys";
@@ -153,7 +153,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );

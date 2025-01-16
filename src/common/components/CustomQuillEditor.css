@@ -5,16 +5,26 @@
     height: auto;
 
 }
-.ql-editor {
+.resizable  .ql-editor  {
     height: inherit;
     resize: both;
     overflow: auto;
-
+    border-end-end-radius: 0;
+}
+.ql-editor  {
+    width: 400px;
+    height: min-content;
 }
 .ql-container {
-    /* height: inherit; */
-    width: 400px;
+    height: inherit;
+    width: auto;
 }
 .ql-toolbar {
-    width: 100%;
+    width: auto;
+}
+
+.readonly > .ql-container {
+    background-color: var(--a-surface-subtle);
+    border-color: var(--a-border-subtle);
+    cursor: default;
 }
