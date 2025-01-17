@@ -28,10 +28,6 @@ export default {
             "@common": path.resolve("./src/common"),
             "@commonTypes": path.resolve("./src/types"),
             "@utils": path.resolve("./src/utils"),
-            parchment: path.resolve(__dirname, "./node_modules/parchment/dist/parchment.js"),
-            // quill: path.resolve(__dirname, "./node_modules/quill/quill.js"),
-            // "^quill$": path.resolve(__dirname, "./node_modules/quill/quill.js"),
-            // "quill/dist/quill.snow.css": path.resolve(__dirname, "./node_modules/quill/dist/quill.snow.css"),
         },
     },
 
@@ -73,6 +69,7 @@ export default {
                         "@babel/preset-typescript",
                         ["@babel/preset-react", { runtime: "automatic" }],
                     ],
+                    plugins: ["@babel/plugin-transform-runtime"],
                 },
             },
             {
