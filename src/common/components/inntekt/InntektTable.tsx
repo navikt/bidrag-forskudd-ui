@@ -256,15 +256,17 @@ export const InntektTabel = ({
             ...periode,
             erRedigerbart: periode.kanRedigeres && taMed,
         });
-
-        if (!taMed) {
-            if (!erOffentlig) {
-                handleDelete(index);
-            } else {
-                const inntekt = inntekter[inntektType].find((inntekt: InntektDtoV2) => inntekt.id === periode.id);
-                if (inntekt.taMed !== taMed) {
-                    handleUpdate(index);
-                }
+        if (!taMed && !erOffentlig) {
+            handleDelete(index);
+        } else {
+            handleUpdate(index);
+        }
+        if (!taMed && !erOffentlig) {
+            handleDelete(index);
+        } else {
+            const inntekt = inntekter[inntektType].find((inntekt: InntektDtoV2) => inntekt.id === periode.id);
+            if (inntekt.taMed !== taMed) {
+                handleUpdate(index);
             }
         }
     };
