@@ -1,4 +1,5 @@
 import "quill/dist/quill.snow.css";
+import "quill/dist/quill.core.css";
 import "./CustomQuillEditor.css";
 import "quill-paste-smart";
 
@@ -17,7 +18,7 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
 
     useEffect(() => {
         ref.current?.enable(!readOnly);
-    }, [ref, readOnly, containerRef.current?.querySelector(".ql-container")]);
+    }, [ref, readOnly]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -26,10 +27,10 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
             theme: "snow",
             modules: {
                 history: {},
+
                 toolbar: {
                     container: [
-                        ["bold", "italic", "underline"],
-                        [{ header: 3 }],
+                        ["bold", "italic", "underline", { header: 3 }],
                         // [{ 'color': "red" }, { 'background': "yellow" }]
                     ],
                 },

@@ -28,3 +28,16 @@
     border-color: var(--a-border-subtle);
     cursor: default;
 }
+
+.ql-snow .ql-formats button[aria-label="header: 3"]:before {
+    content: "Undertittel";
+    width: max-content;
+    font-size: 14px;
+}
+.ql-snow .ql-formats button[aria-label="header: 3"].ql-active {
+    font-weight: bold;
+}
+.ql-snow .ql-formats button[aria-label="header: 3"] svg {
+    display: none;
+    width: max-content;
+}

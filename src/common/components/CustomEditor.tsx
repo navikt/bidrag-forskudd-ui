@@ -28,6 +28,10 @@ export function CustomTextareaEditor({
         setValue(name, value);
         trigger(name);
     }
+
+    function reformatText(text?: string) {
+        return text?.replace(new RegExp(String.fromCharCode(10), "g"), "<br>");
+    }
     return (
         <BodyLong size="small" as="div" className={className}>
             <div className="flex items-center gap-2">
@@ -47,7 +51,7 @@ export function CustomTextareaEditor({
                 ref={quillRef}
                 resize={resize}
                 readOnly={lesemodus}
-                defaultValue={watch(name)?.replace(new RegExp(String.fromCharCode(10), "g"), "<br>")}
+                defaultValue={reformatText(watch(name))}
                 onTextChange={onChange}
             />
         </BodyLong>
