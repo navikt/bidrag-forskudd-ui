@@ -43,7 +43,7 @@ export function CustomTextareaEditor({
                 )}
             </div>
             {description && (
-                <BodyShort spacing textColor="subtle" size="small">
+                <BodyShort spacing textColor="subtle" size="small" className="max-w-[500px] mt-[-0.375rem]">
                     {description}
                 </BodyShort>
             )}
