@@ -17,14 +17,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
     const containerRef = useRef(null);
 
     useEffect(() => {
-        ref.current?.enable(!readOnly);
-    }, [ref, readOnly]);
-
-    useEffect(() => {
         const container = containerRef.current;
         const editorContainer = container.appendChild(container.ownerDocument.createElement("div"));
         const quill = new Quill(editorContainer, {
             theme: "snow",
+            readOnly,
             modules: {
                 history: {},
 
