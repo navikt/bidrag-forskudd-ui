@@ -7,7 +7,6 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { PersonNavn } from "@common/components/PersonNavn";
@@ -45,6 +44,7 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { SærligeutgifterStepper } from "../../../../særbidrag/enum/SærligeutgifterStepper";
 import { STEPS } from "../../../constants/steps";
@@ -143,7 +143,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes("begrunnelse") && type === "change") {
+            if (name.includes("begrunnelse") && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });
@@ -152,9 +152,10 @@ const Side = () => {
 
     return (
         <Fragment key={oppdaterSamvær.id}>
-            <FormControlledTextarea
-                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
+            <CustomTextareaEditor
                 label={text.title.begrunnelse}
+                name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
+                description={text.description.samværBegrunnelse}
                 resize
             />
             <ActionButtons onNext={onNext} />

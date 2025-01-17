@@ -60,6 +60,8 @@ const tekster = {
             "Denne siden er under arbeid og er ikke klar for testing. Du vil få beskjed når du kan begynne å teste denne siden.",
     },
     description: {
+        samværBegrunnelse:
+            "Du skal vurdere partenes samværsopplysninger, samværsavtaler og begrunne samværet som legges til grunn ut ifra relevante momenter i saken",
         inntektBegrunnelseBM:
             "Du skal også vurdere partens inntektsevne. Dersom parten har en lavere inntekt enn inntektsevnen, må det også vurderes om parten har en rimelig grunn til dette. Husk å vurdere forskuddet.",
         inntektBegrunnelseBP:

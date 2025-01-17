@@ -1,7 +1,6 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
@@ -24,6 +23,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
@@ -155,7 +155,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes("begrunnelser") && type === "change") {
+            if (name.includes("begrunnelser") && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });
@@ -171,10 +171,10 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <FormControlledTextarea
-                name={`begrunnelser.${selectedRolleId}`}
-                label={text.title.begrunnelse}
+            <CustomTextareaEditor
                 description={descriptionText}
+                label={text.title.begrunnelse}
+                name={`begrunnelser.${selectedRolleId}`}
                 resize
             />
             <ActionButtons onNext={onNext} />

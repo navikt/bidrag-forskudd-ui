@@ -3,10 +3,15 @@ import { merge } from "webpack-merge";
 
 import webpackCommon from "./webpack.common.config.mjs";
 const { EnvironmentPlugin } = webpack;
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
 export default merge(webpackCommon, {
     mode: "production",
     plugins: [
+        new HtmlWebpackPlugin({
+            publicPath: "/",
+            template: "./src/index.html",
+        }),
         // Defined as variable: default-value
         new EnvironmentPlugin({
             STATIC_FILES_URL: "",
@@ -22,6 +27,7 @@ export default merge(webpackCommon, {
             UNLEASH_FRONTEND_TOKEN: "",
             UNLEASH_API_URL: "",
             MODIA_URL: "",
+            ENVIRONMENT: "",
         }),
     ],
 });

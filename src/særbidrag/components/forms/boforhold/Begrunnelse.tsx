@@ -1,5 +1,4 @@
 import { ActionButtons } from "@common/components/ActionButtons";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useDebounce } from "@common/hooks/useDebounce";
@@ -8,6 +7,7 @@ import { BoforholdFormValues } from "@common/types/boforholdFormValues";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
 import { SærligeutgifterStepper } from "../../../enum/SærligeutgifterStepper";
 
@@ -53,7 +53,7 @@ export const Begrunnelse = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (["begrunnelse"].includes(name) && type === "change") {
+            if (["begrunnelse"].includes(name) && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });
@@ -62,7 +62,7 @@ export const Begrunnelse = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );

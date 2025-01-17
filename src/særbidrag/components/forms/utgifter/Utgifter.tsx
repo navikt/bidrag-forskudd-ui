@@ -36,6 +36,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { useEffect, useRef } from "react";
 import { FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import elementIds from "../../../../common/constants/elementIds";
 import { AvslagListe, AvslagListeEtterUtgifterErUtfylt } from "../../../constants/avslag";
 import { STEPS } from "../../../constants/steps";
@@ -767,7 +768,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -787,7 +788,7 @@ const UtgifterForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (name === undefined || type === undefined) {
+            if (name === undefined || (name !== "begrunnelse" && type === undefined)) {
                 return;
             } else {
                 debouncedOnSave(name);

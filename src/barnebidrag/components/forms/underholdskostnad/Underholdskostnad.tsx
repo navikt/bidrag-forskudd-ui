@@ -1,7 +1,6 @@
 import { Rolletype, UnderholdDto } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -14,6 +13,7 @@ import { BodyShort, Tabs, Textarea } from "@navikt/ds-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { PersonIdent } from "../../../../common/components/PersonIdent";
 import { toUnderholdskostnadTabQueryParameter } from "../../../../common/constants/behandlingQueryKeys";
 import { STEPS } from "../../../constants/steps";
@@ -156,7 +156,7 @@ const Side = () => {
 
     useEffect(() => {
         const subscription = watch((_, { name, type }) => {
-            if (name.includes(fieldName) && type === "change") {
+            if (name.includes(fieldName) && (type === "change" || type === undefined)) {
                 debouncedOnSave();
             }
         });
@@ -166,7 +166,7 @@ const Side = () => {
     return (
         <>
             {underholdId && (
-                <FormControlledTextarea key={fieldName} name={fieldName} label={text.title.begrunnelse} resize />
+                <CustomTextareaEditor key={fieldName} name={fieldName} label={text.title.begrunnelse} resize />
             )}
             {!underholdId && <Textarea label={text.title.begrunnelse} size="small" readOnly={true} />}
             <ActionButtons onNext={onNext} />

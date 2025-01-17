@@ -1,0 +1,43 @@
+.ql-top-container {
+   
+    height: inherit;
+    width: max-content;
+    height: auto;
+
+}
+.resizable  .ql-editor  {
+    height: inherit;
+    resize: both;
+    overflow: auto;
+    border-end-end-radius: 0;
+}
+.ql-editor  {
+    width: 400px;
+    height: min-content;
+}
+.ql-container {
+    height: inherit;
+    width: auto;
+}
+.ql-toolbar {
+    width: auto;
+}
+
+.readonly > .ql-container {
+    background-color: var(--a-surface-subtle);
+    border-color: var(--a-border-subtle);
+    cursor: default;
+}
+
+.ql-snow .ql-formats button[aria-label="header: 3"]:before {
+    content: "Undertittel";
+    width: max-content;
+    font-size: 14px;
+}
+.ql-snow .ql-formats button[aria-label="header: 3"].ql-active {
+    font-weight: bold;
+}
+.ql-snow .ql-formats button[aria-label="header: 3"] svg {
+    display: none;
+    width: max-content;
+}

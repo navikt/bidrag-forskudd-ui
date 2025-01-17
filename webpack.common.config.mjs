@@ -1,7 +1,6 @@
 import { fileURLToPath } from "node:url";
 
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
-import { EsbuildPlugin } from "esbuild-loader";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import rehypeSlug from "rehype-slug";
@@ -31,22 +30,7 @@ export default {
             "@utils": path.resolve("./src/utils"),
         },
     },
-    optimization: {
-        minimizer: [
-            new EsbuildPlugin({
-                target: "ESNext",
-                minify: false,
-                format: "esm",
-                sourcemap: true,
-                minifyIdentifiers: false,
-                minifyWhitespace: true,
-                minifySyntax: true,
-                globalName: "bidrag_behandling_ui",
-                css: true,
-                keepNames: true,
-            }),
-        ],
-    },
+
     module: {
         rules: [
             {
@@ -77,10 +61,15 @@ export default {
             },
             {
                 test: /\.([jt]sx?)?$/,
-                exclude: /node_modules/,
-                loader: "esbuild-loader",
+                exclude: /node_modules(?!\/quill)/,
+                loader: "babel-loader",
                 options: {
-                    target: "ESNext",
+                    presets: [
+                        ["@babel/preset-env", { targets: "defaults" }],
+                        "@babel/preset-typescript",
+                        ["@babel/preset-react", { runtime: "automatic" }],
+                    ],
+                    plugins: ["@babel/plugin-transform-runtime"],
                 },
             },
             {

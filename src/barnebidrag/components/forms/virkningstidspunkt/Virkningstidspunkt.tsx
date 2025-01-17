@@ -10,7 +10,6 @@ import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
-import { FormControlledTextarea } from "@common/components/formFields/FormControlledTextArea";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -30,6 +29,7 @@ import { addMonths, dateOrNull, DateToDDMMYYYYString } from "@utils/date-utils";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
+import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
 import { useOnSaveVirkningstidspunkt } from "../../../hooks/useOnSaveVirkningstidspunkt";
@@ -187,7 +187,7 @@ const Side = () => {
 
     return (
         <>
-            <FormControlledTextarea name="begrunnelse" label={text.title.begrunnelse} resize />
+            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
             <ActionButtons onNext={onNext} />
         </>
     );
@@ -217,7 +217,10 @@ const VirkningstidspunktForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type === undefined) {
+            if (
+                (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
+                (name !== "begrunnelse" && type === undefined)
+            ) {
                 return;
             } else {
                 debouncedOnSave();
