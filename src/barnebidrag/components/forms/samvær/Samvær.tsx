@@ -40,7 +40,6 @@ import {
     getStartOfNextMonth,
     toISODateString,
 } from "@utils/date-utils";
-import { getSearchParam } from "@utils/window-utils";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
@@ -93,9 +92,9 @@ const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
-    const samværId = searchParams.get(urlSearchParams.tab);
-    const oppdaterSamvær = samvær.find((s) => s.id === Number(samværId)) ?? samvær?.[0];
-    const selectedRolleId = roller.find((r) => r.ident === oppdaterSamvær.gjelderBarn).id;
+    const selectedRolleId = searchParams.get(urlSearchParams.tab);
+    const rolle = roller.find((rolle) => rolle.id === Number(selectedRolleId));
+    const oppdaterSamvær = rolle ? samvær.find((s) => s.gjelderBarn === rolle.ident) : samvær?.[0];
     const [previousValues, setPreviousValues] = useState<string>(
         getValues(`${oppdaterSamvær.gjelderBarn}.begrunnelse`)
     );
@@ -112,15 +111,18 @@ const Side = () => {
             },
             {
                 onSuccess: (response) => {
-                    saveSamværFn.queryClientUpdater((currentData) => ({
-                        ...currentData,
-                        samvær: currentData.samvær.map((s) => {
-                            if (s.id === Number(samværId)) {
+                    saveSamværFn.queryClientUpdater((currentData) => {
+                        const updatedSamvær = currentData.samvær.map((s) => {
+                            if (s.id === Number(oppdaterSamvær.id)) {
                                 return response.oppdatertSamvær;
                             }
                             return s;
-                        }),
-                    }));
+                        });
+                        return {
+                            ...currentData,
+                            samvær: updatedSamvær,
+                        };
+                    });
                     setPreviousValues(response.oppdatertSamvær.begrunnelse.innhold);
                 },
                 onError: () => {
@@ -149,7 +151,7 @@ const Side = () => {
     }, []);
 
     return (
-        <Fragment key={selectedRolleId}>
+        <Fragment key={oppdaterSamvær.id}>
             <CustomTextareaEditor
                 label={text.title.begrunnelse}
                 name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
@@ -172,7 +174,7 @@ const Main = () => {
 
     const defaultTab = useMemo(() => {
         const roleId = roller
-            .find((rolle) => rolle.id?.toString() === getSearchParam(urlSearchParams.tab))
+            .find((rolle) => rolle.id?.toString() === searchParams.get(urlSearchParams.tab))
             ?.id?.toString();
         return roleId ?? roller[0].id.toString();
     }, []);
