@@ -231,7 +231,10 @@ const VirkningstidspunktForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if ((name === "virkningstidspunkt" && !value.virkningstidspunkt) || type === undefined) {
+            if (
+                (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
+                (name !== "begrunnelse" && type === undefined)
+            ) {
                 return;
             } else {
                 debouncedOnSave();

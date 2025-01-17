@@ -788,7 +788,7 @@ const UtgifterForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (name === undefined || type === undefined) {
+            if (name === undefined || (name !== "begrunnelse" && type === undefined)) {
                 return;
             } else {
                 debouncedOnSave(name);
