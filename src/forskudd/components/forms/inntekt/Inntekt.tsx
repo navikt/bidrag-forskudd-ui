@@ -1,5 +1,6 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
@@ -96,11 +97,14 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
-    const { roller } = useGetBehandlingV2();
+    const { roller, inntekter } = useGetBehandlingV2();
     const bm = roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${bm.id}`));
+    const begrunnelseFraOpprinneligVedtak = inntekter.begrunnelserFraOpprinneligVedtak?.find(
+        (begrunnelse) => begrunnelse?.gjelder?.ident === bm.ident
+    );
     const onSave = () => {
         const begrunnelse = getValues(`begrunnelser.${bm.id}`);
         saveInntekt.mutation.mutate(
@@ -153,7 +157,15 @@ const Side = () => {
 
     return (
         <>
-            <CustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
+            <FormControlledCustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
+            {begrunnelseFraOpprinneligVedtak && (
+                <CustomTextareaEditor
+                    name={`begrunnelseFraOpprinneligVedtak.${bm.id}`}
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
         </>
     );

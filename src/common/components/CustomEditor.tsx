@@ -1,32 +1,35 @@
 import { PadlockLockedFillIcon } from "@navikt/aksel-icons";
 import { BodyLong, BodyShort, Label } from "@navikt/ds-react";
 import React, { useRef } from "react";
-import { useFormContext } from "react-hook-form";
 
 import { useBehandlingProvider } from "../context/BehandlingContext";
 import { CustomQuillEditor } from "./CustomQuillEditor";
 
 export function CustomTextareaEditor({
     name,
+    value,
     label,
     description,
     className,
     resize,
+    readOnly,
+    onChange,
 }: {
-    name: string;
+    name;
+    value?: string;
     label?: string;
     description?: string;
     className?: string;
     resize?: boolean;
+    readOnly?: boolean;
+    onChange?: (html: string) => void;
 }) {
-    const { watch, setValue, trigger } = useFormContext();
     const { lesemodus } = useBehandlingProvider();
 
     const quillRef = useRef(null);
 
-    function onChange(value: string) {
-        setValue(name, value);
-        trigger(name);
+    function onTextChange(text: string) {
+        onChange?.(text);
     }
 
     function reformatText(text?: string) {
@@ -34,14 +37,12 @@ export function CustomTextareaEditor({
     }
     return (
         <BodyLong size="small" as="div" className={className}>
-            <div className="flex items-center gap-2">
-                {lesemodus && <PadlockLockedFillIcon />}
-                {label && (
-                    <Label spacing size="small" htmlFor={name}>
-                        {label}
-                    </Label>
-                )}
-            </div>
+            {label && (
+                <Label className="flex items-center gap-2" spacing size="small" htmlFor={name}>
+                    {(lesemodus || readOnly) && <PadlockLockedFillIcon />} {label}
+                </Label>
+            )}
+
             {description && (
                 <BodyShort spacing textColor="subtle" size="small" className="max-w-[500px] mt-[-0.375rem]">
                     {description}
@@ -50,9 +51,9 @@ export function CustomTextareaEditor({
             <CustomQuillEditor
                 ref={quillRef}
                 resize={resize}
-                readOnly={lesemodus}
-                defaultValue={reformatText(watch(name))}
-                onTextChange={onChange}
+                readOnly={lesemodus || readOnly}
+                defaultValue={reformatText(value)}
+                onTextChange={onTextChange}
             />
         </BodyLong>
     );

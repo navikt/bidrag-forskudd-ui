@@ -7,6 +7,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { OverlayLoader } from "@common/components/OverlayLoader";
 import { PersonNavn } from "@common/components/PersonNavn";
@@ -152,12 +153,20 @@ const Side = () => {
 
     return (
         <Fragment key={oppdaterSamvær.id}>
-            <CustomTextareaEditor
+            <FormControlledCustomTextareaEditor
                 label={text.title.begrunnelse}
                 name={`${oppdaterSamvær.gjelderBarn}.begrunnelse`}
                 description={text.description.samværBegrunnelse}
                 resize
             />
+            {oppdaterSamvær.begrunnelseFraOpprinneligVedtak && (
+                <CustomTextareaEditor
+                    name={`${oppdaterSamvær.gjelderBarn}.begrunnelseFraOpprinneligVedtak`}
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
         </Fragment>
     );

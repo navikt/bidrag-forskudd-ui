@@ -8,6 +8,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledMonthPicker } from "@common/components/formFields/FormControlledMonthPicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FlexRow } from "@common/components/layout/grid/FlexRow";
@@ -54,6 +55,7 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
     virkningstidspunkt: response.virkningstidspunkt,
     årsakAvslag: response.årsak ?? response.avslag ?? "",
     begrunnelse: response.begrunnelse?.innhold,
+    begrunnelseFraOpprinneligVedtak: response.begrunnelseFraOpprinneligVedtak?.innhold,
 });
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
@@ -173,7 +175,10 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
-    const { gebyr } = useGetBehandlingV2();
+    const {
+        gebyr,
+        virkningstidspunkt: { begrunnelseFraOpprinneligVedtak },
+    } = useGetBehandlingV2();
     const useFormMethods = useFormContext();
     const årsakAvslag = useFormMethods.getValues("årsakAvslag");
     const onNext = () =>
@@ -187,7 +192,16 @@ const Side = () => {
 
     return (
         <>
-            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            <FormControlledCustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            {begrunnelseFraOpprinneligVedtak?.innhold && (
+                <CustomTextareaEditor
+                    name="begrunnelseFraOpprinneligVedtak"
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
         </>
     );

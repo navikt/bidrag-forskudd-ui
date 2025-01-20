@@ -499,6 +499,10 @@ export interface BarnetilsynGrunnlagDto {
     skolealder?: BarnetilsynGrunnlagDtoSkolealderEnum;
 }
 
+/**
+ * Saksbehandlers begrunnelse
+ * @deprecated
+ */
 export interface BegrunnelseDto {
     innhold: string;
     gjelder?: RolleDto;
@@ -572,7 +576,10 @@ export interface BoforholdDtoV2 {
     andreVoksneIHusstanden: BostatusperiodeDto[];
     /** @uniqueItems true */
     sivilstand: SivilstandDto[];
+    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
     valideringsfeil: BoforholdValideringsfeil;
     /** Er sann hvis status på andre voksne i husstanden er 'BOR_IKKE_MED_ANDRE_VOKSNE', men det er 18 åring i husstanden som regnes som voksen i husstanden */
     egetBarnErEnesteVoksenIHusstanden?: boolean;
@@ -583,6 +590,7 @@ export interface BoforholdDtoV2 {
      * @uniqueItems true
      */
     husstandsbarn: HusstandsmedlemDtoV2[];
+    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -905,7 +913,10 @@ export interface InntekterDtoV2 {
      * @uniqueItems true
      */
     begrunnelser: BegrunnelseDto[];
+    /** @uniqueItems true */
+    begrunnelserFraOpprinneligVedtak: BegrunnelseDto[];
     valideringsfeil: InntektValideringsfeilDto;
+    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -1028,7 +1039,10 @@ export interface SamvaerDto {
     /** @format int64 */
     id: number;
     gjelderBarn: string;
+    /** Saksbehandlers begrunnelse */
     begrunnelse?: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
     valideringsfeil?: SamvaerValideringsfeilDto;
     perioder: SamvaersperiodeDto[];
 }
@@ -1043,9 +1057,9 @@ export interface SamvaerValideringsfeilDto {
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
     hullIPerioder: Datoperiode[];
-    gjelderBarn?: string;
     harPeriodiseringsfeil: boolean;
     gjelderBarnNavn?: string;
+    gjelderBarn?: string;
 }
 
 export interface SamvaersperiodeDto {
@@ -1186,10 +1200,14 @@ export interface SaerbidragUtgifterDto {
     kategori: SaerbidragKategoriDto;
     beregning?: UtgiftBeregningDto;
     maksGodkjentBeløp?: MaksGodkjentBelopDto;
+    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
     utgifter: UtgiftspostDto[];
     valideringsfeil?: UtgiftValideringsfeilDto;
     totalBeregning: TotalBeregningUtgifterDto[];
+    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -1257,6 +1275,7 @@ export interface UnderholdDto {
     /** @uniqueItems true */
     underholdskostnad: UnderholdskostnadDto[];
     begrunnelse?: string;
+    begrunnelseFraOpprinneligVedtak?: string;
     /** @uniqueItems true */
     beregnetUnderholdskostnad: UnderholdskostnadDto[];
     valideringsfeil?: UnderholdskostnadValideringsfeil;
@@ -1392,7 +1411,11 @@ export interface VirkningstidspunktDto {
     opprinneligVirkningstidspunkt?: string;
     årsak?: TypeArsakstype;
     avslag?: Resultatkode;
+    /** Saksbehandlers begrunnelse */
     begrunnelse: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
+    begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
+    /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
 
@@ -2019,9 +2042,8 @@ export interface Skatt {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    skattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface UnderholdEgneBarnIHusstand {
@@ -2233,10 +2255,10 @@ export interface HusstandsmedlemDto {
 export interface MaBekrefteNyeOpplysninger {
     type: OpplysningerType;
     rolle: RolleDto;
-    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
-    gjelderBarn?: HusstandsmedlemDto;
     /** @format int64 */
     underholdskostnadId?: number;
+    /** Barn som det må bekreftes nye opplysninger for. Vil bare være satt hvis type = BOFORHOLD */
+    gjelderBarn?: HusstandsmedlemDto;
 }
 
 export interface VirkningstidspunktFeilDto {
@@ -2635,11 +2657,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    vedtakstypeVisningsnavn?: string;
-    avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
+    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2721,9 +2742,9 @@ export interface NotatInntektDto {
     gjelderBarn?: NotatPersonDto;
     historisk: boolean;
     inntektsposter: NotatInntektspostDto[];
-    visningsnavn: string;
     /** Avrundet månedsbeløp for barnetillegg */
     månedsbeløp?: number;
+    visningsnavn: string;
 }
 
 export interface NotatInntekterDto {
@@ -2817,8 +2838,8 @@ export interface NotatResultatPeriodeDto {
     vedtakstype?: Vedtakstype;
     /** @format int32 */
     antallBarnIHusstanden: number;
-    sivilstandVisningsnavn?: string;
     resultatKodeVisningsnavn: string;
+    sivilstandVisningsnavn?: string;
 }
 
 export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2839,8 +2860,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    beløpSomInnkreves: number;
     resultatVisningsnavn: string;
+    beløpSomInnkreves: number;
 };
 
 export interface NotatSamvaerDto {
@@ -2873,9 +2894,8 @@ export interface NotatSkattBeregning {
     trygdeavgift: number;
     skattMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
-    skattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
 }
 
 export interface NotatStonadTilBarnetilsynDto {
