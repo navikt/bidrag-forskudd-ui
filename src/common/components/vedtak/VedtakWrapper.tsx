@@ -21,6 +21,7 @@ import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
+import { hentVisningsnavn } from "../../hooks/useVisningsnavn";
 type STEPSTYPE =
     | { [_key in ForskuddStepper]: number }
     | { [_key in SærligeutgifterStepper]: number }
@@ -38,11 +39,23 @@ const validerForRoller = {
 
 export default function VedtakWrapper({ feil, steps, children }: PropsWithChildren<VedtakWrapperProps>) {
     const { onStepChange } = useBehandlingProvider();
-    const { type } = useGetBehandlingV2();
+    const {
+        type,
+        virkningstidspunkt: { avslag, årsak },
+    } = useGetBehandlingV2();
     function renderFeilmeldinger() {
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
+        if (feilInnhold.virkningstidspunkt != null && "virkningstidspunkt" in steps) {
+            if (feilInnhold.virkningstidspunkt?.manglerBegrunnelse === true) {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Begrunnelse må fylles ut når "{hentVisningsnavn(avslag ?? årsak)}" er valgt
+                    </ErrorSummary.Item>
+                );
+            }
+        }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];
             if (feilInnhold.utgift.manglerUtgifter) {
@@ -292,10 +305,10 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                                 [behandlingQueryKeys.tab]:
                                     value.type === OpplysningerType.BARNETILSYN
                                         ? toUnderholdskostnadTabQueryParameter(
-                                              value.gjelderBarn?.husstandsmedlemId,
-                                              value.underholdskostnadId,
-                                              true
-                                          )
+                                            value.gjelderBarn?.husstandsmedlemId,
+                                            value.underholdskostnadId,
+                                            true
+                                        )
                                         : value.rolle?.id?.toString(),
                             })
                         }
@@ -309,12 +322,12 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                 typeof feil.detaljer == "string"
                     ? []
                     : Object.keys(feil.detaljer)
-                          .filter((key) =>
-                              !Array.isArray(feil.detaljer[key])
-                                  ? feil.detaljer[key] != null
-                                  : feil.detaljer[key].length > 0
-                          )
-                          .map((key) => capitalizeFirstLetter(key));
+                        .filter((key) =>
+                            !Array.isArray(feil.detaljer[key])
+                                ? feil.detaljer[key] != null
+                                : feil.detaljer[key].length > 0
+                        )
+                        .map((key) => capitalizeFirstLetter(key));
 
             feilliste.push(
                 <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.vedtak)}>

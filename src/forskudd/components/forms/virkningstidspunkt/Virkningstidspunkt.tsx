@@ -68,7 +68,7 @@ const avslagsListe = [
     Resultatkode.UTENLANDSK_YTELSE,
 ];
 
-const opphørsListe = [Resultatkode.PARTENBEROMOPPHOR];
+const opphørAvslagsListe = [...avslagsListe, Resultatkode.PARTENBEROMOPPHOR];
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
@@ -80,7 +80,7 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
     const årsak = årsakListe.find((value) => value === values.årsakAvslag);
-    const avslag = avslagsListe.find((value) => value === values.årsakAvslag);
+    const avslag = opphørAvslagsListe.find((value) => value === values.årsakAvslag);
     return {
         virkningstidspunkt: values.virkningstidspunkt,
         årsak,
@@ -115,6 +115,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
     );
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
+    const avslagsOpphørsliste = erTypeOpphør ? opphørAvslagsListe : avslagsListe;
     return (
         <>
             <FlexRow className="gap-x-12">
@@ -158,7 +159,7 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                         </optgroup>
                     )}
                     <optgroup label={erTypeOpphør ? text.label.opphør : text.label.avslag}>
-                        {avslagsListe.map((value) => (
+                        {avslagsOpphørsliste.map((value) => (
                             <option key={value} value={value}>
                                 {hentVisningsnavnVedtakstype(value, behandling.vedtakstype)}
                             </option>
