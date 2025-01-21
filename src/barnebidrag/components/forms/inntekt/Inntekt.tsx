@@ -54,7 +54,7 @@ const Main = () => {
             {beregnetGebyrErEndret && !lesemodus && (
                 <BehandlingAlert variant="info" className="mb-4">
                     <Heading size="xsmall" level="6">
-                        {text.alert.gebyrHarBlittEndret}.
+                        {text.alert.gebyrHarBlittEndret}
                     </Heading>
                     <BodyShort size="small">{text.alert.gebyrHarBlittEndretDescription}</BodyShort>
                 </BehandlingAlert>
@@ -170,8 +170,8 @@ const Side = () => {
         selectedRolle.rolletype === Rolletype.BM
             ? text.description.inntektBegrunnelseBM
             : selectedRolle.rolletype === Rolletype.BP
-              ? text.description.inntektBegrunnelseBP
-              : undefined;
+                ? text.description.inntektBegrunnelseBP
+                : undefined;
 
     return (
         <Fragment key={selectedRolleId}>

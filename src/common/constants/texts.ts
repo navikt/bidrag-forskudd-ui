@@ -24,7 +24,7 @@ const tekster = {
         enEllerFlereSivilstandPerioderEndret: "En eller flere sivilstandsperioder har blitt endret",
         feilIPeriodisering: "Feil i periodisering",
         feilVedInnhentingAvOffentligData: "Data fra offentlig registre feiler",
-        gebyrHarBlittEndret: "Gebry har blitt endret",
+        gebyrHarBlittEndret: "Gebyr",
         gebyrHarBlittEndretDescription:
             "Inntektsendringen har endret gebyrvurderingen. Kontroller om gebyrvurderingen er korrekt.",
         harInnvilgetTilleggsstønad: "BM har fått innvilget tilleggstønad for et eller flere barn.",
