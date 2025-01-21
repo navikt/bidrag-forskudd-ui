@@ -69,6 +69,7 @@ export const Notat = () => {
                 <CustomTextareaEditor
                     name="begrunnelseFraOpprinneligVedtak"
                     label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
                     resize
                     readOnly
                 />

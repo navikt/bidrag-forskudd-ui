@@ -163,6 +163,7 @@ const Side = () => {
                 <CustomTextareaEditor
                     name={`${oppdaterSamvær.gjelderBarn}.begrunnelseFraOpprinneligVedtak`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={oppdaterSamvær.begrunnelseFraOpprinneligVedtak.innhold}
                     resize
                     readOnly
                 />

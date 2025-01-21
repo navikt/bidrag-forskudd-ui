@@ -155,6 +155,7 @@ const Side = () => {
         return () => subscription.unsubscribe();
     }, []);
 
+    console.log(begrunnelseFraOpprinneligVedtak);
     return (
         <>
             <FormControlledCustomTextareaEditor name={`begrunnelser.${bm.id}`} label={text.title.begrunnelse} resize />
@@ -162,6 +163,7 @@ const Side = () => {
                 <CustomTextareaEditor
                     name={`begrunnelseFraOpprinneligVedtak.${bm.id}`}
                     label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
                     resize
                     readOnly
                 />
