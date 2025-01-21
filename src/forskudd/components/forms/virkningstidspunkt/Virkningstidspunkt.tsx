@@ -68,6 +68,8 @@ const avslagsListe = [
     Resultatkode.UTENLANDSK_YTELSE,
 ];
 
+const opphørsListe = [Resultatkode.PARTENBEROMOPPHOR];
+
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
 const createInitialValues = (response: VirkningstidspunktDto): VirkningstidspunktFormValues => ({
