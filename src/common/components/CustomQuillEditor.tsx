@@ -25,12 +25,14 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
             modules: {
                 history: {},
 
-                toolbar: {
-                    container: [
-                        ["bold", "italic", "underline", { header: 3 }],
-                        // [{ 'color': "red" }, { 'background': "yellow" }]
-                    ],
-                },
+                toolbar: readOnly
+                    ? false
+                    : {
+                          container: [
+                              ["bold", "italic", "underline", { header: 3 }],
+                              // [{ 'color': "red" }, { 'background': "yellow" }]
+                          ],
+                      },
                 clipboard: {
                     allowed: {
                         tags: ["strong", "h3", "h4", "em", "p", "br", "span", "u"],
