@@ -9,6 +9,7 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { FormControlledDatePicker } from "@common/components/formFields/FormControlledDatePicker";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledSwitch } from "@common/components/formFields/FormControlledSwitch";
@@ -759,7 +760,7 @@ const BeregnetUtgifter = () => {
 const Side = () => {
     const { onStepChange } = useBehandlingProvider();
     const {
-        utgift: { avslag },
+        utgift: { avslag, begrunnelseFraOpprinneligVedtak },
     } = useGetBehandlingV2();
     const onNext = () =>
         onStepChange(
@@ -768,7 +769,16 @@ const Side = () => {
 
     return (
         <>
-            <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} resize />
+            <FormControlledCustomTextareaEditor label={text.title.begrunnelse} name="begrunnelse" resize />
+            {begrunnelseFraOpprinneligVedtak?.innhold && (
+                <CustomTextareaEditor
+                    name="begrunnelseFraOpprinneligVedtak"
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
         </>
     );

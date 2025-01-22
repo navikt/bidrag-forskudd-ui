@@ -1,5 +1,6 @@
 import { Rolletype } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import { InntektHeader } from "@common/components/inntekt/InntektHeader";
 import { InntektTableComponent, InntektTableProvider } from "@common/components/inntekt/InntektTableContext";
 import { NyOpplysningerAlert } from "@common/components/inntekt/NyOpplysningerAlert";
@@ -94,7 +95,7 @@ const Main = () => {
 
 const Side = () => {
     const [searchParams] = useSearchParams();
-    const { roller } = useGetBehandlingV2();
+    const { roller, inntekter } = useGetBehandlingV2();
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
     const saveInntekt = useOnSaveInntekt();
     const { watch, getValues, setValue } = useFormContext<InntektFormValues>();
@@ -104,6 +105,9 @@ const Side = () => {
         : roller.find((rolle) => rolle.rolletype === Rolletype.BM);
     const selectedRolleId = selectedRolle.id;
     const [previousValues, setPreviousValues] = useState<string>(getValues(`begrunnelser.${selectedRolleId}`));
+    const begrunnelseFraOpprinneligVedtak = inntekter.begrunnelserFraOpprinneligVedtak.find(
+        (begrunnelse) => begrunnelse.gjelder.ident === selectedRolle.ident
+    );
 
     const onSave = () => {
         const begrunnelse = getValues(`begrunnelser.${selectedRolleId}`);
@@ -165,12 +169,21 @@ const Side = () => {
 
     return (
         <Fragment key={selectedRolleId}>
-            <CustomTextareaEditor
-                name={`begrunnelser.${selectedRolleId}`}
-                label={text.title.begrunnelse}
+            <FormControlledCustomTextareaEditor
                 description={descriptionText}
+                label={text.title.begrunnelse}
+                name={`begrunnelser.${selectedRolleId}`}
                 resize
             />
+            {begrunnelseFraOpprinneligVedtak?.innhold && (
+                <CustomTextareaEditor
+                    name="begrunnelseFraOpprinneligVedtak"
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak.innhold}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
         </Fragment>
     );

@@ -131,6 +131,7 @@ const tekster = {
         begrunnelseUtgiftErForeldet: "Utgiften er foreldet",
         begrunnelseKunINotat: "Begrunnelse (kun med i notat)",
         begrunnelseMedIVedtaket: "Begrunnelse (med i vedtaket og notat)",
+        begrunnelseFraOpprinneligVedtak: "Begrunnelse (opprinnelig vedtak)",
         beløp: "Beløp",
         beløpMnd: "Beløp (mnd)",
         beløp12Mnd: "Beløp (12 mnd)",

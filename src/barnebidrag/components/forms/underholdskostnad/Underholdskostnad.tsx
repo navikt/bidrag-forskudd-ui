@@ -1,6 +1,7 @@
 import { Rolletype, UnderholdDto } from "@api/BidragBehandlingApiV1";
 import { ActionButtons } from "@common/components/ActionButtons";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
+import { FormControlledCustomTextareaEditor } from "@common/components/formFields/FormControlledCustomTextEditor";
 import ModiaLink from "@common/components/inntekt/ModiaLink";
 import { NewFormLayout } from "@common/components/layout/grid/NewFormLayout";
 import { QueryErrorWrapper } from "@common/components/query-error-boundary/QueryErrorWrapper";
@@ -9,8 +10,8 @@ import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
 import { useGetBehandlingV2 } from "@common/hooks/useApiData";
 import { useDebounce } from "@common/hooks/useDebounce";
-import { BodyShort, Tabs, Textarea } from "@navikt/ds-react";
-import React, { useEffect, useMemo, useState } from "react";
+import { BodyShort, Tabs } from "@navikt/ds-react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { CustomTextareaEditor } from "../../../../common/components/CustomEditor";
@@ -79,7 +80,7 @@ const Main = () => {
                         </Tabs.Panel>
                     );
                 })}
-                <Tabs.Panel value="underholdskostnaderAndreBarn" className="grid gap-y-4">
+                <Tabs.Panel value="underholdskostnaderAndreBarn" className="grid gap-y-4 py-4">
                     <AndreBarn />
                 </Tabs.Panel>
             </Tabs>
@@ -89,6 +90,7 @@ const Main = () => {
 
 const Side = () => {
     const { onStepChange, setSaveErrorState } = useBehandlingProvider();
+    const { underholdskostnader } = useGetBehandlingV2();
     const [activeTab] = useGetActiveAndDefaultUnderholdskostnadTab();
     const [field, _, underholdskostnadId] = activeTab.split("-");
     const { watch, getValues, setValue } = useFormContext<UnderholdskostnadFormValues>();
@@ -103,6 +105,9 @@ const Side = () => {
         ? "underholdskostnaderAndreBarnBegrunnelse"
         : (`${field as "underholdskostnaderMedIBehandling"}.${fieldIndex}.begrunnelse` as const);
     const [previousValue, setPreviousValue] = useState<string>(getValues(fieldName));
+    const begrunnelseFraOpprinneligVedtak = underholdskostnader.find(
+        (underhold) => underhold.id === Number(underholdId)
+    )?.begrunnelseFraOpprinneligVedtak;
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
 
@@ -164,13 +169,28 @@ const Side = () => {
     }, [fieldName]);
 
     return (
-        <>
+        <Fragment key={activeTab}>
             {underholdId && (
-                <CustomTextareaEditor key={fieldName} name={fieldName} label={text.title.begrunnelse} resize />
+                <FormControlledCustomTextareaEditor
+                    key={fieldName}
+                    name={fieldName}
+                    label={text.title.begrunnelse}
+                    resize
+                />
             )}
-            {!underholdId && <Textarea label={text.title.begrunnelse} size="small" readOnly={true} />}
+            {!underholdId && <CustomTextareaEditor name="begrunnelse" label={text.title.begrunnelse} readOnly resize />}
+            {begrunnelseFraOpprinneligVedtak && (
+                <CustomTextareaEditor
+                    key={fieldName}
+                    name="begrunnelseFraOpprinneligVedtak"
+                    label={text.label.begrunnelseFraOpprinneligVedtak}
+                    value={begrunnelseFraOpprinneligVedtak}
+                    resize
+                    readOnly
+                />
+            )}
             <ActionButtons onNext={onNext} />
-        </>
+        </Fragment>
     );
 };
 

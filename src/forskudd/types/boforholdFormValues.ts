@@ -6,12 +6,6 @@ import {
     Sivilstandskode,
 } from "@api/BidragBehandlingApiV1";
 
-export interface SivilstandBeregnetInnhold {
-    periodeFom?: string;
-    periodeTom?: string;
-    sivilstandskode: Sivilstandskode;
-}
-
 export interface BoforholdFormValues {
     husstandsbarn?: HusstandsmedlemDtoV2[];
     sivilstand?: SivilstandDto[];

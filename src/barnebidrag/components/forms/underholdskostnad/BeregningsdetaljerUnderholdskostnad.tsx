@@ -16,6 +16,8 @@ export default function BeregningsdetaljerUnderholdskostnad({
     const tilleggstønad = detaljer.tilsynsutgifterBarn?.filter((b) => b.tilleggsstønadDagsats !== undefined) ?? [];
     const antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr =
         detaljer.antallBarnBMBeregnet !== detaljer.antallBarnBMUnderTolvÅr;
+    const antallBarnBMBeregnetErUlikAntallBarnMedUtgifter =
+        detaljer.antallBarnBMBeregnet !== detaljer.antallBarnMedTilsynsutgifter;
     return (
         <VStack className="w-[700px]" gap="4">
             <ResultatDescription
@@ -24,6 +26,11 @@ export default function BeregningsdetaljerUnderholdskostnad({
                         label: "Antall barn under 12 år",
                         textRight: false,
                         value: `${formatterBeløpForBeregning(detaljer.antallBarnBMUnderTolvÅr)}`,
+                    },
+                    antallBarnBMBeregnetErUlikAntallBarnMedUtgifter && {
+                        label: "Antall barn med tilsynsutgifter",
+                        textRight: false,
+                        value: `${formatterBeløpForBeregning(detaljer.antallBarnMedTilsynsutgifter)}`,
                     },
                     antallBarnBMBeregnetErUlikAntallBarnBMUnderTolvÅr && {
                         label: "Antall barn over 12 år med tilsynsutgifter",
@@ -129,7 +136,7 @@ export default function BeregningsdetaljerUnderholdskostnad({
                     },
                     {
                         label: "Skattefradrag (per barn)",
-                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnBMBeregnet)}`,
+                        value: `${formatterBeløpForBeregning(detaljer.skattefradrag)} / ${formatterBeløpForBeregning(detaljer.antallBarnMedTilsynsutgifter)}`,
                         result: `- ${formatterBeløpForBeregning(detaljer.skattefradragPerBarn)}`,
                     },
                 ].filter((d) => d)}
