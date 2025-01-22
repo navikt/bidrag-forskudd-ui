@@ -93,7 +93,8 @@ const Side = () => {
     const saveSamværFn = useOnSaveSamvær();
     const { watch, getValues, setValue } = useFormContext<SamværBarnformvalues>();
     const selectedRolleId = searchParams.get(urlSearchParams.tab);
-    const rolle = roller.find((rolle) => rolle.id === Number(selectedRolleId));
+    const selectedRolleIdNumber = selectedRolleId != null ? Number(selectedRolleId) : undefined;
+    const rolle = roller.find((rolle) => rolle.id === selectedRolleIdNumber);
     const oppdaterSamvær = rolle ? samvær.find((s) => s.gjelderBarn === rolle.ident) : samvær?.[0];
     const [previousValues, setPreviousValues] = useState<string>(
         getValues(`${oppdaterSamvær.gjelderBarn}.begrunnelse`)
@@ -106,7 +107,6 @@ const Side = () => {
                 gjelderBarn: oppdaterSamvær.gjelderBarn,
                 oppdatereBegrunnelse: {
                     nyBegrunnelse: begrunnelse,
-                    rolleid: Number(selectedRolleId),
                 },
             },
             {

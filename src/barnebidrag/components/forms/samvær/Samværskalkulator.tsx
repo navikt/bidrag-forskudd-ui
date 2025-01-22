@@ -59,7 +59,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
     if (ferier === undefined) return null;
     return (
         <VStack gap={"4"}>
-            <BodyShort size="small">
+            <BodyShort size="small" as="div">
                 <HStack justify={"space-between"}>
                     <Heading size="xsmall">Regelmessig samvær</Heading>
                     {!viewOnly && (
@@ -90,7 +90,7 @@ export const SamværskalkulatorForm = ({ fieldname, viewOnly = false }: Samværs
                             max={15}
                             step="0.1"
                         />
-                        <BodyShort size="small" className="self-center h-0">
+                        <BodyShort size="small" className="self-center h-0" as="div">
                             {" "}
                             /14 dager
                         </BodyShort>
