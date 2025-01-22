@@ -107,7 +107,7 @@ const Side = () => {
     const [previousValue, setPreviousValue] = useState<string>(getValues(fieldName));
     const begrunnelseFraOpprinneligVedtak = underholdskostnader.find(
         (underhold) => underhold.id === Number(underholdId)
-    ).begrunnelseFraOpprinneligVedtak;
+    )?.begrunnelseFraOpprinneligVedtak;
 
     const onNext = () => onStepChange(STEPS[BarnebidragStepper.INNTEKT]);
 
