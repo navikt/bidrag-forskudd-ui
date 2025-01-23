@@ -57,7 +57,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
         }
 
         quill.on(Quill.events.TEXT_CHANGE, () => {
-            onTextChange(quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>"));
+            if (quill.getLength() <= 1) {
+                onTextChange(undefined);
+            } else {
+                onTextChange(quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>"));
+            }
         });
 
         return () => {
