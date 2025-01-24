@@ -43,6 +43,15 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
         let feilliste = [];
+        if (feilInnhold.virkningstidspunkt != null && "virkningstidspunkt" in steps) {
+            if (feilInnhold.virkningstidspunkt?.manglerBegrunnelse === true) {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Begrunnelse må fylles ut ved opphør
+                    </ErrorSummary.Item>
+                );
+            }
+        }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];
             if (feilInnhold.utgift.manglerUtgifter) {
