@@ -8,6 +8,10 @@ export default function BeregningSamværsfradrag() {
         beregningsdetaljer: { samværsfradrag: beregning },
     } = useBidragBeregningPeriode();
 
+    const samværNetterBeskrivelse = () => {
+        if (beregning.gjennomsnittligSamværPerMåned === 0) return "";
+        return ` (samvær per måned: ${beregning.gjennomsnittligSamværPerMåned} ${beregning.gjennomsnittligSamværPerMåned <= 1 ? "natt" : "netter"})`;
+    };
     return (
         <ResultatDescription
             title="Samværsfradrag"
@@ -16,7 +20,7 @@ export default function BeregningSamværsfradrag() {
                     label: "Samværsklasse",
                     textRight: false,
                     labelBold: true,
-                    value: `Samværsklasse ${hentVisningsnavn(beregning.samværsklasse)} (samvær per måned: ${beregning.gjennomsnittligSamværPerMåned})`,
+                    value: `Samværsklasse ${hentVisningsnavn(beregning.samværsklasse)}${samværNetterBeskrivelse()}`,
                 },
                 {
                     label: "Samværsfradrag",
