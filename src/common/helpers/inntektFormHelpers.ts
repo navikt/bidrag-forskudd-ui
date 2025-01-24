@@ -121,6 +121,18 @@ export const ekplisitteYtelser = [
     Inntektsrapportering.BARNETILLEGG,
 ];
 
+export const alleYtelser = [
+    ...ekplisitteYtelser,
+    Inntektsrapportering.OVERGANGSSTONAD,
+    Inntektsrapportering.AAP,
+    Inntektsrapportering.SYKEPENGER,
+    Inntektsrapportering.PENSJON,
+    Inntektsrapportering.DAGPENGER,
+    Inntektsrapportering.INTRODUKSJONSSTONAD,
+    Inntektsrapportering.KVALIFISERINGSSTONAD,
+    Inntektsrapportering.FORELDREPENGER,
+];
+
 export const manuelleInntekterValg = {
     [TypeBehandling.FORSKUDD]: [
         Inntektsrapportering.LONNMANUELTBEREGNET,
@@ -162,13 +174,12 @@ export const transformInntekt =
             },
             datoFom:
                 inntekt.datoFom ??
-                (ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
-                isAfterDate(inntekt.opprinneligFom, virkningsdato)
+                (alleYtelser.includes(inntekt.rapporteringstype) && isAfterDate(inntekt.opprinneligFom, virkningsdato)
                     ? inntekt.opprinneligFom
                     : toISODateString(virkningsdato)),
             datoTom:
                 inntekt.datoTom ??
-                (ekplisitteYtelser.includes(inntekt.rapporteringstype) && inntekt.opprinneligTom
+                (alleYtelser.includes(inntekt.rapporteringstype) && inntekt.opprinneligTom
                     ? inntekt.opprinneligTom
                     : null),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
