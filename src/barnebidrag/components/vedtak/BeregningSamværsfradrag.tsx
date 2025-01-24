@@ -10,7 +10,7 @@ export default function BeregningSamværsfradrag() {
 
     const samværNetterBeskrivelse = () => {
         if (beregning.gjennomsnittligSamværPerMåned === 0) return "";
-        return ` (samvær per måned: ${beregning.gjennomsnittligSamværPerMåned} ${beregning.gjennomsnittligSamværPerMåned <= 1 ? "natt" : "netter"})`;
+        return ` (samvær per måned: ${beregning.gjennomsnittligSamværPerMåned} ${beregning.gjennomsnittligSamværPerMåned === 1 ? "natt" : "netter"})`;
     };
     return (
         <ResultatDescription
