@@ -21,7 +21,6 @@ import elementIds from "../../constants/elementIds";
 import texts, { mapOpplysningtypeSomMåBekreftesTilFeilmelding, rolletypeTilVisningsnavn } from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
-import { hentVisningsnavn } from "../../hooks/useVisningsnavn";
 type STEPSTYPE =
     | { [_key in ForskuddStepper]: number }
     | { [_key in SærligeutgifterStepper]: number }
@@ -39,10 +38,7 @@ const validerForRoller = {
 
 export default function VedtakWrapper({ feil, steps, children }: PropsWithChildren<VedtakWrapperProps>) {
     const { onStepChange } = useBehandlingProvider();
-    const {
-        type,
-        virkningstidspunkt: { avslag, årsak },
-    } = useGetBehandlingV2();
+    const { type } = useGetBehandlingV2();
     function renderFeilmeldinger() {
         if (!feil?.detaljer) return null;
         const feilInnhold = feil?.detaljer;
@@ -51,7 +47,7 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
             if (feilInnhold.virkningstidspunkt?.manglerBegrunnelse === true) {
                 feilliste.push(
                     <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
-                        Virkningstidspunkt: Begrunnelse må fylles ut når "{hentVisningsnavn(avslag ?? årsak)}" er valgt
+                        Virkningstidspunkt: Begrunnelse må fylles ut ved opphør
                     </ErrorSummary.Item>
                 );
             }
