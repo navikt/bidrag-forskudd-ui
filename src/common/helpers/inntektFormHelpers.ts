@@ -11,7 +11,9 @@ import {
 } from "@api/BidragBehandlingApiV1";
 import { InntektFormPeriode, InntektFormValues } from "@common/types/inntektFormValues";
 import { toISODateString } from "@navikt/bidrag-ui-common";
-import { firstDayOfMonth, isAfterDate, isAfterEqualsDate } from "@utils/date-utils";
+import { firstDayOfMonth, isAfterDate, isAfterEqualsDate, isBeforeDate } from "@utils/date-utils";
+
+import { maxOfDate } from "./../../utils/date-utils";
 
 export enum InntektTableType {
     SKATTEPLIKTIG = "SKATTEPLIKTIG",
@@ -121,6 +123,18 @@ export const ekplisitteYtelser = [
     Inntektsrapportering.BARNETILLEGG,
 ];
 
+export const alleYtelser = [
+    ...ekplisitteYtelser,
+    Inntektsrapportering.OVERGANGSSTONAD,
+    Inntektsrapportering.AAP,
+    Inntektsrapportering.SYKEPENGER,
+    Inntektsrapportering.PENSJON,
+    Inntektsrapportering.DAGPENGER,
+    Inntektsrapportering.INTRODUKSJONSSTONAD,
+    Inntektsrapportering.KVALIFISERINGSSTONAD,
+    Inntektsrapportering.FORELDREPENGER,
+];
+
 export const manuelleInntekterValg = {
     [TypeBehandling.FORSKUDD]: [
         Inntektsrapportering.LONNMANUELTBEREGNET,
@@ -162,15 +176,17 @@ export const transformInntekt =
             },
             datoFom:
                 inntekt.datoFom ??
-                (ekplisitteYtelser.includes(inntekt.rapporteringstype) &&
-                isAfterDate(inntekt.opprinneligFom, virkningsdato)
+                (alleYtelser.includes(inntekt.rapporteringstype) && isAfterDate(inntekt.opprinneligFom, virkningsdato)
                     ? inntekt.opprinneligFom
                     : toISODateString(virkningsdato)),
             datoTom:
                 inntekt.datoTom ??
-                (ekplisitteYtelser.includes(inntekt.rapporteringstype) && inntekt.opprinneligTom
-                    ? inntekt.opprinneligTom
-                    : null),
+                (!inntekt.taMed &&
+                    (alleYtelser.includes(inntekt.rapporteringstype) &&
+                    inntekt.opprinneligTom &&
+                    isBeforeDate(inntekt.opprinneligTom, firstDayOfMonth(maxOfDate(virkningsdato, new Date())))
+                        ? inntekt.opprinneligTom
+                        : null)),
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
             beløpMnd:
                 inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG
