@@ -55,7 +55,6 @@ const createInitialValues = (response: VirkningstidspunktDto): Virkningstidspunk
     virkningstidspunkt: response.virkningstidspunkt,
     årsakAvslag: response.årsak ?? response.avslag ?? "",
     begrunnelse: response.begrunnelse?.innhold,
-    begrunnelseFraOpprinneligVedtak: response.begrunnelseFraOpprinneligVedtak?.innhold,
 });
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
