@@ -4,6 +4,7 @@ import {
     Kilde,
     OppdatereInntektRequest,
     OppdatereInntektResponse,
+    TypeBehandling,
 } from "@api/BidragBehandlingApiV1";
 import { BehandlingAlert } from "@common/components/BehandlingAlert";
 import { FormControlledCheckbox } from "@common/components/formFields/FormControlledCheckbox";
@@ -141,10 +142,12 @@ export const Periode = ({
     item: InntektFormPeriode;
 }) => {
     const virkningsdato = useVirkningsdato();
+    const { type } = useGetBehandlingV2();
     const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
+    const isSærbidragTypeAndFieldIsDatoFom = type === TypeBehandling.SAeRBIDRAG && !fieldIsDatoTom;
 
     const validateFomOgTom = () => {
         const periode = getValues(`${fieldName}.${index}`);
@@ -160,7 +163,10 @@ export const Periode = ({
         }
     };
 
-    return item.erRedigerbart && !erVirkningstidspunktNåværendeMånedEllerFramITid && item.kanRedigeres ? (
+    return !isSærbidragTypeAndFieldIsDatoFom &&
+        item.erRedigerbart &&
+        !erVirkningstidspunktNåværendeMånedEllerFramITid &&
+        item.kanRedigeres ? (
         <FormControlledMonthPicker
             name={`${fieldName}.${index}.${field}`}
             label={label}
