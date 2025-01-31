@@ -72,7 +72,6 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
 
     return (
         <div
-            spellCheck={false}
             className={`ql-top-container ${readOnly ? "readonly" : ""} ${resize ? "resizable" : ""}`}
             ref={containerRef}
         ></div>
