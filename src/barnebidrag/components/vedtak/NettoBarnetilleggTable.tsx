@@ -35,7 +35,9 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                         <Table.Row className="align-top" key={bt.visningsnavn + "-" + index}>
                             <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
                             <Table.DataCell textSize="small">
-                                {bt.visningsnavn == "Tiltakspenger" ? "Ikke relevant" : formatterBeløpForBeregning(bt.bruttoBeløp)}
+                                {bt.visningsnavn == "Tiltakspenger"
+                                    ? "Ikke relevant"
+                                    : formatterBeløpForBeregning(bt.bruttoBeløp)}
                             </Table.DataCell>
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(bt.nettoBeløp)}
