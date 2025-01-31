@@ -28,11 +28,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
                 toolbar: readOnly
                     ? false
                     : {
-                          container: [
-                              ["bold", "italic", "underline", { header: 3 }],
-                              // [{ 'color': "red" }, { 'background': "yellow" }]
-                          ],
-                      },
+                        container: [
+                            ["bold", "italic", "underline", { header: 3 }],
+                            // [{ 'color': "red" }, { 'background': "yellow" }]
+                        ],
+                    },
                 clipboard: {
                     allowed: {
                         tags: ["strong", "h3", "h4", "em", "p", "br", "span", "u"],
@@ -72,7 +72,6 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
 
     return (
         <div
-            spellCheck={false}
             className={`ql-top-container ${readOnly ? "readonly" : ""} ${resize ? "resizable" : ""}`}
             ref={containerRef}
         ></div>

@@ -14,6 +14,7 @@
 .ql-editor  {
     width: 400px;
     height: min-content;
+    font-family: 'Times New Roman', Times, serif;
 }
 .ql-container {
     height: inherit;
