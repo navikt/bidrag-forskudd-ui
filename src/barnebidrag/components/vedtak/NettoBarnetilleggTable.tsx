@@ -3,6 +3,7 @@ import { Heading, Label, Table } from "@navikt/ds-react";
 import { Rolletype } from "../../../api/BidragBehandlingApiV1";
 import { ROLE_FORKORTELSER } from "../../../common/constants/roleTags";
 import { formatterBeløpForBeregning } from "../../../utils/number-utils";
+import { barnetilleggTiltakspengerVisningsnavn } from "../../constants/beregning";
 import { useBidragBeregningPeriode } from "./DetaljertBeregningBidrag";
 
 type NettoBarnetilleggTableProps = {
@@ -13,6 +14,9 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
     const { beregningsdetaljer } = useBidragBeregningPeriode();
 
     const barnetillegg = rolle === Rolletype.BP ? beregningsdetaljer.barnetilleggBP : beregningsdetaljer.barnetilleggBM;
+    const harBareTiltakspenger = barnetillegg.barnetillegg.every(
+        (bt) => bt.visningsnavn === barnetilleggTiltakspengerVisningsnavn
+    );
     return (
         <>
             <Heading size="xsmall">Netto barnetillegg ({ROLE_FORKORTELSER[rolle]})</Heading>
@@ -22,9 +26,11 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                         <Table.HeaderCell textSize="small" scope="col" align="left" className="w-[200px]">
                             Type barnetillegg
                         </Table.HeaderCell>
-                        <Table.HeaderCell textSize="small" scope="col" align="left">
-                            Brutto
-                        </Table.HeaderCell>
+                        {!harBareTiltakspenger && (
+                            <Table.HeaderCell textSize="small" scope="col" align="left">
+                                Brutto
+                            </Table.HeaderCell>
+                        )}
                         <Table.HeaderCell textSize="small" scope="col" align="left">
                             Netto
                         </Table.HeaderCell>
@@ -34,11 +40,13 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                     {barnetillegg.barnetillegg.map((bt, index) => (
                         <Table.Row className="align-top" key={bt.visningsnavn + "-" + index}>
                             <Table.DataCell textSize="small">{bt.visningsnavn}</Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                {bt.visningsnavn === "Tiltakspenger"
-                                    ? "Ikke relevant"
-                                    : formatterBeløpForBeregning(bt.bruttoBeløp)}
-                            </Table.DataCell>
+                            {!harBareTiltakspenger && (
+                                <Table.DataCell textSize="small">
+                                    {bt.visningsnavn === barnetilleggTiltakspengerVisningsnavn
+                                        ? "Ikke relevant"
+                                        : formatterBeløpForBeregning(bt.bruttoBeløp)}
+                                </Table.DataCell>
+                            )}
                             <Table.DataCell textSize="small">
                                 {formatterBeløpForBeregning(bt.nettoBeløp)}
                             </Table.DataCell>
@@ -48,9 +56,11 @@ export const NettoBarnetilleggTable = ({ rolle }: NettoBarnetilleggTableProps) =
                         <Table.DataCell textSize="small">
                             <Label size="small">Resultat</Label>
                         </Table.DataCell>
-                        <Table.DataCell textSize="small">
-                            {formatterBeløpForBeregning(barnetillegg.sumBruttoBeløp)}
-                        </Table.DataCell>
+                        {!harBareTiltakspenger && (
+                            <Table.DataCell textSize="small">
+                                {formatterBeløpForBeregning(barnetillegg.sumBruttoBeløp)}
+                            </Table.DataCell>
+                        )}
                         <Table.DataCell textSize="small">
                             {formatterBeløpForBeregning(barnetillegg.sumNettoBeløp)}
                         </Table.DataCell>
