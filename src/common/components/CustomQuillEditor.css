@@ -10,6 +10,7 @@
     resize: both;
     overflow: auto;
     border-end-end-radius: 0;
+    hyphens: auto;
 }
 .ql-editor  {
     width: 400px;
