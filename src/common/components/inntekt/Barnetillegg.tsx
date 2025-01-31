@@ -1,4 +1,4 @@
-import { Inntektsrapportering, Inntektstype, Kilde, Rolletype } from "@api/BidragBehandlingApiV1";
+import { Inntektsrapportering, Inntektstype, Kilde, Rolletype, TypeBehandling } from "@api/BidragBehandlingApiV1";
 import { FormControlledSelectField } from "@common/components/formFields/FormControlledSelectField";
 import { FormControlledTextField } from "@common/components/formFields/FormControlledTextField";
 import LeggTilPeriodeButton from "@common/components/formFields/FormLeggTilPeriode";
@@ -14,6 +14,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import elementId from "../../constants/elementIds";
+import { useBehandlingProvider } from "../../context/BehandlingContext";
 import PersonNavnIdent from "../PersonNavnIdent";
 import { ExpandableContent } from "./ExpandableContent";
 import { EditOrSaveButton, InntektTabel, KildeIcon, Periode, TaMed } from "./InntektTable";
@@ -21,6 +22,7 @@ import { useInntektTableProvider } from "./InntektTableContext";
 import { Opplysninger } from "./Opplysninger";
 
 const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string }) => {
+    const { type } = useBehandlingProvider();
     return item.erRedigerbart && item.kilde === Kilde.MANUELL ? (
         <FormControlledSelectField
             name={`${field}.inntektstype`}
@@ -28,6 +30,9 @@ const Beskrivelse = ({ item, field }: { item: InntektFormPeriode; field: string 
             options={[{ value: "", text: text.select.inntektPlaceholder }].concat(
                 Object.entries(Inntektstype)
                     .filter(([, text]) => text.includes("BARNETILLEGG"))
+                    .filter(([value]) =>
+                        type !== TypeBehandling.BIDRAG ? value !== Inntektstype.BARNETILLEGG_TILTAKSPENGER : true
+                    )
                     .map(([value, text]) => ({
                         value: Inntektstype[value],
                         text: hentVisningsnavn(text),
