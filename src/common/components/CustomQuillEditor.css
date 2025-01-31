@@ -16,6 +16,8 @@
     width: 400px;
     height: min-content;
     font-family: 'Times New Roman', Times, serif;
+    font-size: 11px;
+    line-height: 1;
 }
 .ql-container {
     height: inherit;
