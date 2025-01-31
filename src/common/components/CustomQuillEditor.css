@@ -10,7 +10,7 @@
     resize: both;
     overflow: auto;
     border-end-end-radius: 0;
-    hyphens: auto;
+
 }
 .ql-editor  {
     width: 400px;
@@ -18,6 +18,10 @@
     font-family: 'Times New Roman', Times, serif;
     font-size: 11px;
     line-height: 1;
+    -webkit-hyphens: none;
+    -moz-hyphens:    none;
+    -ms-hyphens:     none;
+    hyphens:         none;
 }
 .ql-container {
     height: inherit;
