@@ -24,13 +24,21 @@ class CustomClipboard extends Clipboard {
         e.preventDefault();
     }
     applyStyles(html: string): string {
-        const p = document.createElement("p");
-        p.innerHTML = html;
-        p.style.fontSize = "11px";
-        p.style.fontFamily = "Times New Roman";
-        p.style.lineHeight = "1";
+        // Create a container and fill it with the copied HTML.
+        const container = document.createElement("div");
+        container.innerHTML = html;
 
-        return p.outerHTML;
+        // Apply general styles for font family and line height.
+        container.style.fontFamily = "Times New Roman";
+        container.style.lineHeight = "1";
+
+        // For p, strong, and i elements, apply a font size of 11px.
+        const elements = container.querySelectorAll("p, strong, i, em");
+        elements.forEach((el) => {
+            el.style.fontSize = "11px";
+        });
+
+        return container.innerHTML;
     }
 }
 
