@@ -8,14 +8,18 @@ import { useEffect, useRef } from "react";
 
 const Clipboard = Quill.import("modules/clipboard");
 
+//@ts-ignore
 class CustomClipboard extends Clipboard {
     onCaptureCopy(e: ClipboardEvent) {
+        //@ts-ignore
         const range = this.quill.getSelection();
         if (range == null) return;
 
+        //@ts-ignore
         const text = this.quill.getText(range);
+        //@ts-ignore
         const html = this.quill.getSemanticHTML(range);
-        const styledHtml = this.applyStyles(html);
+        const styledHtml = this.tilpassFormatteringForBidragMaler(html);
 
         e.clipboardData.setData("text/plain", text);
         e.clipboardData.setData("text/html", styledHtml);
@@ -23,22 +27,25 @@ class CustomClipboard extends Clipboard {
         console.log(styledHtml);
         e.preventDefault();
     }
-    applyStyles(html: string): string {
+    tilpassFormatteringForBidragMaler(html: string): string {
         // Create a container and fill it with the copied HTML.
         const container = document.createElement("div");
         container.innerHTML = html;
 
         // Apply general styles for font family and line height.
-        container.style.fontFamily = "Times New Roman";
+        container.style.fontFamily = "'Times New Roman', serif";
         container.style.lineHeight = "1";
 
-        // For p, strong, and i elements, apply a font size of 11px.
-        const elements = container.querySelectorAll("p, strong, i, em");
+        // For p, strong, and i elements, apply a font size of 11pt (Word font size is measured in pt and not px).
+        const elements = container.querySelectorAll("*");
         elements.forEach((el) => {
-            el.style.fontSize = "11px";
+            if (!["H1", "H2", "H3", "H4", "H5", "H6"].includes(el.tagName)) {
+                //@ts-ignore
+                el.style.fontSize = "11pt";
+            }
         });
 
-        return container.innerHTML;
+        return container.outerHTML;
     }
 }
 
@@ -65,11 +72,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
                 toolbar: readOnly
                     ? false
                     : {
-                          container: [
-                              ["bold", "italic", "underline", { header: 3 }],
-                              // [{ 'color': "red" }, { 'background': "yellow" }]
-                          ],
-                      },
+                        container: [
+                            ["bold", "italic", "underline", { header: 3 }],
+                            // [{ 'color': "red" }, { 'background': "yellow" }]
+                        ],
+                    },
                 clipboard: {
                     allowed: {
                         tags: ["strong", "h3", "h4", "em", "p", "br", "span", "u"],
