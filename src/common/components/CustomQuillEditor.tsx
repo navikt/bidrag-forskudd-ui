@@ -19,15 +19,15 @@ class CustomClipboard extends Clipboard {
         const text = this.quill.getText(range);
         //@ts-ignore
         const html = this.quill.getSemanticHTML(range);
-        const styledHtml = this.tilpassFormatteringForBidragMaler(html);
+        const styledHtml = this.tilpassFormatteringForLegacyBidragMaler(html);
 
         e.clipboardData.setData("text/plain", text);
         e.clipboardData.setData("text/html", styledHtml);
-        console.log(text);
-        console.log(styledHtml);
+        // console.log(text);
+        // console.log(styledHtml);
         e.preventDefault();
     }
-    tilpassFormatteringForBidragMaler(html: string): string {
+    tilpassFormatteringForLegacyBidragMaler(html: string): string {
         // Create a container and fill it with the copied HTML.
         const container = document.createElement("div");
         container.innerHTML = html;
@@ -35,13 +35,19 @@ class CustomClipboard extends Clipboard {
         // Apply general styles for font family and line height.
         container.style.fontFamily = "'Times New Roman', serif";
         container.style.lineHeight = "1";
-
+        container.style.fontSize = "11pt";
         // For p, strong, and i elements, apply a font size of 11pt (Word font size is measured in pt and not px).
         const elements = container.querySelectorAll("*");
         elements.forEach((el) => {
-            if (!["H1", "H2", "H3", "H4", "H5", "H6"].includes(el.tagName)) {
+            if (el.tagName === "H3") {
+                const strong = document.createElement("strong");
+                strong.innerHTML = el.innerHTML;
+                // strong.style.fontSize = "11pt";
+                // strong.style.fontFamily = "'Times New Roman', serif";
+                el.replaceWith(strong);
+            } else if (!["H1", "H2", "H4", "H5", "H6"].includes(el.tagName)) {
                 //@ts-ignore
-                el.style.fontSize = "11pt";
+                // el.style.fontSize = "11pt";
             }
         });
 
