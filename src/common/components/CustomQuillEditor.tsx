@@ -6,6 +6,56 @@ import "quill-paste-smart";
 import Quill from "quill";
 import { useEffect, useRef } from "react";
 
+const Clipboard = Quill.import("modules/clipboard");
+
+//@ts-ignore
+class CustomClipboard extends Clipboard {
+    onCaptureCopy(e: ClipboardEvent) {
+        //@ts-ignore
+        const range = this.quill.getSelection();
+        if (range == null) return;
+
+        //@ts-ignore
+        const text = this.quill.getText(range);
+        //@ts-ignore
+        const html = this.quill.getSemanticHTML(range);
+        const styledHtml = this.tilpassFormatteringForLegacyBidragMaler(html);
+
+        e.clipboardData.setData("text/plain", text);
+        e.clipboardData.setData("text/html", styledHtml);
+        // console.log(text);
+        // console.log(styledHtml);
+        e.preventDefault();
+    }
+    tilpassFormatteringForLegacyBidragMaler(html: string): string {
+        // Create a container and fill it with the copied HTML.
+        const container = document.createElement("div");
+        container.innerHTML = html;
+
+        // Apply general styles for font family and line height.
+        container.style.fontFamily = "'Times New Roman', serif";
+        container.style.lineHeight = "1";
+        container.style.fontSize = "11pt";
+        // For p, strong, and i elements, apply a font size of 11pt (Word font size is measured in pt and not px).
+        const elements = container.querySelectorAll("*");
+        elements.forEach((el) => {
+            if (el.tagName === "H3") {
+                const strong = document.createElement("strong");
+                strong.innerHTML = el.innerHTML;
+                // strong.style.fontSize = "11pt";
+                // strong.style.fontFamily = "'Times New Roman', serif";
+                el.replaceWith(strong);
+            } else if (!["H1", "H2", "H4", "H5", "H6"].includes(el.tagName)) {
+                //@ts-ignore
+                // el.style.fontSize = "11pt";
+            }
+        });
+
+        return container.outerHTML;
+    }
+}
+
+Quill.register("modules/clipboard", CustomClipboard, true);
 type EditorProps = {
     readOnly: boolean;
     defaultValue: string;
