@@ -29,7 +29,7 @@ class CustomClipboard extends Clipboard {
     }
     tilpassFormatteringForLegacyBidragMaler(html: string): string {
         // Create a container and fill it with the copied HTML.
-        const container = document.createElement("span");
+        const container = document.createElement("div");
         container.innerHTML = html.replaceAll("&nbsp;", " ");
 
         // Apply general styles for font family and line height.
