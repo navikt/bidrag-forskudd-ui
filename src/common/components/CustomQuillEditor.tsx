@@ -29,8 +29,8 @@ class CustomClipboard extends Clipboard {
     }
     tilpassFormatteringForLegacyBidragMaler(html: string): string {
         // Create a container and fill it with the copied HTML.
-        const container = document.createElement("div");
-        container.innerHTML = html;
+        const container = document.createElement("span");
+        container.innerHTML = html.replaceAll("&nbsp;", " ");
 
         // Apply general styles for font family and line height.
         container.style.fontFamily = "'Times New Roman', serif";
@@ -48,6 +48,7 @@ class CustomClipboard extends Clipboard {
             } else if (!["H1", "H2", "H4", "H5", "H6"].includes(el.tagName)) {
                 //@ts-ignore
                 // el.style.fontSize = "11pt";
+                // el.style.whiteSpace = "normal";
             }
         });
 
@@ -78,11 +79,11 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
                 toolbar: readOnly
                     ? false
                     : {
-                          container: [
-                              ["bold", "italic", "underline", { header: 3 }],
-                              // [{ 'color': "red" }, { 'background': "yellow" }]
-                          ],
-                      },
+                        container: [
+                            ["bold", "italic", "underline", { header: 3 }],
+                            // [{ 'color': "red" }, { 'background': "yellow" }]
+                        ],
+                    },
                 clipboard: {
                     allowed: {
                         tags: ["strong", "h3", "h4", "em", "p", "br", "span", "u"],
