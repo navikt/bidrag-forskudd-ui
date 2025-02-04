@@ -174,7 +174,9 @@ export const transformInntekt =
             inntektstype: inntekt.inntektstyper.length ? inntekt.inntektstyper[0] : "",
             beløpMnd:
                 inntekt.rapporteringstype === Inntektsrapportering.BARNETILLEGG
-                    ? Number(inntekt.månedsbeløp)
+                    ? inntekt.kilde === Kilde.OFFENTLIG
+                        ? Number(inntekt.beløp / 12)
+                        : Number(inntekt.månedsbeløp)
                     : undefined,
             kanRedigeres:
                 inntekt.kilde === Kilde.MANUELL ||
