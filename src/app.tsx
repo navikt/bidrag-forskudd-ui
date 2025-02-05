@@ -76,6 +76,7 @@ export const faro = initializeFaro({
 });
 
 const NotatPage = lazy(() => import("./forskudd/pages/notat/NotatPage"));
+const BegrunnelsePage = lazy(() => import("@common/pages/BegrunnelsePage"));
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -147,10 +148,12 @@ export default function App() {
                             <Route path="/sak/:saksnummer/behandling/:behandlingId">
                                 <Route index element={<BidragBehandlingWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
+                                <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
                             </Route>
                             <Route path="/behandling/:behandlingId">
                                 <Route index element={<BidragBehandlingWrapper />} />
                                 <Route path="notat" element={<NotatPageWrapper />} />
+                                <Route path="begrunnelse/:broadcastChannel" element={<BegrunnelsePageWrapper />} />
                             </Route>
                             <Route path="/sak/:saksnummer/vedtak/:vedtakId">
                                 <Route
@@ -369,4 +372,13 @@ const BidragBehandlingWrapper = () => {
 const NotatPageWrapper = () => {
     const { behandlingId, vedtakId } = useParams<{ behandlingId?: string; vedtakId?: string }>();
     return <NotatPage behandlingId={behandlingId} vedtakId={vedtakId} />;
+};
+
+const BegrunnelsePageWrapper = () => {
+    const { behandlingId, broadcastChannel } = useParams<{ behandlingId?: string; broadcastChannel?: string }>();
+    return (
+        <BehandlingPageWrapper>
+            <BegrunnelsePage behandlingId={behandlingId} broadcastChannel={broadcastChannel} />
+        </BehandlingPageWrapper>
+    );
 };
