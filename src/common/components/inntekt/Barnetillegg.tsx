@@ -243,7 +243,11 @@ export const Barnetillegg = () => {
                                                             </Table.DataCell>
                                                             <Table.DataCell textSize="small">
                                                                 <div className="h-8 flex items-center justify-end">
-                                                                    {formatterBeløp(item.beløp)}
+                                                                    {formatterBeløp(
+                                                                        item.kilde === Kilde.MANUELL
+                                                                            ? item.beløpMnd * 12
+                                                                            : item.beløp
+                                                                    )}
                                                                 </div>
                                                             </Table.DataCell>
                                                             <Table.DataCell>

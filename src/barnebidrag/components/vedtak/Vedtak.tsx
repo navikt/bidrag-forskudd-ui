@@ -186,11 +186,11 @@ const VedtakTableBody = ({
                                             <td className="w-[10px]">/</td>
                                             <td>
                                                 {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                                    Samvaersklasse.DELT_BOSTED
+                                                Samvaersklasse.DELT_BOSTED
                                                     ? "D"
                                                     : hentVisningsnavn(
-                                                        periode.beregningsdetaljer.samværsfradrag.samværsklasse
-                                                    )}
+                                                          periode.beregningsdetaljer.samværsfradrag.samværsklasse
+                                                      )}
                                             </td>
                                         </tr>
                                     </tbody>
