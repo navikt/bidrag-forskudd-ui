@@ -4,7 +4,7 @@ import "./CustomQuillEditor.css";
 import "quill-paste-smart";
 
 import Quill from "quill";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Clipboard = Quill.import("modules/clipboard");
 
@@ -66,11 +66,30 @@ type EditorProps = {
 };
 export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, resize }: EditorProps) => {
     const containerRef = useRef(null);
+    const [quill, setQuill] = useState(null);
+
+    useEffect(() => {
+        const textChangeHandler = () => {
+            if (quill.getLength() <= 1) {
+                onTextChange("");
+            } else {
+                onTextChange(quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>"));
+            }
+        };
+
+        if (quill) {
+            quill.on(Quill.events.TEXT_CHANGE, textChangeHandler);
+        }
+
+        return () => {
+            quill?.off(Quill.events.TEXT_CHANGE, textChangeHandler);
+        };
+    }, [quill, onTextChange]);
 
     useEffect(() => {
         const container = containerRef.current;
         const editorContainer = container.appendChild(container.ownerDocument.createElement("div"));
-        const quill = new Quill(editorContainer, {
+        const quillEditor = new Quill(editorContainer, {
             theme: "snow",
             readOnly,
             modules: {
@@ -98,28 +117,25 @@ export const CustomQuillEditor = ({ readOnly, defaultValue, onTextChange, ref, r
                 },
             },
         });
-
-        ref.current = quill;
-
-        if (defaultValue) {
-            const delta = quill.clipboard.convert({ html: defaultValue });
-            quill.setContents(delta, "silent");
-            quill.history.clear();
-        }
-
-        quill.on(Quill.events.TEXT_CHANGE, () => {
-            if (quill.getLength() <= 1) {
-                onTextChange("");
-            } else {
-                onTextChange(quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>"));
-            }
-        });
+        setQuill(quillEditor);
+        ref.current = quillEditor;
 
         return () => {
             ref.current = null;
             container.innerHTML = "";
         };
     }, [ref]);
+
+    useEffect(() => {
+        if (quill) {
+            const currentHTML = quill.getSemanticHTML().replaceAll("<p></p>", "<p><br/></p>");
+
+            if (defaultValue !== currentHTML) {
+                const updatedDelta = quill.clipboard.convert({ html: defaultValue });
+                quill.setContents(updatedDelta, "silent");
+            }
+        }
+    }, [quill, defaultValue]);
 
     return (
         <div
