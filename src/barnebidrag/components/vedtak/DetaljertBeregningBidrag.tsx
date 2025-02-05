@@ -8,6 +8,7 @@ import {
 } from "../../../api/BidragBehandlingApiV1";
 import { BPsEvne } from "../../../common/components/vedtak/BPsEvneTabell";
 import { BarnetilleggSkatteprosent } from "./BarnetilleggSkatteprosent";
+import { BeregningBegrensetRevurdering } from "./BeregningBegrensetRevurdering";
 import { EndeligBidragTable } from "./BeregningEndeligBidrag";
 import { BeregningFordeltBidrag } from "./BeregningFordeltBidrag";
 import { BeregningJusterBMsBarnetillegg } from "./BeregningJusterBMsBarnetillegg";
@@ -54,6 +55,7 @@ export const DetaljertBeregningBidrag: React.FC<DetaljertBeregningBidragProps> =
                     />
                     <BeregningFordeltBidrag />
                 </VStack>
+                <BeregningBegrensetRevurdering />
                 {!beregningsdetaljer.deltBosted && beregningsdetaljer.barnetilleggBP.barnetillegg.length > 0 && (
                     <VStack gap="2">
                         <BarnetilleggSkatteprosent rolle={Rolletype.BP} />

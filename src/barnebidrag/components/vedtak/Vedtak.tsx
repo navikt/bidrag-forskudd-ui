@@ -58,7 +58,7 @@ const Vedtak = () => {
                 <VedtakResultat />
             </div>
 
-            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && (
+            {!beregning?.feil && !lesemodus && isFatteVedtakEnabled && !beregning?.ugyldigBeregning && (
                 <FatteVedtakButtons
                     isBeregningError={isBeregningError}
                     disabled={!kanBehandlesINyLøsning || !isFatteVedtakEnabled}
@@ -66,6 +66,17 @@ const Vedtak = () => {
             )}
             <AdminButtons />
         </div>
+    );
+};
+
+const VedtakUgyldigBeregning = ({ resultat }: { resultat: ResultatBidragsberegningBarnDto }) => {
+    if (!resultat.ugyldigBeregning) return null;
+    return (
+        <Alert variant="warning" size="small" className="mb-2">
+            <Heading size="small">{resultat.ugyldigBeregning.tittel}</Heading>
+            <BodyShort size="small">Kan ikke fatte vedtak</BodyShort>
+            <BodyShort size="small">{resultat.ugyldigBeregning.begrunnelse}</BodyShort>
+        </Alert>
     );
 };
 
@@ -82,6 +93,7 @@ const VedtakResultat = () => {
             {beregning.resultat?.resultatBarn?.map((r, i) => (
                 <div key={i + r.barn.ident + r.barn.navn} className="mb-8">
                     <VedtakResultatBarn barn={r.barn} />
+                    <VedtakUgyldigBeregning resultat={r} />
                     {r.barn.innbetaltBeløp && (
                         <ResultatDescription
                             data={[
@@ -174,11 +186,11 @@ const VedtakTableBody = ({
                                             <td className="w-[10px]">/</td>
                                             <td>
                                                 {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                                Samvaersklasse.DELT_BOSTED
+                                                    Samvaersklasse.DELT_BOSTED
                                                     ? "D"
                                                     : hentVisningsnavn(
-                                                          periode.beregningsdetaljer.samværsfradrag.samværsklasse
-                                                      )}
+                                                        periode.beregningsdetaljer.samværsfradrag.samværsklasse
+                                                    )}
                                             </td>
                                         </tr>
                                     </tbody>

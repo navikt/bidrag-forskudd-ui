@@ -15,8 +15,11 @@ export const BeregningJusterBPsBarnetillegg = () => {
     }
 
     function hentForeløpigBidrag() {
-        if (sluttberegning.bidragJustertForNettoBarnetilleggBP)
+        if (sluttberegning.bidragJustertForNettoBarnetilleggBP) {
             return formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBarnetilleggBP);
+        } else if (sluttberegning.begrensetRevurderingUtført) {
+            return formatterBeløpForBeregning(sluttberegning.bruttoBidragEtterBegrensetRevurdering);
+        }
         return formatterBeløpForBeregning(sluttberegning.bruttoBidragJustertForEvneOg25Prosent);
     }
     return (

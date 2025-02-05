@@ -2055,9 +2055,9 @@ export interface KanBehandlesINyLosningRequest {
     søktFomDato?: string;
     /** @format date */
     mottattdato?: string;
+    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
-    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2166,8 +2166,8 @@ export interface Skatt {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2286,6 +2286,7 @@ export interface ResultatBidragberegningDto {
 
 export interface ResultatBidragsberegningBarnDto {
     barn: ResultatRolle;
+    ugyldigBeregning?: UgyldigBeregningDto;
     perioder: ResultatBarnebidragsberegningPeriodeDto[];
 }
 
@@ -2314,6 +2315,12 @@ export interface SluttberegningBarnebidrag {
     bidragJustertTilForskuddssats: boolean;
     begrensetRevurderingUtført: boolean;
     uminusNettoBarnetilleggBM: number;
+}
+
+export interface UgyldigBeregningDto {
+    tittel: string;
+    begrunnelse: string;
+    perioder: TypeArManedsperiode[];
 }
 
 export interface BehandlingInfoDto {
@@ -2675,8 +2682,8 @@ export interface NotatBehandlingDetaljerDto {
     /** @format date */
     klageMottattDato?: string;
     avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -2910,8 +2917,8 @@ export interface NotatSkattBeregning {
     trinnskatt: number;
     trygdeavgift: number;
     skattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
