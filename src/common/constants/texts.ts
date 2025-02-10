@@ -16,6 +16,7 @@ const tekster = {
         barnSomHarBlittLagtInn: "Barn som har blitt lagt inn i nye opplysninger fra Folkeregisteret:",
         barnSomIkkeFinnes: "Barn som ikke finnes i nye opplysninger fra Folkeregisteret:",
         beløpEndret: "Beløp for en eller flere perioder har blitt endret",
+        bidragOpphørt: "Bidrag er opphørt fra før {} i vedtak fattet {}.",
         endretVirkningstidspunkt:
             "Virkningstidspunktet er endret. Dette kan påvirke beregningen. <br> Inntekter og boforhold må manuelt vurderes på nytt",
         endringer: "Følgende endringer har blitt utført:",
@@ -187,6 +188,7 @@ const tekster = {
         nåværendeArbeidsforhold: "Nåværende arbeidsforhold",
         omfang: "Heltid/Deltid",
         opphør: "Opphør",
+        opphørsdato: "Opphørsdato",
         opplysninger: "Opplysninger",
         oppdaterOpplysninger: "Oppdater opplysninger",
         periode: "Periode",
@@ -216,6 +218,7 @@ const tekster = {
         utgift: "Utgift",
         utgiftskategori: "Utgiftskategori",
         virkningstidspunkt: "Virkningstidspunkt",
+        varighet: "Varighet",
         årsak: "Årsak",
     },
     loading: "venter...",
