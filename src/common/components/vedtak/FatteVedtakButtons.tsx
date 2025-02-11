@@ -7,13 +7,13 @@ import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
 import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
-import { useQueryParams } from "../../../barnebidrag/hooks/useQueryparams";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import useFeatureToogle from "../../hooks/useFeatureToggle";
+import { useQueryParams } from "../../hooks/useQueryParams";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
