@@ -7,6 +7,7 @@ import ReactCanvasConfetti from "react-canvas-confetti";
 import { useParams } from "react-router-dom";
 
 import { TypeBehandling } from "../../../api/BidragBehandlingApiV1";
+import { useQueryParams } from "../../../barnebidrag/hooks/useQueryparams";
 import environment from "../../../environment";
 import { BEHANDLING_API_V1 } from "../../constants/api";
 import tekster from "../../constants/texts";
@@ -39,12 +40,13 @@ export const FatteVedtakButtons = ({
     );
     const { engangsbeløptype, stønadstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
             if (!bekreftetVedtak) {
                 throw new MåBekrefteOpplysningerStemmerError();
             }
-            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager });
+            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager, enhet });
         },
         onSuccess: () => {
             faro.api.pushEvent(`fatte.vedtak`, {
