@@ -13,6 +13,7 @@ import tekster from "../../constants/texts";
 import { useBehandlingProvider } from "../../context/BehandlingContext";
 import { useGetBehandlingV2 } from "../../hooks/useApiData";
 import useFeatureToogle from "../../hooks/useFeatureToggle";
+import { useQueryParams } from "../../hooks/useQueryParams";
 import { FlexRow } from "../layout/grid/FlexRow";
 import NotatButton from "../NotatButton";
 export class MåBekrefteOpplysningerStemmerError extends Error {
@@ -39,12 +40,13 @@ export const FatteVedtakButtons = ({
     );
     const { engangsbeløptype, stønadstype } = useGetBehandlingV2();
     const { saksnummer } = useParams<{ saksnummer?: string }>();
+    const enhet = useQueryParams().get("enhet");
     const fatteVedtakFn = useMutation({
         mutationFn: () => {
             if (!bekreftetVedtak) {
                 throw new MåBekrefteOpplysningerStemmerError();
             }
-            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager });
+            return BEHANDLING_API_V1.api.fatteVedtak(Number(behandlingId), { innkrevingUtsattAntallDager, enhet });
         },
         onSuccess: () => {
             faro.api.pushEvent(`fatte.vedtak`, {
