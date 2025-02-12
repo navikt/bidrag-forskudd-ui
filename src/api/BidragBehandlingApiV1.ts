@@ -793,6 +793,16 @@ export interface DelberegningSumInntekt {
     småbarnstillegg?: number;
 }
 
+/** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
+export interface EksisterendeOpphorsvedtakDto {
+    /** @format int64 */
+    vedtaksid: number;
+    /** @format date */
+    opphørsdato: string;
+    /** @format date */
+    vedtaksdato: string;
+}
+
 export interface FaktiskTilsynsutgiftDto {
     /** @format int64 */
     id?: number;
@@ -1066,6 +1076,13 @@ export interface MaksGodkjentBelopValideringsfeil {
     manglerBeløp: boolean;
     manglerBegrunnelse: boolean;
     harFeil: boolean;
+}
+
+export interface OpphorsdetaljerDto {
+    /** @format date */
+    opphørsdato?: string;
+    /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
+    eksisterendeOpphør?: EksisterendeOpphorsvedtakDto;
 }
 
 export interface OverlappendeBostatusperiode {
@@ -1536,6 +1553,7 @@ export interface VirkningstidspunktDto {
     begrunnelse: BegrunnelseDto;
     /** Saksbehandlers begrunnelse */
     begrunnelseFraOpprinneligVedtak?: BegrunnelseDto;
+    opphør?: OpphorsdetaljerDto;
     /** Saksbehandlers begrunnelse */
     notat: BegrunnelseDto;
 }
@@ -1663,6 +1681,11 @@ export interface OppdaterSamvaersperiodeDto {
 export interface OppdaterSamvaerResponsDto {
     /** Samværsperioder. Vil alltid være null for forskudd og særbidrag */
     oppdatertSamvær?: SamvaerDto;
+}
+
+export interface OppdaterOpphorsdatoRequestDto {
+    /** @format date */
+    opphørsdato?: string;
 }
 
 export interface OppdatereInntektRequest {
@@ -2056,9 +2079,9 @@ export interface KanBehandlesINyLosningRequest {
     søktFomDato?: string;
     /** @format date */
     mottattdato?: string;
-    søknadsbarn: SjekkRolleDto[];
     /** Rolle beskrivelse som er brukte til å opprette nye roller */
     bidragspliktig?: SjekkRolleDto;
+    søknadsbarn: SjekkRolleDto[];
 }
 
 /** Rolle beskrivelse som er brukte til å opprette nye roller */
@@ -2135,8 +2158,8 @@ export interface ResultatBeregningInntekterDto {
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export interface ResultatSaerbidragsberegningDto {
@@ -2167,9 +2190,9 @@ export interface Skatt {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -2270,6 +2293,7 @@ export interface DelberegningUnderholdskostnad {
 
 export interface ResultatBarnebidragsberegningPeriodeDto {
     periode: TypeArManedsperiode;
+    ugyldigBeregning?: UgyldigResultatPeriode;
     underholdskostnad: number;
     bpsAndelU: number;
     bpsAndelBeløp: number;
@@ -2322,7 +2346,13 @@ export interface SluttberegningBarnebidrag {
 export interface UgyldigBeregningDto {
     tittel: string;
     begrunnelse: string;
+    resultatPeriode: UgyldigResultatPeriode[];
     perioder: TypeArManedsperiode[];
+}
+
+export interface UgyldigResultatPeriode {
+    periode: TypeArManedsperiode;
+    type: UgyldigResultatPeriodeTypeEnum;
 }
 
 export interface BehandlingInfoDto {
@@ -2683,9 +2713,9 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
-    avslagVisningsnavn?: string;
-    kategoriVisningsnavn?: string;
     vedtakstypeVisningsnavn?: string;
+    kategoriVisningsnavn?: string;
+    avslagVisningsnavn?: string;
     avslagVisningsnavnUtenPrefiks?: string;
 }
 
@@ -2840,8 +2870,8 @@ export interface NotatResultatBeregningInntekterDto {
     barnEndeligInntekt?: number;
     inntektBarnMånedlig?: number;
     totalEndeligInntekt: number;
-    inntektBMMånedlig?: number;
     inntektBPMånedlig?: number;
+    inntektBMMånedlig?: number;
 }
 
 export type NotatResultatBidragsberegningBarnDto = UtilRequiredKeys<VedtakResultatInnhold, "type"> & {
@@ -2918,9 +2948,9 @@ export interface NotatSkattBeregning {
     skattAlminneligInntekt: number;
     trinnskatt: number;
     trygdeavgift: number;
-    skattMånedsbeløp: number;
-    trygdeavgiftMånedsbeløp: number;
     trinnskattMånedsbeløp: number;
+    trygdeavgiftMånedsbeløp: number;
+    skattMånedsbeløp: number;
     skattAlminneligInntektMånedsbeløp: number;
 }
 
@@ -3318,6 +3348,11 @@ export enum KanBehandlesINyLosningRequestSoknadstypeEnum {
     OMGJORINGBEGRENSETSATS = "OMGJØRING_BEGRENSET_SATS",
 }
 
+export enum UgyldigResultatPeriodeTypeEnum {
+    BEGRENSETREVURDERINGLIKELLERLAVEREENNLOPENDEBIDRAG = "BEGRENSET_REVURDERING_LIK_ELLER_LAVERE_ENN_LØPENDE_BIDRAG",
+    BEGRENSETREVURDERINGUTENLOPENDEFORSKUDD = "BEGRENSET_REVURDERING_UTEN_LØPENDE_FORSKUDD",
+}
+
 export enum InitalizeForsendelseRequestBehandlingStatusEnum {
     OPPRETTET = "OPPRETTET",
     ENDRET = "ENDRET",
@@ -3684,6 +3719,29 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         oppdaterSamvaer: (behandlingsid: number, data: OppdaterSamvaerDto, params: RequestParams = {}) =>
             this.request<OppdaterSamvaerResponsDto, any>({
                 path: `/api/v2/behandling/${behandlingsid}/samvar`,
+                method: "PUT",
+                body: data,
+                secure: true,
+                type: ContentType.Json,
+                format: "json",
+                ...params,
+            }),
+
+        /**
+         * @description Oppdatere opphørsdato for behandling.
+         *
+         * @tags virkningstidspunkt-controller
+         * @name OppdatereOpphorsdato
+         * @request PUT:/api/v2/behandling/{behandlingsid}/opphorsdato
+         * @secure
+         */
+        oppdatereOpphorsdato: (
+            behandlingsid: number,
+            data: OppdaterOpphorsdatoRequestDto,
+            params: RequestParams = {}
+        ) =>
+            this.request<BehandlingDtoV2, any>({
+                path: `/api/v2/behandling/${behandlingsid}/opphorsdato`,
                 method: "PUT",
                 body: data,
                 secure: true,
