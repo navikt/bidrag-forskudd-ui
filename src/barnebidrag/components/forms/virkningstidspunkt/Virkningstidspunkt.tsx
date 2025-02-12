@@ -214,7 +214,8 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
 const Opphør = ({ initialValues }) => {
     const behandling = useGetBehandlingV2();
     const { getValues } = useFormContext();
-    const opphørsvarighetIsLøpende = getValues("opphørsvarighet") === OpphørsVarighet.LØPENDE;
+    const [opphørsvarighet, setOpphørsvarighet] = useState(getValues("opphørsvarighet"));
+    const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
 
     return (
@@ -234,8 +235,8 @@ const Opphør = ({ initialValues }) => {
                 <FormControlledSelectField
                     name="opphørsvarighet"
                     label={text.label.varighet}
-                    onSelect={() => {}}
                     className="w-max"
+                    onSelect={(value) => setOpphørsvarighet(value)}
                 >
                     {getOpphørOptions(behandling.virkningstidspunkt.opphør, behandling.stønadstype).map((value) => (
                         <option key={value} value={value}>
@@ -319,15 +320,20 @@ const VirkningstidspunktForm = () => {
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
             if (name === "opphørsdato" && value.opphørsdato !== initialValues.opphørsdato) {
+                console.log("name", value.opphørsdato);
+                console.log("initialValues.opphørsdato", initialValues.opphørsdato);
                 updateOpphørsdato();
                 return;
             }
             if (
                 (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
-                (name !== "begrunnelse" && type === undefined)
+                (name !== "begrunnelse" && type === undefined) ||
+                name === "opphørsvarighet" ||
+                name === "opphørsdato"
             ) {
                 return;
             } else {
+                console.log("name", name);
                 debouncedOnSave();
             }
         });
