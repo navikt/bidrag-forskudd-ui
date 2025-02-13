@@ -91,12 +91,15 @@ export enum Grunnlagstype {
     SJABLON_SAMVARSFRADRAG = "SJABLON_SAMVARSFRADRAG",
     SJABLON_MAKS_FRADRAG = "SJABLON_MAKS_FRADRAG",
     SJABLON_MAKS_TILSYN = "SJABLON_MAKS_TILSYN",
+    SJABLON_INDEKSREGULERING_FAKTOR = "SJABLON_INDEKSREGULERING_FAKTOR",
     BOSTATUS_PERIODE = "BOSTATUS_PERIODE",
     SIVILSTAND_PERIODE = "SIVILSTAND_PERIODE",
     INNTEKT_RAPPORTERING_PERIODE = "INNTEKT_RAPPORTERING_PERIODE",
     SOKNAD = "SØKNAD",
     VIRKNINGSTIDSPUNKT = "VIRKNINGSTIDSPUNKT",
     NOTAT = "NOTAT",
+    PRIVAT_AVTALE_GRUNNLAG = "PRIVAT_AVTALE_GRUNNLAG",
+    PRIVAT_AVTALE_PERIODE_GRUNNLAG = "PRIVAT_AVTALE_PERIODE_GRUNNLAG",
     SAeRBIDRAGKATEGORI = "SÆRBIDRAG_KATEGORI",
     UTGIFT_DIREKTE_BETALT = "UTGIFT_DIREKTE_BETALT",
     UTGIFTMAKSGODKJENTBELOP = "UTGIFT_MAKS_GODKJENT_BELØP",
@@ -119,7 +122,9 @@ export enum Grunnlagstype {
     DELBEREGNING_BARNETILLEGG_SKATTESATS = "DELBEREGNING_BARNETILLEGG_SKATTESATS",
     DELBEREGNING_NETTO_BARNETILLEGG = "DELBEREGNING_NETTO_BARNETILLEGG",
     DELBEREGNING_UNDERHOLDSKOSTNAD = "DELBEREGNING_UNDERHOLDSKOSTNAD",
+    DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE = "DELBEREGNING_ENDRING_SJEKK_GRENSE_PERIODE",
     DELBEREGNING_ENDRING_SJEKK_GRENSE = "DELBEREGNING_ENDRING_SJEKK_GRENSE",
+    DELBEREGNING_PRIVAT_AVTALE_PERIODE = "DELBEREGNING_PRIVAT_AVTALE_PERIODE",
     SLUTTBEREGNING_BARNEBIDRAG = "SLUTTBEREGNING_BARNEBIDRAG",
     BARNETILLEGG_PERIODE = "BARNETILLEGG_PERIODE",
     BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
@@ -259,6 +264,7 @@ export enum OpplysningerType {
     SKATTEPLIKTIGE_INNTEKTER = "SKATTEPLIKTIGE_INNTEKTER",
     SUMMERTEMANEDSINNTEKTER = "SUMMERTE_MÅNEDSINNTEKTER",
     TILLEGGSSTONAD = "TILLEGGSSTØNAD",
+    BELOPSHISTORIKKBIDRAG = "BELØPSHISTORIKK_BIDRAG",
     AINNTEKT = "AINNTEKT",
     SKATTEGRUNNLAG = "SKATTEGRUNNLAG",
     BOFORHOLD_BEARBEIDET = "BOFORHOLD_BEARBEIDET",
@@ -269,6 +275,7 @@ export enum OpplysningerType {
 }
 
 export enum Resultatkode {
+    OPPHOR = "OPPHØR",
     GEBYR_FRITATT = "GEBYR_FRITATT",
     GEBYR_ILAGT = "GEBYR_ILAGT",
     BARNETERSELVFORSORGET = "BARNET_ER_SELVFORSØRGET",
@@ -718,6 +725,7 @@ export interface BoforholdPeriodeseringsfeil {
     overlappendePerioder: OverlappendeBostatusperiode[];
     /** Er sann hvis husstandsmedlem har en periode som starter senere enn starten av dagens måned. */
     fremtidigPeriode: boolean;
+    ugyldigSluttperiode: boolean;
     /**
      * Er sann hvis husstandsmedlem mangler perioder.
      *         Dette vil si at husstandsmedlem ikke har noen perioder i det hele tatt."
@@ -795,7 +803,7 @@ export interface DelberegningSumInntekt {
 
 /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
 export interface EksisterendeOpphorsvedtakDto {
-    /** @format int64 */
+    /** @format int32 */
     vedtaksid: number;
     /** @format date */
     opphørsdato: string;
@@ -1004,6 +1012,7 @@ export interface InntektValideringsfeil {
     manglerPerioder: boolean;
     /** Hvis det er inntekter som har periode som starter før virkningstidspunkt */
     perioderFørVirkningstidspunkt: boolean;
+    ugyldigSluttPeriode: boolean;
     /** Personident ytelsen gjelder for. Kan være null hvis det er en ytelse som ikke gjelder for et barn. */
     gjelderBarn?: string;
     rolle?: RolleDto;
@@ -1079,6 +1088,13 @@ export interface MaksGodkjentBelopValideringsfeil {
 }
 
 export interface OpphorsdetaljerDto {
+    /** @format date */
+    opphørsdato?: string;
+    opphørRoller: OpphorsdetaljerRolleDto[];
+}
+
+export interface OpphorsdetaljerRolleDto {
+    rolle: RolleDto;
     /** @format date */
     opphørsdato?: string;
     /** Løpende opphørsvedtak detaljer. Er satt hvis det finnes en vedtak hvor bidraget er opphørt */
@@ -1189,6 +1205,7 @@ export interface SamvaerValideringsfeilDto {
     manglerBegrunnelse: boolean;
     ingenLøpendeSamvær: boolean;
     manglerSamvær: boolean;
+    ugyldigSluttperiode: boolean;
     /** @uniqueItems true */
     overlappendePerioder: OverlappendeSamvaerPeriode[];
     /** Liste med perioder hvor det mangler inntekter. Vil alltid være tom liste for ytelser */
@@ -1684,6 +1701,8 @@ export interface OppdaterSamvaerResponsDto {
 }
 
 export interface OppdaterOpphorsdatoRequestDto {
+    /** @format int64 */
+    idRolle: number;
     /** @format date */
     opphørsdato?: string;
 }
@@ -2095,6 +2114,7 @@ export interface SjekkRolleDto {
 export interface FatteVedtakRequestDto {
     /** @format int64 */
     innkrevingUtsattAntallDager?: number;
+    enhet?: string;
 }
 
 export interface BeregnetBidragPerBarn {
@@ -2431,6 +2451,7 @@ export interface MaBekrefteNyeOpplysninger {
 
 export interface VirkningstidspunktFeilDto {
     manglerVirkningstidspunkt: boolean;
+    manglerOpphørsdato: boolean;
     manglerÅrsakEllerAvslag: boolean;
     manglerBegrunnelse: boolean;
     virkningstidspunktKanIkkeVæreSenereEnnOpprinnelig: boolean;
@@ -2712,10 +2733,10 @@ export interface NotatBehandlingDetaljerDto {
     avslag?: Resultatkode;
     /** @format date */
     klageMottattDato?: string;
+    vedtakstypeVisningsnavn?: string;
+    avslagVisningsnavnUtenPrefiks?: string;
     avslagVisningsnavn?: string;
     kategoriVisningsnavn?: string;
-    avslagVisningsnavnUtenPrefiks?: string;
-    vedtakstypeVisningsnavn?: string;
 }
 
 export interface NotatBeregnetBidragPerBarnDto {
@@ -2782,8 +2803,8 @@ export interface NotatGebyrRolleDto {
     begrunnelse?: string;
     beløpGebyrsats: number;
     rolle: NotatPersonDto;
-    gebyrResultatVisningsnavn: string;
     erManueltOverstyrt: boolean;
+    gebyrResultatVisningsnavn: string;
 }
 
 export interface NotatInntektDto {
@@ -2915,8 +2936,8 @@ export type NotatResultatSaerbidragsberegningDto = UtilRequiredKeys<VedtakResult
     enesteVoksenIHusstandenErEgetBarn?: boolean;
     erDirekteAvslag: boolean;
     bpHarEvne: boolean;
-    resultatVisningsnavn: string;
     beløpSomInnkreves: number;
+    resultatVisningsnavn: string;
 };
 
 export interface NotatSamvaerDto {

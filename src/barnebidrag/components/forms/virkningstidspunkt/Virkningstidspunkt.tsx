@@ -1,6 +1,6 @@
 import {
     OppdatereVirkningstidspunkt,
-    OpphorsdetaljerDto,
+    OpphorsdetaljerRolleDto,
     Resultatkode,
     Rolletype,
     Stonadstype,
@@ -55,7 +55,7 @@ const avslagsListe = [Resultatkode.IKKE_OMSORG_FOR_BARNET, Resultatkode.BIDRAGSP
 
 const avslagsListeDeprekert = [Resultatkode.IKKESOKTOMINNKREVINGAVBIDRAG];
 
-const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerDto, stønadstype: Stonadstype) => {
+const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
     const opphørsdatoSameAsEkisterende = opphør?.opphørsdato === opphør?.eksisterendeOpphør?.opphørsdato;
     const varighet = opphørsdatoSameAsEkisterende ? OpphørsVarighet.FORTSETTE_OPPHØR : OpphørsVarighet.VELG_OPPHØRSDATO;
 
@@ -71,13 +71,18 @@ const getDefaultOpphørsvarighet = (opphør: OpphorsdetaljerDto, stønadstype: S
 const createInitialValues = (
     response: VirkningstidspunktDto,
     stønadstype: Stonadstype
-): VirkningstidspunktFormValues => ({
-    virkningstidspunkt: response.virkningstidspunkt,
-    årsakAvslag: response.årsak ?? response.avslag ?? "",
-    begrunnelse: response.begrunnelse?.innhold,
-    opphørsvarighet: getDefaultOpphørsvarighet(response.opphør, stønadstype),
-    opphørsdato: response.opphør?.opphørsdato ?? null,
-});
+): VirkningstidspunktFormValues => {
+    const opphørBA = response.opphør.opphørRoller.find((opphørRolle) => opphørRolle.rolle.rolletype === Rolletype.BA);
+    const opphørsvarighet = getDefaultOpphørsvarighet(opphørBA, stønadstype);
+
+    return {
+        opphørsvarighet,
+        virkningstidspunkt: response.virkningstidspunkt,
+        årsakAvslag: response.årsak ?? response.avslag ?? "",
+        begrunnelse: response.begrunnelse?.innhold,
+        opphørsdato: response.opphør?.opphørsdato ?? null,
+    };
+};
 
 const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirkningstidspunkt => {
     const årsak = årsakListe.find((value) => value === values.årsakAvslag);
@@ -92,7 +97,7 @@ const createPayload = (values: VirkningstidspunktFormValues): OppdatereVirknings
     };
 };
 
-const getOpphørOptions = (opphør: OpphorsdetaljerDto, stønadstype: Stonadstype) => {
+const getOpphørOptions = (opphør: OpphorsdetaljerRolleDto, stønadstype: Stonadstype) => {
     if (stønadstype === Stonadstype.BIDRAG18AAR) {
         if (opphør?.eksisterendeOpphør) {
             return [OpphørsVarighet.VELG_OPPHØRSDATO, OpphørsVarighet.FORTSETTE_OPPHØR];
@@ -108,7 +113,7 @@ const getOpphørOptions = (opphør: OpphorsdetaljerDto, stønadstype: Stonadstyp
     }
 };
 
-const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
+const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVirkningsDatoAlert }) => {
     const behandling = useGetBehandlingV2();
     const { setValue, clearErrors, getValues } = useFormContext();
     const kunEtBarnIBehandlingen = behandling.roller.filter((rolle) => rolle.rolletype === Rolletype.BA).length === 1;
@@ -206,27 +211,84 @@ const Main = ({ initialValues, showChangedVirkningsDatoAlert }) => {
                     <div dangerouslySetInnerHTML={{ __html: text.alert.endretVirkningstidspunkt }}></div>
                 </BehandlingAlert>
             )}
-            <Opphør initialValues={initialValues} />
+            <Opphør
+                initialValues={initialValues}
+                previousValues={previousValues}
+                setPreviousValues={setPreviousValues}
+            />
         </>
     );
 };
 
-const Opphør = ({ initialValues }) => {
+const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     const behandling = useGetBehandlingV2();
-    const { getValues } = useFormContext();
+    const baRolle = behandling.roller.find((rolle) => rolle.rolletype === Rolletype.BA);
+    const opphør = behandling.virkningstidspunkt.opphør.opphørRoller.find(
+        (opphørRolle) => opphørRolle.rolle.ident === baRolle.ident
+    );
+    const { setSaveErrorState } = useBehandlingProvider();
+    const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
+    const { getValues, reset, setValue } = useFormContext();
     const [opphørsvarighet, setOpphørsvarighet] = useState(getValues("opphørsvarighet"));
     const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
     const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
 
+    const updateOpphørsdato = () => {
+        const values = getValues();
+        oppdaterOpphørsdato.mutation.mutate(
+            { idRolle: baRolle.id, opphørsdato: values.opphørsdato },
+            {
+                onSuccess: (response) => {
+                    oppdaterOpphørsdato.queryClientUpdater((currentData) => {
+                        return {
+                            ...currentData,
+                            ...response,
+                        };
+                    });
+                    setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
+                },
+                onError: () => {
+                    setSaveErrorState({
+                        error: true,
+                        retryFn: () => updateOpphørsdato(),
+                        rollbackFn: () => {
+                            reset(previousValues, {
+                                keepIsSubmitSuccessful: true,
+                                keepDirty: true,
+                                keepIsSubmitted: true,
+                            });
+                        },
+                    });
+                },
+            }
+        );
+    };
+
+    const onMonthChange = (date) => {
+        const currentDate = getValues("opphørsdato");
+        if (date && date !== currentDate) {
+            setValue("opphørsdato", date);
+            updateOpphørsdato();
+        }
+    };
+
+    const onSelectVarighet = (value) => {
+        setOpphørsvarighet(value);
+        if (value === OpphørsVarighet.LØPENDE) {
+            setValue("opphørsdato", null);
+            updateOpphørsdato();
+        }
+    };
+
     return (
         <>
-            {behandling.virkningstidspunkt.opphør?.eksisterendeOpphør && (
+            {opphør?.eksisterendeOpphør && (
                 <BehandlingAlert variant="info" className="w-[488px]">
                     <BodyShort>
                         {removePlaceholder(
                             text.alert.bidragOpphørt,
-                            behandling.virkningstidspunkt.opphør.eksisterendeOpphør.opphørsdato,
-                            behandling.virkningstidspunkt.opphør.eksisterendeOpphør.vedtaksdato
+                            opphør.eksisterendeOpphør.opphørsdato,
+                            opphør.eksisterendeOpphør.vedtaksdato
                         )}
                     </BodyShort>
                 </BehandlingAlert>
@@ -236,9 +298,9 @@ const Opphør = ({ initialValues }) => {
                     name="opphørsvarighet"
                     label={text.label.varighet}
                     className="w-max"
-                    onSelect={(value) => setOpphørsvarighet(value)}
+                    onSelect={(value) => onSelectVarighet(value)}
                 >
-                    {getOpphørOptions(behandling.virkningstidspunkt.opphør, behandling.stønadstype).map((value) => (
+                    {getOpphørOptions(opphør, behandling.stønadstype).map((value) => (
                         <option key={value} value={value}>
                             {value}
                         </option>
@@ -247,6 +309,7 @@ const Opphør = ({ initialValues }) => {
                 {!opphørsvarighetIsLøpende && (
                     <FormControlledMonthPicker
                         name="opphørsdato"
+                        onChange={(date) => onMonthChange(date)}
                         label={text.label.opphørsdato}
                         defaultValue={initialValues.virkningstidspunkt}
                         placeholder="DD.MM.ÅÅÅÅ"
@@ -298,7 +361,6 @@ const VirkningstidspunktForm = () => {
     const { virkningstidspunkt, stønadstype } = useGetBehandlingV2();
     const { setPageErrorsOrUnsavedState, setSaveErrorState } = useBehandlingProvider();
     const oppdaterBehandling = useOnSaveVirkningstidspunkt();
-    const oppdaterOpphørsdato = useOnUpdateOpphørsdato();
     const initialValues = createInitialValues(virkningstidspunkt, stønadstype);
     const [initialVirkningsdato, setInitialVirkningsdato] = useState(virkningstidspunkt.virkningstidspunkt);
     const [showChangedVirkningsDatoAlert, setShowChangedVirkningsDatoAlert] = useState(false);
@@ -319,12 +381,6 @@ const VirkningstidspunktForm = () => {
 
     useEffect(() => {
         const subscription = useFormMethods.watch((value, { name, type }) => {
-            if (name === "opphørsdato" && value.opphørsdato !== initialValues.opphørsdato) {
-                console.log("name", value.opphørsdato);
-                console.log("initialValues.opphørsdato", initialValues.opphørsdato);
-                updateOpphørsdato();
-                return;
-            }
             if (
                 (name === "virkningstidspunkt" && !value.virkningstidspunkt) ||
                 (name !== "begrunnelse" && type === undefined) ||
@@ -332,10 +388,9 @@ const VirkningstidspunktForm = () => {
                 name === "opphørsdato"
             ) {
                 return;
-            } else {
-                console.log("name", name);
-                debouncedOnSave();
             }
+            console.log("name", name);
+            debouncedOnSave();
         });
         return () => subscription.unsubscribe();
     }, []);
@@ -400,37 +455,6 @@ const VirkningstidspunktForm = () => {
 
     const debouncedOnSave = useDebounce(onSave);
 
-    const updateOpphørsdato = () => {
-        const values = useFormMethods.getValues();
-        oppdaterOpphørsdato.mutation.mutate(
-            { opphørsdato: values.opphørsdato },
-            {
-                onSuccess: (response) => {
-                    oppdaterBehandling.queryClientUpdater((currentData) => {
-                        return {
-                            ...currentData,
-                            ...response,
-                        };
-                    });
-                    setPreviousValues(createInitialValues(response.virkningstidspunkt, response.stønadstype));
-                },
-                onError: () => {
-                    setSaveErrorState({
-                        error: true,
-                        retryFn: () => onSave(),
-                        rollbackFn: () => {
-                            useFormMethods.reset(previousValues, {
-                                keepIsSubmitSuccessful: true,
-                                keepDirty: true,
-                                keepIsSubmitted: true,
-                            });
-                        },
-                    });
-                },
-            }
-        );
-    };
-
     return (
         <>
             <FormProvider {...useFormMethods}>
@@ -440,6 +464,8 @@ const VirkningstidspunktForm = () => {
                         main={
                             <Main
                                 initialValues={initialValues}
+                                previousValues={previousValues}
+                                setPreviousValues={setPreviousValues}
                                 showChangedVirkningsDatoAlert={showChangedVirkningsDatoAlert}
                             />
                         }
