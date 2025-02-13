@@ -125,10 +125,16 @@ const Periode = ({
     field: "datoFom" | "datoTom";
     label: string;
 }) => {
+    const {
+        virkningstidspunkt: {
+            opphør: { opphørsdato },
+        },
+    } = useGetBehandlingV2();
     const virkningsOrSoktFraDato = useVirkningsdato();
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato);
+    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningsOrSoktFraDato, opphørsTomDato);
     const fieldIsDatoTom = field === "datoTom";
 
     const validateFomOgTom = () => {

@@ -142,8 +142,14 @@ export const Periode = ({
     item: InntektFormPeriode;
 }) => {
     const virkningsdato = useVirkningsdato();
-    const { type } = useGetBehandlingV2();
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
+    const {
+        type,
+        virkningstidspunkt: {
+            opphør: { opphørsdato },
+        },
+    } = useGetBehandlingV2();
+    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();

@@ -389,7 +389,6 @@ const VirkningstidspunktForm = () => {
             ) {
                 return;
             }
-            console.log("name", name);
             debouncedOnSave();
         });
         return () => subscription.unsubscribe();

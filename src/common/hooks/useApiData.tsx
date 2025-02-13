@@ -56,7 +56,6 @@ export const MutationKeys = {
         "oppdaterManueltOverstyrtGebyr",
         behandlingId,
     ],
-    oppdatareOpphørsdato: (behandlingId: string) => ["mutation", "oppdatareOpphørsdato", behandlingId],
     oppdatereTilsynsordning: (behandlingId: string) => ["mutation", "oppdatereTilsynsordning", behandlingId],
     oppdatereUnderhold: (behandlingId: string) => ["mutation", "oppdatereUnderhold", behandlingId],
     oppretteUnderholdForBarn: (behandlingId: string) => ["mutation", "oppretteUnderholdForBarn", behandlingId],
@@ -734,7 +733,7 @@ export const useUpdateOpphørsdato = () => {
     const { behandlingId } = useBehandlingProvider();
 
     return useMutation({
-        mutationKey: MutationKeys.oppdatareOpphørsdato(behandlingId),
+        mutationKey: MutationKeys.oppdaterBehandling(behandlingId),
         mutationFn: async (payload: OppdaterOpphorsdatoRequestDto): Promise<BehandlingDtoV2> => {
             const { data } = await BEHANDLING_API_V1.api.oppdatereOpphorsdato(Number(behandlingId), payload);
             return data;

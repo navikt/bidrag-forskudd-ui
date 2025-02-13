@@ -99,8 +99,14 @@ export const UnderholdskostnadPeriode = ({
     underhold: Underhold;
 }) => {
     const virkningsdato = useVirkningsdato();
+    const {
+        virkningstidspunkt: {
+            opphør: { opphørsdato },
+        },
+    } = useGetBehandlingV2();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(underhold.gjelderBarn.fødselsdato, virkningsdato);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
+    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<UnderholdskostnadFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
