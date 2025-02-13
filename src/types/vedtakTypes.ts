@@ -22,4 +22,5 @@ export interface VedtakSærbidragBeregningResult {
 export interface VedtakBarnebidragBeregningResult {
     resultat?: ResultatBidragberegningDto;
     feil?: VedtakBeregningFeil;
+    ugyldigBeregning?: boolean;
 }

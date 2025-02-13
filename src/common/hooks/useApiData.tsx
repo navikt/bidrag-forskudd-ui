@@ -439,7 +439,8 @@ export const useGetBeregningBidrag = () => {
                     return { resultat: response.data };
                 }
                 const response = await BEHANDLING_API_V1.api.beregnBarnebidrag(Number(behandlingId));
-                return { resultat: response.data };
+                const ugyldigBeregning = response.data.resultatBarn.some((barn) => barn.ugyldigBeregning);
+                return { resultat: response.data, ugyldigBeregning: ugyldigBeregning };
             } catch (error) {
                 const feilmelding = error.response.headers["warning"]?.split(",") ?? [];
                 if (error instanceof AxiosError && error.response.status === 400) {
