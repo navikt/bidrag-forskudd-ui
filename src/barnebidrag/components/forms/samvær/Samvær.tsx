@@ -475,15 +475,27 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                             {valideringsfeil.manglerSamvær && (
                                 <BodyShort size="small">{text.error.manglerSamværsperioder}</BodyShort>
                             )}
+                            {valideringsfeil.ugyldigSluttperiode && (
+                                <BodyShort size="small">
+                                    {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
+                                        "{}",
+                                        DateToDDMMYYYYString(
+                                            deductDays(
+                                                dateOrNull(behandling.virkningstidspunkt?.opphør?.opphørsdato),
+                                                1
+                                            )
+                                        )
+                                    )}
+                                </BodyShort>
+                            )}
                         </BehandlingAlert>
                     </div>
                 )}
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${
-                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                            } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                                } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

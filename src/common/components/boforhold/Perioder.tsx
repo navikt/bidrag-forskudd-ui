@@ -27,7 +27,7 @@ import { hentVisningsnavn } from "@common/hooks/useVisningsnavn";
 import { ArrowUndoIcon, FloppydiskIcon, PencilIcon, TrashIcon } from "@navikt/aksel-icons";
 import { ObjectUtils } from "@navikt/bidrag-ui-common";
 import { Button, Heading, Table } from "@navikt/ds-react";
-import { formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
+import { dateOrNull, DateToDDMMYYYYString, formatDateToYearMonth, isAfterEqualsDate } from "@utils/date-utils";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 
@@ -143,6 +143,7 @@ const Status = ({
 export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
     const {
         boforhold: { valideringsfeil },
+        virkningstidspunkt: { opphør },
         feilOppståttVedSisteGrunnlagsinnhenting,
     } = useGetBehandlingV2();
     const {
@@ -281,10 +282,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         updatedHusstandsbarnIndex === -1
                             ? currentData.boforhold.husstandsbarn.concat(response.oppdatertHusstandsbarn)
                             : currentData.boforhold.husstandsbarn.toSpliced(
-                                  updatedHusstandsbarnIndex,
-                                  1,
-                                  response.oppdatertHusstandsbarn
-                              );
+                                updatedHusstandsbarnIndex,
+                                1,
+                                response.oppdatertHusstandsbarn
+                            );
 
                     return {
                         ...currentData,
@@ -512,15 +513,22 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         {valideringsfeilForBarn.fremtidigPeriode && <p>{text.error.framoverPeriodisering}</p>}
                         {valideringsfeilForBarn.hullIPerioder.length > 0 && <p>{text.error.hullIPerioder}</p>}
                         {valideringsfeilForBarn.ingenLøpendePeriode && <p>{text.error.ingenLoependePeriode}</p>}
+                        {valideringsfeilForBarn.ugyldigSluttperiode && (
+                            <p>
+                                {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
+                                    "{}",
+                                    DateToDDMMYYYYString(dateOrNull(opphør.opphørsdato))
+                                )}
+                            </p>
+                        )}
                     </BehandlingAlert>
                 </div>
             )}
 
             {controlledFields.length > 0 && (
                 <div
-                    className={`${
-                        saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                    } block overflow-x-auto whitespace-nowrap`}
+                    className={`${saveBoforhold.mutation.isPending ? "relative" : "inherit"
+                        } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
