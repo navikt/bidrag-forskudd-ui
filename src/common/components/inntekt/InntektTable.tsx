@@ -132,11 +132,11 @@ export const Periode = ({
 }: {
     index: number;
     fieldName:
-    | `småbarnstillegg.${string}`
-    | `utvidetBarnetrygd.${string}`
-    | `årsinntekter.${string}`
-    | `barnetillegg.${string}.${string}`
-    | `kontantstøtte.${string}.${string}`;
+        | `småbarnstillegg.${string}`
+        | `utvidetBarnetrygd.${string}`
+        | `årsinntekter.${string}`
+        | `barnetillegg.${string}.${string}`
+        | `kontantstøtte.${string}.${string}`;
     label: string;
     field: "datoFom" | "datoTom";
     item: InntektFormPeriode;
@@ -401,11 +401,11 @@ export const InntektTabel = ({
     )
         ? valideringsfeil[inntektType]
         : valideringsfeil[inntektType]?.find((feil) => {
-            if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
-                return feil.gjelderBarn === barnIdent && feil.ident === ident;
-            }
-            return feil.ident === ident;
-        });
+              if (["barnetillegg", "kontantstøtte"].includes(inntektType)) {
+                  return feil.gjelderBarn === barnIdent && feil.ident === ident;
+              }
+              return feil.ident === ident;
+          });
 
     return (
         <>

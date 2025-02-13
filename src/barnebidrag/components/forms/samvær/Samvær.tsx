@@ -494,8 +494,9 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                 <div className="grid gap-2 w-full">
                     {controlledFields.length > 0 && (
                         <div
-                            className={`${saveSamværFn.mutation.isPending ? "relative" : "inherit"
-                                } block overflow-x-auto whitespace-nowrap w-full`}
+                            className={`${
+                                saveSamværFn.mutation.isPending ? "relative" : "inherit"
+                            } block overflow-x-auto whitespace-nowrap w-full`}
                         >
                             <OverlayLoader loading={saveSamværFn.mutation.isPending} />
                             <SamværsperiodeTable

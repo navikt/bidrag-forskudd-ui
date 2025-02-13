@@ -282,10 +282,10 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
                         updatedHusstandsbarnIndex === -1
                             ? currentData.boforhold.husstandsbarn.concat(response.oppdatertHusstandsbarn)
                             : currentData.boforhold.husstandsbarn.toSpliced(
-                                updatedHusstandsbarnIndex,
-                                1,
-                                response.oppdatertHusstandsbarn
-                            );
+                                  updatedHusstandsbarnIndex,
+                                  1,
+                                  response.oppdatertHusstandsbarn
+                              );
 
                     return {
                         ...currentData,
@@ -527,8 +527,9 @@ export const Perioder = ({ barnIndex }: { barnIndex: number }) => {
 
             {controlledFields.length > 0 && (
                 <div
-                    className={`${saveBoforhold.mutation.isPending ? "relative" : "inherit"
-                        } block overflow-x-auto whitespace-nowrap`}
+                    className={`${
+                        saveBoforhold.mutation.isPending ? "relative" : "inherit"
+                    } block overflow-x-auto whitespace-nowrap`}
                     data-section={elementIds.seksjon_perioder}
                 >
                     <OverlayLoader loading={saveBoforhold.mutation.isPending} />
