@@ -67,7 +67,10 @@ export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) 
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, opphørsdato?: Date) => {
     const lastDayOfPreviousMonth = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
     const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(opphørsdato);
-    const fom = firstDayOfMonth(new Date(virkningstidspunkt));
+    const fom =
+        opphørsdato && isBeforeDate(opphørsdato, virkningstidspunkt)
+            ? opphørsdato
+            : firstDayOfMonth(new Date(virkningstidspunkt));
     const tom =
         lastDayOfOpphørsdatoMonth && isBeforeDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
             ? lastDayOfOpphørsdatoMonth
