@@ -1,6 +1,6 @@
 import { BehandlingDtoV2, TypeArsakstype } from "@api/BidragBehandlingApiV1";
 import { lastDayOfMonth } from "@navikt/bidrag-ui-common";
-import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, minOfDates } from "@utils/date-utils";
+import { dateOrNull, deductMonths, firstDayOfMonth, isAfterDate, isBeforeDate, minOfDates } from "@utils/date-utils";
 import { addMonths } from "date-fns";
 
 export const getSoktFraOrMottatDato = (soktFraDato: Date, mottatDato: Date) => {
@@ -65,7 +65,12 @@ export const getFomAndTomForMonthPickerV2 = (virkningstidspunkt: Date | string) 
 };
 
 export const getFomAndTomForMonthPicker = (virkningstidspunkt: Date | string, opphørsdato?: Date) => {
-    const tomDate = opphørsdato ?? new Date();
+    const lastDayOfPreviousMonth = lastDayOfMonth(deductMonths(firstDayOfMonth(new Date()), 1));
+    const lastDayOfOpphørsdatoMonth = opphørsdato && lastDayOfMonth(opphørsdato);
+    const tomDate =
+        lastDayOfOpphørsdatoMonth && isBeforeDate(lastDayOfOpphørsdatoMonth, lastDayOfPreviousMonth)
+            ? lastDayOfOpphørsdatoMonth
+            : lastDayOfPreviousMonth;
     const fom = firstDayOfMonth(new Date(virkningstidspunkt));
     const tom = lastDayOfMonth(deductMonths(firstDayOfMonth(tomDate), 1));
 
