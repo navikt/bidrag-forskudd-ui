@@ -51,6 +51,13 @@ export default function VedtakWrapper({ feil, steps, children }: PropsWithChildr
                     </ErrorSummary.Item>
                 );
             }
+            if (feilInnhold.virkningstidspunkt?.manglerOpphørsdato === true) {
+                feilliste.push(
+                    <ErrorSummary.Item href="#" onClick={() => onStepChange(steps.virkningstidspunkt)}>
+                        Virkningstidspunkt: Opphørsdato må settes ved 18 års bidrag
+                    </ErrorSummary.Item>
+                );
+            }
         }
         if (feilInnhold.utgift != null && "utgift" in steps) {
             const feillisteUtgifter = [];
