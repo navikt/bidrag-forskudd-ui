@@ -133,7 +133,7 @@ export const UnderholdskostnadPeriode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel
