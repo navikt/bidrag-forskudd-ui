@@ -79,6 +79,7 @@ const tekster = {
         framoverPeriodisering: "Det kan ikke periodiseres fremover i tid.",
         feltErPåkrevd: "Dette feltet er påkrevd",
         periodeFørVirkningstidspunkt: "Det kan ikke periodisere før virkningstidspunkt.",
+        sistePeriodeMåSluttePåOpphørsdato: "Siste periode må løpe til opphørsdato {}.",
         ukjentfeil: "Det skjedde en ukjent feil",
         kunneIkkFatteVedtak: "Kunne ikke fatte vedtak",
         beregning: "Det skjedde en feil ved beregning. Prøv å laste siden på nytt",

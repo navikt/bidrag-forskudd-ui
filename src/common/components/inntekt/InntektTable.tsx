@@ -220,7 +220,7 @@ export const InntektTabel = ({
     const {
         inntekter,
         søktFomDato,
-        virkningstidspunkt: { virkningstidspunkt },
+        virkningstidspunkt: { virkningstidspunkt, opphør },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const saveInntekt = useOnSaveInntekt();
@@ -457,6 +457,14 @@ export const InntektTabel = ({
                     )}
                     {tableValideringsfeil.perioderFørVirkningstidspunkt && (
                         <BodyShort size="small">{text.error.periodeFørVirkningstidspunkt}</BodyShort>
+                    )}
+                    {tableValideringsfeil.ugyldigSluttPeriode && (
+                        <BodyShort size="small">
+                            {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
+                                "{}",
+                                DateToDDMMYYYYString(dateOrNull(opphør.opphørsdato))
+                            )}
+                        </BodyShort>
                     )}
                 </BehandlingAlert>
             )}
