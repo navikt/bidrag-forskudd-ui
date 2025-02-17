@@ -19,6 +19,7 @@ import { QueryErrorWrapper } from "@common/components/query-error-boundary/Query
 import { SOKNAD_LABELS } from "@common/constants/soknadFraLabels";
 import text from "@common/constants/texts";
 import { useBehandlingProvider } from "@common/context/BehandlingContext";
+import { getFirstDayOfMonthAfterEighteenYears } from "@common/helpers/boforholdFormHelpers";
 import {
     aarsakToVirkningstidspunktMapper,
     getFomAndTomForMonthPicker,
@@ -231,7 +232,11 @@ const Opphør = ({ initialValues, previousValues, setPreviousValues }) => {
     const { getValues, reset, setValue } = useFormContext();
     const [opphørsvarighet, setOpphørsvarighet] = useState(getValues("opphørsvarighet"));
     const opphørsvarighetIsLøpende = opphørsvarighet === OpphørsVarighet.LØPENDE;
-    const tom = useMemo(() => addMonths(new Date(), 50 * 12), []);
+    const tom = useMemo(() => {
+        if (behandling.stønadstype === Stonadstype.BIDRAG)
+            return getFirstDayOfMonthAfterEighteenYears(new Date(baRolle.fødselsdato));
+        return addMonths(new Date(), 50 * 12);
+    }, []);
 
     const updateOpphørsdato = () => {
         const values = getValues();
