@@ -132,10 +132,13 @@ const Main = ({ initialValues, previousValues, setPreviousValues, showChangedVir
 
     const [fom] = getFomAndTomForMonthPicker(new Date(behandling.søktFomDato));
 
-    const tom = useMemo(
-        () => dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt) ?? addMonths(new Date(), 50 * 12),
-        [fom]
-    );
+    const tom = useMemo(() => {
+        const opprinneligVirkningstidspunkt = dateOrNull(behandling.virkningstidspunkt.opprinneligVirkningstidspunkt);
+        const opphørsdato = dateOrNull(behandling.virkningstidspunkt.opphør.opphørsdato);
+        if (opprinneligVirkningstidspunkt) return opprinneligVirkningstidspunkt;
+        if (opphørsdato) return opphørsdato;
+        return addMonths(new Date(), 50 * 12);
+    }, [behandling.virkningstidspunkt.opprinneligVirkningstidspunkt, behandling.virkningstidspunkt.opphør.opphørsdato]);
 
     const erTypeOpphør = behandling.vedtakstype === Vedtakstype.OPPHOR;
     return (
