@@ -15,6 +15,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import ModiaLink from "../../../../common/components/inntekt/ModiaLink";
 import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { STEPS } from "../../../constants/steps";
 import { BarnebidragStepper } from "../../../enum/BarnebidragStepper";
@@ -154,7 +155,7 @@ const Main = () => {
                     <Fragment key={item?.rolle?.id}>
                         <Box
                             background="surface-subtle"
-                            className="grid gap-2 py-2 px-4"
+                            className="grid gap-2 py-2 mt-2 px-4"
                             id={`${elementIds.seksjon_gebyr}_${item?.rolle?.id}`}
                         >
                             <div className="grid grid-cols-[max-content,max-content,auto] p-2 bg-white">
@@ -162,6 +163,7 @@ const Main = () => {
                                     <RolleTag rolleType={item.rolle.rolletype} />
                                 </div>
                                 <PersonNavnIdent ident={item.rolle.ident} />
+                                <div className="pl-2">{avslag && <ModiaLink ident={item.rolle.ident} />}</div>
                             </div>
 
                             <div className="flex gap-x-2">
