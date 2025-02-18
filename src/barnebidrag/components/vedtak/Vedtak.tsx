@@ -150,7 +150,10 @@ const VedtakTableBody = ({
                         <Table.ExpandableRow
                             togglePlacement="right"
                             expandOnRowClick
-                            expansionDisabled={periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget}
+                            expansionDisabled={
+                                periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
+                                periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet
+                            }
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
                             <Table.DataCell textSize="small">
@@ -179,20 +182,24 @@ const VedtakTableBody = ({
                             <Table.DataCell textSize="small">
                                 <table>
                                     <tbody>
-                                        <tr>
-                                            <td className="w-[45px]" align="right">
-                                                {formatterBeløpForBeregning(periode.samværsfradrag)}
-                                            </td>
-                                            <td className="w-[10px]">/</td>
-                                            <td>
-                                                {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                                Samvaersklasse.DELT_BOSTED
-                                                    ? "D"
-                                                    : hentVisningsnavn(
-                                                          periode.beregningsdetaljer.samværsfradrag.samværsklasse
-                                                      )}
-                                            </td>
-                                        </tr>
+                                        {periode.beregningsdetaljer.samværsfradrag != null ? (
+                                            <tr>
+                                                <td className="w-[45px]" align="right">
+                                                    {formatterBeløpForBeregning(periode.samværsfradrag)}
+                                                </td>
+                                                <td className="w-[10px]">/</td>
+                                                <td>
+                                                    {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
+                                                        Samvaersklasse.DELT_BOSTED
+                                                        ? "D"
+                                                        : hentVisningsnavn(
+                                                            periode.beregningsdetaljer.samværsfradrag.samværsklasse
+                                                        )}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            <tr></tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </Table.DataCell>
@@ -202,14 +209,14 @@ const VedtakTableBody = ({
                                         <tr>
                                             <td className="w-[45px]" align="right">
                                                 {formatterBeløpForBeregning(
-                                                    periode.beregningsdetaljer.delberegningBidragsevne.bidragsevne
+                                                    periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
                                                 )}
                                             </td>
                                             <td className="w-[10px]">/</td>
                                             <td>
                                                 {formatterBeløpForBeregning(
                                                     periode.beregningsdetaljer.delberegningBidragsevne
-                                                        .sumInntekt25Prosent
+                                                        ?.sumInntekt25Prosent
                                                 )}
                                             </td>
                                         </tr>
@@ -270,7 +277,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
                     Samvær
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "50px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "70px" }}>
                     Evne / 25%
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
@@ -282,7 +289,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     Resultat
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "54px" }}></Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
             </Table.Row>
         )}
     </Table.Header>
