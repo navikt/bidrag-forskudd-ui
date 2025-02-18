@@ -15,6 +15,7 @@ import { formatterBeløp } from "@utils/number-utils";
 import React, { Fragment, useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useFormContext, useWatch } from "react-hook-form";
 
+import AinntektLink from "../../../../common/components/inntekt/AinntektLink";
 import ModiaLink from "../../../../common/components/inntekt/ModiaLink";
 import PersonNavnIdent from "../../../../common/components/PersonNavnIdent";
 import { STEPS } from "../../../constants/steps";
@@ -163,7 +164,14 @@ const Main = () => {
                                     <RolleTag rolleType={item.rolle.rolletype} />
                                 </div>
                                 <PersonNavnIdent ident={item.rolle.ident} />
-                                <div className="pl-2">{avslag && <ModiaLink ident={item.rolle.ident} />}</div>
+                                <div className="pl-2">
+                                    {avslag && (
+                                        <div className="flex gap-x-2">
+                                            <AinntektLink ident={item.rolle.ident} />
+                                            <ModiaLink ident={item.rolle.ident} />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex gap-x-2">
