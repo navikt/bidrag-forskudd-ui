@@ -43,11 +43,7 @@ export const gyldigBostatusOver18År = {
         Bostatuskode.DOKUMENTERT_SKOLEGANG,
         Bostatuskode.IKKE_MED_FORELDER,
     ],
-    [TypeBehandling.BIDRAG]: [
-        Bostatuskode.REGNES_IKKE_SOM_BARN,
-        Bostatuskode.DOKUMENTERT_SKOLEGANG,
-        Bostatuskode.IKKE_MED_FORELDER,
-    ],
+    [TypeBehandling.BIDRAG]: [Bostatuskode.REGNES_IKKE_SOM_BARN, Bostatuskode.DOKUMENTERT_SKOLEGANG],
 };
 
 export const boforholdOptions = {
@@ -70,6 +66,7 @@ export const boforholdOptions = {
         likEllerOver18År: [
             ...gyldigBostatusOver18År[TypeBehandling.BIDRAG],
             Bostatuskode.MED_FORELDER,
+            Bostatuskode.IKKE_MED_FORELDER,
             Bostatuskode.DELT_BOSTED,
         ],
     },
