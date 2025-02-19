@@ -475,6 +475,19 @@ export const SamværBarn = ({ gjelderBarn }: { gjelderBarn: string }) => {
                             {valideringsfeil.manglerSamvær && (
                                 <BodyShort size="small">{text.error.manglerSamværsperioder}</BodyShort>
                             )}
+                            {valideringsfeil.ugyldigSluttperiode && (
+                                <BodyShort size="small">
+                                    {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
+                                        "{}",
+                                        DateToDDMMYYYYString(
+                                            deductDays(
+                                                dateOrNull(behandling.virkningstidspunkt?.opphør?.opphørsdato),
+                                                1
+                                            )
+                                        )
+                                    )}
+                                </BodyShort>
+                            )}
                         </BehandlingAlert>
                     </div>
                 )}

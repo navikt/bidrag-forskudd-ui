@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { Fragment, useEffect } from "react";
 
 import {
+    ResultatBarnebidragsberegningPeriodeDto,
     ResultatBidragsberegningBarnDto,
     ResultatRolle,
     Rolletype,
@@ -41,7 +42,7 @@ const Vedtak = () => {
     }, [activeStep]);
 
     return (
-        <div className="grid gap-y-8  w-[1100px]">
+        <div className="grid gap-y-8  w-[1150px]">
             {erVedtakFattet && !lesemodus && <Alert variant="warning">Vedtak er fattet for behandling</Alert>}
             <div className="grid gap-y-2">
                 <Heading level="2" size="medium">
@@ -150,87 +151,111 @@ const VedtakTableBody = ({
                         <Table.ExpandableRow
                             togglePlacement="right"
                             expandOnRowClick
-                            expansionDisabled={periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget}
+                            expansionDisabled={
+                                periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
+                                periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet
+                            }
                             content={<DetaljertBeregningBidrag periode={periode} />}
                         >
-                            <Table.DataCell textSize="small">
-                                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
-                                {periode.periode.til
-                                    ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1))
-                                    : ""}
-                            </Table.DataCell>
-
-                            <Table.DataCell textSize="small">
-                                {formatterBeløpForBeregning(periode.underholdskostnad)}
-                            </Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td className="w-[45px]" align="right">
-                                                {formatterProsent(periode.bpsAndelU)}
-                                            </td>
-                                            <td className="w-[10px]">/</td>
-                                            <td>{formatterBeløpForBeregning(periode.bpsAndelBeløp)}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td className="w-[45px]" align="right">
-                                                {formatterBeløpForBeregning(periode.samværsfradrag)}
-                                            </td>
-                                            <td className="w-[10px]">/</td>
-                                            <td>
-                                                {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
-                                                Samvaersklasse.DELT_BOSTED
-                                                    ? "D"
-                                                    : hentVisningsnavn(
-                                                          periode.beregningsdetaljer.samværsfradrag.samværsklasse
-                                                      )}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </Table.DataCell>
-                            <Table.DataCell textSize="small">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td className="w-[45px]" align="right">
-                                                {formatterBeløpForBeregning(
-                                                    periode.beregningsdetaljer.delberegningBidragsevne.bidragsevne
-                                                )}
-                                            </td>
-                                            <td className="w-[10px]">/</td>
-                                            <td>
-                                                {formatterBeløpForBeregning(
-                                                    periode.beregningsdetaljer.delberegningBidragsevne
-                                                        .sumInntekt25Prosent
-                                                )}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </Table.DataCell>
-
-                            <Table.DataCell textSize="small">
-                                {formatterBeløpForBeregning(periode.beregnetBidrag)}
-                            </Table.DataCell>
-
-                            <Table.DataCell textSize="small">
-                                {formatterBeløpForBeregning(periode.faktiskBidrag)}
-                            </Table.DataCell>
-
-                            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+                            {periode.beregningsdetaljer?.sluttberegning?.barnetErSelvforsørget ||
+                            periode.beregningsdetaljer?.sluttberegning?.ikkeOmsorgForBarnet ? (
+                                <TableRowResultatAvslag periode={periode} />
+                            ) : (
+                                <TableRowResultat periode={periode} />
+                            )}
                         </Table.ExpandableRow>
                     )}
                 </Fragment>
             ))}
         </Table.Body>
+    );
+};
+const TableRowResultatAvslag = ({ periode }: { periode: ResultatBarnebidragsberegningPeriodeDto }) => {
+    return (
+        <>
+            <Table.DataCell textSize="small">
+                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+            </Table.DataCell>
+
+            <Table.DataCell textSize="small" colSpan={5}></Table.DataCell>
+
+            <Table.DataCell textSize="small">Avslag</Table.DataCell>
+
+            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+        </>
+    );
+};
+const TableRowResultat = ({ periode }: { periode: ResultatBarnebidragsberegningPeriodeDto }) => {
+    return (
+        <>
+            <Table.DataCell textSize="small">
+                {dateToDDMMYYYYString(new Date(periode.periode.fom))} -{" "}
+                {periode.periode.til ? dateToDDMMYYYYString(deductDays(new Date(periode.periode.til), 1)) : ""}
+            </Table.DataCell>
+
+            <Table.DataCell textSize="small">{formatterBeløpForBeregning(periode.underholdskostnad)}</Table.DataCell>
+            <Table.DataCell textSize="small">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="w-[45px]" align="right">
+                                {formatterProsent(periode.bpsAndelU)}
+                            </td>
+                            <td className="w-[10px]">/</td>
+                            <td>{formatterBeløpForBeregning(periode.bpsAndelBeløp)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </Table.DataCell>
+            <Table.DataCell textSize="small">
+                <table>
+                    <tbody>
+                        {periode.beregningsdetaljer.samværsfradrag != null ? (
+                            <tr>
+                                <td className="w-[45px]" align="right">
+                                    {formatterBeløpForBeregning(periode.samværsfradrag)}
+                                </td>
+                                <td className="w-[10px]">/</td>
+                                <td>
+                                    {periode.beregningsdetaljer.samværsfradrag.samværsklasse ===
+                                    Samvaersklasse.DELT_BOSTED
+                                        ? "D"
+                                        : hentVisningsnavn(periode.beregningsdetaljer.samværsfradrag.samværsklasse)}
+                                </td>
+                            </tr>
+                        ) : (
+                            <tr></tr>
+                        )}
+                    </tbody>
+                </table>
+            </Table.DataCell>
+            <Table.DataCell textSize="small">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="w-[45px]" align="right">
+                                {formatterBeløpForBeregning(
+                                    periode.beregningsdetaljer.delberegningBidragsevne?.bidragsevne
+                                )}
+                            </td>
+                            <td className="w-[10px]">/</td>
+                            <td>
+                                {formatterBeløpForBeregning(
+                                    periode.beregningsdetaljer.delberegningBidragsevne?.sumInntekt25Prosent
+                                )}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </Table.DataCell>
+
+            <Table.DataCell textSize="small">{formatterBeløpForBeregning(periode.beregnetBidrag)}</Table.DataCell>
+
+            <Table.DataCell textSize="small">{formatterBeløpForBeregning(periode.faktiskBidrag)}</Table.DataCell>
+
+            <Table.DataCell textSize="small">{periode.resultatkodeVisningsnavn}</Table.DataCell>
+        </>
     );
 };
 
@@ -270,7 +295,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "100px" }}>
                     Samvær
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "50px" }}>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "110px" }}>
                     Evne / 25%
                 </Table.HeaderCell>
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "230px" }}>
@@ -282,7 +307,7 @@ const VedtakTableHeader = ({ avslag = false }: { avslag: boolean }) => (
                 <Table.HeaderCell textSize="small" scope="col" style={{ width: "350px" }}>
                     Resultat
                 </Table.HeaderCell>
-                <Table.HeaderCell textSize="small" scope="col" style={{ width: "54px" }}></Table.HeaderCell>
+                <Table.HeaderCell textSize="small" scope="col" style={{ width: "24px" }}></Table.HeaderCell>
             </Table.Row>
         )}
     </Table.Header>

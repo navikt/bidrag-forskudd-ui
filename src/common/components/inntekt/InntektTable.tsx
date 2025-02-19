@@ -142,8 +142,14 @@ export const Periode = ({
     item: InntektFormPeriode;
 }) => {
     const virkningsdato = useVirkningsdato();
-    const { type } = useGetBehandlingV2();
-    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato);
+    const {
+        type,
+        virkningstidspunkt: {
+            opphør: { opphørsdato },
+        },
+    } = useGetBehandlingV2();
+    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const [fom, tom] = getFomAndTomForMonthPicker(virkningsdato, opphørsTomDato);
     const { getValues, clearErrors, setError } = useFormContext<InntektFormValues>();
     const fieldIsDatoTom = field === "datoTom";
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
@@ -174,7 +180,7 @@ export const Periode = ({
             defaultValue={item[field]}
             fromDate={fom}
             customValidation={validateFomOgTom}
-            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={item.taMed && !fieldIsDatoTom}
             hideLabel
@@ -214,7 +220,7 @@ export const InntektTabel = ({
     const {
         inntekter,
         søktFomDato,
-        virkningstidspunkt: { virkningstidspunkt },
+        virkningstidspunkt: { virkningstidspunkt, opphør },
     } = useGetBehandlingV2();
     const virkningsdato = useVirkningsdato();
     const saveInntekt = useOnSaveInntekt();
@@ -451,6 +457,14 @@ export const InntektTabel = ({
                     )}
                     {tableValideringsfeil.perioderFørVirkningstidspunkt && (
                         <BodyShort size="small">{text.error.periodeFørVirkningstidspunkt}</BodyShort>
+                    )}
+                    {tableValideringsfeil.ugyldigSluttPeriode && (
+                        <BodyShort size="small">
+                            {text.error.sistePeriodeMåSluttePåOpphørsdato.replace(
+                                "{}",
+                                DateToDDMMYYYYString(dateOrNull(opphør.opphørsdato))
+                            )}
+                        </BodyShort>
                     )}
                 </BehandlingAlert>
             )}

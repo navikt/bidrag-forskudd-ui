@@ -31,11 +31,17 @@ export const Periode = ({
     label: string;
 }) => {
     const virkningsOrSoktFraDato = useVirkningsdato();
-    const { type } = useGetBehandlingV2();
+    const {
+        type,
+        virkningstidspunkt: {
+            opphør: { opphørsdato },
+        },
+    } = useGetBehandlingV2();
     const { erVirkningstidspunktNåværendeMånedEllerFramITid } = useBehandlingProvider();
     const { getValues, clearErrors, setError } = useFormContext<BoforholdFormValues>();
     const datoFra = getEitherFirstDayOfFoedselsOrVirkingsdatoMonth(barn.fødselsdato, virkningsOrSoktFraDato);
-    const [fom, tom] = getFomAndTomForMonthPicker(datoFra);
+    const opphørsTomDato = opphørsdato ? new Date(opphørsdato) : undefined;
+    const [fom, tom] = getFomAndTomForMonthPicker(datoFra, opphørsTomDato);
     const fieldIsDatoTom = field === "datoTom";
     const isSærbidragTypeAndFieldIsDatoFom = type === TypeBehandling.SAeRBIDRAG && !fieldIsDatoTom;
 
@@ -61,7 +67,7 @@ export const Periode = ({
             defaultValue={item[field]}
             customValidation={validateFomOgTom}
             fromDate={fom}
-            toDate={fieldIsDatoTom ? tom : addMonthsIgnoreDay(tom, 1)}
+            toDate={fieldIsDatoTom || opphørsTomDato ? tom : addMonthsIgnoreDay(tom, 1)}
             lastDayOfMonthPicker={fieldIsDatoTom}
             required={!fieldIsDatoTom}
             hideLabel
