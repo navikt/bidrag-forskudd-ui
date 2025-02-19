@@ -67,7 +67,11 @@ export const boforholdOptions = {
     [TypeBehandling.BIDRAG]: {
         under18År: [Bostatuskode.MED_FORELDER, Bostatuskode.IKKE_MED_FORELDER, Bostatuskode.DELT_BOSTED],
         // Trenger ikke alle perioder pga at det ikke kan periodiseres i særbidrag
-        likEllerOver18År: [...gyldigBostatusOver18År[TypeBehandling.SAeRBIDRAG]],
+        likEllerOver18År: [
+            ...gyldigBostatusOver18År[TypeBehandling.BIDRAG],
+            Bostatuskode.MED_FORELDER,
+            Bostatuskode.DELT_BOSTED,
+        ],
     },
 };
 export const andreVoksneIHusstandenBoforholdOptions = [
